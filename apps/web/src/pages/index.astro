@@ -1,0 +1,418 @@
+---
+import ChecklistPanel from "../components/ChecklistPanel.astro";
+import ChipList from "../components/ChipList.astro";
+import ComparisonCard from "../components/ComparisonCard.astro";
+import FeatureCard from "../components/FeatureCard.astro";
+import SurfaceCard from "../components/SurfaceCard.astro";
+import TileList from "../components/TileList.astro";
+import TimelineCard from "../components/TimelineCard.astro";
+import "../styles/global.css";
+
+const features = [
+	{
+		title: "Shared compliance workspace",
+		body: "Track controls, tasks, owners, notes, and evidence in one place instead of scattered docs and spreadsheets.",
+	},
+	{
+		title: "SOC 2 and GDPR readiness",
+		body: "Work through startup-friendly controls that map to common SOC 2 and GDPR expectations.",
+	},
+	{
+		title: "Evidence collection",
+		body: "Upload screenshots, policies, notes, and links once, then reuse them across mapped controls.",
+	},
+	{
+		title: "Vendor inventory",
+		body: "Track subprocessors, DPAs, data processed, criticality, and ownership before procurement teams ask.",
+	},
+	{
+		title: "Policy templates",
+		body: "Start with plain-English templates for access control, incident response, data retention, acceptable use, and vendor management.",
+	},
+	{
+		title: "Readiness dashboard",
+		body: "See what is complete, what needs evidence, and which gaps could block a pilot or security review.",
+	},
+];
+
+const timeline = [
+	["Build fast", "MVP, demos, customer feedback"],
+	["Get traction", "Pilot interest, enterprise conversations"],
+	["Security review", "SOC 2 questions, vendor reviews, data handling requests"],
+	["Compliance panic", "Missing evidence, unclear controls, costly rebuilds"],
+	["With ComplyFlow", "Collect evidence early, track controls, stay pilot-ready"],
+];
+
+const included = [
+	"SOC 2 readiness checklist",
+	"GDPR-lite readiness layer",
+	"Shared controls mapped across frameworks",
+	"Evidence uploads and links",
+	"Policy templates",
+	"Vendor inventory",
+	"Task ownership and due dates",
+	"Readiness dashboard",
+];
+
+const excluded = [
+	"Automated cloud scanning",
+	"Endpoint agents",
+	"Auditor portal",
+	"Enterprise workflow engines",
+	"Guaranteed certification",
+];
+
+const audiences = [
+	"Have a working product",
+	"Are getting early customer interest",
+	"Sell to regulated or enterprise-adjacent customers",
+	"Need to answer security questionnaires",
+	"Want to prepare for SOC 2 later",
+	"Want GDPR basics handled in the same workspace",
+];
+
+const examples = [
+	"AI copilots",
+	"Healthcare tools",
+	"HR tech",
+	"Fintech products",
+	"Edtech platforms",
+	"Workflow automation SaaS",
+	"Developer tools selling upmarket",
+];
+
+const notThis = [
+	"Enterprise GRC platform",
+	"Continuous monitoring suite",
+	"Audit guarantee",
+	"Six-month onboarding",
+];
+
+const thisInstead = [
+	"Lightweight readiness workspace",
+	"Evidence and task tracking",
+	"Startup-friendly controls",
+	"Practical operating hygiene",
+];
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>ComplyFlow — Compliance readiness for early-stage startups</title>
+		<meta
+			name="description"
+			content="A lightweight workspace that helps startups organize policies, vendors, evidence, and security basics before enterprise customers ask for SOC 2 or GDPR readiness."
+		/>
+		<meta property="og:title" content="Avoid Compliance Debt Early" />
+		<meta
+			property="og:description"
+			content="Lightweight compliance readiness for startups moving toward enterprise customers."
+		/>
+		<meta property="og:type" content="website" />
+	</head>
+	<body class="bg-slate-50 text-slate-950 antialiased">
+		<header class="absolute inset-x-0 top-0 z-50">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5" aria-label="Main navigation">
+				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950">
+					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-base font-black text-slate-950">C</span>
+					<span>ComplyFlow</span>
+				</a>
+				<div class="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
+					<a class="transition hover:text-slate-950" href="#problem">All Pages</a>
+					<a class="transition hover:text-slate-950" href="#features">Features</a>
+					<a class="transition hover:text-slate-950" href="#early-access">Pricing</a>
+					<a class="transition hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
+				</div>
+				<a
+					href="#early-access"
+					class="inline-flex min-h-12 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-6 pr-2 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800"
+				>
+					Get Started
+					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-xl leading-none text-neutral-950">→</span>
+				</a>
+			</nav>
+		</header>
+
+		<main>
+			<section class="relative overflow-hidden bg-white px-6 pb-16 pt-32 md:pb-20 md:pt-36">
+				<div class="absolute inset-0 z-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:92px_92px]"></div>
+				<div class="absolute inset-x-0 top-0 z-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent"></div>
+				<div class="absolute inset-x-0 bottom-0 z-0 h-64 bg-linear-to-t from-slate-50 via-white/90 to-transparent"></div>
+
+				<div class="relative z-10 mx-auto max-w-6xl text-center">
+					<div class="mx-auto max-w-4xl">
+						<p class="mb-6 inline-flex rounded-full border border-lime-200 bg-lime-100 px-4 py-2 text-sm font-bold text-slate-900">
+							Compliance readiness for early-stage startups
+						</p>
+						<h1 class="heading-hero">
+							Startup Security Readiness
+						</h1>
+						<p class="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
+							A lightweight compliance readiness platform for early-stage startups building toward enterprise customers.
+						</p>
+						<div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+							<a
+								href="#early-access"
+								class="inline-flex min-h-14 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-7 pr-2 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800"
+							>
+								Join early access
+								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-2xl leading-none text-neutral-950">→</span>
+							</a>
+							<a
+								href="#features"
+								class="inline-flex min-h-14 items-center gap-4 rounded-full border border-slate-200 bg-white py-1.5 pl-7 pr-2 text-base font-bold text-slate-900 shadow-sm transition hover:bg-slate-100"
+							>
+								See what it helps with
+								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-2xl leading-none text-neutral-950">→</span>
+							</a>
+						</div>
+						<p class="mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-500">
+							For founders preparing for SOC 2, GDPR readiness, security reviews, and enterprise pilots.
+						</p>
+					</div>
+
+					<div class="relative mx-auto mt-20 max-w-5xl" aria-label="Compliance readiness dashboard mockup">
+						<div class="absolute -left-1 top-0 hidden w-64 -rotate-6 rounded-xl border border-slate-100 bg-white/95 p-4 text-left shadow-[0_22px_70px_rgba(15,23,42,0.10)] md:block">
+							<p class="text-xs font-medium text-slate-500">Evidence collected</p>
+							<p class="mt-2 text-2xl font-bold text-slate-950">18 items</p>
+							<p class="mt-1 text-xs text-green-700">+7 mapped this week</p>
+						</div>
+						<div class="absolute -right-1 top-2 hidden w-72 rotate-6 rounded-xl border border-slate-100 bg-white/95 p-4 text-left shadow-[0_22px_70px_rgba(15,23,42,0.10)] md:block">
+							<p class="text-xs font-medium text-slate-500">Impact of risk</p>
+							<div class="mt-3 grid grid-cols-3 gap-2 text-center text-[11px] text-slate-500">
+								<span class="rounded-lg border border-slate-100 bg-slate-50 px-2 py-3">DPA gap</span>
+								<span class="rounded-lg border border-rose-100 bg-rose-50 px-2 py-3 text-rose-700">MFA</span>
+								<span class="rounded-lg border border-amber-100 bg-amber-50 px-2 py-3 text-amber-700">Vendor</span>
+							</div>
+						</div>
+
+						<div class="mx-auto rotate-1 rounded-[1.75rem] border border-slate-200 bg-white/95 p-5 text-left shadow-[0_30px_100px_rgba(15,23,42,0.13)] backdrop-blur">
+							<div class="flex items-center justify-between border-b border-slate-100 pb-5">
+								<div class="flex items-center gap-3">
+									<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-sm font-black text-slate-950">C</span>
+									<span class="font-bold text-slate-950">ComplyFlow</span>
+								</div>
+								<div class="hidden gap-6 text-xs font-medium text-slate-500 sm:flex">
+									<span>Overview</span>
+									<span>Controls</span>
+									<span>Evidence</span>
+									<span>Vendors</span>
+								</div>
+								<div class="flex gap-2">
+									<span class="h-8 w-8 rounded-full border border-slate-200 bg-white"></span>
+									<span class="h-8 w-8 rounded-full border border-slate-200 bg-slate-50"></span>
+								</div>
+							</div>
+							<div class="grid gap-5 pt-6 lg:grid-cols-[1.2fr_0.8fr]">
+								<div>
+									<p class="text-2xl font-semibold text-slate-950">Readiness overview</p>
+									<p class="mt-2 text-sm text-slate-500">Know what is missing before customers ask.</p>
+									<div class="mt-6 grid grid-cols-3 gap-3">
+										<div class="rounded-2xl bg-slate-50 p-4">
+											<p class="text-2xl font-bold">62%</p>
+											<p class="mt-1 text-xs text-slate-500">SOC 2 readiness</p>
+										</div>
+										<div class="rounded-2xl bg-slate-50 p-4">
+											<p class="text-2xl font-bold">12</p>
+											<p class="mt-1 text-xs text-slate-500">Vendors tracked</p>
+										</div>
+										<div class="rounded-2xl bg-slate-50 p-4">
+											<p class="text-2xl font-bold">4</p>
+											<p class="mt-1 text-xs text-slate-500">Gaps to review</p>
+										</div>
+									</div>
+									<div class="mt-6 rounded-2xl border border-slate-100 bg-white p-4">
+										<div class="flex items-center justify-between">
+											<p class="font-bold text-slate-950">Compliance check in progress</p>
+											<p class="text-sm font-bold text-slate-500">54%</p>
+										</div>
+										<div class="mt-4 h-3 overflow-hidden rounded-full bg-slate-100">
+											<div class="h-full w-[54%] rounded-full bg-green-600"></div>
+										</div>
+									</div>
+								</div>
+								<div class="rounded-2xl bg-slate-50 p-5">
+									<p class="font-bold text-slate-950">Security basics</p>
+									<div class="mt-5 space-y-4">
+										<div>
+											<div class="flex justify-between text-sm"><span>MFA required</span><span>Ready</span></div>
+											<div class="mt-2 h-3 rounded-full bg-lime-200"></div>
+										</div>
+										<div>
+											<div class="flex justify-between text-sm"><span>Offboarding</span><span>Needs evidence</span></div>
+											<div class="mt-2 h-3 overflow-hidden rounded-full bg-white"><div class="h-full w-2/3 rounded-full bg-lime-200"></div></div>
+										</div>
+										<div>
+											<div class="flex justify-between text-sm"><span>Vendor DPAs</span><span>In progress</span></div>
+											<div class="mt-2 h-3 overflow-hidden rounded-full bg-white"><div class="h-full w-1/2 rounded-full bg-lime-200"></div></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-3xl">
+					<h2 class="heading-section">The product worked. The pitch rocked. The pilot stalled.</h2>
+					<div class="mt-6 space-y-5 text-lg leading-8 text-slate-600">
+						<p>A small team builds fast, gets early demos, and lands serious interest from a customer.</p>
+						<p>Then the security review starts.</p>
+						<p>Suddenly the blocker is not the product. It is missing policies, scattered evidence, unclear vendors, shared credentials, and no audit-friendly process.</p>
+					</div>
+					<p class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-base font-medium leading-7 text-amber-800">
+						That gap is compliance debt, and it gets expensive when discovered late.
+					</p>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Most startups discover compliance too late.</h2>
+					</div>
+					<div class="mt-10 grid gap-4 md:grid-cols-5">
+						{timeline.map(([title, body], index) => (
+							<TimelineCard title={title} body={body} step={index + 1} highlighted={index === timeline.length - 1} />
+						))}
+					</div>
+				</div>
+			</section>
+
+			<section id="features" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Everything you wish you had organized before the customer asked.</h2>
+					</div>
+					<div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+						{features.map((feature) => <FeatureCard title={feature.title} body={feature.body} />)}
+					</div>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Built for the messy stage before your first audit.</h2>
+						<p class="mt-4 text-lg leading-8 text-slate-600">The first version focuses on lightweight operational hygiene, not heavy automation.</p>
+					</div>
+					<div class="mt-10 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-2">
+						<ChecklistPanel title="Included in the MVP" items={included} listClass="grid gap-3 text-base text-slate-700 sm:grid-cols-2 lg:grid-cols-1" />
+						<ChecklistPanel
+							title="Intentionally not included"
+							items={excluded}
+							marker="—"
+							markerClass="text-slate-400"
+							class="border-t border-slate-200 bg-slate-50 lg:border-l lg:border-t-0"
+						/>
+					</div>
+				</div>
+			</section>
+
+			<section id="for" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Designed for startups that are almost ready for bigger customers.</h2>
+					</div>
+					<div class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+						<SurfaceCard>
+							<h3 class="heading-card text-slate-950">For teams that</h3>
+							<TileList items={audiences} />
+						</SurfaceCard>
+						<SurfaceCard variant="muted">
+							<h3 class="heading-card text-slate-950">Common examples</h3>
+							<ChipList items={examples} />
+						</SurfaceCard>
+					</div>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">This is not another enterprise compliance platform.</h2>
+						<p class="mt-5 text-lg leading-8 text-slate-600">
+							We are not trying to replace Vanta, Drata, auditors, lawyers, or mature GRC systems. This is for the stage before that, when you need to become organized, credible, and ready for serious customer conversations.
+						</p>
+					</div>
+					<div class="mt-10 grid gap-5 md:grid-cols-2">
+						<ComparisonCard title="Not this" items={notThis} />
+						<ComparisonCard title="This" items={thisInstead} variant="positive" />
+					</div>
+				</div>
+			</section>
+
+			<section id="early-access" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+					<div>
+						<h2 class="heading-section">Help shape the compliance readiness tool for startups.</h2>
+						<p class="mt-5 text-lg leading-8 text-slate-600">
+							We are validating the first version with founders and small teams who have hit security reviews, SOC 2 questions, GDPR concerns, or enterprise pilot blockers.
+						</p>
+						<a
+							href="#blocker"
+							class="mt-7 inline-flex min-h-12 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-base font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100"
+						>
+							Tell us what blocked you
+						</a>
+						<p class="mt-5 text-sm leading-6 text-slate-500">No spam. Occasional product updates and founder interviews.</p>
+					</div>
+					<form class="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:p-8" name="early-access" method="post" data-netlify="true">
+						<input type="hidden" name="form-name" value="early-access" />
+						<div class="grid gap-5">
+							<div>
+								<label for="email" class="block text-sm font-semibold text-slate-900">Email</label>
+								<input
+									id="email"
+									name="email"
+									type="email"
+									required
+									placeholder="founder@example.com"
+									class="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+								/>
+							</div>
+							<div>
+								<label for="blocker" class="block text-sm font-semibold text-slate-900">Biggest compliance blocker <span class="font-normal text-slate-500">(optional)</span></label>
+								<textarea
+									id="blocker"
+									name="blocker"
+									rows="4"
+									placeholder="Security questionnaire, SOC 2 prep, GDPR questions, vendor review..."
+									class="mt-2 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+								></textarea>
+							</div>
+							<button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-blue-600 px-5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:w-auto">
+								Join early access
+							</button>
+							<p class="text-sm leading-6 text-slate-500">
+								Compliance Starter provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
+							</p>
+						</div>
+					</form>
+				</div>
+			</section>
+		</main>
+
+		<footer class="px-6 py-10">
+			<div class="mx-auto flex max-w-6xl flex-col gap-6 border-t border-slate-200 pt-8 md:flex-row md:items-start md:justify-between">
+				<div>
+					<p class="font-semibold text-slate-950">ComplyFlow</p>
+					<p class="mt-2 max-w-md text-sm leading-6 text-slate-600">Lightweight compliance readiness for early-stage startups.</p>
+					<p class="mt-3 max-w-xl text-xs leading-5 text-slate-500">Readiness guidance only. Not legal advice, certification, or audit assurance.</p>
+				</div>
+				<nav class="flex flex-wrap gap-5 text-sm font-medium text-slate-600" aria-label="Footer navigation">
+					<a class="hover:text-slate-950" href="#early-access">Early access</a>
+					<a class="hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
+					<a class="hover:text-slate-950" href="#early-access">Privacy</a>
+				</nav>
+			</div>
+		</footer>
+	</body>
+</html>

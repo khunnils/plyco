@@ -1,0 +1,18 @@
+---
+interface Props {
+	variant?: "default" | "muted";
+	class?: string;
+}
+
+const { variant = "default", class: className = "" } = Astro.props;
+---
+
+<div
+	class:list={[
+		"rounded-2xl border border-slate-200 p-6 shadow-sm sm:p-8",
+		variant === "muted" ? "bg-slate-50" : "bg-white",
+		className,
+	]}
+>
+	<slot />
+</div>

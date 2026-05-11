@@ -1,0 +1,28 @@
+---
+interface Props {
+	title: string;
+	body: string;
+	step: number;
+	highlighted?: boolean;
+}
+
+const { title, body, step, highlighted = false } = Astro.props;
+---
+
+<article
+	class:list={[
+		"rounded-xl border p-5 shadow-sm",
+		highlighted ? "border-green-200 bg-green-50 text-green-900" : "border-slate-200 bg-white text-slate-900",
+	]}
+>
+	<div
+		class:list={[
+			"flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold",
+			highlighted ? "bg-green-700 text-white" : "bg-slate-900 text-white",
+		]}
+	>
+		{step}
+	</div>
+	<h3 class="heading-step mt-5">{title}</h3>
+	<p class:list={["mt-2 text-sm leading-6", highlighted ? "text-green-800" : "text-slate-600"]}>{body}</p>
+</article>

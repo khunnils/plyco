@@ -1,0 +1,31 @@
+---
+interface Props {
+	title: string;
+	items: string[];
+	marker?: string;
+	markerClass?: string;
+	listClass?: string;
+	class?: string;
+}
+
+const {
+	title,
+	items,
+	marker = "✓",
+	markerClass = "text-green-700",
+	listClass = "grid gap-3 text-base text-slate-700",
+	class: className = "",
+} = Astro.props;
+---
+
+<div class:list={["p-6 sm:p-8", className]}>
+	<h3 class="heading-card text-slate-950">{title}</h3>
+	<ul class:list={["mt-6", listClass]}>
+		{items.map((item) => (
+			<li class="flex gap-3">
+				<span class:list={["font-semibold", markerClass]}>{marker}</span>
+				<span>{item}</span>
+			</li>
+		))}
+	</ul>
+</div>

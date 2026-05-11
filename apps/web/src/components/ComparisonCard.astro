@@ -1,0 +1,22 @@
+---
+interface Props {
+	title: string;
+	items: string[];
+	variant?: "default" | "positive";
+}
+
+const { title, items, variant = "default" } = Astro.props;
+const isPositive = variant === "positive";
+---
+
+<div
+	class:list={[
+		"rounded-2xl border p-6 shadow-sm",
+		isPositive ? "border-green-200 bg-green-50" : "border-slate-200 bg-white",
+	]}
+>
+	<h3 class:list={["heading-feature", isPositive ? "text-green-950" : "text-slate-950"]}>{title}</h3>
+	<ul class:list={["mt-5 space-y-3", isPositive ? "text-green-800" : "text-slate-600"]}>
+		{items.map((item) => <li>{item}</li>)}
+	</ul>
+</div>

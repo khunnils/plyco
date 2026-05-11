@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id             String   @id @default(cuid())
+  company        Json
+  infrastructure Json
+  dataHandling   Json
+  access         Json
+  vendors        Vendor[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Vendor {
+  id               String       @id @default(cuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name             String
+  category         String
+  purpose          String
+  hasSubprocessors Boolean
+  dataProcessed    String[]
+  dpaStatus        String
+  dataRegions      String[]
+  criticality      String
+  owner            String?
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([organizationId])
+}
