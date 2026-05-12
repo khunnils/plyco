@@ -29,37 +29,32 @@ complyflow/
 
 ## Stack
 
+### Shared
 - TypeScript
 - pnpm workspaces
-- React + Vite
-- Tailwind CSS
+- Zod for validation
+
+### API
 - Node.js + Fastify
 - PostgreSQL on Neon
 - Prisma
-- Firebase Hosting for client
 - Cloud Run for API
 - Google Cloud Storage for assets
 - Google Gen AI for content generation
-- Zod for validation
+
+### Client
+- React + Vite
+- Tailwind CSS
+- TanStack Query
+- React Hook Form
+- Zustand for global state
+- Firebase Hosting for client
 
 ## Shared Package
 
-`packages/shared` contains API contracts only.
-
-Allowed:
-
-- Zod schemas
-- DTOs
-- enums
-- content payload schemas
-- API request/response types
-
-Not allowed:
-
-- Prisma models
-- DB-only fields
-- provider secrets
-- internal admin metadata
+`packages/shared` contains shared elements shared between API and client
+`packages/shared/schemas` shared Zod schemas
+`packages/shared/data` reference data such as code sets
 
 ## Sprint 1 Runtime
 
