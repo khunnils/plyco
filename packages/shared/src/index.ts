@@ -69,6 +69,16 @@ export const vendorSchema = vendorInputSchema.extend({
   updatedAt: z.string().datetime(),
 })
 
+export const providerSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1),
+  logoUrl: z.string().url().optional(),
+  url: z.string().url().optional(),
+  category: z.string().trim().min(1).optional(),
+  securityCriticality: z.string().trim().min(1).optional(),
+  handlesCustomerData: z.boolean(),
+})
+
 export const organizationSecurityProfileSchema = z.object({
   id: z.string().min(1),
   company: companyProfileSchema,
@@ -100,6 +110,7 @@ export type DataHandlingProfile = z.infer<typeof dataHandlingProfileSchema>
 export type AccessProfile = z.infer<typeof accessProfileSchema>
 export type VendorInput = z.infer<typeof vendorInputSchema>
 export type Vendor = z.infer<typeof vendorSchema>
+export type Provider = z.infer<typeof providerSchema>
 export type OrganizationSecurityProfile = z.infer<
   typeof organizationSecurityProfileSchema
 >

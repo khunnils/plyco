@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { createTestApp } from "../src/app.js"
+import { createApp, createTestApp } from "../src/app.js"
+import { AirtableProviderSource } from "../src/providers.js"
+import { InMemorySecurityProfileRepository } from "../src/repository.js"
 
 const profileBody = {
   company: {
@@ -55,6 +57,10 @@ const vendorBody = {
 }
 
 describe("security profile API", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   it("returns health status", async () => {
     const app = await createTestApp()
     const response = await app.inject({ method: "GET", url: "/health" })
@@ -88,7 +94,10 @@ describe("security profile API", () => {
     const response = await app.inject({
       method: "PUT",
       url: "/security-profile",
-      payload: { ...profileBody, company: { ...profileBody.company, companyName: "" } },
+      payload: {
+        ...profileBody,
+        company: { ...profileBody.company, companyName: "" },
+      },
     })
 
     expect(response.statusCode).toBe(400)
@@ -110,7 +119,11 @@ describe("security profile API", () => {
     const updateResponse = await app.inject({
       method: "PUT",
       url: `/vendors/${createdVendor.id}`,
-      payload: { ...vendorBody, dpaStatus: "in_review", notes: "DPA being reviewed" },
+      payload: {
+        ...vendorBody,
+        dpaStatus: "in_review",
+        notes: "DPA being reviewed",
+      },
     })
 
     expect(updateResponse.statusCode).toBe(200)
@@ -125,7 +138,86 @@ describe("security profile API", () => {
     })
     expect(deleteResponse.statusCode).toBe(204)
 
-    const emptyListResponse = await app.inject({ method: "GET", url: "/vendors" })
+    const emptyListResponse = await app.inject({
+      method: "GET",
+      url: "/vendors",
+    })
     expect(emptyListResponse.json()).toHaveLength(0)
+  })
+
+  it("returns provider catalog entries", async () => {
+    const app = await createTestApp()
+    const response = await app.inject({ method: "GET", url: "/providers" })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual([
+      {
+        id: "prov-github",
+        name: "GitHub",
+        url: "https://github.com",
+        category: "Source Control",
+        securityCriticality: "Critical",
+        handlesCustomerData: false,
+      },
+    ])
+  })
+
+  it("returns provider catalog upstream failures as structured gateway errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        return new Response(
+          JSON.stringify({
+            error: {
+              type: "AUTHENTICATION_REQUIRED",
+              message: "Invalid authentication token",
+            },
+          }),
+          { status: 401, statusText: "Unauthorized" }
+        )
+      })
+    )
+    const app = await createApp({
+      repository: new InMemorySecurityProfileRepository(),
+      providerSource: new AirtableProviderSource("app-test", "pat-test"),
+    })
+    const response = await app.inject({ method: "GET", url: "/providers" })
+
+    expect(response.statusCode).toBe(502)
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "PROVIDER_CATALOG_LOAD_FAILED",
+        details: {
+          status: 401,
+          statusText: "Unauthorized",
+        },
+      },
+    })
+  })
+
+  it("logs unexpected request failures with error details", async () => {
+    let logOutput = ""
+    const app = await createApp({
+      logger: {
+        level: "error",
+        stream: {
+          write(chunk) {
+            logOutput += chunk
+          },
+        },
+      },
+      repository: new InMemorySecurityProfileRepository(),
+      providerSource: {
+        async listProviders() {
+          throw new Error("catalog exploded")
+        },
+      },
+    })
+    const response = await app.inject({ method: "GET", url: "/providers" })
+
+    expect(response.statusCode).toBe(500)
+    expect(logOutput).toContain("request failed")
+    expect(logOutput).toContain("catalog exploded")
+    expect(logOutput).toContain("/providers")
   })
 })

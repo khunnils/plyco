@@ -22,4 +22,6 @@ function readPort(value: string | undefined) {
 export const apiConfig = {
   host: process.env.HOST ?? "0.0.0.0",
   port: readPort(process.env.PORT),
+  airtableBase: process.env.AIRTABLE_BASE,
+  airtableApiKey: process.env.AIRTABLE_API_KEY,
 }
