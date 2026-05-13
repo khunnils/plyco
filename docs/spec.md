@@ -7,8 +7,8 @@ ComplyFlow is a lightweight security readiness workspace for early-stage startup
 The product helps startups avoid “compliance debt” by organizing operational security controls, evidence, vendors, policies, and security documentation before enterprise security requirements become blockers.
 
 # Product Vision
-Help startups build enterprise trust before compliance becomes a growth blocker.
 
+Help startups build enterprise trust before compliance becomes a growth blocker.
 
 # Core Product Principles
 
@@ -21,6 +21,7 @@ The product models operational security posture, not audit bureaucracy.
 Controls are operational controls mapped to frameworks.
 
 Users interact with:
+
 - controls
 - evidence
 - tasks
@@ -28,6 +29,7 @@ Users interact with:
 - policies
 
 NOT:
+
 - framework bureaucracy
 - audit terminology
 
@@ -40,11 +42,13 @@ Policies are not standalone documents.
 ## 4. Lightweight and approachable
 
 The product should feel:
+
 - practical
 - founder-friendly
 - operational
 
 NOT:
+
 - enterprise-heavy
 - legalistic
 - cybersecurity theater
@@ -61,6 +65,7 @@ The MVP includes:
 6. Security Summary Generation
 7. Readiness Dashboard
 8. Document Templates
+9. Generated Documents
 
 # Core MVP Features
 
@@ -71,6 +76,7 @@ The MVP includes:
 Provide a structured overview of the startup’s operational security posture.
 
 This becomes:
+
 - onboarding foundation
 - source-of-truth security profile
 - input for policy generation
@@ -92,6 +98,7 @@ Sprint 1 starts with a single organization and no login. The saved snapshot is t
 ### Company Profile
 
 Fields:
+
 - company name
 - employee count
 - industries
@@ -103,6 +110,7 @@ Fields:
 ### Infrastructure Profile
 
 Fields:
+
 - cloud providers
 - source control provider
 - auth provider
@@ -115,6 +123,7 @@ Fields:
 ### Data Handling Profile
 
 Fields:
+
 - data types stored, captured as name, sensitivity, and description entries
 - stores PII
 - stores healthcare data
@@ -126,6 +135,7 @@ Fields:
 ### Access Control Profile
 
 Fields:
+
 - MFA required
 - SSO enabled
 - shared accounts exist
@@ -136,6 +146,7 @@ Fields:
 ### Vendor & Subprocessor Profile
 
 Fields:
+
 - vendor inventory
 - subprocessors
 - DPA status
@@ -167,6 +178,7 @@ Controls are mapped to frameworks secondarily.
 ## Control Model
 
 Each control contains:
+
 - id
 - title
 - description
@@ -218,3 +230,32 @@ The Templates screen shows:
 - Organization templates below, created by copying a system template.
 
 Organization templates can be edited or deleted after they are added. Editing covers name, slug, and markdown content.
+
+# 9. Generated Documents
+
+## Goal
+
+Generate stored markdown documents from organization templates and the current security profile source-of-truth.
+
+Documents are generated through:
+
+```text
+Report Context Builder
+→ Normalized Template Context
+→ Jinja-style Renderer
+→ Generated Document
+```
+
+Generated documents retain a source hash so the app can show when a document is outdated after template or profile changes.
+
+## UX
+
+The app includes a separate Documents sidebar option.
+
+The Documents screen shows one row per organization template:
+
+- templates with no document use an outline ghost style and show Generate
+- generated documents show View
+- outdated generated documents show an Outdated badge and View
+
+Generated documents are read-only in this version.

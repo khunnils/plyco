@@ -6,15 +6,21 @@ import Fastify, {
 import {
   accessProfileSchema,
   companyProfileSchema,
-  createOrganizationTemplateFromSystemSchema,
+  createDocumentSchema,
+  createTemplateFromSystemSchema,
   dataHandlingProfileSchema,
   infrastructureProfileSchema,
-  organizationTemplateInputSchema,
+  templateInputSchema,
   vendorInputSchema,
 } from "@complyflow/shared"
 import { z } from "zod"
 
 import { ApiError, sendError } from "./errors.js"
+import {
+  Jinja2Renderer,
+  ReportContextBuilder,
+  templateSourceHash,
+} from "./document-generation.js"
 import { PrismaSecurityProfileRepository } from "./prisma-repository.js"
 import { apiConfig } from "./config.js"
 import {
@@ -53,13 +59,15 @@ export async function createApp({
   providerSource = apiConfig.airtableBase && apiConfig.airtableApiKey
     ? new AirtableProviderSource(
         apiConfig.airtableBase,
-        apiConfig.airtableApiKey
+        apiConfig.airtableApiKey,
       )
     : new StaticProviderSource(),
   systemTemplateSource = new FileSystemTemplateSource(),
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
+  const contextBuilder = new ReportContextBuilder()
+  const renderer = new Jinja2Renderer()
 
   await app.register(cors, {
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -73,7 +81,7 @@ export async function createApp({
         method: request.method,
         url: request.url,
       },
-      "request failed"
+      "request failed",
     )
 
     return sendError(reply, error)
@@ -87,8 +95,16 @@ export async function createApp({
 
   app.get("/templates", async () => ({
     systemTemplates: await systemTemplateSource.listSystemTemplates(),
-    organizationTemplates: await repository.listOrganizationTemplates(),
+    organizationTemplates: await repository.listTemplates(),
   }))
+
+  app.get("/documents", async () => {
+    const context = contextBuilder.build(await repository.getSnapshot())
+
+    return repository.listDocumentSummaries((template) =>
+      templateSourceHash(template, context),
+    )
+  })
 
   app.put("/security-profile", async (request, reply) => {
     const body = securityProfileBodySchema.parse(request.body)
@@ -118,7 +134,7 @@ export async function createApp({
       }
 
       return reply.send(vendor)
-    }
+    },
   )
 
   app.delete<{ Params: { id: string } }>(
@@ -131,26 +147,25 @@ export async function createApp({
       }
 
       return reply.status(204).send()
-    }
+    },
   )
 
   app.post("/templates/organization", async (request, reply) => {
-    const body = createOrganizationTemplateFromSystemSchema.parse(request.body)
+    const body = createTemplateFromSystemSchema.parse(request.body)
     const systemTemplates = await systemTemplateSource.listSystemTemplates()
     const systemTemplate = systemTemplates.find(
-      (template) => template.slug === body.sourceSystemTemplateSlug
+      (template) => template.slug === body.sourceSystemTemplateSlug,
     )
 
     if (!systemTemplate) {
       throw new ApiError(
         "SYSTEM_TEMPLATE_NOT_FOUND",
         "System template was not found.",
-        404
+        404,
       )
     }
 
-    const template =
-      await repository.createOrganizationTemplateFromSystem(systemTemplate)
+    const template = await repository.createTemplateFromSystem(systemTemplate)
 
     return reply.status(201).send(template)
   })
@@ -158,41 +173,67 @@ export async function createApp({
   app.put<{ Params: { id: string } }>(
     "/templates/organization/:id",
     async (request, reply) => {
-      const body = organizationTemplateInputSchema.parse(request.body)
-      const template = await repository.updateOrganizationTemplate(
-        request.params.id,
-        body
-      )
+      const body = templateInputSchema.parse(request.body)
+      const template = await repository.updateTemplate(request.params.id, body)
 
       if (!template) {
         throw new ApiError(
-          "ORGANIZATION_TEMPLATE_NOT_FOUND",
-          "Organization template was not found.",
-          404
+          "TEMPLATE_NOT_FOUND",
+          "Template was not found.",
+          404,
         )
       }
 
       return reply.send(template)
-    }
+    },
   )
 
   app.delete<{ Params: { id: string } }>(
     "/templates/organization/:id",
     async (request, reply) => {
-      const deleted = await repository.deleteOrganizationTemplate(
-        request.params.id
-      )
+      const deleted = await repository.deleteTemplate(request.params.id)
 
       if (!deleted) {
-        throw new ApiError(
-          "ORGANIZATION_TEMPLATE_NOT_FOUND",
-          "Organization template was not found.",
-          404
-        )
+        throw new ApiError("TEMPLATE_NOT_FOUND", "Template was not found.", 404)
       }
 
       return reply.status(204).send()
+    },
+  )
+
+  app.post("/documents", async (request, reply) => {
+    const body = createDocumentSchema.parse(request.body)
+    const templates = await repository.listTemplates()
+    const template = templates.find(
+      (currentTemplate) => currentTemplate.id === body.templateId,
+    )
+
+    if (!template) {
+      throw new ApiError("TEMPLATE_NOT_FOUND", "Template was not found.", 404)
     }
+
+    const context = contextBuilder.build(await repository.getSnapshot())
+    const document = await repository.createDocument({
+      template,
+      title: template.name,
+      renderedContent: renderer.render(template, context),
+      sourceHash: templateSourceHash(template, context),
+    })
+
+    return reply.status(201).send(document)
+  })
+
+  app.get<{ Params: { id: string } }>(
+    "/documents/:id",
+    async (request, reply) => {
+      const document = await repository.getDocument(request.params.id)
+
+      if (!document) {
+        throw new ApiError("DOCUMENT_NOT_FOUND", "Document was not found.", 404)
+      }
+
+      return reply.send(document)
+    },
   )
 
   return app

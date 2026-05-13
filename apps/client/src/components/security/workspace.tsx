@@ -1,21 +1,25 @@
 import {
   Building2,
   Check,
+  Eye,
   FileText,
   LayoutDashboard,
   Loader2,
   Pencil,
   Plus,
   Save,
+  ScrollText,
   Trash2,
   Users,
   X,
 } from "lucide-react"
 import {
-  type OrganizationTemplate,
-  type OrganizationTemplateInput,
+  type Document,
+  type DocumentSummary,
   type Provider,
+  type Template,
   type TemplateCatalog,
+  type TemplateInput,
   type Vendor,
   type VendorInput,
 } from "@complyflow/shared"
@@ -223,18 +227,18 @@ const CompanyReadOnlySection = ({
   )
 }
 
-const OrganizationTemplateForm = ({
+const TemplateForm = ({
   defaultValues,
   saveState,
   onCancel,
   onSubmit,
 }: {
-  defaultValues: OrganizationTemplate
+  defaultValues: Template
   saveState: MutationState
   onCancel: () => void
-  onSubmit: (template: OrganizationTemplateInput) => void
+  onSubmit: (template: TemplateInput) => void
 }) => {
-  const [draft, setDraft] = useState<OrganizationTemplateInput>({
+  const [draft, setDraft] = useState<TemplateInput>({
     name: defaultValues.name,
     slug: defaultValues.slug,
     content: defaultValues.content,
@@ -337,20 +341,43 @@ const TemplateCard = ({
   </div>
 )
 
+const documentStatusLabel = (status: DocumentSummary["status"]) => {
+  if (status === "stale") {
+    return "Outdated"
+  }
+
+  if (status === "current") {
+    return "Generated"
+  }
+
+  return "Not generated"
+}
+
+const DocumentContent = ({ document }: { document: Document }) => (
+  <article className="rounded-md border border-slate-200 bg-white p-5 font-mono text-sm leading-6 whitespace-pre-wrap text-slate-800">
+    {document.renderedContent}
+  </article>
+)
+
 export const Workspace = ({
   defaultValues,
   vendors,
   providers,
   providersError,
   providersLoading,
+  document,
+  documentLoading,
+  documents,
+  documentsLoading,
   templates,
   templatesLoading,
   error,
   saveState,
   onSaveProfile,
   onAddSystemTemplate,
-  onUpdateOrganizationTemplate,
-  onDeleteOrganizationTemplate,
+  onUpdateTemplate,
+  onDeleteTemplate,
+  onGenerateDocument,
   onCreateVendor,
   onUpdateVendor,
   onDeleteVendor,
@@ -360,17 +387,19 @@ export const Workspace = ({
   providers: Provider[]
   providersError: string | null
   providersLoading: boolean
+  document: Document | null
+  documentLoading: boolean
+  documents: DocumentSummary[]
+  documentsLoading: boolean
   templates: TemplateCatalog
   templatesLoading: boolean
   error: string | null
   saveState: MutationState
   onSaveProfile: (profile: ProfileDraft) => void
   onAddSystemTemplate: (sourceSystemTemplateSlug: string) => void
-  onUpdateOrganizationTemplate: (
-    id: string,
-    template: OrganizationTemplateInput
-  ) => void
-  onDeleteOrganizationTemplate: (template: OrganizationTemplate) => void
+  onUpdateTemplate: (id: string, template: TemplateInput) => void
+  onDeleteTemplate: (template: Template) => void
+  onGenerateDocument: (templateId: string) => void
   onCreateVendor: (vendor: VendorInput) => void
   onUpdateVendor: (id: string, vendor: VendorInput) => void
   onDeleteVendor: (vendor: Vendor) => void
@@ -382,6 +411,8 @@ export const Workspace = ({
     editingCompanySection,
     editingTemplateId,
     editingVendorId,
+    viewingDocumentId,
+    setViewingDocument,
     setActiveWorkspaceView,
     setEditingCompanySection,
     startEditingTemplate,
@@ -398,6 +429,9 @@ export const Workspace = ({
     templates.organizationTemplates.map(
       (template) => template.sourceSystemTemplateSlug
     )
+  )
+  const viewedDocumentSummary = documents.find(
+    (summary) => summary.document?.id === viewingDocumentId
   )
 
   return (
@@ -439,6 +473,13 @@ export const Workspace = ({
               <FileText className="size-4" />
               Templates
             </SidebarMenuButton>
+            <SidebarMenuButton
+              active={activeWorkspaceView === "documents"}
+              onClick={() => setActiveWorkspaceView("documents")}
+            >
+              <ScrollText className="size-4" />
+              Documents
+            </SidebarMenuButton>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
@@ -468,7 +509,9 @@ export const Workspace = ({
                     ? "Company"
                     : activeWorkspaceView === "templates"
                       ? "Templates"
-                      : "Vendors"}
+                      : activeWorkspaceView === "documents"
+                        ? "Documents"
+                        : "Vendors"}
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-slate-950">
                 {activeWorkspaceView === "dashboard"
@@ -477,7 +520,9 @@ export const Workspace = ({
                     ? "Company profile"
                     : activeWorkspaceView === "templates"
                       ? "Document templates"
-                      : "Vendor inventory"}
+                      : activeWorkspaceView === "documents"
+                        ? "Generated documents"
+                        : "Vendor inventory"}
               </h1>
             </div>
             {saveState === "saved" && (
@@ -707,12 +752,12 @@ export const Workspace = ({
                 title="Organization templates"
               >
                 {editingTemplate ? (
-                  <OrganizationTemplateForm
+                  <TemplateForm
                     defaultValues={editingTemplate}
                     saveState={saveState}
                     onCancel={() => startEditingTemplate(null)}
                     onSubmit={(template) => {
-                      onUpdateOrganizationTemplate(editingTemplate.id, template)
+                      onUpdateTemplate(editingTemplate.id, template)
                       startEditingTemplate(null)
                     }}
                   />
@@ -730,7 +775,7 @@ export const Workspace = ({
                       <Button
                         type="button"
                         variant="destructive"
-                        onClick={() => onDeleteOrganizationTemplate(template)}
+                        onClick={() => onDeleteTemplate(template)}
                       >
                         <Trash2 />
                         Delete
@@ -744,6 +789,127 @@ export const Workspace = ({
                   </p>
                 )}
               </Section>
+            </div>
+          )}
+
+          {activeWorkspaceView === "documents" && (
+            <div className="grid gap-5">
+              {viewingDocumentId ? (
+                <Section
+                  description={
+                    viewedDocumentSummary
+                      ? `Generated from ${viewedDocumentSummary.template.name}.`
+                      : "Generated document content."
+                  }
+                  title={document?.title ?? "Document"}
+                >
+                  <Button
+                    className="w-fit"
+                    type="button"
+                    variant="outline"
+                    onClick={() => setViewingDocument(null)}
+                  >
+                    <X />
+                    Close
+                  </Button>
+                  {documentLoading ? (
+                    <p className="text-sm text-slate-500">
+                      Loading document...
+                    </p>
+                  ) : document ? (
+                    <DocumentContent document={document} />
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Document was not found.
+                    </p>
+                  )}
+                </Section>
+              ) : (
+                <Section
+                  description="Generate customer-facing documents from organization templates."
+                  title="Documents"
+                >
+                  {documentsLoading ? (
+                    <p className="text-sm text-slate-500">
+                      Loading documents...
+                    </p>
+                  ) : documents.length > 0 ? (
+                    documents.map((summary) => {
+                      const isGenerated = Boolean(summary.document)
+
+                      return (
+                        <div
+                          className={
+                            isGenerated
+                              ? "grid gap-4 rounded-md border border-slate-200 bg-white p-4 md:grid-cols-[1fr_auto] md:items-start"
+                              : "grid gap-4 rounded-md border border-dashed border-slate-300 bg-white/60 p-4 md:grid-cols-[1fr_auto] md:items-start"
+                          }
+                          key={summary.template.id}
+                        >
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-semibold text-slate-950">
+                                {summary.template.name}
+                              </h3>
+                              <span className="rounded-md bg-slate-50 px-2 py-1 font-mono text-xs text-slate-600 ring-1 ring-slate-200">
+                                {summary.template.slug}
+                              </span>
+                              <span
+                                className={
+                                  summary.status === "stale"
+                                    ? "rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800"
+                                    : "rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600"
+                                }
+                              >
+                                {documentStatusLabel(summary.status)}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm text-slate-500">
+                              {summary.document
+                                ? `Generated ${new Date(
+                                    summary.document.generatedAt
+                                  ).toLocaleString()}`
+                                : "No document has been generated yet."}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {summary.document ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  setViewingDocument(
+                                    summary.document?.id ?? null
+                                  )
+                                }
+                              >
+                                <Eye />
+                                View
+                              </Button>
+                            ) : (
+                              <Button
+                                disabled={saveState === "loading"}
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  onGenerateDocument(summary.template.id)
+                                }
+                              >
+                                <ScrollText />
+                                Generate
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Add an organization template before generating documents.
+                    </p>
+                  )}
+                </Section>
+              )}
             </div>
           )}
         </main>

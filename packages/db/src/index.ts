@@ -4,10 +4,12 @@ import {
   companyProfileSchema,
   dataHandlingProfileSchema,
   infrastructureProfileSchema,
+  documentSchema,
   type OrganizationSecurityProfile,
-  type OrganizationTemplate,
+  type Document,
+  type Template,
   type Vendor,
-  organizationTemplateSchema,
+  templateSchema,
   vendorSchema,
 } from "@complyflow/shared"
 
@@ -105,7 +107,8 @@ export function mapOrganizationRecord(record: {
     sharedAccountsExist: record.accessProfile?.sharedAccountsExist ?? false,
     offboardingProcessExists:
       record.accessProfile?.offboardingProcessExists ?? false,
-    accessReviewsPerformed: record.accessProfile?.accessReviewsPerformed ?? false,
+    accessReviewsPerformed:
+      record.accessProfile?.accessReviewsPerformed ?? false,
     privilegedAccessRestricted:
       record.accessProfile?.privilegedAccessRestricted ?? false,
   })
@@ -149,7 +152,7 @@ export function mapVendorRecord(record: {
     hasSubprocessors: record.hasSubprocessors,
     dataProcessingLevel: record.dataProcessingLevel,
     dataProcessed: record.dataTypes.map(
-      (dataType) => dataType.organizationDataType.name
+      (dataType) => dataType.organizationDataType.name,
     ),
     dpaStatus: record.dpaStatus,
     dataRegions: record.dataRegions,
@@ -161,7 +164,7 @@ export function mapVendorRecord(record: {
   })
 }
 
-export function mapOrganizationTemplateRecord(record: {
+export function mapTemplateRecord(record: {
   id: string
   organizationId: string
   name: string
@@ -170,8 +173,8 @@ export function mapOrganizationTemplateRecord(record: {
   content: string
   createdAt: Date
   updatedAt: Date
-}): OrganizationTemplate {
-  return organizationTemplateSchema.parse({
+}): Template {
+  return templateSchema.parse({
     id: record.id,
     organizationId: record.organizationId,
     name: record.name,
@@ -180,6 +183,26 @@ export function mapOrganizationTemplateRecord(record: {
     content: record.content,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
+  })
+}
+
+export function mapDocumentRecord(record: {
+  id: string
+  organizationId: string
+  templateId: string
+  title: string
+  renderedContent: string
+  sourceHash: string
+  generatedAt: Date
+}): Document {
+  return documentSchema.parse({
+    id: record.id,
+    organizationId: record.organizationId,
+    templateId: record.templateId,
+    title: record.title,
+    renderedContent: record.renderedContent,
+    sourceHash: record.sourceHash,
+    generatedAt: toIsoString(record.generatedAt),
   })
 }
 

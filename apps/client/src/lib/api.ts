@@ -4,13 +4,19 @@ import {
   providerSchema,
   templateCatalogSchema,
   vendorSchema,
-  organizationTemplateSchema,
+  createDocumentSchema,
+  documentSchema,
+  documentSummarySchema,
+  templateSchema,
   type Provider,
-  type CreateOrganizationTemplateFromSystem,
-  type OrganizationTemplate,
-  type OrganizationTemplateInput,
+  type CreateDocument,
+  type CreateTemplateFromSystem,
+  type Document,
+  type DocumentSummary,
   type SecurityProgramSnapshot,
+  type Template,
   type TemplateCatalog,
+  type TemplateInput,
   type Vendor,
   type VendorInput,
 } from "@complyflow/shared"
@@ -60,6 +66,9 @@ export const getProviders = (): Promise<Provider[]> =>
 export const getTemplates = (): Promise<TemplateCatalog> =>
   apiRequest("/templates", templateCatalogSchema)
 
+export const getDocuments = (): Promise<DocumentSummary[]> =>
+  apiRequest("/documents", z.array(documentSummarySchema))
+
 export const saveSecurityProfile = (
   profile: ProfileDraft
 ): Promise<SecurityProgramSnapshot> =>
@@ -74,25 +83,34 @@ export const createVendor = (vendor: VendorInput): Promise<Vendor> =>
     body: JSON.stringify(vendor),
   })
 
-export const createOrganizationTemplateFromSystem = (
-  input: CreateOrganizationTemplateFromSystem
-): Promise<OrganizationTemplate> =>
-  apiRequest("/templates/organization", organizationTemplateSchema, {
+export const createTemplateFromSystem = (
+  input: CreateTemplateFromSystem
+): Promise<Template> =>
+  apiRequest("/templates/organization", templateSchema, {
     method: "POST",
     body: JSON.stringify(input),
   })
 
-export const updateOrganizationTemplate = ({
+export const updateTemplate = ({
   id,
   template,
 }: {
   id: string
-  template: OrganizationTemplateInput
-}): Promise<OrganizationTemplate> =>
-  apiRequest(`/templates/organization/${id}`, organizationTemplateSchema, {
+  template: TemplateInput
+}): Promise<Template> =>
+  apiRequest(`/templates/organization/${id}`, templateSchema, {
     method: "PUT",
     body: JSON.stringify(template),
   })
+
+export const createDocument = (input: CreateDocument): Promise<Document> =>
+  apiRequest("/documents", documentSchema, {
+    method: "POST",
+    body: JSON.stringify(createDocumentSchema.parse(input)),
+  })
+
+export const getDocument = (id: string): Promise<Document> =>
+  apiRequest(`/documents/${id}`, documentSchema)
 
 export const updateVendor = ({
   id,
@@ -120,7 +138,7 @@ export const deleteVendor = async (id: string): Promise<void> => {
   }
 }
 
-export const deleteOrganizationTemplate = async (id: string): Promise<void> => {
+export const deleteTemplate = async (id: string): Promise<void> => {
   const response = await fetch(`${API_URL}/templates/organization/${id}`, {
     method: "DELETE",
   })

@@ -1,10 +1,11 @@
 import {
-  mapOrganizationTemplateRecord,
+  mapDocumentRecord,
   mapOrganizationRecord,
+  mapTemplateRecord,
   mapVendorRecord,
   prisma,
   type PrismaClient,
-} from "@complyflow/db";
+} from "@complyflow/db"
 import {
   emptyAccessProfile,
   emptyCompanyProfile,
@@ -15,33 +16,35 @@ import {
   type DataHandlingProfile,
   type InfrastructureProfile,
   type OrganizationSecurityProfile,
-  type OrganizationTemplate,
-  type OrganizationTemplateInput,
+  type Document,
+  type DocumentSummary,
   type SecurityProgramSnapshot,
   type SystemTemplate,
+  type Template,
+  type TemplateInput,
   type Vendor,
   type VendorInput,
-} from "@complyflow/shared";
+} from "@complyflow/shared"
 
 import type {
   SecurityProfileInput,
   SecurityProfileRepository,
-} from "./repository.js";
-import { ApiError } from "./errors.js";
+} from "./repository.js"
+import { ApiError } from "./errors.js"
 
-const SINGLE_ORG_FILTER = {};
+const SINGLE_ORG_FILTER = {}
 const ORGANIZATION_INCLUDE = {
   accessProfile: true,
   dataHandlingProfile: true,
   dataTypes: { orderBy: { createdAt: "asc" } },
   infrastructureProfile: true,
-} as const;
+} as const
 const VENDOR_INCLUDE = {
   dataTypes: {
     include: { organizationDataType: true },
     orderBy: { createdAt: "asc" },
   },
-} as const;
+} as const
 
 export class PrismaSecurityProfileRepository implements SecurityProfileRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
@@ -50,19 +53,19 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
     const organization = await this.client.organization.findFirst({
       where: SINGLE_ORG_FILTER,
       include: ORGANIZATION_INCLUDE,
-    });
+    })
     const vendors = organization
       ? await this.client.vendor.findMany({
           where: { organizationId: organization.id },
           include: VENDOR_INCLUDE,
           orderBy: { createdAt: "asc" },
         })
-      : [];
+      : []
 
     return {
       organization: organization ? mapOrganizationRecord(organization) : null,
       vendors: vendors.map(mapVendorRecord),
-    };
+    }
   }
 
   async upsertProfile(
@@ -70,11 +73,11 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
   ): Promise<OrganizationSecurityProfile> {
     const existing = await this.client.organization.findFirst({
       where: SINGLE_ORG_FILTER,
-    });
-    const organizationData = this.organizationData(input.company);
-    const infrastructureData = this.infrastructureData(input.infrastructure);
-    const dataHandlingData = this.dataHandlingData(input.dataHandling);
-    const accessData = this.accessData(input.access);
+    })
+    const organizationData = this.organizationData(input.company)
+    const infrastructureData = this.infrastructureData(input.infrastructure)
+    const dataHandlingData = this.dataHandlingData(input.dataHandling)
+    const accessData = this.accessData(input.access)
 
     const organization = existing
       ? await this.client.organization.update({
@@ -113,39 +116,39 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
             infrastructureProfile: { create: infrastructureData },
           },
           include: ORGANIZATION_INCLUDE,
-        });
+        })
 
     if (existing) {
-      await this.syncOrganizationDataTypes(organization.id, input.dataHandling);
+      await this.syncOrganizationDataTypes(organization.id, input.dataHandling)
 
       return mapOrganizationRecord(
         await this.client.organization.findUniqueOrThrow({
           where: { id: organization.id },
           include: ORGANIZATION_INCLUDE,
         }),
-      );
+      )
     }
 
-    return mapOrganizationRecord(organization);
+    return mapOrganizationRecord(organization)
   }
 
   async listVendors(): Promise<Vendor[]> {
-    const organization = await this.getOrCreateOrganization();
+    const organization = await this.getOrCreateOrganization()
     const vendors = await this.client.vendor.findMany({
       where: { organizationId: organization.id },
       include: VENDOR_INCLUDE,
       orderBy: { createdAt: "asc" },
-    });
+    })
 
-    return vendors.map(mapVendorRecord);
+    return vendors.map(mapVendorRecord)
   }
 
   async createVendor(input: VendorInput): Promise<Vendor> {
-    const organization = await this.getOrCreateOrganization();
+    const organization = await this.getOrCreateOrganization()
     const dataProcessed = await this.validVendorDataTypeNames(
       organization.id,
       input,
-    );
+    )
     const vendor = await this.client.vendor.create({
       data: {
         organizationId: organization.id,
@@ -157,25 +160,25 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
         },
       },
       include: VENDOR_INCLUDE,
-    });
+    })
 
-    return mapVendorRecord(vendor);
+    return mapVendorRecord(vendor)
   }
 
   async updateVendor(id: string, input: VendorInput): Promise<Vendor | null> {
-    const organization = await this.getOrCreateOrganization();
+    const organization = await this.getOrCreateOrganization()
     const existing = await this.client.vendor.findFirst({
       where: { id, organizationId: organization.id },
-    });
+    })
 
     if (!existing) {
-      return null;
+      return null
     }
 
     const dataProcessed = await this.validVendorDataTypeNames(
       organization.id,
       input,
-    );
+    )
     const vendor = await this.client.vendor.update({
       where: { id },
       data: {
@@ -188,49 +191,49 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
         },
       },
       include: VENDOR_INCLUDE,
-    });
+    })
 
-    return mapVendorRecord(vendor);
+    return mapVendorRecord(vendor)
   }
 
   async deleteVendor(id: string): Promise<boolean> {
-    const organization = await this.getOrCreateOrganization();
+    const organization = await this.getOrCreateOrganization()
     const existing = await this.client.vendor.findFirst({
       where: { id, organizationId: organization.id },
-    });
+    })
 
     if (!existing) {
-      return false;
+      return false
     }
 
-    await this.client.vendor.delete({ where: { id } });
-    return true;
+    await this.client.vendor.delete({ where: { id } })
+    return true
   }
 
-  async listOrganizationTemplates(): Promise<OrganizationTemplate[]> {
+  async listTemplates(): Promise<Template[]> {
     const organization = await this.client.organization.findFirst({
       where: SINGLE_ORG_FILTER,
-    });
+    })
 
     if (!organization) {
-      return [];
+      return []
     }
 
-    const templates = await this.client.organizationTemplate.findMany({
+    const templates = await this.client.template.findMany({
       where: { organizationId: organization.id },
       orderBy: { createdAt: "asc" },
-    });
+    })
 
-    return templates.map(mapOrganizationTemplateRecord);
+    return templates.map(mapTemplateRecord)
   }
 
-  async createOrganizationTemplateFromSystem(
+  async createTemplateFromSystem(
     systemTemplate: SystemTemplate,
-  ): Promise<OrganizationTemplate> {
-    const organization = await this.getOrCreateOrganization();
+  ): Promise<Template> {
+    const organization = await this.getOrCreateOrganization()
 
     try {
-      const template = await this.client.organizationTemplate.create({
+      const template = await this.client.template.create({
         data: {
           organizationId: organization.id,
           name: systemTemplate.name,
@@ -238,61 +241,134 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
           sourceSystemTemplateSlug: systemTemplate.slug,
           content: systemTemplate.content,
         },
-      });
+      })
 
-      return mapOrganizationTemplateRecord(template);
+      return mapTemplateRecord(template)
     } catch (error) {
-      this.throwTemplateConflict(error, systemTemplate.slug);
+      this.throwTemplateConflict(error, systemTemplate.slug)
     }
   }
 
-  async updateOrganizationTemplate(
+  async updateTemplate(
     id: string,
-    input: OrganizationTemplateInput,
-  ): Promise<OrganizationTemplate | null> {
-    const organization = await this.getOrCreateOrganization();
-    const existing = await this.client.organizationTemplate.findFirst({
+    input: TemplateInput,
+  ): Promise<Template | null> {
+    const organization = await this.getOrCreateOrganization()
+    const existing = await this.client.template.findFirst({
       where: { id, organizationId: organization.id },
-    });
+    })
 
     if (!existing) {
-      return null;
+      return null
     }
 
     try {
-      const template = await this.client.organizationTemplate.update({
+      const template = await this.client.template.update({
         where: { id },
         data: {
           name: input.name,
           slug: input.slug,
           content: input.content,
         },
-      });
+      })
 
-      return mapOrganizationTemplateRecord(template);
+      return mapTemplateRecord(template)
     } catch (error) {
-      this.throwTemplateConflict(error, input.slug);
+      this.throwTemplateConflict(error, input.slug)
     }
   }
 
-  async deleteOrganizationTemplate(id: string): Promise<boolean> {
-    const organization = await this.getOrCreateOrganization();
-    const existing = await this.client.organizationTemplate.findFirst({
+  async deleteTemplate(id: string): Promise<boolean> {
+    const organization = await this.getOrCreateOrganization()
+    const existing = await this.client.template.findFirst({
       where: { id, organizationId: organization.id },
-    });
+    })
 
     if (!existing) {
-      return false;
+      return false
     }
 
-    await this.client.organizationTemplate.delete({ where: { id } });
-    return true;
+    await this.client.template.delete({ where: { id } })
+    return true
+  }
+
+  async listDocumentSummaries(
+    sourceHashForTemplate: (template: Template) => string,
+  ): Promise<DocumentSummary[]> {
+    const organization = await this.client.organization.findFirst({
+      where: SINGLE_ORG_FILTER,
+    })
+
+    if (!organization) {
+      return []
+    }
+
+    const templates = await this.client.template.findMany({
+      where: { organizationId: organization.id },
+      include: { documents: true },
+      orderBy: { createdAt: "asc" },
+    })
+
+    return templates.map((templateRecord) => {
+      const template = mapTemplateRecord(templateRecord)
+      const documentRecord = templateRecord.documents[0] ?? null
+      const document = documentRecord ? mapDocumentRecord(documentRecord) : null
+
+      return {
+        template,
+        document,
+        status: !document
+          ? "not_generated"
+          : document.sourceHash === sourceHashForTemplate(template)
+            ? "current"
+            : "stale",
+      }
+    })
+  }
+
+  async createDocument(input: {
+    template: Template
+    title: string
+    renderedContent: string
+    sourceHash: string
+  }): Promise<Document> {
+    try {
+      const document = await this.client.document.create({
+        data: {
+          organizationId: input.template.organizationId,
+          templateId: input.template.id,
+          title: input.title,
+          renderedContent: input.renderedContent,
+          sourceHash: input.sourceHash,
+        },
+      })
+
+      return mapDocumentRecord(document)
+    } catch (error) {
+      this.throwDocumentConflict(error, input.template.id)
+    }
+  }
+
+  async getDocument(id: string): Promise<Document | null> {
+    const organization = await this.client.organization.findFirst({
+      where: SINGLE_ORG_FILTER,
+    })
+
+    if (!organization) {
+      return null
+    }
+
+    const document = await this.client.document.findFirst({
+      where: { id, organizationId: organization.id },
+    })
+
+    return document ? mapDocumentRecord(document) : null
   }
 
   private async getOrCreateOrganization() {
     const existing = await this.client.organization.findFirst({
       where: SINGLE_ORG_FILTER,
-    });
+    })
 
     if (!existing) {
       return this.client.organization.create({
@@ -313,7 +389,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
           },
         },
         include: ORGANIZATION_INCLUDE,
-      });
+      })
     }
 
     return this.client.organization.update({
@@ -339,7 +415,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
         },
       },
       include: ORGANIZATION_INCLUDE,
-    });
+    })
   }
 
   private organizationData(input: CompanyProfile) {
@@ -351,7 +427,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
       complianceGoals: input.complianceGoals,
-    };
+    }
   }
 
   private infrastructureData(input: InfrastructureProfile) {
@@ -364,7 +440,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       encryptedDevicesRequired: input.encryptedDevicesRequired,
       backupsEnabled: input.backupsEnabled,
       centralizedLoggingEnabled: input.centralizedLoggingEnabled,
-    };
+    }
   }
 
   private dataHandlingData(input: DataHandlingProfile) {
@@ -375,7 +451,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       encryptionInTransit: input.encryptionInTransit,
       productionDataInDevelopment: input.productionDataInDevelopment,
       retentionPolicyExists: input.retentionPolicyExists,
-    };
+    }
   }
 
   private organizationDataTypes(input: DataHandlingProfile) {
@@ -383,22 +459,22 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       name: dataType.name,
       isSensitive: dataType.isSensitive,
       description: dataType.description,
-    }));
+    }))
   }
 
   private async syncOrganizationDataTypes(
     organizationId: string,
     input: DataHandlingProfile,
   ) {
-    const dataTypes = this.organizationDataTypes(input);
-    const names = dataTypes.map((dataType) => dataType.name);
+    const dataTypes = this.organizationDataTypes(input)
+    const names = dataTypes.map((dataType) => dataType.name)
 
     await this.client.organizationDataType.deleteMany({
       where: {
         organizationId,
         name: { notIn: names },
       },
-    });
+    })
 
     await Promise.all(
       dataTypes.map((dataType) =>
@@ -419,7 +495,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
           },
         }),
       ),
-    );
+    )
   }
 
   private async validVendorDataTypeNames(
@@ -427,13 +503,13 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
     input: VendorInput,
   ) {
     if (input.dataProcessingLevel === "none") {
-      return [];
+      return []
     }
 
-    const requestedNames = Array.from(new Set(input.dataProcessed));
+    const requestedNames = Array.from(new Set(input.dataProcessed))
 
     if (requestedNames.length === 0) {
-      return [];
+      return []
     }
 
     const existingDataTypes = await this.client.organizationDataType.findMany({
@@ -442,13 +518,13 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
         name: { in: requestedNames },
       },
       select: { name: true },
-    });
+    })
     const existingNames = new Set(
       existingDataTypes.map((dataType) => dataType.name),
-    );
+    )
     const missingNames = requestedNames.filter(
       (name) => !existingNames.has(name),
-    );
+    )
 
     if (missingNames.length > 0) {
       throw new ApiError(
@@ -456,10 +532,10 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
         "Vendor data processed must reference data types stored on the organization.",
         400,
         { dataProcessed: missingNames },
-      );
+      )
     }
 
-    return requestedNames;
+    return requestedNames
   }
 
   private connectDataType(organizationId: string, name: string) {
@@ -470,7 +546,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
           name,
         },
       },
-    };
+    }
   }
 
   private accessData(input: AccessProfile) {
@@ -481,7 +557,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       offboardingProcessExists: input.offboardingProcessExists,
       accessReviewsPerformed: input.accessReviewsPerformed,
       privilegedAccessRestricted: input.privilegedAccessRestricted,
-    };
+    }
   }
 
   private vendorData(input: VendorInput) {
@@ -496,7 +572,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       criticality: input.criticality,
       owner: input.owner || null,
       notes: input.notes || null,
-    };
+    }
   }
 
   private throwTemplateConflict(error: unknown, slug: string): never {
@@ -507,13 +583,31 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       error.code === "P2002"
     ) {
       throw new ApiError(
-        "ORGANIZATION_TEMPLATE_SLUG_EXISTS",
-        "An organization template with this slug already exists.",
+        "TEMPLATE_SLUG_EXISTS",
+        "A template with this slug already exists.",
         409,
         { slug },
-      );
+      )
     }
 
-    throw error;
+    throw error
+  }
+
+  private throwDocumentConflict(error: unknown, templateId: string): never {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      throw new ApiError(
+        "DOCUMENT_ALREADY_EXISTS",
+        "A document has already been generated for this template.",
+        409,
+        { templateId },
+      )
+    }
+
+    throw error
   }
 }

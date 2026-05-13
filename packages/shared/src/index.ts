@@ -67,8 +67,7 @@ const vendorInputBaseSchema = z.object({
   category: z.string().trim().min(1, "Category is required"),
   purpose: z.string().trim().min(1, "Purpose is required"),
   hasSubprocessors: z.boolean(),
-  dataProcessingLevel:
-    vendorDataProcessingLevelSchema.default("limited"),
+  dataProcessingLevel: vendorDataProcessingLevelSchema.default("limited"),
   dataProcessed: z.array(z.string().trim().min(1)).default([]),
   dpaStatus: dpaStatusSchema,
   dataRegions: z.array(z.string().trim().min(1)).default([]),
@@ -102,8 +101,9 @@ const vendorStoredBaseSchema = vendorInputBaseSchema.extend({
   updatedAt: z.string().datetime(),
 })
 
-export const vendorSchema =
-  vendorStoredBaseSchema.transform(normalizeVendorDataProcessingNone)
+export const vendorSchema = vendorStoredBaseSchema.transform(
+  normalizeVendorDataProcessingNone,
+)
 
 export const providerSchema = z.object({
   id: z.string().min(1),
@@ -131,7 +131,7 @@ export const systemTemplateSchema = z.object({
   content: z.string(),
 })
 
-export const organizationTemplateSchema = z.object({
+export const templateSchema = z.object({
   id: z.string().min(1),
   organizationId: z.string().min(1),
   name: z.string().trim().min(1),
@@ -142,19 +142,45 @@ export const organizationTemplateSchema = z.object({
   updatedAt: z.string().datetime(),
 })
 
-export const organizationTemplateInputSchema = z.object({
+export const templateInputSchema = z.object({
   name: z.string().trim().min(1, "Template name is required"),
   slug: templateSlugSchema,
   content: z.string(),
 })
 
-export const createOrganizationTemplateFromSystemSchema = z.object({
+export const createTemplateFromSystemSchema = z.object({
   sourceSystemTemplateSlug: templateSlugSchema,
+})
+
+export const documentSchema = z.object({
+  id: z.string().min(1),
+  organizationId: z.string().min(1),
+  templateId: z.string().min(1),
+  title: z.string().trim().min(1),
+  renderedContent: z.string(),
+  sourceHash: z.string().min(1),
+  generatedAt: z.string().datetime(),
+})
+
+export const documentStatusSchema = z.enum([
+  "not_generated",
+  "current",
+  "stale",
+])
+
+export const documentSummarySchema = z.object({
+  template: templateSchema,
+  document: documentSchema.nullable(),
+  status: documentStatusSchema,
+})
+
+export const createDocumentSchema = z.object({
+  templateId: z.string().min(1),
 })
 
 export const templateCatalogSchema = z.object({
   systemTemplates: z.array(systemTemplateSchema),
-  organizationTemplates: z.array(organizationTemplateSchema),
+  organizationTemplates: z.array(templateSchema),
 })
 
 export const organizationSecurityProfileSchema = z.object({
@@ -194,13 +220,15 @@ export type VendorInput = z.infer<typeof vendorInputSchema>
 export type Vendor = z.infer<typeof vendorSchema>
 export type Provider = z.infer<typeof providerSchema>
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>
-export type OrganizationTemplate = z.infer<typeof organizationTemplateSchema>
-export type OrganizationTemplateInput = z.infer<
-  typeof organizationTemplateInputSchema
+export type Template = z.infer<typeof templateSchema>
+export type TemplateInput = z.infer<typeof templateInputSchema>
+export type CreateTemplateFromSystem = z.infer<
+  typeof createTemplateFromSystemSchema
 >
-export type CreateOrganizationTemplateFromSystem = z.infer<
-  typeof createOrganizationTemplateFromSystemSchema
->
+export type Document = z.infer<typeof documentSchema>
+export type DocumentStatus = z.infer<typeof documentStatusSchema>
+export type DocumentSummary = z.infer<typeof documentSummarySchema>
+export type CreateDocument = z.infer<typeof createDocumentSchema>
 export type TemplateCatalog = z.infer<typeof templateCatalogSchema>
 export type OrganizationSecurityProfile = z.infer<
   typeof organizationSecurityProfileSchema

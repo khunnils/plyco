@@ -1,20 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  type OrganizationTemplate,
+  type Template,
   type Vendor,
   type VendorInput,
 } from "@complyflow/shared"
 
 import {
-  createOrganizationTemplateFromSystem,
+  createDocument,
+  createTemplateFromSystem,
   createVendor,
-  deleteOrganizationTemplate,
+  deleteTemplate,
   deleteVendor,
+  getDocument,
+  getDocuments,
   getProviders,
   getSecurityProfile,
   getTemplates,
   saveSecurityProfile,
-  updateOrganizationTemplate,
+  updateTemplate,
   updateVendor,
 } from "@/lib/api"
 import { type ProfileDraft } from "@/types/security-profile"
@@ -22,6 +25,7 @@ import { type ProfileDraft } from "@/types/security-profile"
 const securityProfileQueryKey = ["security-profile"] as const
 const providersQueryKey = ["providers"] as const
 const templatesQueryKey = ["templates"] as const
+const documentsQueryKey = ["documents"] as const
 
 export const useSecurityProfile = () =>
   useQuery({
@@ -39,6 +43,19 @@ export const useTemplates = () =>
   useQuery({
     queryKey: templatesQueryKey,
     queryFn: getTemplates,
+  })
+
+export const useDocuments = () =>
+  useQuery({
+    queryKey: documentsQueryKey,
+    queryFn: getDocuments,
+  })
+
+export const useDocument = (id: string | null) =>
+  useQuery({
+    enabled: Boolean(id),
+    queryKey: ["document", id] as const,
+    queryFn: () => getDocument(id ?? ""),
   })
 
 export const useSaveSecurityProfile = () => {
@@ -159,27 +176,28 @@ export const useDeleteVendor = () => {
   })
 }
 
-export const useCreateOrganizationTemplateFromSystem = () => {
+export const useCreateTemplateFromSystem = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: createOrganizationTemplateFromSystem,
+    mutationFn: createTemplateFromSystem,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: templatesQueryKey })
+      void queryClient.invalidateQueries({ queryKey: documentsQueryKey })
     },
   })
 }
 
-export const useUpdateOrganizationTemplate = () => {
+export const useUpdateTemplate = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: updateOrganizationTemplate,
+    mutationFn: updateTemplate,
     onMutate: async ({ id, template }) => {
       await queryClient.cancelQueries({ queryKey: templatesQueryKey })
       const previousCatalog = queryClient.getQueryData<{
         systemTemplates: unknown[]
-        organizationTemplates: OrganizationTemplate[]
+        organizationTemplates: Template[]
       }>(templatesQueryKey)
 
       queryClient.setQueryData(templatesQueryKey, (current: unknown) => {
@@ -188,7 +206,7 @@ export const useUpdateOrganizationTemplate = () => {
         }
 
         const catalog = current as {
-          organizationTemplates: OrganizationTemplate[]
+          organizationTemplates: Template[]
         }
         return {
           ...catalog,
@@ -210,20 +228,21 @@ export const useUpdateOrganizationTemplate = () => {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: templatesQueryKey })
+      void queryClient.invalidateQueries({ queryKey: documentsQueryKey })
     },
   })
 }
 
-export const useDeleteOrganizationTemplate = () => {
+export const useDeleteTemplate = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: deleteOrganizationTemplate,
+    mutationFn: deleteTemplate,
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: templatesQueryKey })
       const previousCatalog = queryClient.getQueryData<{
         systemTemplates: unknown[]
-        organizationTemplates: OrganizationTemplate[]
+        organizationTemplates: Template[]
       }>(templatesQueryKey)
 
       queryClient.setQueryData(templatesQueryKey, (current: unknown) => {
@@ -232,7 +251,7 @@ export const useDeleteOrganizationTemplate = () => {
         }
 
         const catalog = current as {
-          organizationTemplates: OrganizationTemplate[]
+          organizationTemplates: Template[]
         }
         return {
           ...catalog,
@@ -251,6 +270,19 @@ export const useDeleteOrganizationTemplate = () => {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: templatesQueryKey })
+      void queryClient.invalidateQueries({ queryKey: documentsQueryKey })
+    },
+  })
+}
+
+export const useCreateDocument = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: createDocument,
+    onSuccess: (document) => {
+      void queryClient.invalidateQueries({ queryKey: documentsQueryKey })
+      queryClient.setQueryData(["document", document.id], document)
     },
   })
 }

@@ -1,20 +1,24 @@
 import {
   useCreateVendor,
   useCreateVendors,
-  useCreateOrganizationTemplateFromSystem,
-  useDeleteOrganizationTemplate,
+  useCreateDocument,
+  useCreateTemplateFromSystem,
+  useDeleteTemplate,
   useDeleteVendor,
+  useDocument,
+  useDocuments,
   useProviders,
   useSaveSecurityProfile,
   useSecurityProfile,
   useTemplates,
-  useUpdateOrganizationTemplate,
+  useUpdateTemplate,
   useUpdateVendor,
 } from "@/hooks/use-security-profile"
 import { emptyProfileDraft, profileFromOrganization } from "@/lib/profile"
 import { LoadingState } from "@/components/security/loading-state"
 import { Onboarding } from "@/components/security/onboarding"
 import { Workspace } from "@/components/security/workspace"
+import { useSecurityUiStore } from "@/stores/security-ui-store"
 import { type MutationState } from "@/types/security-profile"
 
 const mutationState = (
@@ -40,14 +44,20 @@ export const App = () => {
   const securityProfile = useSecurityProfile()
   const providers = useProviders()
   const templates = useTemplates()
+  const documents = useDocuments()
+  const viewingDocumentId = useSecurityUiStore(
+    (state) => state.viewingDocumentId
+  )
+  const document = useDocument(viewingDocumentId)
   const saveProfile = useSaveSecurityProfile()
   const createVendor = useCreateVendor()
   const createVendors = useCreateVendors()
   const updateVendor = useUpdateVendor()
   const deleteVendor = useDeleteVendor()
-  const createOrganizationTemplate = useCreateOrganizationTemplateFromSystem()
-  const updateOrganizationTemplate = useUpdateOrganizationTemplate()
-  const deleteOrganizationTemplate = useDeleteOrganizationTemplate()
+  const createTemplate = useCreateTemplateFromSystem()
+  const updateTemplate = useUpdateTemplate()
+  const deleteTemplate = useDeleteTemplate()
+  const createDocument = useCreateDocument()
   const snapshot = securityProfile.data
   const profile = profileFromOrganization(snapshot?.organization ?? null)
   const vendors = snapshot?.vendors ?? []
@@ -57,37 +67,44 @@ export const App = () => {
       createVendors.isPending ||
       updateVendor.isPending ||
       deleteVendor.isPending ||
-      createOrganizationTemplate.isPending ||
-      updateOrganizationTemplate.isPending ||
-      deleteOrganizationTemplate.isPending,
+      createTemplate.isPending ||
+      updateTemplate.isPending ||
+      deleteTemplate.isPending ||
+      createDocument.isPending,
     saveProfile.isError ||
       createVendor.isError ||
       createVendors.isError ||
       updateVendor.isError ||
       deleteVendor.isError ||
-      createOrganizationTemplate.isError ||
-      updateOrganizationTemplate.isError ||
-      deleteOrganizationTemplate.isError,
+      createTemplate.isError ||
+      updateTemplate.isError ||
+      deleteTemplate.isError ||
+      createDocument.isError ||
+      document.isError,
     saveProfile.isSuccess ||
       createVendor.isSuccess ||
       createVendors.isSuccess ||
       updateVendor.isSuccess ||
       deleteVendor.isSuccess ||
-      createOrganizationTemplate.isSuccess ||
-      updateOrganizationTemplate.isSuccess ||
-      deleteOrganizationTemplate.isSuccess
+      createTemplate.isSuccess ||
+      updateTemplate.isSuccess ||
+      deleteTemplate.isSuccess ||
+      createDocument.isSuccess
   )
   const error = errorMessage(
     securityProfile.error,
     templates.error,
+    documents.error,
     saveProfile.error,
     createVendor.error,
     createVendors.error,
     updateVendor.error,
     deleteVendor.error,
-    createOrganizationTemplate.error,
-    updateOrganizationTemplate.error,
-    deleteOrganizationTemplate.error
+    createTemplate.error,
+    updateTemplate.error,
+    deleteTemplate.error,
+    createDocument.error,
+    document.error
   )
 
   if (securityProfile.isLoading) {
@@ -124,22 +141,25 @@ export const App = () => {
       providersError={providers.error?.message ?? null}
       providersLoading={providers.isLoading}
       saveState={saveState}
+      document={document.data ?? null}
+      documentLoading={document.isLoading}
+      documents={documents.data ?? []}
+      documentsLoading={documents.isLoading}
       templates={
         templates.data ?? { systemTemplates: [], organizationTemplates: [] }
       }
       templatesLoading={templates.isLoading}
       vendors={vendors}
       onAddSystemTemplate={(sourceSystemTemplateSlug) =>
-        createOrganizationTemplate.mutate({ sourceSystemTemplateSlug })
-      }
-      onDeleteOrganizationTemplate={(template) =>
-        deleteOrganizationTemplate.mutate(template.id)
+        createTemplate.mutate({ sourceSystemTemplateSlug })
       }
       onCreateVendor={(vendor) => createVendor.mutate(vendor)}
+      onDeleteTemplate={(template) => deleteTemplate.mutate(template.id)}
       onDeleteVendor={(vendor) => deleteVendor.mutate(vendor.id)}
+      onGenerateDocument={(templateId) => createDocument.mutate({ templateId })}
       onSaveProfile={(profileDraft) => saveProfile.mutate(profileDraft)}
-      onUpdateOrganizationTemplate={(id, template) =>
-        updateOrganizationTemplate.mutate({ id, template })
+      onUpdateTemplate={(id, template) =>
+        updateTemplate.mutate({ id, template })
       }
       onUpdateVendor={(id, vendor) => updateVendor.mutate({ id, vendor })}
     />
