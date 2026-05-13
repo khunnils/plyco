@@ -5,6 +5,7 @@ import { type FieldErrors } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
+  dataTypeOptionsFromProfile,
   emptyVendorDraft,
   toVendorInput,
   vendorInputFromProvider,
@@ -128,109 +129,116 @@ export const Onboarding = ({
             onSave(profile, onboardingVendors.map(toVendorInput))
           }
         >
-          {(form) => (
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-              <div className="mb-6">
-                <p className="text-sm font-medium text-slate-500">
-                  {currentStep?.label}
-                </p>
-                <h2 className="mt-2 text-3xl font-semibold text-slate-950">
-                  {currentStep?.title}
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {currentStep?.description}
-                </p>
-              </div>
+          {(form) => {
+            const dataTypeOptions = dataTypeOptionsFromProfile(
+              form.watch("dataHandling.dataTypesStored")
+            )
 
-              <div className="grid gap-5">
-                {onboardingStep === 0 && <ProfileCompanyFields form={form} />}
-                {onboardingStep === 1 && (
-                  <ProfileInfrastructureFields form={form} />
-                )}
-                {onboardingStep === 2 && (
-                  <ProfileDataHandlingFields form={form} />
-                )}
-                {onboardingStep === 3 && <ProfileAccessFields form={form} />}
-                {onboardingStep === 4 && (
-                  <>
-                    <ProviderSelector
-                      error={providersError}
-                      isLoading={providersLoading}
-                      providers={providers}
-                      onChooseOther={() => {
-                        startEditingVendor(null)
-                        setShowCustomVendorForm(true)
-                      }}
-                      onChooseProvider={(provider) =>
-                        addOnboardingVendor(vendorInputFromProvider(provider))
-                      }
-                    />
-                    {(showCustomVendorForm || editingVendor) && (
-                      <VendorForm
-                        defaultValues={
-                          editingVendor
-                            ? toVendorInput(editingVendor)
-                            : emptyVendorDraft
+            return (
+              <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                <div className="mb-6">
+                  <p className="text-sm font-medium text-slate-500">
+                    {currentStep?.label}
+                  </p>
+                  <h2 className="mt-2 text-3xl font-semibold text-slate-950">
+                    {currentStep?.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {currentStep?.description}
+                  </p>
+                </div>
+
+                <div className="grid gap-5">
+                  {onboardingStep === 0 && <ProfileCompanyFields form={form} />}
+                  {onboardingStep === 1 && (
+                    <ProfileInfrastructureFields form={form} />
+                  )}
+                  {onboardingStep === 2 && (
+                    <ProfileDataHandlingFields form={form} />
+                  )}
+                  {onboardingStep === 3 && <ProfileAccessFields form={form} />}
+                  {onboardingStep === 4 && (
+                    <>
+                      <ProviderSelector
+                        error={providersError}
+                        isLoading={providersLoading}
+                        providers={providers}
+                        onChooseOther={() => {
+                          startEditingVendor(null)
+                          setShowCustomVendorForm(true)
+                        }}
+                        onChooseProvider={(provider) =>
+                          addOnboardingVendor(vendorInputFromProvider(provider))
                         }
-                        submitLabel={
-                          editingVendor ? "Update vendor" : "Add vendor"
-                        }
-                        onSubmit={(vendor) => {
-                          if (editingVendor) {
-                            updateOnboardingVendor(editingVendor.id, vendor)
-                          } else {
-                            addOnboardingVendor(vendor)
+                      />
+                      {(showCustomVendorForm || editingVendor) && (
+                        <VendorForm
+                          dataTypeOptions={dataTypeOptions}
+                          defaultValues={
+                            editingVendor
+                              ? toVendorInput(editingVendor)
+                              : emptyVendorDraft
                           }
+                          submitLabel={
+                            editingVendor ? "Update vendor" : "Add vendor"
+                          }
+                          onSubmit={(vendor) => {
+                            if (editingVendor) {
+                              updateOnboardingVendor(editingVendor.id, vendor)
+                            } else {
+                              addOnboardingVendor(vendor)
+                            }
 
-                          setShowCustomVendorForm(false)
+                            setShowCustomVendorForm(false)
+                          }}
+                        />
+                      )}
+                      <VendorList
+                        vendors={onboardingVendors}
+                        onDelete={(vendor) => removeOnboardingVendor(vendor.id)}
+                        onEdit={(vendor) => {
+                          startEditingVendor(vendor.id)
+                          setShowCustomVendorForm(true)
                         }}
                       />
-                    )}
-                    <VendorList
-                      vendors={onboardingVendors}
-                      onDelete={(vendor) => removeOnboardingVendor(vendor.id)}
-                      onEdit={(vendor) => {
-                        startEditingVendor(vendor.id)
-                        setShowCustomVendorForm(true)
-                      }}
-                    />
-                  </>
-                )}
-
-                {error && (
-                  <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-                    {error}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between border-t border-slate-200 pt-5">
-                  <Button
-                    disabled={onboardingStep === 0}
-                    type="button"
-                    variant="outline"
-                    onClick={() => setOnboardingStep(onboardingStep - 1)}
-                  >
-                    <ChevronLeft />
-                    Back
-                  </Button>
-                  {isFinalStep ? (
-                    <Button disabled={saveState === "loading"} type="submit">
-                      {saveState === "loading" ? <Loader2 /> : <Save />}
-                      Finish onboarding
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={() => setOnboardingStep(onboardingStep + 1)}
-                    >
-                      Next
-                      <ChevronRight />
-                    </Button>
+                    </>
                   )}
+
+                  {error && (
+                    <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+                      {error}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between border-t border-slate-200 pt-5">
+                    <Button
+                      disabled={onboardingStep === 0}
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOnboardingStep(onboardingStep - 1)}
+                    >
+                      <ChevronLeft />
+                      Back
+                    </Button>
+                    {isFinalStep ? (
+                      <Button disabled={saveState === "loading"} type="submit">
+                        {saveState === "loading" ? <Loader2 /> : <Save />}
+                        Finish onboarding
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={() => setOnboardingStep(onboardingStep + 1)}
+                      >
+                        Next
+                        <ChevronRight />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </section>
-          )}
+              </section>
+            )
+          }}
         </ProfileForm>
       </div>
     </main>

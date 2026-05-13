@@ -27,6 +27,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import {
+  dataTypeOptionsFromProfile,
   emptyVendorDraft,
   toVendorInput,
   vendorInputFromProvider,
@@ -81,14 +82,12 @@ const valueList = (values: string[]) =>
   values.length > 0 ? values.join(", ") : "Not set"
 
 const dataTypeList = (
-  values: ProfileDraft["dataHandling"]["dataTypesStored"],
+  values: ProfileDraft["dataHandling"]["dataTypesStored"]
 ) =>
   values.length > 0
     ? values
         .map((value) =>
-          value.description
-            ? `${value.name}: ${value.description}`
-            : value.name,
+          value.description ? `${value.name}: ${value.description}` : value.name
         )
         .join(", ")
     : "Not set"
@@ -254,6 +253,9 @@ export const Workspace = ({
     startEditingVendor,
   } = useSecurityUiStore()
   const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
+  const dataTypeOptions = dataTypeOptionsFromProfile(
+    defaultValues.dataHandling.dataTypesStored
+  )
 
   return (
     <SidebarProvider>
@@ -459,6 +461,7 @@ export const Workspace = ({
               ) : null}
               {(showCustomVendorForm || editingVendor) && (
                 <VendorForm
+                  dataTypeOptions={dataTypeOptions}
                   defaultValues={
                     editingVendor
                       ? toVendorInput(editingVendor)

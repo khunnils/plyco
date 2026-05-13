@@ -1,8 +1,8 @@
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createApp, createTestApp } from "../src/app.js"
-import { AirtableProviderSource } from "../src/providers.js"
-import { InMemorySecurityProfileRepository } from "../src/repository.js"
+import { createApp, createTestApp } from "../src/app.js";
+import { AirtableProviderSource } from "../src/providers.js";
+import { InMemorySecurityProfileRepository } from "../src/repository.js";
 
 const profileBody = {
   company: {
@@ -52,62 +52,64 @@ const profileBody = {
     accessReviewsPerformed: false,
     privilegedAccessRestricted: true,
   },
-}
+};
 
 const vendorBody = {
   name: "GitHub",
   category: "Source control",
   purpose: "Code hosting and pull requests",
   hasSubprocessors: true,
-  dataProcessed: ["source code", "user emails"],
+  dataProcessed: ["customer account data"],
   dpaStatus: "signed",
   dataRegions: ["US"],
   criticality: "high",
   owner: "Engineering",
   notes: "Critical engineering system",
-}
+};
 
 describe("security profile API", () => {
   afterEach(() => {
-    vi.unstubAllGlobals()
-  })
+    vi.unstubAllGlobals();
+  });
 
   it("returns health status", async () => {
-    const app = await createTestApp()
-    const response = await app.inject({ method: "GET", url: "/health" })
+    const app = await createTestApp();
+    const response = await app.inject({ method: "GET", url: "/health" });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ status: "ok" })
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: "ok" });
+  });
 
   it("creates and returns the single organization security profile", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const saveResponse = await app.inject({
       method: "PUT",
       url: "/security-profile",
       payload: profileBody,
-    })
+    });
 
-    expect(saveResponse.statusCode).toBe(200)
-    expect(saveResponse.json().organization.company.companyName).toBe("Acme AI")
-    expect(saveResponse.json().organization.dataHandling.dataTypesStored).toEqual(
-      profileBody.dataHandling.dataTypesStored
-    )
+    expect(saveResponse.statusCode).toBe(200);
+    expect(saveResponse.json().organization.company.companyName).toBe(
+      "Acme AI",
+    );
+    expect(
+      saveResponse.json().organization.dataHandling.dataTypesStored,
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
 
     const getResponse = await app.inject({
       method: "GET",
       url: "/security-profile",
-    })
+    });
 
-    expect(getResponse.statusCode).toBe(200)
-    expect(getResponse.json().organization.company.companyName).toBe("Acme AI")
-    expect(getResponse.json().organization.dataHandling.dataTypesStored).toEqual(
-      profileBody.dataHandling.dataTypesStored
-    )
-  })
+    expect(getResponse.statusCode).toBe(200);
+    expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
+    expect(
+      getResponse.json().organization.dataHandling.dataTypesStored,
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
+  });
 
   it("returns structured validation errors", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/security-profile",
@@ -115,23 +117,29 @@ describe("security profile API", () => {
         ...profileBody,
         company: { ...profileBody.company, companyName: "" },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json().error.code).toBe("VALIDATION_FAILED")
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("VALIDATION_FAILED");
+  });
 
   it("supports vendor CRUD", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/security-profile",
+      payload: profileBody,
+    });
+
     const createResponse = await app.inject({
       method: "POST",
       url: "/vendors",
       payload: vendorBody,
-    })
+    });
 
-    expect(createResponse.statusCode).toBe(201)
-    const createdVendor = createResponse.json()
-    expect(createdVendor.name).toBe("GitHub")
+    expect(createResponse.statusCode).toBe(201);
+    const createdVendor = createResponse.json();
+    expect(createdVendor.name).toBe("GitHub");
 
     const updateResponse = await app.inject({
       method: "PUT",
@@ -141,32 +149,58 @@ describe("security profile API", () => {
         dpaStatus: "in_review",
         notes: "DPA being reviewed",
       },
-    })
+    });
 
-    expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json().dpaStatus).toBe("in_review")
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json().dpaStatus).toBe("in_review");
 
-    const listResponse = await app.inject({ method: "GET", url: "/vendors" })
-    expect(listResponse.json()).toHaveLength(1)
+    const listResponse = await app.inject({ method: "GET", url: "/vendors" });
+    expect(listResponse.json()).toHaveLength(1);
 
     const deleteResponse = await app.inject({
       method: "DELETE",
       url: `/vendors/${createdVendor.id}`,
-    })
-    expect(deleteResponse.statusCode).toBe(204)
+    });
+    expect(deleteResponse.statusCode).toBe(204);
 
     const emptyListResponse = await app.inject({
       method: "GET",
       url: "/vendors",
-    })
-    expect(emptyListResponse.json()).toHaveLength(0)
-  })
+    });
+    expect(emptyListResponse.json()).toHaveLength(0);
+  });
+
+  it("rejects vendor data processed outside organization data types", async () => {
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/security-profile",
+      payload: profileBody,
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/vendors",
+      payload: {
+        ...vendorBody,
+        dataProcessed: ["source code"],
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "VENDOR_DATA_TYPE_NOT_FOUND",
+        details: { dataProcessed: ["source code"] },
+      },
+    });
+  });
 
   it("returns provider catalog entries", async () => {
-    const app = await createTestApp()
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    const app = await createTestApp();
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([
       {
         id: "prov-github",
@@ -176,8 +210,8 @@ describe("security profile API", () => {
         securityCriticality: "Critical",
         handlesCustomerData: false,
       },
-    ])
-  })
+    ]);
+  });
 
   it("returns provider catalog upstream failures as structured gateway errors", async () => {
     vi.stubGlobal(
@@ -190,17 +224,17 @@ describe("security profile API", () => {
               message: "Invalid authentication token",
             },
           }),
-          { status: 401, statusText: "Unauthorized" }
-        )
-      })
-    )
+          { status: 401, statusText: "Unauthorized" },
+        );
+      }),
+    );
     const app = await createApp({
       repository: new InMemorySecurityProfileRepository(),
       providerSource: new AirtableProviderSource("app-test", "pat-test"),
-    })
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    });
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(502)
+    expect(response.statusCode).toBe(502);
     expect(response.json()).toMatchObject({
       error: {
         code: "PROVIDER_CATALOG_LOAD_FAILED",
@@ -209,32 +243,32 @@ describe("security profile API", () => {
           statusText: "Unauthorized",
         },
       },
-    })
-  })
+    });
+  });
 
   it("logs unexpected request failures with error details", async () => {
-    let logOutput = ""
+    let logOutput = "";
     const app = await createApp({
       logger: {
         level: "error",
         stream: {
           write(chunk) {
-            logOutput += chunk
+            logOutput += chunk;
           },
         },
       },
       repository: new InMemorySecurityProfileRepository(),
       providerSource: {
         async listProviders() {
-          throw new Error("catalog exploded")
+          throw new Error("catalog exploded");
         },
       },
-    })
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    });
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(500)
-    expect(logOutput).toContain("request failed")
-    expect(logOutput).toContain("catalog exploded")
-    expect(logOutput).toContain("/providers")
-  })
-})
+    expect(response.statusCode).toBe(500);
+    expect(logOutput).toContain("request failed");
+    expect(logOutput).toContain("catalog exploded");
+    expect(logOutput).toContain("/providers");
+  });
+});

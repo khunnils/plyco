@@ -59,6 +59,29 @@ export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
   notes: vendor.notes,
 })
 
+export const dataTypeOptionsFromProfile = (
+  dataTypes: ProfileDraft["dataHandling"]["dataTypesStored"]
+) =>
+  Array.from(
+    new Map(
+      dataTypes
+        .map((dataType) => ({
+          name: dataType.name.trim(),
+          description: dataType.description.trim(),
+        }))
+        .filter((dataType) => dataType.name)
+        .map((dataType) => [
+          dataType.name,
+          {
+            value: dataType.name,
+            label: dataType.description
+              ? `${dataType.name} - ${dataType.description}`
+              : dataType.name,
+          },
+        ])
+    ).values()
+  )
+
 const providerCriticality = (
   provider: Provider
 ): VendorInput["criticality"] => {
@@ -85,7 +108,7 @@ export const vendorInputFromProvider = (provider: Provider): VendorInput => ({
     ? `Operational provider listed at ${provider.url}`
     : "Operational provider",
   hasSubprocessors: false,
-  dataProcessed: provider.handlesCustomerData ? ["customer data"] : [],
+  dataProcessed: [],
   dpaStatus: "not_started",
   dataRegions: [],
   criticality: providerCriticality(provider),

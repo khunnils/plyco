@@ -16,18 +16,17 @@ type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   label: string
   name: FieldPath<T>
   options: Array<{ value: TValue; label: string }>
+  emptyMessage?: string
   placeholder?: string
 }
 
-export const MultiSelectField = <
-  T extends FieldValues,
-  TValue extends string,
->({
+export const MultiSelectField = <T extends FieldValues, TValue extends string>({
   control,
   error,
   label,
   name,
   options,
+  emptyMessage = "No options available",
   placeholder = "Select options",
 }: MultiSelectFieldProps<T, TValue>) => {
   const fieldId = name.replace(/\W+/g, "-")
@@ -45,6 +44,7 @@ export const MultiSelectField = <
             fieldId={fieldId}
             label={label}
             options={options}
+            emptyMessage={emptyMessage}
             placeholder={placeholder}
             selectedValues={selectedValues}
             onBlur={field.onBlur}
@@ -61,6 +61,7 @@ const MultiSelectInput = <TValue extends string>({
   fieldId,
   label,
   options,
+  emptyMessage,
   placeholder,
   selectedValues,
   onBlur,
@@ -70,6 +71,7 @@ const MultiSelectInput = <TValue extends string>({
   fieldId: string
   label: string
   options: Array<{ value: TValue; label: string }>
+  emptyMessage: string
   placeholder: string
   selectedValues: string[]
   onBlur: () => void
@@ -79,10 +81,10 @@ const MultiSelectInput = <TValue extends string>({
   const rootRef = useRef<HTMLDivElement>(null)
   const optionLabels = useMemo(
     () => new Map(options.map((option) => [option.value, option.label])),
-    [options],
+    [options]
   )
   const selectedLabels = selectedValues.map(
-    (value) => optionLabels.get(value) ?? value,
+    (value) => optionLabels.get(value) ?? value
   )
 
   useEffect(() => {
@@ -98,7 +100,9 @@ const MultiSelectInput = <TValue extends string>({
 
   const toggleValue = (value: string) => {
     if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter((selectedValue) => selectedValue !== value))
+      onChange(
+        selectedValues.filter((selectedValue) => selectedValue !== value)
+      )
       return
     }
 
@@ -116,7 +120,7 @@ const MultiSelectInput = <TValue extends string>({
         aria-expanded={isOpen}
         className={cn(
           "flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100",
-          error && "border-red-300 focus:border-red-500 focus:ring-red-100",
+          error && "border-red-300 focus:border-red-500 focus:ring-red-100"
         )}
         type="button"
         onBlur={onBlur}
@@ -145,7 +149,7 @@ const MultiSelectInput = <TValue extends string>({
           aria-hidden="true"
           className={cn(
             "size-4 shrink-0 text-slate-500 transition",
-            isOpen && "rotate-180",
+            isOpen && "rotate-180"
           )}
         />
       </button>
@@ -155,35 +159,43 @@ const MultiSelectInput = <TValue extends string>({
           id={`${fieldId}-options`}
           role="listbox"
         >
-          {options.map((option) => {
-            const isSelected = selectedValues.includes(option.value)
+          {options.length > 0 ? (
+            options.map((option) => {
+              const isSelected = selectedValues.includes(option.value)
 
-            return (
-              <button
-                key={option.value}
-                aria-selected={isSelected}
-                className="flex items-center gap-2 rounded-sm px-2 py-2 text-left text-sm font-normal text-slate-800 outline-none transition hover:bg-slate-50 focus:bg-slate-50"
-                role="option"
-                type="button"
-                onClick={() => toggleValue(option.value)}
-              >
-                <span
-                  className={cn(
-                    "flex size-4 shrink-0 items-center justify-center rounded-sm border",
-                    isSelected
-                      ? "border-blue-600 bg-blue-600 text-white"
-                      : "border-slate-300 bg-white text-transparent",
-                  )}
+              return (
+                <button
+                  key={option.value}
+                  aria-selected={isSelected}
+                  className="flex items-center gap-2 rounded-sm px-2 py-2 text-left text-sm font-normal text-slate-800 transition outline-none hover:bg-slate-50 focus:bg-slate-50"
+                  role="option"
+                  type="button"
+                  onClick={() => toggleValue(option.value)}
                 >
-                  <Check aria-hidden="true" className="size-3" />
-                </span>
-                <span className="min-w-0 flex-1 truncate">{option.label}</span>
-              </button>
-            )
-          })}
+                  <span
+                    className={cn(
+                      "flex size-4 shrink-0 items-center justify-center rounded-sm border",
+                      isSelected
+                        ? "border-blue-600 bg-blue-600 text-white"
+                        : "border-slate-300 bg-white text-transparent"
+                    )}
+                  >
+                    <Check aria-hidden="true" className="size-3" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {option.label}
+                  </span>
+                </button>
+              )
+            })
+          ) : (
+            <p className="px-2 py-2 text-sm font-normal text-slate-500">
+              {emptyMessage}
+            </p>
+          )}
           {selectedValues.length > 0 && (
             <button
-              className="mt-1 flex items-center gap-2 border-t border-slate-100 px-2 py-2 text-left text-xs font-medium text-slate-500 outline-none transition hover:text-slate-800 focus:text-slate-800"
+              className="mt-1 flex items-center gap-2 border-t border-slate-100 px-2 py-2 text-left text-xs font-medium text-slate-500 transition outline-none hover:text-slate-800 focus:text-slate-800"
               type="button"
               onClick={() => onChange([])}
             >

@@ -10,6 +10,7 @@ import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { ListField } from "@/components/form/list-field"
+import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
@@ -31,10 +32,12 @@ const criticalityOptions: Array<{ value: VendorCriticality; label: string }> = [
 ]
 
 export const VendorForm = ({
+  dataTypeOptions,
   defaultValues,
   submitLabel,
   onSubmit,
 }: {
+  dataTypeOptions: Array<{ value: string; label: string }>
   defaultValues: VendorInput
   submitLabel: string
   onSubmit: (vendor: VendorInput) => void
@@ -85,12 +88,18 @@ export const VendorForm = ({
           placeholder="Engineering"
           register={form.register}
         />
-        <ListField
+        <MultiSelectField
           control={form.control}
           error={form.formState.errors.dataProcessed?.root}
+          emptyMessage="Add data types stored in the organization profile first."
           label="Data processed"
           name="dataProcessed"
-          placeholder="source code, user emails"
+          options={dataTypeOptions}
+          placeholder={
+            dataTypeOptions.length > 0
+              ? "Select organization data types"
+              : "No organization data types defined"
+          }
         />
         <ListField
           control={form.control}
