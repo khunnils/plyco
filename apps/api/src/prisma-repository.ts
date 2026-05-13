@@ -340,6 +340,10 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
     organizationId: string,
     input: VendorInput,
   ) {
+    if (input.dataProcessingLevel === "none") {
+      return [];
+    }
+
     const requestedNames = Array.from(new Set(input.dataProcessed));
 
     if (requestedNames.length === 0) {
@@ -400,6 +404,7 @@ export class PrismaSecurityProfileRepository implements SecurityProfileRepositor
       category: input.category,
       purpose: input.purpose,
       hasSubprocessors: input.hasSubprocessors,
+      dataProcessingLevel: input.dataProcessingLevel,
       dpaStatus: input.dpaStatus,
       dataRegions: input.dataRegions,
       criticality: input.criticality,

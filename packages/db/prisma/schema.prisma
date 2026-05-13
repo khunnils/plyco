@@ -101,6 +101,7 @@ model Vendor {
   category         String
   purpose          String
   hasSubprocessors Boolean      @map("has_subprocessors")
+  dataProcessingLevel String    @default("limited") @map("data_processing_level")
   dpaStatus        String       @map("dpa_status")
   dataRegions      String[]     @map("data_regions")
   criticality      String

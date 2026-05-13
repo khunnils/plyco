@@ -22,12 +22,13 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false)
   })
 
-  it("requires operational vendor fields", () => {
+    it("requires operational vendor fields", () => {
     const result = vendorInputSchema.safeParse({
       name: "GitHub",
       category: "Source control",
       purpose: "Code hosting",
       hasSubprocessors: true,
+      dataProcessingLevel: "limited",
       dataProcessed: ["source code"],
       dpaStatus: "signed",
       dataRegions: ["US"],

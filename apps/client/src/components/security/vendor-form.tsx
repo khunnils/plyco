@@ -4,10 +4,11 @@ import {
   vendorInputSchema,
   type DpaStatus,
   type VendorCriticality,
+  type VendorDataProcessingLevel,
   type VendorInput,
 } from "@complyflow/shared"
 import { useEffect } from "react"
-import { type Resolver, useForm } from "react-hook-form"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 
 import { ListField } from "@/components/form/list-field"
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -23,6 +24,15 @@ const dpaStatusOptions: Array<{ value: DpaStatus; label: string }> = [
   { value: "in_review", label: "In review" },
   { value: "signed", label: "Signed" },
   { value: "not_required", label: "Not required" },
+]
+
+const dataProcessingLevelOptions: Array<{
+  value: VendorDataProcessingLevel
+  label: string
+}> = [
+  { value: "none", label: "None" },
+  { value: "limited", label: "Limited" },
+  { value: "subprocessor", label: "Subprocessor" },
 ]
 
 const criticalityOptions: Array<{ value: VendorCriticality; label: string }> = [
@@ -51,6 +61,23 @@ export const VendorForm = ({
   useEffect(() => {
     form.reset(defaultValues)
   }, [defaultValues, form])
+
+  const dataProcessingLevel =
+    useWatch({
+      control: form.control,
+      name: "dataProcessingLevel",
+      defaultValue: defaultValues.dataProcessingLevel,
+    }) ?? defaultValues.dataProcessingLevel
+  const showDataProcessingDetail = dataProcessingLevel !== "none"
+
+  useEffect(() => {
+    if (dataProcessingLevel === "none") {
+      form.setValue("dataProcessed", [])
+      form.setValue("dataRegions", [])
+      form.setValue("dpaStatus", "not_required")
+      form.setValue("hasSubprocessors", false)
+    }
+  }, [dataProcessingLevel, form])
 
   const submitVendor = form.handleSubmit((vendor) => {
     onSubmit(vendor)
@@ -88,31 +115,11 @@ export const VendorForm = ({
           placeholder="Engineering"
           register={form.register}
         />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.dataProcessed?.root}
-          emptyMessage="Add data types stored in the organization profile first."
-          label="Data processed"
-          name="dataProcessed"
-          options={dataTypeOptions}
-          placeholder={
-            dataTypeOptions.length > 0
-              ? "Select organization data types"
-              : "No organization data types defined"
-          }
-        />
-        <ListField
-          control={form.control}
-          error={form.formState.errors.dataRegions?.root}
-          label="Data regions"
-          name="dataRegions"
-          placeholder="US, EU"
-        />
         <SelectField
           control={form.control}
-          label="DPA status"
-          name="dpaStatus"
-          options={dpaStatusOptions}
+          label="Data processing level"
+          name="dataProcessingLevel"
+          options={dataProcessingLevelOptions}
         />
         <SelectField
           control={form.control}
@@ -120,12 +127,42 @@ export const VendorForm = ({
           name="criticality"
           options={criticalityOptions}
         />
+        {showDataProcessingDetail ? (
+          <>
+            <MultiSelectField
+              control={form.control}
+              error={form.formState.errors.dataProcessed?.root}
+              emptyMessage="Add data types stored in the organization profile first."
+              label="Data processed"
+              name="dataProcessed"
+              options={dataTypeOptions}
+              placeholder={
+                dataTypeOptions.length > 0
+                  ? "Select organization data types"
+                  : "No organization data types defined"
+              }
+            />
+            <ListField
+              control={form.control}
+              error={form.formState.errors.dataRegions?.root}
+              label="Data regions"
+              name="dataRegions"
+              placeholder="US, EU"
+            />
+            <SelectField
+              control={form.control}
+              label="DPA status"
+              name="dpaStatus"
+              options={dpaStatusOptions}
+            />
+            <ToggleField
+              control={form.control}
+              label="Vendor uses subprocessors"
+              name="hasSubprocessors"
+            />
+          </>
+        ) : null}
       </div>
-      <ToggleField
-        control={form.control}
-        label="Vendor uses subprocessors"
-        name="hasSubprocessors"
-      />
       <TextAreaField
         error={form.formState.errors.notes}
         label="Notes"

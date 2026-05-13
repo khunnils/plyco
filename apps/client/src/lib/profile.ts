@@ -23,6 +23,7 @@ export const emptyVendorDraft: VendorInput = {
   category: "",
   purpose: "",
   hasSubprocessors: false,
+  dataProcessingLevel: "none",
   dataProcessed: [],
   dpaStatus: "not_started",
   dataRegions: [],
@@ -51,6 +52,7 @@ export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
   category: vendor.category,
   purpose: vendor.purpose,
   hasSubprocessors: vendor.hasSubprocessors,
+  dataProcessingLevel: vendor.dataProcessingLevel,
   dataProcessed: vendor.dataProcessed,
   dpaStatus: vendor.dpaStatus,
   dataRegions: vendor.dataRegions,
@@ -108,6 +110,7 @@ export const vendorInputFromProvider = (provider: Provider): VendorInput => ({
     ? `Operational provider listed at ${provider.url}`
     : "Operational provider",
   hasSubprocessors: false,
+  dataProcessingLevel: provider.handlesCustomerData ? "limited" : "none",
   dataProcessed: [],
   dpaStatus: "not_started",
   dataRegions: [],

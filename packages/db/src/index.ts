@@ -125,6 +125,7 @@ export function mapVendorRecord(record: {
   category: string
   purpose: string
   hasSubprocessors: boolean
+  dataProcessingLevel: string
   dpaStatus: string
   dataRegions: string[]
   dataTypes: Array<{
@@ -144,6 +145,7 @@ export function mapVendorRecord(record: {
     category: record.category,
     purpose: record.purpose,
     hasSubprocessors: record.hasSubprocessors,
+    dataProcessingLevel: record.dataProcessingLevel,
     dataProcessed: record.dataTypes.map(
       (dataType) => dataType.organizationDataType.name
     ),

@@ -59,6 +59,7 @@ const vendorBody = {
   category: "Source control",
   purpose: "Code hosting and pull requests",
   hasSubprocessors: true,
+  dataProcessingLevel: "limited",
   dataProcessed: ["customer account data"],
   dpaStatus: "signed",
   dataRegions: ["US"],

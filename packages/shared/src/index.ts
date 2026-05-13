@@ -10,6 +10,12 @@ export const dpaStatusSchema = z.enum([
 
 export const vendorCriticalitySchema = z.enum(["low", "medium", "high"])
 
+export const vendorDataProcessingLevelSchema = z.enum([
+  "none",
+  "limited",
+  "subprocessor",
+])
+
 export const storedDataTypeSchema = z.object({
   name: z.string().trim().min(1),
   isSensitive: z.boolean().default(false),
@@ -56,11 +62,13 @@ export const accessProfileSchema = z.object({
   privilegedAccessRestricted: z.boolean(),
 })
 
-export const vendorInputSchema = z.object({
+const vendorInputBaseSchema = z.object({
   name: z.string().trim().min(1, "Vendor name is required"),
   category: z.string().trim().min(1, "Category is required"),
   purpose: z.string().trim().min(1, "Purpose is required"),
   hasSubprocessors: z.boolean(),
+  dataProcessingLevel:
+    vendorDataProcessingLevelSchema.default("limited"),
   dataProcessed: z.array(z.string().trim().min(1)).default([]),
   dpaStatus: dpaStatusSchema,
   dataRegions: z.array(z.string().trim().min(1)).default([]),
@@ -69,11 +77,33 @@ export const vendorInputSchema = z.object({
   notes: z.string().trim().optional().or(z.literal("")),
 })
 
-export const vendorSchema = vendorInputSchema.extend({
+const normalizeVendorDataProcessingNone = <
+  T extends z.infer<typeof vendorInputBaseSchema>,
+>(
+  value: T,
+): T =>
+  value.dataProcessingLevel === "none"
+    ? ({
+        ...value,
+        hasSubprocessors: false,
+        dataProcessed: [],
+        dataRegions: [],
+        dpaStatus: "not_required",
+      } as T)
+    : value
+
+export const vendorInputSchema = vendorInputBaseSchema.transform(
+  normalizeVendorDataProcessingNone,
+)
+
+const vendorStoredBaseSchema = vendorInputBaseSchema.extend({
   id: z.string().min(1),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
+
+export const vendorSchema =
+  vendorStoredBaseSchema.transform(normalizeVendorDataProcessingNone)
 
 export const providerSchema = z.object({
   id: z.string().min(1),
@@ -110,6 +140,9 @@ export const structuredErrorSchema = z.object({
 
 export type DpaStatus = z.infer<typeof dpaStatusSchema>
 export type VendorCriticality = z.infer<typeof vendorCriticalitySchema>
+export type VendorDataProcessingLevel = z.infer<
+  typeof vendorDataProcessingLevelSchema
+>
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>
 export type CompanyProfile = z.infer<typeof companyProfileSchema>
 export type InfrastructureProfile = z.infer<typeof infrastructureProfileSchema>

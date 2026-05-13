@@ -101,6 +101,10 @@ export class InMemorySecurityProfileRepository implements SecurityProfileReposit
   }
 
   private validVendorDataTypeNames(input: VendorInput) {
+    if (input.dataProcessingLevel === "none") {
+      return [];
+    }
+
     const requestedNames = Array.from(new Set(input.dataProcessed));
 
     if (requestedNames.length === 0) {
