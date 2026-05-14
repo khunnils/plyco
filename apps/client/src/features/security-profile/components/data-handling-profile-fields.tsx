@@ -2,7 +2,7 @@ import { type UseFormReturn } from "react-hook-form"
 
 import { DataTypesField } from "@/components/form/data-types-field"
 import { ToggleField } from "@/components/form/toggle-field"
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const getErrorMessage = (error: unknown): string | undefined => {
   if (!error || typeof error !== "object") {

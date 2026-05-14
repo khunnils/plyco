@@ -15,7 +15,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox"
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const comboboxInputClassName =
   "h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100"

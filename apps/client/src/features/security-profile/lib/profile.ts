@@ -9,7 +9,7 @@ import {
   type VendorInput,
 } from "@complyflow/shared"
 
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 export const emptyProfileDraft: ProfileDraft = {
   company: emptyCompanyProfile,

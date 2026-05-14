@@ -11,5 +11,3 @@ export type ProfileDraft = {
   dataHandling: DataHandlingProfile
   access: AccessProfile
 }
-
-export type MutationState = "idle" | "loading" | "saved" | "error"

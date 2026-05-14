@@ -1,9 +1,5 @@
 import { ChevronLeft, ChevronRight, Loader2, LogOut, Save } from "lucide-react"
-import {
-  type AuthUser,
-  type Provider,
-  type VendorInput,
-} from "@complyflow/shared"
+import { type AuthUser } from "@complyflow/shared"
 import { useState } from "react"
 import { type FieldErrors } from "react-hook-form"
 
@@ -13,19 +9,23 @@ import {
   emptyVendorDraft,
   toVendorInput,
   vendorInputFromProvider,
-} from "@/lib/profile"
+} from "@/features/security-profile/lib/profile"
 import {
   ProfileAccessFields,
   ProfileCompanyFields,
   ProfileDataHandlingFields,
   ProfileForm,
   ProfileInfrastructureFields,
-} from "@/components/security/profile-form"
-import { ProviderSelector } from "@/components/security/provider-selector"
-import { VendorForm } from "@/components/security/vendor-form"
-import { VendorList } from "@/components/security/vendor-list"
-import { useSecurityUiStore } from "@/stores/security-ui-store"
-import { type MutationState, type ProfileDraft } from "@/types/security-profile"
+} from "@/features/security-profile/components/profile-form"
+import { useSaveSecurityProfile } from "@/features/security-profile/hooks/use-security-profile"
+import { ProviderSelector } from "@/features/vendors/components/provider-selector"
+import { useCreateVendors, useProviders } from "@/features/vendors/hooks/use-vendors"
+import { VendorForm } from "@/features/vendors/components/vendor-form"
+import { VendorList } from "@/features/vendors/components/vendor-list"
+import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
+import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
+import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const onboardingSteps = [
   {
@@ -79,26 +79,25 @@ const stepWithError = (errors: FieldErrors<ProfileDraft>) => {
 
 export const Onboarding = ({
   defaultValues,
-  error,
-  providers,
-  providersError,
-  providersLoading,
-  saveState,
   user,
   onLogout,
-  onSave,
 }: {
   defaultValues: ProfileDraft
-  error: string | null
-  providers: Provider[]
-  providersError: string | null
-  providersLoading: boolean
-  saveState: MutationState
   user: AuthUser
   onLogout: () => void
-  onSave: (profile: ProfileDraft, vendors: VendorInput[]) => void
 }) => {
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
+  const providers = useProviders()
+  const saveProfile = useSaveSecurityProfile()
+  const createVendors = useCreateVendors()
+  const { selectedOrganization } = useSelectedOrganization()
+  const completeOnboarding = useCurrentOrganizationStore(
+    (state) => state.completeOnboarding
+  )
+  const isSaving =
+    saveProfile.isPending || createVendors.isPending
+  const saveError =
+    saveProfile.error?.message ?? createVendors.error?.message ?? null
   const {
     addOnboardingVendor,
     editingVendorId,
@@ -146,9 +145,20 @@ export const Onboarding = ({
         <ProfileForm
           defaultValues={defaultValues}
           onInvalid={(errors) => setOnboardingStep(stepWithError(errors))}
-          onSubmit={(profile) =>
-            onSave(profile, onboardingVendors.map(toVendorInput))
-          }
+          onSubmit={(profile) => {
+            const vendorInputs = onboardingVendors.map(toVendorInput)
+            saveProfile.mutate(profile, {
+              onSuccess: () => {
+                const orgId = selectedOrganization?.id
+                if (orgId) {
+                  completeOnboarding(orgId)
+                }
+                if (vendorInputs.length > 0) {
+                  createVendors.mutate(vendorInputs)
+                }
+              },
+            })
+          }}
         >
           {(form) => {
             const dataTypeOptions = dataTypeOptionsFromProfile(
@@ -174,7 +184,7 @@ export const Onboarding = ({
                   {onboardingStep === 1 && (
                     <ProfileInfrastructureFields
                       form={form}
-                      providers={providers}
+                      providers={providers.data ?? []}
                     />
                   )}
                   {onboardingStep === 2 && (
@@ -184,9 +194,9 @@ export const Onboarding = ({
                   {onboardingStep === 4 && (
                     <>
                       <ProviderSelector
-                        error={providersError}
-                        isLoading={providersLoading}
-                        providers={providers}
+                        error={providers.error?.message ?? null}
+                        isLoading={providers.isLoading}
+                        providers={providers.data ?? []}
                         onChooseOther={() => {
                           startEditingVendor(null)
                           setShowCustomVendorForm(true)
@@ -228,9 +238,9 @@ export const Onboarding = ({
                     </>
                   )}
 
-                  {error && (
+                  {saveError && (
                     <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-                      {error}
+                      {saveError}
                     </p>
                   )}
 
@@ -245,8 +255,8 @@ export const Onboarding = ({
                       Back
                     </Button>
                     {isFinalStep ? (
-                      <Button disabled={saveState === "loading"} type="submit">
-                        {saveState === "loading" ? <Loader2 /> : <Save />}
+                      <Button disabled={isSaving} type="submit">
+                        {isSaving ? <Loader2 /> : <Save />}
                         Finish onboarding
                       </Button>
                     ) : (

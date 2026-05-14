@@ -14,11 +14,11 @@ import {
 } from "react-hook-form"
 import { z } from "zod"
 
-import { AccessProfileFields } from "@/components/security/access-profile-fields"
-import { CompanyProfileFields } from "@/components/security/company-profile-fields"
-import { DataHandlingProfileFields } from "@/components/security/data-handling-profile-fields"
-import { InfrastructureProfileFields } from "@/components/security/infrastructure-profile-fields"
-import { type ProfileDraft } from "@/types/security-profile"
+import { AccessProfileFields } from "@/features/security-profile/components/access-profile-fields"
+import { CompanyProfileFields } from "@/features/security-profile/components/company-profile-fields"
+import { DataHandlingProfileFields } from "@/features/security-profile/components/data-handling-profile-fields"
+import { InfrastructureProfileFields } from "@/features/security-profile/components/infrastructure-profile-fields"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const profileDraftSchema = z.object({
   company: companyProfileSchema,

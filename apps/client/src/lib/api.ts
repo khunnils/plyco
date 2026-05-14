@@ -28,7 +28,7 @@ import {
 } from "@complyflow/shared"
 import { z } from "zod"
 
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"
 

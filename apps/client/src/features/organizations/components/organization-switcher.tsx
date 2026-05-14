@@ -1,36 +1,27 @@
 import { Building2, Check, ChevronDown, Plus, X } from "lucide-react"
-import { type AuthUser, type OrganizationSummary } from "@complyflow/shared"
+import { type AuthUser } from "@complyflow/shared"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { CreateOrganizationPanel } from "@/components/security/create-organization-screen"
-import { type MutationState } from "@/types/security-profile"
+import { CreateOrganizationPanel } from "@/features/organizations/components/create-organization-screen"
+import { useCreateOrganization } from "@/features/organizations/hooks/use-organizations"
+import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
+import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 
-export const OrganizationSwitcher = ({
-  error,
-  organizations,
-  saveState,
-  selectedOrganizationId,
-  user,
-  onCreateOrganization,
-  onSelectOrganization,
-}: {
-  error: string | null
-  organizations: OrganizationSummary[]
-  saveState: MutationState
-  selectedOrganizationId: string
-  user: AuthUser
-  onCreateOrganization: (name: string) => void
-  onSelectOrganization: (organizationId: string) => void
-}) => {
+export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
+  const { organizations, selectedOrganization } = useSelectedOrganization()
+  const selectOrganization = useCurrentOrganizationStore(
+    (state) => state.selectOrganization
+  )
+  const markOnboarding = useCurrentOrganizationStore(
+    (state) => state.markOnboarding
+  )
+  const createOrganization = useCreateOrganization()
+  const createError = createOrganization.error?.message ?? null
+  const selectedOrganizationId = selectedOrganization?.id ?? ""
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const selectedOrganization =
-    organizations.find(
-      (organization) => organization.id === selectedOrganizationId
-    ) ?? organizations[0]
-
   useEffect(() => {
     if (!open && !creating) {
       return
@@ -58,12 +49,25 @@ export const OrganizationSwitcher = ({
   }, [creating, open])
 
   const handleSelectOrganization = (organizationId: string) => {
-    onSelectOrganization(organizationId)
+    selectOrganization(organizationId)
     setOpen(false)
   }
 
   const handleCreateOrganization = (name: string) => {
-    onCreateOrganization(name)
+    createOrganization.mutate(
+      { name },
+      {
+        onSuccess: (organization) => {
+          selectOrganization(organization.id)
+          markOnboarding(organization.id)
+          setCreating(false)
+        },
+      }
+    )
+  }
+
+  if (!selectedOrganization) {
+    return null
   }
 
   return (
@@ -84,7 +88,7 @@ export const OrganizationSwitcher = ({
           </span>
           <span className="grid min-w-0 gap-0.5">
             <span className="truncate text-sm font-semibold text-blue-700">
-              {selectedOrganization.name}
+              {selectedOrganization?.name}
             </span>
             <span className="text-xs font-medium text-blue-600">
               All workspace data
@@ -153,8 +157,8 @@ export const OrganizationSwitcher = ({
           <div className="w-full max-w-xl">
             <CreateOrganizationPanel
               className="rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
-              error={error}
-              saveState={saveState}
+              error={createError}
+              isSubmitting={createOrganization.isPending}
               user={user}
               onCreate={handleCreateOrganization}
               actions={

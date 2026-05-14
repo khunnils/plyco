@@ -3,20 +3,21 @@ import { type AuthUser } from "@complyflow/shared"
 import { useState, type FormEvent, type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
-import { type MutationState } from "@/types/security-profile"
+import { useCreateOrganization } from "@/features/organizations/hooks/use-organizations"
+import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 
 export const CreateOrganizationPanel = ({
   actions,
   className = "",
   error,
-  saveState,
+  isSubmitting,
   user,
   onCreate,
 }: {
   actions?: ReactNode
   className?: string
   error: string | null
-  saveState: MutationState
+  isSubmitting: boolean
   user: AuthUser
   onCreate: (name: string) => void
 }) => {
@@ -67,8 +68,8 @@ export const CreateOrganizationPanel = ({
           <div className="text-sm text-slate-500">
             Signed in as {user.email}
           </div>
-          <Button disabled={saveState === "loading"} type="submit">
-            {saveState === "loading" ? <Loader2 /> : <Plus />}
+          <Button disabled={isSubmitting} type="submit">
+            {isSubmitting ? <Loader2 /> : <Plus />}
             Create organization
           </Button>
         </div>
@@ -78,33 +79,43 @@ export const CreateOrganizationPanel = ({
 }
 
 export const CreateOrganizationScreen = ({
-  error,
-  saveState,
   user,
-  onCreate,
   onLogout,
 }: {
-  error: string | null
-  saveState: MutationState
   user: AuthUser
-  onCreate: (name: string) => void
   onLogout: () => void
-}) => (
-  <main className="min-h-svh bg-slate-50 px-4 py-6 text-slate-900 md:px-8">
-    <div className="mx-auto grid min-h-[calc(100svh-3rem)] max-w-xl content-center">
-      <CreateOrganizationPanel
-        className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-        error={error}
-        saveState={saveState}
-        user={user}
-        onCreate={onCreate}
-        actions={
-          <Button type="button" variant="outline" onClick={onLogout}>
-            <LogOut />
-            Logout
-          </Button>
-        }
-      />
-    </div>
-  </main>
-)
+}) => {
+  const createOrganization = useCreateOrganization()
+  const error = createOrganization.error?.message ?? null
+
+  return (
+    <main className="min-h-svh bg-slate-50 px-4 py-6 text-slate-900 md:px-8">
+      <div className="mx-auto grid min-h-[calc(100svh-3rem)] max-w-xl content-center">
+        <CreateOrganizationPanel
+          className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+          error={error}
+          isSubmitting={createOrganization.isPending}
+          user={user}
+          onCreate={(name) =>
+            createOrganization.mutate(
+              { name },
+              {
+                onSuccess: (organization) => {
+                  const store = useCurrentOrganizationStore.getState()
+                  store.selectOrganization(organization.id)
+                  store.markOnboarding(organization.id)
+                },
+              }
+            )
+          }
+          actions={
+            <Button type="button" variant="outline" onClick={onLogout}>
+              <LogOut />
+              Logout
+            </Button>
+          }
+        />
+      </div>
+    </main>
+  )
+}

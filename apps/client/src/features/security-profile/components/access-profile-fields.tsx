@@ -1,7 +1,7 @@
 import { type UseFormReturn } from "react-hook-form"
 
 import { ToggleField } from "@/components/form/toggle-field"
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 export const AccessProfileFields = ({
   form,

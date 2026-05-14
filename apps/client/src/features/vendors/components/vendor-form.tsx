@@ -45,11 +45,13 @@ export const VendorForm = ({
   dataTypeOptions,
   defaultValues,
   submitLabel,
+  submitDisabled = false,
   onSubmit,
 }: {
   dataTypeOptions: Array<{ value: string; label: string }>
   defaultValues: VendorInput
   submitLabel: string
+  submitDisabled?: boolean
   onSubmit: (vendor: VendorInput) => void
 }) => {
   const form = useForm<VendorInput>({
@@ -171,7 +173,7 @@ export const VendorForm = ({
         register={form.register}
       />
       <div>
-        <Button type="button" onClick={submitVendor}>
+        <Button disabled={submitDisabled} type="button" onClick={submitVendor}>
           <Plus />
           {submitLabel}
         </Button>

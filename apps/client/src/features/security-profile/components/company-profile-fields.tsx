@@ -4,7 +4,7 @@ import { ListField } from "@/components/form/list-field"
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
-import { type ProfileDraft } from "@/types/security-profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 const industryOptions = [
   { value: "AI", label: "AI" },

@@ -1,6 +1,5 @@
 import {
   Building2,
-  Check,
   Eye,
   FileText,
   LayoutDashboard,
@@ -15,21 +14,17 @@ import {
   X,
 } from "lucide-react"
 import {
-  type Document,
   type DocumentSummary,
   type AuthUser,
-  type OrganizationSummary,
   type Provider,
   type ProviderSystemType,
-  type Template,
   type TemplateCatalog,
-  type TemplateInput,
-  type Vendor,
-  type VendorInput,
 } from "@complyflow/shared"
-import { useState, type FormEvent, type ReactNode } from "react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { DocumentContent } from "@/features/documents/components/document-content"
+import { documentStatusLabel } from "@/features/documents/lib/document-status"
 import {
   Sidebar,
   SidebarContent,
@@ -43,9 +38,10 @@ import {
 import {
   dataTypeOptionsFromProfile,
   emptyVendorDraft,
+  profileFromOrganization,
   toVendorInput,
   vendorInputFromProvider,
-} from "@/lib/profile"
+} from "@/features/security-profile/lib/profile"
 import {
   ProfileAccessFields,
   ProfileCompanyFields,
@@ -53,16 +49,36 @@ import {
   ProfileForm,
   type ProfileFormReturn,
   ProfileInfrastructureFields,
-} from "@/components/security/profile-form"
-import { ProviderSelector } from "@/components/security/provider-selector"
-import { OrganizationSwitcher } from "@/components/security/organization-switcher"
-import { Section } from "@/components/security/section"
-import { SummaryTiles } from "@/components/security/summary-tiles"
-import { VendorEmptyState } from "@/components/security/vendor-empty-state"
-import { VendorForm } from "@/components/security/vendor-form"
-import { VendorList } from "@/components/security/vendor-list"
-import { useSecurityUiStore } from "@/stores/security-ui-store"
-import { type MutationState, type ProfileDraft } from "@/types/security-profile"
+} from "@/features/security-profile/components/profile-form"
+import { useCreateDocument, useDocument, useDocuments } from "@/features/documents/hooks/use-documents"
+import { useLogout } from "@/features/auth/hooks/use-auth"
+import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
+import {
+  useSaveSecurityProfile,
+  useSecurityProfile,
+} from "@/features/security-profile/hooks/use-security-profile"
+import {
+  useCreateTemplateFromSystem,
+  useDeleteTemplate,
+  useTemplates,
+  useUpdateTemplate,
+} from "@/features/templates/hooks/use-templates"
+import {
+  useCreateVendor,
+  useDeleteVendor,
+  useProviders,
+  useUpdateVendor,
+} from "@/features/vendors/hooks/use-vendors"
+import { Section } from "@/features/shell/components/section"
+import { SummaryTiles } from "@/features/security-profile/components/summary-tiles"
+import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
+import { VendorForm } from "@/features/vendors/components/vendor-form"
+import { VendorList } from "@/features/vendors/components/vendor-list"
+import { ProviderSelector } from "@/features/vendors/components/provider-selector"
+import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { TemplateCard } from "@/features/templates/components/template-card"
+import { TemplateForm } from "@/features/templates/components/template-form"
 
 type CompanySectionId = "company" | "infrastructure" | "dataHandling" | "access"
 
@@ -190,18 +206,12 @@ const CompanyReadOnlySection = ({
       ["Sensitive data", boolText(profile.company.handlesSensitiveData)],
     ],
     infrastructure: [
-      [
-        "Cloud providers",
-        providerNamesForSystem(profile, providers, "cloud"),
-      ],
+      ["Cloud providers", providerNamesForSystem(profile, providers, "cloud")],
       [
         "Source control",
         providerNamesForSystem(profile, providers, "source-control"),
       ],
-      [
-        "Auth provider",
-        providerNamesForSystem(profile, providers, "auth"),
-      ],
+      ["Auth provider", providerNamesForSystem(profile, providers, "auth")],
       [
         "Password manager",
         providerNamesForSystem(profile, providers, "password-manager"),
@@ -263,195 +273,52 @@ const CompanyReadOnlySection = ({
   )
 }
 
-const TemplateForm = ({
-  defaultValues,
-  saveState,
-  onCancel,
-  onSubmit,
-}: {
-  defaultValues: Template
-  saveState: MutationState
-  onCancel: () => void
-  onSubmit: (template: TemplateInput) => void
-}) => {
-  const [draft, setDraft] = useState<TemplateInput>({
-    name: defaultValues.name,
-    slug: defaultValues.slug,
-    content: defaultValues.content,
-  })
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    onSubmit(draft)
-  }
-
-  return (
-    <form className="grid gap-4" onSubmit={handleSubmit}>
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1">
-          <span className="text-sm font-medium text-slate-700">Name</span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            required
-            value={draft.name}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                name: event.target.value,
-              }))
-            }
-          />
-        </label>
-        <label className="grid gap-1">
-          <span className="text-sm font-medium text-slate-700">Slug</span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            pattern="[a-z0-9]+(-[a-z0-9]+)*"
-            required
-            value={draft.slug}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                slug: event.target.value,
-              }))
-            }
-          />
-        </label>
-      </div>
-      <label className="grid gap-1">
-        <span className="text-sm font-medium text-slate-700">Content</span>
-        <textarea
-          className="min-h-80 rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          value={draft.content}
-          onChange={(event) =>
-            setDraft((current) => ({
-              ...current,
-              content: event.target.value,
-            }))
-          }
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button disabled={saveState === "loading"} type="submit">
-          {saveState === "loading" ? <Loader2 /> : <Save />}
-          Save template
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+export const Workspace = ({ user }: { user: AuthUser }) => {
+  const logout = useLogout()
+  const securityProfile = useSecurityProfile()
+  const providers = useProviders()
+  const templates = useTemplates()
+  const documents = useDocuments()
+  const viewingDocumentId = useSecurityUiStore(
+    (state) => state.viewingDocumentId
   )
-}
+  const document = useDocument(viewingDocumentId)
 
-const TemplateCard = ({
-  template,
-  children,
-}: {
-  template: {
-    slug: string
-    name: string
-    description?: string
-    sourceSystemTemplateSlug?: string
-  }
-  children: ReactNode
-}) => (
-  <div className="grid gap-4 rounded-md border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-start">
-    <div>
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-semibold text-slate-950">{template.name}</h3>
-        <span className="rounded-md bg-white px-2 py-1 font-mono text-xs text-slate-600 ring-1 ring-slate-200">
-          {template.slug}
-        </span>
-      </div>
-      {template.description ? (
-        <p className="mt-2 text-sm text-slate-600">{template.description}</p>
-      ) : null}
-      {template.sourceSystemTemplateSlug ? (
-        <p className="mt-2 text-xs text-slate-500">
-          Copied from {template.sourceSystemTemplateSlug}
-        </p>
-      ) : null}
-    </div>
-    <div className="flex flex-wrap gap-2">{children}</div>
-  </div>
-)
+  const saveProfile = useSaveSecurityProfile()
+  const createVendor = useCreateVendor()
+  const updateVendor = useUpdateVendor()
+  const deleteVendor = useDeleteVendor()
+  const createTemplate = useCreateTemplateFromSystem()
+  const updateTemplate = useUpdateTemplate()
+  const deleteTemplate = useDeleteTemplate()
+  const createDocument = useCreateDocument()
 
-const documentStatusLabel = (status: DocumentSummary["status"]) => {
-  if (status === "stale") {
-    return "Outdated"
-  }
+  const snapshot = securityProfile.data
+  const defaultValues = profileFromOrganization(
+    snapshot?.organization ?? null
+  )
+  const vendors = snapshot?.vendors ?? []
+  const templatesData: TemplateCatalog =
+    templates.data ?? { systemTemplates: [], organizationTemplates: [] }
+  const documentsList: DocumentSummary[] = documents.data ?? []
 
-  if (status === "current") {
-    return "Generated"
-  }
+  const workspaceDataError = [
+    securityProfile.error,
+    templates.error,
+    documents.error,
+    providers.error,
+    document.error,
+  ]
+    .map((err) => err?.message)
+    .filter(Boolean)
+    .join(" · ")
 
-  return "Not generated"
-}
+  const isVendorMutationPending =
+    createVendor.isPending || updateVendor.isPending
 
-const DocumentContent = ({ document }: { document: Document }) => (
-  <article className="rounded-md border border-slate-200 bg-white p-5 font-mono text-sm leading-6 whitespace-pre-wrap text-slate-800">
-    {document.renderedContent}
-  </article>
-)
+  const providersList = providers.data ?? []
+  const documentRecord = document.data ?? null
 
-export const Workspace = ({
-  defaultValues,
-  vendors,
-  providers,
-  providersError,
-  providersLoading,
-  document,
-  documentLoading,
-  documents,
-  documentsLoading,
-  templates,
-  templatesLoading,
-  error,
-  saveState,
-  user,
-  onLogout,
-  onSaveProfile,
-  onAddSystemTemplate,
-  onUpdateTemplate,
-  onDeleteTemplate,
-  onGenerateDocument,
-  onCreateVendor,
-  onUpdateVendor,
-  onDeleteVendor,
-  organizations,
-  selectedOrganizationId,
-  onCreateOrganization,
-  onSelectOrganization,
-}: {
-  defaultValues: ProfileDraft
-  vendors: Vendor[]
-  providers: Provider[]
-  providersError: string | null
-  providersLoading: boolean
-  document: Document | null
-  documentLoading: boolean
-  documents: DocumentSummary[]
-  documentsLoading: boolean
-  templates: TemplateCatalog
-  templatesLoading: boolean
-  error: string | null
-  saveState: MutationState
-  user: AuthUser
-  organizations: OrganizationSummary[]
-  selectedOrganizationId: string
-  onLogout: () => void
-  onSaveProfile: (profile: ProfileDraft) => void
-  onAddSystemTemplate: (sourceSystemTemplateSlug: string) => void
-  onUpdateTemplate: (id: string, template: TemplateInput) => void
-  onDeleteTemplate: (template: Template) => void
-  onGenerateDocument: (templateId: string) => void
-  onCreateVendor: (vendor: VendorInput) => void
-  onUpdateVendor: (id: string, vendor: VendorInput) => void
-  onDeleteVendor: (vendor: Vendor) => void
-  onCreateOrganization: (name: string) => void
-  onSelectOrganization: (organizationId: string) => void
-}) => {
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
   const {
@@ -459,7 +326,6 @@ export const Workspace = ({
     editingCompanySection,
     editingTemplateId,
     editingVendorId,
-    viewingDocumentId,
     setViewingDocument,
     setActiveWorkspaceView,
     setEditingCompanySection,
@@ -467,18 +333,18 @@ export const Workspace = ({
     startEditingVendor,
   } = useSecurityUiStore()
   const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
-  const editingTemplate = templates.organizationTemplates.find(
+  const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === editingTemplateId
   )
   const dataTypeOptions = dataTypeOptionsFromProfile(
     defaultValues.dataHandling.dataTypesStored
   )
   const addedSystemTemplateSlugs = new Set(
-    templates.organizationTemplates.map(
+    templatesData.organizationTemplates.map(
       (template) => template.sourceSystemTemplateSlug
     )
   )
-  const viewedDocumentSummary = documents.find(
+  const viewedDocumentSummary = documentsList.find(
     (summary) => summary.document?.id === viewingDocumentId
   )
 
@@ -488,15 +354,7 @@ export const Workspace = ({
         <SidebarHeader>
           <p className="text-sm font-semibold text-blue-700">ComplyFlow</p>
           <div className="mt-3">
-            <OrganizationSwitcher
-              error={error}
-              organizations={organizations}
-              saveState={saveState}
-              selectedOrganizationId={selectedOrganizationId}
-              user={user}
-              onCreateOrganization={onCreateOrganization}
-              onSelectOrganization={onSelectOrganization}
-            />
+            <OrganizationSwitcher user={user} />
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -552,7 +410,7 @@ export const Workspace = ({
               <p className="text-xs text-slate-500">{user.email}</p>
             </div>
           </div>
-          <Button type="button" variant="outline" onClick={onLogout}>
+          <Button type="button" variant="outline" onClick={() => logout.mutate()}>
             <LogOut />
             Logout
           </Button>
@@ -586,19 +444,13 @@ export const Workspace = ({
                         : "Vendor inventory"}
               </h1>
             </div>
-            {saveState === "saved" && (
-              <span className="inline-flex w-fit items-center gap-1 rounded-md bg-green-50 px-2 py-1 text-sm font-medium text-green-800">
-                <Check className="size-4" />
-                Saved
-              </span>
-            )}
           </header>
 
-          {error && (
+          {workspaceDataError ? (
             <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-              {error}
+              {workspaceDataError}
             </p>
-          )}
+          ) : null}
 
           {activeWorkspaceView === "dashboard" && (
             <>
@@ -609,7 +461,7 @@ export const Workspace = ({
               >
                 <CompanyReadOnlySection
                   profile={defaultValues}
-                  providers={providers}
+                  providers={providersList}
                   section="company"
                   onEdit={() => {
                     setActiveWorkspaceView("company")
@@ -632,7 +484,7 @@ export const Workspace = ({
                     <ProfileForm
                       defaultValues={defaultValues}
                       onSubmit={(profile) => {
-                        onSaveProfile(profile)
+                        saveProfile.mutate(profile)
                         setEditingCompanySection(null)
                       }}
                     >
@@ -640,15 +492,15 @@ export const Workspace = ({
                         <>
                           <CompanySectionFields
                             form={form}
-                            providers={providers}
+                            providers={providersList}
                             section={section.id}
                           />
                           <div className="flex gap-2">
                             <Button
-                              disabled={saveState === "loading"}
+                              disabled={saveProfile.isPending}
                               type="submit"
                             >
-                              {saveState === "loading" ? <Loader2 /> : <Save />}
+                              {saveProfile.isPending ? <Loader2 /> : <Save />}
                               Save section
                             </Button>
                             <Button
@@ -665,7 +517,7 @@ export const Workspace = ({
                   ) : (
                     <CompanyReadOnlySection
                       profile={defaultValues}
-                      providers={providers}
+                      providers={providersList}
                       section={section.id}
                       onEdit={() => setEditingCompanySection(section.id)}
                     />
@@ -706,16 +558,16 @@ export const Workspace = ({
                     </Button>
                   </div>
                   <ProviderSelector
-                    error={providersError}
-                    isLoading={providersLoading}
-                    providers={providers}
+                    error={providers.error?.message ?? null}
+                    isLoading={providers.isLoading}
+                    providers={providersList}
                     onChooseOther={() => {
                       startEditingVendor(null)
                       setShowVendorCatalog(false)
                       setShowCustomVendorForm(true)
                     }}
                     onChooseProvider={(provider) => {
-                      onCreateVendor(vendorInputFromProvider(provider))
+                      createVendor.mutate(vendorInputFromProvider(provider))
                       setShowVendorCatalog(false)
                       setShowCustomVendorForm(false)
                     }}
@@ -730,15 +582,24 @@ export const Workspace = ({
                       ? toVendorInput(editingVendor)
                       : emptyVendorDraft
                   }
+                  submitDisabled={isVendorMutationPending}
                   submitLabel={editingVendor ? "Update vendor" : "Add vendor"}
                   onSubmit={(vendor) => {
                     if (editingVendor) {
-                      onUpdateVendor(editingVendor.id, vendor)
-                      startEditingVendor(null)
-                    } else {
-                      onCreateVendor(vendor)
+                      updateVendor.mutate(
+                        { id: editingVendor.id, vendor },
+                        {
+                          onSuccess: () => {
+                            startEditingVendor(null)
+                            setShowVendorCatalog(false)
+                            setShowCustomVendorForm(false)
+                          },
+                        }
+                      )
+                      return
                     }
 
+                    createVendor.mutate(vendor)
                     setShowVendorCatalog(false)
                     setShowCustomVendorForm(false)
                   }}
@@ -760,7 +621,7 @@ export const Workspace = ({
                     </Button>
                     <VendorList
                       vendors={vendors}
-                      onDelete={onDeleteVendor}
+                      onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
                       onEdit={(vendor) => {
                         startEditingVendor(vendor.id)
                         setShowCustomVendorForm(true)
@@ -785,18 +646,22 @@ export const Workspace = ({
                 description="Versioned starter markdown templates with Jinja-style placeholders."
                 title="System templates"
               >
-                {templatesLoading ? (
+                {templates.isLoading ? (
                   <p className="text-sm text-slate-500">Loading templates...</p>
-                ) : templates.systemTemplates.length > 0 ? (
-                  templates.systemTemplates.map((template) => {
+                ) : templatesData.systemTemplates.length > 0 ? (
+                  templatesData.systemTemplates.map((template) => {
                     const isAdded = addedSystemTemplateSlugs.has(template.slug)
 
                     return (
                       <TemplateCard key={template.slug} template={template}>
                         <Button
-                          disabled={isAdded || saveState === "loading"}
+                          disabled={isAdded || createTemplate.isPending}
                           type="button"
-                          onClick={() => onAddSystemTemplate(template.slug)}
+                          onClick={() =>
+                            createTemplate.mutate({
+                              sourceSystemTemplateSlug: template.slug,
+                            })
+                          }
                         >
                           <Plus />
                           {isAdded ? "Added" : "Add"}
@@ -818,15 +683,17 @@ export const Workspace = ({
                 {editingTemplate ? (
                   <TemplateForm
                     defaultValues={editingTemplate}
-                    saveState={saveState}
+                    isSaving={updateTemplate.isPending}
                     onCancel={() => startEditingTemplate(null)}
                     onSubmit={(template) => {
-                      onUpdateTemplate(editingTemplate.id, template)
-                      startEditingTemplate(null)
+                      updateTemplate.mutate(
+                        { id: editingTemplate.id, template },
+                        { onSuccess: () => startEditingTemplate(null) }
+                      )
                     }}
                   />
-                ) : templates.organizationTemplates.length > 0 ? (
-                  templates.organizationTemplates.map((template) => (
+                ) : templatesData.organizationTemplates.length > 0 ? (
+                  templatesData.organizationTemplates.map((template) => (
                     <TemplateCard key={template.id} template={template}>
                       <Button
                         type="button"
@@ -839,7 +706,7 @@ export const Workspace = ({
                       <Button
                         type="button"
                         variant="destructive"
-                        onClick={() => onDeleteTemplate(template)}
+                        onClick={() => deleteTemplate.mutate(template.id)}
                       >
                         <Trash2 />
                         Delete
@@ -865,7 +732,7 @@ export const Workspace = ({
                       ? `Generated from ${viewedDocumentSummary.template.name}.`
                       : "Generated document content."
                   }
-                  title={document?.title ?? "Document"}
+                  title={documentRecord?.title ?? "Document"}
                 >
                   <Button
                     className="w-fit"
@@ -876,12 +743,12 @@ export const Workspace = ({
                     <X />
                     Close
                   </Button>
-                  {documentLoading ? (
+                  {document.isLoading ? (
                     <p className="text-sm text-slate-500">
                       Loading document...
                     </p>
-                  ) : document ? (
-                    <DocumentContent document={document} />
+                  ) : documentRecord ? (
+                    <DocumentContent document={documentRecord} />
                   ) : (
                     <p className="text-sm text-slate-500">
                       Document was not found.
@@ -893,12 +760,12 @@ export const Workspace = ({
                   description="Generate customer-facing documents from organization templates."
                   title="Documents"
                 >
-                  {documentsLoading ? (
+                  {documents.isLoading ? (
                     <p className="text-sm text-slate-500">
                       Loading documents...
                     </p>
-                  ) : documents.length > 0 ? (
-                    documents.map((summary) => {
+                  ) : documentsList.length > 0 ? (
+                    documentsList.map((summary) => {
                       const isGenerated = Boolean(summary.document)
 
                       return (
@@ -952,11 +819,13 @@ export const Workspace = ({
                               </Button>
                             ) : (
                               <Button
-                                disabled={saveState === "loading"}
+                                disabled={createDocument.isPending}
                                 type="button"
                                 variant="outline"
                                 onClick={() =>
-                                  onGenerateDocument(summary.template.id)
+                                  createDocument.mutate({
+                                    templateId: summary.template.id,
+                                  })
                                 }
                               >
                                 <ScrollText />
