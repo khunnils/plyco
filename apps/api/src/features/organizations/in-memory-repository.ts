@@ -1,4 +1,7 @@
-import { type OrganizationSecurityProfile } from "@complyflow/shared"
+import {
+  type OrganizationSecurityProfile,
+  type Provider,
+} from "@complyflow/shared"
 
 import {
   type OrganizationRepository,
@@ -21,6 +24,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   async upsertProfile(
     organizationId: string,
     input: SecurityProfileInput,
+    _providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
     const timestamp = now()
     const existing = this.organizations.get(organizationId)

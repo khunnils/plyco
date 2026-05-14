@@ -1,4 +1,7 @@
-import { type OrganizationSecurityProfile } from "@complyflow/shared"
+import {
+  type OrganizationSecurityProfile,
+  type Provider,
+} from "@complyflow/shared"
 
 export type SecurityProfileInput = Pick<
   OrganizationSecurityProfile,
@@ -12,6 +15,7 @@ export interface OrganizationRepository {
   upsertProfile(
     organizationId: string,
     input: SecurityProfileInput,
+    providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile>
   listDataTypeNames(organizationId: string): Promise<string[]>
 }

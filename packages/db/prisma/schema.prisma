@@ -22,7 +22,7 @@ model Organization {
   dataTypes                OrganizationDataType[]
   templates                Template[]
   documents                Document[]
-  vendors                  Vendor[]
+  vendors                  OrganizationProvider[]
   memberships              OrganizationMembership[]
   createdAt                DateTime               @default(now()) @map("created_at")
   updatedAt                DateTime               @updatedAt @map("updated_at")
@@ -63,10 +63,6 @@ model InfrastructureProfile {
   id                        String       @id(map: "infrastructure_profiles_pkey") @default(cuid())
   organizationId            String       @unique(map: "infrastructure_profiles_organization_id_key") @map("organization_id")
   organization              Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "infrastructure_profiles_organization_id_fkey")
-  cloudProviders            String[]     @map("cloud_providers")
-  sourceControlProvider     String?      @map("source_control_provider")
-  authProvider              String?      @map("auth_provider")
-  passwordManager           String?      @map("password_manager")
   mfaEnabled                Boolean      @map("mfa_enabled")
   encryptedDevicesRequired  Boolean      @map("encrypted_devices_required")
   backupsEnabled            Boolean      @map("backups_enabled")
@@ -125,10 +121,12 @@ model AccessProfile {
   @@map("access_profiles")
 }
 
-model Vendor {
-  id               String       @id(map: "vendors_pkey") @default(cuid())
+model OrganizationProvider {
+  id               String       @id(map: "organization_providers_pkey") @default(cuid())
   organizationId   String       @map("organization_id")
   organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "vendors_organization_id_fkey")
+  providerId       String?      @map("provider_id")
+  systemType       String?      @map("system_type")
   name             String
   category         String
   purpose          String
@@ -143,8 +141,11 @@ model Vendor {
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  @@index([organizationId], map: "idx_vendors_organization_id")
-  @@map("vendors")
+  @@index([organizationId], map: "idx_organization_providers_organization_id")
+  @@index([providerId], map: "idx_organization_providers_provider_id")
+  @@index([systemType], map: "idx_organization_providers_system_type")
+  @@unique([organizationId, systemType, providerId], map: "organization_providers_org_system_provider_key")
+  @@map("organization_providers")
 }
 
 model Template {
@@ -185,7 +186,7 @@ model Document {
 model VendorDataType {
   id                     String               @id(map: "vendor_data_types_pkey") @default(cuid())
   vendorId               String               @map("vendor_id")
-  vendor                 Vendor               @relation(fields: [vendorId], references: [id], onDelete: Cascade, map: "vendor_data_types_vendor_id_fkey")
+  vendor                 OrganizationProvider @relation(fields: [vendorId], references: [id], onDelete: Cascade, map: "vendor_data_types_vendor_id_fkey")
   organizationDataTypeId String               @map("organization_data_type_id")
   organizationDataType   OrganizationDataType @relation(fields: [organizationDataTypeId], references: [id], onDelete: Cascade, map: "vendor_data_types_organization_data_type_id_fkey")
   createdAt              DateTime             @default(now()) @map("created_at")

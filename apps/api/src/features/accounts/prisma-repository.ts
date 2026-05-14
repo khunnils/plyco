@@ -115,10 +115,6 @@ export class PrismaAccountRepository implements AccountRepository {
         },
         infrastructureProfile: {
           create: {
-            cloudProviders: [],
-            sourceControlProvider: null,
-            authProvider: null,
-            passwordManager: null,
             mfaEnabled: false,
             encryptedDevicesRequired: false,
             backupsEnabled: false,

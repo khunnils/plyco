@@ -9,6 +9,7 @@ import { z } from "zod"
 
 import { requireOrganizationMembership } from "../../organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
+import { type ProviderSource } from "../../providers.js"
 import { type VendorRepository } from "../vendors/repository.js"
 import { type OrganizationRepository } from "./repository.js"
 
@@ -23,11 +24,13 @@ export async function registerOrganizationRoutes(
   app: FastifyInstance,
   {
     organizationRepository,
+    providerSource,
     vendorRepository,
     accountRepository,
   }: {
     accountRepository: AccountRepository
     organizationRepository: OrganizationRepository
+    providerSource: ProviderSource
     vendorRepository: VendorRepository
   },
 ) {
@@ -63,6 +66,9 @@ export async function registerOrganizationRoutes(
       const organization = await organizationRepository.upsertProfile(
         request.params.organizationId,
         body,
+        body.infrastructure.organizationProviders.length > 0
+          ? await providerSource.listProviders()
+          : [],
       )
       const vendors = await vendorRepository.listVendors(
         request.params.organizationId,

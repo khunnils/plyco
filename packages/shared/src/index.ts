@@ -16,6 +16,18 @@ export const vendorDataProcessingLevelSchema = z.enum([
   "subprocessor",
 ])
 
+export const providerSystemTypeSchema = z.enum([
+  "auth",
+  "source-control",
+  "cloud",
+  "password-manager",
+])
+
+export const organizationProviderSchema = z.object({
+  systemType: providerSystemTypeSchema,
+  providerId: z.string().trim().min(1),
+})
+
 export const storedDataTypeSchema = z.object({
   name: z.string().trim().min(1),
   isSensitive: z.boolean().default(false),
@@ -33,10 +45,7 @@ export const companyProfileSchema = z.object({
 })
 
 export const infrastructureProfileSchema = z.object({
-  cloudProviders: z.array(z.string().trim().min(1)).default([]),
-  sourceControlProvider: z.string().trim().min(1).optional().or(z.literal("")),
-  authProvider: z.string().trim().min(1).optional().or(z.literal("")),
-  passwordManager: z.string().trim().min(1).optional().or(z.literal("")),
+  organizationProviders: z.array(organizationProviderSchema).default([]),
   mfaEnabled: z.boolean(),
   encryptedDevicesRequired: z.boolean(),
   backupsEnabled: z.boolean(),
@@ -111,6 +120,7 @@ export const providerSchema = z.object({
   logoUrl: z.string().url().optional(),
   url: z.string().url().optional(),
   category: z.string().trim().min(1).optional(),
+  systemTypes: z.array(providerSystemTypeSchema).default([]),
   securityCriticality: z.string().trim().min(1).optional(),
   handlesCustomerData: z.boolean(),
 })
@@ -237,6 +247,8 @@ export type VendorCriticality = z.infer<typeof vendorCriticalitySchema>
 export type VendorDataProcessingLevel = z.infer<
   typeof vendorDataProcessingLevelSchema
 >
+export type ProviderSystemType = z.infer<typeof providerSystemTypeSchema>
+export type OrganizationProvider = z.infer<typeof organizationProviderSchema>
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>
 export type CompanyProfile = z.infer<typeof companyProfileSchema>
 export type InfrastructureProfile = z.infer<typeof infrastructureProfileSchema>
@@ -282,10 +294,7 @@ export const emptyCompanyProfile: CompanyProfile = {
 }
 
 export const emptyInfrastructureProfile: InfrastructureProfile = {
-  cloudProviders: [],
-  sourceControlProvider: "",
-  authProvider: "",
-  passwordManager: "",
+  organizationProviders: [],
   mfaEnabled: false,
   encryptedDevicesRequired: false,
   backupsEnabled: false,

@@ -6,10 +6,10 @@ API code is organized by feature area under `src/features`:
 
 - `features/accounts` owns persistent users, organization membership lookup, and organization creation.
 - `features/organizations` owns organization-scoped security profile routes and the organization repository contract used by other features.
-- `features/vendors` owns vendor CRUD routes, the provider catalog route, and vendor persistence. Vendor data-type validation reads the current organization data types through the organization repository.
+- `features/vendors` owns vendor CRUD routes, the provider catalog route, and provider inventory persistence. Vendor data-type validation reads the current organization data types through the organization repository.
 - `features/documents` owns template routes, generated document routes, document persistence, and document-generation orchestration.
 
-`src/app.ts` is the composition root. It configures Fastify, CORS, the central error handler, `/health`, OAuth/session auth, feature repositories, and feature route registration. Public auth paths are `/auth/google`, `/auth/google/callback`, `/auth/me`, and `/auth/logout`; workspace paths are scoped under `/organizations/:organizationId`, while `/providers` remains global.
+`src/app.ts` is the composition root. It configures Fastify, CORS, the central error handler, `/health`, OAuth/session auth, feature repositories, and feature route registration. Public auth paths are `/auth/google`, `/auth/google/callback`, `/auth/me`, and `/auth/logout`; workspace paths are scoped under `/organizations/:organizationId`, while `/providers` remains global. Infrastructure profile saves resolve selected provider IDs through the Airtable-backed provider catalog before upserting system providers.
 
 The templates endpoint combines system templates read from versioned markdown files in `apps/api/data/templates` with organization-owned template copies from the repository. System template files use a simple metadata header followed by markdown content with Jinja-style placeholders. Adding a system template creates an editable organization template; the API does not mutate system template files at runtime.
 

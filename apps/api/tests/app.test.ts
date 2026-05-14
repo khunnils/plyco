@@ -19,10 +19,12 @@ const profileBody = {
     complianceGoals: ["SOC 2", "GDPR"],
   },
   infrastructure: {
-    cloudProviders: ["AWS"],
-    sourceControlProvider: "GitHub",
-    authProvider: "Google Workspace",
-    passwordManager: "1Password",
+    organizationProviders: [
+      {
+        systemType: "source-control",
+        providerId: "prov-github",
+      },
+    ],
     mfaEnabled: true,
     encryptedDevicesRequired: true,
     backupsEnabled: true,
@@ -478,6 +480,7 @@ describe("security profile API", () => {
         name: "GitHub",
         url: "https://github.com",
         category: "Source Control",
+        systemTypes: ["source-control"],
         securityCriticality: "Critical",
         handlesCustomerData: false,
       },

@@ -1,5 +1,3 @@
-import { Check, ChevronDown, X } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Controller,
   type Control,
@@ -8,7 +6,25 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  useComboboxAnchor,
+} from "@/components/ui/combobox"
 import { cn } from "@/lib/utils"
+
+const comboboxChipsClassName =
+  "min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
+
+const comboboxChipClassName =
+  "h-6 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-100"
 
 type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
@@ -18,6 +34,8 @@ type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   options: Array<{ value: TValue; label: string }>
   emptyMessage?: string
   placeholder?: string
+  value?: TValue[]
+  onValueChange?: (value: TValue[]) => void
 }
 
 export const MultiSelectField = <T extends FieldValues, TValue extends string>({
@@ -28,6 +46,8 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
   options,
   emptyMessage = "No options available",
   placeholder = "Select options",
+  value,
+  onValueChange,
 }: MultiSelectFieldProps<T, TValue>) => {
   const fieldId = name.replace(/\W+/g, "-")
 
@@ -36,7 +56,8 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
       control={control}
       name={name}
       render={({ field }) => {
-        const selectedValues = Array.isArray(field.value) ? field.value : []
+        const selectedValues =
+          value ?? (Array.isArray(field.value) ? field.value : [])
 
         return (
           <MultiSelectInput
@@ -48,7 +69,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
             placeholder={placeholder}
             selectedValues={selectedValues}
             onBlur={field.onBlur}
-            onChange={field.onChange}
+            onChange={onValueChange ?? field.onChange}
           />
         )
       }}
@@ -73,138 +94,65 @@ const MultiSelectInput = <TValue extends string>({
   options: Array<{ value: TValue; label: string }>
   emptyMessage: string
   placeholder: string
-  selectedValues: string[]
+  selectedValues: TValue[]
   onBlur: () => void
-  onChange: (value: string[]) => void
+  onChange: (value: TValue[]) => void
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-  const optionLabels = useMemo<Map<string, string>>(
-    () => new Map(options.map((option) => [option.value, option.label])),
-    [options]
+  const anchorRef = useComboboxAnchor()
+  const optionLabelByValue = new Map(
+    options.map((option) => [option.value, option.label])
   )
-  const selectedLabels = selectedValues.map(
-    (value) => optionLabels.get(value) ?? value
-  )
-
-  useEffect(() => {
-    const closeOnPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener("pointerdown", closeOnPointerDown)
-    return () => document.removeEventListener("pointerdown", closeOnPointerDown)
-  }, [])
-
-  const toggleValue = (value: string) => {
-    if (selectedValues.includes(value)) {
-      onChange(
-        selectedValues.filter((selectedValue) => selectedValue !== value)
-      )
-      return
-    }
-
-    onChange([...selectedValues, value])
-  }
 
   return (
-    <div
-      ref={rootRef}
-      className="relative grid gap-2 text-sm font-medium text-slate-800"
-    >
-      <span>{label}</span>
-      <button
-        aria-controls={`${fieldId}-options`}
-        aria-expanded={isOpen}
-        className={cn(
-          "flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100",
-          error && "border-red-300 focus:border-red-500 focus:ring-red-100"
-        )}
-        type="button"
-        onBlur={onBlur}
-        onClick={() => setIsOpen((current) => !current)}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            setIsOpen(false)
-          }
-        }}
+    <div className="grid gap-2 text-sm font-medium text-slate-800">
+      <label htmlFor={fieldId}>{label}</label>
+      <Combobox<TValue, true>
+        multiple
+        items={options.map((option) => option.value)}
+        value={selectedValues}
+        itemToStringLabel={(value) => optionLabelByValue.get(value) ?? value}
+        onValueChange={(value) => onChange([...value])}
       >
-        <span className="flex min-w-0 flex-1 flex-wrap gap-1">
-          {selectedLabels.length === 0 ? (
-            <span className="truncate text-slate-400">{placeholder}</span>
-          ) : (
-            selectedLabels.map((selectedLabel) => (
-              <span
-                key={selectedLabel}
-                className="inline-flex max-w-full items-center gap-1 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
-              >
-                <span className="truncate">{selectedLabel}</span>
-              </span>
-            ))
-          )}
-        </span>
-        <ChevronDown
-          aria-hidden="true"
+        <ComboboxChips
+          ref={anchorRef}
           className={cn(
-            "size-4 shrink-0 text-slate-500 transition",
-            isOpen && "rotate-180"
+            comboboxChipsClassName,
+            error &&
+              "border-red-300 focus-within:border-red-500 focus-within:ring-red-100"
           )}
-        />
-      </button>
-      {isOpen && (
-        <div
-          className="absolute top-full z-20 mt-1 grid max-h-64 w-full overflow-y-auto rounded-md border border-slate-200 bg-white p-1 shadow-lg"
-          id={`${fieldId}-options`}
-          role="listbox"
         >
-          {options.length > 0 ? (
-            options.map((option) => {
-              const isSelected = selectedValues.includes(option.value)
-
-              return (
-                <button
-                  key={option.value}
-                  aria-selected={isSelected}
-                  className="flex items-center gap-2 rounded-sm px-2 py-2 text-left text-sm font-normal text-slate-800 transition outline-none hover:bg-slate-50 focus:bg-slate-50"
-                  role="option"
-                  type="button"
-                  onClick={() => toggleValue(option.value)}
-                >
-                  <span
-                    className={cn(
-                      "flex size-4 shrink-0 items-center justify-center rounded-sm border",
-                      isSelected
-                        ? "border-blue-600 bg-blue-600 text-white"
-                        : "border-slate-300 bg-white text-transparent"
-                    )}
-                  >
-                    <Check aria-hidden="true" className="size-3" />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">
-                    {option.label}
-                  </span>
-                </button>
-              )
-            })
-          ) : (
-            <p className="px-2 py-2 text-sm font-normal text-slate-500">
-              {emptyMessage}
-            </p>
-          )}
-          {selectedValues.length > 0 && (
-            <button
-              className="mt-1 flex items-center gap-2 border-t border-slate-100 px-2 py-2 text-left text-xs font-medium text-slate-500 transition outline-none hover:text-slate-800 focus:text-slate-800"
-              type="button"
-              onClick={() => onChange([])}
-            >
-              <X aria-hidden="true" className="size-3.5" />
-              Clear selections
-            </button>
-          )}
-        </div>
-      )}
+          {selectedValues.map((selectedValue) => (
+            <ComboboxChip key={selectedValue} className={comboboxChipClassName}>
+              {optionLabelByValue.get(selectedValue) ?? selectedValue}
+            </ComboboxChip>
+          ))}
+          <ComboboxChipsInput
+            id={fieldId}
+            aria-invalid={!!error || undefined}
+            placeholder={selectedValues.length === 0 ? placeholder : undefined}
+            className="text-sm font-normal text-slate-900 placeholder:text-slate-400"
+            onBlur={onBlur}
+          />
+          <ComboboxTrigger className="ml-auto rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />
+        </ComboboxChips>
+        <ComboboxContent
+          anchor={anchorRef}
+          className="rounded-md border border-slate-200 bg-white shadow-lg ring-0"
+        >
+          <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
+          <ComboboxList>
+            {options.map((option) => (
+              <ComboboxItem
+                key={option.value}
+                className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
+                value={option.value}
+              >
+                {option.label}
+              </ComboboxItem>
+            ))}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
       {error && <span className="text-xs text-red-700">{error.message}</span>}
     </div>
   )

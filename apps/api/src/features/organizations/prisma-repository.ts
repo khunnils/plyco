@@ -5,18 +5,27 @@ import {
   type DataHandlingProfile,
   type InfrastructureProfile,
   type OrganizationSecurityProfile,
+  type Provider,
+  type ProviderSystemType,
 } from "@complyflow/shared"
 
 import {
   type OrganizationRepository,
   type SecurityProfileInput,
 } from "./repository.js"
+import { ApiError } from "../../errors.js"
 
 export const ORGANIZATION_INCLUDE = {
   accessProfile: true,
   dataHandlingProfile: true,
   dataTypes: { orderBy: { createdAt: "asc" } },
   infrastructureProfile: true,
+  vendors: {
+    select: {
+      providerId: true,
+      systemType: true,
+    },
+  },
 } as const
 
 export class PrismaOrganizationRepository implements OrganizationRepository {
@@ -36,6 +45,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   async upsertProfile(
     organizationId: string,
     input: SecurityProfileInput,
+    providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
     const organizationData = this.organizationData(input.company)
     const infrastructureData = this.infrastructureData(input.infrastructure)
@@ -69,6 +79,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     })
 
     await this.syncOrganizationDataTypes(organization.id, input.dataHandling)
+    await this.syncOrganizationProviders(
+      organization.id,
+      input.infrastructure,
+      providerCatalog,
+    )
 
     return mapOrganizationRecord(
       await this.client.organization.findUniqueOrThrow({
@@ -101,15 +116,124 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private infrastructureData(input: InfrastructureProfile) {
     return {
-      cloudProviders: input.cloudProviders,
-      sourceControlProvider: input.sourceControlProvider || null,
-      authProvider: input.authProvider || null,
-      passwordManager: input.passwordManager || null,
       mfaEnabled: input.mfaEnabled,
       encryptedDevicesRequired: input.encryptedDevicesRequired,
       backupsEnabled: input.backupsEnabled,
       centralizedLoggingEnabled: input.centralizedLoggingEnabled,
     }
+  }
+
+  private async syncOrganizationProviders(
+    organizationId: string,
+    input: InfrastructureProfile,
+    providerCatalog: Provider[],
+  ) {
+    const selectedProviders = input.organizationProviders
+    const catalogProviders = selectedProviders.map((selectedProvider) => ({
+      selectedProvider,
+      provider: this.catalogProvider(
+        providerCatalog,
+        selectedProvider.systemType,
+        selectedProvider.providerId,
+      ),
+    }))
+
+    await this.client.organizationProvider.deleteMany({
+      where: {
+        organizationId,
+        systemType: {
+          in: ["auth", "source-control", "cloud", "password-manager"],
+        },
+        ...(selectedProviders.length > 0
+          ? {
+              NOT: selectedProviders.map((provider) => ({
+                systemType: provider.systemType,
+                providerId: provider.providerId,
+              })),
+            }
+          : {}),
+      },
+    })
+
+    await Promise.all(
+      catalogProviders.map(({ provider, selectedProvider }) =>
+        this.client.organizationProvider.upsert({
+          where: {
+            organizationId_systemType_providerId: {
+              organizationId,
+              systemType: selectedProvider.systemType,
+              providerId: selectedProvider.providerId,
+            },
+          },
+          create: {
+            organizationId,
+            providerId: provider.id,
+            systemType: selectedProvider.systemType,
+            ...this.organizationProviderData(provider),
+          },
+          update: this.organizationProviderData(provider),
+        })
+      ),
+    )
+  }
+
+  private catalogProvider(
+    providerCatalog: Provider[],
+    systemType: ProviderSystemType,
+    providerId: string,
+  ) {
+    const provider = providerCatalog.find(
+      (catalogProvider) =>
+        catalogProvider.id === providerId &&
+        catalogProvider.systemTypes.includes(systemType),
+    )
+
+    if (!provider) {
+      throw new ApiError(
+        "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
+        "Selected provider is not available for the requested system type.",
+        400,
+        { providerId, systemType },
+      )
+    }
+
+    return provider
+  }
+
+  private organizationProviderData(provider: Provider) {
+    return {
+      name: provider.name,
+      category: provider.category ?? "Provider",
+      purpose: provider.url
+        ? `Operational provider listed at ${provider.url}`
+        : "Operational provider",
+      hasSubprocessors: false,
+      dataProcessingLevel: provider.handlesCustomerData ? "limited" : "none",
+      dpaStatus: "not_started",
+      dataRegions: [],
+      criticality: this.providerCriticality(provider),
+      owner: null,
+      notes: provider.securityCriticality
+        ? `Provider catalog criticality: ${provider.securityCriticality}`
+        : null,
+    }
+  }
+
+  private providerCriticality(provider: Provider) {
+    const normalizedCriticality = provider.securityCriticality?.toLowerCase()
+
+    if (
+      normalizedCriticality === "critical" ||
+      normalizedCriticality === "high"
+    ) {
+      return "high"
+    }
+
+    if (normalizedCriticality === "low") {
+      return "low"
+    }
+
+    return "medium"
   }
 
   private dataHandlingData(input: DataHandlingProfile) {

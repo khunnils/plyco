@@ -20,6 +20,7 @@ import {
   type AuthUser,
   type OrganizationSummary,
   type Provider,
+  type ProviderSystemType,
   type Template,
   type TemplateCatalog,
   type TemplateInput,
@@ -95,6 +96,24 @@ const companySections: Array<{
 const valueList = (values: string[]) =>
   values.length > 0 ? values.join(", ") : "Not set"
 
+const providerNamesForSystem = (
+  profile: ProfileDraft,
+  providers: Provider[],
+  systemType: ProviderSystemType
+) => {
+  const names = profile.infrastructure.organizationProviders
+    .filter((provider) => provider.systemType === systemType)
+    .map((provider) => {
+      const catalogProvider = providers.find(
+        (catalogProvider) => catalogProvider.id === provider.providerId
+      )
+
+      return catalogProvider?.name ?? provider.providerId
+    })
+
+  return valueList(names)
+}
+
 const dataTypeList = (
   values: ProfileDraft["dataHandling"]["dataTypesStored"]
 ) =>
@@ -124,9 +143,11 @@ const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
 
 const CompanySectionFields = ({
   form,
+  providers,
   section,
 }: {
   form: ProfileFormReturn
+  providers: Provider[]
   section: CompanySectionId
 }) => {
   if (section === "company") {
@@ -134,7 +155,7 @@ const CompanySectionFields = ({
   }
 
   if (section === "infrastructure") {
-    return <ProfileInfrastructureFields form={form} />
+    return <ProfileInfrastructureFields form={form} providers={providers} />
   }
 
   if (section === "dataHandling") {
@@ -146,10 +167,12 @@ const CompanySectionFields = ({
 
 const CompanyReadOnlySection = ({
   profile,
+  providers,
   section,
   onEdit,
 }: {
   profile: ProfileDraft
+  providers: Provider[]
   section: CompanySectionId
   onEdit: () => void
 }) => {
@@ -167,13 +190,22 @@ const CompanyReadOnlySection = ({
       ["Sensitive data", boolText(profile.company.handlesSensitiveData)],
     ],
     infrastructure: [
-      ["Cloud providers", valueList(profile.infrastructure.cloudProviders)],
+      [
+        "Cloud providers",
+        providerNamesForSystem(profile, providers, "cloud"),
+      ],
       [
         "Source control",
-        profile.infrastructure.sourceControlProvider || "Not set",
+        providerNamesForSystem(profile, providers, "source-control"),
       ],
-      ["Auth provider", profile.infrastructure.authProvider || "Not set"],
-      ["Password manager", profile.infrastructure.passwordManager || "Not set"],
+      [
+        "Auth provider",
+        providerNamesForSystem(profile, providers, "auth"),
+      ],
+      [
+        "Password manager",
+        providerNamesForSystem(profile, providers, "password-manager"),
+      ],
       ["MFA enabled", boolText(profile.infrastructure.mfaEnabled)],
       [
         "Encrypted devices",
@@ -577,6 +609,7 @@ export const Workspace = ({
               >
                 <CompanyReadOnlySection
                   profile={defaultValues}
+                  providers={providers}
                   section="company"
                   onEdit={() => {
                     setActiveWorkspaceView("company")
@@ -607,6 +640,7 @@ export const Workspace = ({
                         <>
                           <CompanySectionFields
                             form={form}
+                            providers={providers}
                             section={section.id}
                           />
                           <div className="flex gap-2">
@@ -631,6 +665,7 @@ export const Workspace = ({
                   ) : (
                     <CompanyReadOnlySection
                       profile={defaultValues}
+                      providers={providers}
                       section={section.id}
                       onEdit={() => setEditingCompanySection(section.id)}
                     />

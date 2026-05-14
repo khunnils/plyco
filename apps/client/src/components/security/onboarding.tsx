@@ -172,7 +172,10 @@ export const Onboarding = ({
                 <div className="grid gap-5">
                   {onboardingStep === 0 && <ProfileCompanyFields form={form} />}
                   {onboardingStep === 1 && (
-                    <ProfileInfrastructureFields form={form} />
+                    <ProfileInfrastructureFields
+                      form={form}
+                      providers={providers}
+                    />
                   )}
                   {onboardingStep === 2 && (
                     <ProfileDataHandlingFields form={form} />

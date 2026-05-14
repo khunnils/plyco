@@ -1,4 +1,9 @@
-import { providerSchema, type Provider } from "@complyflow/shared"
+import {
+  providerSchema,
+  providerSystemTypeSchema,
+  type Provider,
+  type ProviderSystemType,
+} from "@complyflow/shared"
 import { z } from "zod"
 
 import { ApiError } from "./errors.js"
@@ -56,6 +61,56 @@ const booleanField = (
   return false
 }
 
+const rawStringValues = (
+  fields: Record<string, unknown>,
+  ...names: string[]
+): string[] => {
+  for (const name of names) {
+    const value = fields[name]
+
+    if (Array.isArray(value)) {
+      return value.filter(
+        (item): item is string => typeof item === "string" && Boolean(item.trim()),
+      )
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      return value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    }
+  }
+
+  return []
+}
+
+const systemTypeAliases: Record<string, ProviderSystemType> = {
+  auth: "auth",
+  authentication: "auth",
+  "identity provider": "auth",
+  "source control": "source-control",
+  "source-control": "source-control",
+  scm: "source-control",
+  cloud: "cloud",
+  "cloud provider": "cloud",
+  "password manager": "password-manager",
+  "password-manager": "password-manager",
+}
+
+const systemTypesField = (
+  fields: Record<string, unknown>,
+): ProviderSystemType[] =>
+  Array.from(
+    new Set(
+      rawStringValues(fields, "System Type", "System type", "System Types", "System types")
+        .map((value) => systemTypeAliases[value.trim().toLowerCase()])
+        .filter((value): value is ProviderSystemType =>
+          providerSystemTypeSchema.safeParse(value).success,
+        ),
+    ),
+  )
+
 const logoUrlField = (fields: Record<string, unknown>): string | undefined => {
   const parsedLogo = z.array(airtableAttachmentSchema).safeParse(fields.Logo)
   return parsedLogo.success ? parsedLogo.data[0]?.url : undefined
@@ -71,6 +126,7 @@ const mapAirtableProvider = (
     logoUrl: logoUrlField(fields),
     url: stringField(fields, "Url", "URL"),
     category: stringField(fields, "Category"),
+    systemTypes: systemTypesField(fields),
     securityCriticality: stringField(
       fields,
       "Security Criticality",

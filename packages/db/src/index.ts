@@ -29,15 +29,15 @@ export function mapOrganizationRecord(record: {
   handlesSensitiveData: boolean
   complianceGoals: string[]
   infrastructureProfile: {
-    cloudProviders: string[]
-    sourceControlProvider: string | null
-    authProvider: string | null
-    passwordManager: string | null
     mfaEnabled: boolean
     encryptedDevicesRequired: boolean
     backupsEnabled: boolean
     centralizedLoggingEnabled: boolean
   } | null
+  vendors: Array<{
+    providerId: string | null
+    systemType: string | null
+  }>
   dataHandlingProfile: {
     storesPii: boolean
     storesHealthcareData: boolean
@@ -72,11 +72,16 @@ export function mapOrganizationRecord(record: {
     complianceGoals: record.complianceGoals,
   })
   const infrastructure = infrastructureProfileSchema.parse({
-    cloudProviders: record.infrastructureProfile?.cloudProviders ?? [],
-    sourceControlProvider:
-      record.infrastructureProfile?.sourceControlProvider ?? "",
-    authProvider: record.infrastructureProfile?.authProvider ?? "",
-    passwordManager: record.infrastructureProfile?.passwordManager ?? "",
+    organizationProviders: record.vendors.flatMap((provider) =>
+      provider.providerId && provider.systemType
+        ? [
+            {
+              providerId: provider.providerId,
+              systemType: provider.systemType,
+            },
+          ]
+        : [],
+    ),
     mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? false,
     encryptedDevicesRequired:
       record.infrastructureProfile?.encryptedDevicesRequired ?? false,

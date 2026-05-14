@@ -107,6 +107,7 @@ export async function createApp({
   await registerOrganizationRoutes(app, {
     accountRepository: repositories.accountRepository,
     organizationRepository: repositories.organizationRepository,
+    providerSource,
     vendorRepository: repositories.vendorRepository,
   })
   await registerDocumentRoutes(app, {
@@ -140,6 +141,7 @@ export function createTestApp() {
         name: "GitHub",
         url: "https://github.com",
         category: "Source Control",
+        systemTypes: ["source-control"],
         securityCriticality: "Critical",
         handlesCustomerData: false,
       },

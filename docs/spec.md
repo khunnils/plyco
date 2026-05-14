@@ -111,10 +111,7 @@ Fields:
 
 Fields:
 
-- cloud providers
-- source control provider
-- auth provider
-- password manager
+- organization providers for cloud, source control, auth, and password management systems
 - MFA enabled
 - encrypted devices required
 - backups enabled
