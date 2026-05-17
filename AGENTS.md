@@ -1,4 +1,4 @@
-## ComplyFlow - Agent Instructions
+## Plyco - Agent Instructions
 
 ## Key principles
 

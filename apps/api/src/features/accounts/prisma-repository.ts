@@ -17,6 +17,13 @@ import {
 const toIsoString = (value: Date) => value.toISOString()
 
 const DEFAULT_PROFILE = {
+  legalEntityName: "",
+  website: "",
+  contactEmail: "",
+  securityContactEmail: "",
+  privacyContactEmail: "",
+  country: "",
+  address: "",
   employeeCount: 1,
   industries: [],
   regions: [],

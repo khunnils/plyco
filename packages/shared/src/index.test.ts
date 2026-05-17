@@ -8,12 +8,20 @@ import {
   dataHandlingProfileSchema,
   vendorInputSchema,
   vendorCriticalitySchema,
+  countryCodeSchema,
 } from "./index.js"
 
 describe("shared security profile schemas", () => {
   it("requires a company name and a positive employee count", () => {
     const result = companyProfileSchema.safeParse({
       companyName: "",
+      legalEntityName: "",
+      website: "",
+      contactEmail: "",
+      securityContactEmail: "",
+      privacyContactEmail: "",
+      country: "",
+      address: "",
       employeeCount: 0,
       industries: [],
       regions: [],
@@ -28,14 +36,14 @@ describe("shared security profile schemas", () => {
   it("requires operational vendor fields", () => {
     const result = vendorInputSchema.safeParse({
       name: "GitHub",
-      category: "Source control",
+      category: "source_control",
       purpose: "Code hosting",
-      countryOfRegistration: "United States",
+      countryOfRegistration: "US",
       hasSubprocessors: true,
       dataProcessingLevel: "limited",
-      dataProcessed: ["source code"],
+      dataProcessed: ["source_code"],
       dpaStatus: "signed",
-      dataRegions: ["US"],
+      dataRegions: ["us"],
       criticality: "high",
       owner: "Engineering",
       notes: "",
@@ -84,13 +92,26 @@ describe("shared security profile schemas", () => {
     expect(vendorCriticalitySchema.safeParse("severe").success).toBe(false)
   })
 
-  it("requires stored data types to include a name, sensitivity, and description", () => {
+  it("validates ISO alpha-2 country codes", () => {
+    expect(countryCodeSchema.safeParse("US").success).toBe(true)
+    expect(countryCodeSchema.safeParse("United States").success).toBe(false)
+  })
+
+  it("accepts rich stored data type details", () => {
     const result = dataHandlingProfileSchema.safeParse({
       dataTypesStored: [
         {
-          name: "customer emails",
-          isSensitive: true,
+          name: "account_data",
           description: "Account contact and notification data",
+          subjectTypes: ["customer"],
+          purposes: ["account_management"],
+          collectionMethods: ["account_signup"],
+          legalBasis: ["contract"],
+          retentionDays: 365,
+          isSensitive: true,
+          isRequired: true,
+          sharedWithThirdParties: true,
+          thirdParties: ["email delivery provider"],
         },
       ],
       storesPii: true,

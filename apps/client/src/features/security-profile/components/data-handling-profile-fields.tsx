@@ -3,6 +3,7 @@ import { type UseFormReturn } from "react-hook-form"
 import { DataTypesField } from "@/components/form/data-types-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 const getErrorMessage = (error: unknown): string | undefined => {
   if (!error || typeof error !== "object") {
@@ -21,9 +22,19 @@ const getErrorMessage = (error: unknown): string | undefined => {
 }
 
 export const DataHandlingProfileFields = ({
+  collectionMethodOptions,
+  dataCategoryOptions,
   form,
+  legalBasisOptions,
+  purposeOptions,
+  subjectTypeOptions,
 }: {
+  collectionMethodOptions: Option[]
+  dataCategoryOptions: Option[]
   form: UseFormReturn<ProfileDraft>
+  legalBasisOptions: Option[]
+  purposeOptions: Option[]
+  subjectTypeOptions: Option[]
 }) => (
   <div className="grid gap-4 md:grid-cols-2">
     <DataTypesField
@@ -34,6 +45,11 @@ export const DataHandlingProfileFields = ({
       )}
       label="Data types stored"
       name="dataHandling.dataTypesStored"
+      collectionMethodOptions={collectionMethodOptions}
+      dataCategoryOptions={dataCategoryOptions}
+      legalBasisOptions={legalBasisOptions}
+      purposeOptions={purposeOptions}
+      subjectTypeOptions={subjectTypeOptions}
     />
     <ToggleField
       control={form.control}

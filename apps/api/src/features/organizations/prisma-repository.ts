@@ -105,6 +105,13 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   private organizationData(input: CompanyProfile) {
     return {
       companyName: input.companyName,
+      legalEntityName: input.legalEntityName,
+      website: input.website,
+      contactEmail: input.contactEmail,
+      securityContactEmail: input.securityContactEmail,
+      privacyContactEmail: input.privacyContactEmail,
+      country: input.country,
+      address: input.address,
       employeeCount: input.employeeCount,
       industries: input.industries,
       regions: input.regions,
@@ -203,7 +210,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   private organizationProviderData(provider: Provider) {
     return {
       name: provider.name,
-      category: provider.category ?? "Provider",
+      category: this.providerCategory(provider),
       purpose: provider.url
         ? `Operational provider listed at ${provider.url}`
         : "Operational provider",
@@ -218,6 +225,24 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         ? `Provider catalog criticality: ${provider.securityCriticality}`
         : null,
     }
+  }
+
+  private providerCategory(provider: Provider) {
+    const normalizedCategory = provider.category?.trim().toLowerCase()
+
+    if (normalizedCategory === "source control") {
+      return "source_control"
+    }
+
+    if (normalizedCategory === "payments") {
+      return "payments"
+    }
+
+    if (normalizedCategory === "project management") {
+      return "project_management"
+    }
+
+    return "provider"
   }
 
   private providerCriticality(provider: Provider) {
@@ -251,8 +276,16 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   private organizationDataTypes(input: DataHandlingProfile) {
     return input.dataTypesStored.map((dataType) => ({
       name: dataType.name,
-      isSensitive: dataType.isSensitive,
       description: dataType.description,
+      subjectTypes: dataType.subjectTypes,
+      purposes: dataType.purposes,
+      collectionMethods: dataType.collectionMethods,
+      legalBasis: dataType.legalBasis,
+      retentionDays: dataType.retentionDays,
+      isSensitive: dataType.isSensitive,
+      isRequired: dataType.isRequired,
+      sharedWithThirdParties: dataType.sharedWithThirdParties,
+      thirdParties: dataType.thirdParties,
     }))
   }
 
@@ -284,8 +317,16 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             ...dataType,
           },
           update: {
-            isSensitive: dataType.isSensitive,
             description: dataType.description,
+            subjectTypes: dataType.subjectTypes,
+            purposes: dataType.purposes,
+            collectionMethods: dataType.collectionMethods,
+            legalBasis: dataType.legalBasis,
+            retentionDays: dataType.retentionDays,
+            isSensitive: dataType.isSensitive,
+            isRequired: dataType.isRequired,
+            sharedWithThirdParties: dataType.sharedWithThirdParties,
+            thirdParties: dataType.thirdParties,
           },
         }),
       ),

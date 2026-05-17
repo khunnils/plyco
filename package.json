@@ -9,6 +9,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "plyco": "pnpm --filter @complyflow/api exec tsx src/cli/plyco.ts",
     "dev:api": "pnpm --filter @complyflow/shared build && pnpm --filter @complyflow/db build && pnpm --filter @complyflow/api dev",
     "dev:client": "pnpm --filter @complyflow/shared build && pnpm --filter cf-app dev",
     "db:generate": "pnpm --filter @complyflow/db prisma:generate"

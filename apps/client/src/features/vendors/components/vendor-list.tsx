@@ -1,19 +1,18 @@
 import { Pencil, Trash2 } from "lucide-react"
-import { type Vendor, type VendorDataProcessingLevel } from "@complyflow/shared"
+import { type Country, type Vendor, type Vocabulary } from "@complyflow/shared"
 
 import { Button } from "@/components/ui/button"
-
-const processingLevelLabels: Record<VendorDataProcessingLevel, string> = {
-  none: "None",
-  limited: "Limited",
-  subprocessor: "Subprocessor",
-}
+import { codeLabel, countryLabel } from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorList = ({
+  countries,
+  vocabulary,
   vendors,
   onEdit,
   onDelete,
 }: {
+  countries: Country[]
+  vocabulary: Vocabulary | undefined
   vendors: Vendor[]
   onEdit: (vendor: Vendor) => void
   onDelete: (vendor: Vendor) => void
@@ -38,23 +37,38 @@ export const VendorList = ({
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold text-slate-950">{vendor.name}</h3>
                 <span className="rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-800">
-                  {processingLevelLabels[vendor.dataProcessingLevel]}
+                  {codeLabel(
+                    vocabulary,
+                    "data_processing_level",
+                    vendor.dataProcessingLevel,
+                  )}
                 </span>
                 <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
-                  {vendor.criticality}
+                  {codeLabel(
+                    vocabulary,
+                    "vendor_criticality",
+                    vendor.criticality,
+                  )}
                 </span>
                 {vendor.dataProcessingLevel !== "none" ? (
                   <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                    {vendor.dpaStatus.replaceAll("_", " ")}
+                    {codeLabel(vocabulary, "dpa_status", vendor.dpaStatus)}
                   </span>
                 ) : null}
               </div>
               <p className="mt-1 text-sm text-slate-600">{vendor.purpose}</p>
               <p className="mt-2 text-xs text-slate-500">
-                {vendor.category}
+                {codeLabel(vocabulary, "vendor_category", vendor.category)}
+                {vendor.countryOfRegistration
+                  ? ` · ${countryLabel(countries, vendor.countryOfRegistration)}`
+                  : ""}
                 {" · "}
                 {vendor.dataProcessingLevel !== "none"
-                  ? vendor.dataProcessed.join(", ") || "No data types selected"
+                  ? vendor.dataProcessed
+                      .map((value) =>
+                        codeLabel(vocabulary, "data_categories", value),
+                      )
+                      .join(", ") || "No data types selected"
                   : "No data processing"}
               </p>
             </div>

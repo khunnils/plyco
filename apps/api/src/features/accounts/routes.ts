@@ -4,10 +4,17 @@ import { type FastifyInstance } from "fastify"
 import { getPersistedSessionUser } from "../../auth.js"
 import { ApiError } from "../../errors.js"
 import { type AccountRepository } from "./repository.js"
+import { type VocabularyRepository } from "../vocabulary/repository.js"
 
 export async function registerAccountRoutes(
   app: FastifyInstance,
-  { accountRepository }: { accountRepository: AccountRepository },
+  {
+    accountRepository,
+    vocabularyRepository,
+  }: {
+    accountRepository: AccountRepository
+    vocabularyRepository: VocabularyRepository
+  },
 ) {
   app.post("/organizations", async (request, reply) => {
     const user = await getPersistedSessionUser(request, accountRepository)
@@ -25,6 +32,7 @@ export async function registerAccountRoutes(
       user.id,
       body,
     )
+    await vocabularyRepository.cloneOrganizationVocabulary(organization.id)
 
     return reply.status(201).send(organization)
   })

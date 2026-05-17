@@ -3,6 +3,10 @@ import {
   securityProgramSnapshotSchema,
   structuredErrorSchema,
   providerSchema,
+  countrySchema,
+  vocabularySchema,
+  vocabularyCodeSchema,
+  vocabularyCodeInputSchema,
   templateCatalogSchema,
   vendorSchema,
   createDocumentSchema,
@@ -12,6 +16,10 @@ import {
   createOrganizationSchema,
   organizationSummarySchema,
   type Provider,
+  type Country,
+  type Vocabulary,
+  type VocabularyCode,
+  type VocabularyCodeInput,
   type CreateDocument,
   type CreateOrganization,
   type CreateTemplateFromSystem,
@@ -96,6 +104,76 @@ export const getOrganizationSecurityProfile = (
 
 export const getProviders = (): Promise<Provider[]> =>
   apiRequest("/providers", z.array(providerSchema))
+
+export const getCountries = (): Promise<Country[]> =>
+  apiRequest("/countries", z.array(countrySchema))
+
+export const getVocabulary = (organizationId: string): Promise<Vocabulary> =>
+  apiRequest(`/organizations/${organizationId}/vocabulary`, vocabularySchema)
+
+export const createVocabularyCode = ({
+  organizationId,
+  codeSetId,
+  code,
+}: {
+  organizationId: string
+  codeSetId: string
+  code: VocabularyCodeInput
+}): Promise<VocabularyCode> =>
+  apiRequest(
+    `/organizations/${organizationId}/vocabulary/${codeSetId}/codes`,
+    vocabularyCodeSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(vocabularyCodeInputSchema.parse(code)),
+    }
+  )
+
+export const updateVocabularyCode = ({
+  organizationId,
+  codeSetId,
+  codeId,
+  code,
+}: {
+  organizationId: string
+  codeSetId: string
+  codeId: string
+  code: VocabularyCodeInput
+}): Promise<VocabularyCode> =>
+  apiRequest(
+    `/organizations/${organizationId}/vocabulary/${codeSetId}/codes/${codeId}`,
+    vocabularyCodeSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(vocabularyCodeInputSchema.parse(code)),
+    }
+  )
+
+export const deleteVocabularyCode = async ({
+  organizationId,
+  codeSetId,
+  codeId,
+}: {
+  organizationId: string
+  codeSetId: string
+  codeId: string
+}): Promise<void> => {
+  const response = await fetch(
+    `${API_URL}/organizations/${organizationId}/vocabulary/${codeSetId}/codes/${codeId}`,
+    {
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const parsedError = structuredErrorSchema.safeParse(body)
+    throw new Error(
+      parsedError.success ? parsedError.data.error.message : "Request failed"
+    )
+  }
+}
 
 export const getOrganizationTemplates = (
   organizationId: string

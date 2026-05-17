@@ -4,17 +4,21 @@ import { create } from "zustand"
 type SecurityUiState = {
   activeWorkspaceView:
     | "dashboard"
-    | "company"
+    | "companyProfile"
+    | "companyInfrastructure"
+    | "companyData"
+    | "companyAccess"
     | "templates"
     | "documents"
     | "vendors"
+    | "vocabulary"
   onboardingStep: number
   editingVendorId: string | null
   editingTemplateId: string | null
   viewingDocumentId: string | null
   onboardingVendors: Vendor[]
   editingCompanySection:
-    | "company"
+    | "profile"
     | "infrastructure"
     | "dataHandling"
     | "access"

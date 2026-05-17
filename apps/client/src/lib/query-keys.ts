@@ -2,6 +2,11 @@ export const authStateQueryKey = ["auth"] as const
 
 export const providersQueryKey = ["providers"] as const
 
+export const countriesQueryKey = ["countries"] as const
+
+export const vocabularyQueryKey = (organizationId: string) =>
+  ["vocabulary", organizationId] as const
+
 export const securityProfileQueryKey = (organizationId: string) =>
   ["security-profile", organizationId] as const
 

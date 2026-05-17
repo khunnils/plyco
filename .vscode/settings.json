@@ -6,9 +6,9 @@
       "server": "localhost",
       "port": 5432,
       "driver": "PostgreSQL",
-      "name": "local-complyflow",
+      "name": "local-plyco",
       "group": "Local",
-      "database": "complyflow",
+      "database": "plyco",
       "username": "nils"
     }
   ]

@@ -26,6 +26,15 @@ import { useSelectedOrganization } from "@/features/organizations/hooks/use-sele
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  useCountries,
+  useVocabulary,
+} from "@/features/vocabulary/hooks/use-vocabulary"
+import {
+  codeLabel,
+  codeOptions,
+  countryOptions,
+} from "@/features/vocabulary/lib/vocabulary"
 
 const onboardingSteps = [
   {
@@ -88,6 +97,8 @@ export const Onboarding = ({
 }) => {
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
   const providers = useProviders()
+  const countries = useCountries()
+  const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
   const createVendors = useCreateVendors()
   const { selectedOrganization } = useSelectedOrganization()
@@ -97,7 +108,11 @@ export const Onboarding = ({
   const isSaving =
     saveProfile.isPending || createVendors.isPending
   const saveError =
-    saveProfile.error?.message ?? createVendors.error?.message ?? null
+    saveProfile.error?.message ??
+    createVendors.error?.message ??
+    countries.error?.message ??
+    vocabulary.error?.message ??
+    null
   const {
     addOnboardingVendor,
     editingVendorId,
@@ -163,7 +178,10 @@ export const Onboarding = ({
           {(form) => {
             const dataTypeOptions = dataTypeOptionsFromProfile(
               form.watch("dataHandling.dataTypesStored")
-            )
+            ).map((option) => ({
+              ...option,
+              label: codeLabel(vocabulary.data, "data_categories", option.value),
+            }))
 
             return (
               <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -180,7 +198,18 @@ export const Onboarding = ({
                 </div>
 
                 <div className="grid gap-5">
-                  {onboardingStep === 0 && <ProfileCompanyFields form={form} />}
+                  {onboardingStep === 0 && (
+                    <ProfileCompanyFields
+                      complianceGoalOptions={codeOptions(
+                        vocabulary.data,
+                        "compliance_goals",
+                      )}
+                      countryOptions={countryOptions(countries.data ?? [])}
+                      form={form}
+                      industryOptions={codeOptions(vocabulary.data, "industries")}
+                      regionOptions={codeOptions(vocabulary.data, "regions")}
+                    />
+                  )}
                   {onboardingStep === 1 && (
                     <ProfileInfrastructureFields
                       form={form}
@@ -188,7 +217,23 @@ export const Onboarding = ({
                     />
                   )}
                   {onboardingStep === 2 && (
-                    <ProfileDataHandlingFields form={form} />
+                    <ProfileDataHandlingFields
+                      collectionMethodOptions={codeOptions(
+                        vocabulary.data,
+                        "collection_methods",
+                      )}
+                      dataCategoryOptions={codeOptions(
+                        vocabulary.data,
+                        "data_categories",
+                      )}
+                      form={form}
+                      legalBasisOptions={codeOptions(vocabulary.data, "legal_basis")}
+                      purposeOptions={codeOptions(vocabulary.data, "data_purposes")}
+                      subjectTypeOptions={codeOptions(
+                        vocabulary.data,
+                        "subject_types",
+                      )}
+                    />
                   )}
                   {onboardingStep === 3 && <ProfileAccessFields form={form} />}
                   {onboardingStep === 4 && (
@@ -207,13 +252,31 @@ export const Onboarding = ({
                       />
                       {(showCustomVendorForm || editingVendor) && (
                         <VendorForm
+                          countryOptions={countryOptions(countries.data ?? [])}
+                          criticalityOptions={codeOptions(
+                            vocabulary.data,
+                            "vendor_criticality",
+                          )}
                           dataTypeOptions={dataTypeOptions}
+                          dataProcessingLevelOptions={codeOptions(
+                            vocabulary.data,
+                            "data_processing_level",
+                          )}
+                          dataRegionOptions={codeOptions(vocabulary.data, "regions")}
                           defaultValues={
                             editingVendor
                               ? toVendorInput(editingVendor)
                               : emptyVendorDraft
                           }
+                          dpaStatusOptions={codeOptions(
+                            vocabulary.data,
+                            "dpa_status",
+                          )}
                           submitLabel={editingVendor ? "Save" : "Add vendor"}
+                          vendorCategoryOptions={codeOptions(
+                            vocabulary.data,
+                            "vendor_category",
+                          )}
                           onCancel={
                             editingVendor
                               ? () => {
@@ -234,6 +297,8 @@ export const Onboarding = ({
                         />
                       )}
                       <VendorList
+                        countries={countries.data ?? []}
+                        vocabulary={vocabulary.data}
                         vendors={onboardingVendors}
                         onDelete={(vendor) => removeOnboardingVendor(vendor.id)}
                         onEdit={(vendor) => {

@@ -20,12 +20,19 @@ import { parseSystemTemplate } from "../src/system-templates.js"
 const profileBody = {
   company: {
     companyName: "Acme AI",
+    legalEntityName: "Acme AI, Inc.",
+    website: "https://acme.example",
+    contactEmail: "hello@acme.example",
+    securityContactEmail: "security@acme.example",
+    privacyContactEmail: "privacy@acme.example",
+    country: "US",
+    address: "123 Market Street, San Francisco, CA",
     employeeCount: 12,
-    industries: ["AI", "SaaS"],
-    regions: ["US", "EU"],
+    industries: ["artificial_intelligence", "technology_saas"],
+    regions: ["us", "eu"],
     handlesPii: true,
     handlesSensitiveData: true,
-    complianceGoals: ["SOC 2", "GDPR"],
+    complianceGoals: ["soc_2", "gdpr"],
   },
   infrastructure: {
     organizationProviders: [
@@ -42,14 +49,30 @@ const profileBody = {
   dataHandling: {
     dataTypesStored: [
       {
-        name: "customer account data",
-        isSensitive: true,
+        name: "account_data",
         description: "Profile and billing contact details",
+        subjectTypes: ["customer", "administrator"],
+        purposes: ["account_management", "billing_payments"],
+        collectionMethods: ["account_signup"],
+        legalBasis: ["contract"],
+        retentionDays: 365,
+        isSensitive: true,
+        isRequired: true,
+        sharedWithThirdParties: true,
+        thirdParties: ["Stripe"],
       },
       {
-        name: "product analytics",
-        isSensitive: false,
+        name: "usage_data",
         description: "Usage events for product improvement",
+        subjectTypes: ["end_user"],
+        purposes: ["analytics"],
+        collectionMethods: ["product_usage"],
+        legalBasis: ["legitimate_interests"],
+        retentionDays: 180,
+        isSensitive: false,
+        isRequired: false,
+        sharedWithThirdParties: false,
+        thirdParties: [],
       },
     ],
     storesPii: true,
@@ -71,14 +94,14 @@ const profileBody = {
 
 const vendorBody = {
   name: "GitHub",
-  category: "Source control",
+  category: "source_control",
   purpose: "Code hosting and pull requests",
-  countryOfRegistration: "United States",
+  countryOfRegistration: "US",
   hasSubprocessors: true,
   dataProcessingLevel: "limited",
-  dataProcessed: ["customer account data"],
+  dataProcessed: ["account_data"],
   dpaStatus: "signed",
-  dataRegions: ["US"],
+  dataRegions: ["us"],
   criticality: "high",
   owner: "Engineering",
   notes: "Critical engineering system",
@@ -87,10 +110,10 @@ const vendorBody = {
 const subprocessorBody = {
   ...vendorBody,
   name: "Stripe",
-  category: "Payments",
+  category: "payments",
   purpose: "Payment processing",
   dataProcessingLevel: "subprocessor",
-  dataRegions: ["US", "EU"],
+  dataRegions: ["us", "eu"],
   criticality: "medium",
   owner: "Finance",
   notes: "Customer payment processor",
@@ -99,7 +122,7 @@ const subprocessorBody = {
 const noProcessingVendorBody = {
   ...vendorBody,
   name: "Linear",
-  category: "Project management",
+  category: "project_management",
   purpose: "Issue tracking",
   hasSubprocessors: false,
   dataProcessingLevel: "none",
@@ -220,6 +243,9 @@ describe("security profile API", () => {
 
     expect(saveResponse.statusCode).toBe(200)
     expect(saveResponse.json().organization.company.companyName).toBe("Acme AI")
+    expect(saveResponse.json().organization.company.legalEntityName).toBe(
+      "Acme AI, Inc.",
+    )
     expect(
       saveResponse.json().organization.dataHandling.dataTypesStored,
     ).toEqual(profileBody.dataHandling.dataTypesStored)
@@ -381,20 +407,20 @@ describe("security profile API", () => {
     expect(createResponse.statusCode).toBe(201)
     const createdVendor = createResponse.json()
     expect(createdVendor.name).toBe("GitHub")
-    expect(createdVendor.countryOfRegistration).toBe("United States")
+    expect(createdVendor.countryOfRegistration).toBe("US")
 
     const updateResponse = await app.inject({
       method: "PUT",
       url: `/organizations/org-test/vendors/${createdVendor.id}`,
       payload: {
         ...vendorBody,
-        dpaStatus: "in_review",
+        dpaStatus: "under_review",
         notes: "DPA being reviewed",
       },
     })
 
     expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json().dpaStatus).toBe("in_review")
+    expect(updateResponse.json().dpaStatus).toBe("under_review")
 
     const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/vendors" })
     expect(listResponse.json()).toHaveLength(1)
@@ -410,6 +436,98 @@ describe("security profile API", () => {
       url: "/organizations/org-test/vendors",
     })
     expect(emptyListResponse.json()).toHaveLength(0)
+  })
+
+  it("returns countries and organization vocabulary", async () => {
+    const app = await createTestApp()
+    const countriesResponse = await app.inject({
+      method: "GET",
+      url: "/countries",
+    })
+
+    expect(countriesResponse.statusCode).toBe(200)
+    expect(countriesResponse.json()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "US", name: "United States" }),
+      ]),
+    )
+
+    const vocabularyResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/vocabulary",
+    })
+
+    expect(vocabularyResponse.statusCode).toBe(200)
+    expect(vocabularyResponse.json().codeSets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          codeSetId: "industries",
+          isSystem: false,
+        }),
+        expect.objectContaining({
+          codeSetId: "dpa_status",
+          isSystem: true,
+        }),
+      ]),
+    )
+  })
+
+  it("supports editing organization vocabulary codes", async () => {
+    const app = await createTestApp()
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/vocabulary/industries/codes",
+      payload: {
+        codeId: "robotics",
+        name: "Robotics",
+        active: true,
+      },
+    })
+
+    expect(createResponse.statusCode).toBe(201)
+    expect(createResponse.json()).toMatchObject({
+      codeId: "robotics",
+      name: "Robotics",
+      isSystem: false,
+    })
+
+    const updateResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/vocabulary/industries/codes/robotics",
+      payload: {
+        codeId: "robotics",
+        name: "Robotics and automation",
+        active: true,
+      },
+    })
+
+    expect(updateResponse.statusCode).toBe(200)
+    expect(updateResponse.json().name).toBe("Robotics and automation")
+
+    const deleteResponse = await app.inject({
+      method: "DELETE",
+      url: "/organizations/org-test/vocabulary/industries/codes/robotics",
+    })
+
+    expect(deleteResponse.statusCode).toBe(204)
+  })
+
+  it("rejects unknown controlled codes and countries", async () => {
+    const app = await createTestApp()
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        company: {
+          ...profileBody.company,
+          country: "ZZ",
+        },
+      },
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json().error.code).toBe("COUNTRY_NOT_FOUND")
   })
 
   it("returns system and organization templates", async () => {
@@ -614,7 +732,7 @@ describe("security profile API", () => {
       url: "/organizations/org-test/vendors",
       payload: {
         ...vendorBody,
-        dataProcessed: ["source code"],
+        dataProcessed: ["source_code"],
       },
     })
 
@@ -622,7 +740,7 @@ describe("security profile API", () => {
     expect(response.json()).toMatchObject({
       error: {
         code: "VENDOR_DATA_TYPE_NOT_FOUND",
-        details: { dataProcessed: ["source code"] },
+        details: { dataProcessed: ["source_code"] },
       },
     })
   })

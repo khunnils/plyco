@@ -1,37 +1,24 @@
 import { type UseFormReturn } from "react-hook-form"
 
-import { ListField } from "@/components/form/list-field"
 import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
-
-const industryOptions = [
-  { value: "AI", label: "AI" },
-  { value: "SaaS", label: "SaaS" },
-  { value: "Healthcare", label: "Healthcare" },
-  { value: "Financial services", label: "Financial services" },
-  { value: "Education", label: "Education" },
-  { value: "E-commerce", label: "E-commerce" },
-  { value: "Manufacturing", label: "Manufacturing" },
-  { value: "Professional services", label: "Professional services" },
-]
-
-const operatingRegionOptions = [
-  { value: "US", label: "United States" },
-  { value: "EU", label: "European Union" },
-  { value: "UK", label: "United Kingdom" },
-  { value: "Canada", label: "Canada" },
-  { value: "APAC", label: "APAC" },
-  { value: "Australia", label: "Australia" },
-  { value: "Latin America", label: "Latin America" },
-  { value: "Middle East & Africa", label: "Middle East & Africa" },
-]
+import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const CompanyProfileFields = ({
+  complianceGoalOptions,
+  countryOptions,
   form,
+  industryOptions,
+  regionOptions,
 }: {
+  complianceGoalOptions: Option[]
+  countryOptions: Option[]
   form: UseFormReturn<ProfileDraft>
+  industryOptions: Option[]
+  regionOptions: Option[]
 }) => (
   <div className="grid gap-4 md:grid-cols-2">
     <TextField
@@ -39,6 +26,55 @@ export const CompanyProfileFields = ({
       label="Company name"
       name="company.companyName"
       placeholder="Acme AI"
+      register={form.register}
+    />
+    <TextField
+      error={form.formState.errors.company?.legalEntityName}
+      label="Legal entity name"
+      name="company.legalEntityName"
+      placeholder="Acme AI, Inc."
+      register={form.register}
+    />
+    <TextField
+      error={form.formState.errors.company?.website}
+      label="Website"
+      name="company.website"
+      placeholder="https://acme.example"
+      register={form.register}
+    />
+    <TextField
+      error={form.formState.errors.company?.contactEmail}
+      label="Contact email"
+      name="company.contactEmail"
+      placeholder="hello@acme.example"
+      register={form.register}
+    />
+    <TextField
+      error={form.formState.errors.company?.securityContactEmail}
+      label="Security contact email"
+      name="company.securityContactEmail"
+      placeholder="security@acme.example"
+      register={form.register}
+    />
+    <TextField
+      error={form.formState.errors.company?.privacyContactEmail}
+      label="Privacy contact email"
+      name="company.privacyContactEmail"
+      placeholder="privacy@acme.example"
+      register={form.register}
+    />
+    <SelectField
+      control={form.control}
+      label="Country"
+      name="company.country"
+      placeholder="United States"
+      options={[{ value: "", label: "Not set" }, ...countryOptions]}
+    />
+    <TextField
+      error={form.formState.errors.company?.address}
+      label="Address"
+      name="company.address"
+      placeholder="123 Market Street"
       register={form.register}
     />
     <TextField
@@ -61,15 +97,16 @@ export const CompanyProfileFields = ({
       error={form.formState.errors.company?.regions?.root}
       label="Operating regions"
       name="company.regions"
-      options={operatingRegionOptions}
+      options={regionOptions}
       placeholder="Select operating regions"
     />
-    <ListField
+    <MultiSelectField
       control={form.control}
       error={form.formState.errors.company?.complianceGoals?.root}
       label="Compliance goals"
       name="company.complianceGoals"
-      placeholder="SOC 2, GDPR"
+      options={complianceGoalOptions}
+      placeholder="Select compliance goals"
     />
     <div className="grid gap-3">
       <ToggleField

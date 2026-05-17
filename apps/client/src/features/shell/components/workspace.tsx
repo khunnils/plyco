@@ -1,8 +1,10 @@
 import {
   Building2,
+  Database,
   Download,
   Eye,
   FileText,
+  KeyRound,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -10,7 +12,9 @@ import {
   Plus,
   Save,
   ScrollText,
+  Server,
   Trash2,
+  Tags,
   Users,
   X,
 } from "lucide-react"
@@ -20,6 +24,8 @@ import {
   type Provider,
   type ProviderSystemType,
   type TemplateCatalog,
+  type Vocabulary,
+  type Country,
 } from "@complyflow/shared"
 import { useState } from "react"
 
@@ -80,38 +86,93 @@ import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 import { TemplateCard } from "@/features/templates/components/template-card"
 import { TemplateForm } from "@/features/templates/components/template-form"
+import {
+  useCountries,
+  useCreateVocabularyCode,
+  useDeleteVocabularyCode,
+  useUpdateVocabularyCode,
+  useVocabulary,
+} from "@/features/vocabulary/hooks/use-vocabulary"
+import {
+  codeLabel,
+  codeOptions,
+  countryLabel,
+  countryOptions,
+} from "@/features/vocabulary/lib/vocabulary"
+import { VocabularyManager } from "@/features/vocabulary/components/vocabulary-manager"
 
-type CompanySectionId = "company" | "infrastructure" | "dataHandling" | "access"
+type CompanySectionId = "profile" | "infrastructure" | "dataHandling" | "access"
+type WorkspaceView =
+  | "dashboard"
+  | "companyProfile"
+  | "companyInfrastructure"
+  | "companyData"
+  | "companyAccess"
+  | "templates"
+  | "documents"
+  | "vendors"
+  | "vocabulary"
 
 const companySections: Array<{
   id: CompanySectionId
+  view: WorkspaceView
   title: string
   description: string
+  icon: typeof Building2
 }> = [
   {
-    id: "company",
-    title: "Company",
+    id: "profile",
+    view: "companyProfile",
+    title: "Profile",
     description: "Operational context customers ask for early.",
+    icon: Building2,
   },
   {
     id: "infrastructure",
+    view: "companyInfrastructure",
     title: "Infrastructure",
     description: "The baseline systems behind the product.",
+    icon: Server,
   },
   {
     id: "dataHandling",
+    view: "companyData",
     title: "Data",
     description: "Data categories and protection practices.",
+    icon: Database,
   },
   {
     id: "access",
+    view: "companyAccess",
     title: "Access",
     description: "Access hygiene and account risk.",
+    icon: KeyRound,
   },
 ]
 
+const companySectionByView = new Map(
+  companySections.map((section) => [section.view, section])
+)
+
+const isCompanyView = (
+  view: WorkspaceView
+): view is
+  | "companyProfile"
+  | "companyInfrastructure"
+  | "companyData"
+  | "companyAccess" => companySectionByView.has(view)
+
 const valueList = (values: string[]) =>
   values.length > 0 ? values.join(", ") : "Not set"
+
+const codeValueList = (
+  vocabulary: Vocabulary | undefined,
+  codeSetId: string,
+  values: string[],
+) =>
+  values.length > 0
+    ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
+    : "Not set"
 
 const providerNamesForSystem = (
   profile: ProfileDraft,
@@ -132,13 +193,26 @@ const providerNamesForSystem = (
 }
 
 const dataTypeList = (
-  values: ProfileDraft["dataHandling"]["dataTypesStored"]
+  values: ProfileDraft["dataHandling"]["dataTypesStored"],
+  vocabulary: Vocabulary | undefined,
 ) =>
   values.length > 0
     ? values
-        .map((value) =>
-          value.description ? `${value.name}: ${value.description}` : value.name
-        )
+        .map((value) => {
+          const details = [
+            value.description,
+            value.retentionDays > 0
+              ? `${value.retentionDays} day retention`
+              : null,
+            value.isRequired ? "required" : null,
+            value.isSensitive ? "sensitive" : null,
+            value.sharedWithThirdParties ? "shared with third parties" : null,
+          ].filter(Boolean)
+
+          return details.length > 0
+            ? `${codeLabel(vocabulary, "data_categories", value.name)}: ${details.join("; ")}`
+            : codeLabel(vocabulary, "data_categories", value.name)
+        })
         .join(", ")
     : "Not set"
 
@@ -159,16 +233,28 @@ const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
 )
 
 const CompanySectionFields = ({
+  countries,
   form,
   providers,
   section,
+  vocabulary,
 }: {
+  countries: Country[]
   form: ProfileFormReturn
   providers: Provider[]
   section: CompanySectionId
+  vocabulary: Vocabulary | undefined
 }) => {
-  if (section === "company") {
-    return <ProfileCompanyFields form={form} />
+  if (section === "profile") {
+    return (
+      <ProfileCompanyFields
+        complianceGoalOptions={codeOptions(vocabulary, "compliance_goals")}
+        countryOptions={countryOptions(countries)}
+        form={form}
+        industryOptions={codeOptions(vocabulary, "industries")}
+        regionOptions={codeOptions(vocabulary, "regions")}
+      />
+    )
   }
 
   if (section === "infrastructure") {
@@ -176,33 +262,71 @@ const CompanySectionFields = ({
   }
 
   if (section === "dataHandling") {
-    return <ProfileDataHandlingFields form={form} />
+    return (
+      <ProfileDataHandlingFields
+        collectionMethodOptions={codeOptions(vocabulary, "collection_methods")}
+        dataCategoryOptions={codeOptions(vocabulary, "data_categories")}
+        form={form}
+        legalBasisOptions={codeOptions(vocabulary, "legal_basis")}
+        purposeOptions={codeOptions(vocabulary, "data_purposes")}
+        subjectTypeOptions={codeOptions(vocabulary, "subject_types")}
+      />
+    )
   }
 
   return <ProfileAccessFields form={form} />
 }
 
 const CompanyReadOnlySection = ({
+  countries,
   profile,
   providers,
   section,
+  vocabulary,
   onEdit,
 }: {
+  countries: Country[]
   profile: ProfileDraft
   providers: Provider[]
   section: CompanySectionId
+  vocabulary: Vocabulary | undefined
   onEdit: () => void
 }) => {
   const rowsBySection: Record<
     CompanySectionId,
     Array<[string, string | number]>
   > = {
-    company: [
+    profile: [
       ["Company name", profile.company.companyName || "Not set"],
+      ["Legal entity", profile.company.legalEntityName || "Not set"],
+      ["Website", profile.company.website || "Not set"],
+      ["Contact email", profile.company.contactEmail || "Not set"],
+      [
+        "Security contact",
+        profile.company.securityContactEmail || "Not set",
+      ],
+      ["Privacy contact", profile.company.privacyContactEmail || "Not set"],
+      [
+        "Country",
+        profile.company.country
+          ? countryLabel(countries, profile.company.country)
+          : "Not set",
+      ],
+      ["Address", profile.company.address || "Not set"],
       ["Employees", profile.company.employeeCount],
-      ["Industries", valueList(profile.company.industries)],
-      ["Regions", valueList(profile.company.regions)],
-      ["Compliance goals", valueList(profile.company.complianceGoals)],
+      [
+        "Industries",
+        codeValueList(vocabulary, "industries", profile.company.industries),
+      ],
+      ["Regions", codeValueList(vocabulary, "regions", profile.company.regions)],
+      [
+        "Compliance goals",
+        codeValueList(
+          vocabulary,
+          "compliance_goals",
+          profile.company.complianceGoals,
+        ),
+      ],
       ["Handles PII", boolText(profile.company.handlesPii)],
       ["Sensitive data", boolText(profile.company.handlesSensitiveData)],
     ],
@@ -229,7 +353,10 @@ const CompanyReadOnlySection = ({
       ],
     ],
     dataHandling: [
-      ["Data types", dataTypeList(profile.dataHandling.dataTypesStored)],
+      [
+        "Data types",
+        dataTypeList(profile.dataHandling.dataTypesStored, vocabulary),
+      ],
       ["Stores PII", boolText(profile.dataHandling.storesPii)],
       ["Healthcare data", boolText(profile.dataHandling.storesHealthcareData)],
       ["Encryption at rest", boolText(profile.dataHandling.encryptionAtRest)],
@@ -278,6 +405,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const logout = useLogout()
   const securityProfile = useSecurityProfile()
   const providers = useProviders()
+  const countries = useCountries()
+  const vocabulary = useVocabulary()
   const templates = useTemplates()
   const documents = useDocuments()
   const viewingDocumentId = useSecurityUiStore(
@@ -289,6 +418,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const createVendor = useCreateVendor()
   const updateVendor = useUpdateVendor()
   const deleteVendor = useDeleteVendor()
+  const createVocabularyCode = useCreateVocabularyCode()
+  const updateVocabularyCode = useUpdateVocabularyCode()
+  const deleteVocabularyCode = useDeleteVocabularyCode()
   const createTemplate = useCreateTemplateFromSystem()
   const updateTemplate = useUpdateTemplate()
   const deleteTemplate = useDeleteTemplate()
@@ -309,6 +441,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     templates.error,
     documents.error,
     providers.error,
+    countries.error,
+    vocabulary.error,
     document.error,
   ]
     .map((err) => err?.message)
@@ -319,6 +453,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     createVendor.isPending || updateVendor.isPending
 
   const providersList = providers.data ?? []
+  const countriesList = countries.data ?? []
+  const vocabularyData = vocabulary.data
   const documentRecord = document.data ?? null
 
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
@@ -340,7 +476,10 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   )
   const dataTypeOptions = dataTypeOptionsFromProfile(
     defaultValues.dataHandling.dataTypesStored
-  )
+  ).map((option) => ({
+    ...option,
+    label: codeLabel(vocabularyData, "data_categories", option.value),
+  }))
   const addedSystemTemplateSlugs = new Set(
     templatesData.organizationTemplates.map(
       (template) => template.sourceSystemTemplateSlug
@@ -349,6 +488,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const viewedDocumentSummary = documentsList.find(
     (summary) => summary.document?.id === viewingDocumentId
   )
+  const activeCompanySection = companySectionByView.get(activeWorkspaceView)
+  const activeCompanySectionId = activeCompanySection?.id
+  const activeCompanyTitle = activeCompanySection?.title ?? "Profile"
 
   return (
     <SidebarProvider>
@@ -369,18 +511,41 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
               Dashboard
             </SidebarMenuButton>
             <SidebarMenuButton
-              active={activeWorkspaceView === "company"}
-              onClick={() => setActiveWorkspaceView("company")}
+              active={isCompanyView(activeWorkspaceView)}
+              onClick={() => setActiveWorkspaceView("companyProfile")}
             >
               <Building2 className="size-4" />
               Company
             </SidebarMenuButton>
+            <div className="ml-4 grid gap-1 border-l border-slate-200 pl-3">
+              {companySections.map((section) => {
+                const Icon = section.icon
+
+                return (
+                  <SidebarMenuButton
+                    active={activeWorkspaceView === section.view}
+                    key={section.id}
+                    onClick={() => setActiveWorkspaceView(section.view)}
+                  >
+                    <Icon className="size-4" />
+                    {section.title}
+                  </SidebarMenuButton>
+                )
+              })}
+            </div>
             <SidebarMenuButton
               active={activeWorkspaceView === "vendors"}
               onClick={() => setActiveWorkspaceView("vendors")}
             >
               <Users className="size-4" />
               Vendors
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              active={activeWorkspaceView === "vocabulary"}
+              onClick={() => setActiveWorkspaceView("vocabulary")}
+            >
+              <Tags className="size-4" />
+              Vocabulary
             </SidebarMenuButton>
             <SidebarMenuButton
               active={activeWorkspaceView === "templates"}
@@ -426,24 +591,28 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
               <p className="text-sm font-semibold text-blue-700">
                 {activeWorkspaceView === "dashboard"
                   ? "Dashboard"
-                  : activeWorkspaceView === "company"
+                  : isCompanyView(activeWorkspaceView)
                     ? "Company"
                     : activeWorkspaceView === "templates"
                       ? "Templates"
                       : activeWorkspaceView === "documents"
                         ? "Documents"
-                        : "Vendors"}
+                        : activeWorkspaceView === "vocabulary"
+                          ? "Vocabulary"
+                          : "Vendors"}
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-slate-950">
                 {activeWorkspaceView === "dashboard"
                   ? "Security readiness dashboard"
-                  : activeWorkspaceView === "company"
-                    ? "Company profile"
+                  : isCompanyView(activeWorkspaceView)
+                    ? activeCompanyTitle
                     : activeWorkspaceView === "templates"
                       ? "Document templates"
                       : activeWorkspaceView === "documents"
                         ? "Generated documents"
-                        : "Vendor inventory"}
+                        : activeWorkspaceView === "vocabulary"
+                          ? "Vocabulary"
+                          : "Vendor inventory"}
               </h1>
             </div>
           </header>
@@ -462,21 +631,23 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                 title="Snapshot"
               >
                 <CompanyReadOnlySection
+                  countries={countriesList}
                   profile={defaultValues}
                   providers={providersList}
-                  section="company"
+                  section="profile"
+                  vocabulary={vocabularyData}
                   onEdit={() => {
-                    setActiveWorkspaceView("company")
-                    setEditingCompanySection("company")
+                    setActiveWorkspaceView("companyProfile")
+                    setEditingCompanySection("profile")
                   }}
                 />
               </Section>
             </>
           )}
 
-          {activeWorkspaceView === "company" && (
+          {activeCompanySection && activeCompanySectionId && (
             <div className="grid gap-5">
-              {companySections.map((section) => (
+              {[activeCompanySection].map((section) => (
                 <Section
                   description={section.description}
                   key={section.id}
@@ -493,9 +664,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       {(form) => (
                         <>
                           <CompanySectionFields
+                            countries={countriesList}
                             form={form}
                             providers={providersList}
                             section={section.id}
+                            vocabulary={vocabularyData}
                           />
                           <div className="flex gap-2">
                             <Button
@@ -518,9 +691,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                     </ProfileForm>
                   ) : (
                     <CompanyReadOnlySection
+                      countries={countriesList}
                       profile={defaultValues}
                       providers={providersList}
                       section={section.id}
+                      vocabulary={vocabularyData}
                       onEdit={() => setEditingCompanySection(section.id)}
                     />
                   )}
@@ -578,14 +753,29 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
               ) : null}
               {(showCustomVendorForm || editingVendor) && (
                 <VendorForm
+                  countryOptions={countryOptions(countriesList)}
+                  criticalityOptions={codeOptions(
+                    vocabularyData,
+                    "vendor_criticality",
+                  )}
                   dataTypeOptions={dataTypeOptions}
+                  dataProcessingLevelOptions={codeOptions(
+                    vocabularyData,
+                    "data_processing_level",
+                  )}
+                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
                   defaultValues={
                     editingVendor
                       ? toVendorInput(editingVendor)
                       : emptyVendorDraft
                   }
+                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
                   submitDisabled={isVendorMutationPending}
                   submitLabel={editingVendor ? "Save" : "Add vendor"}
+                  vendorCategoryOptions={codeOptions(
+                    vocabularyData,
+                    "vendor_category",
+                  )}
                   onCancel={
                     editingVendor
                       ? () => {
@@ -631,6 +821,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       Add vendor
                     </Button>
                     <VendorList
+                      countries={countriesList}
+                      vocabulary={vocabularyData}
                       vendors={vendors}
                       onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
                       onEdit={(vendor) => {
@@ -648,6 +840,31 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   />
                 )
               ) : null}
+            </Section>
+          )}
+
+          {activeWorkspaceView === "vocabulary" && (
+            <Section
+              description="Edit organization-owned vocabularies used by onboarding and vendor records."
+              title="Vocabulary"
+            >
+              <VocabularyManager
+                vocabulary={vocabularyData}
+                isSaving={
+                  createVocabularyCode.isPending ||
+                  updateVocabularyCode.isPending ||
+                  deleteVocabularyCode.isPending
+                }
+                onCreateCode={(codeSetId, code) =>
+                  createVocabularyCode.mutate({ codeSetId, code })
+                }
+                onDeleteCode={(codeSetId, codeId) =>
+                  deleteVocabularyCode.mutate({ codeSetId, codeId })
+                }
+                onUpdateCode={(codeSetId, codeId, code) =>
+                  updateVocabularyCode.mutate({ codeSetId, codeId, code })
+                }
+              />
             </Section>
           )}
 

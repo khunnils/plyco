@@ -5,6 +5,8 @@ import { ApiError } from "../../errors.js"
 import { requireOrganizationMembership } from "../../organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type ProviderSource } from "../../providers.js"
+import { type VocabularyRepository } from "../vocabulary/repository.js"
+import { validateVendorCodes } from "../vocabulary/validation.js"
 import { type VendorRepository } from "./repository.js"
 
 export async function registerVendorRoutes(
@@ -13,10 +15,12 @@ export async function registerVendorRoutes(
     providerSource,
     vendorRepository,
     accountRepository,
+    vocabularyRepository,
   }: {
     accountRepository: AccountRepository
     providerSource: ProviderSource
     vendorRepository: VendorRepository
+    vocabularyRepository: VocabularyRepository
   },
 ) {
   app.get("/providers", async () => providerSource.listProviders())
@@ -43,6 +47,11 @@ export async function registerVendorRoutes(
         request.params.organizationId,
       )
       const body = vendorInputSchema.parse(request.body)
+      await validateVendorCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body,
+      )
       const vendor = await vendorRepository.createVendor(
         request.params.organizationId,
         body,
@@ -61,6 +70,11 @@ export async function registerVendorRoutes(
         request.params.organizationId,
       )
       const body = vendorInputSchema.parse(request.body)
+      await validateVendorCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body,
+      )
       const vendor = await vendorRepository.updateVendor(
         request.params.organizationId,
         request.params.id,

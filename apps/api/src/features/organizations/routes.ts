@@ -10,6 +10,12 @@ import { z } from "zod"
 import { requireOrganizationMembership } from "../../organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type ProviderSource } from "../../providers.js"
+import {
+  validateCompanyProfileCodes,
+  validateDataHandlingProfileCodes,
+  validateInfrastructureProfileCodes,
+} from "../vocabulary/validation.js"
+import { type VocabularyRepository } from "../vocabulary/repository.js"
 import { type VendorRepository } from "../vendors/repository.js"
 import { type OrganizationRepository } from "./repository.js"
 
@@ -27,11 +33,13 @@ export async function registerOrganizationRoutes(
     providerSource,
     vendorRepository,
     accountRepository,
+    vocabularyRepository,
   }: {
     accountRepository: AccountRepository
     organizationRepository: OrganizationRepository
     providerSource: ProviderSource
     vendorRepository: VendorRepository
+    vocabularyRepository: VocabularyRepository
   },
 ) {
   app.get<{ Params: { organizationId: string } }>(
@@ -63,6 +71,21 @@ export async function registerOrganizationRoutes(
         request.params.organizationId,
       )
       const body = securityProfileBodySchema.parse(request.body)
+      await validateCompanyProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body.company,
+      )
+      await validateDataHandlingProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body.dataHandling,
+      )
+      await validateInfrastructureProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body.infrastructure,
+      )
       const organization = await organizationRepository.upsertProfile(
         request.params.organizationId,
         body,

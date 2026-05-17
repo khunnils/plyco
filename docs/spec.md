@@ -93,6 +93,8 @@ Avoid giant forms or audit-style questionnaires.
 
 Users sign in with Google and can belong to multiple organizations. The client lets users choose the current organization from the workspace sidebar, and all workspace data is loaded through organization-scoped API routes. Organization membership controls access; v1 stores `owner` and `member` roles, with both roles able to edit the security snapshot and related workspace data.
 
+Controlled choices such as industries, regions, compliance goals, data categories, data purposes, collection methods, legal basis, DPA status, data processing level, vendor category, vendor criticality, and provider system type are stored as stable code IDs. System code sets are loaded from Airtable with `pnpm plyco codes load`; organization-editable code sets are cloned during onboarding and managed from the Vocabulary screen. Countries use app-owned ISO alpha-2 country codes from a separate countries reference table.
+
 ## Sections
 
 ### Company Profile
@@ -103,6 +105,7 @@ Fields:
 - employee count
 - industries
 - regions
+- country
 - handles PII
 - handles sensitive data
 - compliance goals
@@ -146,10 +149,16 @@ Fields:
 
 - vendor inventory
 - country of registration
+- vendor category
+- data processing level
 - subprocessors
 - DPA status
 - data regions
 - criticality
+
+### Vocabulary
+
+The app includes a Vocabulary sidebar option. Organization users can add, remove, rename, and deactivate codes in organization-owned vocabulary sets. System code sets and countries are not editable from the Vocabulary screen.
 
 # 2. Shared Security Controls
 

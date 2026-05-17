@@ -105,9 +105,27 @@ const providerCriticality = (
   return "medium"
 }
 
+const providerCategory = (provider: Provider): VendorInput["category"] => {
+  const normalizedCategory = provider.category?.trim().toLowerCase()
+
+  if (normalizedCategory === "source control") {
+    return "source_control"
+  }
+
+  if (normalizedCategory === "payments") {
+    return "payments"
+  }
+
+  if (normalizedCategory === "project management") {
+    return "project_management"
+  }
+
+  return "provider"
+}
+
 export const vendorInputFromProvider = (provider: Provider): VendorInput => ({
   name: provider.name,
-  category: provider.category ?? "Provider",
+  category: providerCategory(provider),
   purpose: provider.url
     ? `Operational provider listed at ${provider.url}`
     : "Operational provider",

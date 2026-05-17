@@ -10,6 +10,13 @@ datasource db {
 model Organization {
   id                       String                 @id(map: "organizations_pkey") @default(cuid())
   companyName              String                 @map("company_name")
+  legalEntityName          String                 @default("") @map("legal_entity_name")
+  website                  String                 @default("")
+  contactEmail             String                 @default("") @map("contact_email")
+  securityContactEmail     String                 @default("") @map("security_contact_email")
+  privacyContactEmail      String                 @default("") @map("privacy_contact_email")
+  country                  String                 @default("")
+  address                  String                 @default("")
   employeeCount            Int                    @map("employee_count")
   industries               String[]
   regions                  String[]
@@ -24,10 +31,88 @@ model Organization {
   documents                Document[]
   vendors                  OrganizationProvider[]
   memberships              OrganizationMembership[]
+  codeSets                 OrganizationCodeSet[]
   createdAt                DateTime               @default(now()) @map("created_at")
   updatedAt                DateTime               @updatedAt @map("updated_at")
 
   @@map("organizations")
+}
+
+model Country {
+  code      String   @id(map: "countries_pkey")
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("countries")
+}
+
+model SystemCodeSet {
+  id                String                @id(map: "system_code_sets_pkey")
+  airtableRecordId  String                @unique(map: "system_code_sets_airtable_record_id_key") @map("airtable_record_id")
+  name              String
+  description       String                @default("")
+  isSystem          Boolean               @default(false) @map("is_system")
+  codes             SystemCode[]
+  organizationSets  OrganizationCodeSet[]
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  @@map("system_code_sets")
+}
+
+model SystemCode {
+  id               String        @id(map: "system_codes_pkey") @default(cuid())
+  codeSetId        String        @map("code_set_id")
+  codeSet          SystemCodeSet @relation(fields: [codeSetId], references: [id], onDelete: Cascade, map: "system_codes_code_set_id_fkey")
+  airtableRecordId String        @unique(map: "system_codes_airtable_record_id_key") @map("airtable_record_id")
+  codeId           String        @map("code_id")
+  name             String
+  sortOrder        Int           @default(0) @map("sort_order")
+  active           Boolean       @default(true)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@unique([codeSetId, codeId], map: "system_codes_code_set_id_code_id_key")
+  @@index([codeSetId], map: "idx_system_codes_code_set_id")
+  @@map("system_codes")
+}
+
+model OrganizationCodeSet {
+  id               String             @id(map: "organization_code_sets_pkey") @default(cuid())
+  organizationId   String             @map("organization_id")
+  organization     Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_code_sets_organization_id_fkey")
+  systemCodeSetId  String             @map("system_code_set_id")
+  systemCodeSet    SystemCodeSet      @relation(fields: [systemCodeSetId], references: [id], onDelete: Restrict, map: "organization_code_sets_system_code_set_id_fkey")
+  name             String
+  description      String             @default("")
+  codes            OrganizationCode[]
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  @@unique([organizationId, systemCodeSetId], map: "organization_code_sets_organization_id_system_code_set_id_key")
+  @@index([organizationId], map: "idx_organization_code_sets_organization_id")
+  @@index([systemCodeSetId], map: "idx_organization_code_sets_system_code_set_id")
+  @@map("organization_code_sets")
+}
+
+model OrganizationCode {
+  id                    String              @id(map: "organization_codes_pkey") @default(cuid())
+  organizationCodeSetId String              @map("organization_code_set_id")
+  organizationCodeSet   OrganizationCodeSet @relation(fields: [organizationCodeSetId], references: [id], onDelete: Cascade, map: "organization_codes_organization_code_set_id_fkey")
+  systemCodeId          String?             @map("system_code_id")
+  codeId                String              @map("code_id")
+  name                  String
+  sortOrder             Int                 @default(0) @map("sort_order")
+  active                Boolean             @default(true)
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+
+  @@unique([organizationCodeSetId, codeId], map: "organization_codes_code_set_id_code_id_key")
+  @@index([organizationCodeSetId], map: "idx_organization_codes_organization_code_set_id")
+  @@index([systemCodeId], map: "idx_organization_codes_system_code_id")
+  @@map("organization_codes")
 }
 
 model User {
@@ -94,8 +179,16 @@ model OrganizationDataType {
   organizationId  String           @map("organization_id")
   organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
   name            String
-  isSensitive     Boolean          @map("is_sensitive")
   description     String
+  subjectTypes    String[]         @default([]) @map("subject_types")
+  purposes        String[]         @default([])
+  collectionMethods String[]       @default([]) @map("collection_methods")
+  legalBasis      String[]         @default([]) @map("legal_basis")
+  retentionDays   Int              @default(0) @map("retention_days")
+  isSensitive     Boolean          @map("is_sensitive")
+  isRequired      Boolean          @default(false) @map("is_required")
+  sharedWithThirdParties Boolean    @default(false) @map("shared_with_third_parties")
+  thirdParties    String[]         @default([]) @map("third_parties")
   vendorDataTypes VendorDataType[]
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")

@@ -2,9 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus, Save, X } from "lucide-react"
 import {
   vendorInputSchema,
-  type DpaStatus,
-  type VendorCriticality,
-  type VendorDataProcessingLevel,
   type VendorInput,
 } from "@complyflow/shared"
 import { useEffect } from "react"
@@ -16,53 +13,32 @@ import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
-
-const dataRegionOptions = [
-  { value: "US", label: "United States" },
-  { value: "EU", label: "European Union" },
-  { value: "UK", label: "United Kingdom" },
-  { value: "Canada", label: "Canada" },
-  { value: "APAC", label: "APAC" },
-  { value: "Australia", label: "Australia" },
-  { value: "Latin America", label: "Latin America" },
-  { value: "Middle East & Africa", label: "Middle East & Africa" },
-]
-
-const dpaStatusOptions: Array<{ value: DpaStatus; label: string }> = [
-  { value: "not_started", label: "Not started" },
-  { value: "requested", label: "Requested" },
-  { value: "in_review", label: "In review" },
-  { value: "signed", label: "Signed" },
-  { value: "not_required", label: "Not required" },
-]
-
-const dataProcessingLevelOptions: Array<{
-  value: VendorDataProcessingLevel
-  label: string
-}> = [
-  { value: "none", label: "None" },
-  { value: "limited", label: "Limited" },
-  { value: "subprocessor", label: "Subprocessor" },
-]
-
-const criticalityOptions: Array<{ value: VendorCriticality; label: string }> = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-]
+import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorForm = ({
   dataTypeOptions,
+  countryOptions,
+  criticalityOptions,
+  dataProcessingLevelOptions,
+  dataRegionOptions,
   defaultValues,
+  dpaStatusOptions,
+  vendorCategoryOptions,
   submitLabel,
   submitDisabled = false,
   onSubmit,
   onCancel,
 }: {
   dataTypeOptions: Array<{ value: string; label: string }>
+  countryOptions: Option[]
+  criticalityOptions: Option[]
+  dataProcessingLevelOptions: Option[]
+  dataRegionOptions: Option[]
   defaultValues: VendorInput
+  dpaStatusOptions: Option[]
   submitLabel: string
   submitDisabled?: boolean
+  vendorCategoryOptions: Option[]
   onSubmit: (vendor: VendorInput) => void
   onCancel?: () => void
 }) => {
@@ -108,12 +84,11 @@ export const VendorForm = ({
           placeholder="GitHub"
           register={form.register}
         />
-        <TextField
-          error={form.formState.errors.category}
+        <SelectField
+          control={form.control}
           label="Category"
           name="category"
-          placeholder="Source control"
-          register={form.register}
+          options={vendorCategoryOptions}
         />
         <TextField
           error={form.formState.errors.purpose}
@@ -122,12 +97,11 @@ export const VendorForm = ({
           placeholder="Code hosting and reviews"
           register={form.register}
         />
-        <TextField
-          error={form.formState.errors.countryOfRegistration}
+        <SelectField
+          control={form.control}
           label="Country of registration"
           name="countryOfRegistration"
-          placeholder="United States"
-          register={form.register}
+          options={[{ value: "", label: "Not set" }, ...countryOptions]}
         />
         <TextField
           error={form.formState.errors.owner}

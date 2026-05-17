@@ -10,6 +10,62 @@
       "example": "Acme AI"
     },
     {
+      "key": "organization.legalEntityName",
+      "label": "Legal entity name",
+      "type": "string",
+      "category": "Organization",
+      "description": "Registered legal entity name for the organization.",
+      "example": "Acme AI, Inc."
+    },
+    {
+      "key": "organization.website",
+      "label": "Website",
+      "type": "string",
+      "category": "Organization",
+      "description": "Public website for the organization.",
+      "example": "https://acme.example"
+    },
+    {
+      "key": "organization.contactEmail",
+      "label": "Contact email",
+      "type": "string",
+      "category": "Organization",
+      "description": "General contact email for the organization.",
+      "example": "hello@acme.example"
+    },
+    {
+      "key": "organization.securityContactEmail",
+      "label": "Security contact email",
+      "type": "string",
+      "category": "Organization",
+      "description": "Email address for security inquiries.",
+      "example": "security@acme.example"
+    },
+    {
+      "key": "organization.privacyContactEmail",
+      "label": "Privacy contact email",
+      "type": "string",
+      "category": "Organization",
+      "description": "Email address for privacy inquiries.",
+      "example": "privacy@acme.example"
+    },
+    {
+      "key": "organization.country",
+      "label": "Country",
+      "type": "string",
+      "category": "Organization",
+      "description": "Primary country for the organization.",
+      "example": "United States"
+    },
+    {
+      "key": "organization.address",
+      "label": "Address",
+      "type": "string",
+      "category": "Organization",
+      "description": "Primary business address for the organization.",
+      "example": "123 Market Street, San Francisco, CA"
+    },
+    {
       "key": "organization.employeeCount",
       "label": "Employee count",
       "type": "number",
@@ -136,8 +192,28 @@
       "example": [
         {
           "name": "customer account data",
+          "description": "Profile and billing contact details",
+          "subjectTypes": [
+            "customers",
+            "admins"
+          ],
+          "purposes": [
+            "account management",
+            "billing"
+          ],
+          "collectionMethods": [
+            "signup form"
+          ],
+          "legalBasis": [
+            "contract"
+          ],
+          "retentionDays": 365,
           "isSensitive": true,
-          "description": "Profile and billing contact details"
+          "isRequired": true,
+          "sharedWithThirdParties": true,
+          "thirdParties": [
+            "Stripe"
+          ]
         }
       ],
       "itemFields": [
@@ -149,6 +225,58 @@
           "example": "customer account data"
         },
         {
+          "key": "description",
+          "label": "Description",
+          "type": "string",
+          "description": "Short explanation of what the data category includes.",
+          "example": "Profile and billing contact details"
+        },
+        {
+          "key": "subjectTypes",
+          "label": "Subject types",
+          "type": "string[]",
+          "description": "People or account types the data category relates to.",
+          "example": [
+            "customers",
+            "admins"
+          ]
+        },
+        {
+          "key": "purposes",
+          "label": "Purposes",
+          "type": "string[]",
+          "description": "Business or product purposes for collecting or processing the data category.",
+          "example": [
+            "account management",
+            "billing"
+          ]
+        },
+        {
+          "key": "collectionMethods",
+          "label": "Collection methods",
+          "type": "string[]",
+          "description": "Ways this data category is collected.",
+          "example": [
+            "signup form"
+          ]
+        },
+        {
+          "key": "legalBasis",
+          "label": "Legal basis",
+          "type": "string[]",
+          "description": "Legal bases used for processing this data category.",
+          "example": [
+            "contract"
+          ]
+        },
+        {
+          "key": "retentionDays",
+          "label": "Retention days",
+          "type": "number",
+          "description": "Number of days this data category is retained. A value of 0 means unset.",
+          "example": 365
+        },
+        {
           "key": "isSensitive",
           "label": "Sensitive",
           "type": "boolean",
@@ -156,11 +284,27 @@
           "example": true
         },
         {
-          "key": "description",
-          "label": "Description",
-          "type": "string",
-          "description": "Short explanation of what the data category includes.",
-          "example": "Profile and billing contact details"
+          "key": "isRequired",
+          "label": "Product required",
+          "type": "boolean",
+          "description": "Whether this data category is required to provide the product or service.",
+          "example": true
+        },
+        {
+          "key": "sharedWithThirdParties",
+          "label": "Shared with third parties",
+          "type": "boolean",
+          "description": "Whether this data category is shared with third parties.",
+          "example": true
+        },
+        {
+          "key": "thirdParties",
+          "label": "Third parties",
+          "type": "string[]",
+          "description": "Third parties that receive this data category.",
+          "example": [
+            "Stripe"
+          ]
         }
       ]
     },

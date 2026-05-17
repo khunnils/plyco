@@ -28,6 +28,10 @@ import { InMemoryVendorRepository } from "./features/vendors/in-memory-repositor
 import { PrismaVendorRepository } from "./features/vendors/prisma-repository.js"
 import { type VendorRepository } from "./features/vendors/repository.js"
 import { registerVendorRoutes } from "./features/vendors/routes.js"
+import { InMemoryVocabularyRepository } from "./features/vocabulary/in-memory-repository.js"
+import { PrismaVocabularyRepository } from "./features/vocabulary/prisma-repository.js"
+import { type VocabularyRepository } from "./features/vocabulary/repository.js"
+import { registerVocabularyRoutes } from "./features/vocabulary/routes.js"
 import {
   AirtableProviderSource,
   type ProviderSource,
@@ -44,6 +48,7 @@ export type CreateAppOptions = {
   accountRepository?: AccountRepository
   organizationRepository?: OrganizationRepository
   vendorRepository?: VendorRepository
+  vocabularyRepository?: VocabularyRepository
   documentRepository?: DocumentRepository
   documentPdfStorage?: DocumentPdfStorage
   providerSource?: ProviderSource
@@ -56,6 +61,7 @@ export async function createApp({
   accountRepository,
   organizationRepository,
   vendorRepository,
+  vocabularyRepository,
   documentRepository,
   documentPdfStorage,
   providerSource = apiConfig.airtableBase && apiConfig.airtableApiKey
@@ -73,6 +79,7 @@ export async function createApp({
     documentRepository,
     organizationRepository,
     vendorRepository,
+    vocabularyRepository,
   })
 
   await app.register(cors, {
@@ -105,17 +112,24 @@ export async function createApp({
 
   await registerAccountRoutes(app, {
     accountRepository: repositories.accountRepository,
+    vocabularyRepository: repositories.vocabularyRepository,
   })
   await registerVendorRoutes(app, {
     accountRepository: repositories.accountRepository,
     providerSource,
     vendorRepository: repositories.vendorRepository,
+    vocabularyRepository: repositories.vocabularyRepository,
   })
   await registerOrganizationRoutes(app, {
     accountRepository: repositories.accountRepository,
     organizationRepository: repositories.organizationRepository,
     providerSource,
     vendorRepository: repositories.vendorRepository,
+    vocabularyRepository: repositories.vocabularyRepository,
+  })
+  await registerVocabularyRoutes(app, {
+    accountRepository: repositories.accountRepository,
+    vocabularyRepository: repositories.vocabularyRepository,
   })
   await registerDocumentRoutes(app, {
     accountRepository: repositories.accountRepository,
@@ -137,6 +151,7 @@ export function createTestApp() {
   const accountRepository = new InMemoryAccountRepository()
   const organizationRepository = new InMemoryOrganizationRepository()
   const vendorRepository = new InMemoryVendorRepository(organizationRepository)
+  const vocabularyRepository = new InMemoryVocabularyRepository()
   const documentRepository = new InMemoryDocumentRepository(
     organizationRepository,
   )
@@ -148,6 +163,7 @@ export function createTestApp() {
     documentPdfStorage: new NullDocumentPdfStorage(),
     organizationRepository,
     vendorRepository,
+    vocabularyRepository,
     providerSource: new StaticProviderSource([
       {
         id: "prov-github",
@@ -188,11 +204,13 @@ function createRepositories({
   documentRepository,
   organizationRepository,
   vendorRepository,
+  vocabularyRepository,
 }: {
   accountRepository?: AccountRepository
   documentRepository?: DocumentRepository
   organizationRepository?: OrganizationRepository
   vendorRepository?: VendorRepository
+  vocabularyRepository?: VocabularyRepository
 }) {
   const resolvedAccountRepository =
     accountRepository ??
@@ -209,6 +227,11 @@ function createRepositories({
     (process.env.DATABASE_URL
       ? new PrismaVendorRepository(resolvedOrganizationRepository)
       : new InMemoryVendorRepository(resolvedOrganizationRepository))
+  const resolvedVocabularyRepository =
+    vocabularyRepository ??
+    (process.env.DATABASE_URL
+      ? new PrismaVocabularyRepository()
+      : new InMemoryVocabularyRepository())
   const resolvedDocumentRepository =
     documentRepository ??
     (process.env.DATABASE_URL
@@ -220,5 +243,6 @@ function createRepositories({
     documentRepository: resolvedDocumentRepository,
     organizationRepository: resolvedOrganizationRepository,
     vendorRepository: resolvedVendorRepository,
+    vocabularyRepository: resolvedVocabularyRepository,
   }
 }

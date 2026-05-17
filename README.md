@@ -1,4 +1,4 @@
-# ComplyFlow
+# Plyco
 
 Lightweight security compliance readiness workspace for early-stage startups.
 
@@ -30,7 +30,7 @@ The API loads `.env` from the repo root first, then `apps/api/.env` as an overri
 For persistent local data, set `DATABASE_URL` in `apps/api/.env`:
 
 ```dotenv
-DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/complyflow
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/plyco
 ```
 
 If `DATABASE_URL` is blank or removed, the API starts with in-memory storage for local development only.

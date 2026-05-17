@@ -3,12 +3,19 @@ import { z } from "zod"
 export const dpaStatusSchema = z.enum([
   "not_started",
   "requested",
-  "in_review",
+  "under_review",
   "signed",
   "not_required",
+  "unavailable",
+  "unknown",
 ])
 
-export const vendorCriticalitySchema = z.enum(["low", "medium", "high"])
+export const vendorCriticalitySchema = z.enum([
+  "low",
+  "medium",
+  "high",
+  "critical",
+])
 
 export const vendorDataProcessingLevelSchema = z.enum([
   "none",
@@ -23,25 +30,88 @@ export const providerSystemTypeSchema = z.enum([
   "password-manager",
 ])
 
+export const codeIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .regex(
+    /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/,
+    "Code IDs must use lowercase letters, numbers, underscores, or hyphens",
+  )
+
+export const countryCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^[A-Z]{2}$/, "Country codes must use ISO alpha-2 format")
+
+export const countrySchema = z.object({
+  code: countryCodeSchema,
+  name: z.string().trim().min(1),
+  active: z.boolean(),
+})
+
+export const vocabularyCodeSchema = z.object({
+  id: z.string().min(1),
+  codeId: codeIdSchema,
+  name: z.string().trim().min(1),
+  sortOrder: z.number().int().min(0),
+  active: z.boolean(),
+  isSystem: z.boolean(),
+})
+
+export const vocabularyCodeSetSchema = z.object({
+  id: z.string().min(1),
+  codeSetId: codeIdSchema,
+  name: z.string().trim().min(1),
+  description: z.string(),
+  isSystem: z.boolean(),
+  codes: z.array(vocabularyCodeSchema),
+})
+
+export const vocabularySchema = z.object({
+  codeSets: z.array(vocabularyCodeSetSchema),
+})
+
+export const vocabularyCodeInputSchema = z.object({
+  codeId: codeIdSchema,
+  name: z.string().trim().min(1, "Code name is required"),
+  active: z.boolean().default(true),
+})
+
 export const organizationProviderSchema = z.object({
   systemType: providerSystemTypeSchema,
   providerId: z.string().trim().min(1),
 })
 
 export const storedDataTypeSchema = z.object({
-  name: z.string().trim().min(1),
-  isSensitive: z.boolean().default(false),
+  name: codeIdSchema,
   description: z.string().trim().default(""),
+  subjectTypes: z.array(codeIdSchema).default([]),
+  purposes: z.array(codeIdSchema).default([]),
+  collectionMethods: z.array(codeIdSchema).default([]),
+  legalBasis: z.array(codeIdSchema).default([]),
+  retentionDays: z.number().int().min(0).default(0),
+  isSensitive: z.boolean().default(false),
+  isRequired: z.boolean().default(false),
+  sharedWithThirdParties: z.boolean().default(false),
+  thirdParties: z.array(z.string().trim().min(1)).default([]),
 })
 
 export const companyProfileSchema = z.object({
   companyName: z.string().trim().min(1, "Company name is required"),
+  legalEntityName: z.string().trim().default(""),
+  website: z.string().trim().default(""),
+  contactEmail: z.string().trim().default(""),
+  securityContactEmail: z.string().trim().default(""),
+  privacyContactEmail: z.string().trim().default(""),
+  country: countryCodeSchema.or(z.literal("")).default(""),
+  address: z.string().trim().default(""),
   employeeCount: z.number().int().min(1).max(100000),
-  industries: z.array(z.string().trim().min(1)).default([]),
-  regions: z.array(z.string().trim().min(1)).default([]),
+  industries: z.array(codeIdSchema).default([]),
+  regions: z.array(codeIdSchema).default([]),
   handlesPii: z.boolean(),
   handlesSensitiveData: z.boolean(),
-  complianceGoals: z.array(z.string().trim().min(1)).default([]),
+  complianceGoals: z.array(codeIdSchema).default([]),
 })
 
 export const infrastructureProfileSchema = z.object({
@@ -73,14 +143,14 @@ export const accessProfileSchema = z.object({
 
 const vendorInputBaseSchema = z.object({
   name: z.string().trim().min(1, "Vendor name is required"),
-  category: z.string().trim().min(1, "Category is required"),
+  category: codeIdSchema,
   purpose: z.string().trim().min(1, "Purpose is required"),
-  countryOfRegistration: z.string().trim().default(""),
+  countryOfRegistration: countryCodeSchema.or(z.literal("")).default(""),
   hasSubprocessors: z.boolean(),
   dataProcessingLevel: vendorDataProcessingLevelSchema.default("limited"),
-  dataProcessed: z.array(z.string().trim().min(1)).default([]),
+  dataProcessed: z.array(codeIdSchema).default([]),
   dpaStatus: dpaStatusSchema,
-  dataRegions: z.array(z.string().trim().min(1)).default([]),
+  dataRegions: z.array(codeIdSchema).default([]),
   criticality: vendorCriticalitySchema,
   owner: z.string().trim().min(1).optional().or(z.literal("")),
   notes: z.string().trim().optional().or(z.literal("")),
@@ -250,6 +320,13 @@ export type VendorDataProcessingLevel = z.infer<
   typeof vendorDataProcessingLevelSchema
 >
 export type ProviderSystemType = z.infer<typeof providerSystemTypeSchema>
+export type CodeId = z.infer<typeof codeIdSchema>
+export type CountryCode = z.infer<typeof countryCodeSchema>
+export type Country = z.infer<typeof countrySchema>
+export type VocabularyCode = z.infer<typeof vocabularyCodeSchema>
+export type VocabularyCodeSet = z.infer<typeof vocabularyCodeSetSchema>
+export type Vocabulary = z.infer<typeof vocabularySchema>
+export type VocabularyCodeInput = z.infer<typeof vocabularyCodeInputSchema>
 export type OrganizationProvider = z.infer<typeof organizationProviderSchema>
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>
 export type CompanyProfile = z.infer<typeof companyProfileSchema>
@@ -287,6 +364,13 @@ export type StructuredError = z.infer<typeof structuredErrorSchema>
 
 export const emptyCompanyProfile: CompanyProfile = {
   companyName: "",
+  legalEntityName: "",
+  website: "",
+  contactEmail: "",
+  securityContactEmail: "",
+  privacyContactEmail: "",
+  country: "",
+  address: "",
   employeeCount: 1,
   industries: [],
   regions: [],

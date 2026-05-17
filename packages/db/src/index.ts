@@ -22,6 +22,13 @@ function toIsoString(value: Date) {
 export function mapOrganizationRecord(record: {
   id: string
   companyName: string
+  legalEntityName: string
+  website: string
+  contactEmail: string
+  securityContactEmail: string
+  privacyContactEmail: string
+  country: string
+  address: string
   employeeCount: number
   industries: string[]
   regions: string[]
@@ -48,8 +55,16 @@ export function mapOrganizationRecord(record: {
   } | null
   dataTypes: Array<{
     name: string
-    isSensitive: boolean
     description: string
+    subjectTypes: string[]
+    purposes: string[]
+    collectionMethods: string[]
+    legalBasis: string[]
+    retentionDays: number
+    isSensitive: boolean
+    isRequired: boolean
+    sharedWithThirdParties: boolean
+    thirdParties: string[]
   }>
   accessProfile: {
     mfaRequired: boolean
@@ -64,6 +79,13 @@ export function mapOrganizationRecord(record: {
 }): OrganizationSecurityProfile {
   const company = companyProfileSchema.parse({
     companyName: record.companyName,
+    legalEntityName: record.legalEntityName,
+    website: record.website,
+    contactEmail: record.contactEmail,
+    securityContactEmail: record.securityContactEmail,
+    privacyContactEmail: record.privacyContactEmail,
+    country: record.country,
+    address: record.address,
     employeeCount: record.employeeCount,
     industries: record.industries,
     regions: record.regions,
@@ -92,8 +114,16 @@ export function mapOrganizationRecord(record: {
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
       name: dataType.name,
-      isSensitive: dataType.isSensitive,
       description: dataType.description,
+      subjectTypes: dataType.subjectTypes,
+      purposes: dataType.purposes,
+      collectionMethods: dataType.collectionMethods,
+      legalBasis: dataType.legalBasis,
+      retentionDays: dataType.retentionDays,
+      isSensitive: dataType.isSensitive,
+      isRequired: dataType.isRequired,
+      sharedWithThirdParties: dataType.sharedWithThirdParties,
+      thirdParties: dataType.thirdParties,
     })),
     storesPii: record.dataHandlingProfile?.storesPii ?? false,
     storesHealthcareData:
