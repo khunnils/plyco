@@ -1,4 +1,3 @@
-import { type Vendor, type VendorInput } from "@plyco/shared"
 import { create } from "zustand"
 
 type SecurityUiState = {
@@ -16,7 +15,6 @@ type SecurityUiState = {
   editingVendorId: string | null
   editingTemplateId: string | null
   viewingDocumentId: string | null
-  onboardingVendors: Vendor[]
   editingCompanySection:
     | "profile"
     | "infrastructure"
@@ -31,10 +29,6 @@ type SecurityUiState = {
   setEditingCompanySection: (
     section: SecurityUiState["editingCompanySection"]
   ) => void
-  addOnboardingVendor: (vendor: VendorInput) => void
-  updateOnboardingVendor: (id: string, vendor: VendorInput) => void
-  removeOnboardingVendor: (id: string) => void
-  clearOnboardingVendors: () => void
 }
 
 export const useSecurityUiStore = create<SecurityUiState>((set) => ({
@@ -44,7 +38,6 @@ export const useSecurityUiStore = create<SecurityUiState>((set) => ({
   editingTemplateId: null,
   viewingDocumentId: null,
   editingCompanySection: null,
-  onboardingVendors: [],
   setActiveWorkspaceView: (view) => set({ activeWorkspaceView: view }),
   setOnboardingStep: (step) => set({ onboardingStep: step }),
   startEditingVendor: (id) => set({ editingVendorId: id }),
@@ -52,36 +45,4 @@ export const useSecurityUiStore = create<SecurityUiState>((set) => ({
   setViewingDocument: (id) => set({ viewingDocumentId: id }),
   setEditingCompanySection: (section) =>
     set({ editingCompanySection: section }),
-  addOnboardingVendor: (vendor) =>
-    set((state) => {
-      const timestamp = new Date().toISOString()
-
-      return {
-        onboardingVendors: [
-          ...state.onboardingVendors,
-          {
-            id: `local_${crypto.randomUUID()}`,
-            ...vendor,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-          },
-        ],
-      }
-    }),
-  updateOnboardingVendor: (id, vendor) =>
-    set((state) => ({
-      onboardingVendors: state.onboardingVendors.map((currentVendor) =>
-        currentVendor.id === id
-          ? { ...currentVendor, ...vendor, updatedAt: new Date().toISOString() }
-          : currentVendor
-      ),
-      editingVendorId: null,
-    })),
-  removeOnboardingVendor: (id) =>
-    set((state) => ({
-      onboardingVendors: state.onboardingVendors.filter(
-        (vendor) => vendor.id !== id
-      ),
-    })),
-  clearOnboardingVendors: () => set({ onboardingVendors: [] }),
 }))
