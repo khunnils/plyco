@@ -96,6 +96,12 @@ const systemTypeAliases: Record<string, ProviderSystemType> = {
   hosting: "cloud",
   "password manager": "password_manager",
   "password_manager": "password_manager",
+  analytics: "analytics",
+  "analytics provider": "analytics",
+  advertising: "advertising",
+  ads: "advertising",
+  "advertising provider": "advertising",
+  marketing: "advertising",
 }
 
 const systemTypesField = (

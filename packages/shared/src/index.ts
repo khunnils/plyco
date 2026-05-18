@@ -28,6 +28,8 @@ export const providerSystemTypeSchema = z.enum([
   "source_control",
   "cloud",
   "password_manager",
+  "analytics",
+  "advertising",
 ])
 
 export const codeIdSchema = z
@@ -81,6 +83,7 @@ export const vocabularyCodeInputSchema = z.object({
 export const organizationProviderSchema = z.object({
   systemType: providerSystemTypeSchema,
   providerId: z.string().trim().min(1),
+  name: z.string().trim().optional(),
 })
 
 export const storedDataTypeSchema = z.object({
@@ -133,6 +136,12 @@ export const privacyProfileSchema = z.object({
   identityVerificationRequired: z.boolean(),
   authorizedAgentSupported: z.boolean(),
   appealProcessExists: z.boolean(),
+  usesCookies: z.boolean(),
+  cookieTypes: z.array(codeIdSchema).default([]),
+  organizationProviders: z.array(organizationProviderSchema).default([]),
+  cookieConsentMechanism: codeIdSchema.or(z.literal("")).default(""),
+  doNotTrackResponse: z.boolean(),
+  globalPrivacyControlSupported: z.boolean(),
 })
 
 export const infrastructureProfileSchema = z.object({
@@ -443,6 +452,12 @@ export const emptyPrivacyProfile: PrivacyProfile = {
   identityVerificationRequired: false,
   authorizedAgentSupported: false,
   appealProcessExists: false,
+  usesCookies: false,
+  cookieTypes: [],
+  organizationProviders: [],
+  cookieConsentMechanism: "",
+  doNotTrackResponse: false,
+  globalPrivacyControlSupported: false,
 }
 
 export const emptyInfrastructureProfile: InfrastructureProfile = {

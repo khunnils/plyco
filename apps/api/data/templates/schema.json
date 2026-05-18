@@ -329,6 +329,110 @@
       "example": false
     },
     {
+      "key": "privacy.usesCookies",
+      "label": "Uses cookies",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization uses cookies or similar tracking technologies.",
+      "example": true
+    },
+    {
+      "key": "privacy.cookieTypes",
+      "label": "Cookie types",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Cookie type codes used by the organization.",
+      "example": [
+        "necessary",
+        "analytics"
+      ]
+    },
+    {
+      "key": "privacy.cookieTypeLabels",
+      "label": "Cookie type labels",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Human-readable labels for cookie type codes.",
+      "example": [
+        "Necessary",
+        "Analytics"
+      ]
+    },
+    {
+      "key": "privacy.analyticsProviders",
+      "label": "Analytics providers",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Names of selected analytics providers used by the organization.",
+      "example": [
+        "Google Analytics",
+        "PostHog"
+      ]
+    },
+    {
+      "key": "privacy.analyticsProviderIds",
+      "label": "Analytics provider IDs",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Catalog provider IDs for selected analytics providers.",
+      "example": [
+        "prov-google-analytics",
+        "prov-posthog"
+      ]
+    },
+    {
+      "key": "privacy.advertisingProviders",
+      "label": "Advertising providers",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Names of selected advertising or marketing tracking providers used by the organization.",
+      "example": [
+        "Google Ads"
+      ]
+    },
+    {
+      "key": "privacy.advertisingProviderIds",
+      "label": "Advertising provider IDs",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Catalog provider IDs for selected advertising providers.",
+      "example": [
+        "prov-google-ads"
+      ]
+    },
+    {
+      "key": "privacy.cookieConsentMechanism",
+      "label": "Cookie consent mechanism",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Cookie consent mechanism code used by the organization.",
+      "example": "cookie_banner"
+    },
+    {
+      "key": "privacy.cookieConsentMechanismLabel",
+      "label": "Cookie consent mechanism label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the cookie consent mechanism code.",
+      "example": "Cookie banner"
+    },
+    {
+      "key": "privacy.doNotTrackResponse",
+      "label": "Do Not Track response",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization responds to browser Do Not Track signals.",
+      "example": false
+    },
+    {
+      "key": "privacy.globalPrivacyControlSupported",
+      "label": "Global Privacy Control supported",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization supports Global Privacy Control signals.",
+      "example": true
+    },
+    {
       "key": "policy.effectiveDate",
       "label": "Policy effective date",
       "type": "string",

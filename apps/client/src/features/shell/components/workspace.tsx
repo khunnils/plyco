@@ -23,6 +23,7 @@ import {
 import {
   type DocumentSummary,
   type AuthUser,
+  type OrganizationProvider,
   type Provider,
   type ProviderSystemType,
   type TemplateCatalog,
@@ -205,18 +206,18 @@ const codeValueList = (
     : "Not set"
 
 const providerNamesForSystem = (
-  profile: ProfileDraft,
+  organizationProviders: OrganizationProvider[],
   providers: Provider[],
   systemType: ProviderSystemType
 ) => {
-  const names = profile.infrastructure.organizationProviders
+  const names = organizationProviders
     .filter((provider) => provider.systemType === systemType)
     .map((provider) => {
       const catalogProvider = providers.find(
         (catalogProvider) => catalogProvider.id === provider.providerId
       )
 
-      return catalogProvider?.name ?? provider.providerId
+      return catalogProvider?.name ?? provider.name ?? provider.providerId
     })
 
   return valueList(names)
@@ -278,7 +279,13 @@ const CompanySectionFields = ({
   if (section === "privacy") {
     return (
       <ProfilePrivacyFields
+        cookieConsentMechanismOptions={codeOptions(
+          vocabulary,
+          "privacy_cookie_consent_mechanisms",
+        )}
+        cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         form={form}
+        providers={providers}
         requestMethodOptions={codeOptions(
           vocabulary,
           "privacy_request_methods",
@@ -334,8 +341,111 @@ const CompanyReadOnlySection = ({
     )
   }
 
+  if (section === "privacy") {
+    const rightsRows: Array<[string, string | number]> = [
+      [
+        "Supported rights",
+        codeValueList(
+          vocabulary,
+          "privacy_supported_rights",
+          profile.privacy.supportedRights,
+        ),
+      ],
+      [
+        "Request methods",
+        codeValueList(
+          vocabulary,
+          "privacy_request_methods",
+          profile.privacy.requestMethods,
+        ),
+      ],
+      [
+        "Response timeline",
+        profile.privacy.responseTimelineDays === 0
+          ? "Not set"
+          : profile.privacy.responseTimelineDays,
+      ],
+      [
+        "Identity verification",
+        boolText(profile.privacy.identityVerificationRequired),
+      ],
+      [
+        "Authorized agent",
+        boolText(profile.privacy.authorizedAgentSupported),
+      ],
+      ["Appeal process", boolText(profile.privacy.appealProcessExists)],
+    ]
+    const cookieRows: Array<[string, string | number]> = [
+      ["Uses cookies", boolText(profile.privacy.usesCookies)],
+      [
+        "Cookie types",
+        codeValueList(
+          vocabulary,
+          "privacy_cookie_types",
+          profile.privacy.cookieTypes,
+        ),
+      ],
+      [
+        "Analytics providers",
+        providerNamesForSystem(
+          profile.privacy.organizationProviders,
+          providers,
+          "analytics",
+        ),
+      ],
+      [
+        "Advertising providers",
+        providerNamesForSystem(
+          profile.privacy.organizationProviders,
+          providers,
+          "advertising",
+        ),
+      ],
+      [
+        "Cookie consent mechanism",
+        profile.privacy.cookieConsentMechanism
+          ? codeLabel(
+              vocabulary,
+              "privacy_cookie_consent_mechanisms",
+              profile.privacy.cookieConsentMechanism,
+            )
+          : "Not set",
+      ],
+      ["Do Not Track response", boolText(profile.privacy.doNotTrackResponse)],
+      [
+        "Global Privacy Control",
+        boolText(profile.privacy.globalPrivacyControlSupported),
+      ],
+    ]
+
+    return (
+      <div className="grid gap-5">
+        <section className="grid gap-3">
+          <h3 className="text-sm font-semibold text-slate-900">
+            Privacy Rights & Request Handling
+          </h3>
+          <DetailGrid rows={rightsRows} />
+        </section>
+        <section className="grid gap-3">
+          <h3 className="text-sm font-semibold text-slate-900">
+            Cookies / Tracking / Analytics
+          </h3>
+          <DetailGrid rows={cookieRows} />
+        </section>
+        <Button
+          className="w-fit"
+          type="button"
+          variant="outline"
+          onClick={onEdit}
+        >
+          Edit
+        </Button>
+      </div>
+    )
+  }
+
   const rowsBySection: Record<
-    Exclude<CompanySectionId, "dataHandling">,
+    Exclude<CompanySectionId, "dataHandling" | "privacy">,
     Array<[string, string | number]>
   > = {
     profile: [
@@ -422,49 +532,38 @@ const CompanyReadOnlySection = ({
           : profile.service.minimumUserAge,
       ],
     ],
-    privacy: [
-      [
-        "Supported rights",
-        codeValueList(
-          vocabulary,
-          "privacy_supported_rights",
-          profile.privacy.supportedRights,
-        ),
-      ],
-      [
-        "Request methods",
-        codeValueList(
-          vocabulary,
-          "privacy_request_methods",
-          profile.privacy.requestMethods,
-        ),
-      ],
-      [
-        "Response timeline",
-        profile.privacy.responseTimelineDays === 0
-          ? "Not set"
-          : profile.privacy.responseTimelineDays,
-      ],
-      [
-        "Identity verification",
-        boolText(profile.privacy.identityVerificationRequired),
-      ],
-      [
-        "Authorized agent",
-        boolText(profile.privacy.authorizedAgentSupported),
-      ],
-      ["Appeal process", boolText(profile.privacy.appealProcessExists)],
-    ],
     infrastructure: [
-      ["Cloud providers", providerNamesForSystem(profile, providers, "cloud")],
+      [
+        "Cloud providers",
+        providerNamesForSystem(
+          profile.infrastructure.organizationProviders,
+          providers,
+          "cloud",
+        ),
+      ],
       [
         "Source control",
-        providerNamesForSystem(profile, providers, "source_control"),
+        providerNamesForSystem(
+          profile.infrastructure.organizationProviders,
+          providers,
+          "source_control",
+        ),
       ],
-      ["Auth provider", providerNamesForSystem(profile, providers, "auth")],
+      [
+        "Auth provider",
+        providerNamesForSystem(
+          profile.infrastructure.organizationProviders,
+          providers,
+          "auth",
+        ),
+      ],
       [
         "Password manager",
-        providerNamesForSystem(profile, providers, "password_manager"),
+        providerNamesForSystem(
+          profile.infrastructure.organizationProviders,
+          providers,
+          "password_manager",
+        ),
       ],
       ["MFA enabled", boolText(profile.infrastructure.mfaEnabled)],
       [

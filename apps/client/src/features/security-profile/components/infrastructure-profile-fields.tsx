@@ -20,14 +20,19 @@ import { type ProfileDraft } from "@/features/security-profile/types/security-pr
 const comboboxInputClassName =
   "h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100"
 
-const systemLabels: Record<ProviderSystemType, string> = {
+type InfrastructureProviderSystemType = Exclude<
+  ProviderSystemType,
+  "analytics" | "advertising"
+>
+
+const systemLabels: Record<InfrastructureProviderSystemType, string> = {
   auth: "Auth provider",
   source_control: "Source control provider",
   cloud: "Cloud provider",
   password_manager: "Password manager",
 }
 
-const infrastructureSystemTypes: ProviderSystemType[] = [
+const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
   "cloud",
   "source_control",
   "auth",
@@ -99,7 +104,7 @@ const ProviderPicker = ({
 }: {
   form: UseFormReturn<ProfileDraft>
   providers: Provider[]
-  systemType: ProviderSystemType
+  systemType: InfrastructureProviderSystemType
 }) => {
   const organizationProviders = form.watch(
     "infrastructure.organizationProviders"

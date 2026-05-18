@@ -179,6 +179,33 @@ export function createTestApp() {
         securityCriticality: "Critical",
         handlesCustomerData: false,
       },
+      {
+        id: "prov-google-analytics",
+        name: "Google Analytics",
+        url: "https://analytics.google.com",
+        category: "Analytics",
+        systemTypes: ["analytics"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
+      {
+        id: "prov-posthog",
+        name: "PostHog",
+        url: "https://posthog.com",
+        category: "Analytics",
+        systemTypes: ["analytics"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
+      {
+        id: "prov-google-ads",
+        name: "Google Ads",
+        url: "https://ads.google.com",
+        category: "Advertising",
+        systemTypes: ["advertising"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
     ]),
     systemTemplateSource: new StaticSystemTemplateSource([
       {

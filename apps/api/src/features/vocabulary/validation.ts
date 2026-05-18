@@ -129,15 +129,28 @@ export const validateInfrastructureProfileCodes = async (
   infrastructure: InfrastructureProfile,
 ) => {
   await Promise.all(
-    infrastructure.organizationProviders.map((provider) =>
-      assertCode(
+    infrastructure.organizationProviders.map((provider) => {
+      if (
+        !["auth", "source_control", "cloud", "password_manager"].includes(
+          provider.systemType,
+        )
+      ) {
+        throw new ApiError(
+          "INFRASTRUCTURE_PROVIDER_SYSTEM_TYPE_INVALID",
+          "Infrastructure providers must use cloud, source control, auth, or password manager system types.",
+          400,
+          { systemType: provider.systemType },
+        )
+      }
+
+      return assertCode(
         vocabularyRepository,
         organizationId,
         "provider_system_type",
         provider.systemType,
         "infrastructure.organizationProviders.systemType",
-      ),
-    ),
+      )
+    }),
   )
 }
 
@@ -198,6 +211,43 @@ export const validatePrivacyProfileCodes = async (
       privacy.requestMethods,
       "privacy.requestMethods",
     ),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "privacy_cookie_types",
+      privacy.cookieTypes,
+      "privacy.cookieTypes",
+    ),
+    privacy.cookieConsentMechanism
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "privacy_cookie_consent_mechanisms",
+          privacy.cookieConsentMechanism,
+          "privacy.cookieConsentMechanism",
+        )
+      : Promise.resolve(),
+    ...privacy.organizationProviders.map((provider) => {
+      if (
+        provider.systemType !== "analytics" &&
+        provider.systemType !== "advertising"
+      ) {
+        throw new ApiError(
+          "PRIVACY_PROVIDER_SYSTEM_TYPE_INVALID",
+          "Privacy providers must use analytics or advertising system types.",
+          400,
+          { systemType: provider.systemType },
+        )
+      }
+
+      return assertCode(
+        vocabularyRepository,
+        organizationId,
+        "provider_system_type",
+        provider.systemType,
+        "privacy.organizationProviders.systemType",
+      )
+    }),
   ])
 }
 

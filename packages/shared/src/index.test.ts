@@ -9,6 +9,7 @@ import {
   emptyPrivacyProfile,
   emptyServiceProfile,
   privacyProfileSchema,
+  providerSystemTypeSchema,
   serviceProfileSchema,
   templateInputSchema,
   templateSchema,
@@ -211,6 +212,12 @@ describe("shared security profile schemas", () => {
         identityVerificationRequired: false,
         authorizedAgentSupported: false,
         appealProcessExists: false,
+        usesCookies: false,
+        cookieTypes: [],
+        organizationProviders: [],
+        cookieConsentMechanism: "",
+        doNotTrackResponse: false,
+        globalPrivacyControlSupported: false,
       })
     }
   })
@@ -223,6 +230,21 @@ describe("shared security profile schemas", () => {
       identityVerificationRequired: true,
       authorizedAgentSupported: true,
       appealProcessExists: false,
+      usesCookies: true,
+      cookieTypes: ["necessary", "analytics"],
+      organizationProviders: [
+        {
+          systemType: "analytics",
+          providerId: "prov-google-analytics",
+        },
+        {
+          systemType: "advertising",
+          providerId: "prov-google-ads",
+        },
+      ],
+      cookieConsentMechanism: "cookie_banner",
+      doNotTrackResponse: false,
+      globalPrivacyControlSupported: true,
     })
 
     expect(result.success).toBe(true)
@@ -244,6 +266,29 @@ describe("shared security profile schemas", () => {
     })
 
     expect(result.success).toBe(false)
+  })
+
+  it("rejects privacy cookie type values that violate the code id format", () => {
+    const result = privacyProfileSchema.safeParse({
+      ...emptyPrivacyProfile,
+      cookieTypes: ["Analytics Cookies"],
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it("rejects privacy cookie consent mechanism values that violate the code id format", () => {
+    const result = privacyProfileSchema.safeParse({
+      ...emptyPrivacyProfile,
+      cookieConsentMechanism: "Cookie Banner",
+    })
+
+    expect(result.success).toBe(false)
+  })
+
+  it("accepts analytics and advertising provider system types", () => {
+    expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true)
+    expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(true)
   })
 
   it("accepts template input policy metadata fields", () => {

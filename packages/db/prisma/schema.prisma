@@ -168,17 +168,22 @@ model ServiceProfile {
 }
 
 model PrivacyProfile {
-  id                           String       @id(map: "privacy_profiles_pkey") @default(cuid())
-  organizationId               String       @unique(map: "privacy_profiles_organization_id_key") @map("organization_id")
-  organization                 Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "privacy_profiles_organization_id_fkey")
-  supportedRights              String[]     @default([]) @map("supported_rights")
-  requestMethods               String[]     @default([]) @map("request_methods")
-  responseTimelineDays         Int          @default(0) @map("response_timeline_days")
-  identityVerificationRequired Boolean      @default(false) @map("identity_verification_required")
-  authorizedAgentSupported     Boolean      @default(false) @map("authorized_agent_supported")
-  appealProcessExists          Boolean      @default(false) @map("appeal_process_exists")
-  createdAt                    DateTime     @default(now()) @map("created_at")
-  updatedAt                    DateTime     @updatedAt @map("updated_at")
+  id                            String       @id(map: "privacy_profiles_pkey") @default(cuid())
+  organizationId                String       @unique(map: "privacy_profiles_organization_id_key") @map("organization_id")
+  organization                  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "privacy_profiles_organization_id_fkey")
+  supportedRights               String[]     @default([]) @map("supported_rights")
+  requestMethods                String[]     @default([]) @map("request_methods")
+  responseTimelineDays          Int          @default(0) @map("response_timeline_days")
+  identityVerificationRequired  Boolean      @default(false) @map("identity_verification_required")
+  authorizedAgentSupported      Boolean      @default(false) @map("authorized_agent_supported")
+  appealProcessExists           Boolean      @default(false) @map("appeal_process_exists")
+  usesCookies                   Boolean      @default(false) @map("uses_cookies")
+  cookieTypes                   String[]     @default([]) @map("cookie_types")
+  cookieConsentMechanism        String       @default("") @map("cookie_consent_mechanism")
+  doNotTrackResponse            Boolean      @default(false) @map("do_not_track_response")
+  globalPrivacyControlSupported Boolean      @default(false) @map("global_privacy_control_supported")
+  createdAt                     DateTime     @default(now()) @map("created_at")
+  updatedAt                     DateTime     @updatedAt @map("updated_at")
 
   @@map("privacy_profiles")
 }

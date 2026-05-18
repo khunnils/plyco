@@ -55,6 +55,11 @@ export function mapOrganizationRecord(record: {
     identityVerificationRequired: boolean
     authorizedAgentSupported: boolean
     appealProcessExists: boolean
+    usesCookies: boolean
+    cookieTypes: string[]
+    cookieConsentMechanism: string
+    doNotTrackResponse: boolean
+    globalPrivacyControlSupported: boolean
   } | null
   infrastructureProfile: {
     mfaEnabled: boolean
@@ -65,6 +70,7 @@ export function mapOrganizationRecord(record: {
   vendors: Array<{
     providerId: string | null
     systemType: string | null
+    name: string
   }>
   dataHandlingProfile: {
     storesPii: boolean
@@ -116,11 +122,16 @@ export function mapOrganizationRecord(record: {
   })
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.vendors.flatMap((provider) =>
-      provider.providerId && provider.systemType
+      provider.providerId &&
+      provider.systemType &&
+      ["auth", "source_control", "cloud", "password_manager"].includes(
+        provider.systemType,
+      )
         ? [
             {
               providerId: provider.providerId,
               systemType: provider.systemType,
+              name: provider.name,
             },
           ]
         : [],
@@ -152,6 +163,26 @@ export function mapOrganizationRecord(record: {
     authorizedAgentSupported:
       record.privacyProfile?.authorizedAgentSupported ?? false,
     appealProcessExists: record.privacyProfile?.appealProcessExists ?? false,
+    usesCookies: record.privacyProfile?.usesCookies ?? false,
+    cookieTypes: record.privacyProfile?.cookieTypes ?? [],
+    organizationProviders: record.vendors.flatMap((provider) =>
+      provider.providerId &&
+      (provider.systemType === "analytics" ||
+        provider.systemType === "advertising")
+        ? [
+            {
+              providerId: provider.providerId,
+              systemType: provider.systemType,
+              name: provider.name,
+            },
+          ]
+        : [],
+    ),
+    cookieConsentMechanism:
+      record.privacyProfile?.cookieConsentMechanism ?? "",
+    doNotTrackResponse: record.privacyProfile?.doNotTrackResponse ?? false,
+    globalPrivacyControlSupported:
+      record.privacyProfile?.globalPrivacyControlSupported ?? false,
   })
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({

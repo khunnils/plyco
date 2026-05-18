@@ -1,6 +1,12 @@
+import {
+  type OrganizationProvider,
+  type Provider,
+  type ProviderSystemType,
+} from "@plyco/shared"
 import { type UseFormReturn } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
@@ -29,47 +35,172 @@ const ResponseTimelineField = ({
   </label>
 )
 
-export const PrivacyProfileFields = ({
+const selectedProviderIds = (
+  organizationProviders: OrganizationProvider[],
+  systemType: ProviderSystemType,
+) =>
+  organizationProviders
+    .filter((provider) => provider.systemType === systemType)
+    .map((provider) => provider.providerId)
+
+const providerOptions = (
+  providers: Provider[],
+  systemType: ProviderSystemType,
+) =>
+  providers
+    .filter((provider) => provider.systemTypes.includes(systemType))
+    .map((provider) => ({ value: provider.id, label: provider.name }))
+
+const PrivacyProviderPicker = ({
   form,
+  label,
+  providers,
+  systemType,
+}: {
+  form: UseFormReturn<ProfileDraft>
+  label: string
+  providers: Provider[]
+  systemType: "analytics" | "advertising"
+}) => {
+  const organizationProviders = form.watch("privacy.organizationProviders")
+  const selectedIds = selectedProviderIds(organizationProviders, systemType)
+  const options = providerOptions(providers, systemType)
+
+  return (
+    <MultiSelectField
+      control={form.control}
+      label={label}
+      name="privacy.organizationProviders"
+      options={options}
+      placeholder={`Select ${label.toLowerCase()}`}
+      value={selectedIds}
+      onValueChange={(providerIds) => {
+        const otherProviders = organizationProviders.filter(
+          (provider) => provider.systemType !== systemType,
+        )
+
+        form.setValue(
+          "privacy.organizationProviders",
+          [
+            ...otherProviders,
+            ...providerIds.map((providerId) => ({
+              systemType,
+              providerId,
+            })),
+          ],
+          { shouldDirty: true, shouldValidate: true },
+        )
+      }}
+    />
+  )
+}
+
+export const PrivacyProfileFields = ({
+  cookieConsentMechanismOptions,
+  cookieTypeOptions,
+  form,
+  providers,
   requestMethodOptions,
   supportedRightOptions,
 }: {
+  cookieConsentMechanismOptions: Option[]
+  cookieTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
+  providers: Provider[]
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
 }) => (
-  <div className="grid gap-4 md:grid-cols-2">
-    <MultiSelectField
-      control={form.control}
-      error={form.formState.errors.privacy?.supportedRights?.root}
-      label="Supported rights"
-      name="privacy.supportedRights"
-      options={supportedRightOptions}
-      placeholder="Select supported rights"
-    />
-    <MultiSelectField
-      control={form.control}
-      error={form.formState.errors.privacy?.requestMethods?.root}
-      label="Request methods"
-      name="privacy.requestMethods"
-      options={requestMethodOptions}
-      placeholder="Select request methods"
-    />
-    <ResponseTimelineField form={form} />
-    <ToggleField
-      control={form.control}
-      label="Identity verification required"
-      name="privacy.identityVerificationRequired"
-    />
-    <ToggleField
-      control={form.control}
-      label="Authorized agent supported"
-      name="privacy.authorizedAgentSupported"
-    />
-    <ToggleField
-      control={form.control}
-      label="Appeal process exists"
-      name="privacy.appealProcessExists"
-    />
+  <div className="grid gap-6">
+    <section className="grid gap-4">
+      <h3 className="text-sm font-semibold text-slate-900">
+        Privacy Rights & Request Handling
+      </h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.supportedRights?.root}
+          label="Supported rights"
+          name="privacy.supportedRights"
+          options={supportedRightOptions}
+          placeholder="Select supported rights"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.requestMethods?.root}
+          label="Request methods"
+          name="privacy.requestMethods"
+          options={requestMethodOptions}
+          placeholder="Select request methods"
+        />
+        <ResponseTimelineField form={form} />
+        <ToggleField
+          control={form.control}
+          label="Identity verification required"
+          name="privacy.identityVerificationRequired"
+        />
+        <ToggleField
+          control={form.control}
+          label="Authorized agent supported"
+          name="privacy.authorizedAgentSupported"
+        />
+        <ToggleField
+          control={form.control}
+          label="Appeal process exists"
+          name="privacy.appealProcessExists"
+        />
+      </div>
+    </section>
+    <section className="grid gap-4">
+      <h3 className="text-sm font-semibold text-slate-900">
+        Cookies / Tracking / Analytics
+      </h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Uses cookies"
+          name="privacy.usesCookies"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.cookieTypes?.root}
+          label="Cookie types"
+          name="privacy.cookieTypes"
+          options={cookieTypeOptions}
+          placeholder="Select cookie types"
+        />
+        <PrivacyProviderPicker
+          form={form}
+          label="Analytics providers"
+          providers={providers}
+          systemType="analytics"
+        />
+        <PrivacyProviderPicker
+          form={form}
+          label="Advertising providers"
+          providers={providers}
+          systemType="advertising"
+        />
+        <SelectField
+          control={form.control}
+          label="Cookie consent mechanism"
+          name="privacy.cookieConsentMechanism"
+          options={[
+            { value: "", label: "Not set" },
+            ...cookieConsentMechanismOptions,
+          ]}
+          placeholder="Not set"
+        />
+        <ToggleField
+          control={form.control}
+          label="Responds to Do Not Track"
+          name="privacy.doNotTrackResponse"
+        />
+        <ToggleField
+          control={form.control}
+          label="Global Privacy Control supported"
+          name="privacy.globalPrivacyControlSupported"
+        />
+      </div>
+    </section>
   </div>
 )

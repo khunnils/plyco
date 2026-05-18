@@ -26,6 +26,7 @@ export const ORGANIZATION_INCLUDE = {
   serviceProfile: true,
   vendors: {
     select: {
+      name: true,
       providerId: true,
       systemType: true,
     },
@@ -97,11 +98,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     })
 
     await this.syncOrganizationDataTypes(organization.id, input.dataHandling)
-    await this.syncOrganizationProviders(
-      organization.id,
-      input.infrastructure,
-      providerCatalog,
-    )
+    await this.syncOrganizationProviders(organization.id, input, providerCatalog)
 
     return mapOrganizationRecord(
       await this.client.organization.findUniqueOrThrow({
@@ -170,15 +167,23 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       identityVerificationRequired: input.identityVerificationRequired,
       authorizedAgentSupported: input.authorizedAgentSupported,
       appealProcessExists: input.appealProcessExists,
+      usesCookies: input.usesCookies,
+      cookieTypes: input.cookieTypes,
+      cookieConsentMechanism: input.cookieConsentMechanism,
+      doNotTrackResponse: input.doNotTrackResponse,
+      globalPrivacyControlSupported: input.globalPrivacyControlSupported,
     }
   }
 
   private async syncOrganizationProviders(
     organizationId: string,
-    input: InfrastructureProfile,
+    input: SecurityProfileInput,
     providerCatalog: Provider[],
   ) {
-    const selectedProviders = input.organizationProviders
+    const selectedProviders = [
+      ...input.infrastructure.organizationProviders,
+      ...input.privacy.organizationProviders,
+    ]
     const catalogProviders = selectedProviders.map((selectedProvider) => ({
       selectedProvider,
       provider: this.catalogProvider(
@@ -192,7 +197,14 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       where: {
         organizationId,
         systemType: {
-          in: ["auth", "source_control", "cloud", "password_manager"],
+          in: [
+            "auth",
+            "source_control",
+            "cloud",
+            "password_manager",
+            "analytics",
+            "advertising",
+          ],
         },
         ...(selectedProviders.length > 0
           ? {

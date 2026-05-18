@@ -1,4 +1,5 @@
 import {
+  type OrganizationProvider,
   type OrganizationSecurityProfile,
   type Provider,
 } from "@plyco/shared"
@@ -7,6 +8,7 @@ import {
   type OrganizationRepository,
   type SecurityProfileInput,
 } from "./repository.js"
+import { ApiError } from "../../errors.js"
 
 function now() {
   return new Date().toISOString()
@@ -24,13 +26,13 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   async upsertProfile(
     organizationId: string,
     input: SecurityProfileInput,
-    _providerCatalog: Provider[],
+    providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
     const timestamp = now()
     const existing = this.organizations.get(organizationId)
     const organization: OrganizationSecurityProfile = {
       id: organizationId,
-      ...input,
+      ...this.withProviderNames(input, providerCatalog),
       createdAt: existing?.createdAt ?? timestamp,
       updatedAt: timestamp,
     }
@@ -47,5 +49,63 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
         (dataType) => dataType.name,
       ) ?? []
     )
+  }
+
+  private withProviderNames(
+    input: SecurityProfileInput,
+    providerCatalog: Provider[],
+  ): SecurityProfileInput {
+    return {
+      ...input,
+      infrastructure: {
+        ...input.infrastructure,
+        organizationProviders: this.providerNames(
+          input.infrastructure.organizationProviders,
+          providerCatalog,
+        ),
+      },
+      privacy: {
+        ...input.privacy,
+        organizationProviders: this.providerNames(
+          input.privacy.organizationProviders,
+          providerCatalog,
+        ),
+      },
+    }
+  }
+
+  private providerNames(
+    selectedProviders: OrganizationProvider[],
+    providerCatalog: Provider[],
+  ) {
+    return selectedProviders.map((selectedProvider) => ({
+      ...selectedProvider,
+      name: this.catalogProvider(providerCatalog, selectedProvider).name,
+    }))
+  }
+
+  private catalogProvider(
+    providerCatalog: Provider[],
+    selectedProvider: OrganizationProvider,
+  ) {
+    const provider = providerCatalog.find(
+      (catalogProvider) =>
+        catalogProvider.id === selectedProvider.providerId &&
+        catalogProvider.systemTypes.includes(selectedProvider.systemType),
+    )
+
+    if (!provider) {
+      throw new ApiError(
+        "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
+        "Selected provider is not available for the requested system type.",
+        400,
+        {
+          providerId: selectedProvider.providerId,
+          systemType: selectedProvider.systemType,
+        },
+      )
+    }
+
+    return provider
   }
 }

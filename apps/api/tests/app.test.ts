@@ -53,6 +53,28 @@ const profileBody = {
     identityVerificationRequired: true,
     authorizedAgentSupported: true,
     appealProcessExists: false,
+    usesCookies: true,
+    cookieTypes: ["necessary", "analytics"],
+    organizationProviders: [
+      {
+        systemType: "analytics",
+        providerId: "prov-google-analytics",
+        name: "Google Analytics",
+      },
+      {
+        systemType: "analytics",
+        providerId: "prov-posthog",
+        name: "PostHog",
+      },
+      {
+        systemType: "advertising",
+        providerId: "prov-google-ads",
+        name: "Google Ads",
+      },
+    ],
+    cookieConsentMechanism: "cookie_banner",
+    doNotTrackResponse: false,
+    globalPrivacyControlSupported: true,
   },
   infrastructure: {
     organizationProviders: [
@@ -340,6 +362,88 @@ describe("security profile API", () => {
     })
   })
 
+  it("rejects privacy cookie tracking codes that are not in organization vocabulary", async () => {
+    const app = await createTestApp()
+    const invalidCookieTypeResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          cookieTypes: ["not_a_real_cookie_type"],
+        },
+      },
+    })
+
+    expect(invalidCookieTypeResponse.statusCode).toBe(400)
+    expect(invalidCookieTypeResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_cookie_types",
+          field: "privacy.cookieTypes",
+          value: "not_a_real_cookie_type",
+        },
+      },
+    })
+
+    const invalidConsentResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          cookieConsentMechanism: "not_a_real_mechanism",
+        },
+      },
+    })
+
+    expect(invalidConsentResponse.statusCode).toBe(400)
+    expect(invalidConsentResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_cookie_consent_mechanisms",
+          field: "privacy.cookieConsentMechanism",
+          value: "not_a_real_mechanism",
+        },
+      },
+    })
+  })
+
+  it("rejects privacy providers that are not available for the selected system type", async () => {
+    const app = await createTestApp()
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          organizationProviders: [
+            {
+              systemType: "analytics",
+              providerId: "prov-google-ads",
+            },
+          ],
+        },
+      },
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
+        details: {
+          providerId: "prov-google-ads",
+          systemType: "analytics",
+        },
+      },
+    })
+  })
+
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
       organization: {
@@ -423,6 +527,21 @@ describe("security profile API", () => {
         }),
         expect.objectContaining({ key: "privacy.authorizedAgentSupported" }),
         expect.objectContaining({ key: "privacy.appealProcessExists" }),
+        expect.objectContaining({ key: "privacy.usesCookies" }),
+        expect.objectContaining({ key: "privacy.cookieTypes" }),
+        expect.objectContaining({ key: "privacy.cookieTypeLabels" }),
+        expect.objectContaining({ key: "privacy.analyticsProviders" }),
+        expect.objectContaining({ key: "privacy.analyticsProviderIds" }),
+        expect.objectContaining({ key: "privacy.advertisingProviders" }),
+        expect.objectContaining({ key: "privacy.advertisingProviderIds" }),
+        expect.objectContaining({ key: "privacy.cookieConsentMechanism" }),
+        expect.objectContaining({
+          key: "privacy.cookieConsentMechanismLabel",
+        }),
+        expect.objectContaining({ key: "privacy.doNotTrackResponse" }),
+        expect.objectContaining({
+          key: "privacy.globalPrivacyControlSupported",
+        }),
         expect.objectContaining({ key: "vendors.all" }),
         expect.objectContaining({ key: "vendors.dataProcessors" }),
         expect.objectContaining({ key: "vendors.subprocessors" }),
@@ -474,6 +593,17 @@ describe("security profile API", () => {
       identityVerificationRequired: true,
       authorizedAgentSupported: true,
       appealProcessExists: false,
+      usesCookies: true,
+      cookieTypes: ["necessary", "analytics"],
+      cookieTypeLabels: ["Necessary", "Analytics"],
+      analyticsProviders: ["Google Analytics", "PostHog"],
+      analyticsProviderIds: ["prov-google-analytics", "prov-posthog"],
+      advertisingProviders: ["Google Ads"],
+      advertisingProviderIds: ["prov-google-ads"],
+      cookieConsentMechanism: "cookie_banner",
+      cookieConsentMechanismLabel: "Cookie banner",
+      doNotTrackResponse: false,
+      globalPrivacyControlSupported: true,
     })
   })
 
@@ -898,6 +1028,34 @@ describe("security profile API", () => {
       },
     ])
 
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          cookieTypes: ["necessary", "analytics", "personalization"],
+        },
+      },
+    })
+    const cookieStaleDocumentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    })
+    expect(cookieStaleDocumentsResponse.json()).toMatchObject([
+      {
+        document: { id: generateResponse.json().id },
+        status: "stale",
+      },
+    ])
+
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    })
+
     const duplicateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/documents",
@@ -996,6 +1154,33 @@ describe("security profile API", () => {
         systemTypes: ["source_control"],
         securityCriticality: "Critical",
         handlesCustomerData: false,
+      },
+      {
+        id: "prov-google-analytics",
+        name: "Google Analytics",
+        url: "https://analytics.google.com",
+        category: "Analytics",
+        systemTypes: ["analytics"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
+      {
+        id: "prov-posthog",
+        name: "PostHog",
+        url: "https://posthog.com",
+        category: "Analytics",
+        systemTypes: ["analytics"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
+      {
+        id: "prov-google-ads",
+        name: "Google Ads",
+        url: "https://ads.google.com",
+        category: "Advertising",
+        systemTypes: ["advertising"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
       },
     ])
   })

@@ -144,7 +144,40 @@ export class ReportContextBuilder {
       identityVerificationRequired: privacy.identityVerificationRequired,
       authorizedAgentSupported: privacy.authorizedAgentSupported,
       appealProcessExists: privacy.appealProcessExists,
+      usesCookies: privacy.usesCookies,
+      cookieTypes: privacy.cookieTypes,
+      cookieTypeLabels: this.codeLabels(
+        vocabulary,
+        "privacy_cookie_types",
+        privacy.cookieTypes,
+      ),
+      analyticsProviders: this.providerNames(privacy, "analytics"),
+      analyticsProviderIds: this.providerIds(privacy, "analytics"),
+      advertisingProviders: this.providerNames(privacy, "advertising"),
+      advertisingProviderIds: this.providerIds(privacy, "advertising"),
+      cookieConsentMechanism: privacy.cookieConsentMechanism,
+      cookieConsentMechanismLabel: privacy.cookieConsentMechanism
+        ? this.codeLabels(
+            vocabulary,
+            "privacy_cookie_consent_mechanisms",
+            [privacy.cookieConsentMechanism],
+          )[0]
+        : "",
+      doNotTrackResponse: privacy.doNotTrackResponse,
+      globalPrivacyControlSupported: privacy.globalPrivacyControlSupported,
     }
+  }
+
+  private providerIds(privacy: PrivacyProfile, systemType: string) {
+    return privacy.organizationProviders
+      .filter((provider) => provider.systemType === systemType)
+      .map((provider) => provider.providerId)
+  }
+
+  private providerNames(privacy: PrivacyProfile, systemType: string) {
+    return privacy.organizationProviders
+      .filter((provider) => provider.systemType === systemType)
+      .map((provider) => provider.name ?? provider.providerId)
   }
 
   private codeLabels(

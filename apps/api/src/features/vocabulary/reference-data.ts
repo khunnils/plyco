@@ -9,6 +9,8 @@ export const requiredCodeSetIds = [
   "service_customer_types",
   "privacy_supported_rights",
   "privacy_request_methods",
+  "privacy_cookie_types",
+  "privacy_cookie_consent_mechanisms",
   "data_categories",
   "subject_types",
   "data_purposes",
@@ -350,6 +352,24 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["support_portal", "Support portal"],
     ["postal_mail", "Postal mail"],
   ]),
+  codeSet("privacy_cookie_types", "Privacy cookie types", false, [
+    ["necessary", "Necessary"],
+    ["analytics", "Analytics"],
+    ["marketing", "Marketing"],
+    ["personalization", "Personalization"],
+  ]),
+  codeSet(
+    "privacy_cookie_consent_mechanisms",
+    "Privacy cookie consent mechanisms",
+    false,
+    [
+      ["cookie_banner", "Cookie banner"],
+      ["preference_center", "Preference center"],
+      ["opt_out_link", "Opt-out link"],
+      ["browser_or_device_setting", "Browser or device setting"],
+      ["none", "None"],
+    ],
+  ),
   codeSet("data_categories", "Data categories", false, [
     ["account_data", "Account Data"],
     ["usage_data", "Usage Data"],
@@ -423,5 +443,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["source_control", "Source control"],
     ["cloud", "Cloud"],
     ["password_manager", "Password manager"],
+    ["analytics", "Analytics"],
+    ["advertising", "Advertising"],
   ]),
 ]
