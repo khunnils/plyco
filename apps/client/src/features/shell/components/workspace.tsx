@@ -285,6 +285,10 @@ const CompanySectionFields = ({
         )}
         cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         form={form}
+        marketingOptOutMethodOptions={codeOptions(
+          vocabulary,
+          "privacy_marketing_opt_out_methods",
+        )}
         providers={providers}
         requestMethodOptions={codeOptions(
           vocabulary,
@@ -417,6 +421,34 @@ const CompanyReadOnlySection = ({
         boolText(profile.privacy.globalPrivacyControlSupported),
       ],
     ]
+    const marketingRows: Array<[string, string | number]> = [
+      [
+        "Marketing emails",
+        boolText(profile.privacy.sendsMarketingEmails),
+      ],
+      [
+        "Marketing opt-out method",
+        profile.privacy.marketingOptOutMethod
+          ? codeLabel(
+              vocabulary,
+              "privacy_marketing_opt_out_methods",
+              profile.privacy.marketingOptOutMethod,
+            )
+          : "Not set",
+      ],
+      [
+        "Transactional emails",
+        boolText(profile.privacy.transactionalEmailsSent),
+      ],
+      [
+        "Newsletter provider",
+        providerNamesForSystem(
+          profile.privacy.organizationProviders,
+          providers,
+          "newsletter",
+        ),
+      ],
+    ]
 
     return (
       <div className="grid gap-5">
@@ -431,6 +463,12 @@ const CompanyReadOnlySection = ({
             Cookies / Tracking / Analytics
           </h3>
           <DetailGrid rows={cookieRows} />
+        </section>
+        <section className="grid gap-3">
+          <h3 className="text-sm font-semibold text-slate-900">
+            Marketing & Communications
+          </h3>
+          <DetailGrid rows={marketingRows} />
         </section>
         <Button
           className="w-fit"

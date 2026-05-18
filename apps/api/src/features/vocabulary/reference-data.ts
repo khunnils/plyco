@@ -11,6 +11,7 @@ export const requiredCodeSetIds = [
   "privacy_request_methods",
   "privacy_cookie_types",
   "privacy_cookie_consent_mechanisms",
+  "privacy_marketing_opt_out_methods",
   "data_categories",
   "subject_types",
   "data_purposes",
@@ -370,6 +371,12 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
       ["none", "None"],
     ],
   ),
+  codeSet("privacy_marketing_opt_out_methods", "Privacy marketing opt-out methods", false, [
+    ["unsubscribe_link", "Unsubscribe link"],
+    ["account_settings", "Account settings"],
+    ["email_request", "Email request"],
+    ["support_portal", "Support portal"],
+  ]),
   codeSet("data_categories", "Data categories", false, [
     ["account_data", "Account Data"],
     ["usage_data", "Usage Data"],
@@ -445,5 +452,6 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["password_manager", "Password manager"],
     ["analytics", "Analytics"],
     ["advertising", "Advertising"],
+    ["newsletter", "Newsletter"],
   ]),
 ]

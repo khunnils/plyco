@@ -102,6 +102,10 @@ const systemTypeAliases: Record<string, ProviderSystemType> = {
   ads: "advertising",
   "advertising provider": "advertising",
   marketing: "advertising",
+  newsletter: "newsletter",
+  "newsletter provider": "newsletter",
+  "email marketing": "newsletter",
+  "email marketing provider": "newsletter",
 }
 
 const systemTypesField = (

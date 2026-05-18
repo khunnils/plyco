@@ -172,6 +172,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       cookieConsentMechanism: input.cookieConsentMechanism,
       doNotTrackResponse: input.doNotTrackResponse,
       globalPrivacyControlSupported: input.globalPrivacyControlSupported,
+      sendsMarketingEmails: input.sendsMarketingEmails,
+      marketingOptOutMethod: input.marketingOptOutMethod,
+      transactionalEmailsSent: input.transactionalEmailsSent,
     }
   }
 
@@ -204,6 +207,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             "password_manager",
             "analytics",
             "advertising",
+            "newsletter",
           ],
         },
         ...(selectedProviders.length > 0

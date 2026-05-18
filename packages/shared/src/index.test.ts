@@ -218,6 +218,9 @@ describe("shared security profile schemas", () => {
         cookieConsentMechanism: "",
         doNotTrackResponse: false,
         globalPrivacyControlSupported: false,
+        sendsMarketingEmails: false,
+        marketingOptOutMethod: "",
+        transactionalEmailsSent: false,
       })
     }
   })
@@ -241,10 +244,17 @@ describe("shared security profile schemas", () => {
           systemType: "advertising",
           providerId: "prov-google-ads",
         },
+        {
+          systemType: "newsletter",
+          providerId: "prov-mailchimp",
+        },
       ],
       cookieConsentMechanism: "cookie_banner",
       doNotTrackResponse: false,
       globalPrivacyControlSupported: true,
+      sendsMarketingEmails: true,
+      marketingOptOutMethod: "unsubscribe_link",
+      transactionalEmailsSent: true,
     })
 
     expect(result.success).toBe(true)
@@ -286,9 +296,19 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false)
   })
 
+  it("rejects privacy marketing opt-out method values that violate the code id format", () => {
+    const result = privacyProfileSchema.safeParse({
+      ...emptyPrivacyProfile,
+      marketingOptOutMethod: "Unsubscribe Link",
+    })
+
+    expect(result.success).toBe(false)
+  })
+
   it("accepts analytics and advertising provider system types", () => {
     expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true)
     expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(true)
+    expect(providerSystemTypeSchema.safeParse("newsletter").success).toBe(true)
   })
 
   it("accepts template input policy metadata fields", () => {

@@ -30,6 +30,7 @@ export const providerSystemTypeSchema = z.enum([
   "password_manager",
   "analytics",
   "advertising",
+  "newsletter",
 ])
 
 export const codeIdSchema = z
@@ -142,6 +143,9 @@ export const privacyProfileSchema = z.object({
   cookieConsentMechanism: codeIdSchema.or(z.literal("")).default(""),
   doNotTrackResponse: z.boolean(),
   globalPrivacyControlSupported: z.boolean(),
+  sendsMarketingEmails: z.boolean(),
+  marketingOptOutMethod: codeIdSchema.or(z.literal("")).default(""),
+  transactionalEmailsSent: z.boolean(),
 })
 
 export const infrastructureProfileSchema = z.object({
@@ -458,6 +462,9 @@ export const emptyPrivacyProfile: PrivacyProfile = {
   cookieConsentMechanism: "",
   doNotTrackResponse: false,
   globalPrivacyControlSupported: false,
+  sendsMarketingEmails: false,
+  marketingOptOutMethod: "",
+  transactionalEmailsSent: false,
 }
 
 export const emptyInfrastructureProfile: InfrastructureProfile = {

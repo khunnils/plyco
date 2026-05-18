@@ -182,6 +182,9 @@ model PrivacyProfile {
   cookieConsentMechanism        String       @default("") @map("cookie_consent_mechanism")
   doNotTrackResponse            Boolean      @default(false) @map("do_not_track_response")
   globalPrivacyControlSupported Boolean      @default(false) @map("global_privacy_control_supported")
+  sendsMarketingEmails          Boolean      @default(false) @map("sends_marketing_emails")
+  marketingOptOutMethod         String       @default("") @map("marketing_opt_out_method")
+  transactionalEmailsSent       Boolean      @default(false) @map("transactional_emails_sent")
   createdAt                     DateTime     @default(now()) @map("created_at")
   updatedAt                     DateTime     @updatedAt @map("updated_at")
 

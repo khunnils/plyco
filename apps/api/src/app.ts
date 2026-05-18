@@ -206,6 +206,15 @@ export function createTestApp() {
         securityCriticality: "Medium",
         handlesCustomerData: true,
       },
+      {
+        id: "prov-mailchimp",
+        name: "Mailchimp",
+        url: "https://mailchimp.com",
+        category: "Newsletter",
+        systemTypes: ["newsletter"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
     ]),
     systemTemplateSource: new StaticSystemTemplateSource([
       {

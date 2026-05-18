@@ -71,10 +71,18 @@ const profileBody = {
         providerId: "prov-google-ads",
         name: "Google Ads",
       },
+      {
+        systemType: "newsletter",
+        providerId: "prov-mailchimp",
+        name: "Mailchimp",
+      },
     ],
     cookieConsentMechanism: "cookie_banner",
     doNotTrackResponse: false,
     globalPrivacyControlSupported: true,
+    sendsMarketingEmails: true,
+    marketingOptOutMethod: "unsubscribe_link",
+    transactionalEmailsSent: true,
   },
   infrastructure: {
     organizationProviders: [
@@ -444,6 +452,33 @@ describe("security profile API", () => {
     })
   })
 
+  it("rejects invalid marketing opt-out method codes", async () => {
+    const app = await createTestApp()
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          marketingOptOutMethod: "phone_call",
+        },
+      },
+    })
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_marketing_opt_out_methods",
+          field: "privacy.marketingOptOutMethod",
+          value: "phone_call",
+        },
+      },
+    })
+  })
+
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
       organization: {
@@ -542,6 +577,12 @@ describe("security profile API", () => {
         expect.objectContaining({
           key: "privacy.globalPrivacyControlSupported",
         }),
+        expect.objectContaining({ key: "privacy.sendsMarketingEmails" }),
+        expect.objectContaining({ key: "privacy.marketingOptOutMethod" }),
+        expect.objectContaining({ key: "privacy.marketingOptOutMethodLabel" }),
+        expect.objectContaining({ key: "privacy.transactionalEmailsSent" }),
+        expect.objectContaining({ key: "privacy.newsletterProvider" }),
+        expect.objectContaining({ key: "privacy.newsletterProviderId" }),
         expect.objectContaining({ key: "vendors.all" }),
         expect.objectContaining({ key: "vendors.dataProcessors" }),
         expect.objectContaining({ key: "vendors.subprocessors" }),
@@ -604,6 +645,12 @@ describe("security profile API", () => {
       cookieConsentMechanismLabel: "Cookie banner",
       doNotTrackResponse: false,
       globalPrivacyControlSupported: true,
+      sendsMarketingEmails: true,
+      marketingOptOutMethod: "unsubscribe_link",
+      marketingOptOutMethodLabel: "Unsubscribe link",
+      transactionalEmailsSent: true,
+      newsletterProvider: "Mailchimp",
+      newsletterProviderId: "prov-mailchimp",
     })
   })
 
@@ -1179,6 +1226,15 @@ describe("security profile API", () => {
         url: "https://ads.google.com",
         category: "Advertising",
         systemTypes: ["advertising"],
+        securityCriticality: "Medium",
+        handlesCustomerData: true,
+      },
+      {
+        id: "prov-mailchimp",
+        name: "Mailchimp",
+        url: "https://mailchimp.com",
+        category: "Newsletter",
+        systemTypes: ["newsletter"],
         securityCriticality: "Medium",
         handlesCustomerData: true,
       },

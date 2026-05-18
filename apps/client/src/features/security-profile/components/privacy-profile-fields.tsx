@@ -54,13 +54,15 @@ const providerOptions = (
 const PrivacyProviderPicker = ({
   form,
   label,
+  multiple,
   providers,
   systemType,
 }: {
   form: UseFormReturn<ProfileDraft>
   label: string
+  multiple?: boolean
   providers: Provider[]
-  systemType: "analytics" | "advertising"
+  systemType: "analytics" | "advertising" | "newsletter"
 }) => {
   const organizationProviders = form.watch("privacy.organizationProviders")
   const selectedIds = selectedProviderIds(organizationProviders, systemType)
@@ -75,6 +77,8 @@ const PrivacyProviderPicker = ({
       placeholder={`Select ${label.toLowerCase()}`}
       value={selectedIds}
       onValueChange={(providerIds) => {
+        const selectedProviderIds =
+          multiple === false ? providerIds.slice(-1) : providerIds
         const otherProviders = organizationProviders.filter(
           (provider) => provider.systemType !== systemType,
         )
@@ -83,7 +87,7 @@ const PrivacyProviderPicker = ({
           "privacy.organizationProviders",
           [
             ...otherProviders,
-            ...providerIds.map((providerId) => ({
+            ...selectedProviderIds.map((providerId) => ({
               systemType,
               providerId,
             })),
@@ -99,6 +103,7 @@ export const PrivacyProfileFields = ({
   cookieConsentMechanismOptions,
   cookieTypeOptions,
   form,
+  marketingOptOutMethodOptions,
   providers,
   requestMethodOptions,
   supportedRightOptions,
@@ -106,6 +111,7 @@ export const PrivacyProfileFields = ({
   cookieConsentMechanismOptions: Option[]
   cookieTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
+  marketingOptOutMethodOptions: Option[]
   providers: Provider[]
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
@@ -199,6 +205,40 @@ export const PrivacyProfileFields = ({
           control={form.control}
           label="Global Privacy Control supported"
           name="privacy.globalPrivacyControlSupported"
+        />
+      </div>
+    </section>
+    <section className="grid gap-4">
+      <h3 className="text-sm font-semibold text-slate-900">
+        Marketing & Communications
+      </h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Sends marketing emails"
+          name="privacy.sendsMarketingEmails"
+        />
+        <SelectField
+          control={form.control}
+          label="Marketing opt-out method"
+          name="privacy.marketingOptOutMethod"
+          options={[
+            { value: "", label: "Not set" },
+            ...marketingOptOutMethodOptions,
+          ]}
+          placeholder="Not set"
+        />
+        <ToggleField
+          control={form.control}
+          label="Transactional emails sent"
+          name="privacy.transactionalEmailsSent"
+        />
+        <PrivacyProviderPicker
+          form={form}
+          label="Newsletter provider"
+          multiple={false}
+          providers={providers}
+          systemType="newsletter"
         />
       </div>
     </section>

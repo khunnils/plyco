@@ -165,6 +165,18 @@ export class ReportContextBuilder {
         : "",
       doNotTrackResponse: privacy.doNotTrackResponse,
       globalPrivacyControlSupported: privacy.globalPrivacyControlSupported,
+      sendsMarketingEmails: privacy.sendsMarketingEmails,
+      marketingOptOutMethod: privacy.marketingOptOutMethod,
+      marketingOptOutMethodLabel: privacy.marketingOptOutMethod
+        ? this.codeLabels(
+            vocabulary,
+            "privacy_marketing_opt_out_methods",
+            [privacy.marketingOptOutMethod],
+          )[0]
+        : "",
+      transactionalEmailsSent: privacy.transactionalEmailsSent,
+      newsletterProvider: this.providerNames(privacy, "newsletter")[0] ?? "",
+      newsletterProviderId: this.providerIds(privacy, "newsletter")[0] ?? "",
     }
   }
 

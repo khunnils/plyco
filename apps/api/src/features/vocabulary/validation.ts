@@ -227,14 +227,24 @@ export const validatePrivacyProfileCodes = async (
           "privacy.cookieConsentMechanism",
         )
       : Promise.resolve(),
+    privacy.marketingOptOutMethod
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "privacy_marketing_opt_out_methods",
+          privacy.marketingOptOutMethod,
+          "privacy.marketingOptOutMethod",
+        )
+      : Promise.resolve(),
     ...privacy.organizationProviders.map((provider) => {
       if (
         provider.systemType !== "analytics" &&
-        provider.systemType !== "advertising"
+        provider.systemType !== "advertising" &&
+        provider.systemType !== "newsletter"
       ) {
         throw new ApiError(
           "PRIVACY_PROVIDER_SYSTEM_TYPE_INVALID",
-          "Privacy providers must use analytics or advertising system types.",
+          "Privacy providers must use analytics, advertising, or newsletter system types.",
           400,
           { systemType: provider.systemType },
         )

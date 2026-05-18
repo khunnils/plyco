@@ -60,6 +60,9 @@ export function mapOrganizationRecord(record: {
     cookieConsentMechanism: string
     doNotTrackResponse: boolean
     globalPrivacyControlSupported: boolean
+    sendsMarketingEmails: boolean
+    marketingOptOutMethod: string
+    transactionalEmailsSent: boolean
   } | null
   infrastructureProfile: {
     mfaEnabled: boolean
@@ -168,7 +171,8 @@ export function mapOrganizationRecord(record: {
     organizationProviders: record.vendors.flatMap((provider) =>
       provider.providerId &&
       (provider.systemType === "analytics" ||
-        provider.systemType === "advertising")
+        provider.systemType === "advertising" ||
+        provider.systemType === "newsletter")
         ? [
             {
               providerId: provider.providerId,
@@ -183,6 +187,10 @@ export function mapOrganizationRecord(record: {
     doNotTrackResponse: record.privacyProfile?.doNotTrackResponse ?? false,
     globalPrivacyControlSupported:
       record.privacyProfile?.globalPrivacyControlSupported ?? false,
+    sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? false,
+    marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? "",
+    transactionalEmailsSent:
+      record.privacyProfile?.transactionalEmailsSent ?? false,
   })
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({

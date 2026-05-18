@@ -433,6 +433,54 @@
       "example": true
     },
     {
+      "key": "privacy.sendsMarketingEmails",
+      "label": "Sends marketing emails",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization sends marketing emails.",
+      "example": true
+    },
+    {
+      "key": "privacy.marketingOptOutMethod",
+      "label": "Marketing opt-out method",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Marketing opt-out method code used by the organization.",
+      "example": "unsubscribe_link"
+    },
+    {
+      "key": "privacy.marketingOptOutMethodLabel",
+      "label": "Marketing opt-out method label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the marketing opt-out method code.",
+      "example": "Unsubscribe link"
+    },
+    {
+      "key": "privacy.transactionalEmailsSent",
+      "label": "Transactional emails sent",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization sends transactional or service emails.",
+      "example": true
+    },
+    {
+      "key": "privacy.newsletterProvider",
+      "label": "Newsletter provider",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Name of the selected newsletter provider.",
+      "example": "Mailchimp"
+    },
+    {
+      "key": "privacy.newsletterProviderId",
+      "label": "Newsletter provider ID",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Catalog provider ID for the selected newsletter provider.",
+      "example": "prov-mailchimp"
+    },
+    {
       "key": "policy.effectiveDate",
       "label": "Policy effective date",
       "type": "string",
