@@ -158,7 +158,6 @@ describe("shared security profile schemas", () => {
         serviceName: "",
         serviceDescription: "",
         serviceUrl: "",
-        audiences: [],
         userTypes: [],
         customerTypes: [],
         availabilityRegions: [],
@@ -173,7 +172,6 @@ describe("shared security profile schemas", () => {
       serviceName: "Acme AI Platform",
       serviceDescription: "Customer security review automation",
       serviceUrl: "https://app.acme.example",
-      audiences: ["businesses", "developers"],
       userTypes: ["workspace_admins", "end_users"],
       customerTypes: ["smb", "mid_market"],
       availabilityRegions: ["us", "eu"],
@@ -187,7 +185,7 @@ describe("shared security profile schemas", () => {
   it("rejects service profile code array values that violate the code id format", () => {
     const result = serviceProfileInputSchema.safeParse({
       ...emptyServiceProfile,
-      audiences: ["Invalid Audience"],
+      userTypes: ["Invalid User"],
     })
 
     expect(result.success).toBe(false)

@@ -267,7 +267,6 @@ const CompanySectionFields = ({
   if (section === "service") {
     return (
       <ProfileServiceFields
-        audienceOptions={codeOptions(vocabulary, "service_audiences")}
         customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
         form={form}
         regionOptions={codeOptions(vocabulary, "regions")}
@@ -530,14 +529,6 @@ const CompanyReadOnlySection = ({
               rows={[
                 ["Service URL", service.serviceUrl || "Not set"],
                 ["Description", service.serviceDescription || "Not set"],
-                [
-                  "Audiences",
-                  codeValueList(
-                    vocabulary,
-                    "service_audiences",
-                    service.audiences,
-                  ),
-                ],
                 [
                   "User types",
                   codeValueList(

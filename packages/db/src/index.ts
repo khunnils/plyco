@@ -42,7 +42,6 @@ export function mapOrganizationRecord(record: {
     serviceName: string
     serviceDescription: string
     serviceUrl: string
-    audiences: string[]
     userTypes: string[]
     customerTypes: string[]
     availabilityRegions: string[]
@@ -56,7 +55,6 @@ export function mapOrganizationRecord(record: {
     serviceName: string
     serviceDescription: string
     serviceUrl: string
-    audiences: string[]
     userTypes: string[]
     customerTypes: string[]
     availabilityRegions: string[]
@@ -180,7 +178,6 @@ export function mapOrganizationRecord(record: {
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
-            audiences: service.audiences,
             userTypes: service.userTypes,
             customerTypes: service.customerTypes,
             availabilityRegions: service.availabilityRegions,

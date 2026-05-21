@@ -147,28 +147,6 @@
       "example": "https://app.acme.example"
     },
     {
-      "key": "service.audiences",
-      "label": "Service audiences",
-      "type": "string[]",
-      "category": "Service",
-      "description": "Audience codes for the primary service.",
-      "example": [
-        "businesses",
-        "developers"
-      ]
-    },
-    {
-      "key": "service.audienceLabels",
-      "label": "Service audience labels",
-      "type": "string[]",
-      "category": "Service",
-      "description": "Human-readable labels for service audience codes.",
-      "example": [
-        "Businesses",
-        "Developers"
-      ]
-    },
-    {
       "key": "service.userTypes",
       "label": "Service user types",
       "type": "string[]",

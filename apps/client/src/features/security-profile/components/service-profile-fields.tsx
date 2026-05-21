@@ -39,13 +39,11 @@ const MinimumAgeField = ({
 }
 
 export const ServiceProfileFields = ({
-  audienceOptions,
   customerTypeOptions,
   form,
   regionOptions,
   userTypeOptions,
 }: {
-  audienceOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   regionOptions: Option[]
@@ -103,14 +101,6 @@ export const ServiceProfileFields = ({
               register={form.register}
             />
           </div>
-          <MultiSelectField
-            control={form.control}
-            error={form.formState.errors.services?.[index]?.audiences?.root}
-            label="Audiences"
-            name={servicePath(index, "audiences")}
-            options={audienceOptions}
-            placeholder="Select audiences"
-          />
           <MultiSelectField
             control={form.control}
             error={form.formState.errors.services?.[index]?.userTypes?.root}

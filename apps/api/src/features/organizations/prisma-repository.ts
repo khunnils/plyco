@@ -153,7 +153,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       serviceName: input.serviceName,
       serviceDescription: input.serviceDescription,
       serviceUrl: input.serviceUrl,
-      audiences: input.audiences,
       userTypes: input.userTypes,
       customerTypes: input.customerTypes,
       availabilityRegions: input.availabilityRegions,

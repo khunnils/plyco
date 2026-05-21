@@ -156,7 +156,6 @@ model ServiceProfile {
   serviceName         String       @default("") @map("service_name")
   serviceDescription  String       @default("") @map("service_description")
   serviceUrl          String       @default("") @map("service_url")
-  audiences           String[]     @default([])
   userTypes           String[]     @default([]) @map("user_types")
   customerTypes       String[]     @default([]) @map("customer_types")
   availabilityRegions String[]     @default([]) @map("availability_regions")

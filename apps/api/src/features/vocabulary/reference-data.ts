@@ -4,7 +4,6 @@ export const requiredCodeSetIds = [
   "industries",
   "regions",
   "compliance_goals",
-  "service_audiences",
   "service_user_types",
   "service_customer_types",
   "privacy_supported_rights",
@@ -320,11 +319,6 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
   codeSet("compliance_goals", "Compliance Goals", false, [
     ["soc_2", "SOC 2"],
     ["gdpr", "GDPR"],
-  ]),
-  codeSet("service_audiences", "Service audiences", false, [
-    ["businesses", "Businesses"],
-    ["developers", "Developers"],
-    ["internal_teams", "Internal teams"],
   ]),
   codeSet("service_user_types", "Service user types", false, [
     ["workspace_admins", "Workspace admins"],

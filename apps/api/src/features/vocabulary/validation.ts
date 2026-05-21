@@ -164,13 +164,6 @@ export const validateServiceProfileCodes = async (
     assertCodes(
       vocabularyRepository,
       organizationId,
-      "service_audiences",
-      service.audiences,
-      `${fieldPrefix}.audiences`,
-    ),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
       "service_user_types",
       service.userTypes,
       `${fieldPrefix}.userTypes`,

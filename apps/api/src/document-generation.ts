@@ -112,12 +112,6 @@ export class ReportContextBuilder {
       name: service.serviceName,
       description: service.serviceDescription,
       url: service.serviceUrl,
-      audiences: service.audiences,
-      audienceLabels: this.codeLabels(
-        vocabulary,
-        "service_audiences",
-        service.audiences,
-      ),
       userTypes: service.userTypes,
       userTypeLabels: this.codeLabels(
         vocabulary,

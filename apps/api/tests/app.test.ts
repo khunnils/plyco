@@ -22,7 +22,6 @@ const serviceBody = {
   serviceName: "Acme AI Platform",
   serviceDescription: "Cloud software for managing customer security reviews",
   serviceUrl: "https://app.acme.example",
-  audiences: ["businesses", "developers"],
   userTypes: ["workspace_admins", "end_users"],
   customerTypes: ["smb", "mid_market"],
   availabilityRegions: ["us", "eu"],
@@ -348,7 +347,7 @@ describe("security profile API", () => {
         services: [
           {
             ...profileBody.services[0],
-            audiences: ["not_a_real_audience"],
+            userTypes: ["not_a_real_user_type"],
           },
         ],
       },
@@ -359,9 +358,9 @@ describe("security profile API", () => {
       error: {
         code: "CODE_NOT_FOUND",
         details: {
-          codeSetId: "service_audiences",
-          field: "services.0.audiences",
-          value: "not_a_real_audience",
+          codeSetId: "service_user_types",
+          field: "services.0.userTypes",
+          value: "not_a_real_user_type",
         },
       },
     })
@@ -632,8 +631,6 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "service.name" }),
         expect.objectContaining({ key: "service.description" }),
         expect.objectContaining({ key: "service.url" }),
-        expect.objectContaining({ key: "service.audiences" }),
-        expect.objectContaining({ key: "service.audienceLabels" }),
         expect.objectContaining({ key: "service.userTypes" }),
         expect.objectContaining({ key: "service.userTypeLabels" }),
         expect.objectContaining({ key: "service.customerTypes" }),
@@ -709,8 +706,6 @@ describe("security profile API", () => {
       name: "Acme AI Platform",
       description: "Cloud software for managing customer security reviews",
       url: "https://app.acme.example",
-      audiences: ["businesses", "developers"],
-      audienceLabels: ["Businesses", "Developers"],
       userTypes: ["workspace_admins", "end_users"],
       userTypeLabels: ["Workspace admins", "End users"],
       customerTypes: ["smb", "mid_market"],
@@ -1087,7 +1082,7 @@ describe("security profile API", () => {
         name: "Security Policy",
         slug: "security-policy",
         content:
-          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.audienceLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
+          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
         policyEffectiveDate: "2026-05-18",
         policyLastReviewedDate: "2026-05-18",
         policyVersion: "1.0",
@@ -1121,7 +1116,7 @@ describe("security profile API", () => {
       templateId: template.id,
       title: "Security Policy",
       renderedContent:
-        "# Acme AI Security Policy\n\nService Acme AI Platform for Businesses, Developers\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
+        "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
       hasPdf: false,
     })
     expect(generateResponse.json().sourceHash).toHaveLength(64)
@@ -1217,7 +1212,7 @@ describe("security profile API", () => {
     })
     expect(documentResponse.statusCode).toBe(200)
     expect(documentResponse.json().renderedContent).toBe(
-      "# Acme AI Security Policy\n\nService Acme AI Platform for Businesses, Developers\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
+      "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
     )
 
     await app.inject({
@@ -1227,7 +1222,7 @@ describe("security profile API", () => {
         name: "Security Policy",
         slug: "security-policy",
         content:
-          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.audienceLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
+          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
         policyEffectiveDate: "2026-05-18",
         policyLastReviewedDate: "2026-05-18",
         policyVersion: "1.1",

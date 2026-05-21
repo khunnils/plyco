@@ -54,7 +54,6 @@ export const profileFromOrganization = (
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
-            audiences: service.audiences,
             userTypes: service.userTypes,
             customerTypes: service.customerTypes,
             availabilityRegions: service.availabilityRegions,
