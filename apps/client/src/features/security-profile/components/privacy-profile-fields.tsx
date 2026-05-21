@@ -5,7 +5,6 @@ import {
 } from "@plyco/shared"
 import { type UseFormReturn } from "react-hook-form"
 
-import { ListField } from "@/components/form/list-field"
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
@@ -107,16 +106,20 @@ export const PrivacyProfileFields = ({
   form,
   marketingOptOutMethodOptions,
   providers,
+  regionOptions,
   requestMethodOptions,
   supportedRightOptions,
+  transferMechanismOptions,
 }: {
   cookieConsentMechanismOptions: Option[]
   cookieTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   marketingOptOutMethodOptions: Option[]
   providers: Provider[]
+  regionOptions: Option[]
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
+  transferMechanismOptions: Option[]
 }) => (
   <div className="grid gap-6">
     <section className="grid gap-4">
@@ -246,15 +249,44 @@ export const PrivacyProfileFields = ({
     </section>
     <section className="grid gap-4">
       <h3 className="text-sm font-semibold text-slate-900">
+        International Transfers
+      </h3>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Cross-border transfers"
+          name="privacy.crossBorderTransfers"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.transferMechanisms?.root}
+          label="Transfer mechanisms"
+          name="privacy.transferMechanisms"
+          options={transferMechanismOptions}
+          placeholder="Select transfer mechanisms"
+        />
+        <SelectField
+          control={form.control}
+          label="Primary hosting region"
+          name="privacy.primaryHostingRegion"
+          options={[{ value: "", label: "Not set" }, ...regionOptions]}
+          placeholder="Not set"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.dataResidencyOptions?.root}
+          label="Data residency options"
+          name="privacy.dataResidencyOptions"
+          options={regionOptions}
+          placeholder="Select data residency options"
+        />
+      </div>
+    </section>
+    <section className="grid gap-4">
+      <h3 className="text-sm font-semibold text-slate-900">
         Compliance & Disclosures
       </h3>
       <div className="grid gap-4 md:grid-cols-2">
-        <ListField
-          control={form.control}
-          label="Data transfer mechanisms"
-          name="privacy.dataTransferMechanisms"
-          placeholder="e.g. SCCs, DPF"
-        />
         <ToggleField
           control={form.control}
           label="Sells or shares data (CCPA)"

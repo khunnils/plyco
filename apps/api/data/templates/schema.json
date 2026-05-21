@@ -469,14 +469,71 @@
       "example": true
     },
     {
-      "key": "privacy.dataTransferMechanisms",
-      "label": "Data transfer mechanisms",
+      "key": "privacy.crossBorderTransfers",
+      "label": "Cross-border transfers",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization transfers personal data across borders.",
+      "example": true
+    },
+    {
+      "key": "privacy.transferMechanisms",
+      "label": "Transfer mechanisms",
       "type": "string[]",
       "category": "Privacy",
-      "description": "Legal mechanisms used for cross-border data transfers.",
+      "description": "Transfer mechanism codes used for cross-border data transfers.",
       "example": [
-        "Standard Contractual Clauses (SCCs)",
-        "EU-US Data Privacy Framework (DPF)"
+        "sccs",
+        "dpf"
+      ]
+    },
+    {
+      "key": "privacy.transferMechanismLabels",
+      "label": "Transfer mechanism labels",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Human-readable labels for transfer mechanism codes.",
+      "example": [
+        "SCCs",
+        "Data Privacy Framework"
+      ]
+    },
+    {
+      "key": "privacy.primaryHostingRegion",
+      "label": "Primary hosting region",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Primary hosting region code. An empty value means not set.",
+      "example": "us"
+    },
+    {
+      "key": "privacy.primaryHostingRegionLabel",
+      "label": "Primary hosting region label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the primary hosting region.",
+      "example": "United States"
+    },
+    {
+      "key": "privacy.dataResidencyOptions",
+      "label": "Data residency options",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Region codes available for data residency.",
+      "example": [
+        "us",
+        "eu"
+      ]
+    },
+    {
+      "key": "privacy.dataResidencyOptionLabels",
+      "label": "Data residency option labels",
+      "type": "string[]",
+      "category": "Privacy",
+      "description": "Human-readable labels for data residency option region codes.",
+      "example": [
+        "United States",
+        "European Union"
       ]
     },
     {

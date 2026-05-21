@@ -289,6 +289,7 @@ const CompanySectionFields = ({
           "privacy_marketing_opt_out_methods",
         )}
         providers={providers}
+        regionOptions={codeOptions(vocabulary, "regions")}
         requestMethodOptions={codeOptions(
           vocabulary,
           "privacy_request_methods",
@@ -296,6 +297,10 @@ const CompanySectionFields = ({
         supportedRightOptions={codeOptions(
           vocabulary,
           "privacy_supported_rights",
+        )}
+        transferMechanismOptions={codeOptions(
+          vocabulary,
+          "privacy_transfer_mechanisms",
         )}
       />
     )
@@ -448,11 +453,35 @@ const CompanyReadOnlySection = ({
         ),
       ],
     ]
-    const complianceRows: Array<[string, string | number]> = [
+    const internationalTransferRows: Array<[string, string | number]> = [
       [
-        "Data transfer mechanisms",
-        profile.privacy.dataTransferMechanisms?.join(", ") || "None set",
+        "Cross-border transfers",
+        boolText(profile.privacy.crossBorderTransfers),
       ],
+      [
+        "Transfer mechanisms",
+        codeValueList(
+          vocabulary,
+          "privacy_transfer_mechanisms",
+          profile.privacy.transferMechanisms,
+        ),
+      ],
+      [
+        "Primary hosting region",
+        profile.privacy.primaryHostingRegion
+          ? codeLabel(vocabulary, "regions", profile.privacy.primaryHostingRegion)
+          : "Not set",
+      ],
+      [
+        "Data residency options",
+        codeValueList(
+          vocabulary,
+          "regions",
+          profile.privacy.dataResidencyOptions,
+        ),
+      ],
+    ]
+    const complianceRows: Array<[string, string | number]> = [
       [
         "Sells or shares data (CCPA)",
         boolText(profile.privacy.sellsOrSharesData),
@@ -492,6 +521,12 @@ const CompanyReadOnlySection = ({
             Marketing & Communications
           </h3>
           <DetailGrid rows={marketingRows} />
+        </section>
+        <section className="grid gap-3">
+          <h3 className="text-sm font-semibold text-slate-900">
+            International Transfers
+          </h3>
+          <DetailGrid rows={internationalTransferRows} />
         </section>
         <section className="grid gap-3">
           <h3 className="text-sm font-semibold text-slate-900">

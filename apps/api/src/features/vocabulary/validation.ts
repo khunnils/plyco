@@ -230,6 +230,29 @@ export const validatePrivacyProfileCodes = async (
           "privacy.marketingOptOutMethod",
         )
       : Promise.resolve(),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "privacy_transfer_mechanisms",
+      privacy.transferMechanisms,
+      "privacy.transferMechanisms",
+    ),
+    privacy.primaryHostingRegion
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "regions",
+          privacy.primaryHostingRegion,
+          "privacy.primaryHostingRegion",
+        )
+      : Promise.resolve(),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "regions",
+      privacy.dataResidencyOptions,
+      "privacy.dataResidencyOptions",
+    ),
     ...privacy.organizationProviders.map((provider) => {
       if (
         provider.systemType !== "analytics" &&

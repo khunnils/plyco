@@ -232,7 +232,10 @@ describe("shared security profile schemas", () => {
         sendsMarketingEmails: false,
         marketingOptOutMethod: "",
         transactionalEmailsSent: false,
-        dataTransferMechanisms: [],
+        crossBorderTransfers: false,
+        transferMechanisms: [],
+        primaryHostingRegion: "",
+        dataResidencyOptions: [],
         sellsOrSharesData: false,
         doNotSellLink: "",
         dpoName: "",
@@ -274,6 +277,10 @@ describe("shared security profile schemas", () => {
       sendsMarketingEmails: true,
       marketingOptOutMethod: "unsubscribe_link",
       transactionalEmailsSent: true,
+      crossBorderTransfers: true,
+      transferMechanisms: ["sccs", "dpf"],
+      primaryHostingRegion: "us",
+      dataResidencyOptions: ["us", "eu"],
     })
 
     expect(result.success).toBe(true)
@@ -322,6 +329,27 @@ describe("shared security profile schemas", () => {
     })
 
     expect(result.success).toBe(false)
+  })
+
+  it("rejects privacy transfer and residency values that violate the code id format", () => {
+    expect(
+      privacyProfileSchema.safeParse({
+        ...emptyPrivacyProfile,
+        transferMechanisms: ["Standard Contractual Clauses"],
+      }).success,
+    ).toBe(false)
+    expect(
+      privacyProfileSchema.safeParse({
+        ...emptyPrivacyProfile,
+        primaryHostingRegion: "United States",
+      }).success,
+    ).toBe(false)
+    expect(
+      privacyProfileSchema.safeParse({
+        ...emptyPrivacyProfile,
+        dataResidencyOptions: ["European Union"],
+      }).success,
+    ).toBe(false)
   })
 
   it("accepts analytics and advertising provider system types", () => {

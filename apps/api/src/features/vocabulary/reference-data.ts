@@ -11,6 +11,7 @@ export const requiredCodeSetIds = [
   "privacy_cookie_types",
   "privacy_cookie_consent_mechanisms",
   "privacy_marketing_opt_out_methods",
+  "privacy_transfer_mechanisms",
   "data_categories",
   "subject_types",
   "data_purposes",
@@ -370,6 +371,12 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["account_settings", "Account settings"],
     ["email_request", "Email request"],
     ["support_portal", "Support portal"],
+  ]),
+  codeSet("privacy_transfer_mechanisms", "Privacy transfer mechanisms", false, [
+    ["sccs", "SCCs"],
+    ["adequacy_decision", "Adequacy decision"],
+    ["dpf", "Data Privacy Framework"],
+    ["contractual_safeguards", "Contractual safeguards"],
   ]),
   codeSet("data_categories", "Data categories", false, [
     ["account_data", "Account Data"],

@@ -78,7 +78,10 @@ export function mapOrganizationRecord(record: {
     sendsMarketingEmails: boolean
     marketingOptOutMethod: string
     transactionalEmailsSent: boolean
-    dataTransferMechanisms: string[]
+    crossBorderTransfers: boolean
+    transferMechanisms: string[]
+    primaryHostingRegion: string
+    dataResidencyOptions: string[]
     sellsOrSharesData: boolean
     doNotSellLink: string
     dpoName: string
@@ -223,8 +226,10 @@ export function mapOrganizationRecord(record: {
     marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? "",
     transactionalEmailsSent:
       record.privacyProfile?.transactionalEmailsSent ?? false,
-    dataTransferMechanisms:
-      record.privacyProfile?.dataTransferMechanisms ?? [],
+    crossBorderTransfers: record.privacyProfile?.crossBorderTransfers ?? false,
+    transferMechanisms: record.privacyProfile?.transferMechanisms ?? [],
+    primaryHostingRegion: record.privacyProfile?.primaryHostingRegion ?? "",
+    dataResidencyOptions: record.privacyProfile?.dataResidencyOptions ?? [],
     sellsOrSharesData: record.privacyProfile?.sellsOrSharesData ?? false,
     doNotSellLink: record.privacyProfile?.doNotSellLink ?? "",
     dpoName: record.privacyProfile?.dpoName ?? "",

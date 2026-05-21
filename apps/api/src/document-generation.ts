@@ -186,7 +186,23 @@ export class ReportContextBuilder {
       transactionalEmailsSent: privacy.transactionalEmailsSent,
       newsletterProvider: this.providerNames(privacy, "newsletter")[0] ?? "",
       newsletterProviderId: this.providerIds(privacy, "newsletter")[0] ?? "",
-      dataTransferMechanisms: privacy.dataTransferMechanisms,
+      crossBorderTransfers: privacy.crossBorderTransfers,
+      transferMechanisms: privacy.transferMechanisms,
+      transferMechanismLabels: this.codeLabels(
+        vocabulary,
+        "privacy_transfer_mechanisms",
+        privacy.transferMechanisms,
+      ),
+      primaryHostingRegion: privacy.primaryHostingRegion,
+      primaryHostingRegionLabel: privacy.primaryHostingRegion
+        ? this.codeLabels(vocabulary, "regions", [privacy.primaryHostingRegion])[0]
+        : "",
+      dataResidencyOptions: privacy.dataResidencyOptions,
+      dataResidencyOptionLabels: this.codeLabels(
+        vocabulary,
+        "regions",
+        privacy.dataResidencyOptions,
+      ),
       sellsOrSharesData: privacy.sellsOrSharesData,
       doNotSellLink: privacy.doNotSellLink,
       dpoName: privacy.dpoName,

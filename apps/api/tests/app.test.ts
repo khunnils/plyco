@@ -91,7 +91,10 @@ const profileBody = {
     sendsMarketingEmails: true,
     marketingOptOutMethod: "unsubscribe_link",
     transactionalEmailsSent: true,
-    dataTransferMechanisms: [],
+    crossBorderTransfers: true,
+    transferMechanisms: ["sccs", "dpf"],
+    primaryHostingRegion: "us",
+    dataResidencyOptions: ["us", "eu"],
     sellsOrSharesData: false,
     doNotSellLink: "",
     dpoName: "",
@@ -557,6 +560,81 @@ describe("security profile API", () => {
     })
   })
 
+  it("rejects invalid international transfer codes", async () => {
+    const app = await createTestApp()
+    const invalidTransferResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          transferMechanisms: ["not_a_real_mechanism"],
+        },
+      },
+    })
+
+    expect(invalidTransferResponse.statusCode).toBe(400)
+    expect(invalidTransferResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_transfer_mechanisms",
+          field: "privacy.transferMechanisms",
+          value: "not_a_real_mechanism",
+        },
+      },
+    })
+
+    const invalidRegionResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          primaryHostingRegion: "antarctica",
+        },
+      },
+    })
+
+    expect(invalidRegionResponse.statusCode).toBe(400)
+    expect(invalidRegionResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "regions",
+          field: "privacy.primaryHostingRegion",
+          value: "antarctica",
+        },
+      },
+    })
+
+    const invalidResidencyResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          dataResidencyOptions: ["antarctica"],
+        },
+      },
+    })
+
+    expect(invalidResidencyResponse.statusCode).toBe(400)
+    expect(invalidResidencyResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "regions",
+          field: "privacy.dataResidencyOptions",
+          value: "antarctica",
+        },
+      },
+    })
+  })
+
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
       organization: {
@@ -670,6 +748,13 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "privacy.marketingOptOutMethod" }),
         expect.objectContaining({ key: "privacy.marketingOptOutMethodLabel" }),
         expect.objectContaining({ key: "privacy.transactionalEmailsSent" }),
+        expect.objectContaining({ key: "privacy.crossBorderTransfers" }),
+        expect.objectContaining({ key: "privacy.transferMechanisms" }),
+        expect.objectContaining({ key: "privacy.transferMechanismLabels" }),
+        expect.objectContaining({ key: "privacy.primaryHostingRegion" }),
+        expect.objectContaining({ key: "privacy.primaryHostingRegionLabel" }),
+        expect.objectContaining({ key: "privacy.dataResidencyOptions" }),
+        expect.objectContaining({ key: "privacy.dataResidencyOptionLabels" }),
         expect.objectContaining({ key: "privacy.newsletterProvider" }),
         expect.objectContaining({ key: "privacy.newsletterProviderId" }),
         expect.objectContaining({ key: "vendors.all" }),
@@ -741,6 +826,13 @@ describe("security profile API", () => {
       marketingOptOutMethod: "unsubscribe_link",
       marketingOptOutMethodLabel: "Unsubscribe link",
       transactionalEmailsSent: true,
+      crossBorderTransfers: true,
+      transferMechanisms: ["sccs", "dpf"],
+      transferMechanismLabels: ["SCCs", "Data Privacy Framework"],
+      primaryHostingRegion: "us",
+      primaryHostingRegionLabel: "United States",
+      dataResidencyOptions: ["us", "eu"],
+      dataResidencyOptionLabels: ["United States", "European Union"],
       newsletterProvider: "Mailchimp",
       newsletterProviderId: "prov-mailchimp",
     })
@@ -1169,6 +1261,34 @@ describe("security profile API", () => {
         status: "current",
       },
     ])
+
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          dataResidencyOptions: ["eu"],
+        },
+      },
+    })
+    const transferStaleDocumentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    })
+    expect(transferStaleDocumentsResponse.json()).toMatchObject([
+      {
+        document: { id: generateResponse.json().id },
+        status: "stale",
+      },
+    ])
+
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    })
 
     await app.inject({
       method: "PUT",
