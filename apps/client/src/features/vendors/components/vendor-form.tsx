@@ -5,9 +5,8 @@ import {
   type VendorInput,
 } from "@plyco/shared"
 import { useEffect } from "react"
-import { type Resolver, useForm, useWatch } from "react-hook-form"
+import { type Resolver, useForm } from "react-hook-form"
 
-import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
@@ -16,28 +15,18 @@ import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorForm = ({
-  dataTypeOptions,
   countryOptions,
   criticalityOptions,
-  dataProcessingLevelOptions,
-  dataRegionOptions,
   defaultValues,
-  dpaStatusOptions,
-  serviceOptions,
   vendorCategoryOptions,
   submitLabel,
   submitDisabled = false,
   onSubmit,
   onCancel,
 }: {
-  dataTypeOptions: Array<{ value: string; label: string }>
   countryOptions: Option[]
   criticalityOptions: Option[]
-  dataProcessingLevelOptions: Option[]
-  dataRegionOptions: Option[]
   defaultValues: VendorInput
-  dpaStatusOptions: Option[]
-  serviceOptions: Option[]
   submitLabel: string
   submitDisabled?: boolean
   vendorCategoryOptions: Option[]
@@ -53,23 +42,6 @@ export const VendorForm = ({
   useEffect(() => {
     form.reset(defaultValues)
   }, [defaultValues, form])
-
-  const dataProcessingLevel =
-    useWatch({
-      control: form.control,
-      name: "dataProcessingLevel",
-      defaultValue: defaultValues.dataProcessingLevel,
-    }) ?? defaultValues.dataProcessingLevel
-  const showDataProcessingDetail = dataProcessingLevel !== "none"
-
-  useEffect(() => {
-    if (dataProcessingLevel === "none") {
-      form.setValue("dataProcessed", [])
-      form.setValue("dataRegions", [])
-      form.setValue("dpaStatus", "not_required")
-      form.setValue("hasSubprocessors", false)
-    }
-  }, [dataProcessingLevel, form])
 
   const submitVendor = form.handleSubmit((vendor) => {
     onSubmit(vendor)
@@ -88,22 +60,9 @@ export const VendorForm = ({
         />
         <SelectField
           control={form.control}
-          label="Service"
-          name="serviceId"
-          options={serviceOptions}
-        />
-        <SelectField
-          control={form.control}
           label="Category"
           name="category"
           options={[{ value: "", label: "Not set" }, ...vendorCategoryOptions]}
-        />
-        <TextField
-          error={form.formState.errors.purpose}
-          label="Purpose"
-          name="purpose"
-          placeholder="Code hosting and reviews"
-          register={form.register}
         />
         <TextField
           error={form.formState.errors.displayName}
@@ -148,73 +107,36 @@ export const VendorForm = ({
         />
         <SelectField
           control={form.control}
-          label="Data processing level"
-          name="dataProcessingLevel"
-          options={dataProcessingLevelOptions}
-        />
-        <SelectField
-          control={form.control}
           label="Criticality"
           name="criticality"
           options={criticalityOptions}
         />
-        {showDataProcessingDetail ? (
-          <>
-            <MultiSelectField
-              control={form.control}
-              error={form.formState.errors.dataProcessed?.root}
-              emptyMessage="Add data types stored in the organization profile first."
-              label="Data processed"
-              name="dataProcessed"
-              options={dataTypeOptions}
-              placeholder={
-                dataTypeOptions.length > 0
-                  ? "Select organization data types"
-                  : "No organization data types defined"
-              }
-            />
-            <MultiSelectField
-              control={form.control}
-              error={form.formState.errors.dataRegions?.root}
-              label="Data regions"
-              name="dataRegions"
-              options={dataRegionOptions}
-              placeholder="Select data regions"
-            />
-            <SelectField
-              control={form.control}
-              label="DPA status"
-              name="dpaStatus"
-              options={dpaStatusOptions}
-            />
-            <ToggleField
-              control={form.control}
-              label="Vendor uses subprocessors"
-              name="hasSubprocessors"
-            />
-            <TextField
-              error={form.formState.errors.privacyPolicyUrl}
-              label="Privacy policy URL"
-              name="privacyPolicyUrl"
-              placeholder="https://example.com/privacy"
-              register={form.register}
-            />
-            <TextField
-              error={form.formState.errors.dpaUrl}
-              label="DPA URL"
-              name="dpaUrl"
-              placeholder="https://example.com/dpa"
-              register={form.register}
-            />
-            <TextField
-              error={form.formState.errors.securityPageUrl}
-              label="Security page URL"
-              name="securityPageUrl"
-              placeholder="https://example.com/security"
-              register={form.register}
-            />
-          </>
-        ) : null}
+        <ToggleField
+          control={form.control}
+          label="Vendor uses subprocessors"
+          name="hasSubprocessors"
+        />
+        <TextField
+          error={form.formState.errors.privacyPolicyUrl}
+          label="Privacy policy URL"
+          name="privacyPolicyUrl"
+          placeholder="https://example.com/privacy"
+          register={form.register}
+        />
+        <TextField
+          error={form.formState.errors.dpaUrl}
+          label="DPA URL"
+          name="dpaUrl"
+          placeholder="https://example.com/dpa"
+          register={form.register}
+        />
+        <TextField
+          error={form.formState.errors.securityPageUrl}
+          label="Security page URL"
+          name="securityPageUrl"
+          placeholder="https://example.com/security"
+          register={form.register}
+        />
       </div>
       <TextAreaField
         error={form.formState.errors.notes}

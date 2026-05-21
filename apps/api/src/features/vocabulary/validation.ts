@@ -1,10 +1,12 @@
 import {
   type AccessProfile,
+  type BusinessActivityInput,
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
   type PrivacyProfile,
   type ServiceProfileInput,
+  type ServiceVendorUseInput,
   type VendorInput,
 } from "@plyco/shared"
 
@@ -113,15 +115,31 @@ export const validateDataHandlingProfileCodes = async (
         dataType.collectionMethods,
         "dataHandling.dataTypesStored.collectionMethods",
       ),
-      assertCodes(
-        vocabularyRepository,
-        organizationId,
-        "legal_basis",
-        dataType.legalBasis,
-        "dataHandling.dataTypesStored.legalBasis",
-      ),
     ])
   }
+}
+
+export const validateBusinessActivityCodes = async (
+  vocabularyRepository: VocabularyRepository,
+  organizationId: string,
+  activity: BusinessActivityInput,
+) => {
+  await Promise.all([
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "data_purposes",
+      activity.purposes,
+      "businessActivity.purposes",
+    ),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "legal_basis",
+      activity.legalBasis,
+      "businessActivity.legalBasis",
+    ),
+  ])
 }
 
 export const validateInfrastructureProfileCodes = async (
@@ -442,30 +460,39 @@ export const validateVendorCodes = async (
     assertCode(
       vocabularyRepository,
       organizationId,
+      "vendor_criticality",
+      vendor.criticality,
+      "vendor.criticality",
+    ),
+  ])
+}
+
+export const validateServiceVendorUseCodes = async (
+  vocabularyRepository: VocabularyRepository,
+  organizationId: string,
+  vendorUse: ServiceVendorUseInput,
+) => {
+  await Promise.all([
+    assertCode(
+      vocabularyRepository,
+      organizationId,
       "data_processing_level",
-      vendor.dataProcessingLevel,
-      "vendor.dataProcessingLevel",
+      vendorUse.dataProcessingLevel,
+      "serviceVendorUse.dataProcessingLevel",
     ),
     assertCode(
       vocabularyRepository,
       organizationId,
       "dpa_status",
-      vendor.dpaStatus,
-      "vendor.dpaStatus",
+      vendorUse.dpaStatus,
+      "serviceVendorUse.dpaStatus",
     ),
     assertCodes(
       vocabularyRepository,
       organizationId,
       "regions",
-      vendor.dataRegions,
-      "vendor.dataRegions",
-    ),
-    assertCode(
-      vocabularyRepository,
-      organizationId,
-      "vendor_criticality",
-      vendor.criticality,
-      "vendor.criticality",
+      vendorUse.dataRegions,
+      "serviceVendorUse.dataRegions",
     ),
   ])
 }

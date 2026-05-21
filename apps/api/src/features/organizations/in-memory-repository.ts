@@ -68,6 +68,20 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     return this.organizations.get(organizationId)?.services.map((service) => service.id) ?? []
   }
 
+  async listBusinessActivityIds(organizationId: string): Promise<string[]> {
+    return Array.from(
+      new Set(
+        this.organizations
+          .get(organizationId)
+          ?.services.flatMap((service) => service.businessActivityIds) ?? [],
+      ),
+    )
+  }
+
+  async listVendorIds(_organizationId: string): Promise<string[]> {
+    return []
+  }
+
   private servicesWithIds(
     inputServices: ServiceProfileInput[],
     existingServices: ServiceProfile[],

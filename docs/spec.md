@@ -119,6 +119,7 @@ Fields:
 - service name
 - service description
 - service URL
+- business activities performed by the service
 - user types
 - customer types
 - availability regions
@@ -173,7 +174,7 @@ Fields:
 
 Fields:
 
-- data types stored, captured as name, sensitivity, and description entries
+- data types stored, captured as name, subject types, collection methods, retention, sensitivity, and description entries
 - stores PII
 - stores healthcare data
 - encryption at rest
@@ -201,17 +202,29 @@ Fields:
 
 Fields:
 
-- vendor inventory mapped to one service
+- reusable vendor inventory
+- service-specific vendor use mappings
 - country of registration
 - vendor category
-- data processing level
+- service-specific purpose
+- service-specific data processing level
 - subprocessors
 - DPA status
-- data regions
+- service-specific data regions
 - criticality
 - legal name and display name
 - provider organization name and legal name
 - privacy policy, DPA, and security page URLs
+
+### Business Activities
+
+Fields:
+
+- activity name
+- activity description
+- processing purposes
+- legal basis
+- services that perform the activity
 
 ### Vocabulary
 

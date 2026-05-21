@@ -29,4 +29,6 @@ export interface OrganizationRepository {
   ): Promise<OrganizationSecurityProfile>
   listDataTypeNames(organizationId: string): Promise<string[]>
   listServiceIds(organizationId: string): Promise<string[]>
+  listBusinessActivityIds(organizationId: string): Promise<string[]>
+  listVendorIds(organizationId: string): Promise<string[]>
 }

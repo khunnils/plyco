@@ -47,8 +47,10 @@ import {
 } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
+  emptyServiceVendorUseDraft,
   emptyVendorDraft,
   profileFromOrganization,
+  toServiceVendorUseInput,
   toVendorInput,
   vendorInputFromProvider,
 } from "@/features/security-profile/lib/profile"
@@ -79,8 +81,13 @@ import {
 } from "@/features/templates/hooks/use-templates"
 import {
   useCreateVendor,
+  useCreateBusinessActivity,
+  useCreateServiceVendorUse,
+  useDeleteBusinessActivity,
+  useDeleteServiceVendorUse,
   useDeleteVendor,
   useProviders,
+  useUpdateServiceVendorUse,
   useUpdateVendor,
 } from "@/features/vendors/hooks/use-vendors"
 import { Section } from "@/features/shell/components/section"
@@ -88,6 +95,7 @@ import { SummaryTiles } from "@/features/security-profile/components/summary-til
 import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
 import { VendorForm } from "@/features/vendors/components/vendor-form"
 import { VendorList } from "@/features/vendors/components/vendor-list"
+import { ServiceVendorUseForm } from "@/features/vendors/components/service-vendor-use-form"
 import { ProviderSelector } from "@/features/vendors/components/provider-selector"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
@@ -106,6 +114,7 @@ import {
   countryLabel,
   countryOptions,
 } from "@/features/vocabulary/lib/vocabulary"
+import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { VocabularyManager } from "@/features/vocabulary/components/vocabulary-manager"
 
 type CompanySectionId =
@@ -240,12 +249,14 @@ const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
 )
 
 const CompanySectionFields = ({
+  businessActivityOptions,
   countries,
   form,
   providers,
   section,
   vocabulary,
 }: {
+  businessActivityOptions: Option[]
   countries: Country[]
   form: ProfileFormReturn
   providers: Provider[]
@@ -267,6 +278,7 @@ const CompanySectionFields = ({
   if (section === "service") {
     return (
       <ProfileServiceFields
+        businessActivityOptions={businessActivityOptions}
         cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
         form={form}
@@ -345,7 +357,6 @@ const CompanySectionFields = ({
       <ProfileDataHandlingFields
         collectionMethodOptions={codeOptions(vocabulary, "collection_methods")}
         form={form}
-        legalBasisOptions={codeOptions(vocabulary, "legal_basis")}
         subjectTypeOptions={codeOptions(vocabulary, "subject_types")}
       />
     )
@@ -914,9 +925,14 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const document = useDocument(viewingDocumentId)
 
   const saveProfile = useSaveSecurityProfile()
+  const createBusinessActivity = useCreateBusinessActivity()
+  const deleteBusinessActivity = useDeleteBusinessActivity()
   const createVendor = useCreateVendor()
   const updateVendor = useUpdateVendor()
   const deleteVendor = useDeleteVendor()
+  const createServiceVendorUse = useCreateServiceVendorUse()
+  const updateServiceVendorUse = useUpdateServiceVendorUse()
+  const deleteServiceVendorUse = useDeleteServiceVendorUse()
   const createVocabularyCode = useCreateVocabularyCode()
   const updateVocabularyCode = useUpdateVocabularyCode()
   const deleteVocabularyCode = useDeleteVocabularyCode()
@@ -931,6 +947,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     snapshot?.organization ?? null
   )
   const vendors = snapshot?.vendors ?? []
+  const serviceVendorUses = snapshot?.serviceVendorUses ?? []
+  const businessActivities = snapshot?.businessActivities ?? []
   const templatesData: TemplateCatalog =
     templates.data ?? { systemTemplates: [], organizationTemplates: [] }
   const documentsList: DocumentSummary[] = documents.data ?? []
@@ -950,7 +968,10 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     .join(" · ")
 
   const isVendorMutationPending =
-    createVendor.isPending || updateVendor.isPending
+    createVendor.isPending ||
+    updateVendor.isPending ||
+    createServiceVendorUse.isPending ||
+    updateServiceVendorUse.isPending
 
   const providersList = providers.data ?? []
   const countriesList = countries.data ?? []
@@ -960,6 +981,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
+  const [showVendorUseForm, setShowVendorUseForm] = useState(false)
+  const [editingVendorUseId, setEditingVendorUseId] = useState<string | null>(
+    null
+  )
+  const [newActivityName, setNewActivityName] = useState("")
   const {
     activeWorkspaceView,
     editingCompanySection,
@@ -972,6 +998,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     startEditingVendor,
   } = useSecurityUiStore()
   const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
+  const editingVendorUse = serviceVendorUses.find(
+    (vendorUse) => vendorUse.id === editingVendorUseId
+  )
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === editingTemplateId
   )
@@ -987,9 +1016,18 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
       label: service.serviceName || `Service ${index + 1}`,
     })
   )
-  const defaultVendorValues = {
-    ...emptyVendorDraft,
+  const businessActivityOptions = businessActivities.map((activity) => ({
+    value: activity.id,
+    label: activity.name,
+  }))
+  const vendorOptions = vendors.map((vendor) => ({
+    value: vendor.id,
+    label: vendor.displayName || vendor.name,
+  }))
+  const defaultVendorUseValues = {
+    ...emptyServiceVendorUseDraft,
     serviceId: serviceOptions[0]?.value ?? "",
+    vendorId: vendorOptions[0]?.value ?? "",
   }
   const addedSystemTemplateSlugs = new Set(
     templatesData.organizationTemplates.map(
@@ -1175,6 +1213,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       {(form) => (
                         <>
                           <CompanySectionFields
+                            businessActivityOptions={businessActivityOptions}
                             countries={countriesList}
                             form={form}
                             providers={providersList}
@@ -1216,11 +1255,61 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           )}
 
           {activeWorkspaceView === "vendors" && (
-            <Section
-              description="Review organization vendors or add common providers from the catalog."
-              title="Vendors"
-            >
-              {showVendorCatalog ? (
+	            <Section
+	              description="Review organization vendors or add common providers from the catalog."
+	              title="Vendors"
+	            >
+	              <div className="mb-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4">
+	                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+	                  <label className="grid flex-1 gap-2 text-sm font-medium text-slate-800">
+	                    Business activity
+	                    <input
+	                      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+	                      placeholder="Account management"
+	                      value={newActivityName}
+	                      onChange={(event) => setNewActivityName(event.target.value)}
+	                    />
+	                  </label>
+	                  <Button
+	                    className="w-fit"
+	                    disabled={!newActivityName.trim() || createBusinessActivity.isPending}
+	                    type="button"
+	                    variant="outline"
+	                    onClick={() => {
+	                      createBusinessActivity.mutate({
+	                        name: newActivityName,
+	                        description: "",
+	                        purposes: [],
+	                        legalBasis: [],
+	                      })
+	                      setNewActivityName("")
+	                    }}
+	                  >
+	                    <Plus />
+	                    Add activity
+	                  </Button>
+	                </div>
+	                {businessActivities.length > 0 ? (
+	                  <div className="flex flex-wrap gap-2">
+	                    {businessActivities.map((activity) => (
+	                      <span
+	                        className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+	                        key={activity.id}
+	                      >
+	                        {activity.name}
+	                        <button
+	                          className="text-slate-500 hover:text-red-700"
+	                          type="button"
+	                          onClick={() => deleteBusinessActivity.mutate(activity.id)}
+	                        >
+	                          <Trash2 className="size-3" />
+	                        </button>
+	                      </span>
+	                    ))}
+	                  </div>
+	                ) : null}
+	              </div>
+	              {showVendorCatalog ? (
                 <div className="grid gap-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -1254,40 +1343,27 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       setShowVendorCatalog(false)
                       setShowCustomVendorForm(true)
                     }}
-                    onChooseProvider={(provider) => {
-                      createVendor.mutate(
-                        vendorInputFromProvider(
-                          provider,
-                          serviceOptions[0]?.value ?? "",
-                        )
-                      )
-                      setShowVendorCatalog(false)
-                      setShowCustomVendorForm(false)
-                    }}
+	                    onChooseProvider={(provider) => {
+	                      createVendor.mutate(vendorInputFromProvider(provider))
+	                      setShowVendorCatalog(false)
+	                      setShowCustomVendorForm(false)
+	                    }}
                   />
                 </div>
               ) : null}
               {(showCustomVendorForm || editingVendor) && (
                 <VendorForm
                   countryOptions={countryOptions(countriesList)}
-                  criticalityOptions={codeOptions(
-                    vocabularyData,
-                    "vendor_criticality",
-                  )}
-                  dataTypeOptions={dataTypeOptions}
-                  dataProcessingLevelOptions={codeOptions(
-                    vocabularyData,
-                    "data_processing_level",
-                  )}
-                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
-                  defaultValues={
-                    editingVendor
-                      ? toVendorInput(editingVendor)
-                      : defaultVendorValues
-                  }
-                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
-                  serviceOptions={serviceOptions}
-                  submitDisabled={isVendorMutationPending}
+	                  criticalityOptions={codeOptions(
+	                    vocabularyData,
+	                    "vendor_criticality",
+	                  )}
+	                  defaultValues={
+	                    editingVendor
+	                      ? toVendorInput(editingVendor)
+	                      : emptyVendorDraft
+	                  }
+	                  submitDisabled={isVendorMutationPending}
                   submitLabel={editingVendor ? "Save" : "Add vendor"}
                   vendorCategoryOptions={codeOptions(
                     vocabularyData,
@@ -1317,36 +1393,104 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       return
                     }
 
-                    createVendor.mutate(vendor)
-                    setShowVendorCatalog(false)
-                    setShowCustomVendorForm(false)
-                  }}
-                />
-              )}
-              {!showVendorCatalog && !showCustomVendorForm && !editingVendor ? (
-                vendors.length > 0 ? (
-                  <div className="grid gap-4">
-                    <Button
-                      className="w-fit"
-                      type="button"
-                      onClick={() => {
-                        startEditingVendor(null)
-                        setShowVendorCatalog(true)
-                      }}
-                    >
-                      <Plus />
-                      Add vendor
-                    </Button>
-                    <VendorList
-                      countries={countriesList}
-                      vocabulary={vocabularyData}
-                      vendors={vendors}
-                      onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
-                      onEdit={(vendor) => {
-                        startEditingVendor(vendor.id)
-                        setShowCustomVendorForm(true)
-                      }}
-                    />
+	                    createVendor.mutate(vendor)
+	                    setShowVendorCatalog(false)
+	                    setShowCustomVendorForm(false)
+	                  }}
+	                />
+	              )}
+	              {(showVendorUseForm || editingVendorUse) && (
+	                <ServiceVendorUseForm
+	                  dataProcessingLevelOptions={codeOptions(
+	                    vocabularyData,
+	                    "data_processing_level",
+	                  )}
+	                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
+	                  dataTypeOptions={dataTypeOptions}
+	                  defaultValues={
+	                    editingVendorUse
+	                      ? toServiceVendorUseInput(editingVendorUse)
+	                      : defaultVendorUseValues
+	                  }
+	                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
+	                  serviceOptions={serviceOptions}
+	                  submitDisabled={isVendorMutationPending}
+	                  submitLabel={editingVendorUse ? "Save" : "Add service use"}
+	                  vendorOptions={vendorOptions}
+	                  onCancel={() => {
+	                    setEditingVendorUseId(null)
+	                    setShowVendorUseForm(false)
+	                  }}
+	                  onSubmit={(vendorUse) => {
+	                    if (editingVendorUse) {
+	                      updateServiceVendorUse.mutate(
+	                        { id: editingVendorUse.id, vendorUse },
+	                        {
+	                          onSuccess: () => {
+	                            setEditingVendorUseId(null)
+	                            setShowVendorUseForm(false)
+	                          },
+	                        }
+	                      )
+	                      return
+	                    }
+
+	                    createServiceVendorUse.mutate(vendorUse)
+	                    setShowVendorUseForm(false)
+	                  }}
+	                />
+	              )}
+	              {!showVendorCatalog &&
+	              !showCustomVendorForm &&
+	              !editingVendor &&
+	              !showVendorUseForm &&
+	              !editingVendorUse ? (
+	                vendors.length > 0 ? (
+	                  <div className="grid gap-4">
+	                    <div className="flex flex-wrap gap-2">
+	                      <Button
+	                        className="w-fit"
+	                        type="button"
+	                        onClick={() => {
+	                          startEditingVendor(null)
+	                          setShowVendorCatalog(true)
+	                        }}
+	                      >
+	                        <Plus />
+	                        Add vendor
+	                      </Button>
+	                      <Button
+	                        className="w-fit"
+	                        disabled={serviceOptions.length === 0 || vendors.length === 0}
+	                        type="button"
+	                        variant="outline"
+	                        onClick={() => {
+	                          setEditingVendorUseId(null)
+	                          setShowVendorUseForm(true)
+	                        }}
+	                      >
+	                        <Plus />
+	                        Add service use
+	                      </Button>
+	                    </div>
+	                    <VendorList
+	                      countries={countriesList}
+	                      serviceVendorUses={serviceVendorUses}
+	                      vocabulary={vocabularyData}
+	                      vendors={vendors}
+	                      onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
+	                      onDeleteUse={(vendorUse) =>
+	                        deleteServiceVendorUse.mutate(vendorUse.id)
+	                      }
+	                      onEdit={(vendor) => {
+	                        startEditingVendor(vendor.id)
+	                        setShowCustomVendorForm(true)
+	                      }}
+	                      onEditUse={(vendorUse) => {
+	                        setEditingVendorUseId(vendorUse.id)
+	                        setShowVendorUseForm(true)
+	                      }}
+	                    />
                   </div>
                 ) : (
                   <VendorEmptyState

@@ -7,6 +7,8 @@ import {
   emptyServiceProfile,
   type OrganizationSecurityProfile,
   type Provider,
+  type ServiceVendorUse,
+  type ServiceVendorUseInput,
   type Vendor,
   type VendorInput,
 } from "@plyco/shared"
@@ -32,16 +34,21 @@ export const emptyVendorDraft: VendorInput = {
   dpaUrl: "",
   securityPageUrl: "",
   category: "",
-  serviceId: "",
-  purpose: "",
   countryOfRegistration: "",
   hasSubprocessors: false,
+  criticality: "medium",
+  owner: "",
+  notes: "",
+}
+
+export const emptyServiceVendorUseDraft: ServiceVendorUseInput = {
+  serviceId: "",
+  vendorId: "",
+  purpose: "",
   dataProcessingLevel: "none",
   dataProcessed: [],
   dpaStatus: "not_started",
   dataRegions: [],
-  criticality: "medium",
-  owner: "",
   notes: "",
 }
 
@@ -61,6 +68,7 @@ export const profileFromOrganization = (
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
+            businessActivityIds: service.businessActivityIds,
             userTypes: service.userTypes,
             customerTypes: service.customerTypes,
             availabilityRegions: service.availabilityRegions,
@@ -80,7 +88,6 @@ export const profileFromOrganization = (
 }
 
 export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
-  serviceId: vendor.serviceId,
   name: vendor.name,
   legalName: vendor.legalName,
   displayName: vendor.displayName,
@@ -90,16 +97,24 @@ export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
   dpaUrl: vendor.dpaUrl,
   securityPageUrl: vendor.securityPageUrl,
   category: vendor.category,
-  purpose: vendor.purpose,
   countryOfRegistration: vendor.countryOfRegistration,
   hasSubprocessors: vendor.hasSubprocessors,
-  dataProcessingLevel: vendor.dataProcessingLevel,
-  dataProcessed: vendor.dataProcessed,
-  dpaStatus: vendor.dpaStatus,
-  dataRegions: vendor.dataRegions,
   criticality: vendor.criticality,
   owner: vendor.owner,
   notes: vendor.notes,
+})
+
+export const toServiceVendorUseInput = (
+  vendorUse: ServiceVendorUse | ServiceVendorUseInput
+): ServiceVendorUseInput => ({
+  serviceId: vendorUse.serviceId,
+  vendorId: vendorUse.vendorId,
+  purpose: vendorUse.purpose,
+  dataProcessingLevel: vendorUse.dataProcessingLevel,
+  dataProcessed: vendorUse.dataProcessed,
+  dpaStatus: vendorUse.dpaStatus,
+  dataRegions: vendorUse.dataRegions,
+  notes: vendorUse.notes,
 })
 
 export const dataTypeOptionsFromProfile = (
@@ -164,9 +179,7 @@ const providerCategory = (provider: Provider): VendorInput["category"] => {
 
 export const vendorInputFromProvider = (
   provider: Provider,
-  serviceId: string,
 ): VendorInput => ({
-  serviceId,
   name: provider.name,
   legalName: "",
   displayName: provider.name,
@@ -176,15 +189,8 @@ export const vendorInputFromProvider = (
   dpaUrl: "",
   securityPageUrl: "",
   category: providerCategory(provider),
-  purpose: provider.url
-    ? `Operational provider listed at ${provider.url}`
-    : "Operational provider",
   countryOfRegistration: "",
   hasSubprocessors: false,
-  dataProcessingLevel: provider.handlesCustomerData ? "limited" : "none",
-  dataProcessed: [],
-  dpaStatus: "not_started",
-  dataRegions: [],
   criticality: providerCriticality(provider),
   owner: "",
   notes: provider.securityCriticality

@@ -122,26 +122,6 @@ export const DataHandlingReadOnlySection = ({
                         </div>
                         <div>
                           <dt className="text-xs font-medium text-slate-500">
-                            Legal basis
-                          </dt>
-                          <dd className="mt-1 text-sm font-medium text-slate-900">
-                            {codeValueList(
-                              vocabulary,
-                              "legal_basis",
-                              dataType.legalBasis,
-                            )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs font-medium text-slate-500">
-                            Purpose
-                          </dt>
-                          <dd className="mt-1 text-sm font-medium text-slate-900">
-                            {dataType.purposes || "Not set"}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs font-medium text-slate-500">
                             Collection method
                           </dt>
                           <dd className="mt-1 text-sm font-medium text-slate-900">

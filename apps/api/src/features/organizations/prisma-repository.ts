@@ -24,7 +24,10 @@ export const ORGANIZATION_INCLUDE = {
   dataTypes: { orderBy: { createdAt: "asc" } },
   infrastructureProfile: true,
   privacyProfile: true,
-  services: { orderBy: { createdAt: "asc" } },
+  services: {
+    include: { businessActivities: true },
+    orderBy: { createdAt: "asc" },
+  },
   vendors: {
     select: {
       name: true,
@@ -126,6 +129,24 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return services.map((service) => service.id)
   }
 
+  async listBusinessActivityIds(organizationId: string): Promise<string[]> {
+    const activities = await this.client.businessActivity.findMany({
+      where: { organizationId },
+      select: { id: true },
+    })
+
+    return activities.map((activity) => activity.id)
+  }
+
+  async listVendorIds(organizationId: string): Promise<string[]> {
+    const vendors = await this.client.vendorMaster.findMany({
+      where: { organizationId },
+      select: { id: true },
+    })
+
+    return vendors.map((vendor) => vendor.id)
+  }
+
   private organizationData(input: CompanyProfile) {
     return {
       companyName: input.companyName,
@@ -197,6 +218,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       where: { organizationId },
       select: { id: true },
     })
+    const existingBusinessActivityIds = new Set(
+      await this.listBusinessActivityIds(organizationId),
+    )
     const existingIds = new Set(existingServices.map((service) => service.id))
     const resolvedServices = services.map((service, index) => ({
       ...service,
@@ -213,6 +237,22 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         "Service was not found for this organization.",
         400,
         { serviceId: unknownId },
+      )
+    }
+
+    const requestedActivityIds = Array.from(
+      new Set(resolvedServices.flatMap((service) => service.businessActivityIds)),
+    )
+    const unknownActivityId = requestedActivityIds.find(
+      (id) => !existingBusinessActivityIds.has(id),
+    )
+
+    if (unknownActivityId) {
+      throw new ApiError(
+        "BUSINESS_ACTIVITY_NOT_FOUND",
+        "Service activity must reference a business activity on the organization.",
+        400,
+        { businessActivityId: unknownActivityId },
       )
     }
 
@@ -237,8 +277,47 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
               },
             })
 
+        await this.syncServiceBusinessActivities(
+          record.id,
+          service.businessActivityIds,
+        )
+
         return { ...service, id: record.id }
       }),
+    )
+  }
+
+  private async syncServiceBusinessActivities(
+    serviceId: string,
+    businessActivityIds: string[],
+  ) {
+    const requestedIds = Array.from(new Set(businessActivityIds))
+
+    await this.client.serviceBusinessActivity.deleteMany({
+      where: {
+        serviceId,
+        ...(requestedIds.length > 0
+          ? { businessActivityId: { notIn: requestedIds } }
+          : {}),
+      },
+    })
+
+    await Promise.all(
+      requestedIds.map((businessActivityId) =>
+        this.client.serviceBusinessActivity.upsert({
+          where: {
+            serviceId_businessActivityId: {
+              serviceId,
+              businessActivityId,
+            },
+          },
+          create: {
+            serviceId,
+            businessActivityId,
+          },
+          update: {},
+        }),
+      ),
     )
   }
 
@@ -435,9 +514,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       name: dataType.name,
       description: dataType.description,
       subjectTypes: dataType.subjectTypes,
-      purposes: dataType.purposes,
       collectionMethods: dataType.collectionMethods,
-      legalBasis: dataType.legalBasis,
       retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
@@ -474,9 +551,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           update: {
             description: dataType.description,
             subjectTypes: dataType.subjectTypes,
-            purposes: dataType.purposes,
             collectionMethods: dataType.collectionMethods,
-            legalBasis: dataType.legalBasis,
             retentionDays: dataType.retentionDays,
             isSensitive: dataType.isSensitive,
             isRequired: dataType.isRequired,

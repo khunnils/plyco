@@ -182,12 +182,8 @@ export const Onboarding = ({
                       vocabulary.data,
                       "collection_methods"
                     )}
-                    form={form}
-                    legalBasisOptions={codeOptions(
-                      vocabulary.data,
-                      "legal_basis"
-                    )}
-                    subjectTypeOptions={codeOptions(
+	                    form={form}
+	                    subjectTypeOptions={codeOptions(
                       vocabulary.data,
                       "subject_types"
                     )}

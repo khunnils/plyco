@@ -1,14 +1,18 @@
 import { PrismaClient } from "@prisma/client"
 import {
   accessProfileSchema,
+  businessActivitySchema,
   companyProfileSchema,
   dataHandlingProfileSchema,
   infrastructureProfileSchema,
   privacyProfileSchema,
   serviceProfileSchema,
+  serviceVendorUseSchema,
   documentSchema,
+  type BusinessActivity,
   type OrganizationSecurityProfile,
   type Document,
+  type ServiceVendorUse,
   type Template,
   type Vendor,
   templateSchema,
@@ -51,6 +55,9 @@ export function mapOrganizationRecord(record: {
     cookieTypes: string[]
     primaryHostingRegion: string
     dataResidencyOptions: string[]
+    businessActivities?: Array<{
+      businessActivityId: string
+    }>
     createdAt: Date
     updatedAt: Date
   } | null
@@ -68,6 +75,9 @@ export function mapOrganizationRecord(record: {
     cookieTypes: string[]
     primaryHostingRegion: string
     dataResidencyOptions: string[]
+    businessActivities?: Array<{
+      businessActivityId: string
+    }>
     createdAt: Date
     updatedAt: Date
   }>
@@ -136,9 +146,7 @@ export function mapOrganizationRecord(record: {
     name: string
     description: string
     subjectTypes: string[]
-    purposes: string
     collectionMethods: string[]
-    legalBasis: string[]
     retentionDays: number
     isSensitive: boolean
     isRequired: boolean
@@ -240,6 +248,10 @@ export function mapOrganizationRecord(record: {
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
+            businessActivityIds:
+              service.businessActivities?.map(
+                (activity) => activity.businessActivityId,
+              ) ?? [],
             userTypes: service.userTypes,
             customerTypes: service.customerTypes,
             availabilityRegions: service.availabilityRegions,
@@ -329,9 +341,7 @@ export function mapOrganizationRecord(record: {
       name: dataType.name,
       description: dataType.description,
       subjectTypes: dataType.subjectTypes,
-      purposes: dataType.purposes,
       collectionMethods: dataType.collectionMethods,
-      legalBasis: dataType.legalBasis,
       retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
@@ -379,12 +389,29 @@ export function mapOrganizationRecord(record: {
   }
 }
 
+export function mapBusinessActivityRecord(record: {
+  id: string
+  name: string
+  description: string
+  purposes: string[]
+  legalBasis: string[]
+  createdAt: Date
+  updatedAt: Date
+}): BusinessActivity {
+  return businessActivitySchema.parse({
+    id: record.id,
+    name: record.name,
+    description: record.description,
+    purposes: record.purposes,
+    legalBasis: record.legalBasis,
+    createdAt: toIsoString(record.createdAt),
+    updatedAt: toIsoString(record.updatedAt),
+  })
+}
+
 export function mapVendorRecord(record: {
   id: string
-  serviceId: string | null
-  service?: {
-    serviceName: string
-  } | null
+  providerId?: string | null
   name: string
   legalName: string
   displayName: string
@@ -394,17 +421,8 @@ export function mapVendorRecord(record: {
   dpaUrl: string
   securityPageUrl: string
   category: string
-  purpose: string
   countryOfRegistration: string
   hasSubprocessors: boolean
-  dataProcessingLevel: string
-  dpaStatus: string
-  dataRegions: string[]
-  dataTypes: Array<{
-    organizationDataType: {
-      name: string
-    }
-  }>
   criticality: string
   owner: string | null
   notes: string | null
@@ -413,8 +431,6 @@ export function mapVendorRecord(record: {
 }): Vendor {
   return vendorSchema.parse({
     id: record.id,
-    serviceId: record.serviceId ?? "",
-    serviceName: record.service?.serviceName ?? "",
     name: record.name,
     legalName: record.legalName,
     displayName: record.displayName,
@@ -424,17 +440,52 @@ export function mapVendorRecord(record: {
     dpaUrl: record.dpaUrl,
     securityPageUrl: record.securityPageUrl,
     category: record.category,
-    purpose: record.purpose,
     countryOfRegistration: record.countryOfRegistration,
     hasSubprocessors: record.hasSubprocessors,
+    criticality: record.criticality,
+    owner: record.owner ?? "",
+    notes: record.notes ?? "",
+    createdAt: toIsoString(record.createdAt),
+    updatedAt: toIsoString(record.updatedAt),
+  })
+}
+
+export function mapServiceVendorUseRecord(record: {
+  id: string
+  serviceId: string
+  service?: {
+    serviceName: string
+  } | null
+  vendorId: string
+  vendor?: {
+    name: string
+  } | null
+  purpose: string
+  dataProcessingLevel: string
+  dpaStatus: string
+  dataRegions: string[]
+  dataTypes: Array<{
+    organizationDataType: {
+      name: string
+    }
+  }>
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+}): ServiceVendorUse {
+  return serviceVendorUseSchema.parse({
+    id: record.id,
+    serviceId: record.serviceId,
+    serviceName: record.service?.serviceName ?? "",
+    vendorId: record.vendorId,
+    vendorName: record.vendor?.name ?? "",
+    purpose: record.purpose,
     dataProcessingLevel: record.dataProcessingLevel,
     dataProcessed: record.dataTypes.map(
       (dataType) => dataType.organizationDataType.name,
     ),
     dpaStatus: record.dpaStatus,
     dataRegions: record.dataRegions,
-    criticality: record.criticality,
-    owner: record.owner ?? "",
     notes: record.notes ?? "",
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),

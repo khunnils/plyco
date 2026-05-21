@@ -8,6 +8,10 @@ import {
   vocabularyCodeSchema,
   vocabularyCodeInputSchema,
   templateCatalogSchema,
+  businessActivitySchema,
+  businessActivityInputSchema,
+  serviceVendorUseSchema,
+  serviceVendorUseInputSchema,
   vendorSchema,
   createDocumentSchema,
   documentSchema,
@@ -31,6 +35,10 @@ import {
   type Template,
   type TemplateCatalog,
   type TemplateInput,
+  type BusinessActivity,
+  type BusinessActivityInput,
+  type ServiceVendorUse,
+  type ServiceVendorUseInput,
   type Vendor,
   type VendorInput,
   type OrganizationSummary,
@@ -223,6 +231,58 @@ export const createVendor = (
     body: JSON.stringify(vendor),
   })
 
+export const createBusinessActivity = (
+  organizationId: string,
+  activity: BusinessActivityInput
+): Promise<BusinessActivity> =>
+  apiRequest(
+    `/organizations/${organizationId}/business-activities`,
+    businessActivitySchema,
+    {
+      method: "POST",
+      body: JSON.stringify(businessActivityInputSchema.parse(activity)),
+    }
+  )
+
+export const updateBusinessActivity = ({
+  organizationId,
+  id,
+  activity,
+}: {
+  organizationId: string
+  id: string
+  activity: BusinessActivityInput
+}): Promise<BusinessActivity> =>
+  apiRequest(
+    `/organizations/${organizationId}/business-activities/${id}`,
+    businessActivitySchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(businessActivityInputSchema.parse(activity)),
+    }
+  )
+
+export const deleteBusinessActivity = async (
+  organizationId: string,
+  id: string
+): Promise<void> => {
+  const response = await fetch(
+    `${API_URL}/organizations/${organizationId}/business-activities/${id}`,
+    {
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const parsedError = structuredErrorSchema.safeParse(body)
+    throw new Error(
+      parsedError.success ? parsedError.data.error.message : "Request failed"
+    )
+  }
+}
+
 export const createTemplateFromSystem = (
   organizationId: string,
   input: CreateTemplateFromSystem
@@ -317,6 +377,58 @@ export const deleteVendor = async (
 ): Promise<void> => {
   const response = await fetch(
     `${API_URL}/organizations/${organizationId}/vendors/${id}`,
+    {
+      credentials: "include",
+      method: "DELETE",
+    }
+  )
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const parsedError = structuredErrorSchema.safeParse(body)
+    throw new Error(
+      parsedError.success ? parsedError.data.error.message : "Request failed"
+    )
+  }
+}
+
+export const createServiceVendorUse = (
+  organizationId: string,
+  vendorUse: ServiceVendorUseInput
+): Promise<ServiceVendorUse> =>
+  apiRequest(
+    `/organizations/${organizationId}/service-vendor-uses`,
+    serviceVendorUseSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(serviceVendorUseInputSchema.parse(vendorUse)),
+    }
+  )
+
+export const updateServiceVendorUse = ({
+  organizationId,
+  id,
+  vendorUse,
+}: {
+  organizationId: string
+  id: string
+  vendorUse: ServiceVendorUseInput
+}): Promise<ServiceVendorUse> =>
+  apiRequest(
+    `/organizations/${organizationId}/service-vendor-uses/${id}`,
+    serviceVendorUseSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(serviceVendorUseInputSchema.parse(vendorUse)),
+    }
+  )
+
+export const deleteServiceVendorUse = async (
+  organizationId: string,
+  id: string
+): Promise<void> => {
+  const response = await fetch(
+    `${API_URL}/organizations/${organizationId}/service-vendor-uses/${id}`,
     {
       credentials: "include",
       method: "DELETE",

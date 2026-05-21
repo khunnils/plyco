@@ -29,6 +29,9 @@ model Organization {
   dataHandlingProfile   DataHandlingProfile?
   accessProfile         AccessProfile?
   dataTypes             OrganizationDataType[]
+  businessActivities    BusinessActivity[]
+  vendorMasters         VendorMaster[]
+  serviceVendorUses     ServiceVendorUse[]
   templates             Template[]
   documents             Document[]
   vendors               OrganizationProvider[]
@@ -153,6 +156,8 @@ model ServiceProfile {
   organizationId      String                 @map("organization_id")
   organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
   vendors             OrganizationProvider[]
+  businessActivities  ServiceBusinessActivity[]
+  serviceVendorUses   ServiceVendorUse[]
   serviceName         String                 @default("") @map("service_name")
   serviceDescription  String                 @default("") @map("service_description")
   serviceUrl          String                 @default("") @map("service_url")
@@ -258,19 +263,49 @@ model OrganizationDataType {
   name                   String
   description            String
   subjectTypes           String[]         @default([]) @map("subject_types")
-  purposes               String           @default("")
   collectionMethods      String[]         @default([]) @map("collection_methods")
-  legalBasis             String[]         @default([]) @map("legal_basis")
   retentionDays          Int              @default(0) @map("retention_days")
   isSensitive            Boolean          @map("is_sensitive")
   isRequired             Boolean          @default(false) @map("is_required")
-  vendorDataTypes        VendorDataType[]
+  vendorDataTypes        VendorUseDataType[]
   createdAt              DateTime         @default(now()) @map("created_at")
   updatedAt              DateTime         @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "organization_data_types_organization_id_name_key")
   @@index([organizationId], map: "idx_organization_data_types_organization_id")
   @@map("organization_data_types")
+}
+
+model BusinessActivity {
+  id                 String                    @id(map: "business_activities_pkey") @default(cuid())
+  organizationId     String                    @map("organization_id")
+  organization       Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
+  name               String
+  description        String                    @default("")
+  purposes           String[]                  @default([])
+  legalBasis         String[]                  @default([]) @map("legal_basis")
+  services           ServiceBusinessActivity[]
+  createdAt          DateTime                  @default(now()) @map("created_at")
+  updatedAt          DateTime                  @updatedAt @map("updated_at")
+
+  @@unique([organizationId, name], map: "business_activities_organization_id_name_key")
+  @@index([organizationId], map: "idx_business_activities_organization_id")
+  @@map("business_activities")
+}
+
+model ServiceBusinessActivity {
+  id                 String           @id(map: "service_business_activities_pkey") @default(cuid())
+  serviceId          String           @map("service_id")
+  service            ServiceProfile   @relation(fields: [serviceId], references: [id], onDelete: Cascade, map: "service_business_activities_service_id_fkey")
+  businessActivityId String           @map("business_activity_id")
+  businessActivity   BusinessActivity @relation(fields: [businessActivityId], references: [id], onDelete: Cascade, map: "service_business_activities_business_activity_id_fkey")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@unique([serviceId, businessActivityId], map: "service_business_activities_service_id_business_activity_id_key")
+  @@index([serviceId], map: "idx_service_business_activities_service_id")
+  @@index([businessActivityId], map: "idx_service_business_activities_business_activity_id")
+  @@map("service_business_activities")
 }
 
 model AccessProfile {
@@ -320,7 +355,6 @@ model OrganizationProvider {
   criticality           String
   owner                 String?
   notes                 String?
-  dataTypes             VendorDataType[]
   createdAt             DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @updatedAt @map("updated_at")
 
@@ -330,6 +364,59 @@ model OrganizationProvider {
   @@index([providerId], map: "idx_organization_providers_provider_id")
   @@index([systemType], map: "idx_organization_providers_system_type")
   @@map("organization_providers")
+}
+
+model VendorMaster {
+  id                            String             @id(map: "vendors_pkey") @default(cuid())
+  organizationId                String             @map("organization_id")
+  organization                  Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "vendors_organization_id_fkey")
+  providerId                    String?            @map("provider_id")
+  name                          String
+  legalName                     String             @default("") @map("legal_name")
+  displayName                   String             @default("") @map("display_name")
+  providerOrganizationName      String             @default("") @map("provider_organization_name")
+  providerOrganizationLegalName String             @default("") @map("provider_organization_legal_name")
+  privacyPolicyUrl              String             @default("") @map("privacy_policy_url")
+  dpaUrl                        String             @default("") @map("dpa_url")
+  securityPageUrl               String             @default("") @map("security_page_url")
+  category                      String
+  countryOfRegistration         String             @default("") @map("country_of_registration")
+  hasSubprocessors              Boolean            @default(false) @map("has_subprocessors")
+  criticality                   String
+  owner                         String?
+  notes                         String?
+  serviceUses                   ServiceVendorUse[]
+  createdAt                     DateTime           @default(now()) @map("created_at")
+  updatedAt                     DateTime           @updatedAt @map("updated_at")
+
+  @@unique([organizationId, name], map: "vendors_organization_id_name_key")
+  @@index([organizationId], map: "idx_vendors_organization_id")
+  @@index([providerId], map: "idx_vendors_provider_id")
+  @@map("vendors")
+}
+
+model ServiceVendorUse {
+  id                  String              @id(map: "service_vendor_uses_pkey") @default(cuid())
+  organizationId      String              @map("organization_id")
+  organization        Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_vendor_uses_organization_id_fkey")
+  serviceId           String              @map("service_id")
+  service             ServiceProfile      @relation(fields: [serviceId], references: [id], onDelete: Cascade, map: "service_vendor_uses_service_id_fkey")
+  vendorId            String              @map("vendor_id")
+  vendor              VendorMaster        @relation(fields: [vendorId], references: [id], onDelete: Cascade, map: "service_vendor_uses_vendor_id_fkey")
+  purpose             String
+  dataProcessingLevel String              @default("limited") @map("data_processing_level")
+  dpaStatus           String              @map("dpa_status")
+  dataRegions         String[]            @default([]) @map("data_regions")
+  notes               String?
+  dataTypes           VendorUseDataType[]
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  @@unique([serviceId, vendorId], map: "service_vendor_uses_service_id_vendor_id_key")
+  @@index([organizationId], map: "idx_service_vendor_uses_organization_id")
+  @@index([serviceId], map: "idx_service_vendor_uses_service_id")
+  @@index([vendorId], map: "idx_service_vendor_uses_vendor_id")
+  @@map("service_vendor_uses")
 }
 
 model Template {
@@ -378,17 +465,17 @@ model Document {
   @@map("documents")
 }
 
-model VendorDataType {
+model VendorUseDataType {
   id                     String               @id(map: "vendor_data_types_pkey") @default(cuid())
-  vendorId               String               @map("vendor_id")
-  vendor                 OrganizationProvider @relation(fields: [vendorId], references: [id], onDelete: Cascade, map: "vendor_data_types_vendor_id_fkey")
+  serviceVendorUseId     String               @map("service_vendor_use_id")
+  serviceVendorUse       ServiceVendorUse     @relation(fields: [serviceVendorUseId], references: [id], onDelete: Cascade, map: "vendor_data_types_service_vendor_use_id_fkey")
   organizationDataTypeId String               @map("organization_data_type_id")
   organizationDataType   OrganizationDataType @relation(fields: [organizationDataTypeId], references: [id], onDelete: Cascade, map: "vendor_data_types_organization_data_type_id_fkey")
   createdAt              DateTime             @default(now()) @map("created_at")
   updatedAt              DateTime             @updatedAt @map("updated_at")
 
-  @@unique([vendorId, organizationDataTypeId], map: "vendor_data_types_vendor_id_organization_data_type_id_key")
-  @@index([vendorId], map: "idx_vendor_data_types_vendor_id")
+  @@unique([serviceVendorUseId, organizationDataTypeId], map: "vendor_data_types_use_id_data_type_id_key")
+  @@index([serviceVendorUseId], map: "idx_vendor_data_types_service_vendor_use_id")
   @@index([organizationDataTypeId], map: "idx_vendor_data_types_organization_data_type_id")
   @@map("vendor_data_types")
 }

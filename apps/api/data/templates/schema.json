@@ -1206,15 +1206,8 @@
             "customers",
             "admins"
           ],
-          "purposes": [
-            "account management",
-            "billing"
-          ],
           "collectionMethods": [
             "signup form"
-          ],
-          "legalBasis": [
-            "contract"
           ],
           "retentionDays": 365,
           "isSensitive": true,
@@ -1247,31 +1240,12 @@
           ]
         },
         {
-          "key": "purposes",
-          "label": "Purposes",
-          "type": "string[]",
-          "description": "Business or product purposes for collecting or processing the data category.",
-          "example": [
-            "account management",
-            "billing"
-          ]
-        },
-        {
           "key": "collectionMethods",
           "label": "Collection methods",
           "type": "string[]",
           "description": "Ways this data category is collected.",
           "example": [
             "signup form"
-          ]
-        },
-        {
-          "key": "legalBasis",
-          "label": "Legal basis",
-          "type": "string[]",
-          "description": "Legal bases used for processing this data category.",
-          "example": [
-            "contract"
           ]
         },
         {
@@ -1297,8 +1271,22 @@
         }
       ]
     },
-    {
-      "key": "dataHandling.storesPii",
+	    {
+	      "key": "services.all[].activities",
+	      "label": "Service activities",
+	      "type": "collection",
+	      "category": "Services",
+	      "description": "Business activities performed by each service, including processing purposes and legal basis.",
+	      "example": [
+	        {
+	          "name": "Account management",
+	          "purposes": ["account_management"],
+	          "legalBasis": ["contract"]
+	        }
+	      ]
+	    },
+	    {
+	      "key": "dataHandling.storesPii",
       "label": "Stores PII",
       "type": "boolean",
       "category": "Data Handling",

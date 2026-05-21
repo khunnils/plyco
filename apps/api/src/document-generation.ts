@@ -3,10 +3,12 @@ import { createHash } from "node:crypto"
 import nunjucks from "nunjucks"
 import {
   type AccessProfile,
+  type BusinessActivity,
   type InfrastructureProfile,
   type PrivacyProfile,
   type ServiceProfile,
   type SecurityProgramSnapshot,
+  type ServiceVendorUse,
   type StoredDataType,
   type OrganizationMember,
   type Template,
@@ -30,6 +32,7 @@ export type NormalizedTemplateContext = {
   access: Record<string, unknown>
   vendors: {
     all: Array<Record<string, unknown>>
+    uses: Array<Record<string, unknown>>
     dataProcessors: Array<Record<string, unknown>>
     subprocessors: Array<Record<string, unknown>>
     byService: Array<Record<string, unknown>>
@@ -51,11 +54,15 @@ export class ReportContextBuilder {
         }
       : {}
     const vendors = snapshot.vendors.map((vendor) => this.vendorContext(vendor))
+    const vendorUses = (snapshot.serviceVendorUses ?? []).map((vendorUse) =>
+      this.vendorUseContext(vendorUse, vendors),
+    )
     const services = organization
       ? organization.services.map((service) =>
           this.serviceContext(
             service,
-            vendors,
+            snapshot.businessActivities,
+            vendorUses,
             organization.dataHandling.dataTypesStored,
             vocabulary,
           ),
@@ -87,15 +94,16 @@ export class ReportContextBuilder {
       access: organization?.access ?? {},
       vendors: {
         all: vendors,
-        dataProcessors: vendors.filter((vendor) =>
+        uses: vendorUses,
+        dataProcessors: vendorUses.filter((vendorUse) =>
           ["limited", "subprocessor"].includes(
-            String(vendor.dataProcessingLevel),
+            String(vendorUse.dataProcessingLevel),
           ),
         ),
-        subprocessors: vendors.filter(
-          (vendor) => vendor.dataProcessingLevel === "subprocessor",
+        subprocessors: vendorUses.filter(
+          (vendorUse) => vendorUse.dataProcessingLevel === "subprocessor",
         ),
-        byService: this.vendorsByService(services, vendors),
+        byService: this.vendorsByService(services, vendorUses),
       },
     }
   }
@@ -124,17 +132,21 @@ export class ReportContextBuilder {
 
   private serviceContext(
     service: ServiceProfile,
-    vendors: Array<Record<string, unknown>>,
+    activities: BusinessActivity[],
+    vendorUses: Array<Record<string, unknown>>,
     dataTypes: StoredDataType[],
     vocabulary?: Vocabulary,
   ) {
-    const serviceVendors = vendors.filter(
-      (vendor) => vendor.serviceId === service.id,
+    const serviceVendorUses = vendorUses.filter(
+      (vendorUse) => vendorUse.serviceId === service.id,
     )
+    const serviceActivities = activities
+      .filter((activity) => service.businessActivityIds.includes(activity.id))
+      .map((activity) => this.businessActivityContext(activity, vocabulary))
     const dataTypeNames = new Set(
-      serviceVendors.flatMap((vendor) =>
-        Array.isArray(vendor.dataProcessed)
-          ? vendor.dataProcessed.map(String)
+      serviceVendorUses.flatMap((vendorUse) =>
+        Array.isArray(vendorUse.dataProcessed)
+          ? vendorUse.dataProcessed.map(String)
           : [],
       ),
     )
@@ -164,6 +176,8 @@ export class ReportContextBuilder {
       ),
       childrenDirected: service.childrenDirected,
       minimumUserAge: service.minimumUserAge,
+      activities: serviceActivities,
+      businessActivities: serviceActivities,
       privacy: {
         usesCookies: service.privacy.usesCookies,
         cookieTypes: service.privacy.cookieTypes,
@@ -199,9 +213,10 @@ export class ReportContextBuilder {
           service.privacy.dataResidencyOptions,
         ),
       },
-      vendors: serviceVendors,
-      subprocessors: serviceVendors.filter(
-        (vendor) => vendor.dataProcessingLevel === "subprocessor",
+      vendorUses: serviceVendorUses,
+      vendors: serviceVendorUses,
+      subprocessors: serviceVendorUses.filter(
+        (vendorUse) => vendorUse.dataProcessingLevel === "subprocessor",
       ),
       dataTypes: dataTypes.filter((dataType) =>
         dataTypeNames.has(String(dataType.name)),
@@ -409,8 +424,7 @@ export class ReportContextBuilder {
 
   private vendorContext(vendor: Vendor) {
     return {
-      serviceId: vendor.serviceId,
-      serviceName: vendor.serviceName,
+      id: vendor.id,
       name: vendor.name,
       legalName: vendor.legalName,
       displayName: vendor.displayName,
@@ -420,16 +434,55 @@ export class ReportContextBuilder {
       dpaUrl: vendor.dpaUrl,
       securityPageUrl: vendor.securityPageUrl,
       category: vendor.category,
-      purpose: vendor.purpose,
       countryOfRegistration: vendor.countryOfRegistration,
       hasSubprocessors: vendor.hasSubprocessors,
-      dataProcessingLevel: vendor.dataProcessingLevel,
-      dataProcessed: vendor.dataProcessed,
-      dpaStatus: vendor.dpaStatus,
-      dataRegions: vendor.dataRegions,
       criticality: vendor.criticality,
       owner: vendor.owner,
       notes: vendor.notes,
+    }
+  }
+
+  private vendorUseContext(
+    vendorUse: ServiceVendorUse,
+    vendors: Array<Record<string, unknown>>,
+  ) {
+    const vendor =
+      vendors.find((currentVendor) => currentVendor.id === vendorUse.vendorId) ??
+      {}
+
+    return {
+      ...vendor,
+      id: vendorUse.id,
+      serviceId: vendorUse.serviceId,
+      serviceName: vendorUse.serviceName,
+      vendorId: vendorUse.vendorId,
+      vendorName: vendorUse.vendorName,
+      name: vendorUse.vendorName,
+      purpose: vendorUse.purpose,
+      dataProcessingLevel: vendorUse.dataProcessingLevel,
+      dataProcessed: vendorUse.dataProcessed,
+      dpaStatus: vendorUse.dpaStatus,
+      dataRegions: vendorUse.dataRegions,
+      notes: vendorUse.notes || vendor.notes,
+    }
+  }
+
+  private businessActivityContext(
+    activity: BusinessActivity,
+    vocabulary?: Vocabulary,
+  ) {
+    return {
+      id: activity.id,
+      name: activity.name,
+      description: activity.description,
+      purposes: activity.purposes,
+      purposeLabels: this.codeLabels(vocabulary, "data_purposes", activity.purposes),
+      legalBasis: activity.legalBasis,
+      legalBasisLabels: this.codeLabels(
+        vocabulary,
+        "legal_basis",
+        activity.legalBasis,
+      ),
     }
   }
 

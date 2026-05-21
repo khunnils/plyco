@@ -5,6 +5,7 @@ import {
   authUserSchema,
   companyProfileSchema,
   createOrganizationSchema,
+  businessActivityInputSchema,
   dataHandlingProfileSchema,
   emptyAccessProfile,
   emptyInfrastructureProfile,
@@ -16,6 +17,7 @@ import {
   providerSystemTypeSchema,
   serviceProfileInputSchema,
   serviceProfileSchema,
+  serviceVendorUseInputSchema,
   templateInputSchema,
   templateSchema,
   vendorInputSchema,
@@ -48,7 +50,6 @@ describe("shared security profile schemas", () => {
   it("requires operational vendor fields", () => {
     const result = vendorInputSchema.safeParse({
       name: "GitHub",
-      serviceId: "service_1",
       legalName: "GitHub, Inc.",
       displayName: "GitHub",
       providerOrganizationName: "GitHub",
@@ -57,19 +58,51 @@ describe("shared security profile schemas", () => {
       dpaUrl: "https://github.com/customer-terms/dpa",
       securityPageUrl: "https://github.com/security",
       category: "source_control",
-      purpose: "Code hosting",
       countryOfRegistration: "US",
       hasSubprocessors: true,
-      dataProcessingLevel: "limited",
-      dataProcessed: ["source_code"],
-      dpaStatus: "signed",
-      dataRegions: ["us"],
       criticality: "high",
       owner: "Engineering",
       notes: "",
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it("accepts service-specific vendor processing fields", () => {
+    const result = serviceVendorUseInputSchema.safeParse({
+      serviceId: "service_1",
+      vendorId: "vendor_1",
+      purpose: "Code hosting",
+      dataProcessingLevel: "limited",
+      dataProcessed: ["source_code"],
+      dpaStatus: "signed",
+      dataRegions: ["us"],
+      notes: "",
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("normalizes non-processing vendor uses", () => {
+    const result = serviceVendorUseInputSchema.safeParse({
+      serviceId: "service_1",
+      vendorId: "vendor_1",
+      purpose: "Issue tracking",
+      dataProcessingLevel: "none",
+      dataProcessed: ["source_code"],
+      dpaStatus: "signed",
+      dataRegions: ["us"],
+      notes: "",
+    })
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data).toMatchObject({
+        dataProcessed: [],
+        dpaStatus: "not_required",
+        dataRegions: [],
+      })
+    }
   })
 
   it("accepts authenticated user state", () => {
@@ -124,9 +157,7 @@ describe("shared security profile schemas", () => {
           name: "account_data",
           description: "Account contact and notification data",
           subjectTypes: ["customer"],
-          purposes: "account_management",
           collectionMethods: ["account_signup"],
-          legalBasis: ["contract"],
           retentionDays: 365,
           isSensitive: true,
           isRequired: true,
@@ -138,6 +169,17 @@ describe("shared security profile schemas", () => {
       encryptionInTransit: true,
       productionDataInDevelopment: false,
       retentionPolicyExists: true,
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("accepts business activity purpose and legal basis", () => {
+    const result = businessActivityInputSchema.safeParse({
+      name: "Account management",
+      description: "Operate user accounts",
+      purposes: ["account_management"],
+      legalBasis: ["contract"],
     })
 
     expect(result.success).toBe(true)
@@ -167,6 +209,7 @@ describe("shared security profile schemas", () => {
         serviceName: "",
         serviceDescription: "",
         serviceUrl: "",
+        businessActivityIds: [],
         userTypes: [],
         customerTypes: [],
         availabilityRegions: [],
@@ -189,6 +232,7 @@ describe("shared security profile schemas", () => {
       serviceName: "Acme AI Platform",
       serviceDescription: "Customer security review automation",
       serviceUrl: "https://app.acme.example",
+      businessActivityIds: ["activity_1"],
       userTypes: ["workspace_admins", "end_users"],
       customerTypes: ["smb", "mid_market"],
       availabilityRegions: ["us", "eu"],

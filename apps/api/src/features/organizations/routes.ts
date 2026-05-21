@@ -62,7 +62,13 @@ export async function registerOrganizationRoutes(
         organization: await organizationRepository.getOrganization(
           request.params.organizationId,
         ),
+        businessActivities: await vendorRepository.listBusinessActivities(
+          request.params.organizationId,
+        ),
         vendors: await vendorRepository.listVendors(
+          request.params.organizationId,
+        ),
+        serviceVendorUses: await vendorRepository.listServiceVendorUses(
           request.params.organizationId,
         ),
       }
@@ -129,8 +135,19 @@ export async function registerOrganizationRoutes(
       const vendors = await vendorRepository.listVendors(
         request.params.organizationId,
       )
+      const businessActivities = await vendorRepository.listBusinessActivities(
+        request.params.organizationId,
+      )
+      const serviceVendorUses = await vendorRepository.listServiceVendorUses(
+        request.params.organizationId,
+      )
 
-      return reply.send({ organization, vendors })
+      return reply.send({
+        organization,
+        businessActivities,
+        vendors,
+        serviceVendorUses,
+      })
     },
   )
 }

@@ -73,7 +73,13 @@ export async function registerDocumentRoutes(
         organization: await organizationRepository.getOrganization(
           request.params.organizationId,
         ),
+        businessActivities: await vendorRepository.listBusinessActivities(
+          request.params.organizationId,
+        ),
         vendors: await vendorRepository.listVendors(
+          request.params.organizationId,
+        ),
+        serviceVendorUses: await vendorRepository.listServiceVendorUses(
           request.params.organizationId,
         ),
       }
@@ -217,7 +223,13 @@ export async function registerDocumentRoutes(
         organization: await organizationRepository.getOrganization(
           request.params.organizationId,
         ),
+        businessActivities: await vendorRepository.listBusinessActivities(
+          request.params.organizationId,
+        ),
         vendors: await vendorRepository.listVendors(
+          request.params.organizationId,
+        ),
+        serviceVendorUses: await vendorRepository.listServiceVendorUses(
           request.params.organizationId,
         ),
       }

@@ -145,9 +145,7 @@ const profileBody = {
         name: "account_data",
         description: "Profile and billing contact details",
         subjectTypes: ["customer", "administrator"],
-        purposes: "account_management, billing_payments",
         collectionMethods: ["account_signup"],
-        legalBasis: ["contract"],
         retentionDays: 365,
         isSensitive: true,
         isRequired: true,
@@ -156,9 +154,7 @@ const profileBody = {
         name: "usage_data",
         description: "Usage events for product improvement",
         subjectTypes: ["end_user"],
-        purposes: "analytics",
         collectionMethods: ["product_usage"],
-        legalBasis: ["legitimate_interests"],
         retentionDays: 180,
         isSensitive: false,
         isRequired: false,
@@ -187,7 +183,6 @@ const profileBody = {
 }
 
 const vendorBody = {
-  serviceId: "service-platform",
   name: "GitHub",
   legalName: "GitHub, Inc.",
   displayName: "GitHub",
@@ -197,15 +192,21 @@ const vendorBody = {
   dpaUrl: "https://github.com/customer-terms/dpa",
   securityPageUrl: "https://github.com/security",
   category: "source_control",
-  purpose: "Code hosting and pull requests",
   countryOfRegistration: "US",
   hasSubprocessors: true,
+  criticality: "high",
+  owner: "Engineering",
+  notes: "Critical engineering system",
+}
+
+const vendorUseBody = {
+  serviceId: "service-platform",
+  vendorId: "vendor-limited",
+  purpose: "Code hosting and pull requests",
   dataProcessingLevel: "limited",
   dataProcessed: ["account_data"],
   dpaStatus: "signed",
   dataRegions: ["us"],
-  criticality: "high",
-  owner: "Engineering",
   notes: "Critical engineering system",
 }
 
@@ -213,11 +214,17 @@ const subprocessorBody = {
   ...vendorBody,
   name: "Stripe",
   category: "payments",
+  criticality: "medium",
+  owner: "Finance",
+  notes: "Customer payment processor",
+}
+
+const subprocessorUseBody = {
+  ...vendorUseBody,
+  vendorId: "vendor-subprocessor",
   purpose: "Payment processing",
   dataProcessingLevel: "subprocessor",
   dataRegions: ["us", "eu"],
-  criticality: "medium",
-  owner: "Finance",
   notes: "Customer payment processor",
 }
 
@@ -225,14 +232,20 @@ const noProcessingVendorBody = {
   ...vendorBody,
   name: "Linear",
   category: "project_management",
-  purpose: "Issue tracking",
   hasSubprocessors: false,
+  criticality: "low",
+  owner: "Product",
+  notes: "",
+}
+
+const noProcessingVendorUseBody = {
+  ...vendorUseBody,
+  vendorId: "vendor-none",
+  purpose: "Issue tracking",
   dataProcessingLevel: "none",
   dataProcessed: [],
   dpaStatus: "not_required",
   dataRegions: [],
-  criticality: "low",
-  owner: "Product",
   notes: "",
 }
 
@@ -429,23 +442,37 @@ describe("security profile API", () => {
       url: "/organizations/org-test/vendors",
       payload: {
         ...vendorBody,
-        serviceId: services[1].id,
         name: "Stripe EU",
       },
     })
 
     expect(vendorResponse.statusCode).toBe(201)
-    expect(vendorResponse.json()).toMatchObject({
+    const vendorUseResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/service-vendor-uses",
+      payload: {
+        ...vendorUseBody,
+        serviceId: services[1].id,
+        vendorId: vendorResponse.json().id,
+      },
+    })
+
+    expect(vendorUseResponse.statusCode).toBe(201)
+    expect(vendorUseResponse.json()).toMatchObject({
       serviceId: services[1].id,
       serviceName: "Acme EU",
+      vendorName: "Stripe EU",
+    })
+    expect(vendorResponse.json()).toMatchObject({
       name: "Stripe EU",
     })
 
     const invalidVendorResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/vendors",
+      url: "/organizations/org-test/service-vendor-uses",
       payload: {
-        ...vendorBody,
+        ...vendorUseBody,
+        vendorId: vendorResponse.json().id,
         serviceId: "service_missing",
       },
     })
@@ -746,11 +773,12 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-      },
-      vendors: [
+	      },
+	      businessActivities: [],
+	      vendors: [
         {
-          id: "vendor-limited",
-          ...vendorBody,
+	          id: "vendor-limited",
+	          ...vendorBody,
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
@@ -766,8 +794,34 @@ describe("security profile API", () => {
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
-      ],
-    }
+	      ],
+	      serviceVendorUses: [
+	        {
+	          id: "vendor-use-limited",
+	          ...vendorUseBody,
+	          vendorName: "GitHub",
+	          serviceName: "Acme AI Platform",
+	          createdAt: "2026-05-15T00:00:00.000Z",
+	          updatedAt: "2026-05-15T00:00:00.000Z",
+	        },
+	        {
+	          id: "vendor-use-subprocessor",
+	          ...subprocessorUseBody,
+	          vendorName: "Stripe",
+	          serviceName: "Acme AI Platform",
+	          createdAt: "2026-05-15T00:00:00.000Z",
+	          updatedAt: "2026-05-15T00:00:00.000Z",
+	        },
+	        {
+	          id: "vendor-use-none",
+	          ...noProcessingVendorUseBody,
+	          vendorName: "Linear",
+	          serviceName: "Acme AI Platform",
+	          createdAt: "2026-05-15T00:00:00.000Z",
+	          updatedAt: "2026-05-15T00:00:00.000Z",
+	        },
+	      ],
+	    }
 
     const context = new ReportContextBuilder().build(snapshot)
 
@@ -779,9 +833,9 @@ describe("security profile API", () => {
       "Stripe",
       "Linear",
     ])
-    expect(context.vendors.dataProcessors.map((vendor) => vendor.name)).toEqual(
-      ["GitHub", "Stripe"],
-    )
+	    expect(context.vendors.dataProcessors.map((vendor) => vendor.name)).toEqual(
+	      ["GitHub", "Stripe"],
+	    )
     expect(context.vendors.subprocessors.map((vendor) => vendor.name)).toEqual([
       "Stripe",
     ])
@@ -893,9 +947,11 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-      },
-      vendors: [],
-    }
+	      },
+	      businessActivities: [],
+	      vendors: [],
+	      serviceVendorUses: [],
+	    }
 
     const context = new ReportContextBuilder().build(
       snapshot,
@@ -1028,8 +1084,9 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-      },
-      vendors: [
+	      },
+	      businessActivities: [],
+	      vendors: [
         {
           id: "vendor-limited",
           ...vendorBody,
@@ -1042,8 +1099,26 @@ describe("security profile API", () => {
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
-      ],
-    })
+	      ],
+	      serviceVendorUses: [
+	        {
+	          id: "vendor-use-limited",
+	          ...vendorUseBody,
+	          vendorName: "GitHub",
+	          serviceName: "Acme AI Platform",
+	          createdAt: "2026-05-15T00:00:00.000Z",
+	          updatedAt: "2026-05-15T00:00:00.000Z",
+	        },
+	        {
+	          id: "vendor-use-subprocessor",
+	          ...subprocessorUseBody,
+	          vendorName: "Stripe",
+	          serviceName: "Acme AI Platform",
+	          createdAt: "2026-05-15T00:00:00.000Z",
+	          updatedAt: "2026-05-15T00:00:00.000Z",
+	        },
+	      ],
+	    })
     const renderedContent = new Jinja2Renderer().render(
       {
         id: "template-subprocessors",
@@ -1095,7 +1170,7 @@ describe("security profile API", () => {
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/vendors",
-      payload: { ...vendorBody, serviceId },
+      payload: vendorBody,
     })
 
     expect(createResponse.statusCode).toBe(201)
@@ -1103,12 +1178,23 @@ describe("security profile API", () => {
     expect(createdVendor.name).toBe("GitHub")
     expect(createdVendor.countryOfRegistration).toBe("US")
 
+    const createUseResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/service-vendor-uses",
+      payload: { ...vendorUseBody, serviceId, vendorId: createdVendor.id },
+    })
+
+    expect(createUseResponse.statusCode).toBe(201)
+    const createdVendorUse = createUseResponse.json()
+    expect(createdVendorUse.dpaStatus).toBe("signed")
+
     const updateResponse = await app.inject({
       method: "PUT",
-      url: `/organizations/org-test/vendors/${createdVendor.id}`,
+      url: `/organizations/org-test/service-vendor-uses/${createdVendorUse.id}`,
       payload: {
-        ...vendorBody,
+        ...vendorUseBody,
         serviceId,
+        vendorId: createdVendor.id,
         dpaStatus: "under_review",
         notes: "DPA being reviewed",
       },
@@ -1119,6 +1205,11 @@ describe("security profile API", () => {
 
     const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/vendors" })
     expect(listResponse.json()).toHaveLength(1)
+    const useListResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/service-vendor-uses",
+    })
+    expect(useListResponse.json()).toHaveLength(1)
 
     const deleteResponse = await app.inject({
       method: "DELETE",
@@ -1600,10 +1691,17 @@ describe("security profile API", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/vendors",
+      url: "/organizations/org-test/service-vendor-uses",
       payload: {
-        ...vendorBody,
+        ...vendorUseBody,
         serviceId,
+        vendorId: (
+          await app.inject({
+            method: "POST",
+            url: "/organizations/org-test/vendors",
+            payload: vendorBody,
+          })
+        ).json().id,
         dataProcessed: ["source_code"],
       },
     })

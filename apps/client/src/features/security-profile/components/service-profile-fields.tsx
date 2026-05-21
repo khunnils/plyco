@@ -100,6 +100,7 @@ const MinimumAgeField = ({
 }
 
 export const ServiceProfileFields = ({
+  businessActivityOptions,
   cookieTypeOptions,
   customerTypeOptions,
   form,
@@ -107,6 +108,7 @@ export const ServiceProfileFields = ({
   regionOptions,
   userTypeOptions,
 }: {
+  businessActivityOptions: Option[]
   cookieTypeOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
@@ -166,6 +168,16 @@ export const ServiceProfileFields = ({
               register={form.register}
             />
           </div>
+          <MultiSelectField
+            control={form.control}
+            error={
+              form.formState.errors.services?.[index]?.businessActivityIds?.root
+            }
+            label="Business activities"
+            name={servicePath(index, "businessActivityIds")}
+            options={businessActivityOptions}
+            placeholder="Select business activities"
+          />
           <MultiSelectField
             control={form.control}
             error={form.formState.errors.services?.[index]?.userTypes?.root}

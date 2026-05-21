@@ -28,9 +28,7 @@ type StoredDataType = {
   name: string
   description: string
   subjectTypes: string[]
-  purposes: string
   collectionMethods: string[]
-  legalBasis: string[]
   retentionDays: number
   isSensitive: boolean
   isRequired: boolean
@@ -42,7 +40,6 @@ type DataTypesFieldProps<T extends FieldValues> = {
   error?: FieldError
   errorMessage?: string
   label: string
-  legalBasisOptions: Option[]
   name: FieldPath<T>
   subjectTypeOptions: Option[]
 }
@@ -51,9 +48,7 @@ const emptyDataType = (): StoredDataType => ({
   name: "",
   description: "",
   subjectTypes: [],
-  purposes: "",
   collectionMethods: [],
-  legalBasis: [],
   retentionDays: 0,
   isSensitive: false,
   isRequired: false,
@@ -63,11 +58,9 @@ const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
   ...emptyDataType(),
   ...value,
   subjectTypes: Array.isArray(value.subjectTypes) ? value.subjectTypes : [],
-  purposes: typeof value.purposes === "string" ? value.purposes : "",
   collectionMethods: Array.isArray(value.collectionMethods)
     ? value.collectionMethods
     : [],
-  legalBasis: Array.isArray(value.legalBasis) ? value.legalBasis : [],
   retentionDays:
     typeof value.retentionDays === "number" && Number.isFinite(value.retentionDays)
       ? value.retentionDays
@@ -219,7 +212,6 @@ const DataTypesEditor = <T extends FieldValues>({
   errorMessage,
   field,
   label,
-  legalBasisOptions,
   subjectTypeOptions,
 }: {
   collectionMethodOptions: Option[]
@@ -227,7 +219,6 @@ const DataTypesEditor = <T extends FieldValues>({
   errorMessage?: string
   field: ControllerRenderProps<T, FieldPath<T>>
   label: string
-  legalBasisOptions: Option[]
   subjectTypeOptions: Option[]
 }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
@@ -387,13 +378,6 @@ const DataTypesEditor = <T extends FieldValues>({
                           updateValue(index, "subjectTypes", value)
                         }
                       />
-                      <FieldInput
-                        label="Purpose"
-                        placeholder="Why is this data collected?"
-                        value={item.purposes}
-                        onBlur={field.onBlur}
-                        onChange={(value) => updateValue(index, "purposes", value)}
-                      />
                       <MultiSelectDropdown
                         label="Collection methods"
                         placeholder="Select collection methods"
@@ -403,14 +387,6 @@ const DataTypesEditor = <T extends FieldValues>({
                         onChange={(value) =>
                           updateValue(index, "collectionMethods", value)
                         }
-                      />
-                      <MultiSelectDropdown
-                        label="Legal basis"
-                        placeholder="Select legal basis"
-                        options={legalBasisOptions}
-                        value={item.legalBasis}
-                        onBlur={field.onBlur}
-                        onChange={(value) => updateValue(index, "legalBasis", value)}
                       />
                     </div>
                     <div className="grid gap-2 md:grid-cols-2">
@@ -449,7 +425,6 @@ export const DataTypesField = <T extends FieldValues>({
   error,
   errorMessage,
   label,
-  legalBasisOptions,
   name,
   subjectTypeOptions,
 }: DataTypesFieldProps<T>) => (
@@ -463,7 +438,6 @@ export const DataTypesField = <T extends FieldValues>({
         errorMessage={errorMessage}
         field={field}
         label={label}
-        legalBasisOptions={legalBasisOptions}
         subjectTypeOptions={subjectTypeOptions}
       />
     )}
