@@ -112,7 +112,7 @@ Fields:
 
 ### Service Profiles
 
-The workspace supports multiple product or service profiles per organization. Services are edited from the Company workspace navigation and are not part of onboarding. Organization-level profile sections such as Privacy, Infrastructure, Data Handling, and Access stay shared across services.
+The workspace supports multiple product or service profiles per organization. Services are edited from the Company workspace navigation and are not part of onboarding. Service-specific cookie, tracking, hosting, and data-residency details live on each service. Organization-level profile sections such as shared Privacy rights, Infrastructure, Data Handling, and Access stay shared across services.
 
 Fields:
 
@@ -124,6 +124,12 @@ Fields:
 - availability regions
 - children-directed indicator
 - minimum user age, where `0` means unset
+- uses cookies
+- cookie types
+- analytics providers selected from provider catalog entries tagged as `analytics`
+- advertising providers selected from provider catalog entries tagged as `advertising`
+- primary hosting region
+- data residency options
 
 ### Privacy Profile
 
@@ -137,10 +143,6 @@ Fields:
 - identity verification required
 - authorized agent supported
 - appeal process exists
-- uses cookies
-- cookie types
-- analytics providers selected from provider catalog entries tagged as `analytics`
-- advertising providers selected from provider catalog entries tagged as `advertising`
 - cookie consent mechanism
 - Do Not Track response
 - Global Privacy Control supported
@@ -150,8 +152,6 @@ Fields:
 - newsletter provider selected from provider catalog entries tagged as `newsletter`
 - cross-border transfers
 - transfer mechanisms
-- primary hosting region
-- data residency options
 
 ### Infrastructure Profile
 
@@ -209,6 +209,9 @@ Fields:
 - DPA status
 - data regions
 - criticality
+- legal name and display name
+- provider organization name and legal name
+- privacy policy, DPA, and security page URLs
 
 ### Vocabulary
 

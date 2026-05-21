@@ -165,6 +165,13 @@ export class PrismaVendorRepository implements VendorRepository {
   private vendorData(input: VendorInput) {
     return {
       name: input.name,
+      legalName: input.legalName,
+      displayName: input.displayName,
+      providerOrganizationName: input.providerOrganizationName,
+      providerOrganizationLegalName: input.providerOrganizationLegalName,
+      privacyPolicyUrl: input.privacyPolicyUrl,
+      dpaUrl: input.dpaUrl,
+      securityPageUrl: input.securityPageUrl,
       category: input.category,
       purpose: input.purpose,
       countryOfRegistration: input.countryOfRegistration,

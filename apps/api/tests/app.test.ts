@@ -27,6 +27,31 @@ const serviceBody = {
   availabilityRegions: ["us", "eu"],
   childrenDirected: false,
   minimumUserAge: 13,
+  privacy: {
+    usesCookies: true,
+    cookieTypes: ["necessary", "analytics"],
+    analyticsProviders: [
+      {
+        systemType: "analytics",
+        providerId: "prov-google-analytics",
+        name: "Google Analytics",
+      },
+      {
+        systemType: "analytics",
+        providerId: "prov-posthog",
+        name: "PostHog",
+      },
+    ],
+    advertisingProviders: [
+      {
+        systemType: "advertising",
+        providerId: "prov-google-ads",
+        name: "Google Ads",
+      },
+    ],
+    primaryHostingRegion: "us",
+    dataResidencyOptions: ["us", "eu"],
+  },
 }
 
 const storedService = {
@@ -61,24 +86,7 @@ const profileBody = {
     identityVerificationRequired: true,
     authorizedAgentSupported: true,
     appealProcessExists: false,
-    usesCookies: true,
-    cookieTypes: ["necessary", "analytics"],
     organizationProviders: [
-      {
-        systemType: "analytics",
-        providerId: "prov-google-analytics",
-        name: "Google Analytics",
-      },
-      {
-        systemType: "analytics",
-        providerId: "prov-posthog",
-        name: "PostHog",
-      },
-      {
-        systemType: "advertising",
-        providerId: "prov-google-ads",
-        name: "Google Ads",
-      },
       {
         systemType: "newsletter",
         providerId: "prov-mailchimp",
@@ -93,8 +101,6 @@ const profileBody = {
     transactionalEmailsSent: true,
     crossBorderTransfers: true,
     transferMechanisms: ["sccs", "dpf"],
-    primaryHostingRegion: "us",
-    dataResidencyOptions: ["us", "eu"],
     sellsOrSharesData: false,
     doNotSellLink: "",
     dpoName: "",
@@ -145,8 +151,6 @@ const profileBody = {
         retentionDays: 365,
         isSensitive: true,
         isRequired: true,
-        sharedWithThirdParties: true,
-        thirdParties: ["Stripe"],
       },
       {
         name: "usage_data",
@@ -158,8 +162,6 @@ const profileBody = {
         retentionDays: 180,
         isSensitive: false,
         isRequired: false,
-        sharedWithThirdParties: false,
-        thirdParties: [],
       },
     ],
     storesPii: true,
@@ -187,6 +189,13 @@ const profileBody = {
 const vendorBody = {
   serviceId: "service-platform",
   name: "GitHub",
+  legalName: "GitHub, Inc.",
+  displayName: "GitHub",
+  providerOrganizationName: "GitHub",
+  providerOrganizationLegalName: "GitHub, Inc.",
+  privacyPolicyUrl: "https://github.com/privacy",
+  dpaUrl: "https://github.com/customer-terms/dpa",
+  securityPageUrl: "https://github.com/security",
   category: "source_control",
   purpose: "Code hosting and pull requests",
   countryOfRegistration: "US",
@@ -481,10 +490,15 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          cookieTypes: ["not_a_real_cookie_type"],
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieTypes: ["not_a_real_cookie_type"],
+            },
+          },
+        ],
       },
     })
 
@@ -494,7 +508,7 @@ describe("security profile API", () => {
         code: "CODE_NOT_FOUND",
         details: {
           codeSetId: "privacy_cookie_types",
-          field: "privacy.cookieTypes",
+          field: "services.0.privacy.cookieTypes",
           value: "not_a_real_cookie_type",
         },
       },
@@ -532,15 +546,20 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          organizationProviders: [
-            {
-              systemType: "analytics",
-              providerId: "prov-google-ads",
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              analyticsProviders: [
+                {
+                  systemType: "analytics",
+                  providerId: "prov-google-ads",
+                },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
     })
 
@@ -614,10 +633,15 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          primaryHostingRegion: "antarctica",
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              primaryHostingRegion: "antarctica",
+            },
+          },
+        ],
       },
     })
 
@@ -627,7 +651,7 @@ describe("security profile API", () => {
         code: "CODE_NOT_FOUND",
         details: {
           codeSetId: "regions",
-          field: "privacy.primaryHostingRegion",
+          field: "services.0.privacy.primaryHostingRegion",
           value: "antarctica",
         },
       },
@@ -638,10 +662,15 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          dataResidencyOptions: ["antarctica"],
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              dataResidencyOptions: ["antarctica"],
+            },
+          },
+        ],
       },
     })
 
@@ -651,7 +680,7 @@ describe("security profile API", () => {
         code: "CODE_NOT_FOUND",
         details: {
           codeSetId: "regions",
-          field: "privacy.dataResidencyOptions",
+          field: "services.0.privacy.dataResidencyOptions",
           value: "antarctica",
         },
       },
@@ -766,6 +795,14 @@ describe("security profile API", () => {
         ]),
       }),
     ])
+    expect(context.services.all[0]).toMatchObject({
+      vendors: expect.arrayContaining([
+        expect.objectContaining({ name: "GitHub" }),
+        expect.objectContaining({ name: "Stripe" }),
+      ]),
+      subprocessors: [expect.objectContaining({ name: "Stripe" })],
+      dataTypes: [expect.objectContaining({ name: "account_data" })],
+    })
   })
 
   it("loads the report builder variable schema", async () => {
@@ -803,13 +840,6 @@ describe("security profile API", () => {
         }),
         expect.objectContaining({ key: "privacy.authorizedAgentSupported" }),
         expect.objectContaining({ key: "privacy.appealProcessExists" }),
-        expect.objectContaining({ key: "privacy.usesCookies" }),
-        expect.objectContaining({ key: "privacy.cookieTypes" }),
-        expect.objectContaining({ key: "privacy.cookieTypeLabels" }),
-        expect.objectContaining({ key: "privacy.analyticsProviders" }),
-        expect.objectContaining({ key: "privacy.analyticsProviderIds" }),
-        expect.objectContaining({ key: "privacy.advertisingProviders" }),
-        expect.objectContaining({ key: "privacy.advertisingProviderIds" }),
         expect.objectContaining({ key: "privacy.cookieConsentMechanism" }),
         expect.objectContaining({
           key: "privacy.cookieConsentMechanismLabel",
@@ -825,10 +855,6 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "privacy.crossBorderTransfers" }),
         expect.objectContaining({ key: "privacy.transferMechanisms" }),
         expect.objectContaining({ key: "privacy.transferMechanismLabels" }),
-        expect.objectContaining({ key: "privacy.primaryHostingRegion" }),
-        expect.objectContaining({ key: "privacy.primaryHostingRegionLabel" }),
-        expect.objectContaining({ key: "privacy.dataResidencyOptions" }),
-        expect.objectContaining({ key: "privacy.dataResidencyOptionLabels" }),
         expect.objectContaining({ key: "privacy.newsletterProvider" }),
         expect.objectContaining({ key: "privacy.newsletterProviderId" }),
         expect.objectContaining({ key: "security.accessControl.leastPrivilege" }),
@@ -891,6 +917,19 @@ describe("security profile API", () => {
       availabilityRegionLabels: ["United States", "European Union"],
       childrenDirected: false,
       minimumUserAge: 13,
+      privacy: {
+        usesCookies: true,
+        cookieTypes: ["necessary", "analytics"],
+        cookieTypeLabels: ["Necessary", "Analytics"],
+        analyticsProviders: ["Google Analytics", "PostHog"],
+        analyticsProviderIds: ["prov-google-analytics", "prov-posthog"],
+        advertisingProviders: ["Google Ads"],
+        advertisingProviderIds: ["prov-google-ads"],
+        primaryHostingRegion: "us",
+        primaryHostingRegionLabel: "United States",
+        dataResidencyOptions: ["us", "eu"],
+        dataResidencyOptionLabels: ["United States", "European Union"],
+      },
     })
     expect(context.services.primary).toMatchObject(context.service)
     expect(context.services.all).toHaveLength(1)
@@ -903,13 +942,6 @@ describe("security profile API", () => {
       identityVerificationRequired: true,
       authorizedAgentSupported: true,
       appealProcessExists: false,
-      usesCookies: true,
-      cookieTypes: ["necessary", "analytics"],
-      cookieTypeLabels: ["Necessary", "Analytics"],
-      analyticsProviders: ["Google Analytics", "PostHog"],
-      analyticsProviderIds: ["prov-google-analytics", "prov-posthog"],
-      advertisingProviders: ["Google Ads"],
-      advertisingProviderIds: ["prov-google-ads"],
       cookieConsentMechanism: "cookie_banner",
       cookieConsentMechanismLabel: "Cookie banner",
       doNotTrackResponse: false,
@@ -921,10 +953,6 @@ describe("security profile API", () => {
       crossBorderTransfers: true,
       transferMechanisms: ["sccs", "dpf"],
       transferMechanismLabels: ["SCCs", "Data Privacy Framework"],
-      primaryHostingRegion: "us",
-      primaryHostingRegionLabel: "United States",
-      dataResidencyOptions: ["us", "eu"],
-      dataResidencyOptionLabels: ["United States", "European Union"],
       newsletterProvider: "Mailchimp",
       newsletterProviderId: "prov-mailchimp",
     })
@@ -1414,10 +1442,15 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          dataResidencyOptions: ["eu"],
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              dataResidencyOptions: ["eu"],
+            },
+          },
+        ],
       },
     })
     const transferStaleDocumentsResponse = await app.inject({
@@ -1470,10 +1503,15 @@ describe("security profile API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          cookieTypes: ["necessary", "analytics", "personalization"],
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieTypes: ["necessary", "analytics", "personalization"],
+            },
+          },
+        ],
       },
     })
     const cookieStaleDocumentsResponse = await app.inject({

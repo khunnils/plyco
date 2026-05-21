@@ -291,6 +291,65 @@ export const validateServiceProfileCodes = async (
       service.availabilityRegions,
       `${fieldPrefix}.availabilityRegions`,
     ),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "privacy_cookie_types",
+      service.privacy.cookieTypes,
+      `${fieldPrefix}.privacy.cookieTypes`,
+    ),
+    service.privacy.primaryHostingRegion
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "regions",
+          service.privacy.primaryHostingRegion,
+          `${fieldPrefix}.privacy.primaryHostingRegion`,
+        )
+      : Promise.resolve(),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "regions",
+      service.privacy.dataResidencyOptions,
+      `${fieldPrefix}.privacy.dataResidencyOptions`,
+    ),
+    ...service.privacy.analyticsProviders.map((provider) => {
+      if (provider.systemType !== "analytics") {
+        throw new ApiError(
+          "SERVICE_PROVIDER_SYSTEM_TYPE_INVALID",
+          "Service analytics providers must use analytics system type.",
+          400,
+          { systemType: provider.systemType },
+        )
+      }
+
+      return assertCode(
+        vocabularyRepository,
+        organizationId,
+        "provider_system_type",
+        provider.systemType,
+        `${fieldPrefix}.privacy.analyticsProviders.systemType`,
+      )
+    }),
+    ...service.privacy.advertisingProviders.map((provider) => {
+      if (provider.systemType !== "advertising") {
+        throw new ApiError(
+          "SERVICE_PROVIDER_SYSTEM_TYPE_INVALID",
+          "Service advertising providers must use advertising system type.",
+          400,
+          { systemType: provider.systemType },
+        )
+      }
+
+      return assertCode(
+        vocabularyRepository,
+        organizationId,
+        "provider_system_type",
+        provider.systemType,
+        `${fieldPrefix}.privacy.advertisingProviders.systemType`,
+      )
+    }),
   ])
 }
 
@@ -313,13 +372,6 @@ export const validatePrivacyProfileCodes = async (
       "privacy_request_methods",
       privacy.requestMethods,
       "privacy.requestMethods",
-    ),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "privacy_cookie_types",
-      privacy.cookieTypes,
-      "privacy.cookieTypes",
     ),
     privacy.cookieConsentMechanism
       ? assertCode(
@@ -346,31 +398,11 @@ export const validatePrivacyProfileCodes = async (
       privacy.transferMechanisms,
       "privacy.transferMechanisms",
     ),
-    privacy.primaryHostingRegion
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "regions",
-          privacy.primaryHostingRegion,
-          "privacy.primaryHostingRegion",
-        )
-      : Promise.resolve(),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "regions",
-      privacy.dataResidencyOptions,
-      "privacy.dataResidencyOptions",
-    ),
     ...privacy.organizationProviders.map((provider) => {
-      if (
-        provider.systemType !== "analytics" &&
-        provider.systemType !== "advertising" &&
-        provider.systemType !== "newsletter"
-      ) {
+      if (provider.systemType !== "newsletter") {
         throw new ApiError(
           "PRIVACY_PROVIDER_SYSTEM_TYPE_INVALID",
-          "Privacy providers must use analytics, advertising, or newsletter system types.",
+          "Privacy providers must use newsletter system type.",
           400,
           { systemType: provider.systemType },
         )

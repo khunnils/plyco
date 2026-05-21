@@ -1,8 +1,14 @@
 import { Plus, Trash2 } from "lucide-react"
-import { emptyServiceProfile } from "@plyco/shared"
+import {
+  emptyServiceProfile,
+  type OrganizationProvider,
+  type Provider,
+  type ProviderSystemType,
+} from "@plyco/shared"
 import { type FieldPath, type UseFormReturn, useFieldArray } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
@@ -11,6 +17,61 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 const servicePath = (index: number, field: string) =>
   `services.${index}.${field}` as FieldPath<ProfileDraft>
+
+const servicePrivacyPath = (index: number, field: string) =>
+  `services.${index}.privacy.${field}` as FieldPath<ProfileDraft>
+
+const selectedProviderIds = (providers: OrganizationProvider[]) =>
+  providers.map((provider) => provider.providerId)
+
+const providerOptions = (
+  providers: Provider[],
+  systemType: ProviderSystemType,
+) =>
+  providers
+    .filter((provider) => provider.systemTypes.includes(systemType))
+    .map((provider) => ({ value: provider.id, label: provider.name }))
+
+const ServiceProviderPicker = ({
+  form,
+  index,
+  label,
+  providers,
+  systemType,
+}: {
+  form: UseFormReturn<ProfileDraft>
+  index: number
+  label: string
+  providers: Provider[]
+  systemType: "analytics" | "advertising"
+}) => {
+  const field =
+    systemType === "analytics" ? "analyticsProviders" : "advertisingProviders"
+  const path = servicePrivacyPath(index, field)
+  const selectedProviders = form.watch(path) as OrganizationProvider[]
+  const options = providerOptions(providers, systemType)
+
+  return (
+    <MultiSelectField
+      control={form.control}
+      label={label}
+      name={path}
+      options={options}
+      placeholder={`Select ${label.toLowerCase()}`}
+      value={selectedProviderIds(selectedProviders)}
+      onValueChange={(providerIds) => {
+        form.setValue(
+          path,
+          providerIds.map((providerId) => ({
+            systemType,
+            providerId,
+          })) as never,
+          { shouldDirty: true, shouldValidate: true },
+        )
+      }}
+    />
+  )
+}
 
 const MinimumAgeField = ({
   form,
@@ -39,13 +100,17 @@ const MinimumAgeField = ({
 }
 
 export const ServiceProfileFields = ({
+  cookieTypeOptions,
   customerTypeOptions,
   form,
+  providers,
   regionOptions,
   userTypeOptions,
 }: {
+  cookieTypeOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
+  providers: Provider[]
   regionOptions: Option[]
   userTypeOptions: Option[]
 }) => {
@@ -133,6 +198,59 @@ export const ServiceProfileFields = ({
             name={servicePath(index, "childrenDirected")}
           />
           <MinimumAgeField form={form} index={index} />
+          <div className="grid gap-4 border-t border-slate-200 pt-4 md:col-span-2 md:grid-cols-2">
+            <h4 className="text-sm font-semibold text-slate-900 md:col-span-2">
+              Service privacy
+            </h4>
+            <ToggleField
+              control={form.control}
+              label="Uses cookies"
+              name={servicePrivacyPath(index, "usesCookies")}
+            />
+            <MultiSelectField
+              control={form.control}
+              error={
+                form.formState.errors.services?.[index]?.privacy?.cookieTypes
+                  ?.root
+              }
+              label="Cookie types"
+              name={servicePrivacyPath(index, "cookieTypes")}
+              options={cookieTypeOptions}
+              placeholder="Select cookie types"
+            />
+            <ServiceProviderPicker
+              form={form}
+              index={index}
+              label="Analytics providers"
+              providers={providers}
+              systemType="analytics"
+            />
+            <ServiceProviderPicker
+              form={form}
+              index={index}
+              label="Advertising providers"
+              providers={providers}
+              systemType="advertising"
+            />
+            <SelectField
+              control={form.control}
+              label="Primary hosting region"
+              name={servicePrivacyPath(index, "primaryHostingRegion")}
+              options={[{ value: "", label: "Not set" }, ...regionOptions]}
+              placeholder="Not set"
+            />
+            <MultiSelectField
+              control={form.control}
+              error={
+                form.formState.errors.services?.[index]?.privacy
+                  ?.dataResidencyOptions?.root
+              }
+              label="Data residency options"
+              name={servicePrivacyPath(index, "dataResidencyOptions")}
+              options={regionOptions}
+              placeholder="Select data residency options"
+            />
+          </div>
         </div>
       ))}
       <Button

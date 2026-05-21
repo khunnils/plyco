@@ -105,6 +105,34 @@ export const VendorForm = ({
           placeholder="Code hosting and reviews"
           register={form.register}
         />
+        <TextField
+          error={form.formState.errors.displayName}
+          label="Display name"
+          name="displayName"
+          placeholder="GitHub"
+          register={form.register}
+        />
+        <TextField
+          error={form.formState.errors.legalName}
+          label="Legal name"
+          name="legalName"
+          placeholder="GitHub, Inc."
+          register={form.register}
+        />
+        <TextField
+          error={form.formState.errors.providerOrganizationName}
+          label="Provider organization"
+          name="providerOrganizationName"
+          placeholder="GitHub"
+          register={form.register}
+        />
+        <TextField
+          error={form.formState.errors.providerOrganizationLegalName}
+          label="Provider organization legal name"
+          name="providerOrganizationLegalName"
+          placeholder="GitHub, Inc."
+          register={form.register}
+        />
         <SelectField
           control={form.control}
           label="Country of registration"
@@ -163,6 +191,27 @@ export const VendorForm = ({
               control={form.control}
               label="Vendor uses subprocessors"
               name="hasSubprocessors"
+            />
+            <TextField
+              error={form.formState.errors.privacyPolicyUrl}
+              label="Privacy policy URL"
+              name="privacyPolicyUrl"
+              placeholder="https://example.com/privacy"
+              register={form.register}
+            />
+            <TextField
+              error={form.formState.errors.dpaUrl}
+              label="DPA URL"
+              name="dpaUrl"
+              placeholder="https://example.com/dpa"
+              register={form.register}
+            />
+            <TextField
+              error={form.formState.errors.securityPageUrl}
+              label="Security page URL"
+              name="securityPageUrl"
+              placeholder="https://example.com/security"
+              register={form.register}
             />
           </>
         ) : null}

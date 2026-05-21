@@ -238,7 +238,280 @@
         {
           "id": "service_1",
           "name": "Acme AI Platform",
-          "url": "https://app.acme.example"
+          "description": "Cloud software for managing customer security reviews",
+          "url": "https://app.acme.example",
+          "privacy": {
+            "usesCookies": true,
+            "cookieTypes": [
+              "necessary",
+              "analytics"
+            ],
+            "analyticsProviders": [
+              "Google Analytics"
+            ],
+            "advertisingProviders": [
+              "Google Ads"
+            ],
+            "primaryHostingRegion": "us",
+            "dataResidencyOptions": [
+              "us",
+              "eu"
+            ]
+          },
+          "vendors": [
+            {
+              "name": "Stripe",
+              "dataProcessingLevel": "subprocessor"
+            }
+          ],
+          "subprocessors": [
+            {
+              "name": "Stripe",
+              "dataProcessingLevel": "subprocessor"
+            }
+          ],
+          "dataTypes": [
+            {
+              "name": "account_data",
+              "description": "Profile and billing contact details"
+            }
+          ]
+        }
+      ],
+      "itemFields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "string",
+          "description": "Service profile ID.",
+          "example": "service_1"
+        },
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "string",
+          "description": "Service name.",
+          "example": "Acme AI Platform"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "string",
+          "description": "Service description.",
+          "example": "Cloud software for managing customer security reviews"
+        },
+        {
+          "key": "url",
+          "label": "URL",
+          "type": "string",
+          "description": "Service URL.",
+          "example": "https://app.acme.example"
+        },
+        {
+          "key": "userTypes",
+          "label": "User types",
+          "type": "string[]",
+          "description": "Service user type codes.",
+          "example": [
+            "workspace_admins",
+            "end_users"
+          ]
+        },
+        {
+          "key": "userTypeLabels",
+          "label": "User type labels",
+          "type": "string[]",
+          "description": "Human-readable service user type labels.",
+          "example": [
+            "Workspace admins",
+            "End users"
+          ]
+        },
+        {
+          "key": "customerTypes",
+          "label": "Customer types",
+          "type": "string[]",
+          "description": "Service customer type codes.",
+          "example": [
+            "smb",
+            "mid_market"
+          ]
+        },
+        {
+          "key": "customerTypeLabels",
+          "label": "Customer type labels",
+          "type": "string[]",
+          "description": "Human-readable service customer type labels.",
+          "example": [
+            "SMB",
+            "Mid-market"
+          ]
+        },
+        {
+          "key": "availabilityRegions",
+          "label": "Availability regions",
+          "type": "string[]",
+          "description": "Region codes where the service is available.",
+          "example": [
+            "us",
+            "eu"
+          ]
+        },
+        {
+          "key": "availabilityRegionLabels",
+          "label": "Availability region labels",
+          "type": "string[]",
+          "description": "Human-readable availability region labels.",
+          "example": [
+            "United States",
+            "European Union"
+          ]
+        },
+        {
+          "key": "childrenDirected",
+          "label": "Children-directed",
+          "type": "boolean",
+          "description": "Whether the service is directed to children.",
+          "example": false
+        },
+        {
+          "key": "minimumUserAge",
+          "label": "Minimum user age",
+          "type": "number",
+          "description": "Minimum age required for service users. A value of 0 means not set.",
+          "example": 13
+        },
+        {
+          "key": "privacy.usesCookies",
+          "label": "Uses cookies",
+          "type": "boolean",
+          "description": "Whether this service uses cookies or similar tracking technologies.",
+          "example": true
+        },
+        {
+          "key": "privacy.cookieTypes",
+          "label": "Cookie types",
+          "type": "string[]",
+          "description": "Cookie type codes used by this service.",
+          "example": [
+            "necessary",
+            "analytics"
+          ]
+        },
+        {
+          "key": "privacy.cookieTypeLabels",
+          "label": "Cookie type labels",
+          "type": "string[]",
+          "description": "Human-readable cookie type labels for this service.",
+          "example": [
+            "Necessary",
+            "Analytics"
+          ]
+        },
+        {
+          "key": "privacy.analyticsProviders",
+          "label": "Analytics providers",
+          "type": "string[]",
+          "description": "Names of analytics providers used by this service.",
+          "example": [
+            "Google Analytics"
+          ]
+        },
+        {
+          "key": "privacy.analyticsProviderIds",
+          "label": "Analytics provider IDs",
+          "type": "string[]",
+          "description": "Catalog provider IDs for service analytics providers.",
+          "example": [
+            "prov-google-analytics"
+          ]
+        },
+        {
+          "key": "privacy.advertisingProviders",
+          "label": "Advertising providers",
+          "type": "string[]",
+          "description": "Names of advertising providers used by this service.",
+          "example": [
+            "Google Ads"
+          ]
+        },
+        {
+          "key": "privacy.advertisingProviderIds",
+          "label": "Advertising provider IDs",
+          "type": "string[]",
+          "description": "Catalog provider IDs for service advertising providers.",
+          "example": [
+            "prov-google-ads"
+          ]
+        },
+        {
+          "key": "privacy.primaryHostingRegion",
+          "label": "Primary hosting region",
+          "type": "string",
+          "description": "Primary hosting region code for this service.",
+          "example": "us"
+        },
+        {
+          "key": "privacy.primaryHostingRegionLabel",
+          "label": "Primary hosting region label",
+          "type": "string",
+          "description": "Human-readable primary hosting region for this service.",
+          "example": "United States"
+        },
+        {
+          "key": "privacy.dataResidencyOptions",
+          "label": "Data residency options",
+          "type": "string[]",
+          "description": "Region codes available for service data residency.",
+          "example": [
+            "us",
+            "eu"
+          ]
+        },
+        {
+          "key": "privacy.dataResidencyOptionLabels",
+          "label": "Data residency option labels",
+          "type": "string[]",
+          "description": "Human-readable data residency labels for this service.",
+          "example": [
+            "United States",
+            "European Union"
+          ]
+        },
+        {
+          "key": "vendors",
+          "label": "Vendors",
+          "type": "collection",
+          "description": "Vendors assigned to this service.",
+          "example": [
+            {
+              "name": "Stripe",
+              "dataProcessingLevel": "subprocessor"
+            }
+          ]
+        },
+        {
+          "key": "subprocessors",
+          "label": "Subprocessors",
+          "type": "collection",
+          "description": "Service vendors whose data processing level is subprocessor.",
+          "example": [
+            {
+              "name": "Stripe",
+              "dataProcessingLevel": "subprocessor"
+            }
+          ]
+        },
+        {
+          "key": "dataTypes",
+          "label": "Data types",
+          "type": "collection",
+          "description": "Organization data types referenced by this service’s vendors.",
+          "example": [
+            {
+              "name": "account_data"
+            }
+          ]
         }
       ]
     },
@@ -333,78 +606,6 @@
       "example": false
     },
     {
-      "key": "privacy.usesCookies",
-      "label": "Uses cookies",
-      "type": "boolean",
-      "category": "Privacy",
-      "description": "Whether the organization uses cookies or similar tracking technologies.",
-      "example": true
-    },
-    {
-      "key": "privacy.cookieTypes",
-      "label": "Cookie types",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Cookie type codes used by the organization.",
-      "example": [
-        "necessary",
-        "analytics"
-      ]
-    },
-    {
-      "key": "privacy.cookieTypeLabels",
-      "label": "Cookie type labels",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Human-readable labels for cookie type codes.",
-      "example": [
-        "Necessary",
-        "Analytics"
-      ]
-    },
-    {
-      "key": "privacy.analyticsProviders",
-      "label": "Analytics providers",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Names of selected analytics providers used by the organization.",
-      "example": [
-        "Google Analytics",
-        "PostHog"
-      ]
-    },
-    {
-      "key": "privacy.analyticsProviderIds",
-      "label": "Analytics provider IDs",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Catalog provider IDs for selected analytics providers.",
-      "example": [
-        "prov-google-analytics",
-        "prov-posthog"
-      ]
-    },
-    {
-      "key": "privacy.advertisingProviders",
-      "label": "Advertising providers",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Names of selected advertising or marketing tracking providers used by the organization.",
-      "example": [
-        "Google Ads"
-      ]
-    },
-    {
-      "key": "privacy.advertisingProviderIds",
-      "label": "Advertising provider IDs",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Catalog provider IDs for selected advertising providers.",
-      "example": [
-        "prov-google-ads"
-      ]
-    },
-    {
       "key": "privacy.cookieConsentMechanism",
       "label": "Cookie consent mechanism",
       "type": "string",
@@ -496,44 +697,6 @@
       "example": [
         "SCCs",
         "Data Privacy Framework"
-      ]
-    },
-    {
-      "key": "privacy.primaryHostingRegion",
-      "label": "Primary hosting region",
-      "type": "string",
-      "category": "Privacy",
-      "description": "Primary hosting region code. An empty value means not set.",
-      "example": "us"
-    },
-    {
-      "key": "privacy.primaryHostingRegionLabel",
-      "label": "Primary hosting region label",
-      "type": "string",
-      "category": "Privacy",
-      "description": "Human-readable label for the primary hosting region.",
-      "example": "United States"
-    },
-    {
-      "key": "privacy.dataResidencyOptions",
-      "label": "Data residency options",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Region codes available for data residency.",
-      "example": [
-        "us",
-        "eu"
-      ]
-    },
-    {
-      "key": "privacy.dataResidencyOptionLabels",
-      "label": "Data residency option labels",
-      "type": "string[]",
-      "category": "Privacy",
-      "description": "Human-readable labels for data residency option region codes.",
-      "example": [
-        "United States",
-        "European Union"
       ]
     },
     {
@@ -1055,11 +1218,7 @@
           ],
           "retentionDays": 365,
           "isSensitive": true,
-          "isRequired": true,
-          "sharedWithThirdParties": true,
-          "thirdParties": [
-            "Stripe"
-          ]
+          "isRequired": true
         }
       ],
       "itemFields": [
@@ -1135,22 +1294,6 @@
           "type": "boolean",
           "description": "Whether this data category is required to provide the product or service.",
           "example": true
-        },
-        {
-          "key": "sharedWithThirdParties",
-          "label": "Shared with third parties",
-          "type": "boolean",
-          "description": "Whether this data category is shared with third parties.",
-          "example": true
-        },
-        {
-          "key": "thirdParties",
-          "label": "Third parties",
-          "type": "string[]",
-          "description": "Third parties that receive this data category.",
-          "example": [
-            "Stripe"
-          ]
         }
       ]
     },
@@ -1285,6 +1428,55 @@
           "example": "GitHub"
         },
         {
+          "key": "legalName",
+          "label": "Legal name",
+          "type": "string",
+          "description": "Vendor legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "displayName",
+          "label": "Display name",
+          "type": "string",
+          "description": "Customer-facing vendor display name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationName",
+          "label": "Provider organization",
+          "type": "string",
+          "description": "Provider organization name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationLegalName",
+          "label": "Provider organization legal name",
+          "type": "string",
+          "description": "Provider organization legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "privacyPolicyUrl",
+          "label": "Privacy policy URL",
+          "type": "string",
+          "description": "Vendor privacy policy URL.",
+          "example": "https://stripe.com/privacy"
+        },
+        {
+          "key": "dpaUrl",
+          "label": "DPA URL",
+          "type": "string",
+          "description": "Vendor data processing agreement URL.",
+          "example": "https://stripe.com/legal/dpa"
+        },
+        {
+          "key": "securityPageUrl",
+          "label": "Security page URL",
+          "type": "string",
+          "description": "Vendor security page URL.",
+          "example": "https://stripe.com/docs/security"
+        },
+        {
           "key": "category",
           "label": "Category",
           "type": "string",
@@ -1396,6 +1588,55 @@
           "example": "GitHub"
         },
         {
+          "key": "legalName",
+          "label": "Legal name",
+          "type": "string",
+          "description": "Vendor legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "displayName",
+          "label": "Display name",
+          "type": "string",
+          "description": "Customer-facing vendor display name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationName",
+          "label": "Provider organization",
+          "type": "string",
+          "description": "Provider organization name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationLegalName",
+          "label": "Provider organization legal name",
+          "type": "string",
+          "description": "Provider organization legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "privacyPolicyUrl",
+          "label": "Privacy policy URL",
+          "type": "string",
+          "description": "Vendor privacy policy URL.",
+          "example": "https://stripe.com/privacy"
+        },
+        {
+          "key": "dpaUrl",
+          "label": "DPA URL",
+          "type": "string",
+          "description": "Vendor data processing agreement URL.",
+          "example": "https://stripe.com/legal/dpa"
+        },
+        {
+          "key": "securityPageUrl",
+          "label": "Security page URL",
+          "type": "string",
+          "description": "Vendor security page URL.",
+          "example": "https://stripe.com/docs/security"
+        },
+        {
           "key": "category",
           "label": "Category",
           "type": "string",
@@ -1503,6 +1744,55 @@
           "type": "string",
           "description": "Vendor name.",
           "example": "GitHub"
+        },
+        {
+          "key": "legalName",
+          "label": "Legal name",
+          "type": "string",
+          "description": "Vendor legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "displayName",
+          "label": "Display name",
+          "type": "string",
+          "description": "Customer-facing vendor display name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationName",
+          "label": "Provider organization",
+          "type": "string",
+          "description": "Provider organization name.",
+          "example": "Stripe"
+        },
+        {
+          "key": "providerOrganizationLegalName",
+          "label": "Provider organization legal name",
+          "type": "string",
+          "description": "Provider organization legal entity name.",
+          "example": "Stripe, Inc."
+        },
+        {
+          "key": "privacyPolicyUrl",
+          "label": "Privacy policy URL",
+          "type": "string",
+          "description": "Vendor privacy policy URL.",
+          "example": "https://stripe.com/privacy"
+        },
+        {
+          "key": "dpaUrl",
+          "label": "DPA URL",
+          "type": "string",
+          "description": "Vendor data processing agreement URL.",
+          "example": "https://stripe.com/legal/dpa"
+        },
+        {
+          "key": "securityPageUrl",
+          "label": "Security page URL",
+          "type": "string",
+          "description": "Vendor security page URL.",
+          "example": "https://stripe.com/docs/security"
         },
         {
           "key": "category",

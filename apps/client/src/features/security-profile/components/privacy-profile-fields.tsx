@@ -63,7 +63,7 @@ const PrivacyProviderPicker = ({
   label: string
   multiple?: boolean
   providers: Provider[]
-  systemType: "analytics" | "advertising" | "newsletter"
+  systemType: "newsletter"
 }) => {
   const organizationProviders = form.watch("privacy.organizationProviders")
   const selectedIds = selectedProviderIds(organizationProviders, systemType)
@@ -102,21 +102,17 @@ const PrivacyProviderPicker = ({
 
 export const PrivacyProfileFields = ({
   cookieConsentMechanismOptions,
-  cookieTypeOptions,
   form,
   marketingOptOutMethodOptions,
   providers,
-  regionOptions,
   requestMethodOptions,
   supportedRightOptions,
   transferMechanismOptions,
 }: {
   cookieConsentMechanismOptions: Option[]
-  cookieTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   marketingOptOutMethodOptions: Option[]
   providers: Provider[]
-  regionOptions: Option[]
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
   transferMechanismOptions: Option[]
@@ -163,34 +159,9 @@ export const PrivacyProfileFields = ({
     </section>
     <section className="grid gap-4">
       <h3 className="text-sm font-semibold text-slate-900">
-        Cookies / Tracking / Analytics
+        Cookie Preferences
       </h3>
       <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Uses cookies"
-          name="privacy.usesCookies"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.cookieTypes?.root}
-          label="Cookie types"
-          name="privacy.cookieTypes"
-          options={cookieTypeOptions}
-          placeholder="Select cookie types"
-        />
-        <PrivacyProviderPicker
-          form={form}
-          label="Analytics providers"
-          providers={providers}
-          systemType="analytics"
-        />
-        <PrivacyProviderPicker
-          form={form}
-          label="Advertising providers"
-          providers={providers}
-          systemType="advertising"
-        />
         <SelectField
           control={form.control}
           label="Cookie consent mechanism"
@@ -264,21 +235,6 @@ export const PrivacyProfileFields = ({
           name="privacy.transferMechanisms"
           options={transferMechanismOptions}
           placeholder="Select transfer mechanisms"
-        />
-        <SelectField
-          control={form.control}
-          label="Primary hosting region"
-          name="privacy.primaryHostingRegion"
-          options={[{ value: "", label: "Not set" }, ...regionOptions]}
-          placeholder="Not set"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.dataResidencyOptions?.root}
-          label="Data residency options"
-          name="privacy.dataResidencyOptions"
-          options={regionOptions}
-          placeholder="Select data residency options"
         />
       </div>
     </section>

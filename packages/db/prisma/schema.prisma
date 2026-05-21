@@ -161,6 +161,10 @@ model ServiceProfile {
   availabilityRegions String[]               @default([]) @map("availability_regions")
   childrenDirected    Boolean                @default(false) @map("children_directed")
   minimumUserAge      Int                    @default(0) @map("minimum_user_age")
+  usesCookies         Boolean                @default(false) @map("uses_cookies")
+  cookieTypes         String[]               @default([]) @map("cookie_types")
+  primaryHostingRegion String                @default("") @map("primary_hosting_region")
+  dataResidencyOptions String[]              @default([]) @map("data_residency_options")
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
 
@@ -178,8 +182,6 @@ model PrivacyProfile {
   identityVerificationRequired  Boolean      @default(false) @map("identity_verification_required")
   authorizedAgentSupported      Boolean      @default(false) @map("authorized_agent_supported")
   appealProcessExists           Boolean      @default(false) @map("appeal_process_exists")
-  usesCookies                   Boolean      @default(false) @map("uses_cookies")
-  cookieTypes                   String[]     @default([]) @map("cookie_types")
   cookieConsentMechanism        String       @default("") @map("cookie_consent_mechanism")
   doNotTrackResponse            Boolean      @default(false) @map("do_not_track_response")
   globalPrivacyControlSupported Boolean      @default(false) @map("global_privacy_control_supported")
@@ -188,8 +190,6 @@ model PrivacyProfile {
   transactionalEmailsSent       Boolean      @default(false) @map("transactional_emails_sent")
   crossBorderTransfers          Boolean      @default(false) @map("cross_border_transfers")
   transferMechanisms            String[]     @default([]) @map("transfer_mechanisms")
-  primaryHostingRegion          String       @default("") @map("primary_hosting_region")
-  dataResidencyOptions          String[]     @default([]) @map("data_residency_options")
   sellsOrSharesData             Boolean      @default(false) @map("sells_or_shares_data")
   doNotSellLink                 String       @default("") @map("do_not_sell_link")
   dpoName                       String       @default("") @map("dpo_name")
@@ -264,8 +264,6 @@ model OrganizationDataType {
   retentionDays          Int              @default(0) @map("retention_days")
   isSensitive            Boolean          @map("is_sensitive")
   isRequired             Boolean          @default(false) @map("is_required")
-  sharedWithThirdParties Boolean          @default(false) @map("shared_with_third_parties")
-  thirdParties           String[]         @default([]) @map("third_parties")
   vendorDataTypes        VendorDataType[]
   createdAt              DateTime         @default(now()) @map("created_at")
   updatedAt              DateTime         @updatedAt @map("updated_at")
@@ -305,6 +303,13 @@ model OrganizationProvider {
   providerId            String?          @map("provider_id")
   systemType            String?          @map("system_type")
   name                  String
+  legalName             String           @default("") @map("legal_name")
+  displayName           String           @default("") @map("display_name")
+  providerOrganizationName      String   @default("") @map("provider_organization_name")
+  providerOrganizationLegalName String   @default("") @map("provider_organization_legal_name")
+  privacyPolicyUrl      String           @default("") @map("privacy_policy_url")
+  dpaUrl                String           @default("") @map("dpa_url")
+  securityPageUrl       String           @default("") @map("security_page_url")
   category              String
   purpose               String
   countryOfRegistration String           @default("") @map("country_of_registration")
@@ -319,7 +324,7 @@ model OrganizationProvider {
   createdAt             DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @updatedAt @map("updated_at")
 
-  @@unique([organizationId, systemType, providerId], map: "organization_providers_org_system_provider_key")
+  @@unique([organizationId, serviceId, systemType, providerId], map: "organization_providers_org_service_system_provider_key")
   @@index([organizationId], map: "idx_organization_providers_organization_id")
   @@index([serviceId], map: "idx_organization_providers_service_id")
   @@index([providerId], map: "idx_organization_providers_provider_id")

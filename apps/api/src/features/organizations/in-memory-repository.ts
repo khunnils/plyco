@@ -36,8 +36,12 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   ): Promise<OrganizationSecurityProfile> {
     const timestamp = now()
     const existing = this.organizations.get(organizationId)
-    const services = this.servicesWithIds(input.services, existing?.services ?? [], timestamp)
     const inputWithProviderNames = this.withProviderNames(input, providerCatalog)
+    const services = this.servicesWithIds(
+      inputWithProviderNames.services,
+      existing?.services ?? [],
+      timestamp,
+    )
     const organization: OrganizationSecurityProfile = {
       id: organizationId,
       ...inputWithProviderNames,
@@ -99,6 +103,20 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   ): SecurityProfileInput {
     return {
       ...input,
+      services: input.services.map((service) => ({
+        ...service,
+        privacy: {
+          ...service.privacy,
+          analyticsProviders: this.providerNames(
+            service.privacy.analyticsProviders,
+            providerCatalog,
+          ),
+          advertisingProviders: this.providerNames(
+            service.privacy.advertisingProviders,
+            providerCatalog,
+          ),
+        },
+      })),
       infrastructure: {
         ...input.infrastructure,
         organizationProviders: this.providerNames(

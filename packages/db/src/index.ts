@@ -47,6 +47,10 @@ export function mapOrganizationRecord(record: {
     availabilityRegions: string[]
     childrenDirected: boolean
     minimumUserAge: number
+    usesCookies: boolean
+    cookieTypes: string[]
+    primaryHostingRegion: string
+    dataResidencyOptions: string[]
     createdAt: Date
     updatedAt: Date
   } | null
@@ -60,6 +64,10 @@ export function mapOrganizationRecord(record: {
     availabilityRegions: string[]
     childrenDirected: boolean
     minimumUserAge: number
+    usesCookies: boolean
+    cookieTypes: string[]
+    primaryHostingRegion: string
+    dataResidencyOptions: string[]
     createdAt: Date
     updatedAt: Date
   }>
@@ -70,8 +78,6 @@ export function mapOrganizationRecord(record: {
     identityVerificationRequired: boolean
     authorizedAgentSupported: boolean
     appealProcessExists: boolean
-    usesCookies: boolean
-    cookieTypes: string[]
     cookieConsentMechanism: string
     doNotTrackResponse: boolean
     globalPrivacyControlSupported: boolean
@@ -80,8 +86,6 @@ export function mapOrganizationRecord(record: {
     transactionalEmailsSent: boolean
     crossBorderTransfers: boolean
     transferMechanisms: string[]
-    primaryHostingRegion: string
-    dataResidencyOptions: string[]
     sellsOrSharesData: boolean
     doNotSellLink: string
     dpoName: string
@@ -115,6 +119,7 @@ export function mapOrganizationRecord(record: {
     dpaRequiredForProcessors: boolean
   } | null
   vendors: Array<{
+    serviceId: string | null
     providerId: string | null
     systemType: string | null
     name: string
@@ -137,8 +142,6 @@ export function mapOrganizationRecord(record: {
     retentionDays: number
     isSensitive: boolean
     isRequired: boolean
-    sharedWithThirdParties: boolean
-    thirdParties: string[]
   }>
   accessProfile: {
     mfaRequired: boolean
@@ -175,6 +178,7 @@ export function mapOrganizationRecord(record: {
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.vendors.flatMap((provider) =>
       provider.providerId &&
+      provider.serviceId === null &&
       provider.systemType &&
       ["auth", "source_control", "cloud", "password_manager"].includes(
         provider.systemType,
@@ -241,6 +245,38 @@ export function mapOrganizationRecord(record: {
             availabilityRegions: service.availabilityRegions,
             childrenDirected: service.childrenDirected,
             minimumUserAge: service.minimumUserAge,
+            privacy: {
+              usesCookies: service.usesCookies,
+              cookieTypes: service.cookieTypes,
+              analyticsProviders: record.vendors.flatMap((provider) =>
+                provider.serviceId === service.id &&
+                provider.providerId &&
+                provider.systemType === "analytics"
+                  ? [
+                      {
+                        providerId: provider.providerId,
+                        systemType: provider.systemType,
+                        name: provider.name,
+                      },
+                    ]
+                  : [],
+              ),
+              advertisingProviders: record.vendors.flatMap((provider) =>
+                provider.serviceId === service.id &&
+                provider.providerId &&
+                provider.systemType === "advertising"
+                  ? [
+                      {
+                        providerId: provider.providerId,
+                        systemType: provider.systemType,
+                        name: provider.name,
+                      },
+                    ]
+                  : [],
+              ),
+              primaryHostingRegion: service.primaryHostingRegion,
+              dataResidencyOptions: service.dataResidencyOptions,
+            },
             createdAt: toIsoString(service.createdAt),
             updatedAt: toIsoString(service.updatedAt),
           }),
@@ -256,13 +292,10 @@ export function mapOrganizationRecord(record: {
     authorizedAgentSupported:
       record.privacyProfile?.authorizedAgentSupported ?? false,
     appealProcessExists: record.privacyProfile?.appealProcessExists ?? false,
-    usesCookies: record.privacyProfile?.usesCookies ?? false,
-    cookieTypes: record.privacyProfile?.cookieTypes ?? [],
     organizationProviders: record.vendors.flatMap((provider) =>
       provider.providerId &&
-      (provider.systemType === "analytics" ||
-        provider.systemType === "advertising" ||
-        provider.systemType === "newsletter")
+      provider.serviceId === null &&
+      provider.systemType === "newsletter"
         ? [
             {
               providerId: provider.providerId,
@@ -283,8 +316,6 @@ export function mapOrganizationRecord(record: {
       record.privacyProfile?.transactionalEmailsSent ?? false,
     crossBorderTransfers: record.privacyProfile?.crossBorderTransfers ?? false,
     transferMechanisms: record.privacyProfile?.transferMechanisms ?? [],
-    primaryHostingRegion: record.privacyProfile?.primaryHostingRegion ?? "",
-    dataResidencyOptions: record.privacyProfile?.dataResidencyOptions ?? [],
     sellsOrSharesData: record.privacyProfile?.sellsOrSharesData ?? false,
     doNotSellLink: record.privacyProfile?.doNotSellLink ?? "",
     dpoName: record.privacyProfile?.dpoName ?? "",
@@ -304,8 +335,6 @@ export function mapOrganizationRecord(record: {
       retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
-      sharedWithThirdParties: dataType.sharedWithThirdParties,
-      thirdParties: dataType.thirdParties,
     })),
     storesPii: record.dataHandlingProfile?.storesPii ?? false,
     storesHealthcareData:
@@ -357,6 +386,13 @@ export function mapVendorRecord(record: {
     serviceName: string
   } | null
   name: string
+  legalName: string
+  displayName: string
+  providerOrganizationName: string
+  providerOrganizationLegalName: string
+  privacyPolicyUrl: string
+  dpaUrl: string
+  securityPageUrl: string
   category: string
   purpose: string
   countryOfRegistration: string
@@ -380,6 +416,13 @@ export function mapVendorRecord(record: {
     serviceId: record.serviceId ?? "",
     serviceName: record.service?.serviceName ?? "",
     name: record.name,
+    legalName: record.legalName,
+    displayName: record.displayName,
+    providerOrganizationName: record.providerOrganizationName,
+    providerOrganizationLegalName: record.providerOrganizationLegalName,
+    privacyPolicyUrl: record.privacyPolicyUrl,
+    dpaUrl: record.dpaUrl,
+    securityPageUrl: record.securityPageUrl,
     category: record.category,
     purpose: record.purpose,
     countryOfRegistration: record.countryOfRegistration,

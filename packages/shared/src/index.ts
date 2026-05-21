@@ -97,8 +97,6 @@ export const storedDataTypeSchema = z.object({
   retentionDays: z.number().int().min(0).default(0),
   isSensitive: z.boolean().default(false),
   isRequired: z.boolean().default(false),
-  sharedWithThirdParties: z.boolean().default(false),
-  thirdParties: z.array(z.string().trim().min(1)).default([]),
 })
 
 export const companyProfileSchema = z.object({
@@ -118,6 +116,15 @@ export const companyProfileSchema = z.object({
   complianceGoals: z.array(codeIdSchema).default([]),
 })
 
+export const servicePrivacyProfileSchema = z.object({
+  usesCookies: z.boolean(),
+  cookieTypes: z.array(codeIdSchema).default([]),
+  analyticsProviders: z.array(organizationProviderSchema).default([]),
+  advertisingProviders: z.array(organizationProviderSchema).default([]),
+  primaryHostingRegion: codeIdSchema.or(z.literal("")).default(""),
+  dataResidencyOptions: z.array(codeIdSchema).default([]),
+})
+
 export const serviceProfileInputSchema = z.object({
   id: z.string().min(1).optional(),
   serviceName: z.string().trim().default(""),
@@ -128,6 +135,7 @@ export const serviceProfileInputSchema = z.object({
   availabilityRegions: z.array(codeIdSchema).default([]),
   childrenDirected: z.boolean(),
   minimumUserAge: z.number().int().min(0).max(120).default(0),
+  privacy: servicePrivacyProfileSchema,
 })
 
 export const serviceProfileSchema = serviceProfileInputSchema.extend({
@@ -143,8 +151,6 @@ export const privacyProfileSchema = z.object({
   identityVerificationRequired: z.boolean(),
   authorizedAgentSupported: z.boolean(),
   appealProcessExists: z.boolean(),
-  usesCookies: z.boolean(),
-  cookieTypes: z.array(codeIdSchema).default([]),
   organizationProviders: z.array(organizationProviderSchema).default([]),
   cookieConsentMechanism: codeIdSchema.or(z.literal("")).default(""),
   doNotTrackResponse: z.boolean(),
@@ -154,8 +160,6 @@ export const privacyProfileSchema = z.object({
   transactionalEmailsSent: z.boolean(),
   crossBorderTransfers: z.boolean().default(false),
   transferMechanisms: z.array(codeIdSchema).default([]),
-  primaryHostingRegion: codeIdSchema.or(z.literal("")).default(""),
-  dataResidencyOptions: z.array(codeIdSchema).default([]),
   sellsOrSharesData: z.boolean().default(false),
   doNotSellLink: z.string().trim().default(""),
   dpoName: z.string().trim().default(""),
@@ -218,6 +222,13 @@ export const accessProfileSchema = z.object({
 const vendorInputBaseSchema = z.object({
   serviceId: z.string().trim().min(1, "Service is required"),
   name: z.string().trim().min(1, "Vendor name is required"),
+  legalName: z.string().trim().default(""),
+  displayName: z.string().trim().default(""),
+  providerOrganizationName: z.string().trim().default(""),
+  providerOrganizationLegalName: z.string().trim().default(""),
+  privacyPolicyUrl: z.string().trim().default(""),
+  dpaUrl: z.string().trim().default(""),
+  securityPageUrl: z.string().trim().default(""),
   category: codeIdSchema.or(z.literal("")).default(""),
   purpose: z.string().trim().min(1, "Purpose is required"),
   countryOfRegistration: countryCodeSchema.or(z.literal("")).default(""),
@@ -427,6 +438,7 @@ export type VocabularyCodeInput = z.infer<typeof vocabularyCodeInputSchema>
 export type OrganizationProvider = z.infer<typeof organizationProviderSchema>
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>
 export type CompanyProfile = z.infer<typeof companyProfileSchema>
+export type ServicePrivacyProfile = z.infer<typeof servicePrivacyProfileSchema>
 export type ServiceProfileInput = z.infer<typeof serviceProfileInputSchema>
 export type ServiceProfile = z.infer<typeof serviceProfileSchema>
 export type PrivacyProfile = z.infer<typeof privacyProfileSchema>
@@ -489,6 +501,14 @@ export const emptyServiceProfile: ServiceProfileInput = {
   availabilityRegions: [],
   childrenDirected: false,
   minimumUserAge: 0,
+  privacy: {
+    usesCookies: false,
+    cookieTypes: [],
+    analyticsProviders: [],
+    advertisingProviders: [],
+    primaryHostingRegion: "",
+    dataResidencyOptions: [],
+  },
 }
 
 export const emptyPrivacyProfile: PrivacyProfile = {
@@ -498,8 +518,6 @@ export const emptyPrivacyProfile: PrivacyProfile = {
   identityVerificationRequired: false,
   authorizedAgentSupported: false,
   appealProcessExists: false,
-  usesCookies: false,
-  cookieTypes: [],
   organizationProviders: [],
   cookieConsentMechanism: "",
   doNotTrackResponse: false,
@@ -509,8 +527,6 @@ export const emptyPrivacyProfile: PrivacyProfile = {
   transactionalEmailsSent: false,
   crossBorderTransfers: false,
   transferMechanisms: [],
-  primaryHostingRegion: "",
-  dataResidencyOptions: [],
   sellsOrSharesData: false,
   doNotSellLink: "",
   dpoName: "",

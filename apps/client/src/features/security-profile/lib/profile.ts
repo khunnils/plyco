@@ -24,6 +24,13 @@ export const emptyProfileDraft: ProfileDraft = {
 
 export const emptyVendorDraft: VendorInput = {
   name: "",
+  legalName: "",
+  displayName: "",
+  providerOrganizationName: "",
+  providerOrganizationLegalName: "",
+  privacyPolicyUrl: "",
+  dpaUrl: "",
+  securityPageUrl: "",
   category: "",
   serviceId: "",
   purpose: "",
@@ -59,6 +66,7 @@ export const profileFromOrganization = (
             availabilityRegions: service.availabilityRegions,
             childrenDirected: service.childrenDirected,
             minimumUserAge: service.minimumUserAge,
+            privacy: service.privacy,
           }))
         : [emptyServiceProfile],
     privacy: { ...emptyPrivacyProfile, ...organization.privacy },
@@ -74,6 +82,13 @@ export const profileFromOrganization = (
 export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
   serviceId: vendor.serviceId,
   name: vendor.name,
+  legalName: vendor.legalName,
+  displayName: vendor.displayName,
+  providerOrganizationName: vendor.providerOrganizationName,
+  providerOrganizationLegalName: vendor.providerOrganizationLegalName,
+  privacyPolicyUrl: vendor.privacyPolicyUrl,
+  dpaUrl: vendor.dpaUrl,
+  securityPageUrl: vendor.securityPageUrl,
   category: vendor.category,
   purpose: vendor.purpose,
   countryOfRegistration: vendor.countryOfRegistration,
@@ -153,6 +168,13 @@ export const vendorInputFromProvider = (
 ): VendorInput => ({
   serviceId,
   name: provider.name,
+  legalName: "",
+  displayName: provider.name,
+  providerOrganizationName: provider.name,
+  providerOrganizationLegalName: "",
+  privacyPolicyUrl: provider.url ?? "",
+  dpaUrl: "",
+  securityPageUrl: "",
   category: providerCategory(provider),
   purpose: provider.url
     ? `Operational provider listed at ${provider.url}`

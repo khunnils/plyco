@@ -34,8 +34,6 @@ type StoredDataType = {
   retentionDays: number
   isSensitive: boolean
   isRequired: boolean
-  sharedWithThirdParties: boolean
-  thirdParties: string[]
 }
 
 type DataTypesFieldProps<T extends FieldValues> = {
@@ -59,8 +57,6 @@ const emptyDataType = (): StoredDataType => ({
   retentionDays: 0,
   isSensitive: false,
   isRequired: false,
-  sharedWithThirdParties: false,
-  thirdParties: [],
 })
 
 const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
@@ -76,7 +72,6 @@ const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
     typeof value.retentionDays === "number" && Number.isFinite(value.retentionDays)
       ? value.retentionDays
       : 0,
-  thirdParties: Array.isArray(value.thirdParties) ? value.thirdParties : [],
 })
 
 const dataTypeTitle = (item: StoredDataType, index: number) =>

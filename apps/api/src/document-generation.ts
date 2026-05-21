@@ -7,6 +7,7 @@ import {
   type PrivacyProfile,
   type ServiceProfile,
   type SecurityProgramSnapshot,
+  type StoredDataType,
   type OrganizationMember,
   type Template,
   type Vendor,
@@ -52,7 +53,12 @@ export class ReportContextBuilder {
     const vendors = snapshot.vendors.map((vendor) => this.vendorContext(vendor))
     const services = organization
       ? organization.services.map((service) =>
-          this.serviceContext(service, vocabulary),
+          this.serviceContext(
+            service,
+            vendors,
+            organization.dataHandling.dataTypesStored,
+            vocabulary,
+          ),
         )
       : []
     const primaryService = services[0] ?? {}
@@ -116,7 +122,23 @@ export class ReportContextBuilder {
     }
   }
 
-  private serviceContext(service: ServiceProfile, vocabulary?: Vocabulary) {
+  private serviceContext(
+    service: ServiceProfile,
+    vendors: Array<Record<string, unknown>>,
+    dataTypes: StoredDataType[],
+    vocabulary?: Vocabulary,
+  ) {
+    const serviceVendors = vendors.filter(
+      (vendor) => vendor.serviceId === service.id,
+    )
+    const dataTypeNames = new Set(
+      serviceVendors.flatMap((vendor) =>
+        Array.isArray(vendor.dataProcessed)
+          ? vendor.dataProcessed.map(String)
+          : [],
+      ),
+    )
+
     return {
       id: service.id,
       name: service.serviceName,
@@ -142,6 +164,48 @@ export class ReportContextBuilder {
       ),
       childrenDirected: service.childrenDirected,
       minimumUserAge: service.minimumUserAge,
+      privacy: {
+        usesCookies: service.privacy.usesCookies,
+        cookieTypes: service.privacy.cookieTypes,
+        cookieTypeLabels: this.codeLabels(
+          vocabulary,
+          "privacy_cookie_types",
+          service.privacy.cookieTypes,
+        ),
+        analyticsProviders: this.providerNames(
+          service.privacy.analyticsProviders,
+        ),
+        analyticsProviderIds: this.providerIds(
+          service.privacy.analyticsProviders,
+        ),
+        advertisingProviders: this.providerNames(
+          service.privacy.advertisingProviders,
+        ),
+        advertisingProviderIds: this.providerIds(
+          service.privacy.advertisingProviders,
+        ),
+        primaryHostingRegion: service.privacy.primaryHostingRegion,
+        primaryHostingRegionLabel: service.privacy.primaryHostingRegion
+          ? this.codeLabels(
+              vocabulary,
+              "regions",
+              [service.privacy.primaryHostingRegion],
+            )[0]
+          : "",
+        dataResidencyOptions: service.privacy.dataResidencyOptions,
+        dataResidencyOptionLabels: this.codeLabels(
+          vocabulary,
+          "regions",
+          service.privacy.dataResidencyOptions,
+        ),
+      },
+      vendors: serviceVendors,
+      subprocessors: serviceVendors.filter(
+        (vendor) => vendor.dataProcessingLevel === "subprocessor",
+      ),
+      dataTypes: dataTypes.filter((dataType) =>
+        dataTypeNames.has(String(dataType.name)),
+      ),
     }
   }
 
@@ -163,17 +227,6 @@ export class ReportContextBuilder {
       identityVerificationRequired: privacy.identityVerificationRequired,
       authorizedAgentSupported: privacy.authorizedAgentSupported,
       appealProcessExists: privacy.appealProcessExists,
-      usesCookies: privacy.usesCookies,
-      cookieTypes: privacy.cookieTypes,
-      cookieTypeLabels: this.codeLabels(
-        vocabulary,
-        "privacy_cookie_types",
-        privacy.cookieTypes,
-      ),
-      analyticsProviders: this.providerNames(privacy, "analytics"),
-      analyticsProviderIds: this.providerIds(privacy, "analytics"),
-      advertisingProviders: this.providerNames(privacy, "advertising"),
-      advertisingProviderIds: this.providerIds(privacy, "advertising"),
       cookieConsentMechanism: privacy.cookieConsentMechanism,
       cookieConsentMechanismLabel: privacy.cookieConsentMechanism
         ? this.codeLabels(
@@ -194,24 +247,16 @@ export class ReportContextBuilder {
           )[0]
         : "",
       transactionalEmailsSent: privacy.transactionalEmailsSent,
-      newsletterProvider: this.providerNames(privacy, "newsletter")[0] ?? "",
-      newsletterProviderId: this.providerIds(privacy, "newsletter")[0] ?? "",
+      newsletterProvider:
+        this.providerNames(privacy.organizationProviders)[0] ?? "",
+      newsletterProviderId:
+        this.providerIds(privacy.organizationProviders)[0] ?? "",
       crossBorderTransfers: privacy.crossBorderTransfers,
       transferMechanisms: privacy.transferMechanisms,
       transferMechanismLabels: this.codeLabels(
         vocabulary,
         "privacy_transfer_mechanisms",
         privacy.transferMechanisms,
-      ),
-      primaryHostingRegion: privacy.primaryHostingRegion,
-      primaryHostingRegionLabel: privacy.primaryHostingRegion
-        ? this.codeLabels(vocabulary, "regions", [privacy.primaryHostingRegion])[0]
-        : "",
-      dataResidencyOptions: privacy.dataResidencyOptions,
-      dataResidencyOptionLabels: this.codeLabels(
-        vocabulary,
-        "regions",
-        privacy.dataResidencyOptions,
       ),
       sellsOrSharesData: privacy.sellsOrSharesData,
       doNotSellLink: privacy.doNotSellLink,
@@ -223,16 +268,12 @@ export class ReportContextBuilder {
     }
   }
 
-  private providerIds(privacy: PrivacyProfile, systemType: string) {
-    return privacy.organizationProviders
-      .filter((provider) => provider.systemType === systemType)
-      .map((provider) => provider.providerId)
+  private providerIds(providers: PrivacyProfile["organizationProviders"]) {
+    return providers.map((provider) => provider.providerId)
   }
 
-  private providerNames(privacy: PrivacyProfile, systemType: string) {
-    return privacy.organizationProviders
-      .filter((provider) => provider.systemType === systemType)
-      .map((provider) => provider.name ?? provider.providerId)
+  private providerNames(providers: PrivacyProfile["organizationProviders"]) {
+    return providers.map((provider) => provider.name ?? provider.providerId)
   }
 
   private securityContext(
@@ -371,6 +412,13 @@ export class ReportContextBuilder {
       serviceId: vendor.serviceId,
       serviceName: vendor.serviceName,
       name: vendor.name,
+      legalName: vendor.legalName,
+      displayName: vendor.displayName,
+      providerOrganizationName: vendor.providerOrganizationName,
+      providerOrganizationLegalName: vendor.providerOrganizationLegalName,
+      privacyPolicyUrl: vendor.privacyPolicyUrl,
+      dpaUrl: vendor.dpaUrl,
+      securityPageUrl: vendor.securityPageUrl,
       category: vendor.category,
       purpose: vendor.purpose,
       countryOfRegistration: vendor.countryOfRegistration,

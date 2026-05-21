@@ -49,6 +49,13 @@ describe("shared security profile schemas", () => {
     const result = vendorInputSchema.safeParse({
       name: "GitHub",
       serviceId: "service_1",
+      legalName: "GitHub, Inc.",
+      displayName: "GitHub",
+      providerOrganizationName: "GitHub",
+      providerOrganizationLegalName: "GitHub, Inc.",
+      privacyPolicyUrl: "https://github.com/privacy",
+      dpaUrl: "https://github.com/customer-terms/dpa",
+      securityPageUrl: "https://github.com/security",
       category: "source_control",
       purpose: "Code hosting",
       countryOfRegistration: "US",
@@ -123,8 +130,6 @@ describe("shared security profile schemas", () => {
           retentionDays: 365,
           isSensitive: true,
           isRequired: true,
-          sharedWithThirdParties: true,
-          thirdParties: ["email delivery provider"],
         },
       ],
       storesPii: true,
@@ -167,6 +172,14 @@ describe("shared security profile schemas", () => {
         availabilityRegions: [],
         childrenDirected: false,
         minimumUserAge: 0,
+        privacy: {
+          usesCookies: false,
+          cookieTypes: [],
+          analyticsProviders: [],
+          advertisingProviders: [],
+          primaryHostingRegion: "",
+          dataResidencyOptions: [],
+        },
       })
     }
   })
@@ -181,6 +194,24 @@ describe("shared security profile schemas", () => {
       availabilityRegions: ["us", "eu"],
       childrenDirected: false,
       minimumUserAge: 13,
+      privacy: {
+        usesCookies: true,
+        cookieTypes: ["necessary", "analytics"],
+        analyticsProviders: [
+          {
+            systemType: "analytics",
+            providerId: "prov-google-analytics",
+          },
+        ],
+        advertisingProviders: [
+          {
+            systemType: "advertising",
+            providerId: "prov-google-ads",
+          },
+        ],
+        primaryHostingRegion: "us",
+        dataResidencyOptions: ["us", "eu"],
+      },
     })
 
     expect(result.success).toBe(true)
@@ -227,8 +258,6 @@ describe("shared security profile schemas", () => {
         identityVerificationRequired: false,
         authorizedAgentSupported: false,
         appealProcessExists: false,
-        usesCookies: false,
-        cookieTypes: [],
         organizationProviders: [],
         cookieConsentMechanism: "",
         doNotTrackResponse: false,
@@ -238,8 +267,6 @@ describe("shared security profile schemas", () => {
         transactionalEmailsSent: false,
         crossBorderTransfers: false,
         transferMechanisms: [],
-        primaryHostingRegion: "",
-        dataResidencyOptions: [],
         sellsOrSharesData: false,
         doNotSellLink: "",
         dpoName: "",
@@ -346,17 +373,7 @@ describe("shared security profile schemas", () => {
       identityVerificationRequired: true,
       authorizedAgentSupported: true,
       appealProcessExists: false,
-      usesCookies: true,
-      cookieTypes: ["necessary", "analytics"],
       organizationProviders: [
-        {
-          systemType: "analytics",
-          providerId: "prov-google-analytics",
-        },
-        {
-          systemType: "advertising",
-          providerId: "prov-google-ads",
-        },
         {
           systemType: "newsletter",
           providerId: "prov-mailchimp",
@@ -370,8 +387,6 @@ describe("shared security profile schemas", () => {
       transactionalEmailsSent: true,
       crossBorderTransfers: true,
       transferMechanisms: ["sccs", "dpf"],
-      primaryHostingRegion: "us",
-      dataResidencyOptions: ["us", "eu"],
     })
 
     expect(result.success).toBe(true)
@@ -395,10 +410,13 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false)
   })
 
-  it("rejects privacy cookie type values that violate the code id format", () => {
-    const result = privacyProfileSchema.safeParse({
-      ...emptyPrivacyProfile,
-      cookieTypes: ["Analytics Cookies"],
+  it("rejects service privacy values that violate the code id format", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        cookieTypes: ["Analytics Cookies"],
+      },
     })
 
     expect(result.success).toBe(false)
@@ -422,23 +440,32 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false)
   })
 
-  it("rejects privacy transfer and residency values that violate the code id format", () => {
+  it("rejects privacy transfer values that violate the code id format", () => {
     expect(
       privacyProfileSchema.safeParse({
         ...emptyPrivacyProfile,
         transferMechanisms: ["Standard Contractual Clauses"],
       }).success,
     ).toBe(false)
+  })
+
+  it("rejects service privacy residency values that violate the code id format", () => {
     expect(
-      privacyProfileSchema.safeParse({
-        ...emptyPrivacyProfile,
-        primaryHostingRegion: "United States",
+      serviceProfileInputSchema.safeParse({
+        ...emptyServiceProfile,
+        privacy: {
+          ...emptyServiceProfile.privacy,
+          primaryHostingRegion: "United States",
+        },
       }).success,
     ).toBe(false)
     expect(
-      privacyProfileSchema.safeParse({
-        ...emptyPrivacyProfile,
-        dataResidencyOptions: ["European Union"],
+      serviceProfileInputSchema.safeParse({
+        ...emptyServiceProfile,
+        privacy: {
+          ...emptyServiceProfile.privacy,
+          dataResidencyOptions: ["European Union"],
+        },
       }).success,
     ).toBe(false)
   })

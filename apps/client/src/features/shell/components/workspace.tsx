@@ -267,8 +267,10 @@ const CompanySectionFields = ({
   if (section === "service") {
     return (
       <ProfileServiceFields
+        cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
         form={form}
+        providers={providers}
         regionOptions={codeOptions(vocabulary, "regions")}
         userTypeOptions={codeOptions(vocabulary, "service_user_types")}
       />
@@ -282,14 +284,12 @@ const CompanySectionFields = ({
           vocabulary,
           "privacy_cookie_consent_mechanisms",
         )}
-        cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         form={form}
         marketingOptOutMethodOptions={codeOptions(
           vocabulary,
           "privacy_marketing_opt_out_methods",
         )}
         providers={providers}
-        regionOptions={codeOptions(vocabulary, "regions")}
         requestMethodOptions={codeOptions(
           vocabulary,
           "privacy_request_methods",
@@ -419,31 +419,6 @@ const CompanyReadOnlySection = ({
       ["Appeal process", boolText(profile.privacy.appealProcessExists)],
     ]
     const cookieRows: Array<[string, string | number]> = [
-      ["Uses cookies", boolText(profile.privacy.usesCookies)],
-      [
-        "Cookie types",
-        codeValueList(
-          vocabulary,
-          "privacy_cookie_types",
-          profile.privacy.cookieTypes,
-        ),
-      ],
-      [
-        "Analytics providers",
-        providerNamesForSystem(
-          profile.privacy.organizationProviders,
-          providers,
-          "analytics",
-        ),
-      ],
-      [
-        "Advertising providers",
-        providerNamesForSystem(
-          profile.privacy.organizationProviders,
-          providers,
-          "advertising",
-        ),
-      ],
       [
         "Cookie consent mechanism",
         profile.privacy.cookieConsentMechanism
@@ -499,20 +474,6 @@ const CompanyReadOnlySection = ({
           vocabulary,
           "privacy_transfer_mechanisms",
           profile.privacy.transferMechanisms,
-        ),
-      ],
-      [
-        "Primary hosting region",
-        profile.privacy.primaryHostingRegion
-          ? codeLabel(vocabulary, "regions", profile.privacy.primaryHostingRegion)
-          : "Not set",
-      ],
-      [
-        "Data residency options",
-        codeValueList(
-          vocabulary,
-          "regions",
-          profile.privacy.dataResidencyOptions,
         ),
       ],
     ]
@@ -625,6 +586,49 @@ const CompanyReadOnlySection = ({
                   service.minimumUserAge === 0
                     ? "Not set"
                     : service.minimumUserAge,
+                ],
+                ["Uses cookies", boolText(service.privacy.usesCookies)],
+                [
+                  "Cookie types",
+                  codeValueList(
+                    vocabulary,
+                    "privacy_cookie_types",
+                    service.privacy.cookieTypes,
+                  ),
+                ],
+                [
+                  "Analytics providers",
+                  providerNamesForSystem(
+                    service.privacy.analyticsProviders,
+                    providers,
+                    "analytics",
+                  ),
+                ],
+                [
+                  "Advertising providers",
+                  providerNamesForSystem(
+                    service.privacy.advertisingProviders,
+                    providers,
+                    "advertising",
+                  ),
+                ],
+                [
+                  "Primary hosting region",
+                  service.privacy.primaryHostingRegion
+                    ? codeLabel(
+                        vocabulary,
+                        "regions",
+                        service.privacy.primaryHostingRegion,
+                      )
+                    : "Not set",
+                ],
+                [
+                  "Data residency options",
+                  codeValueList(
+                    vocabulary,
+                    "regions",
+                    service.privacy.dataResidencyOptions,
+                  ),
                 ],
               ]}
             />

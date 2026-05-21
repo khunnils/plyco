@@ -162,24 +162,6 @@ export const DataHandlingReadOnlySection = ({
                               : "Not set"}
                           </dd>
                         </div>
-                        <div>
-                          <dt className="text-xs font-medium text-slate-500">
-                            Shared with third parties
-                          </dt>
-                          <dd className="mt-1 text-sm font-medium text-slate-900">
-                            {boolText(dataType.sharedWithThirdParties)}
-                          </dd>
-                        </div>
-                        {dataType.thirdParties.length > 0 ? (
-                          <div className="sm:col-span-2">
-                            <dt className="text-xs font-medium text-slate-500">
-                              Third parties
-                            </dt>
-                            <dd className="mt-1 text-sm font-medium text-slate-900">
-                              {dataType.thirdParties.join(", ")}
-                            </dd>
-                          </div>
-                        ) : null}
                       </dl>
                     ) : null}
                   </article>

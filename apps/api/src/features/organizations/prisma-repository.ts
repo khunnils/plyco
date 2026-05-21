@@ -4,6 +4,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type OrganizationProvider,
   type OrganizationSecurityProfile,
   type PrivacyProfile,
   type Provider,
@@ -28,6 +29,7 @@ export const ORGANIZATION_INCLUDE = {
     select: {
       name: true,
       providerId: true,
+      serviceId: true,
       systemType: true,
     },
   },
@@ -91,8 +93,12 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     })
 
     await this.syncOrganizationDataTypes(organization.id, input.dataHandling)
-    await this.syncServices(organization.id, input.services)
-    await this.syncOrganizationProviders(organization.id, input, providerCatalog)
+    const services = await this.syncServices(organization.id, input.services)
+    await this.syncOrganizationProviders(
+      organization.id,
+      { ...input, services },
+      providerCatalog,
+    )
 
     return mapOrganizationRecord(
       await this.client.organization.findUniqueOrThrow({
@@ -176,13 +182,17 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       availabilityRegions: input.availabilityRegions,
       childrenDirected: input.childrenDirected,
       minimumUserAge: input.minimumUserAge,
+      usesCookies: input.privacy.usesCookies,
+      cookieTypes: input.privacy.cookieTypes,
+      primaryHostingRegion: input.privacy.primaryHostingRegion,
+      dataResidencyOptions: input.privacy.dataResidencyOptions,
     }
   }
 
   private async syncServices(
     organizationId: string,
     services: ServiceProfileInput[],
-  ) {
+  ): Promise<ServiceProfileInput[]> {
     const existingServices = await this.client.serviceProfile.findMany({
       where: { organizationId },
       select: { id: true },
@@ -213,20 +223,22 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       },
     })
 
-    await Promise.all(
-      resolvedServices.map((service) =>
-        service.id
-          ? this.client.serviceProfile.update({
+    return Promise.all(
+      resolvedServices.map(async (service) => {
+        const record = service.id
+          ? await this.client.serviceProfile.update({
               where: { id: service.id },
               data: this.serviceData(service),
             })
-          : this.client.serviceProfile.create({
+          : await this.client.serviceProfile.create({
               data: {
                 organizationId,
                 ...this.serviceData(service),
               },
-            }),
-      ),
+            })
+
+        return { ...service, id: record.id }
+      }),
     )
   }
 
@@ -238,8 +250,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       identityVerificationRequired: input.identityVerificationRequired,
       authorizedAgentSupported: input.authorizedAgentSupported,
       appealProcessExists: input.appealProcessExists,
-      usesCookies: input.usesCookies,
-      cookieTypes: input.cookieTypes,
       cookieConsentMechanism: input.cookieConsentMechanism,
       doNotTrackResponse: input.doNotTrackResponse,
       globalPrivacyControlSupported: input.globalPrivacyControlSupported,
@@ -248,8 +258,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       transactionalEmailsSent: input.transactionalEmailsSent,
       crossBorderTransfers: input.crossBorderTransfers,
       transferMechanisms: input.transferMechanisms,
-      primaryHostingRegion: input.primaryHostingRegion,
-      dataResidencyOptions: input.dataResidencyOptions,
       sellsOrSharesData: input.sellsOrSharesData,
       doNotSellLink: input.doNotSellLink,
       dpoName: input.dpoName,
@@ -265,9 +273,25 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     input: SecurityProfileInput,
     providerCatalog: Provider[],
   ) {
-    const selectedProviders = [
-      ...input.infrastructure.organizationProviders,
-      ...input.privacy.organizationProviders,
+    const selectedProviders: Array<OrganizationProvider & { serviceId?: string }> = [
+      ...input.infrastructure.organizationProviders.map((provider) => ({
+        ...provider,
+        serviceId: undefined,
+      })),
+      ...input.privacy.organizationProviders.map((provider) => ({
+        ...provider,
+        serviceId: undefined,
+      })),
+      ...input.services.flatMap((service) => [
+        ...service.privacy.analyticsProviders.map((provider) => ({
+          ...provider,
+          serviceId: service.id,
+        })),
+        ...service.privacy.advertisingProviders.map((provider) => ({
+          ...provider,
+          serviceId: service.id,
+        })),
+      ]),
     ]
     const catalogProviders = selectedProviders.map((selectedProvider) => ({
       selectedProvider,
@@ -292,34 +316,19 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             "newsletter",
           ],
         },
-        ...(selectedProviders.length > 0
-          ? {
-              NOT: selectedProviders.map((provider) => ({
-                systemType: provider.systemType,
-                providerId: provider.providerId,
-              })),
-            }
-          : {}),
       },
     })
 
     await Promise.all(
       catalogProviders.map(({ provider, selectedProvider }) =>
-        this.client.organizationProvider.upsert({
-          where: {
-            organizationId_systemType_providerId: {
-              organizationId,
-              systemType: selectedProvider.systemType,
-              providerId: selectedProvider.providerId,
-            },
-          },
-          create: {
+        this.client.organizationProvider.create({
+          data: {
             organizationId,
+            serviceId: selectedProvider.serviceId ?? null,
             providerId: provider.id,
             systemType: selectedProvider.systemType,
             ...this.organizationProviderData(provider),
           },
-          update: this.organizationProviderData(provider),
         })
       ),
     )
@@ -351,6 +360,13 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   private organizationProviderData(provider: Provider) {
     return {
       name: provider.name,
+      legalName: "",
+      displayName: provider.name,
+      providerOrganizationName: provider.name,
+      providerOrganizationLegalName: "",
+      privacyPolicyUrl: "",
+      dpaUrl: "",
+      securityPageUrl: "",
       category: this.providerCategory(provider),
       purpose: provider.url
         ? `Operational provider listed at ${provider.url}`
@@ -425,8 +441,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
-      sharedWithThirdParties: dataType.sharedWithThirdParties,
-      thirdParties: dataType.thirdParties,
     }))
   }
 
@@ -466,8 +480,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             retentionDays: dataType.retentionDays,
             isSensitive: dataType.isSensitive,
             isRequired: dataType.isRequired,
-            sharedWithThirdParties: dataType.sharedWithThirdParties,
-            thirdParties: dataType.thirdParties,
           },
         }),
       ),
