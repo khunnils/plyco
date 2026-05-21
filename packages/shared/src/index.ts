@@ -171,6 +171,24 @@ export const infrastructureProfileSchema = z.object({
   encryptedDevicesRequired: z.boolean(),
   backupsEnabled: z.boolean(),
   centralizedLoggingEnabled: z.boolean(),
+  atRestAlgorithm: codeIdSchema.or(z.literal("")).default(""),
+  inTransitMinimumTlsVersion: codeIdSchema.or(z.literal("")).default(""),
+  keyManagementProvider: codeIdSchema.or(z.literal("")).default(""),
+  logRetentionDays: z.number().int().min(0).default(0),
+  securityMonitoringOwner: codeIdSchema.or(z.literal("")).default(""),
+  scanningCadence: codeIdSchema.or(z.literal("")).default(""),
+  patchingSlaCriticalDays: z.number().int().min(0).default(0),
+  patchingSlaHighDays: z.number().int().min(0).default(0),
+  incidentResponsePlanExists: z.boolean().default(false),
+  incidentNotificationTimeline: codeIdSchema.or(z.literal("")).default(""),
+  customerNotificationProcess: codeIdSchema.or(z.literal("")).default(""),
+  incidentResponseLastTestedDate: z.string().trim().default(""),
+  backupCadence: codeIdSchema.or(z.literal("")).default(""),
+  backupRetentionDays: z.number().int().min(0).default(0),
+  restoreTestingCadence: codeIdSchema.or(z.literal("")).default(""),
+  vendorReviewRequired: z.boolean().default(false),
+  vendorReviewCadence: codeIdSchema.or(z.literal("")).default(""),
+  dpaRequiredForProcessors: z.boolean().default(false),
 })
 
 export const dataHandlingProfileSchema = z.object({
@@ -190,6 +208,11 @@ export const accessProfileSchema = z.object({
   offboardingProcessExists: z.boolean(),
   accessReviewsPerformed: z.boolean(),
   privilegedAccessRestricted: z.boolean(),
+  leastPrivilege: z.boolean().default(false),
+  roleBasedAccess: z.boolean().default(false),
+  accessReviewCadence: codeIdSchema.or(z.literal("")).default(""),
+  adminApprovalRequired: z.boolean().default(false),
+  passwordManagerRequired: z.boolean().default(false),
 })
 
 const vendorInputBaseSchema = z.object({
@@ -503,6 +526,24 @@ export const emptyInfrastructureProfile: InfrastructureProfile = {
   encryptedDevicesRequired: false,
   backupsEnabled: false,
   centralizedLoggingEnabled: false,
+  atRestAlgorithm: "",
+  inTransitMinimumTlsVersion: "",
+  keyManagementProvider: "",
+  logRetentionDays: 0,
+  securityMonitoringOwner: "",
+  scanningCadence: "",
+  patchingSlaCriticalDays: 0,
+  patchingSlaHighDays: 0,
+  incidentResponsePlanExists: false,
+  incidentNotificationTimeline: "",
+  customerNotificationProcess: "",
+  incidentResponseLastTestedDate: "",
+  backupCadence: "",
+  backupRetentionDays: 0,
+  restoreTestingCadence: "",
+  vendorReviewRequired: false,
+  vendorReviewCadence: "",
+  dpaRequiredForProcessors: false,
 }
 
 export const emptyDataHandlingProfile: DataHandlingProfile = {
@@ -522,4 +563,9 @@ export const emptyAccessProfile: AccessProfile = {
   offboardingProcessExists: false,
   accessReviewsPerformed: false,
   privilegedAccessRestricted: false,
+  leastPrivilege: false,
+  roleBasedAccess: false,
+  accessReviewCadence: "",
+  adminApprovalRequired: false,
+  passwordManagerRequired: false,
 }

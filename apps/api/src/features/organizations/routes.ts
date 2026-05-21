@@ -13,6 +13,7 @@ import { requireOrganizationMembership } from "../../organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type ProviderSource } from "../../providers.js"
 import {
+  validateAccessProfileCodes,
   validateCompanyProfileCodes,
   validateDataHandlingProfileCodes,
   validateInfrastructureProfileCodes,
@@ -106,6 +107,11 @@ export async function registerOrganizationRoutes(
         vocabularyRepository,
         request.params.organizationId,
         body.infrastructure,
+      )
+      await validateAccessProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body.access,
       )
       const organization = await organizationRepository.upsertProfile(
         request.params.organizationId,

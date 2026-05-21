@@ -1,0 +1,24 @@
+ALTER TABLE "access_profiles" ADD COLUMN "least_privilege" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "access_profiles" ADD COLUMN "role_based_access" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "access_profiles" ADD COLUMN "access_review_cadence" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "access_profiles" ADD COLUMN "admin_approval_required" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "access_profiles" ADD COLUMN "password_manager_required" BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "at_rest_algorithm" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "in_transit_minimum_tls_version" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "key_management_provider" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "log_retention_days" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "security_monitoring_owner" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "scanning_cadence" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "patching_sla_critical_days" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "patching_sla_high_days" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "incident_response_plan_exists" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "incident_notification_timeline" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "customer_notification_process" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "incident_response_last_tested_date" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "backup_cadence" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "backup_retention_days" INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "restore_testing_cadence" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "vendor_review_required" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "vendor_review_cadence" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "dpa_required_for_processors" BOOLEAN NOT NULL DEFAULT false;

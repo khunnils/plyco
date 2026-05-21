@@ -307,7 +307,37 @@ const CompanySectionFields = ({
   }
 
   if (section === "infrastructure") {
-    return <ProfileInfrastructureFields form={form} providers={providers} />
+    return (
+      <ProfileInfrastructureFields
+        form={form}
+        providers={providers}
+        securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
+        securityCustomerNotificationProcessOptions={codeOptions(
+          vocabulary,
+          "security_customer_notification_processes",
+        )}
+        securityEncryptionAlgorithmOptions={codeOptions(
+          vocabulary,
+          "security_encryption_algorithms",
+        )}
+        securityKeyManagementProviderOptions={codeOptions(
+          vocabulary,
+          "security_key_management_providers",
+        )}
+        securityMonitoringOwnerOptions={codeOptions(
+          vocabulary,
+          "security_monitoring_owners",
+        )}
+        securityNotificationTimelineOptions={codeOptions(
+          vocabulary,
+          "security_notification_timelines",
+        )}
+        securityTlsVersionOptions={codeOptions(
+          vocabulary,
+          "security_tls_versions",
+        )}
+      />
+    )
   }
 
   if (section === "dataHandling") {
@@ -321,7 +351,12 @@ const CompanySectionFields = ({
     )
   }
 
-  return <ProfileAccessFields form={form} />
+  return (
+    <ProfileAccessFields
+      form={form}
+      securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
+    />
+  )
 }
 
 const CompanyReadOnlySection = ({
@@ -688,10 +723,153 @@ const CompanyReadOnlySection = ({
         "Centralized logging",
         boolText(profile.infrastructure.centralizedLoggingEnabled),
       ],
+      [
+        "At-rest algorithm",
+        profile.infrastructure.atRestAlgorithm
+          ? codeLabel(
+              vocabulary,
+              "security_encryption_algorithms",
+              profile.infrastructure.atRestAlgorithm,
+            )
+          : "Not set",
+      ],
+      [
+        "Minimum TLS version",
+        profile.infrastructure.inTransitMinimumTlsVersion
+          ? codeLabel(
+              vocabulary,
+              "security_tls_versions",
+              profile.infrastructure.inTransitMinimumTlsVersion,
+            )
+          : "Not set",
+      ],
+      [
+        "Key management",
+        profile.infrastructure.keyManagementProvider
+          ? codeLabel(
+              vocabulary,
+              "security_key_management_providers",
+              profile.infrastructure.keyManagementProvider,
+            )
+          : "Not set",
+      ],
+      ["Log retention days", profile.infrastructure.logRetentionDays],
+      [
+        "Security monitoring owner",
+        profile.infrastructure.securityMonitoringOwner
+          ? codeLabel(
+              vocabulary,
+              "security_monitoring_owners",
+              profile.infrastructure.securityMonitoringOwner,
+            )
+          : "Not set",
+      ],
+      [
+        "Scanning cadence",
+        profile.infrastructure.scanningCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              profile.infrastructure.scanningCadence,
+            )
+          : "Not set",
+      ],
+      [
+        "Critical patch SLA days",
+        profile.infrastructure.patchingSlaCriticalDays,
+      ],
+      ["High patch SLA days", profile.infrastructure.patchingSlaHighDays],
+      [
+        "Incident response plan",
+        boolText(profile.infrastructure.incidentResponsePlanExists),
+      ],
+      [
+        "Incident notification timeline",
+        profile.infrastructure.incidentNotificationTimeline
+          ? codeLabel(
+              vocabulary,
+              "security_notification_timelines",
+              profile.infrastructure.incidentNotificationTimeline,
+            )
+          : "Not set",
+      ],
+      [
+        "Customer notification process",
+        profile.infrastructure.customerNotificationProcess
+          ? codeLabel(
+              vocabulary,
+              "security_customer_notification_processes",
+              profile.infrastructure.customerNotificationProcess,
+            )
+          : "Not set",
+      ],
+      [
+        "Incident response last tested",
+        profile.infrastructure.incidentResponseLastTestedDate || "Not set",
+      ],
+      [
+        "Backup cadence",
+        profile.infrastructure.backupCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              profile.infrastructure.backupCadence,
+            )
+          : "Not set",
+      ],
+      ["Backup retention days", profile.infrastructure.backupRetentionDays],
+      [
+        "Restore testing cadence",
+        profile.infrastructure.restoreTestingCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              profile.infrastructure.restoreTestingCadence,
+            )
+          : "Not set",
+      ],
+      [
+        "Vendor review required",
+        boolText(profile.infrastructure.vendorReviewRequired),
+      ],
+      [
+        "Vendor review cadence",
+        profile.infrastructure.vendorReviewCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              profile.infrastructure.vendorReviewCadence,
+            )
+          : "Not set",
+      ],
+      [
+        "DPA required for processors",
+        boolText(profile.infrastructure.dpaRequiredForProcessors),
+      ],
     ],
     access: [
+      ["Least privilege", boolText(profile.access.leastPrivilege)],
+      ["Role-based access", boolText(profile.access.roleBasedAccess)],
+      [
+        "Access review cadence",
+        profile.access.accessReviewCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              profile.access.accessReviewCadence,
+            )
+          : "Not set",
+      ],
+      [
+        "Admin approval required",
+        boolText(profile.access.adminApprovalRequired),
+      ],
       ["MFA required", boolText(profile.access.mfaRequired)],
       ["SSO enabled", boolText(profile.access.ssoEnabled)],
+      [
+        "Password manager required",
+        boolText(profile.access.passwordManagerRequired),
+      ],
       ["Shared accounts", boolText(profile.access.sharedAccountsExist)],
       ["Offboarding", boolText(profile.access.offboardingProcessExists)],
       ["Access reviews", boolText(profile.access.accessReviewsPerformed)],

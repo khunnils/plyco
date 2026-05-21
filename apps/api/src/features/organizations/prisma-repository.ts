@@ -145,6 +145,24 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       encryptedDevicesRequired: input.encryptedDevicesRequired,
       backupsEnabled: input.backupsEnabled,
       centralizedLoggingEnabled: input.centralizedLoggingEnabled,
+      atRestAlgorithm: input.atRestAlgorithm,
+      inTransitMinimumTlsVersion: input.inTransitMinimumTlsVersion,
+      keyManagementProvider: input.keyManagementProvider,
+      logRetentionDays: input.logRetentionDays,
+      securityMonitoringOwner: input.securityMonitoringOwner,
+      scanningCadence: input.scanningCadence,
+      patchingSlaCriticalDays: input.patchingSlaCriticalDays,
+      patchingSlaHighDays: input.patchingSlaHighDays,
+      incidentResponsePlanExists: input.incidentResponsePlanExists,
+      incidentNotificationTimeline: input.incidentNotificationTimeline,
+      customerNotificationProcess: input.customerNotificationProcess,
+      incidentResponseLastTestedDate: input.incidentResponseLastTestedDate,
+      backupCadence: input.backupCadence,
+      backupRetentionDays: input.backupRetentionDays,
+      restoreTestingCadence: input.restoreTestingCadence,
+      vendorReviewRequired: input.vendorReviewRequired,
+      vendorReviewCadence: input.vendorReviewCadence,
+      dpaRequiredForProcessors: input.dpaRequiredForProcessors,
     }
   }
 
@@ -464,6 +482,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       offboardingProcessExists: input.offboardingProcessExists,
       accessReviewsPerformed: input.accessReviewsPerformed,
       privilegedAccessRestricted: input.privilegedAccessRestricted,
+      leastPrivilege: input.leastPrivilege,
+      roleBasedAccess: input.roleBasedAccess,
+      accessReviewCadence: input.accessReviewCadence,
+      adminApprovalRequired: input.adminApprovalRequired,
+      passwordManagerRequired: input.passwordManagerRequired,
     }
   }
 }

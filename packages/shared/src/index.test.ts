@@ -6,9 +6,13 @@ import {
   companyProfileSchema,
   createOrganizationSchema,
   dataHandlingProfileSchema,
+  emptyAccessProfile,
+  emptyInfrastructureProfile,
   emptyPrivacyProfile,
   emptyServiceProfile,
   privacyProfileSchema,
+  accessProfileSchema,
+  infrastructureProfileSchema,
   providerSystemTypeSchema,
   serviceProfileInputSchema,
   serviceProfileSchema,
@@ -245,6 +249,93 @@ describe("shared security profile schemas", () => {
         usesAutomatedDecisionMaking: false,
       })
     }
+  })
+
+  it("accepts empty security control defaults", () => {
+    expect(accessProfileSchema.parse(emptyAccessProfile)).toMatchObject({
+      leastPrivilege: false,
+      roleBasedAccess: false,
+      accessReviewCadence: "",
+      adminApprovalRequired: false,
+      passwordManagerRequired: false,
+    })
+    expect(infrastructureProfileSchema.parse(emptyInfrastructureProfile)).toMatchObject({
+      atRestAlgorithm: "",
+      inTransitMinimumTlsVersion: "",
+      keyManagementProvider: "",
+      logRetentionDays: 0,
+      securityMonitoringOwner: "",
+      scanningCadence: "",
+      patchingSlaCriticalDays: 0,
+      patchingSlaHighDays: 0,
+      incidentResponsePlanExists: false,
+      incidentNotificationTimeline: "",
+      customerNotificationProcess: "",
+      incidentResponseLastTestedDate: "",
+      backupCadence: "",
+      backupRetentionDays: 0,
+      restoreTestingCadence: "",
+      vendorReviewRequired: false,
+      vendorReviewCadence: "",
+      dpaRequiredForProcessors: false,
+    })
+  })
+
+  it("accepts populated security control detail", () => {
+    expect(
+      accessProfileSchema.safeParse({
+        ...emptyAccessProfile,
+        leastPrivilege: true,
+        roleBasedAccess: true,
+        accessReviewCadence: "quarterly",
+        adminApprovalRequired: true,
+        passwordManagerRequired: true,
+      }).success,
+    ).toBe(true)
+    expect(
+      infrastructureProfileSchema.safeParse({
+        ...emptyInfrastructureProfile,
+        atRestAlgorithm: "aes_256",
+        inTransitMinimumTlsVersion: "tls_1_2",
+        keyManagementProvider: "aws_kms",
+        logRetentionDays: 365,
+        securityMonitoringOwner: "security",
+        scanningCadence: "weekly",
+        patchingSlaCriticalDays: 7,
+        patchingSlaHighDays: 30,
+        incidentResponsePlanExists: true,
+        incidentNotificationTimeline: "within_72_hours",
+        customerNotificationProcess: "email_notice",
+        incidentResponseLastTestedDate: "2026-05-21",
+        backupCadence: "daily",
+        backupRetentionDays: 30,
+        restoreTestingCadence: "quarterly",
+        vendorReviewRequired: true,
+        vendorReviewCadence: "annually",
+        dpaRequiredForProcessors: true,
+      }).success,
+    ).toBe(true)
+  })
+
+  it("rejects invalid security control codes and negative day counts", () => {
+    expect(
+      accessProfileSchema.safeParse({
+        ...emptyAccessProfile,
+        accessReviewCadence: "Every Quarter",
+      }).success,
+    ).toBe(false)
+    expect(
+      infrastructureProfileSchema.safeParse({
+        ...emptyInfrastructureProfile,
+        atRestAlgorithm: "AES 256",
+      }).success,
+    ).toBe(false)
+    expect(
+      infrastructureProfileSchema.safeParse({
+        ...emptyInfrastructureProfile,
+        logRetentionDays: -1,
+      }).success,
+    ).toBe(false)
   })
 
   it("accepts a populated privacy profile with code-array fields", () => {

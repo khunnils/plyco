@@ -1,4 +1,5 @@
 import {
+  type AccessProfile,
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
@@ -128,8 +129,8 @@ export const validateInfrastructureProfileCodes = async (
   organizationId: string,
   infrastructure: InfrastructureProfile,
 ) => {
-  await Promise.all(
-    infrastructure.organizationProviders.map((provider) => {
+  await Promise.all([
+    ...infrastructure.organizationProviders.map((provider) => {
       if (
         !["auth", "source_control", "cloud", "password_manager"].includes(
           provider.systemType,
@@ -151,7 +152,115 @@ export const validateInfrastructureProfileCodes = async (
         "infrastructure.organizationProviders.systemType",
       )
     }),
-  )
+    infrastructure.atRestAlgorithm
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_encryption_algorithms",
+          infrastructure.atRestAlgorithm,
+          "infrastructure.atRestAlgorithm",
+        )
+      : Promise.resolve(),
+    infrastructure.inTransitMinimumTlsVersion
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_tls_versions",
+          infrastructure.inTransitMinimumTlsVersion,
+          "infrastructure.inTransitMinimumTlsVersion",
+        )
+      : Promise.resolve(),
+    infrastructure.keyManagementProvider
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_key_management_providers",
+          infrastructure.keyManagementProvider,
+          "infrastructure.keyManagementProvider",
+        )
+      : Promise.resolve(),
+    infrastructure.securityMonitoringOwner
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_monitoring_owners",
+          infrastructure.securityMonitoringOwner,
+          "infrastructure.securityMonitoringOwner",
+        )
+      : Promise.resolve(),
+    infrastructure.scanningCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          infrastructure.scanningCadence,
+          "infrastructure.scanningCadence",
+        )
+      : Promise.resolve(),
+    infrastructure.incidentNotificationTimeline
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_notification_timelines",
+          infrastructure.incidentNotificationTimeline,
+          "infrastructure.incidentNotificationTimeline",
+        )
+      : Promise.resolve(),
+    infrastructure.customerNotificationProcess
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_customer_notification_processes",
+          infrastructure.customerNotificationProcess,
+          "infrastructure.customerNotificationProcess",
+        )
+      : Promise.resolve(),
+    infrastructure.backupCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          infrastructure.backupCadence,
+          "infrastructure.backupCadence",
+        )
+      : Promise.resolve(),
+    infrastructure.restoreTestingCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          infrastructure.restoreTestingCadence,
+          "infrastructure.restoreTestingCadence",
+        )
+      : Promise.resolve(),
+    infrastructure.vendorReviewCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          infrastructure.vendorReviewCadence,
+          "infrastructure.vendorReviewCadence",
+        )
+      : Promise.resolve(),
+  ])
+}
+
+export const validateAccessProfileCodes = async (
+  vocabularyRepository: VocabularyRepository,
+  organizationId: string,
+  access: AccessProfile,
+) => {
+  await Promise.all([
+    access.accessReviewCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          access.accessReviewCadence,
+          "access.accessReviewCadence",
+        )
+      : Promise.resolve(),
+  ])
 }
 
 export const validateServiceProfileCodes = async (

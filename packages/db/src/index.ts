@@ -95,6 +95,24 @@ export function mapOrganizationRecord(record: {
     encryptedDevicesRequired: boolean
     backupsEnabled: boolean
     centralizedLoggingEnabled: boolean
+    atRestAlgorithm: string
+    inTransitMinimumTlsVersion: string
+    keyManagementProvider: string
+    logRetentionDays: number
+    securityMonitoringOwner: string
+    scanningCadence: string
+    patchingSlaCriticalDays: number
+    patchingSlaHighDays: number
+    incidentResponsePlanExists: boolean
+    incidentNotificationTimeline: string
+    customerNotificationProcess: string
+    incidentResponseLastTestedDate: string
+    backupCadence: string
+    backupRetentionDays: number
+    restoreTestingCadence: string
+    vendorReviewRequired: boolean
+    vendorReviewCadence: string
+    dpaRequiredForProcessors: boolean
   } | null
   vendors: Array<{
     providerId: string | null
@@ -129,6 +147,11 @@ export function mapOrganizationRecord(record: {
     offboardingProcessExists: boolean
     accessReviewsPerformed: boolean
     privilegedAccessRestricted: boolean
+    leastPrivilege: boolean
+    roleBasedAccess: boolean
+    accessReviewCadence: string
+    adminApprovalRequired: boolean
+    passwordManagerRequired: boolean
   } | null
   createdAt: Date
   updatedAt: Date
@@ -171,6 +194,38 @@ export function mapOrganizationRecord(record: {
     backupsEnabled: record.infrastructureProfile?.backupsEnabled ?? false,
     centralizedLoggingEnabled:
       record.infrastructureProfile?.centralizedLoggingEnabled ?? false,
+    atRestAlgorithm: record.infrastructureProfile?.atRestAlgorithm ?? "",
+    inTransitMinimumTlsVersion:
+      record.infrastructureProfile?.inTransitMinimumTlsVersion ?? "",
+    keyManagementProvider:
+      record.infrastructureProfile?.keyManagementProvider ?? "",
+    logRetentionDays: record.infrastructureProfile?.logRetentionDays ?? 0,
+    securityMonitoringOwner:
+      record.infrastructureProfile?.securityMonitoringOwner ?? "",
+    scanningCadence: record.infrastructureProfile?.scanningCadence ?? "",
+    patchingSlaCriticalDays:
+      record.infrastructureProfile?.patchingSlaCriticalDays ?? 0,
+    patchingSlaHighDays:
+      record.infrastructureProfile?.patchingSlaHighDays ?? 0,
+    incidentResponsePlanExists:
+      record.infrastructureProfile?.incidentResponsePlanExists ?? false,
+    incidentNotificationTimeline:
+      record.infrastructureProfile?.incidentNotificationTimeline ?? "",
+    customerNotificationProcess:
+      record.infrastructureProfile?.customerNotificationProcess ?? "",
+    incidentResponseLastTestedDate:
+      record.infrastructureProfile?.incidentResponseLastTestedDate ?? "",
+    backupCadence: record.infrastructureProfile?.backupCadence ?? "",
+    backupRetentionDays:
+      record.infrastructureProfile?.backupRetentionDays ?? 0,
+    restoreTestingCadence:
+      record.infrastructureProfile?.restoreTestingCadence ?? "",
+    vendorReviewRequired:
+      record.infrastructureProfile?.vendorReviewRequired ?? false,
+    vendorReviewCadence:
+      record.infrastructureProfile?.vendorReviewCadence ?? "",
+    dpaRequiredForProcessors:
+      record.infrastructureProfile?.dpaRequiredForProcessors ?? false,
   })
   const serviceRecords = record.services ?? (record.serviceProfile ? [record.serviceProfile] : [])
   const services = serviceRecords.flatMap((service) =>
@@ -273,6 +328,13 @@ export function mapOrganizationRecord(record: {
       record.accessProfile?.accessReviewsPerformed ?? false,
     privilegedAccessRestricted:
       record.accessProfile?.privilegedAccessRestricted ?? false,
+    leastPrivilege: record.accessProfile?.leastPrivilege ?? false,
+    roleBasedAccess: record.accessProfile?.roleBasedAccess ?? false,
+    accessReviewCadence: record.accessProfile?.accessReviewCadence ?? "",
+    adminApprovalRequired:
+      record.accessProfile?.adminApprovalRequired ?? false,
+    passwordManagerRequired:
+      record.accessProfile?.passwordManagerRequired ?? false,
   })
 
   return {

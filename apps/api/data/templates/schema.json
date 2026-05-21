@@ -609,6 +609,302 @@
       "example": "prov-mailchimp"
     },
     {
+      "key": "security.accessControl.leastPrivilege",
+      "label": "Least privilege",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether access follows least-privilege principles.",
+      "example": true
+    },
+    {
+      "key": "security.accessControl.roleBasedAccess",
+      "label": "Role-based access",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether access is assigned using roles.",
+      "example": true
+    },
+    {
+      "key": "security.accessControl.accessReviewCadence",
+      "label": "Access review cadence",
+      "type": "string",
+      "category": "Security",
+      "description": "Access review cadence code.",
+      "example": "quarterly"
+    },
+    {
+      "key": "security.accessControl.accessReviewCadenceLabel",
+      "label": "Access review cadence label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable access review cadence label.",
+      "example": "Quarterly"
+    },
+    {
+      "key": "security.accessControl.adminApprovalRequired",
+      "label": "Admin approval required",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether administrative access requires approval.",
+      "example": true
+    },
+    {
+      "key": "security.authentication.mfaRequired",
+      "label": "MFA required",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether multi-factor authentication is required.",
+      "example": true
+    },
+    {
+      "key": "security.authentication.ssoSupported",
+      "label": "SSO supported",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether single sign-on is supported.",
+      "example": true
+    },
+    {
+      "key": "security.authentication.passwordManagerRequired",
+      "label": "Password manager required",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether use of a password manager is required.",
+      "example": true
+    },
+    {
+      "key": "security.encryption.atRestAlgorithmLabel",
+      "label": "At-rest algorithm label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable encryption-at-rest algorithm label.",
+      "example": "AES-256"
+    },
+    {
+      "key": "security.encryption.inTransitMinimumTlsVersionLabel",
+      "label": "Minimum TLS version label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable minimum TLS version label.",
+      "example": "TLS 1.2"
+    },
+    {
+      "key": "security.encryption.keyManagementProviderLabel",
+      "label": "Key management provider label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable key management provider label.",
+      "example": "AWS KMS"
+    },
+    {
+      "key": "security.logging.centralizedLogging",
+      "label": "Centralized logging",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether centralized logging is enabled.",
+      "example": true
+    },
+    {
+      "key": "security.logging.logRetentionDays",
+      "label": "Log retention days",
+      "type": "number",
+      "category": "Security",
+      "description": "Number of days security logs are retained. A value of 0 means unset.",
+      "example": 365
+    },
+    {
+      "key": "security.logging.securityMonitoringOwnerLabel",
+      "label": "Security monitoring owner label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable security monitoring owner label.",
+      "example": "Security"
+    },
+    {
+      "key": "security.vulnerabilityManagement.scanningCadenceLabel",
+      "label": "Scanning cadence label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable vulnerability scanning cadence label.",
+      "example": "Weekly"
+    },
+    {
+      "key": "security.vulnerabilityManagement.patchingSlaCriticalDays",
+      "label": "Critical patching SLA days",
+      "type": "number",
+      "category": "Security",
+      "description": "Target days to patch critical vulnerabilities. A value of 0 means unset.",
+      "example": 7
+    },
+    {
+      "key": "security.vulnerabilityManagement.patchingSlaHighDays",
+      "label": "High patching SLA days",
+      "type": "number",
+      "category": "Security",
+      "description": "Target days to patch high vulnerabilities. A value of 0 means unset.",
+      "example": 30
+    },
+    {
+      "key": "security.incidentResponse.planExists",
+      "label": "Incident response plan exists",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether an incident response plan exists.",
+      "example": true
+    },
+    {
+      "key": "security.incidentResponse.notificationTimelineLabel",
+      "label": "Notification timeline label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable incident notification timeline label.",
+      "example": "Within 72 hours"
+    },
+    {
+      "key": "security.incidentResponse.customerNotificationProcessLabel",
+      "label": "Customer notification process label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable customer notification process label.",
+      "example": "Email notice"
+    },
+    {
+      "key": "security.incidentResponse.lastTestedDate",
+      "label": "Incident response last tested date",
+      "type": "string",
+      "category": "Security",
+      "description": "Date when the incident response plan was last tested.",
+      "example": "2026-05-21"
+    },
+    {
+      "key": "security.backups.backupCadenceLabel",
+      "label": "Backup cadence label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable backup cadence label.",
+      "example": "Daily"
+    },
+    {
+      "key": "security.backups.backupRetentionDays",
+      "label": "Backup retention days",
+      "type": "number",
+      "category": "Security",
+      "description": "Number of days backups are retained. A value of 0 means unset.",
+      "example": 30
+    },
+    {
+      "key": "security.backups.restoreTestingCadenceLabel",
+      "label": "Restore testing cadence label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable restore testing cadence label.",
+      "example": "Quarterly"
+    },
+    {
+      "key": "security.vendorRisk.vendorReviewRequired",
+      "label": "Vendor review required",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether vendor reviews are required.",
+      "example": true
+    },
+    {
+      "key": "security.vendorRisk.vendorReviewCadenceLabel",
+      "label": "Vendor review cadence label",
+      "type": "string",
+      "category": "Security",
+      "description": "Human-readable vendor review cadence label.",
+      "example": "Annually"
+    },
+    {
+      "key": "security.vendorRisk.dpaRequiredForProcessors",
+      "label": "DPA required for processors",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether DPAs are required for processors.",
+      "example": true
+    },
+    {
+      "key": "security.encryption.atRestAlgorithm",
+      "label": "At-rest algorithm",
+      "type": "string",
+      "category": "Security",
+      "description": "Encryption-at-rest algorithm code.",
+      "example": "aes_256"
+    },
+    {
+      "key": "security.encryption.inTransitMinimumTlsVersion",
+      "label": "Minimum TLS version",
+      "type": "string",
+      "category": "Security",
+      "description": "Minimum TLS version code for data in transit.",
+      "example": "tls_1_2"
+    },
+    {
+      "key": "security.encryption.keyManagementProvider",
+      "label": "Key management provider",
+      "type": "string",
+      "category": "Security",
+      "description": "Key management provider code.",
+      "example": "aws_kms"
+    },
+    {
+      "key": "security.logging.securityMonitoringOwner",
+      "label": "Security monitoring owner",
+      "type": "string",
+      "category": "Security",
+      "description": "Security monitoring owner code.",
+      "example": "security"
+    },
+    {
+      "key": "security.vulnerabilityManagement.scanningCadence",
+      "label": "Scanning cadence",
+      "type": "string",
+      "category": "Security",
+      "description": "Vulnerability scanning cadence code.",
+      "example": "weekly"
+    },
+    {
+      "key": "security.incidentResponse.notificationTimeline",
+      "label": "Notification timeline",
+      "type": "string",
+      "category": "Security",
+      "description": "Incident notification timeline code.",
+      "example": "within_72_hours"
+    },
+    {
+      "key": "security.incidentResponse.customerNotificationProcess",
+      "label": "Customer notification process",
+      "type": "string",
+      "category": "Security",
+      "description": "Customer notification process code.",
+      "example": "email_notice"
+    },
+    {
+      "key": "security.backups.backupCadence",
+      "label": "Backup cadence",
+      "type": "string",
+      "category": "Security",
+      "description": "Backup cadence code.",
+      "example": "daily"
+    },
+    {
+      "key": "security.backups.restoreTestingCadence",
+      "label": "Restore testing cadence",
+      "type": "string",
+      "category": "Security",
+      "description": "Restore testing cadence code.",
+      "example": "quarterly"
+    },
+    {
+      "key": "security.vendorRisk.vendorReviewCadence",
+      "label": "Vendor review cadence",
+      "type": "string",
+      "category": "Security",
+      "description": "Vendor review cadence code.",
+      "example": "annually"
+    },
+    {
       "key": "policy.effectiveDate",
       "label": "Policy effective date",
       "type": "string",

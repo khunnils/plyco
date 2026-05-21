@@ -2,6 +2,8 @@ import { createHash } from "node:crypto"
 
 import nunjucks from "nunjucks"
 import {
+  type AccessProfile,
+  type InfrastructureProfile,
   type PrivacyProfile,
   type ServiceProfile,
   type SecurityProgramSnapshot,
@@ -21,6 +23,7 @@ export type NormalizedTemplateContext = {
     primary: Record<string, unknown>
   }
   privacy: Record<string, unknown>
+  security: Record<string, unknown>
   infrastructure: Record<string, unknown>
   dataHandling: Record<string, unknown>
   access: Record<string, unknown>
@@ -65,6 +68,13 @@ export class ReportContextBuilder {
       },
       privacy: organization
         ? this.privacyContext(organization.privacy, vocabulary)
+        : {},
+      security: organization
+        ? this.securityContext(
+            organization.access,
+            organization.infrastructure,
+            vocabulary,
+          )
         : {},
       infrastructure: organization?.infrastructure ?? {},
       dataHandling: organization?.dataHandling ?? {},
@@ -225,6 +235,114 @@ export class ReportContextBuilder {
       .map((provider) => provider.name ?? provider.providerId)
   }
 
+  private securityContext(
+    access: AccessProfile,
+    infrastructure: InfrastructureProfile,
+    vocabulary?: Vocabulary,
+  ) {
+    return {
+      accessControl: {
+        leastPrivilege: access.leastPrivilege,
+        roleBasedAccess: access.roleBasedAccess,
+        accessReviewCadence: access.accessReviewCadence,
+        accessReviewCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          access.accessReviewCadence,
+        ),
+        adminApprovalRequired: access.adminApprovalRequired,
+      },
+      authentication: {
+        mfaRequired: access.mfaRequired,
+        ssoSupported: access.ssoEnabled,
+        passwordManagerRequired: access.passwordManagerRequired,
+      },
+      encryption: {
+        atRestAlgorithm: infrastructure.atRestAlgorithm,
+        atRestAlgorithmLabel: this.codeLabel(
+          vocabulary,
+          "security_encryption_algorithms",
+          infrastructure.atRestAlgorithm,
+        ),
+        inTransitMinimumTlsVersion:
+          infrastructure.inTransitMinimumTlsVersion,
+        inTransitMinimumTlsVersionLabel: this.codeLabel(
+          vocabulary,
+          "security_tls_versions",
+          infrastructure.inTransitMinimumTlsVersion,
+        ),
+        keyManagementProvider: infrastructure.keyManagementProvider,
+        keyManagementProviderLabel: this.codeLabel(
+          vocabulary,
+          "security_key_management_providers",
+          infrastructure.keyManagementProvider,
+        ),
+      },
+      logging: {
+        centralizedLogging: infrastructure.centralizedLoggingEnabled,
+        logRetentionDays: infrastructure.logRetentionDays,
+        securityMonitoringOwner: infrastructure.securityMonitoringOwner,
+        securityMonitoringOwnerLabel: this.codeLabel(
+          vocabulary,
+          "security_monitoring_owners",
+          infrastructure.securityMonitoringOwner,
+        ),
+      },
+      vulnerabilityManagement: {
+        scanningCadence: infrastructure.scanningCadence,
+        scanningCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          infrastructure.scanningCadence,
+        ),
+        patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
+        patchingSlaHighDays: infrastructure.patchingSlaHighDays,
+      },
+      incidentResponse: {
+        planExists: infrastructure.incidentResponsePlanExists,
+        notificationTimeline: infrastructure.incidentNotificationTimeline,
+        notificationTimelineLabel: this.codeLabel(
+          vocabulary,
+          "security_notification_timelines",
+          infrastructure.incidentNotificationTimeline,
+        ),
+        customerNotificationProcess:
+          infrastructure.customerNotificationProcess,
+        customerNotificationProcessLabel: this.codeLabel(
+          vocabulary,
+          "security_customer_notification_processes",
+          infrastructure.customerNotificationProcess,
+        ),
+        lastTestedDate: infrastructure.incidentResponseLastTestedDate,
+      },
+      backups: {
+        backupCadence: infrastructure.backupCadence,
+        backupCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          infrastructure.backupCadence,
+        ),
+        backupRetentionDays: infrastructure.backupRetentionDays,
+        restoreTestingCadence: infrastructure.restoreTestingCadence,
+        restoreTestingCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          infrastructure.restoreTestingCadence,
+        ),
+      },
+      vendorRisk: {
+        vendorReviewRequired: infrastructure.vendorReviewRequired,
+        vendorReviewCadence: infrastructure.vendorReviewCadence,
+        vendorReviewCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          infrastructure.vendorReviewCadence,
+        ),
+        dpaRequiredForProcessors: infrastructure.dpaRequiredForProcessors,
+      },
+    }
+  }
+
   private codeLabels(
     vocabulary: Vocabulary | undefined,
     codeSetId: string,
@@ -238,6 +356,14 @@ export class ReportContextBuilder {
       (value) =>
         codeSet?.codes.find((code) => code.codeId === value)?.name ?? value,
     )
+  }
+
+  private codeLabel(
+    vocabulary: Vocabulary | undefined,
+    codeSetId: string,
+    value: string,
+  ) {
+    return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : ""
   }
 
   private vendorContext(vendor: Vendor) {

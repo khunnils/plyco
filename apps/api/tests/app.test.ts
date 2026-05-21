@@ -114,6 +114,24 @@ const profileBody = {
     encryptedDevicesRequired: true,
     backupsEnabled: true,
     centralizedLoggingEnabled: false,
+    atRestAlgorithm: "aes_256",
+    inTransitMinimumTlsVersion: "tls_1_2",
+    keyManagementProvider: "aws_kms",
+    logRetentionDays: 365,
+    securityMonitoringOwner: "security",
+    scanningCadence: "weekly",
+    patchingSlaCriticalDays: 7,
+    patchingSlaHighDays: 30,
+    incidentResponsePlanExists: true,
+    incidentNotificationTimeline: "within_72_hours",
+    customerNotificationProcess: "email_notice",
+    incidentResponseLastTestedDate: "2026-05-21",
+    backupCadence: "daily",
+    backupRetentionDays: 30,
+    restoreTestingCadence: "quarterly",
+    vendorReviewRequired: true,
+    vendorReviewCadence: "annually",
+    dpaRequiredForProcessors: true,
   },
   dataHandling: {
     dataTypesStored: [
@@ -158,6 +176,11 @@ const profileBody = {
     offboardingProcessExists: true,
     accessReviewsPerformed: false,
     privilegedAccessRestricted: true,
+    leastPrivilege: true,
+    roleBasedAccess: true,
+    accessReviewCadence: "quarterly",
+    adminApprovalRequired: true,
+    passwordManagerRequired: true,
   },
 }
 
@@ -635,6 +658,57 @@ describe("security profile API", () => {
     })
   })
 
+  it("rejects invalid security control codes", async () => {
+    const app = await createTestApp()
+    const invalidAccessResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        access: {
+          ...profileBody.access,
+          accessReviewCadence: "every_quarter",
+        },
+      },
+    })
+
+    expect(invalidAccessResponse.statusCode).toBe(400)
+    expect(invalidAccessResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_cadences",
+          field: "access.accessReviewCadence",
+          value: "every_quarter",
+        },
+      },
+    })
+
+    const invalidInfrastructureResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          atRestAlgorithm: "aes_512",
+        },
+      },
+    })
+
+    expect(invalidInfrastructureResponse.statusCode).toBe(400)
+    expect(invalidInfrastructureResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_encryption_algorithms",
+          field: "infrastructure.atRestAlgorithm",
+          value: "aes_512",
+        },
+      },
+    })
+  })
+
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
       organization: {
@@ -757,6 +831,24 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "privacy.dataResidencyOptionLabels" }),
         expect.objectContaining({ key: "privacy.newsletterProvider" }),
         expect.objectContaining({ key: "privacy.newsletterProviderId" }),
+        expect.objectContaining({ key: "security.accessControl.leastPrivilege" }),
+        expect.objectContaining({
+          key: "security.authentication.mfaRequired",
+        }),
+        expect.objectContaining({
+          key: "security.encryption.atRestAlgorithmLabel",
+        }),
+        expect.objectContaining({ key: "security.logging.logRetentionDays" }),
+        expect.objectContaining({
+          key: "security.vulnerabilityManagement.scanningCadenceLabel",
+        }),
+        expect.objectContaining({
+          key: "security.incidentResponse.notificationTimelineLabel",
+        }),
+        expect.objectContaining({ key: "security.backups.backupCadenceLabel" }),
+        expect.objectContaining({
+          key: "security.vendorRisk.vendorReviewCadenceLabel",
+        }),
         expect.objectContaining({ key: "vendors.all" }),
         expect.objectContaining({ key: "vendors.dataProcessors" }),
         expect.objectContaining({ key: "vendors.subprocessors" }),
@@ -835,6 +927,61 @@ describe("security profile API", () => {
       dataResidencyOptionLabels: ["United States", "European Union"],
       newsletterProvider: "Mailchimp",
       newsletterProviderId: "prov-mailchimp",
+    })
+    expect(context.security).toMatchObject({
+      accessControl: {
+        leastPrivilege: true,
+        roleBasedAccess: true,
+        accessReviewCadence: "quarterly",
+        accessReviewCadenceLabel: "Quarterly",
+        adminApprovalRequired: true,
+      },
+      authentication: {
+        mfaRequired: true,
+        ssoSupported: false,
+        passwordManagerRequired: true,
+      },
+      encryption: {
+        atRestAlgorithm: "aes_256",
+        atRestAlgorithmLabel: "AES-256",
+        inTransitMinimumTlsVersion: "tls_1_2",
+        inTransitMinimumTlsVersionLabel: "TLS 1.2",
+        keyManagementProvider: "aws_kms",
+        keyManagementProviderLabel: "AWS KMS",
+      },
+      logging: {
+        centralizedLogging: false,
+        logRetentionDays: 365,
+        securityMonitoringOwner: "security",
+        securityMonitoringOwnerLabel: "Security",
+      },
+      vulnerabilityManagement: {
+        scanningCadence: "weekly",
+        scanningCadenceLabel: "Weekly",
+        patchingSlaCriticalDays: 7,
+        patchingSlaHighDays: 30,
+      },
+      incidentResponse: {
+        planExists: true,
+        notificationTimeline: "within_72_hours",
+        notificationTimelineLabel: "Within 72 hours",
+        customerNotificationProcess: "email_notice",
+        customerNotificationProcessLabel: "Email notice",
+        lastTestedDate: "2026-05-21",
+      },
+      backups: {
+        backupCadence: "daily",
+        backupCadenceLabel: "Daily",
+        backupRetentionDays: 30,
+        restoreTestingCadence: "quarterly",
+        restoreTestingCadenceLabel: "Quarterly",
+      },
+      vendorRisk: {
+        vendorReviewRequired: true,
+        vendorReviewCadence: "annually",
+        vendorReviewCadenceLabel: "Annually",
+        dpaRequiredForProcessors: true,
+      },
     })
   })
 
@@ -1278,6 +1425,34 @@ describe("security profile API", () => {
       url: "/organizations/org-test/documents",
     })
     expect(transferStaleDocumentsResponse.json()).toMatchObject([
+      {
+        document: { id: generateResponse.json().id },
+        status: "stale",
+      },
+    ])
+
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    })
+
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          logRetentionDays: 180,
+        },
+      },
+    })
+    const securityStaleDocumentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    })
+    expect(securityStaleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
