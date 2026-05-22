@@ -1,6 +1,7 @@
 import {
   Box,
   Building2,
+  ClipboardList,
   Database,
   Download,
   Eye,
@@ -87,6 +88,7 @@ import {
   useDeleteServiceVendorUse,
   useDeleteVendor,
   useProviders,
+  useUpdateBusinessActivity,
   useUpdateServiceVendorUse,
   useUpdateVendor,
 } from "@/features/vendors/hooks/use-vendors"
@@ -97,6 +99,7 @@ import { VendorForm } from "@/features/vendors/components/vendor-form"
 import { VendorList } from "@/features/vendors/components/vendor-list"
 import { ServiceVendorUseForm } from "@/features/vendors/components/service-vendor-use-form"
 import { ProviderSelector } from "@/features/vendors/components/provider-selector"
+import { ActivitiesManager } from "@/features/vendors/components/activities-manager"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 import { TemplateCard } from "@/features/templates/components/template-card"
@@ -120,6 +123,7 @@ import { VocabularyManager } from "@/features/vocabulary/components/vocabulary-m
 type CompanySectionId =
   | "profile"
   | "service"
+  | "activities"
   | "privacy"
   | "infrastructure"
   | "dataHandling"
@@ -128,6 +132,7 @@ type WorkspaceView =
   | "dashboard"
   | "companyProfile"
   | "companyService"
+  | "companyActivities"
   | "companyPrivacy"
   | "companyInfrastructure"
   | "companyData"
@@ -157,6 +162,13 @@ const companySections: Array<{
     title: "Services",
     description: "Products or services the organization offers.",
     icon: Box,
+  },
+  {
+    id: "activities",
+    view: "companyActivities",
+    title: "Activities",
+    description: "Processing activities with purposes and legal basis.",
+    icon: ClipboardList,
   },
   {
     id: "privacy",
@@ -197,6 +209,7 @@ const isCompanyView = (
 ): view is
   | "companyProfile"
   | "companyService"
+  | "companyActivities"
   | "companyPrivacy"
   | "companyInfrastructure"
   | "companyData"
@@ -263,6 +276,10 @@ const CompanySectionFields = ({
   section: CompanySectionId
   vocabulary: Vocabulary | undefined
 }) => {
+  if (section === "activities") {
+    return null
+  }
+
   if (section === "profile") {
     return (
       <ProfileCompanyFields
@@ -385,6 +402,10 @@ const CompanyReadOnlySection = ({
   vocabulary: Vocabulary | undefined
   onEdit: () => void
 }) => {
+  if (section === "activities") {
+    return null
+  }
+
   if (section === "dataHandling") {
     return (
       <DataHandlingReadOnlySection
@@ -658,7 +679,10 @@ const CompanyReadOnlySection = ({
   }
 
   const rowsBySection: Record<
-    Exclude<CompanySectionId, "dataHandling" | "privacy" | "service">,
+    Exclude<
+      CompanySectionId,
+      "activities" | "dataHandling" | "privacy" | "service"
+    >,
     Array<[string, string | number]>
   > = {
     profile: [
@@ -926,6 +950,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const saveProfile = useSaveSecurityProfile()
   const createBusinessActivity = useCreateBusinessActivity()
+  const updateBusinessActivity = useUpdateBusinessActivity()
   const deleteBusinessActivity = useDeleteBusinessActivity()
   const createVendor = useCreateVendor()
   const updateVendor = useUpdateVendor()
@@ -967,6 +992,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     .filter(Boolean)
     .join(" · ")
 
+  const isActivityMutationPending =
+    createBusinessActivity.isPending ||
+    updateBusinessActivity.isPending ||
+    deleteBusinessActivity.isPending
+
   const isVendorMutationPending =
     createVendor.isPending ||
     updateVendor.isPending ||
@@ -985,7 +1015,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const [editingVendorUseId, setEditingVendorUseId] = useState<string | null>(
     null
   )
-  const [newActivityName, setNewActivityName] = useState("")
   const {
     activeWorkspaceView,
     editingCompanySection,
@@ -1202,7 +1231,20 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   key={section.id}
                   title={section.title}
                 >
-                  {editingCompanySection === section.id ? (
+                  {section.id === "activities" ? (
+                    <ActivitiesManager
+                      activities={businessActivities}
+                      isMutationPending={isActivityMutationPending}
+                      legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
+                      purposeOptions={codeOptions(vocabularyData, "data_purposes")}
+                      vocabulary={vocabularyData}
+                      onCreate={(activity) => createBusinessActivity.mutate(activity)}
+                      onDelete={(activity) =>
+                        deleteBusinessActivity.mutate(activity.id)
+                      }
+                      onUpdate={(input) => updateBusinessActivity.mutate(input)}
+                    />
+                  ) : editingCompanySection === section.id ? (
                     <ProfileForm
                       defaultValues={defaultValues}
                       onSubmit={(profile) => {
@@ -1259,56 +1301,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 	              description="Review organization vendors or add common providers from the catalog."
 	              title="Vendors"
 	            >
-	              <div className="mb-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4">
-	                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-	                  <label className="grid flex-1 gap-2 text-sm font-medium text-slate-800">
-	                    Business activity
-	                    <input
-	                      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-	                      placeholder="Account management"
-	                      value={newActivityName}
-	                      onChange={(event) => setNewActivityName(event.target.value)}
-	                    />
-	                  </label>
-	                  <Button
-	                    className="w-fit"
-	                    disabled={!newActivityName.trim() || createBusinessActivity.isPending}
-	                    type="button"
-	                    variant="outline"
-	                    onClick={() => {
-	                      createBusinessActivity.mutate({
-	                        name: newActivityName,
-	                        description: "",
-	                        purposes: [],
-	                        legalBasis: [],
-	                      })
-	                      setNewActivityName("")
-	                    }}
-	                  >
-	                    <Plus />
-	                    Add activity
-	                  </Button>
-	                </div>
-	                {businessActivities.length > 0 ? (
-	                  <div className="flex flex-wrap gap-2">
-	                    {businessActivities.map((activity) => (
-	                      <span
-	                        className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
-	                        key={activity.id}
-	                      >
-	                        {activity.name}
-	                        <button
-	                          className="text-slate-500 hover:text-red-700"
-	                          type="button"
-	                          onClick={() => deleteBusinessActivity.mutate(activity.id)}
-	                        >
-	                          <Trash2 className="size-3" />
-	                        </button>
-	                      </span>
-	                    ))}
-	                  </div>
-	                ) : null}
-	              </div>
 	              {showVendorCatalog ? (
                 <div className="grid gap-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

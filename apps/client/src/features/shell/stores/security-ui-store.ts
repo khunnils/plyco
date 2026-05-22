@@ -5,6 +5,7 @@ type SecurityUiState = {
     | "dashboard"
     | "companyProfile"
     | "companyService"
+    | "companyActivities"
     | "companyPrivacy"
     | "companyInfrastructure"
     | "companyData"
@@ -20,6 +21,7 @@ type SecurityUiState = {
   editingCompanySection:
     | "profile"
     | "service"
+    | "activities"
     | "privacy"
     | "infrastructure"
     | "dataHandling"
