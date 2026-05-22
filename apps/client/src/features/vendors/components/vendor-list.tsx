@@ -113,11 +113,8 @@ export const VendorList = ({
                         )}
                         {" - "}
                         {vendorUse.dataProcessingLevel !== "none"
-                          ? vendorUse.dataProcessed
-                              .map((value) =>
-                                codeLabel(vocabulary, "data_categories", value),
-                              )
-                              .join(", ") || "No data types selected"
+                          ? vendorUse.dataProcessed.join(", ") ||
+                              "No data types selected"
                           : "No data processing"}
                       </p>
                     </div>

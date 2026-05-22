@@ -1209,7 +1209,6 @@
           "collectionMethods": [
             "signup form"
           ],
-          "retentionDays": 365,
           "isSensitive": true,
           "isRequired": true
         }
@@ -1249,13 +1248,6 @@
           ]
         },
         {
-          "key": "retentionDays",
-          "label": "Retention days",
-          "type": "number",
-          "description": "Number of days this data category is retained. A value of 0 means unset.",
-          "example": 365
-        },
-        {
           "key": "isSensitive",
           "label": "Sensitive",
           "type": "boolean",
@@ -1276,13 +1268,51 @@
 	      "label": "Service activities",
 	      "type": "collection",
 	      "category": "Services",
-	      "description": "Business activities performed by each service, including purpose, role, and legal basis.",
+	      "description": "Business activities performed by each service, including purpose, role, legal basis, and retention.",
 	      "example": [
 	        {
 	          "name": "Account management",
 	          "purpose": "Operate user accounts",
 	          "role": "controller",
-	          "legalBasis": ["contract"]
+	          "legalBasis": ["contract"],
+	          "retentionDays": 365
+	        }
+	      ],
+	      "itemFields": [
+	        {
+	          "key": "name",
+	          "label": "Name",
+	          "type": "string",
+	          "description": "Name of the business activity.",
+	          "example": "Account management"
+	        },
+	        {
+	          "key": "purpose",
+	          "label": "Purpose",
+	          "type": "string",
+	          "description": "What this processing activity covers.",
+	          "example": "Operate user accounts"
+	        },
+	        {
+	          "key": "role",
+	          "label": "Role",
+	          "type": "string",
+	          "description": "Controller or processor role for this activity.",
+	          "example": "controller"
+	        },
+	        {
+	          "key": "legalBasis",
+	          "label": "Legal basis",
+	          "type": "string[]",
+	          "description": "Legal bases for this processing activity.",
+	          "example": ["contract"]
+	        },
+	        {
+	          "key": "retentionDays",
+	          "label": "Retention days",
+	          "type": "number",
+	          "description": "Number of days data for this activity is retained. A value of 0 means unset.",
+	          "example": 365
 	        }
 	      ]
 	    },

@@ -5,7 +5,6 @@ export const emptyDataTypeDraft = (): StoredDataType => ({
   description: "",
   subjectTypes: [],
   collectionMethods: [],
-  retentionDays: 0,
   isSensitive: false,
   isRequired: false,
 })
@@ -19,9 +18,4 @@ export const normalizeDataType = (
   collectionMethods: Array.isArray(value?.collectionMethods)
     ? value.collectionMethods
     : [],
-  retentionDays:
-    typeof value?.retentionDays === "number" &&
-    Number.isFinite(value.retentionDays)
-      ? value.retentionDays
-      : 0,
 })

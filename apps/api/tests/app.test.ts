@@ -142,20 +142,18 @@ const profileBody = {
   dataHandling: {
     dataTypesStored: [
       {
-        name: "account_data",
+        name: "Customer account data",
         description: "Profile and billing contact details",
         subjectTypes: ["customer", "administrator"],
         collectionMethods: ["account_signup"],
-        retentionDays: 365,
         isSensitive: true,
         isRequired: true,
       },
       {
-        name: "usage_data",
+        name: "Usage data",
         description: "Usage events for product improvement",
         subjectTypes: ["end_user"],
         collectionMethods: ["product_usage"],
-        retentionDays: 180,
         isSensitive: false,
         isRequired: false,
       },
@@ -204,7 +202,7 @@ const vendorUseBody = {
   vendorId: "vendor-limited",
   purpose: "Code hosting and pull requests",
   dataProcessingLevel: "limited",
-  dataProcessed: ["account_data"],
+  dataProcessed: ["Customer account data"],
   dpaStatus: "signed",
   dataRegions: ["us"],
   notes: "Critical engineering system",
@@ -855,7 +853,9 @@ describe("security profile API", () => {
         expect.objectContaining({ name: "Stripe" }),
       ]),
       subprocessors: [expect.objectContaining({ name: "Stripe" })],
-      dataTypes: [expect.objectContaining({ name: "account_data" })],
+      dataTypes: [
+        expect.objectContaining({ name: "Customer account data" }),
+      ],
     })
   })
 

@@ -5,7 +5,6 @@ import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
-import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
@@ -13,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const DataTypeForm = ({
-  categoryOptions,
   collectionMethodOptions,
   defaultValues,
   submitDisabled = false,
@@ -22,7 +20,6 @@ export const DataTypeForm = ({
   onCancel,
   onSubmit,
 }: {
-  categoryOptions: Option[]
   collectionMethodOptions: Option[]
   defaultValues: StoredDataType
   submitDisabled?: boolean
@@ -49,20 +46,12 @@ export const DataTypeForm = ({
 
   return (
     <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <SelectField
-        control={form.control}
-        label="Category"
-        name="name"
-        options={[{ value: "", label: "Not set" }, ...categoryOptions]}
-        placeholder="Select a data category"
-      />
       <TextField
-        error={form.formState.errors.retentionDays}
-        label="Retention days"
-        name="retentionDays"
-        placeholder="0"
+        error={form.formState.errors.name}
+        label="Name"
+        name="name"
+        placeholder="e.g. Customer billing details"
         register={form.register}
-        type="number"
       />
       <TextAreaField
         error={form.formState.errors.description}

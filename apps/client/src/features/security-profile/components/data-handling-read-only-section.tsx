@@ -52,9 +52,10 @@ export const DataHandlingReadOnlySection = ({
           ) : (
             <div className="grid gap-3">
               {profile.dataHandling.dataTypesStored.map((dataType, index) => {
-                const displayTitle = dataType.name.trim()
-                  ? codeLabel(vocabulary, "data_categories", dataType.name)
-                  : dataType.description.trim() || `Data type ${index + 1}`
+                const displayTitle =
+                  dataType.name.trim() ||
+                  dataType.description.trim() ||
+                  `Data type ${index + 1}`
                 const expanded = expandedIndex === index
 
                 return (
@@ -130,16 +131,6 @@ export const DataHandlingReadOnlySection = ({
                               "collection_methods",
                               dataType.collectionMethods,
                             )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs font-medium text-slate-500">
-                            Retention
-                          </dt>
-                          <dd className="mt-1 text-sm font-medium text-slate-900">
-                            {dataType.retentionDays > 0
-                              ? `${dataType.retentionDays} days`
-                              : "Not set"}
                           </dd>
                         </div>
                       </dl>

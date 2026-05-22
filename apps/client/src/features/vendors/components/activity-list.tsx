@@ -47,6 +47,12 @@ export const ActivityList = ({
                 <span className="font-medium text-slate-700">Legal basis: </span>
                 {codeValueList(vocabulary, "legal_basis", activity.legalBasis)}
               </p>
+              <p className="text-xs text-slate-500">
+                <span className="font-medium text-slate-700">Retention: </span>
+                {activity.retentionDays > 0
+                  ? `${activity.retentionDays} days`
+                  : "Not set"}
+              </p>
             </div>
             <div className="flex gap-2">
               <Button

@@ -88,11 +88,10 @@ export const organizationProviderSchema = z.object({
 })
 
 export const storedDataTypeSchema = z.object({
-  name: z.string().trim().default(""),
+  name: z.string().trim().min(1, "Name is required"),
   description: z.string().trim().default(""),
   subjectTypes: z.array(codeIdSchema).default([]),
   collectionMethods: z.array(codeIdSchema).default([]),
-  retentionDays: z.number().int().min(0).default(0),
   isSensitive: z.boolean().default(false),
   isRequired: z.boolean().default(false),
 })
@@ -102,6 +101,7 @@ export const businessActivityInputSchema = z.object({
   purpose: z.string().trim().default(""),
   role: codeIdSchema.or(z.literal("")).default(""),
   legalBasis: z.array(codeIdSchema).default([]),
+  retentionDays: z.number().int().min(0).default(0),
 })
 
 export const businessActivitySchema = businessActivityInputSchema.extend({
@@ -259,7 +259,7 @@ const serviceVendorUseInputBaseSchema = z.object({
   vendorId: z.string().trim().min(1, "Vendor is required"),
   purpose: z.string().trim().min(1, "Purpose is required"),
   dataProcessingLevel: vendorDataProcessingLevelSchema.default("limited"),
-  dataProcessed: z.array(codeIdSchema).default([]),
+  dataProcessed: z.array(z.string().trim().min(1)).default([]),
   dpaStatus: dpaStatusSchema,
   dataRegions: z.array(codeIdSchema).default([]),
   notes: z.string().trim().optional().or(z.literal("")),

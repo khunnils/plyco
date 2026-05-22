@@ -19,17 +19,10 @@ const codeValueList = (
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
-const displayTitle = (
-  dataType: StoredDataType,
-  index: number,
-  vocabulary: Vocabulary | undefined,
-) =>
-  dataType.name.trim()
-    ? codeLabel(vocabulary, "data_categories", dataType.name)
-    : dataType.description.trim() || `Data type ${index + 1}`
+const displayTitle = (dataType: StoredDataType, index: number) =>
+  dataType.name.trim() || dataType.description.trim() || `Data type ${index + 1}`
 
 export const DataTypesPanel = ({
-  categoryOptions,
   collectionMethodOptions,
   dataTypes,
   isMutationPending,
@@ -37,7 +30,6 @@ export const DataTypesPanel = ({
   vocabulary,
   onSave,
 }: {
-  categoryOptions: Option[]
   collectionMethodOptions: Option[]
   dataTypes: StoredDataType[]
   isMutationPending: boolean
@@ -102,7 +94,6 @@ export const DataTypesPanel = ({
   if (showCreateForm) {
     return (
       <DataTypeForm
-        categoryOptions={categoryOptions}
         collectionMethodOptions={collectionMethodOptions}
         defaultValues={emptyDataTypeDraft()}
         subjectTypeOptions={subjectTypeOptions}
@@ -117,7 +108,6 @@ export const DataTypesPanel = ({
   if (editingIndex !== null && dataTypes[editingIndex]) {
     return (
       <DataTypeForm
-        categoryOptions={categoryOptions}
         collectionMethodOptions={collectionMethodOptions}
         defaultValues={normalizeDataType(dataTypes[editingIndex])}
         subjectTypeOptions={subjectTypeOptions}
@@ -152,7 +142,7 @@ export const DataTypesPanel = ({
         <div className="grid gap-3">
           {dataTypes.map((dataType, index) => {
             const expanded = expandedIndex === index
-            const title = displayTitle(dataType, index, vocabulary)
+            const title = displayTitle(dataType, index)
 
             return (
               <article
@@ -255,16 +245,6 @@ export const DataTypesPanel = ({
                           "collection_methods",
                           dataType.collectionMethods,
                         )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-medium text-slate-500">
-                        Retention
-                      </dt>
-                      <dd className="mt-1 text-sm font-medium text-slate-900">
-                        {dataType.retentionDays > 0
-                          ? `${dataType.retentionDays} days`
-                          : "Not set"}
                       </dd>
                     </div>
                   </dl>

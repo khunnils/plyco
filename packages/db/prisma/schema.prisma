@@ -264,7 +264,6 @@ model OrganizationDataType {
   description            String
   subjectTypes           String[]         @default([]) @map("subject_types")
   collectionMethods      String[]         @default([]) @map("collection_methods")
-  retentionDays          Int              @default(0) @map("retention_days")
   isSensitive            Boolean          @map("is_sensitive")
   isRequired             Boolean          @default(false) @map("is_required")
   vendorDataTypes        VendorUseDataType[]
@@ -284,6 +283,7 @@ model BusinessActivity {
   purpose            String                    @default("")
   role               String                    @default("")
   legalBasis         String[]                  @default([]) @map("legal_basis")
+  retentionDays      Int                       @default(0) @map("retention_days")
   services           ServiceBusinessActivity[]
   createdAt          DateTime                  @default(now()) @map("created_at")
   updatedAt          DateTime                  @updatedAt @map("updated_at")

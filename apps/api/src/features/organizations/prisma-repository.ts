@@ -515,7 +515,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       description: dataType.description,
       subjectTypes: dataType.subjectTypes,
       collectionMethods: dataType.collectionMethods,
-      retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
     }))
@@ -552,7 +551,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             description: dataType.description,
             subjectTypes: dataType.subjectTypes,
             collectionMethods: dataType.collectionMethods,
-            retentionDays: dataType.retentionDays,
             isSensitive: dataType.isSensitive,
             isRequired: dataType.isRequired,
           },

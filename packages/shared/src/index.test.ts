@@ -154,11 +154,10 @@ describe("shared security profile schemas", () => {
     const result = dataHandlingProfileSchema.safeParse({
       dataTypesStored: [
         {
-          name: "account_data",
+          name: "Customer account data",
           description: "Account contact and notification data",
           subjectTypes: ["customer"],
           collectionMethods: ["account_signup"],
-          retentionDays: 365,
           isSensitive: true,
           isRequired: true,
         },
@@ -180,6 +179,7 @@ describe("shared security profile schemas", () => {
       purpose: "Operate user accounts",
       role: "controller",
       legalBasis: ["contract"],
+      retentionDays: 365,
     })
 
     expect(result.success).toBe(true)

@@ -6,7 +6,6 @@ import { type ProfileDraft } from "@/features/security-profile/types/security-pr
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const DataHandlingManager = ({
-  categoryOptions,
   collectionMethodOptions,
   isMutationPending,
   profile,
@@ -14,7 +13,6 @@ export const DataHandlingManager = ({
   vocabulary,
   onSaveProfile,
 }: {
-  categoryOptions: Option[]
   collectionMethodOptions: Option[]
   isMutationPending: boolean
   profile: ProfileDraft
@@ -44,7 +42,6 @@ export const DataHandlingManager = ({
         }
       />
       <DataTypesPanel
-        categoryOptions={categoryOptions}
         collectionMethodOptions={collectionMethodOptions}
         dataTypes={profile.dataHandling.dataTypesStored}
         isMutationPending={isMutationPending}

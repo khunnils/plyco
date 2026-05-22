@@ -486,6 +486,11 @@ export class ReportContextBuilder {
         "legal_basis",
         activity.legalBasis,
       ),
+      retentionDays: activity.retentionDays,
+      retentionLabel:
+        activity.retentionDays > 0
+          ? `${activity.retentionDays} days`
+          : "Not set",
     }
   }
 

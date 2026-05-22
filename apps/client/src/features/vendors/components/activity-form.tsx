@@ -80,6 +80,14 @@ export const ActivityForm = ({
         options={legalBasisOptions}
         placeholder="Select legal basis"
       />
+      <TextField
+        error={form.formState.errors.retentionDays}
+        label="Retention days"
+        name="retentionDays"
+        placeholder="0"
+        register={form.register}
+        type="number"
+      />
       <div className="flex items-center gap-2">
         {onCancel ? (
           <Button

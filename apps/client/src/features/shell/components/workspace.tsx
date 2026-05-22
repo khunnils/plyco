@@ -1036,10 +1036,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   )
   const dataTypeOptions = dataTypeOptionsFromProfile(
     defaultValues.dataHandling.dataTypesStored
-  ).map((option) => ({
-    ...option,
-    label: codeLabel(vocabularyData, "data_categories", option.value),
-  }))
+  )
   const serviceOptions = (snapshot?.organization?.services ?? []).map(
     (service, index) => ({
       value: service.id,
@@ -1228,10 +1225,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
             <div className="grid gap-5">
               {activeCompanySectionId === "dataHandling" ? (
                 <DataHandlingManager
-                  categoryOptions={codeOptions(
-                    vocabularyData,
-                    "data_categories",
-                  )}
                   collectionMethodOptions={codeOptions(
                     vocabularyData,
                     "collection_methods",

@@ -8,6 +8,7 @@ export const emptyActivityDraft: BusinessActivityInput = {
   purpose: "",
   role: "",
   legalBasis: [],
+  retentionDays: 0,
 }
 
 export const toActivityInput = (
@@ -17,4 +18,5 @@ export const toActivityInput = (
   purpose: activity.purpose,
   role: activity.role,
   legalBasis: activity.legalBasis,
+  retentionDays: activity.retentionDays,
 })

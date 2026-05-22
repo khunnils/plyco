@@ -147,7 +147,6 @@ export function mapOrganizationRecord(record: {
     description: string
     subjectTypes: string[]
     collectionMethods: string[]
-    retentionDays: number
     isSensitive: boolean
     isRequired: boolean
   }>
@@ -342,7 +341,6 @@ export function mapOrganizationRecord(record: {
       description: dataType.description,
       subjectTypes: dataType.subjectTypes,
       collectionMethods: dataType.collectionMethods,
-      retentionDays: dataType.retentionDays,
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
     })),
@@ -395,6 +393,7 @@ export function mapBusinessActivityRecord(record: {
   purpose: string
   role: string
   legalBasis: string[]
+  retentionDays: number
   createdAt: Date
   updatedAt: Date
 }): BusinessActivity {
@@ -404,6 +403,7 @@ export function mapBusinessActivityRecord(record: {
     purpose: record.purpose,
     role: record.role,
     legalBasis: record.legalBasis,
+    retentionDays: record.retentionDays,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   })

@@ -29,7 +29,6 @@ type StoredDataType = {
   description: string
   subjectTypes: string[]
   collectionMethods: string[]
-  retentionDays: number
   isSensitive: boolean
   isRequired: boolean
 }
@@ -49,7 +48,6 @@ const emptyDataType = (): StoredDataType => ({
   description: "",
   subjectTypes: [],
   collectionMethods: [],
-  retentionDays: 0,
   isSensitive: false,
   isRequired: false,
 })
@@ -61,10 +59,6 @@ const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
   collectionMethods: Array.isArray(value.collectionMethods)
     ? value.collectionMethods
     : [],
-  retentionDays:
-    typeof value.retentionDays === "number" && Number.isFinite(value.retentionDays)
-      ? value.retentionDays
-      : 0,
 })
 
 const dataTypeTitle = (item: StoredDataType, index: number) =>
@@ -74,7 +68,6 @@ const dataTypeBadges = (item: StoredDataType) =>
   [
     item.isSensitive ? "Sensitive" : null,
     item.isRequired ? "Required" : null,
-    item.retentionDays > 0 ? `${item.retentionDays} days` : null,
   ].filter(Boolean)
 
 const FieldInput = ({
@@ -343,16 +336,6 @@ const DataTypesEditor = <T extends FieldValues>({
                         onBlur={field.onBlur}
                         onChange={(value) =>
                           updateValue(index, "name", value)
-                        }
-                      />
-                      <FieldInput
-                        label="Retention days"
-                        placeholder="0"
-                        type="number"
-                        value={item.retentionDays}
-                        onBlur={field.onBlur}
-                        onChange={(value) =>
-                          updateValue(index, "retentionDays", value)
                         }
                       />
                       <div className="md:col-span-2">

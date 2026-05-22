@@ -174,7 +174,7 @@ Fields:
 
 Fields:
 
-- data types stored, captured as name, subject types, collection methods, retention, sensitivity, and description entries
+- data types stored, captured as free-text name, subject types, collection methods, sensitivity, and description entries
 - stores PII
 - stores healthcare data
 - encryption at rest
@@ -224,6 +224,7 @@ Fields:
 - purpose
 - role
 - legal basis
+- retention days
 - services that perform the activity
 
 ### Vocabulary
