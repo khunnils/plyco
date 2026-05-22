@@ -25,6 +25,7 @@ import {
   type Country,
 } from "@plyco/shared"
 import { useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { DocumentContent } from "@/features/documents/components/document-content"
@@ -35,11 +36,8 @@ import {
 } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
-  emptyVendorDraft,
   profileFromOrganization,
   providerNamesForSystem,
-  toVendorInput,
-  vendorInputFromProvider,
 } from "@/features/security-profile/lib/profile"
 import {
   ProfileAccessFields,
@@ -49,10 +47,10 @@ import {
   type ProfileFormReturn,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
-import { ServiceManager } from "@/features/security-profile/components/service-manager"
-import { DataHandlingManager } from "@/features/security-profile/components/data-handling-manager"
-import { InfrastructureManager } from "@/features/security-profile/components/infrastructure-manager"
-import { PrivacyManager } from "@/features/security-profile/components/privacy-manager"
+import { DataHandlingProfilePage } from "@/features/security-profile/pages/data-handling-profile-page"
+import { InfrastructureProfilePage } from "@/features/security-profile/pages/infrastructure-profile-page"
+import { PrivacyProfilePage } from "@/features/security-profile/pages/privacy-profile-page"
+import { ServiceProfilePage } from "@/features/security-profile/pages/service-profile-page"
 import { useCreateDocument, useDocument, useDocuments, useDownloadDocumentPdf } from "@/features/documents/hooks/use-documents"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 import {
@@ -87,10 +85,7 @@ import {
   type WorkspaceView,
 } from "@/features/shell/components/app-sidebar"
 import { SummaryTiles } from "@/features/security-profile/components/summary-tiles"
-import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
-import { VendorForm } from "@/features/vendors/components/vendor-form"
-import { VendorList } from "@/features/vendors/components/vendor-list"
-import { ProviderSelector } from "@/features/vendors/components/provider-selector"
+import { VendorInventoryPage } from "@/features/vendors/components/vendor-inventory-page"
 import { ActivitiesManager } from "@/features/vendors/components/activities-manager"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
@@ -168,6 +163,43 @@ const companySections: CompanySection[] = [
 const companySectionByView = new Map(
   companySections.map((section) => [section.view, section])
 )
+
+const workspacePathByView: Record<WorkspaceView, string> = {
+  dashboard: "/",
+  companyProfile: "/company/profile",
+  companyService: "/company/services",
+  companyActivities: "/company/activities",
+  companyPrivacy: "/company/privacy",
+  companyInfrastructure: "/company/infrastructure",
+  companyData: "/company/data",
+  companyAccess: "/company/access",
+  templates: "/templates",
+  documents: "/documents",
+  vendors: "/vendors",
+  vocabulary: "/vocabulary",
+}
+
+const workspaceViewFromPath = (pathname: string): WorkspaceView => {
+  if (pathname.startsWith("/company/services")) return "companyService"
+  if (pathname === "/company/profile") return "companyProfile"
+  if (pathname === "/company/activities") return "companyActivities"
+  if (pathname === "/company/privacy") return "companyPrivacy"
+  if (pathname === "/company/infrastructure") return "companyInfrastructure"
+  if (pathname === "/company/data") return "companyData"
+  if (pathname === "/company/access") return "companyAccess"
+  if (pathname === "/templates") return "templates"
+  if (pathname.startsWith("/documents")) return "documents"
+  if (pathname === "/vendors") return "vendors"
+  if (pathname === "/vocabulary") return "vocabulary"
+
+  return "dashboard"
+}
+
+const serviceIdFromPath = (pathname: string) => {
+  const match = pathname.match(/^\/company\/services\/([^/]+)$/)
+
+  return match?.[1] ?? null
+}
 
 const isCompanyView = (
   view: WorkspaceView
@@ -482,6 +514,8 @@ const CompanyReadOnlySection = ({
 }
 
 export const Workspace = ({ user }: { user: AuthUser }) => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const logout = useLogout()
   const securityProfile = useSecurityProfile()
   const providers = useProviders()
@@ -562,24 +596,29 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
-  const [isCreatingService, setIsCreatingService] = useState(false)
   const [showActivityForm, setShowActivityForm] = useState(false)
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
   const {
-    activeWorkspaceView,
     editingCompanySection,
     editingTemplateId,
     editingVendorId,
     selectedServiceId,
     servicesExpanded,
     setViewingDocument,
-    setActiveWorkspaceView,
     setEditingCompanySection,
     setSelectedServiceId,
     setServicesExpanded,
     startEditingTemplate,
     startEditingVendor,
   } = useSecurityUiStore()
+  const activeWorkspaceView = workspaceViewFromPath(location.pathname)
+  const routeServiceId = serviceIdFromPath(location.pathname)
+  const isCreatingService =
+    activeWorkspaceView === "companyService" && routeServiceId === "new"
+  const routedSelectedServiceId =
+    activeWorkspaceView === "companyService" && routeServiceId !== "new"
+      ? routeServiceId
+      : selectedServiceId
   const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === editingTemplateId
@@ -602,6 +641,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const activeCompanySection = companySectionByView.get(activeWorkspaceView)
   const activeCompanySectionId = activeCompanySection?.id
   const headerService =
+    defaultValues.services.find((service) => service.id === routedSelectedServiceId) ??
     defaultValues.services.find((service) => service.id === selectedServiceId) ??
     defaultValues.services[0]
   const activeCompanyTitle =
@@ -611,7 +651,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
         : (headerService?.serviceName.trim() || "Service")
       : activeCompanySection?.title ?? "Profile"
   const headerServiceIndex = Math.max(
-    defaultValues.services.findIndex((service) => service.id === selectedServiceId),
+    defaultValues.services.findIndex(
+      (service) => service.id === routedSelectedServiceId,
+    ),
     0,
   )
   const deleteSelectedService = () => {
@@ -633,7 +675,14 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
         services: nextServices,
       },
       {
-        onSuccess: () => setSelectedServiceId(nextSelectedService?.id ?? null),
+        onSuccess: () => {
+          const nextPath = nextSelectedService?.id
+            ? `/company/services/${nextSelectedService.id}`
+            : "/company/services"
+
+          setSelectedServiceId(nextSelectedService?.id ?? null)
+          navigate(nextPath)
+        },
       },
     )
   }
@@ -643,27 +692,24 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
       <AppSidebar
         activeWorkspaceView={activeWorkspaceView}
         companySections={companySections}
-        selectedServiceId={selectedServiceId}
+        selectedServiceId={routedSelectedServiceId}
         services={defaultValues.services}
         servicesExpanded={servicesExpanded}
         user={user}
         onAddService={() => {
-          setIsCreatingService(true)
           setSelectedServiceId(null)
           setServicesExpanded(true)
+          navigate("/company/services/new")
         }}
         onLogout={() => logout.mutate()}
         onSelectService={(serviceId) => {
-          setIsCreatingService(false)
           setSelectedServiceId(serviceId)
           setServicesExpanded(true)
+          navigate(serviceId ? `/company/services/${serviceId}` : "/company/services")
         }}
         onServicesExpandedChange={setServicesExpanded}
         onWorkspaceViewChange={(view) => {
-          if (view !== "companyService") {
-            setIsCreatingService(false)
-          }
-          setActiveWorkspaceView(view)
+          navigate(workspacePathByView[view])
         }}
       />
 
@@ -734,7 +780,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   section="profile"
                   vocabulary={vocabularyData}
                   onEdit={() => {
-                    setActiveWorkspaceView("companyProfile")
+                    navigate("/company/profile")
                     setEditingCompanySection("profile")
                   }}
                 />
@@ -745,38 +791,25 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           {activeCompanySection && activeCompanySectionId && (
             <div className="grid gap-5">
               {activeCompanySectionId === "service" ? (
-                <ServiceManager
+                <ServiceProfilePage
                   businessActivityOptions={businessActivityOptions}
-                  cookieTypeOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_cookie_types",
-                  )}
-                  customerTypeOptions={codeOptions(
-                    vocabularyData,
-                    "service_customer_types",
-                  )}
-                  dataProcessingLevelOptions={codeOptions(
-                    vocabularyData,
-                    "data_processing_level",
-                  )}
-                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
                   dataTypeOptions={dataTypeOptions}
-                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
                   isCreatingService={isCreatingService}
                   isProfileMutationPending={saveProfile.isPending}
                   isVendorMutationPending={isVendorMutationPending}
                   profile={defaultValues}
                   providers={providersList}
-                  regionOptions={codeOptions(vocabularyData, "regions")}
-                  selectedServiceId={selectedServiceId}
+                  selectedServiceId={routedSelectedServiceId}
                   serviceVendorUses={serviceVendorUses}
-                  userTypeOptions={codeOptions(
-                    vocabularyData,
-                    "service_user_types",
-                  )}
                   vendors={vendors}
                   vocabulary={vocabularyData}
-                  onCancelCreateService={() => setIsCreatingService(false)}
+                  onCancelCreateService={() =>
+                    navigate(
+                      routedSelectedServiceId
+                        ? `/company/services/${routedSelectedServiceId}`
+                        : "/company/services",
+                    )
+                  }
                   onCreateVendorUse={(vendorUse) =>
                     createServiceVendorUse.mutate(vendorUse)
                   }
@@ -786,95 +819,38 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   onSaveProfile={(profile, onSuccess) =>
                     saveProfile.mutate(profile, { onSuccess })
                   }
-                  onSelectService={setSelectedServiceId}
+                  onSelectService={(serviceId) => {
+                    setSelectedServiceId(serviceId)
+                    navigate(
+                      serviceId
+                        ? `/company/services/${serviceId}`
+                        : "/company/services",
+                    )
+                  }}
                   onUpdateVendorUse={(input) =>
                     updateServiceVendorUse.mutate(input)
                   }
                 />
               ) : activeCompanySectionId === "dataHandling" ? (
-                <DataHandlingManager
-                  collectionMethodOptions={codeOptions(
-                    vocabularyData,
-                    "collection_methods",
-                  )}
+                <DataHandlingProfilePage
                   isMutationPending={saveProfile.isPending}
                   profile={defaultValues}
-                  subjectTypeOptions={codeOptions(
-                    vocabularyData,
-                    "subject_types",
-                  )}
                   vocabulary={vocabularyData}
                   onSaveProfile={(profile) => saveProfile.mutate(profile)}
                 />
               ) : activeCompanySectionId === "privacy" ? (
-                <PrivacyManager
-                  cookieConsentMechanismOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_cookie_consent_mechanisms",
-                  )}
+                <PrivacyProfilePage
                   isMutationPending={saveProfile.isPending}
-                  marketingOptOutMethodOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_marketing_opt_out_methods",
-                  )}
-                  newsletterProviderOptions={providersList
-                    .filter((provider) =>
-                      provider.systemTypes.includes("newsletter"),
-                    )
-                    .map((provider) => ({
-                      value: provider.id,
-                      label: provider.name,
-                    }))}
                   profile={defaultValues}
                   providers={providersList}
-                  requestMethodOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_request_methods",
-                  )}
-                  supportedRightOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_supported_rights",
-                  )}
-                  transferMechanismOptions={codeOptions(
-                    vocabularyData,
-                    "privacy_transfer_mechanisms",
-                  )}
                   vocabulary={vocabularyData}
                   onSaveProfile={(profile) => saveProfile.mutate(profile)}
                 />
               ) : activeCompanySectionId === "infrastructure" ? (
-                <InfrastructureManager
+                <InfrastructureProfilePage
                   isMutationPending={saveProfile.isPending}
                   profile={defaultValues}
                   providers={providersList}
-                  securityCadenceOptions={codeOptions(
-                    vocabularyData,
-                    "security_cadences",
-                  )}
-                  securityCustomerNotificationProcessOptions={codeOptions(
-                    vocabularyData,
-                    "security_customer_notification_processes",
-                  )}
-                  securityEncryptionAlgorithmOptions={codeOptions(
-                    vocabularyData,
-                    "security_encryption_algorithms",
-                  )}
-                  securityKeyManagementProviderOptions={codeOptions(
-                    vocabularyData,
-                    "security_key_management_providers",
-                  )}
-                  securityMonitoringOwnerOptions={codeOptions(
-                    vocabularyData,
-                    "security_monitoring_owners",
-                  )}
-                  securityNotificationTimelineOptions={codeOptions(
-                    vocabularyData,
-                    "security_notification_timelines",
-                  )}
-                  securityTlsVersionOptions={codeOptions(
-                    vocabularyData,
-                    "security_tls_versions",
-                  )}
                   vocabulary={vocabularyData}
                   onSaveProfile={(profile) => saveProfile.mutate(profile)}
                 />
@@ -974,146 +950,50 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           )}
 
           {activeWorkspaceView === "vendors" && (
-	            <Section
-	              description="Review organization vendors or add common providers from the catalog."
-              action={
-                !showVendorCatalog && !showCustomVendorForm && !editingVendor ? (
-                  <Button
-                    className="w-fit"
-                    type="button"
-                    onClick={() => {
-                      startEditingVendor(null)
-                      setShowVendorCatalog(true)
-                    }}
-                  >
-                    <Plus />
-                    Add vendors
-                  </Button>
-                ) : null
+            <VendorInventoryPage
+              countries={countriesList}
+              editingVendor={editingVendor}
+              isLoadingProviders={providers.isLoading}
+              isMutationPending={isVendorMutationPending}
+              providerError={providers.error?.message ?? null}
+              providers={providersList}
+              serviceVendorUses={serviceVendorUses}
+              showCustomVendorForm={showCustomVendorForm}
+              showVendorCatalog={showVendorCatalog}
+              vocabulary={vocabularyData}
+              vendors={vendors}
+              onCreateVendors={(vendorInputs) =>
+                createVendors.mutate(vendorInputs, {
+                  onSuccess: () => {
+                    setShowVendorCatalog(false)
+                    setShowCustomVendorForm(false)
+                  },
+                })
               }
-	              title="Vendors"
-	            >
-	              {showVendorCatalog ? (
-                <div className="grid gap-4">
-                  <div>
-                    <div>
-                      <h3 className="font-semibold text-slate-950">
-                        Add vendors from catalog
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Filter by category, then choose providers to add to
-                        the organization inventory.
-                      </p>
-                    </div>
-                  </div>
-                  <ProviderSelector
-                    error={providers.error?.message ?? null}
-                    existingProviderNames={vendors.flatMap((vendor) => [
-                      vendor.name,
-                      vendor.displayName,
-                      vendor.providerOrganizationName,
-                    ])}
-                    isLoading={providers.isLoading}
-                    providers={providersList}
-                    submitDisabled={isVendorMutationPending}
-                    onCancel={() => {
-                      setShowVendorCatalog(false)
-                      setShowCustomVendorForm(false)
-                    }}
-                    onChooseOther={() => {
-                      startEditingVendor(null)
-                      setShowVendorCatalog(false)
-                      setShowCustomVendorForm(true)
-                    }}
-                    onChooseProviders={(selectedProviders) => {
-                      createVendors.mutate(
-                        selectedProviders.map(vendorInputFromProvider),
-                        {
-                          onSuccess: () => {
-                            setShowVendorCatalog(false)
-                            setShowCustomVendorForm(false)
-                          },
-                        },
-                      )
-	                    }}
-                  />
-                </div>
-              ) : null}
-              {(showCustomVendorForm || editingVendor) && (
-                <VendorForm
-                  countryOptions={countryOptions(countriesList)}
-	                  criticalityOptions={codeOptions(
-	                    vocabularyData,
-	                    "vendor_criticality",
-	                  )}
-	                  defaultValues={
-	                    editingVendor
-	                      ? toVendorInput(editingVendor)
-	                      : emptyVendorDraft
-	                  }
-	                  submitDisabled={isVendorMutationPending}
-                  submitLabel={editingVendor ? "Save" : "Add vendor"}
-                  vendorCategoryOptions={codeOptions(
-                    vocabularyData,
-                    "vendor_category",
-                  )}
-                  onCancel={
-                    editingVendor
-                      ? () => {
-                          startEditingVendor(null)
-                          setShowVendorCatalog(false)
-                          setShowCustomVendorForm(false)
-                        }
-                      : undefined
-                  }
-                  onSubmit={(vendor) => {
-                    if (editingVendor) {
-                      updateVendor.mutate(
-                        { id: editingVendor.id, vendor },
-                        {
-                          onSuccess: () => {
-                            startEditingVendor(null)
-                            setShowVendorCatalog(false)
-                            setShowCustomVendorForm(false)
-                          },
-                        }
-                      )
-                      return
-                    }
+              onDeleteVendor={(vendor) => deleteVendor.mutate(vendor.id)}
+              onEditVendor={startEditingVendor}
+              onShowCustomVendorFormChange={setShowCustomVendorForm}
+              onShowVendorCatalogChange={setShowVendorCatalog}
+              onSubmitVendor={(vendor) => {
+                if (editingVendor) {
+                  updateVendor.mutate(
+                    { id: editingVendor.id, vendor },
+                    {
+                      onSuccess: () => {
+                        startEditingVendor(null)
+                        setShowVendorCatalog(false)
+                        setShowCustomVendorForm(false)
+                      },
+                    },
+                  )
+                  return
+                }
 
-	                    createVendor.mutate(vendor)
-	                    setShowVendorCatalog(false)
-	                    setShowCustomVendorForm(false)
-	                  }}
-	                />
-	              )}
-              {!showVendorCatalog &&
-              !showCustomVendorForm &&
-              !editingVendor ? (
-                vendors.length > 0 ? (
-                  <div className="grid gap-4">
-	                    <VendorList
-	                      countries={countriesList}
-	                      serviceVendorUses={serviceVendorUses}
-	                      vocabulary={vocabularyData}
-	                      vendors={vendors}
-	                      onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
-	                      onEdit={(vendor) => {
-	                        startEditingVendor(vendor.id)
-	                        setShowCustomVendorForm(true)
-	                      }}
-	                    />
-                  </div>
-                ) : (
-                  <VendorEmptyState
-                    onAdd={() => {
-                      startEditingVendor(null)
-                      setShowVendorCatalog(true)
-                    }}
-                  />
-                )
-              ) : null}
-            </Section>
+                createVendor.mutate(vendor)
+                setShowVendorCatalog(false)
+                setShowCustomVendorForm(false)
+              }}
+            />
           )}
 
           {activeWorkspaceView === "vocabulary" && (

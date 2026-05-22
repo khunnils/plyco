@@ -133,7 +133,6 @@ export const AppSidebar = ({
                             key={service.id ?? `service-${index}`}
                             onClick={() => {
                               onSelectService(serviceId)
-                              onWorkspaceViewChange("companyService")
                             }}
                           >
                             <span className="truncate">
@@ -145,7 +144,6 @@ export const AppSidebar = ({
                       <SidebarMenuButton
                         onClick={() => {
                           onAddService()
-                          onWorkspaceViewChange("companyService")
                         }}
                       >
                         <Plus className="size-4" />
