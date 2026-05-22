@@ -5,11 +5,8 @@ import {
   Database,
   Download,
   Eye,
-  FileText,
   KeyRound,
-  LayoutDashboard,
   Loader2,
-  LogOut,
   Pencil,
   Plus,
   Save,
@@ -17,8 +14,6 @@ import {
   Server,
   ShieldCheck,
   Trash2,
-  Tags,
-  Users,
   X,
 } from "lucide-react"
 import {
@@ -35,13 +30,7 @@ import { Button } from "@/components/ui/button"
 import { DocumentContent } from "@/features/documents/components/document-content"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
   SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import {
@@ -67,7 +56,6 @@ import { InfrastructureManager } from "@/features/security-profile/components/in
 import { PrivacyManager } from "@/features/security-profile/components/privacy-manager"
 import { useCreateDocument, useDocument, useDocuments, useDownloadDocumentPdf } from "@/features/documents/hooks/use-documents"
 import { useLogout } from "@/features/auth/hooks/use-auth"
-import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
@@ -92,6 +80,12 @@ import {
   useUpdateVendor,
 } from "@/features/vendors/hooks/use-vendors"
 import { Section } from "@/features/shell/components/section"
+import {
+  AppSidebar,
+  type CompanySection,
+  type CompanySectionId,
+  type WorkspaceView,
+} from "@/features/shell/components/app-sidebar"
 import { SummaryTiles } from "@/features/security-profile/components/summary-tiles"
 import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
 import { VendorForm } from "@/features/vendors/components/vendor-form"
@@ -120,35 +114,7 @@ import {
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { VocabularyManager } from "@/features/vocabulary/components/vocabulary-manager"
 
-type CompanySectionId =
-  | "profile"
-  | "service"
-  | "activities"
-  | "privacy"
-  | "infrastructure"
-  | "dataHandling"
-  | "access"
-type WorkspaceView =
-  | "dashboard"
-  | "companyProfile"
-  | "companyService"
-  | "companyActivities"
-  | "companyPrivacy"
-  | "companyInfrastructure"
-  | "companyData"
-  | "companyAccess"
-  | "templates"
-  | "documents"
-  | "vendors"
-  | "vocabulary"
-
-const companySections: Array<{
-  id: CompanySectionId
-  view: WorkspaceView
-  title: string
-  description: string
-  icon: typeof Building2
-}> = [
+const companySections: CompanySection[] = [
   {
     id: "profile",
     view: "companyProfile",
@@ -651,95 +617,13 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <p className="text-sm font-semibold text-blue-700">plyco</p>
-          <div className="mt-3">
-            <OrganizationSwitcher user={user} />
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuButton
-              active={activeWorkspaceView === "dashboard"}
-              onClick={() => setActiveWorkspaceView("dashboard")}
-            >
-              <LayoutDashboard className="size-4" />
-              Dashboard
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              active={isCompanyView(activeWorkspaceView)}
-              onClick={() => setActiveWorkspaceView("companyProfile")}
-            >
-              <Building2 className="size-4" />
-              Company
-            </SidebarMenuButton>
-            <div className="ml-4 grid gap-1 border-l border-slate-200 pl-3">
-              {companySections.map((section) => {
-                const Icon = section.icon
-
-                return (
-                  <SidebarMenuButton
-                    active={activeWorkspaceView === section.view}
-                    key={section.id}
-                    onClick={() => setActiveWorkspaceView(section.view)}
-                  >
-                    <Icon className="size-4" />
-                    {section.title}
-                  </SidebarMenuButton>
-                )
-              })}
-            </div>
-            <SidebarMenuButton
-              active={activeWorkspaceView === "vendors"}
-              onClick={() => setActiveWorkspaceView("vendors")}
-            >
-              <Users className="size-4" />
-              Vendors
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              active={activeWorkspaceView === "vocabulary"}
-              onClick={() => setActiveWorkspaceView("vocabulary")}
-            >
-              <Tags className="size-4" />
-              Vocabulary
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              active={activeWorkspaceView === "templates"}
-              onClick={() => setActiveWorkspaceView("templates")}
-            >
-              <FileText className="size-4" />
-              Templates
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              active={activeWorkspaceView === "documents"}
-              onClick={() => setActiveWorkspaceView("documents")}
-            >
-              <ScrollText className="size-4" />
-              Documents
-            </SidebarMenuButton>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <div className="flex items-center gap-3 rounded-md px-2 py-2">
-            {user.picture ? (
-              <img alt="" className="size-9 rounded-full" src={user.picture} />
-            ) : (
-              <div className="flex size-9 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-                {user.name.slice(0, 1).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <p className="text-sm font-medium text-slate-900">{user.name}</p>
-              <p className="text-xs text-slate-500">{user.email}</p>
-            </div>
-          </div>
-          <Button type="button" variant="outline" onClick={() => logout.mutate()}>
-            <LogOut />
-            Logout
-          </Button>
-        </SidebarFooter>
-      </Sidebar>
+      <AppSidebar
+        activeWorkspaceView={activeWorkspaceView}
+        companySections={companySections}
+        user={user}
+        onLogout={() => logout.mutate()}
+        onWorkspaceViewChange={setActiveWorkspaceView}
+      />
 
       <SidebarInset>
         <main className="grid gap-6 px-4 py-6 md:px-8">

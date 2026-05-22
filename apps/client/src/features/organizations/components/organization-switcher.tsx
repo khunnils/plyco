@@ -73,7 +73,7 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
   return (
     <div ref={containerRef} className="relative">
       <Button
-        className="h-auto w-full justify-between gap-3 bg-blue-50 px-3 py-2 text-left text-blue-700 hover:bg-blue-100"
+        className="h-auto w-full gap-2 py-2 justify-between text-left text-slate-600 hover:bg-slate-50"
         type="button"
         variant="ghost"
         aria-expanded={open}
@@ -83,14 +83,14 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
         }}
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-blue-100">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-50">
             <Building2 className="size-4" />
           </span>
           <span className="grid min-w-0 gap-0.5">
-            <span className="truncate text-sm font-semibold text-blue-700">
+            <span className="truncate text-sm font-semibold">
               {selectedOrganization?.name}
             </span>
-            <span className="text-xs font-medium text-blue-600">
+            <span className="text-xs font-medium">
               All workspace data
             </span>
           </span>

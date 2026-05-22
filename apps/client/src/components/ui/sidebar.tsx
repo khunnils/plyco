@@ -17,7 +17,7 @@ export const SidebarHeader = ({ children }: { children: ReactNode }) => (
 )
 
 export const SidebarContent = ({ children }: { children: ReactNode }) => (
-  <div className="flex-1 p-3">{children}</div>
+  <div className="flex flex-1 flex-col p-3">{children}</div>
 )
 
 export const SidebarFooter = ({ children }: { children: ReactNode }) => (
@@ -41,7 +41,7 @@ export const SidebarMenuButton = ({
     className={cn(
       "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
       active
-        ? "bg-blue-50 text-blue-700"
+        ? "bg-slate-50 text-slate-900"
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
     )}
     type="button"

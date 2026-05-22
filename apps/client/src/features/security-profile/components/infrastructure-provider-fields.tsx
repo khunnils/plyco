@@ -43,7 +43,7 @@ export const CloudProviderField = ({
   form,
   providers,
 }: {
-  form: UseFormReturn<{ organizationProviders: OrganizationProvider[] }>
+  form: UseFormReturn<ProvidersDraft>
   providers: Provider[]
 }) => {
   const organizationProviders = form.watch("organizationProviders")
@@ -84,7 +84,7 @@ export const SingleProviderField = ({
   providers,
   systemType,
 }: {
-  form: UseFormReturn<{ organizationProviders: OrganizationProvider[] }>
+  form: UseFormReturn<ProvidersDraft>
   providers: Provider[]
   systemType: InfrastructureProviderSystemType
 }) => {
