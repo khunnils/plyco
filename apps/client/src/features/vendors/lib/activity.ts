@@ -5,8 +5,8 @@ import {
 
 export const emptyActivityDraft: BusinessActivityInput = {
   name: "",
-  description: "",
-  purposes: [],
+  purpose: "",
+  role: "",
   legalBasis: [],
 }
 
@@ -14,7 +14,7 @@ export const toActivityInput = (
   activity: BusinessActivity | BusinessActivityInput,
 ): BusinessActivityInput => ({
   name: activity.name,
-  description: activity.description,
-  purposes: activity.purposes,
+  purpose: activity.purpose,
+  role: activity.role,
   legalBasis: activity.legalBasis,
 })

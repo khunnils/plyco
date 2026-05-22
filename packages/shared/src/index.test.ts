@@ -174,11 +174,11 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true)
   })
 
-  it("accepts business activity purpose and legal basis", () => {
+  it("accepts business activity purpose, role, and legal basis", () => {
     const result = businessActivityInputSchema.safeParse({
       name: "Account management",
-      description: "Operate user accounts",
-      purposes: ["account_management"],
+      purpose: "Operate user accounts",
+      role: "controller",
       legalBasis: ["contract"],
     })
 

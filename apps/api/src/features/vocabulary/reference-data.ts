@@ -22,6 +22,7 @@ export const requiredCodeSetIds = [
   "data_categories",
   "subject_types",
   "data_purposes",
+  "activity_role",
   "collection_methods",
   "legal_basis",
   "dpa_status",
@@ -460,6 +461,11 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["research", "Research"],
     ["service_delivery", "Service Delivery"],
     ["other", "Other"],
+  ]),
+  codeSet("activity_role", "Activity role", false, [
+    ["controller", "Controller"],
+    ["processor", "Processor"],
+    ["joint_controller", "Joint controller"],
   ]),
   codeSet("collection_methods", "Collection methods", false, [
     ["account_signup", "Account signup"],

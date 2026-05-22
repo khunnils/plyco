@@ -474,9 +474,12 @@ export class ReportContextBuilder {
     return {
       id: activity.id,
       name: activity.name,
-      description: activity.description,
-      purposes: activity.purposes,
-      purposeLabels: this.codeLabels(vocabulary, "data_purposes", activity.purposes),
+      purpose: activity.purpose,
+      role: activity.role,
+      roleLabel: activity.role
+        ? this.codeLabels(vocabulary, "activity_role", [activity.role])[0] ??
+          activity.role
+        : "",
       legalBasis: activity.legalBasis,
       legalBasisLabels: this.codeLabels(
         vocabulary,

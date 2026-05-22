@@ -18,8 +18,8 @@ export const ActivityEmptyState = ({ onAdd }: { onAdd: () => void }) => (
       </EmptyMedia>
       <EmptyTitle>No activities yet</EmptyTitle>
       <EmptyDescription>
-        Define processing activities with purposes and legal basis so services
-        and documents can reference them consistently.
+        Define processing activities with purpose, role, and legal basis so
+        services and documents can reference them consistently.
       </EmptyDescription>
     </EmptyHeader>
     <EmptyContent>

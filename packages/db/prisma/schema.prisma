@@ -281,8 +281,8 @@ model BusinessActivity {
   organizationId     String                    @map("organization_id")
   organization       Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
   name               String
-  description        String                    @default("")
-  purposes           String[]                  @default([])
+  purpose            String                    @default("")
+  role               String                    @default("")
   legalBasis         String[]                  @default([]) @map("legal_basis")
   services           ServiceBusinessActivity[]
   createdAt          DateTime                  @default(now()) @map("created_at")

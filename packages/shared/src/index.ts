@@ -99,8 +99,8 @@ export const storedDataTypeSchema = z.object({
 
 export const businessActivityInputSchema = z.object({
   name: z.string().trim().min(1, "Activity name is required"),
-  description: z.string().trim().default(""),
-  purposes: z.array(codeIdSchema).default([]),
+  purpose: z.string().trim().default(""),
+  role: codeIdSchema.or(z.literal("")).default(""),
   legalBasis: z.array(codeIdSchema).default([]),
 })
 

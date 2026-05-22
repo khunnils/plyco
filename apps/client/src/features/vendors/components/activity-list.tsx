@@ -2,6 +2,7 @@ import { Pencil, Trash2 } from "lucide-react"
 import { type BusinessActivity, type Vocabulary } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
+import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 import { codeValueList } from "@/features/vendors/lib/activity-display"
 
 export const ActivityList = ({
@@ -34,11 +35,13 @@ export const ActivityList = ({
             <div className="grid gap-2">
               <h3 className="font-semibold text-slate-950">{activity.name}</h3>
               <p className="text-sm text-slate-600">
-                {activity.description.trim() || "No description"}
+                {activity.purpose.trim() || "No purpose"}
               </p>
               <p className="text-xs text-slate-500">
-                <span className="font-medium text-slate-700">Purposes: </span>
-                {codeValueList(vocabulary, "data_purposes", activity.purposes)}
+                <span className="font-medium text-slate-700">Role: </span>
+                {activity.role
+                  ? codeLabel(vocabulary, "activity_role", activity.role)
+                  : "Not set"}
               </p>
               <p className="text-xs text-slate-500">
                 <span className="font-medium text-slate-700">Legal basis: </span>

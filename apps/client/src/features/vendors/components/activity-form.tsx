@@ -8,6 +8,7 @@ import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,7 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ActivityForm = ({
   defaultValues,
-  purposeOptions,
+  roleOptions,
   legalBasisOptions,
   submitLabel,
   submitDisabled = false,
@@ -23,7 +24,7 @@ export const ActivityForm = ({
   onCancel,
 }: {
   defaultValues: BusinessActivityInput
-  purposeOptions: Option[]
+  roleOptions: Option[]
   legalBasisOptions: Option[]
   submitLabel: string
   submitDisabled?: boolean
@@ -59,19 +60,17 @@ export const ActivityForm = ({
         register={form.register}
       />
       <TextAreaField
-        error={form.formState.errors.description}
-        label="Description"
-        name="description"
+        error={form.formState.errors.purpose}
+        label="Purpose"
+        name="purpose"
         placeholder="What this processing activity covers"
         register={form.register}
       />
-      <MultiSelectField
+      <SelectField
         control={form.control}
-        error={form.formState.errors.purposes?.root}
-        label="Purposes"
-        name="purposes"
-        options={purposeOptions}
-        placeholder="Select purposes"
+        label="Role"
+        name="role"
+        options={[{ value: "", label: "Not set" }, ...roleOptions]}
       />
       <MultiSelectField
         control={form.control}

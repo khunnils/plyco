@@ -125,13 +125,15 @@ export const validateBusinessActivityCodes = async (
   activity: BusinessActivityInput,
 ) => {
   await Promise.all([
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "data_purposes",
-      activity.purposes,
-      "businessActivity.purposes",
-    ),
+    activity.role
+      ? assertCodes(
+          vocabularyRepository,
+          organizationId,
+          "activity_role",
+          [activity.role],
+          "businessActivity.role",
+        )
+      : Promise.resolve(),
     assertCodes(
       vocabularyRepository,
       organizationId,

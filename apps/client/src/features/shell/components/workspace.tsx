@@ -167,7 +167,7 @@ const companySections: Array<{
     id: "activities",
     view: "companyActivities",
     title: "Activities",
-    description: "Processing activities with purposes and legal basis.",
+    description: "Processing activities with purpose, role, and legal basis.",
     icon: ClipboardList,
   },
   {
@@ -1236,7 +1236,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       activities={businessActivities}
                       isMutationPending={isActivityMutationPending}
                       legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
-                      purposeOptions={codeOptions(vocabularyData, "data_purposes")}
+                      roleOptions={codeOptions(vocabularyData, "activity_role")}
                       vocabulary={vocabularyData}
                       onCreate={(activity) => createBusinessActivity.mutate(activity)}
                       onDelete={(activity) =>

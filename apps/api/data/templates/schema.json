@@ -1276,11 +1276,12 @@
 	      "label": "Service activities",
 	      "type": "collection",
 	      "category": "Services",
-	      "description": "Business activities performed by each service, including processing purposes and legal basis.",
+	      "description": "Business activities performed by each service, including purpose, role, and legal basis.",
 	      "example": [
 	        {
 	          "name": "Account management",
-	          "purposes": ["account_management"],
+	          "purpose": "Operate user accounts",
+	          "role": "controller",
 	          "legalBasis": ["contract"]
 	        }
 	      ]

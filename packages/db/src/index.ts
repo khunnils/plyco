@@ -392,8 +392,8 @@ export function mapOrganizationRecord(record: {
 export function mapBusinessActivityRecord(record: {
   id: string
   name: string
-  description: string
-  purposes: string[]
+  purpose: string
+  role: string
   legalBasis: string[]
   createdAt: Date
   updatedAt: Date
@@ -401,8 +401,8 @@ export function mapBusinessActivityRecord(record: {
   return businessActivitySchema.parse({
     id: record.id,
     name: record.name,
-    description: record.description,
-    purposes: record.purposes,
+    purpose: record.purpose,
+    role: record.role,
     legalBasis: record.legalBasis,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),

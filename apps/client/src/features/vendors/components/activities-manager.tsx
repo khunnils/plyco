@@ -19,7 +19,7 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 export const ActivitiesManager = ({
   activities,
   isMutationPending,
-  purposeOptions,
+  roleOptions,
   legalBasisOptions,
   vocabulary,
   onCreate,
@@ -28,7 +28,7 @@ export const ActivitiesManager = ({
 }: {
   activities: BusinessActivity[]
   isMutationPending: boolean
-  purposeOptions: Option[]
+  roleOptions: Option[]
   legalBasisOptions: Option[]
   vocabulary: Vocabulary | undefined
   onCreate: (activity: BusinessActivityInput) => void
@@ -64,7 +64,7 @@ export const ActivitiesManager = ({
           editingActivity ? toActivityInput(editingActivity) : emptyActivityDraft
         }
         legalBasisOptions={legalBasisOptions}
-        purposeOptions={purposeOptions}
+        roleOptions={roleOptions}
         submitDisabled={isMutationPending}
         submitLabel={editingActivity ? "Save activity" : "Add activity"}
         onCancel={closeForm}
