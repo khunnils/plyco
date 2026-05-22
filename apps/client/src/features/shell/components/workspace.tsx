@@ -65,6 +65,7 @@ import {
   ProfilePrivacyFields,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
+import { DataHandlingManager } from "@/features/security-profile/components/data-handling-manager"
 import { DataHandlingReadOnlySection } from "@/features/security-profile/components/data-handling-read-only-section"
 import { useCreateDocument, useDocument, useDocuments, useDownloadDocumentPdf } from "@/features/documents/hooks/use-documents"
 import { useLogout } from "@/features/auth/hooks/use-auth"
@@ -1225,7 +1226,27 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
           {activeCompanySection && activeCompanySectionId && (
             <div className="grid gap-5">
-              {[activeCompanySection].map((section) => (
+              {activeCompanySectionId === "dataHandling" ? (
+                <DataHandlingManager
+                  categoryOptions={codeOptions(
+                    vocabularyData,
+                    "data_categories",
+                  )}
+                  collectionMethodOptions={codeOptions(
+                    vocabularyData,
+                    "collection_methods",
+                  )}
+                  isMutationPending={saveProfile.isPending}
+                  profile={defaultValues}
+                  subjectTypeOptions={codeOptions(
+                    vocabularyData,
+                    "subject_types",
+                  )}
+                  vocabulary={vocabularyData}
+                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                />
+              ) : (
+                [activeCompanySection].map((section) => (
                 <Section
                   description={section.description}
                   key={section.id}
@@ -1292,7 +1313,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                     />
                   )}
                 </Section>
-              ))}
+              ))
+              )}
             </div>
           )}
 
