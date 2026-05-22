@@ -88,7 +88,7 @@ export const DataTypeForm = ({
           name="isRequired"
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2">
         <Button
           disabled={submitDisabled}
           type="button"

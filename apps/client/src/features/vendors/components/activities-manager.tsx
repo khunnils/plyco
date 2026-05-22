@@ -1,12 +1,9 @@
-import { Plus } from "lucide-react"
 import {
   type BusinessActivity,
   type BusinessActivityInput,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
 
-import { Button } from "@/components/ui/button"
 import { ActivityEmptyState } from "@/features/vendors/components/activity-empty-state"
 import { ActivityForm } from "@/features/vendors/components/activity-form"
 import { ActivityList } from "@/features/vendors/components/activity-list"
@@ -25,6 +22,10 @@ export const ActivitiesManager = ({
   onCreate,
   onDelete,
   onUpdate,
+  showForm,
+  setShowForm,
+  editingActivityId,
+  setEditingActivityId,
 }: {
   activities: BusinessActivity[]
   isMutationPending: boolean
@@ -34,10 +35,11 @@ export const ActivitiesManager = ({
   onCreate: (activity: BusinessActivityInput) => void
   onDelete: (activity: BusinessActivity) => void
   onUpdate: (input: { id: string; activity: BusinessActivityInput }) => void
+  showForm: boolean
+  setShowForm: (show: boolean) => void
+  editingActivityId: string | null
+  setEditingActivityId: (id: string | null) => void
 }) => {
-  const [showForm, setShowForm] = useState(false)
-  const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
-
   const editingActivity = activities.find(
     (activity) => activity.id === editingActivityId,
   )
@@ -86,12 +88,6 @@ export const ActivitiesManager = ({
 
   return (
     <div className="grid gap-4">
-      <div className="flex justify-end">
-        <Button className="w-fit" type="button" onClick={startCreate}>
-          <Plus />
-          Add activity
-        </Button>
-      </div>
       <ActivityList
         activities={activities}
         vocabulary={vocabulary}

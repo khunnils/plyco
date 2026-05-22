@@ -563,6 +563,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
   const [isCreatingService, setIsCreatingService] = useState(false)
+  const [showActivityForm, setShowActivityForm] = useState(false)
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
   const {
     activeWorkspaceView,
     editingCompanySection,
@@ -882,6 +884,24 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   description={section.description}
                   key={section.id}
                   title={section.title}
+                  action={
+                    section.id === "activities" &&
+                    businessActivities.length > 0 &&
+                    !showActivityForm &&
+                    !editingActivityId ? (
+                      <Button
+                        className="w-fit"
+                        type="button"
+                        onClick={() => {
+                          setEditingActivityId(null)
+                          setShowActivityForm(true)
+                        }}
+                      >
+                        <Plus />
+                        Add activity
+                      </Button>
+                    ) : undefined
+                  }
                 >
                   {section.id === "activities" ? (
                     <ActivitiesManager
@@ -895,6 +915,10 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         deleteBusinessActivity.mutate(activity.id)
                       }
                       onUpdate={(input) => updateBusinessActivity.mutate(input)}
+                      showForm={showActivityForm}
+                      setShowForm={setShowActivityForm}
+                      editingActivityId={editingActivityId}
+                      setEditingActivityId={setEditingActivityId}
                     />
                   ) : editingCompanySection === section.id ? (
                     <ProfileForm
@@ -914,7 +938,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                             section={section.id}
                             vocabulary={vocabularyData}
                           />
-                          <div className="flex gap-2">
+                          <div className="flex justify-end gap-2">
                             <Button
                               disabled={saveProfile.isPending}
                               type="submit"
