@@ -21,6 +21,7 @@ export const ServiceVendorUseForm = ({
   defaultValues,
   dpaStatusOptions,
   serviceOptions,
+  showServiceField = true,
   vendorOptions,
   submitLabel,
   submitDisabled = false,
@@ -33,6 +34,7 @@ export const ServiceVendorUseForm = ({
   defaultValues: ServiceVendorUseInput
   dpaStatusOptions: Option[]
   serviceOptions: Option[]
+  showServiceField?: boolean
   submitLabel: string
   submitDisabled?: boolean
   vendorOptions: Option[]
@@ -73,12 +75,14 @@ export const ServiceVendorUseForm = ({
   return (
     <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <SelectField
-          control={form.control}
-          label="Service"
-          name="serviceId"
-          options={serviceOptions}
-        />
+        {showServiceField ? (
+          <SelectField
+            control={form.control}
+            label="Service"
+            name="serviceId"
+            options={serviceOptions}
+          />
+        ) : null}
         <SelectField
           control={form.control}
           label="Vendor"

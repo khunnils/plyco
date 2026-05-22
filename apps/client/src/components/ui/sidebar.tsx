@@ -17,7 +17,7 @@ export const SidebarHeader = ({ children }: { children: ReactNode }) => (
 )
 
 export const SidebarContent = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-1 flex-col p-3">{children}</div>
+  <div className="flex flex-1 flex-col p-1">{children}</div>
 )
 
 export const SidebarFooter = ({ children }: { children: ReactNode }) => (

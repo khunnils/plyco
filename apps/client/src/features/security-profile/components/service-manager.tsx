@@ -1,0 +1,1063 @@
+import { zodResolver } from "@hookform/resolvers/zod"
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  emptyServiceProfile,
+  serviceProfileInputSchema,
+  servicePrivacyProfileSchema,
+  type OrganizationProvider,
+  type Provider,
+  type ProviderSystemType,
+  type SecurityProgramSnapshot,
+  type ServiceProfileInput,
+  type ServiceVendorUse,
+  type ServiceVendorUseInput,
+  type Vendor,
+  type Vocabulary,
+} from "@plyco/shared"
+import { useEffect, useState } from "react"
+import {
+  type FieldPath,
+  type Resolver,
+  type UseFormReturn,
+  useForm,
+} from "react-hook-form"
+import { z } from "zod"
+
+import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
+import { TextAreaField } from "@/components/form/text-area-field"
+import { TextField } from "@/components/form/text-field"
+import { ToggleField } from "@/components/form/toggle-field"
+import { Button } from "@/components/ui/button"
+import {
+  ProfilePanelDetailGrid,
+  ProfilePanelShell,
+} from "@/features/security-profile/components/profile-panel-shell"
+import { ServiceVendorUseForm } from "@/features/vendors/components/service-vendor-use-form"
+import {
+  emptyServiceVendorUseDraft,
+  providerNamesForSystem,
+  toServiceVendorUseInput,
+} from "@/features/security-profile/lib/profile"
+import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+
+type SaveProfile = (
+  profile: ProfileDraft,
+  onSuccess?: (snapshot: SecurityProgramSnapshot) => void,
+) => void
+
+const serviceBasicsSchema = serviceProfileInputSchema.pick({
+  serviceName: true,
+  serviceDescription: true,
+  serviceUrl: true,
+})
+const serviceAudienceSchema = serviceProfileInputSchema.pick({
+  businessActivityIds: true,
+  userTypes: true,
+  customerTypes: true,
+  availabilityRegions: true,
+  childrenDirected: true,
+  minimumUserAge: true,
+})
+const servicePrivacyDraftSchema = z.object({
+  privacy: servicePrivacyProfileSchema,
+})
+
+type ServiceBasicsDraft = z.infer<typeof serviceBasicsSchema>
+type ServiceAudienceDraft = z.infer<typeof serviceAudienceSchema>
+type ServicePrivacyDraft = z.infer<typeof servicePrivacyDraftSchema>
+
+const basicsPath = (field: string) => field as FieldPath<ServiceBasicsDraft>
+const audiencePath = (field: string) => field as FieldPath<ServiceAudienceDraft>
+const privacyPath = (field: string) =>
+  `privacy.${field}` as FieldPath<ServicePrivacyDraft>
+
+const boolText = (value: boolean) => (value ? "Yes" : "No")
+
+const codeValueList = (
+  vocabulary: Vocabulary | undefined,
+  codeSetId: string,
+  values: string[],
+) =>
+  values.length > 0
+    ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
+    : "Not set"
+
+const selectedProviderIds = (providers: OrganizationProvider[]) =>
+  providers.map((provider) => provider.providerId)
+
+const providerOptions = (
+  providers: Provider[],
+  systemType: ProviderSystemType,
+) =>
+  providers
+    .filter((provider) => provider.systemTypes.includes(systemType))
+    .map((provider) => ({ value: provider.id, label: provider.name }))
+
+const serviceBasicsDraft = (
+  service: ServiceProfileInput,
+): ServiceBasicsDraft => ({
+  serviceName: service.serviceName,
+  serviceDescription: service.serviceDescription,
+  serviceUrl: service.serviceUrl,
+})
+
+const serviceAudienceDraft = (
+  service: ServiceProfileInput,
+): ServiceAudienceDraft => ({
+  businessActivityIds: service.businessActivityIds,
+  userTypes: service.userTypes,
+  customerTypes: service.customerTypes,
+  availabilityRegions: service.availabilityRegions,
+  childrenDirected: service.childrenDirected,
+  minimumUserAge: service.minimumUserAge,
+})
+
+const servicePrivacyDraft = (
+  service: ServiceProfileInput,
+): ServicePrivacyDraft => ({
+  privacy: service.privacy,
+})
+
+const serviceVendorPurpose = (service: ServiceProfileInput) =>
+  `Used by ${service.serviceName.trim() || "this service"}`
+
+const FieldNumberInput = <T extends Record<string, unknown>>({
+  error,
+  label,
+  name,
+  register,
+}: {
+  error?: { message?: string }
+  label: string
+  name: FieldPath<T>
+  register: UseFormReturn<T>["register"]
+}) => (
+  <label className="grid gap-2 text-sm font-medium text-slate-800">
+    {label}
+    <input
+      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      inputMode="numeric"
+      min={0}
+      type="number"
+      {...register(name, { valueAsNumber: true })}
+    />
+    {error?.message ? (
+      <span className="text-xs text-red-700">{error.message}</span>
+    ) : null}
+  </label>
+)
+
+const ServiceProviderPicker = ({
+  form,
+  label,
+  providers,
+  systemType,
+}: {
+  form: UseFormReturn<ServicePrivacyDraft>
+  label: string
+  providers: Provider[]
+  systemType: "analytics" | "advertising"
+}) => {
+  const field =
+    systemType === "analytics" ? "analyticsProviders" : "advertisingProviders"
+  const path = privacyPath(field)
+  const selectedProviders = form.watch(path) as OrganizationProvider[]
+  const options = providerOptions(providers, systemType)
+
+  return (
+    <MultiSelectField
+      control={form.control}
+      label={label}
+      name={path}
+      options={options}
+      placeholder={`Select ${label.toLowerCase()}`}
+      value={selectedProviderIds(selectedProviders)}
+      onValueChange={(providerIds) => {
+        form.setValue(
+          path,
+          providerIds.map((providerId) => ({
+            systemType,
+            providerId,
+          })) as never,
+          { shouldDirty: true, shouldValidate: true },
+        )
+      }}
+    />
+  )
+}
+
+const ServiceBasicsFormFields = ({
+  descriptionName,
+  errors,
+  nameName,
+  register,
+  urlName,
+}: {
+  descriptionName: FieldPath<ServiceBasicsDraft>
+  errors: UseFormReturn<ServiceBasicsDraft>["formState"]["errors"]
+  nameName: FieldPath<ServiceBasicsDraft>
+  register: UseFormReturn<ServiceBasicsDraft>["register"]
+  urlName: FieldPath<ServiceBasicsDraft>
+}) => (
+  <div className="grid gap-4 md:grid-cols-2">
+    <TextField
+      error={errors.serviceName}
+      label="Service name"
+      name={nameName}
+      placeholder="Acme Platform"
+      register={register}
+    />
+    <TextField
+      error={errors.serviceUrl}
+      label="Service URL"
+      name={urlName}
+      placeholder="https://app.acme.example"
+      register={register}
+    />
+    <div className="md:col-span-2">
+      <TextAreaField
+        error={errors.serviceDescription}
+        label="Description"
+        name={descriptionName}
+        placeholder="Briefly describe the product or service"
+        register={register}
+      />
+    </div>
+  </div>
+)
+
+const AddServiceForm = ({
+  isMutationPending,
+  onCancel,
+  onSubmit,
+}: {
+  isMutationPending: boolean
+  onCancel: () => void
+  onSubmit: (service: ServiceProfileInput) => void
+}) => {
+  const draft = serviceBasicsDraft(emptyServiceProfile)
+  const form = useForm<ServiceBasicsDraft>({
+    defaultValues: draft,
+    mode: "onBlur",
+    resolver: zodResolver(serviceBasicsSchema) as Resolver<ServiceBasicsDraft>,
+    values: draft,
+  })
+  const submit = form.handleSubmit((basics) => {
+    onSubmit({
+      ...emptyServiceProfile,
+      ...basics,
+    })
+  })
+
+  return (
+    <ProfilePanelShell
+      isEditing
+      isMutationPending={isMutationPending}
+      readOnlyContent={null}
+      saveLabel="Add service"
+      title="Add service"
+      onCancel={() => {
+        form.reset(draft)
+        onCancel()
+      }}
+      onEdit={() => undefined}
+      onSave={submit}
+    >
+      <ServiceBasicsFormFields
+        descriptionName={basicsPath("serviceDescription")}
+        errors={form.formState.errors}
+        nameName={basicsPath("serviceName")}
+        register={form.register}
+        urlName={basicsPath("serviceUrl")}
+      />
+    </ProfilePanelShell>
+  )
+}
+
+const ServiceBasicsPanel = ({
+  isMutationPending,
+  service,
+  onSave,
+}: {
+  isMutationPending: boolean
+  service: ServiceProfileInput
+  onSave: (patch: ServiceBasicsDraft) => void
+}) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const draft = serviceBasicsDraft(service)
+  const form = useForm<ServiceBasicsDraft>({
+    defaultValues: draft,
+    mode: "onBlur",
+    resolver: zodResolver(serviceBasicsSchema) as Resolver<ServiceBasicsDraft>,
+    values: draft,
+  })
+  const submit = form.handleSubmit((next) => {
+    onSave(next)
+    setIsEditing(false)
+  })
+
+  return (
+    <ProfilePanelShell
+      isEditing={isEditing}
+      isMutationPending={isMutationPending}
+      readOnlyContent={
+        <ProfilePanelDetailGrid
+          rows={[
+            ["Service name", service.serviceName || "Not set"],
+            ["Service URL", service.serviceUrl || "Not set"],
+            ["Description", service.serviceDescription || "Not set"],
+          ]}
+        />
+      }
+      saveLabel="Save section"
+      title="General"
+      onCancel={() => {
+        form.reset(draft)
+        setIsEditing(false)
+      }}
+      onEdit={() => setIsEditing(true)}
+      onSave={submit}
+    >
+      <ServiceBasicsFormFields
+        descriptionName={basicsPath("serviceDescription")}
+        errors={form.formState.errors}
+        nameName={basicsPath("serviceName")}
+        register={form.register}
+        urlName={basicsPath("serviceUrl")}
+      />
+    </ProfilePanelShell>
+  )
+}
+
+const ServiceAudiencePanel = ({
+  businessActivityOptions,
+  customerTypeOptions,
+  isMutationPending,
+  regionOptions,
+  service,
+  userTypeOptions,
+  vocabulary,
+  onSave,
+}: {
+  businessActivityOptions: Option[]
+  customerTypeOptions: Option[]
+  isMutationPending: boolean
+  regionOptions: Option[]
+  service: ServiceProfileInput
+  userTypeOptions: Option[]
+  vocabulary: Vocabulary | undefined
+  onSave: (patch: ServiceAudienceDraft) => void
+}) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const draft = serviceAudienceDraft(service)
+  const form = useForm<ServiceAudienceDraft>({
+    defaultValues: draft,
+    mode: "onBlur",
+    resolver: zodResolver(
+      serviceAudienceSchema,
+    ) as Resolver<ServiceAudienceDraft>,
+    values: draft,
+  })
+  const submit = form.handleSubmit((next) => {
+    onSave(next)
+    setIsEditing(false)
+  })
+  const activityLabels = service.businessActivityIds
+    .map(
+      (activityId) =>
+        businessActivityOptions.find((option) => option.value === activityId)
+          ?.label ?? activityId,
+    )
+    .join(", ")
+
+  return (
+    <ProfilePanelShell
+      isEditing={isEditing}
+      isMutationPending={isMutationPending}
+      readOnlyContent={
+        <ProfilePanelDetailGrid
+          rows={[
+            ["Business activities", activityLabels || "Not set"],
+            [
+              "User types",
+              codeValueList(vocabulary, "service_user_types", service.userTypes),
+            ],
+            [
+              "Customer types",
+              codeValueList(
+                vocabulary,
+                "service_customer_types",
+                service.customerTypes,
+              ),
+            ],
+            [
+              "Availability regions",
+              codeValueList(vocabulary, "regions", service.availabilityRegions),
+            ],
+            ["Directed to children", boolText(service.childrenDirected)],
+            [
+              "Minimum user age",
+              service.minimumUserAge === 0 ? "Not set" : service.minimumUserAge,
+            ],
+          ]}
+        />
+      }
+      saveLabel="Save section"
+      title="Audience and Availability"
+      onCancel={() => {
+        form.reset(draft)
+        setIsEditing(false)
+      }}
+      onEdit={() => setIsEditing(true)}
+      onSave={submit}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.businessActivityIds?.root}
+          label="Business activities"
+          name={audiencePath("businessActivityIds")}
+          options={businessActivityOptions}
+          placeholder="Select business activities"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.userTypes?.root}
+          label="User types"
+          name={audiencePath("userTypes")}
+          options={userTypeOptions}
+          placeholder="Select user types"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.customerTypes?.root}
+          label="Customer types"
+          name={audiencePath("customerTypes")}
+          options={customerTypeOptions}
+          placeholder="Select customer types"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.availabilityRegions?.root}
+          label="Availability regions"
+          name={audiencePath("availabilityRegions")}
+          options={regionOptions}
+          placeholder="Select availability regions"
+        />
+        <ToggleField
+          control={form.control}
+          label="Directed to children"
+          name={audiencePath("childrenDirected")}
+        />
+        <FieldNumberInput
+          error={form.formState.errors.minimumUserAge}
+          label="Minimum user age"
+          name={audiencePath("minimumUserAge")}
+          register={form.register}
+        />
+      </div>
+    </ProfilePanelShell>
+  )
+}
+
+const ServicePrivacyPanel = ({
+  cookieTypeOptions,
+  isMutationPending,
+  providers,
+  regionOptions,
+  service,
+  vocabulary,
+  onSave,
+}: {
+  cookieTypeOptions: Option[]
+  isMutationPending: boolean
+  providers: Provider[]
+  regionOptions: Option[]
+  service: ServiceProfileInput
+  vocabulary: Vocabulary | undefined
+  onSave: (patch: ServicePrivacyDraft) => void
+}) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const draft = servicePrivacyDraft(service)
+  const form = useForm<ServicePrivacyDraft>({
+    defaultValues: draft,
+    mode: "onBlur",
+    resolver: zodResolver(
+      servicePrivacyDraftSchema,
+    ) as Resolver<ServicePrivacyDraft>,
+    values: draft,
+  })
+  const submit = form.handleSubmit((next) => {
+    onSave(next)
+    setIsEditing(false)
+  })
+
+  return (
+    <ProfilePanelShell
+      isEditing={isEditing}
+      isMutationPending={isMutationPending}
+      readOnlyContent={
+        <ProfilePanelDetailGrid
+          rows={[
+            ["Uses cookies", boolText(service.privacy.usesCookies)],
+            [
+              "Cookie types",
+              codeValueList(
+                vocabulary,
+                "privacy_cookie_types",
+                service.privacy.cookieTypes,
+              ),
+            ],
+            [
+              "Analytics providers",
+              providerNamesForSystem(
+                service.privacy.analyticsProviders,
+                providers,
+                "analytics",
+              ),
+            ],
+            [
+              "Advertising providers",
+              providerNamesForSystem(
+                service.privacy.advertisingProviders,
+                providers,
+                "advertising",
+              ),
+            ],
+            [
+              "Primary hosting region",
+              service.privacy.primaryHostingRegion
+                ? codeLabel(
+                    vocabulary,
+                    "regions",
+                    service.privacy.primaryHostingRegion,
+                  )
+                : "Not set",
+            ],
+            [
+              "Data residency options",
+              codeValueList(
+                vocabulary,
+                "regions",
+                service.privacy.dataResidencyOptions,
+              ),
+            ],
+          ]}
+        />
+      }
+      saveLabel="Save section"
+      title="Service Privacy"
+      onCancel={() => {
+        form.reset(draft)
+        setIsEditing(false)
+      }}
+      onEdit={() => setIsEditing(true)}
+      onSave={submit}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Uses cookies"
+          name={privacyPath("usesCookies")}
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.cookieTypes?.root}
+          label="Cookie types"
+          name={privacyPath("cookieTypes")}
+          options={cookieTypeOptions}
+          placeholder="Select cookie types"
+        />
+        <ServiceProviderPicker
+          form={form}
+          label="Analytics providers"
+          providers={providers}
+          systemType="analytics"
+        />
+        <ServiceProviderPicker
+          form={form}
+          label="Advertising providers"
+          providers={providers}
+          systemType="advertising"
+        />
+        <SelectField
+          control={form.control}
+          label="Primary hosting region"
+          name={privacyPath("primaryHostingRegion")}
+          options={[{ value: "", label: "Not set" }, ...regionOptions]}
+          placeholder="Not set"
+        />
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.privacy?.dataResidencyOptions?.root}
+          label="Data residency options"
+          name={privacyPath("dataResidencyOptions")}
+          options={regionOptions}
+          placeholder="Select data residency options"
+        />
+      </div>
+    </ProfilePanelShell>
+  )
+}
+
+const AddVendorsForm = ({
+  selectedVendorIds,
+  vendors,
+  onCancel,
+  onSubmit,
+}: {
+  selectedVendorIds: Set<string>
+  vendors: Vendor[]
+  onCancel: () => void
+  onSubmit: (vendorIds: string[]) => void
+}) => {
+  const [checkedIds, setCheckedIds] = useState<string[]>([])
+  const toggleVendor = (vendorId: string, checked: boolean) => {
+    setCheckedIds((current) =>
+      checked
+        ? [...current, vendorId]
+        : current.filter((currentId) => currentId !== vendorId),
+    )
+  }
+
+  return (
+    <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div className="grid gap-2">
+        {vendors.map((vendor) => {
+          const disabled = selectedVendorIds.has(vendor.id)
+
+          return (
+            <label
+              className={[
+                "flex min-h-11 items-center gap-3 rounded-md border bg-white px-3 py-2 text-sm",
+                disabled
+                  ? "border-slate-200 text-slate-400"
+                  : "border-slate-200 text-slate-800",
+              ].join(" ")}
+              key={vendor.id}
+            >
+              <input
+                checked={disabled || checkedIds.includes(vendor.id)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                disabled={disabled}
+                type="checkbox"
+                onChange={(event) =>
+                  toggleVendor(vendor.id, event.target.checked)
+                }
+              />
+              <span className="min-w-0 flex-1 truncate">
+                {vendor.displayName || vendor.name}
+              </span>
+              {disabled ? (
+                <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
+                  Selected
+                </span>
+              ) : null}
+            </label>
+          )
+        })}
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button
+          disabled={checkedIds.length === 0}
+          type="button"
+          onClick={() => onSubmit(checkedIds)}
+        >
+          <Plus />
+          Add selected
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const ServiceVendorPanel = ({
+  dataProcessingLevelOptions,
+  dataRegionOptions,
+  dataTypeOptions,
+  dpaStatusOptions,
+  isMutationPending,
+  service,
+  serviceVendorUses,
+  vendors,
+  vocabulary,
+  onCreate,
+  onDelete,
+  onUpdate,
+}: {
+  dataProcessingLevelOptions: Option[]
+  dataRegionOptions: Option[]
+  dataTypeOptions: Array<{ value: string; label: string }>
+  dpaStatusOptions: Option[]
+  isMutationPending: boolean
+  service: ServiceProfileInput
+  serviceVendorUses: ServiceVendorUse[]
+  vendors: Vendor[]
+  vocabulary: Vocabulary | undefined
+  onCreate: (vendorUse: ServiceVendorUseInput) => void
+  onDelete: (vendorUse: ServiceVendorUse) => void
+  onUpdate: (input: { id: string; vendorUse: ServiceVendorUseInput }) => void
+}) => {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showAddVendors, setShowAddVendors] = useState(false)
+  const selectedServiceUses = service.id
+    ? serviceVendorUses.filter((vendorUse) => vendorUse.serviceId === service.id)
+    : []
+  const selectedVendorIds = new Set(
+    selectedServiceUses.map((vendorUse) => vendorUse.vendorId),
+  )
+  const editingVendorUse = selectedServiceUses.find(
+    (vendorUse) => vendorUse.id === editingId,
+  )
+  const vendorOptions = vendors.map((vendor) => ({
+    value: vendor.id,
+    label: vendor.displayName || vendor.name,
+  }))
+  const serviceOptions = service.id
+    ? [{ value: service.id, label: service.serviceName || "Selected service" }]
+    : []
+
+  return (
+    <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-base font-semibold text-slate-950">Vendors</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Vendors used by this service and the data they process.
+          </p>
+        </div>
+        <Button
+          className="w-fit"
+          disabled={!service.id || vendors.length === 0 || Boolean(editingVendorUse)}
+          type="button"
+          onClick={() => {
+            setEditingId(null)
+            setShowAddVendors(true)
+          }}
+        >
+          <Plus />
+          Add vendors
+        </Button>
+      </div>
+
+      {!service.id ? (
+        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+          Save this service before assigning vendors.
+        </div>
+      ) : vendors.length === 0 ? (
+        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+          Add vendors to the vendor inventory before assigning them to a service.
+        </div>
+      ) : showAddVendors ? (
+        <AddVendorsForm
+          selectedVendorIds={selectedVendorIds}
+          vendors={vendors}
+          onCancel={() => setShowAddVendors(false)}
+          onSubmit={(vendorIds) => {
+            vendorIds.forEach((vendorId) => {
+              onCreate({
+                ...emptyServiceVendorUseDraft,
+                serviceId: service.id ?? "",
+                vendorId,
+                purpose: serviceVendorPurpose(service),
+              })
+            })
+            setShowAddVendors(false)
+          }}
+        />
+      ) : editingVendorUse ? (
+        <ServiceVendorUseForm
+          dataProcessingLevelOptions={dataProcessingLevelOptions}
+          dataRegionOptions={dataRegionOptions}
+          dataTypeOptions={dataTypeOptions}
+          defaultValues={toServiceVendorUseInput(editingVendorUse)}
+          dpaStatusOptions={dpaStatusOptions}
+          serviceOptions={serviceOptions}
+          showServiceField={false}
+          submitDisabled={isMutationPending}
+          submitLabel="Save vendor use"
+          vendorOptions={vendorOptions}
+          onCancel={() => setEditingId(null)}
+          onSubmit={(vendorUse) => {
+            onUpdate({
+              id: editingVendorUse.id,
+              vendorUse: {
+                ...vendorUse,
+                serviceId: service.id ?? "",
+              },
+            })
+            setEditingId(null)
+          }}
+        />
+      ) : selectedServiceUses.length === 0 ? (
+        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+          No vendors selected for this service.
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {selectedServiceUses.map((vendorUse) => {
+            const expanded = expandedId === vendorUse.id
+
+            return (
+              <article
+                className={[
+                  "rounded-md border bg-white",
+                  expanded
+                    ? "border-blue-300 ring-2 ring-blue-100"
+                    : "border-slate-200",
+                ].join(" ")}
+                key={vendorUse.id}
+              >
+                <div className="flex items-start gap-2 p-4">
+                  <button
+                    aria-expanded={expanded}
+                    className="min-w-0 flex-1 text-left"
+                    type="button"
+                    onClick={() =>
+                      setExpandedId((current) =>
+                        current === vendorUse.id ? null : vendorUse.id,
+                      )
+                    }
+                  >
+                    <h4 className="text-sm font-semibold text-slate-950">
+                      {vendorUse.vendorName || "Selected vendor"}
+                    </h4>
+                    <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
+                      {vendorUse.purpose}
+                    </p>
+                  </button>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      aria-label={expanded ? "Collapse" : "Expand"}
+                      size="icon-sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        setExpandedId((current) =>
+                          current === vendorUse.id ? null : vendorUse.id,
+                        )
+                      }
+                    >
+                      {expanded ? <ChevronUp /> : <ChevronDown />}
+                    </Button>
+                    <Button
+                      aria-label="Edit vendor use"
+                      size="icon-sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowAddVendors(false)
+                        setEditingId(vendorUse.id)
+                      }}
+                    >
+                      <Pencil />
+                    </Button>
+                    <Button
+                      aria-label="Delete vendor use"
+                      size="icon-sm"
+                      type="button"
+                      variant="outline"
+                      onClick={() => onDelete(vendorUse)}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                </div>
+
+                {expanded ? (
+                  <ProfilePanelDetailGrid
+                    rows={[
+                      [
+                        "Data processing",
+                        codeLabel(
+                          vocabulary,
+                          "data_processing_level",
+                          vendorUse.dataProcessingLevel,
+                        ),
+                      ],
+                      ["DPA status", codeLabel(vocabulary, "dpa_status", vendorUse.dpaStatus)],
+                      [
+                        "Data processed",
+                        vendorUse.dataProcessed.length > 0
+                          ? vendorUse.dataProcessed.join(", ")
+                          : "No data types selected",
+                      ],
+                      [
+                        "Data regions",
+                        codeValueList(vocabulary, "regions", vendorUse.dataRegions),
+                      ],
+                      ["Notes", vendorUse.notes || "Not set"],
+                    ]}
+                  />
+                ) : null}
+              </article>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export const ServiceManager = ({
+  businessActivityOptions,
+  cookieTypeOptions,
+  customerTypeOptions,
+  dataProcessingLevelOptions,
+  dataRegionOptions,
+  dataTypeOptions,
+  dpaStatusOptions,
+  isCreatingService,
+  isProfileMutationPending,
+  isVendorMutationPending,
+  profile,
+  providers,
+  regionOptions,
+  selectedServiceId,
+  serviceVendorUses,
+  userTypeOptions,
+  vendors,
+  vocabulary,
+  onCancelCreateService,
+  onCreateVendorUse,
+  onDeleteVendorUse,
+  onSaveProfile,
+  onSelectService,
+  onUpdateVendorUse,
+}: {
+  businessActivityOptions: Option[]
+  cookieTypeOptions: Option[]
+  customerTypeOptions: Option[]
+  dataProcessingLevelOptions: Option[]
+  dataRegionOptions: Option[]
+  dataTypeOptions: Array<{ value: string; label: string }>
+  dpaStatusOptions: Option[]
+  isCreatingService: boolean
+  isProfileMutationPending: boolean
+  isVendorMutationPending: boolean
+  profile: ProfileDraft
+  providers: Provider[]
+  regionOptions: Option[]
+  selectedServiceId: string | null
+  serviceVendorUses: ServiceVendorUse[]
+  userTypeOptions: Option[]
+  vendors: Vendor[]
+  vocabulary: Vocabulary | undefined
+  onCancelCreateService: () => void
+  onCreateVendorUse: (vendorUse: ServiceVendorUseInput) => void
+  onDeleteVendorUse: (vendorUse: ServiceVendorUse) => void
+  onSaveProfile: SaveProfile
+  onSelectService: (id: string | null) => void
+  onUpdateVendorUse: (input: {
+    id: string
+    vendorUse: ServiceVendorUseInput
+  }) => void
+}) => {
+  const selectedIndex = Math.max(
+    profile.services.findIndex((service) => service.id === selectedServiceId),
+    0,
+  )
+  const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
+
+  useEffect(() => {
+    if (
+      !isCreatingService &&
+      profile.services.length > 0 &&
+      !profile.services.some((service) => service.id === selectedServiceId)
+    ) {
+      const nextServiceId = profile.services[0]?.id ?? null
+
+      if (selectedServiceId !== nextServiceId) {
+        onSelectService(nextServiceId)
+      }
+    }
+  }, [isCreatingService, onSelectService, profile.services, selectedServiceId])
+
+  const saveServicePatch = (patch: Partial<ServiceProfileInput>) => {
+    onSaveProfile({
+      ...profile,
+      services: profile.services.map((currentService, index) =>
+        index === selectedIndex
+          ? {
+              ...currentService,
+              ...patch,
+            }
+          : currentService,
+      ),
+    })
+  }
+
+  const createService = (service: ServiceProfileInput) => {
+    onSaveProfile(
+      {
+        ...profile,
+        services: [...profile.services, service],
+      },
+      (snapshot) => {
+        const createdService = snapshot.organization?.services.at(-1)
+
+        onSelectService(createdService?.id ?? null)
+        onCancelCreateService()
+      },
+    )
+  }
+
+  if (isCreatingService) {
+    return (
+      <AddServiceForm
+        isMutationPending={isProfileMutationPending}
+        onCancel={onCancelCreateService}
+        onSubmit={createService}
+      />
+    )
+  }
+
+  return (
+    <div className="grid gap-5">
+      <ServiceBasicsPanel
+        isMutationPending={isProfileMutationPending}
+        service={selectedService}
+        onSave={saveServicePatch}
+      />
+      <ServiceAudiencePanel
+        businessActivityOptions={businessActivityOptions}
+        customerTypeOptions={customerTypeOptions}
+        isMutationPending={isProfileMutationPending}
+        regionOptions={regionOptions}
+        service={selectedService}
+        userTypeOptions={userTypeOptions}
+        vocabulary={vocabulary}
+        onSave={saveServicePatch}
+      />
+      <ServicePrivacyPanel
+        cookieTypeOptions={cookieTypeOptions}
+        isMutationPending={isProfileMutationPending}
+        providers={providers}
+        regionOptions={regionOptions}
+        service={selectedService}
+        vocabulary={vocabulary}
+        onSave={saveServicePatch}
+      />
+      <ServiceVendorPanel
+        dataProcessingLevelOptions={dataProcessingLevelOptions}
+        dataRegionOptions={dataRegionOptions}
+        dataTypeOptions={dataTypeOptions}
+        dpaStatusOptions={dpaStatusOptions}
+        isMutationPending={isVendorMutationPending}
+        service={selectedService}
+        serviceVendorUses={serviceVendorUses}
+        vendors={vendors}
+        vocabulary={vocabulary}
+        onCreate={onCreateVendorUse}
+        onDelete={onDeleteVendorUse}
+        onUpdate={onUpdateVendorUse}
+      />
+    </div>
+  )
+}

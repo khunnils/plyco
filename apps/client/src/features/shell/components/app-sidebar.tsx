@@ -1,13 +1,17 @@
 import {
+  Box,
+  ChevronDown,
+  ChevronRight,
   FileText,
   LayoutDashboard,
   LogOut,
+  Plus,
   ScrollText,
   Tags,
   Users,
   type LucideIcon,
 } from "lucide-react"
-import { type AuthUser } from "@plyco/shared"
+import { type AuthUser, type ServiceProfileInput } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -55,13 +59,25 @@ export const AppSidebar = ({
   activeWorkspaceView,
   companySections,
   onLogout,
+  onAddService,
+  onSelectService,
+  onServicesExpandedChange,
   onWorkspaceViewChange,
+  selectedServiceId,
+  services,
+  servicesExpanded,
   user,
 }: {
   activeWorkspaceView: WorkspaceView
   companySections: CompanySection[]
   onLogout: () => void
+  onAddService: () => void
+  onSelectService: (serviceId: string | null) => void
+  onServicesExpandedChange: (expanded: boolean) => void
   onWorkspaceViewChange: (view: WorkspaceView) => void
+  selectedServiceId: string | null
+  services: ServiceProfileInput[]
+  servicesExpanded: boolean
   user: AuthUser
 }) => (
   <Sidebar>
@@ -83,6 +99,65 @@ export const AppSidebar = ({
         <div className="ml-1 grid gap-1">
           {companySections.map((section) => {
             const Icon = section.icon
+
+            if (section.id === "service") {
+              return (
+                <div className="grid gap-1" key={section.id}>
+                  <SidebarMenuButton
+                    active={activeWorkspaceView === section.view}
+                    onClick={() => {
+                      onWorkspaceViewChange(section.view)
+                      onServicesExpandedChange(!servicesExpanded)
+                    }}
+                  >
+                    <Box className="size-4" />
+                    <span className="min-w-0 flex-1 text-left">
+                      {section.title}
+                    </span>
+                    {servicesExpanded ? (
+                      <ChevronDown className="size-4" />
+                    ) : (
+                      <ChevronRight className="size-4" />
+                    )}
+                  </SidebarMenuButton>
+                  {servicesExpanded ? (
+                    <div className="ml-6 grid gap-1">
+                      {services.map((service, index) => {
+                        const serviceId = service.id ?? null
+                        const selected =
+                          activeWorkspaceView === "companyService" &&
+                          (selectedServiceId === serviceId ||
+                            (!selectedServiceId && index === 0))
+
+                        return (
+                          <SidebarMenuButton
+                            active={selected}
+                            key={service.id ?? `service-${index}`}
+                            onClick={() => {
+                              onSelectService(serviceId)
+                              onWorkspaceViewChange("companyService")
+                            }}
+                          >
+                            <span className="truncate">
+                              {service.serviceName || `Service ${index + 1}`}
+                            </span>
+                          </SidebarMenuButton>
+                        )
+                      })}
+                      <SidebarMenuButton
+                        onClick={() => {
+                          onAddService()
+                          onWorkspaceViewChange("companyService")
+                        }}
+                      >
+                        <Plus className="size-4" />
+                        Add service
+                      </SidebarMenuButton>
+                    </div>
+                  ) : null}
+                </div>
+              )
+            }
 
             return (
               <SidebarMenuButton

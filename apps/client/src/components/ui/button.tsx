@@ -11,16 +11,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-blue-600 text-white hover:bg-blue-700 focus-visible:border-blue-600 focus-visible:ring-blue-100",
+          "bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-900 focus-visible:ring-slate-100",
         outline:
-          "border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:border-blue-600 focus-visible:ring-blue-100 aria-expanded:border-blue-300 aria-expanded:bg-blue-50 aria-expanded:text-blue-700",
+          "border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:border-slate-900 focus-visible:ring-slate-100 aria-expanded:border-slate-300 aria-expanded:bg-slate-50 aria-expanded:text-slate-950",
         secondary:
-          "bg-teal-700 text-white hover:bg-teal-800 focus-visible:border-teal-700 focus-visible:ring-teal-100 aria-expanded:bg-teal-800 aria-expanded:text-white",
+          "bg-slate-700 text-white hover:bg-slate-800 focus-visible:border-slate-700 focus-visible:ring-slate-100 aria-expanded:bg-slate-800 aria-expanded:text-white",
         ghost:
-          "text-slate-700 hover:bg-slate-100 hover:text-slate-950 focus-visible:border-blue-600 focus-visible:ring-blue-100 aria-expanded:bg-slate-100 aria-expanded:text-slate-950",
+          "text-slate-700 hover:bg-slate-100 hover:text-slate-950 focus-visible:border-slate-900 focus-visible:ring-slate-100 aria-expanded:bg-slate-100 aria-expanded:text-slate-950",
         destructive:
           "bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 focus-visible:border-red-500 focus-visible:ring-red-100",
-        link: "border-0 bg-transparent text-blue-700 underline-offset-4 hover:text-blue-800 hover:underline focus-visible:ring-blue-100",
+        link: "border-0 bg-transparent text-slate-900 underline-offset-4 hover:text-slate-800 hover:underline focus-visible:ring-slate-100",
       },
       size: {
         default:

@@ -35,11 +35,9 @@ import {
 } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
-  emptyServiceVendorUseDraft,
   emptyVendorDraft,
   profileFromOrganization,
   providerNamesForSystem,
-  toServiceVendorUseInput,
   toVendorInput,
   vendorInputFromProvider,
 } from "@/features/security-profile/lib/profile"
@@ -51,6 +49,7 @@ import {
   type ProfileFormReturn,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
+import { ServiceManager } from "@/features/security-profile/components/service-manager"
 import { DataHandlingManager } from "@/features/security-profile/components/data-handling-manager"
 import { InfrastructureManager } from "@/features/security-profile/components/infrastructure-manager"
 import { PrivacyManager } from "@/features/security-profile/components/privacy-manager"
@@ -90,7 +89,6 @@ import { SummaryTiles } from "@/features/security-profile/components/summary-til
 import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
 import { VendorForm } from "@/features/vendors/components/vendor-form"
 import { VendorList } from "@/features/vendors/components/vendor-list"
-import { ServiceVendorUseForm } from "@/features/vendors/components/service-vendor-use-form"
 import { ProviderSelector } from "@/features/vendors/components/provider-selector"
 import { ActivitiesManager } from "@/features/vendors/components/activities-manager"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
@@ -548,8 +546,10 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const isVendorMutationPending =
     createVendor.isPending ||
     updateVendor.isPending ||
+    deleteVendor.isPending ||
     createServiceVendorUse.isPending ||
-    updateServiceVendorUse.isPending
+    updateServiceVendorUse.isPending ||
+    deleteServiceVendorUse.isPending
 
   const providersList = providers.data ?? []
   const countriesList = countries.data ?? []
@@ -559,50 +559,33 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
-  const [showVendorUseForm, setShowVendorUseForm] = useState(false)
-  const [editingVendorUseId, setEditingVendorUseId] = useState<string | null>(
-    null
-  )
+  const [isCreatingService, setIsCreatingService] = useState(false)
   const {
     activeWorkspaceView,
     editingCompanySection,
     editingTemplateId,
     editingVendorId,
+    selectedServiceId,
+    servicesExpanded,
     setViewingDocument,
     setActiveWorkspaceView,
     setEditingCompanySection,
+    setSelectedServiceId,
+    setServicesExpanded,
     startEditingTemplate,
     startEditingVendor,
   } = useSecurityUiStore()
   const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
-  const editingVendorUse = serviceVendorUses.find(
-    (vendorUse) => vendorUse.id === editingVendorUseId
-  )
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === editingTemplateId
   )
   const dataTypeOptions = dataTypeOptionsFromProfile(
     defaultValues.dataHandling.dataTypesStored
   )
-  const serviceOptions = (snapshot?.organization?.services ?? []).map(
-    (service, index) => ({
-      value: service.id,
-      label: service.serviceName || `Service ${index + 1}`,
-    })
-  )
   const businessActivityOptions = businessActivities.map((activity) => ({
     value: activity.id,
     label: activity.name,
   }))
-  const vendorOptions = vendors.map((vendor) => ({
-    value: vendor.id,
-    label: vendor.displayName || vendor.name,
-  }))
-  const defaultVendorUseValues = {
-    ...emptyServiceVendorUseDraft,
-    serviceId: serviceOptions[0]?.value ?? "",
-    vendorId: vendorOptions[0]?.value ?? "",
-  }
   const addedSystemTemplateSlugs = new Set(
     templatesData.organizationTemplates.map(
       (template) => template.sourceSystemTemplateSlug
@@ -613,16 +596,70 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   )
   const activeCompanySection = companySectionByView.get(activeWorkspaceView)
   const activeCompanySectionId = activeCompanySection?.id
-  const activeCompanyTitle = activeCompanySection?.title ?? "Profile"
+  const headerService =
+    defaultValues.services.find((service) => service.id === selectedServiceId) ??
+    defaultValues.services[0]
+  const activeCompanyTitle =
+    activeCompanySectionId === "service"
+      ? isCreatingService
+        ? "Add service"
+        : (headerService?.serviceName.trim() || "Service")
+      : activeCompanySection?.title ?? "Profile"
+  const headerServiceIndex = Math.max(
+    defaultValues.services.findIndex((service) => service.id === selectedServiceId),
+    0,
+  )
+  const deleteSelectedService = () => {
+    if (defaultValues.services.length === 1) {
+      return
+    }
+
+    const nextServices = defaultValues.services.filter(
+      (_, index) => index !== headerServiceIndex,
+    )
+    const nextSelectedService =
+      nextServices[
+        Math.min(headerServiceIndex, nextServices.length - 1)
+      ] ?? null
+
+    saveProfile.mutate(
+      {
+        ...defaultValues,
+        services: nextServices,
+      },
+      {
+        onSuccess: () => setSelectedServiceId(nextSelectedService?.id ?? null),
+      },
+    )
+  }
 
   return (
     <SidebarProvider>
       <AppSidebar
         activeWorkspaceView={activeWorkspaceView}
         companySections={companySections}
+        selectedServiceId={selectedServiceId}
+        services={defaultValues.services}
+        servicesExpanded={servicesExpanded}
         user={user}
+        onAddService={() => {
+          setIsCreatingService(true)
+          setSelectedServiceId(null)
+          setServicesExpanded(true)
+        }}
         onLogout={() => logout.mutate()}
-        onWorkspaceViewChange={setActiveWorkspaceView}
+        onSelectService={(serviceId) => {
+          setIsCreatingService(false)
+          setSelectedServiceId(serviceId)
+          setServicesExpanded(true)
+        }}
+        onServicesExpandedChange={setServicesExpanded}
+        onWorkspaceViewChange={(view) => {
+          if (view !== "companyService") {
+            setIsCreatingService(false)
+          }
+          setActiveWorkspaceView(view)
+        }}
       />
 
       <SidebarInset>
@@ -656,6 +693,20 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                           : "Vendor inventory"}
               </h1>
             </div>
+            {activeCompanySectionId === "service" && !isCreatingService ? (
+              <Button
+                className="w-fit"
+                disabled={
+                  defaultValues.services.length === 1 || saveProfile.isPending
+                }
+                type="button"
+                variant="outline"
+                onClick={deleteSelectedService}
+              >
+                <Trash2 />
+                Delete service
+              </Button>
+            ) : null}
           </header>
 
           {workspaceDataError ? (
@@ -688,7 +739,54 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
           {activeCompanySection && activeCompanySectionId && (
             <div className="grid gap-5">
-              {activeCompanySectionId === "dataHandling" ? (
+              {activeCompanySectionId === "service" ? (
+                <ServiceManager
+                  businessActivityOptions={businessActivityOptions}
+                  cookieTypeOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_cookie_types",
+                  )}
+                  customerTypeOptions={codeOptions(
+                    vocabularyData,
+                    "service_customer_types",
+                  )}
+                  dataProcessingLevelOptions={codeOptions(
+                    vocabularyData,
+                    "data_processing_level",
+                  )}
+                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
+                  dataTypeOptions={dataTypeOptions}
+                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
+                  isCreatingService={isCreatingService}
+                  isProfileMutationPending={saveProfile.isPending}
+                  isVendorMutationPending={isVendorMutationPending}
+                  profile={defaultValues}
+                  providers={providersList}
+                  regionOptions={codeOptions(vocabularyData, "regions")}
+                  selectedServiceId={selectedServiceId}
+                  serviceVendorUses={serviceVendorUses}
+                  userTypeOptions={codeOptions(
+                    vocabularyData,
+                    "service_user_types",
+                  )}
+                  vendors={vendors}
+                  vocabulary={vocabularyData}
+                  onCancelCreateService={() => setIsCreatingService(false)}
+                  onCreateVendorUse={(vendorUse) =>
+                    createServiceVendorUse.mutate(vendorUse)
+                  }
+                  onDeleteVendorUse={(vendorUse) =>
+                    deleteServiceVendorUse.mutate(vendorUse.id)
+                  }
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
+                  onSelectService={setSelectedServiceId}
+                  onUpdateVendorUse={(input) =>
+                    updateServiceVendorUse.mutate(input)
+                  }
+                />
+              ) : activeCompanySectionId === "dataHandling" ? (
                 <DataHandlingManager
                   collectionMethodOptions={codeOptions(
                     vocabularyData,
@@ -943,55 +1041,12 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 	                  }}
 	                />
 	              )}
-	              {(showVendorUseForm || editingVendorUse) && (
-	                <ServiceVendorUseForm
-	                  dataProcessingLevelOptions={codeOptions(
-	                    vocabularyData,
-	                    "data_processing_level",
-	                  )}
-	                  dataRegionOptions={codeOptions(vocabularyData, "regions")}
-	                  dataTypeOptions={dataTypeOptions}
-	                  defaultValues={
-	                    editingVendorUse
-	                      ? toServiceVendorUseInput(editingVendorUse)
-	                      : defaultVendorUseValues
-	                  }
-	                  dpaStatusOptions={codeOptions(vocabularyData, "dpa_status")}
-	                  serviceOptions={serviceOptions}
-	                  submitDisabled={isVendorMutationPending}
-	                  submitLabel={editingVendorUse ? "Save" : "Add service use"}
-	                  vendorOptions={vendorOptions}
-	                  onCancel={() => {
-	                    setEditingVendorUseId(null)
-	                    setShowVendorUseForm(false)
-	                  }}
-	                  onSubmit={(vendorUse) => {
-	                    if (editingVendorUse) {
-	                      updateServiceVendorUse.mutate(
-	                        { id: editingVendorUse.id, vendorUse },
-	                        {
-	                          onSuccess: () => {
-	                            setEditingVendorUseId(null)
-	                            setShowVendorUseForm(false)
-	                          },
-	                        }
-	                      )
-	                      return
-	                    }
-
-	                    createServiceVendorUse.mutate(vendorUse)
-	                    setShowVendorUseForm(false)
-	                  }}
-	                />
-	              )}
-	              {!showVendorCatalog &&
-	              !showCustomVendorForm &&
-	              !editingVendor &&
-	              !showVendorUseForm &&
-	              !editingVendorUse ? (
-	                vendors.length > 0 ? (
-	                  <div className="grid gap-4">
-	                    <div className="flex flex-wrap gap-2">
+              {!showVendorCatalog &&
+              !showCustomVendorForm &&
+              !editingVendor ? (
+                vendors.length > 0 ? (
+                  <div className="grid gap-4">
+                    <div className="flex flex-wrap gap-2">
 	                      <Button
 	                        className="w-fit"
 	                        type="button"
@@ -1003,19 +1058,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 	                        <Plus />
 	                        Add vendor
 	                      </Button>
-	                      <Button
-	                        className="w-fit"
-	                        disabled={serviceOptions.length === 0 || vendors.length === 0}
-	                        type="button"
-	                        variant="outline"
-	                        onClick={() => {
-	                          setEditingVendorUseId(null)
-	                          setShowVendorUseForm(true)
-	                        }}
-	                      >
-	                        <Plus />
-	                        Add service use
-	                      </Button>
 	                    </div>
 	                    <VendorList
 	                      countries={countriesList}
@@ -1023,16 +1065,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 	                      vocabulary={vocabularyData}
 	                      vendors={vendors}
 	                      onDelete={(vendor) => deleteVendor.mutate(vendor.id)}
-	                      onDeleteUse={(vendorUse) =>
-	                        deleteServiceVendorUse.mutate(vendorUse.id)
-	                      }
 	                      onEdit={(vendor) => {
 	                        startEditingVendor(vendor.id)
 	                        setShowCustomVendorForm(true)
-	                      }}
-	                      onEditUse={(vendorUse) => {
-	                        setEditingVendorUseId(vendorUse.id)
-	                        setShowVendorUseForm(true)
 	                      }}
 	                    />
                   </div>

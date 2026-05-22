@@ -15,9 +15,7 @@ export const VendorList = ({
   vocabulary,
   vendors,
   onDelete,
-  onDeleteUse,
   onEdit,
-  onEditUse,
 }: {
   countries: Country[]
   serviceVendorUses: ServiceVendorUse[]
@@ -25,8 +23,6 @@ export const VendorList = ({
   vendors: Vendor[]
   onEdit: (vendor: Vendor) => void
   onDelete: (vendor: Vendor) => void
-  onEditUse: (vendorUse: ServiceVendorUse) => void
-  onDeleteUse: (vendorUse: ServiceVendorUse) => void
 }) => {
   if (vendors.length === 0) {
     return (
@@ -117,24 +113,6 @@ export const VendorList = ({
                               "No data types selected"
                           : "No data processing"}
                       </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        onClick={() => onEditUse(vendorUse)}
-                      >
-                        <Pencil />
-                      </Button>
-                      <Button
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        onClick={() => onDeleteUse(vendorUse)}
-                      >
-                        <Trash2 />
-                      </Button>
                     </div>
                   </div>
                 ))}
