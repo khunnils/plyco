@@ -68,6 +68,7 @@ import {
 } from "@/features/templates/hooks/use-templates"
 import {
   useCreateVendor,
+  useCreateVendors,
   useCreateBusinessActivity,
   useCreateServiceVendorUse,
   useDeleteBusinessActivity,
@@ -499,6 +500,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const updateBusinessActivity = useUpdateBusinessActivity()
   const deleteBusinessActivity = useDeleteBusinessActivity()
   const createVendor = useCreateVendor()
+  const createVendors = useCreateVendors()
   const updateVendor = useUpdateVendor()
   const deleteVendor = useDeleteVendor()
   const createServiceVendorUse = useCreateServiceVendorUse()
@@ -545,6 +547,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const isVendorMutationPending =
     createVendor.isPending ||
+    createVendors.isPending ||
     updateVendor.isPending ||
     deleteVendor.isPending ||
     createServiceVendorUse.isPending ||
@@ -949,46 +952,65 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           {activeWorkspaceView === "vendors" && (
 	            <Section
 	              description="Review organization vendors or add common providers from the catalog."
+              action={
+                !showVendorCatalog && !showCustomVendorForm && !editingVendor ? (
+                  <Button
+                    className="w-fit"
+                    type="button"
+                    onClick={() => {
+                      startEditingVendor(null)
+                      setShowVendorCatalog(true)
+                    }}
+                  >
+                    <Plus />
+                    Add vendors
+                  </Button>
+                ) : null
+              }
 	              title="Vendors"
 	            >
 	              {showVendorCatalog ? (
                 <div className="grid gap-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
                     <div>
                       <h3 className="font-semibold text-slate-950">
-                        Add from catalog
+                        Add vendors from catalog
                       </h3>
                       <p className="mt-1 text-sm text-slate-500">
-                        Filter by category, then choose a provider to add it to
+                        Filter by category, then choose providers to add to
                         the organization inventory.
                       </p>
                     </div>
-                    <Button
-                      className="w-fit"
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowVendorCatalog(false)
-                        setShowCustomVendorForm(false)
-                      }}
-                    >
-                      <X />
-                      Cancel
-                    </Button>
                   </div>
                   <ProviderSelector
                     error={providers.error?.message ?? null}
+                    existingProviderNames={vendors.flatMap((vendor) => [
+                      vendor.name,
+                      vendor.displayName,
+                      vendor.providerOrganizationName,
+                    ])}
                     isLoading={providers.isLoading}
                     providers={providersList}
+                    submitDisabled={isVendorMutationPending}
+                    onCancel={() => {
+                      setShowVendorCatalog(false)
+                      setShowCustomVendorForm(false)
+                    }}
                     onChooseOther={() => {
                       startEditingVendor(null)
                       setShowVendorCatalog(false)
                       setShowCustomVendorForm(true)
                     }}
-	                    onChooseProvider={(provider) => {
-	                      createVendor.mutate(vendorInputFromProvider(provider))
-	                      setShowVendorCatalog(false)
-	                      setShowCustomVendorForm(false)
+                    onChooseProviders={(selectedProviders) => {
+                      createVendors.mutate(
+                        selectedProviders.map(vendorInputFromProvider),
+                        {
+                          onSuccess: () => {
+                            setShowVendorCatalog(false)
+                            setShowCustomVendorForm(false)
+                          },
+                        },
+                      )
 	                    }}
                   />
                 </div>
@@ -1046,19 +1068,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
               !editingVendor ? (
                 vendors.length > 0 ? (
                   <div className="grid gap-4">
-                    <div className="flex flex-wrap gap-2">
-	                      <Button
-	                        className="w-fit"
-	                        type="button"
-	                        onClick={() => {
-	                          startEditingVendor(null)
-	                          setShowVendorCatalog(true)
-	                        }}
-	                      >
-	                        <Plus />
-	                        Add vendor
-	                      </Button>
-	                    </div>
 	                    <VendorList
 	                      countries={countriesList}
 	                      serviceVendorUses={serviceVendorUses}
