@@ -82,6 +82,7 @@ export const LoggingMonitoringPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Centralized logs, retention policies, system monitoring ownership, and security alerts."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

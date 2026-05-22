@@ -85,6 +85,7 @@ export const BackupsPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Backup intervals, encryption status, and geographical distribution of recovery points."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

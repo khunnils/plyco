@@ -106,6 +106,7 @@ export const MarketingCommunicationsPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Marketing communication practices, newsletters, and opt-out methodologies."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

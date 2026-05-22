@@ -62,6 +62,7 @@ export const ComplianceDisclosuresPanel = ({
 
   return (
     <ProfilePanelShell
+      description="CCPA, COPPA, and regulatory compliance disclosures, including opt-out mechanism links."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={complianceRows(draft)} />}

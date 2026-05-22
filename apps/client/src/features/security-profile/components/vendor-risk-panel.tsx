@@ -81,6 +81,7 @@ export const VendorRiskPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Procedures for auditing third-party vendors, review cadences, and DPA mandates."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

@@ -104,6 +104,7 @@ export const InfrastructureProvidersPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Hosting providers, databases, CDNs, and other infrastructure services used to deliver applications."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

@@ -104,9 +104,7 @@ export const AppSidebar = ({
               return (
                 <div className="grid gap-1" key={section.id}>
                   <SidebarMenuButton
-                    active={activeWorkspaceView === section.view}
                     onClick={() => {
-                      onWorkspaceViewChange(section.view)
                       onServicesExpandedChange(!servicesExpanded)
                     }}
                   >

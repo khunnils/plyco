@@ -80,6 +80,7 @@ export const CookiePreferencesPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Cookie consent models, policy document references, and visitor tracking options."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows(draft, vocabulary)} />}

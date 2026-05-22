@@ -63,6 +63,7 @@ export const PrivacyRepresentationPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Details of designated Data Protection Officers and legal representatives in foreign jurisdictions."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

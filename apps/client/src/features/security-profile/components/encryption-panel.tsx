@@ -102,6 +102,7 @@ export const EncryptionPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Encryption algorithms, TLS requirements, and cryptographic key management."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

@@ -253,6 +253,7 @@ const AddServiceForm = ({
 
   return (
     <ProfilePanelShell
+      description="Register a new service or application to define its security scope."
       isEditing
       isMutationPending={isMutationPending}
       readOnlyContent={null}
@@ -300,6 +301,7 @@ const ServiceBasicsPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Core identification and public details of the service or product."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
@@ -374,6 +376,7 @@ const ServiceAudiencePanel = ({
 
   return (
     <ProfilePanelShell
+      description="Target user types, customer industries, availability regions, and age restrictions."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
@@ -496,6 +499,7 @@ const ServicePrivacyPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Cookie preferences, analytics and advertising partners, hosting regions, and data residency."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

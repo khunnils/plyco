@@ -114,7 +114,7 @@ export const GeneralAttributesPanel = ({
             name="retentionPolicyExists"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex justify-end gap-2">
           <Button
             disabled={isMutationPending}
             type="button"

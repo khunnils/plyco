@@ -100,6 +100,7 @@ export const IncidentResponsePanel = ({
 
   return (
     <ProfilePanelShell
+      description="Breach notification plans, customer communication processes, and reporting timelines."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={

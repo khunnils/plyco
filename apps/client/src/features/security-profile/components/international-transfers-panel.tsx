@@ -72,6 +72,7 @@ export const InternationalTransfersPanel = ({
 
   return (
     <ProfilePanelShell
+      description="Cross-border data transfer methods, safeguards, and legal mechanisms."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
