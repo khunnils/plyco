@@ -3,11 +3,11 @@ import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => (
-  <div className="min-h-svh bg-slate-50 text-slate-900">{children}</div>
+  <div className="min-h-svh bg-white text-slate-900">{children}</div>
 )
 
 export const Sidebar = ({ children }: { children: ReactNode }) => (
-  <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white md:flex md:flex-col">
+  <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-slate-50 md:flex md:flex-col">
     {children}
   </aside>
 )
@@ -41,7 +41,7 @@ export const SidebarMenuButton = ({
     className={cn(
       "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
       active
-        ? "bg-slate-50 text-slate-900"
+        ? "bg-slate-100 text-slate-900"
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
     )}
     type="button"
