@@ -24,9 +24,7 @@ import {
 import {
   type DocumentSummary,
   type AuthUser,
-  type OrganizationProvider,
   type Provider,
-  type ProviderSystemType,
   type TemplateCatalog,
   type Vocabulary,
   type Country,
@@ -51,6 +49,7 @@ import {
   emptyServiceVendorUseDraft,
   emptyVendorDraft,
   profileFromOrganization,
+  providerNamesForSystem,
   toServiceVendorUseInput,
   toVendorInput,
   vendorInputFromProvider,
@@ -61,12 +60,11 @@ import {
   ProfileDataHandlingFields,
   ProfileForm,
   type ProfileFormReturn,
-  ProfileInfrastructureFields,
-  ProfilePrivacyFields,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
 import { DataHandlingManager } from "@/features/security-profile/components/data-handling-manager"
-import { DataHandlingReadOnlySection } from "@/features/security-profile/components/data-handling-read-only-section"
+import { InfrastructureManager } from "@/features/security-profile/components/infrastructure-manager"
+import { PrivacyManager } from "@/features/security-profile/components/privacy-manager"
 import { useCreateDocument, useDocument, useDocuments, useDownloadDocumentPdf } from "@/features/documents/hooks/use-documents"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
@@ -115,6 +113,7 @@ import {
 import {
   codeLabel,
   codeOptions,
+  codeValueList,
   countryLabel,
   countryOptions,
 } from "@/features/vocabulary/lib/vocabulary"
@@ -216,36 +215,6 @@ const isCompanyView = (
   | "companyData"
   | "companyAccess" => companySectionByView.has(view)
 
-const valueList = (values: string[]) =>
-  values.length > 0 ? values.join(", ") : "Not set"
-
-const codeValueList = (
-  vocabulary: Vocabulary | undefined,
-  codeSetId: string,
-  values: string[],
-) =>
-  values.length > 0
-    ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
-    : "Not set"
-
-const providerNamesForSystem = (
-  organizationProviders: OrganizationProvider[],
-  providers: Provider[],
-  systemType: ProviderSystemType
-) => {
-  const names = organizationProviders
-    .filter((provider) => provider.systemType === systemType)
-    .map((provider) => {
-      const catalogProvider = providers.find(
-        (catalogProvider) => catalogProvider.id === provider.providerId
-      )
-
-      return catalogProvider?.name ?? provider.name ?? provider.providerId
-    })
-
-  return valueList(names)
-}
-
 const boolText = (value: boolean) => (value ? "Yes" : "No")
 
 const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
@@ -307,67 +276,8 @@ const CompanySectionFields = ({
     )
   }
 
-  if (section === "privacy") {
-    return (
-      <ProfilePrivacyFields
-        cookieConsentMechanismOptions={codeOptions(
-          vocabulary,
-          "privacy_cookie_consent_mechanisms",
-        )}
-        form={form}
-        marketingOptOutMethodOptions={codeOptions(
-          vocabulary,
-          "privacy_marketing_opt_out_methods",
-        )}
-        providers={providers}
-        requestMethodOptions={codeOptions(
-          vocabulary,
-          "privacy_request_methods",
-        )}
-        supportedRightOptions={codeOptions(
-          vocabulary,
-          "privacy_supported_rights",
-        )}
-        transferMechanismOptions={codeOptions(
-          vocabulary,
-          "privacy_transfer_mechanisms",
-        )}
-      />
-    )
-  }
-
-  if (section === "infrastructure") {
-    return (
-      <ProfileInfrastructureFields
-        form={form}
-        providers={providers}
-        securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
-        securityCustomerNotificationProcessOptions={codeOptions(
-          vocabulary,
-          "security_customer_notification_processes",
-        )}
-        securityEncryptionAlgorithmOptions={codeOptions(
-          vocabulary,
-          "security_encryption_algorithms",
-        )}
-        securityKeyManagementProviderOptions={codeOptions(
-          vocabulary,
-          "security_key_management_providers",
-        )}
-        securityMonitoringOwnerOptions={codeOptions(
-          vocabulary,
-          "security_monitoring_owners",
-        )}
-        securityNotificationTimelineOptions={codeOptions(
-          vocabulary,
-          "security_notification_timelines",
-        )}
-        securityTlsVersionOptions={codeOptions(
-          vocabulary,
-          "security_tls_versions",
-        )}
-      />
-    )
+  if (section === "privacy" || section === "infrastructure") {
+    return null
   }
 
   if (section === "dataHandling") {
@@ -407,178 +317,12 @@ const CompanyReadOnlySection = ({
     return null
   }
 
-  if (section === "dataHandling") {
-    return (
-      <DataHandlingReadOnlySection
-        profile={profile}
-        vocabulary={vocabulary}
-        onEdit={onEdit}
-      />
-    )
-  }
-
-  if (section === "privacy") {
-    const rightsRows: Array<[string, string | number]> = [
-      [
-        "Supported rights",
-        codeValueList(
-          vocabulary,
-          "privacy_supported_rights",
-          profile.privacy.supportedRights,
-        ),
-      ],
-      [
-        "Request methods",
-        codeValueList(
-          vocabulary,
-          "privacy_request_methods",
-          profile.privacy.requestMethods,
-        ),
-      ],
-      [
-        "Response timeline",
-        profile.privacy.responseTimelineDays === 0
-          ? "Not set"
-          : profile.privacy.responseTimelineDays,
-      ],
-      [
-        "Identity verification",
-        boolText(profile.privacy.identityVerificationRequired),
-      ],
-      [
-        "Authorized agent",
-        boolText(profile.privacy.authorizedAgentSupported),
-      ],
-      ["Appeal process", boolText(profile.privacy.appealProcessExists)],
-    ]
-    const cookieRows: Array<[string, string | number]> = [
-      [
-        "Cookie consent mechanism",
-        profile.privacy.cookieConsentMechanism
-          ? codeLabel(
-              vocabulary,
-              "privacy_cookie_consent_mechanisms",
-              profile.privacy.cookieConsentMechanism,
-            )
-          : "Not set",
-      ],
-      ["Do Not Track response", boolText(profile.privacy.doNotTrackResponse)],
-      [
-        "Global Privacy Control",
-        boolText(profile.privacy.globalPrivacyControlSupported),
-      ],
-    ]
-    const marketingRows: Array<[string, string | number]> = [
-      [
-        "Marketing emails",
-        boolText(profile.privacy.sendsMarketingEmails),
-      ],
-      [
-        "Marketing opt-out method",
-        profile.privacy.marketingOptOutMethod
-          ? codeLabel(
-              vocabulary,
-              "privacy_marketing_opt_out_methods",
-              profile.privacy.marketingOptOutMethod,
-            )
-          : "Not set",
-      ],
-      [
-        "Transactional emails",
-        boolText(profile.privacy.transactionalEmailsSent),
-      ],
-      [
-        "Newsletter provider",
-        providerNamesForSystem(
-          profile.privacy.organizationProviders,
-          providers,
-          "newsletter",
-        ),
-      ],
-    ]
-    const internationalTransferRows: Array<[string, string | number]> = [
-      [
-        "Cross-border transfers",
-        boolText(profile.privacy.crossBorderTransfers),
-      ],
-      [
-        "Transfer mechanisms",
-        codeValueList(
-          vocabulary,
-          "privacy_transfer_mechanisms",
-          profile.privacy.transferMechanisms,
-        ),
-      ],
-    ]
-    const complianceRows: Array<[string, string | number]> = [
-      [
-        "Sells or shares data (CCPA)",
-        boolText(profile.privacy.sellsOrSharesData),
-      ],
-      ["Do Not Sell link", profile.privacy.doNotSellLink || "Not set"],
-      [
-        "Automated decision making",
-        boolText(profile.privacy.usesAutomatedDecisionMaking),
-      ],
-    ]
-    const officerRows: Array<[string, string | number]> = [
-      ["DPO name", profile.privacy.dpoName || "Not set"],
-      ["DPO email", profile.privacy.dpoEmail || "Not set"],
-      ["EU representative", profile.privacy.euRepresentativeName || "Not set"],
-      [
-        "EU representative address",
-        profile.privacy.euRepresentativeAddress || "Not set",
-      ],
-    ]
-
-    return (
-      <div className="grid gap-5">
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Privacy Rights & Request Handling
-          </h3>
-          <DetailGrid rows={rightsRows} />
-        </section>
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Cookies / Tracking / Analytics
-          </h3>
-          <DetailGrid rows={cookieRows} />
-        </section>
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Marketing & Communications
-          </h3>
-          <DetailGrid rows={marketingRows} />
-        </section>
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            International Transfers
-          </h3>
-          <DetailGrid rows={internationalTransferRows} />
-        </section>
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Compliance & Disclosures
-          </h3>
-          <DetailGrid rows={complianceRows} />
-        </section>
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold text-slate-900">
-            Privacy Officers & Representation
-          </h3>
-          <DetailGrid rows={officerRows} />
-        </section>
-        <Button
-          className="w-fit"
-          type="button"
-          variant="outline"
-          onClick={onEdit}
-        >
-          Edit
-        </Button>
-      </div>
-    )
+  if (
+    section === "dataHandling" ||
+    section === "privacy" ||
+    section === "infrastructure"
+  ) {
+    return null
   }
 
   if (section === "service") {
@@ -682,7 +426,11 @@ const CompanyReadOnlySection = ({
   const rowsBySection: Record<
     Exclude<
       CompanySectionId,
-      "activities" | "dataHandling" | "privacy" | "service"
+      | "activities"
+      | "dataHandling"
+      | "infrastructure"
+      | "privacy"
+      | "service"
     >,
     Array<[string, string | number]>
   > = {
@@ -719,173 +467,6 @@ const CompanyReadOnlySection = ({
       ],
       ["Handles PII", boolText(profile.company.handlesPii)],
       ["Sensitive data", boolText(profile.company.handlesSensitiveData)],
-    ],
-    infrastructure: [
-      [
-        "Cloud providers",
-        providerNamesForSystem(
-          profile.infrastructure.organizationProviders,
-          providers,
-          "cloud",
-        ),
-      ],
-      [
-        "Source control",
-        providerNamesForSystem(
-          profile.infrastructure.organizationProviders,
-          providers,
-          "source_control",
-        ),
-      ],
-      [
-        "Auth provider",
-        providerNamesForSystem(
-          profile.infrastructure.organizationProviders,
-          providers,
-          "auth",
-        ),
-      ],
-      [
-        "Password manager",
-        providerNamesForSystem(
-          profile.infrastructure.organizationProviders,
-          providers,
-          "password_manager",
-        ),
-      ],
-      ["MFA enabled", boolText(profile.infrastructure.mfaEnabled)],
-      [
-        "Encrypted devices",
-        boolText(profile.infrastructure.encryptedDevicesRequired),
-      ],
-      ["Backups", boolText(profile.infrastructure.backupsEnabled)],
-      [
-        "Centralized logging",
-        boolText(profile.infrastructure.centralizedLoggingEnabled),
-      ],
-      [
-        "At-rest algorithm",
-        profile.infrastructure.atRestAlgorithm
-          ? codeLabel(
-              vocabulary,
-              "security_encryption_algorithms",
-              profile.infrastructure.atRestAlgorithm,
-            )
-          : "Not set",
-      ],
-      [
-        "Minimum TLS version",
-        profile.infrastructure.inTransitMinimumTlsVersion
-          ? codeLabel(
-              vocabulary,
-              "security_tls_versions",
-              profile.infrastructure.inTransitMinimumTlsVersion,
-            )
-          : "Not set",
-      ],
-      [
-        "Key management",
-        profile.infrastructure.keyManagementProvider
-          ? codeLabel(
-              vocabulary,
-              "security_key_management_providers",
-              profile.infrastructure.keyManagementProvider,
-            )
-          : "Not set",
-      ],
-      ["Log retention days", profile.infrastructure.logRetentionDays],
-      [
-        "Security monitoring owner",
-        profile.infrastructure.securityMonitoringOwner
-          ? codeLabel(
-              vocabulary,
-              "security_monitoring_owners",
-              profile.infrastructure.securityMonitoringOwner,
-            )
-          : "Not set",
-      ],
-      [
-        "Scanning cadence",
-        profile.infrastructure.scanningCadence
-          ? codeLabel(
-              vocabulary,
-              "security_cadences",
-              profile.infrastructure.scanningCadence,
-            )
-          : "Not set",
-      ],
-      [
-        "Critical patch SLA days",
-        profile.infrastructure.patchingSlaCriticalDays,
-      ],
-      ["High patch SLA days", profile.infrastructure.patchingSlaHighDays],
-      [
-        "Incident response plan",
-        boolText(profile.infrastructure.incidentResponsePlanExists),
-      ],
-      [
-        "Incident notification timeline",
-        profile.infrastructure.incidentNotificationTimeline
-          ? codeLabel(
-              vocabulary,
-              "security_notification_timelines",
-              profile.infrastructure.incidentNotificationTimeline,
-            )
-          : "Not set",
-      ],
-      [
-        "Customer notification process",
-        profile.infrastructure.customerNotificationProcess
-          ? codeLabel(
-              vocabulary,
-              "security_customer_notification_processes",
-              profile.infrastructure.customerNotificationProcess,
-            )
-          : "Not set",
-      ],
-      [
-        "Incident response last tested",
-        profile.infrastructure.incidentResponseLastTestedDate || "Not set",
-      ],
-      [
-        "Backup cadence",
-        profile.infrastructure.backupCadence
-          ? codeLabel(
-              vocabulary,
-              "security_cadences",
-              profile.infrastructure.backupCadence,
-            )
-          : "Not set",
-      ],
-      ["Backup retention days", profile.infrastructure.backupRetentionDays],
-      [
-        "Restore testing cadence",
-        profile.infrastructure.restoreTestingCadence
-          ? codeLabel(
-              vocabulary,
-              "security_cadences",
-              profile.infrastructure.restoreTestingCadence,
-            )
-          : "Not set",
-      ],
-      [
-        "Vendor review required",
-        boolText(profile.infrastructure.vendorReviewRequired),
-      ],
-      [
-        "Vendor review cadence",
-        profile.infrastructure.vendorReviewCadence
-          ? codeLabel(
-              vocabulary,
-              "security_cadences",
-              profile.infrastructure.vendorReviewCadence,
-            )
-          : "Not set",
-      ],
-      [
-        "DPA required for processors",
-        boolText(profile.infrastructure.dpaRequiredForProcessors),
-      ],
     ],
     access: [
       ["Least privilege", boolText(profile.access.leastPrivilege)],
@@ -1234,6 +815,78 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   subjectTypeOptions={codeOptions(
                     vocabularyData,
                     "subject_types",
+                  )}
+                  vocabulary={vocabularyData}
+                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                />
+              ) : activeCompanySectionId === "privacy" ? (
+                <PrivacyManager
+                  cookieConsentMechanismOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_cookie_consent_mechanisms",
+                  )}
+                  isMutationPending={saveProfile.isPending}
+                  marketingOptOutMethodOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_marketing_opt_out_methods",
+                  )}
+                  newsletterProviderOptions={providersList
+                    .filter((provider) =>
+                      provider.systemTypes.includes("newsletter"),
+                    )
+                    .map((provider) => ({
+                      value: provider.id,
+                      label: provider.name,
+                    }))}
+                  profile={defaultValues}
+                  providers={providersList}
+                  requestMethodOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_request_methods",
+                  )}
+                  supportedRightOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_supported_rights",
+                  )}
+                  transferMechanismOptions={codeOptions(
+                    vocabularyData,
+                    "privacy_transfer_mechanisms",
+                  )}
+                  vocabulary={vocabularyData}
+                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                />
+              ) : activeCompanySectionId === "infrastructure" ? (
+                <InfrastructureManager
+                  isMutationPending={saveProfile.isPending}
+                  profile={defaultValues}
+                  providers={providersList}
+                  securityCadenceOptions={codeOptions(
+                    vocabularyData,
+                    "security_cadences",
+                  )}
+                  securityCustomerNotificationProcessOptions={codeOptions(
+                    vocabularyData,
+                    "security_customer_notification_processes",
+                  )}
+                  securityEncryptionAlgorithmOptions={codeOptions(
+                    vocabularyData,
+                    "security_encryption_algorithms",
+                  )}
+                  securityKeyManagementProviderOptions={codeOptions(
+                    vocabularyData,
+                    "security_key_management_providers",
+                  )}
+                  securityMonitoringOwnerOptions={codeOptions(
+                    vocabularyData,
+                    "security_monitoring_owners",
+                  )}
+                  securityNotificationTimelineOptions={codeOptions(
+                    vocabularyData,
+                    "security_notification_timelines",
+                  )}
+                  securityTlsVersionOptions={codeOptions(
+                    vocabularyData,
+                    "security_tls_versions",
                   )}
                   vocabulary={vocabularyData}
                   onSaveProfile={(profile) => saveProfile.mutate(profile)}

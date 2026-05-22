@@ -26,6 +26,15 @@ export const codeLabel = (
     .find((codeSet) => codeSet.codeSetId === codeSetId)
     ?.codes.find((code) => code.codeId === codeId)?.name ?? codeId
 
+export const codeValueList = (
+  vocabulary: Vocabulary | undefined,
+  codeSetId: string,
+  values: string[],
+) =>
+  values.length > 0
+    ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
+    : "Not set"
+
 export const countryLabel = (
   countries: Country[] | undefined,
   code: string,

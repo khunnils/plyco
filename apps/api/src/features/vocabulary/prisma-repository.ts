@@ -128,30 +128,6 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
           })
           organizationCodeSetId = created.id
           existingBySystemId.set(codeSet.id, organizationCodeSetId)
-          continue
-        }
-
-        const existingCodes = await tx.organizationCode.findMany({
-          where: { organizationCodeSetId },
-          select: { codeId: true },
-        })
-        const existingCodeIds = new Set(existingCodes.map((c) => c.codeId))
-
-        const missingCodes = codeSet.codes.filter(
-          (code) => !existingCodeIds.has(code.codeId),
-        )
-
-        if (missingCodes.length > 0) {
-          await tx.organizationCode.createMany({
-            data: missingCodes.map((code) => ({
-              organizationCodeSetId,
-              systemCodeId: code.id,
-              codeId: code.codeId,
-              name: code.name,
-              sortOrder: code.sortOrder,
-              active: code.active,
-            })),
-          })
         }
       }
     })

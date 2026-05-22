@@ -5,8 +5,10 @@ import {
   emptyInfrastructureProfile,
   emptyPrivacyProfile,
   emptyServiceProfile,
+  type OrganizationProvider,
   type OrganizationSecurityProfile,
   type Provider,
+  type ProviderSystemType,
   type ServiceVendorUse,
   type ServiceVendorUseInput,
   type Vendor,
@@ -175,6 +177,27 @@ const providerCategory = (provider: Provider): VendorInput["category"] => {
   }
 
   return ""
+}
+
+const valueList = (values: string[]) =>
+  values.length > 0 ? values.join(", ") : "Not set"
+
+export const providerNamesForSystem = (
+  organizationProviders: OrganizationProvider[],
+  providers: Provider[],
+  systemType: ProviderSystemType,
+) => {
+  const names = organizationProviders
+    .filter((provider) => provider.systemType === systemType)
+    .map((provider) => {
+      const catalogProvider = providers.find(
+        (catalogProvider) => catalogProvider.id === provider.providerId,
+      )
+
+      return catalogProvider?.name ?? provider.name ?? provider.providerId
+    })
+
+  return valueList(names)
 }
 
 export const vendorInputFromProvider = (
