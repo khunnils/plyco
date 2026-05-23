@@ -28,7 +28,7 @@ export const ProfilePanelShell = ({
 }) => {
   if (isEditing) {
     return (
-      <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm">
         <div>
           <h3 className="text-base font-semibold text-slate-950">{title}</h3>
           {description ? (
@@ -60,18 +60,18 @@ export const ProfilePanelShell = ({
   }
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
+        <div className="">
           <h3 className="text-base font-semibold text-slate-950">{title}</h3>
           {description ? (
             <p className="mt-1 text-sm text-slate-500">{description}</p>
           ) : null}
         </div>
         <Button
-          className="w-fit"
+          className="align-self-end"
           type="button"
-          variant="outline"
+          variant="link"
           onClick={onEdit}
         >
           Edit
@@ -90,7 +90,7 @@ export const ProfilePanelDetailGrid = ({
   <dl className="grid gap-3 sm:grid-cols-2">
     {rows.map(([label, value]) => (
       <div
-        className="rounded-md border border-slate-200 bg-slate-50 p-3"
+        className="border border-slate-200 bg-slate-50 p-3"
         key={label}
       >
         <dt className="text-xs font-medium text-slate-500">{label}</dt>

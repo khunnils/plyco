@@ -54,7 +54,7 @@ export const PrivacyManager = ({
   }
 
   return (
-    <div className="grid gap-5">
+    <div className="grid gap-10">
       <PrivacyRightsPanel
         isMutationPending={isMutationPending}
         privacy={profile.privacy}

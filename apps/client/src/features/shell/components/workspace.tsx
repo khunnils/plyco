@@ -708,7 +708,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
       />
 
       <SidebarInset>
-        <main className="grid gap-6 px-4 py-6 md:px-8">
+        <main className="grid gap-6 px-4 py-6 md:px-12">
           <header className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
             <div>
               <p className="text-sm font-semibold text-blue-700">
