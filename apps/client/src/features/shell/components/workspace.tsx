@@ -37,12 +37,12 @@ import {
 } from "@/features/security-profile/lib/profile"
 import {
   ProfileAccessFields,
-  ProfileCompanyFields,
   ProfileDataHandlingFields,
   ProfileForm,
   type ProfileFormReturn,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
+import { CompanyProfilePage } from "@/features/security-profile/pages/company-profile-page"
 import { DataHandlingProfilePage } from "@/features/security-profile/pages/data-handling-profile-page"
 import { InfrastructureProfilePage } from "@/features/security-profile/pages/infrastructure-profile-page"
 import { PrivacyProfilePage } from "@/features/security-profile/pages/privacy-profile-page"
@@ -104,7 +104,6 @@ import {
   codeOptions,
   codeValueList,
   countryLabel,
-  countryOptions,
 } from "@/features/vocabulary/lib/vocabulary"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { VocabularyManager } from "@/features/vocabulary/components/vocabulary-manager"
@@ -234,13 +233,11 @@ const DetailGrid = ({ rows }: { rows: Array<[string, string | number | null]> })
 
 const CompanySectionFields = ({
   businessActivityOptions,
-  countries,
   form,
   section,
   vocabulary,
 }: {
   businessActivityOptions: Option[]
-  countries: Country[]
   form: ProfileFormReturn
   section: CompanySectionId
   vocabulary: Vocabulary | undefined
@@ -250,15 +247,7 @@ const CompanySectionFields = ({
   }
 
   if (section === "profile") {
-    return (
-      <ProfileCompanyFields
-        complianceGoalOptions={codeOptions(vocabulary, "compliance_goals")}
-        countryOptions={countryOptions(countries)}
-        form={form}
-        industryOptions={codeOptions(vocabulary, "industries")}
-        regionOptions={codeOptions(vocabulary, "regions")}
-      />
-    )
+    return null
   }
 
   if (section === "service") {
@@ -777,7 +766,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   vocabulary={vocabularyData}
                   onEdit={() => {
                     navigate("/company/profile")
-                    setEditingCompanySection("profile")
                   }}
                 />
               </Section>
@@ -857,6 +845,16 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                     saveProfile.mutate(profile, { onSuccess })
                   }
                 />
+              ) : activeCompanySectionId === "profile" ? (
+                <CompanyProfilePage
+                  countries={countriesList}
+                  isMutationPending={saveProfile.isPending}
+                  profile={defaultValues}
+                  vocabulary={vocabularyData}
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
+                />
               ) : (
                 [activeCompanySection].map((section) => (
                   <Section
@@ -922,7 +920,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                           <>
                             <CompanySectionFields
                               businessActivityOptions={businessActivityOptions}
-                              countries={countriesList}
                               form={form}
                               section={section.id}
                               vocabulary={vocabularyData}
