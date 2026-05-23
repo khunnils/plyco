@@ -8,13 +8,21 @@ import {
   type PrivacyProfile,
   type ServiceProfile,
   type SecurityProgramSnapshot,
-  type ServiceVendorUse,
+  type ServiceProviderUsage,
   type StoredDataType,
   type OrganizationMember,
   type Template,
-  type Vendor,
+  type OrganizationProvider,
   type Vocabulary,
 } from "@plyco/shared"
+
+type ProviderContextGroup = {
+  all: Array<Record<string, unknown>>
+  uses: Array<Record<string, unknown>>
+  dataProcessors: Array<Record<string, unknown>>
+  subprocessors: Array<Record<string, unknown>>
+  byService: Array<Record<string, unknown>>
+}
 
 export type NormalizedTemplateContext = {
   organization: Record<string, unknown>
@@ -30,13 +38,8 @@ export type NormalizedTemplateContext = {
   infrastructure: Record<string, unknown>
   dataHandling: Record<string, unknown>
   access: Record<string, unknown>
-  vendors: {
-    all: Array<Record<string, unknown>>
-    uses: Array<Record<string, unknown>>
-    dataProcessors: Array<Record<string, unknown>>
-    subprocessors: Array<Record<string, unknown>>
-    byService: Array<Record<string, unknown>>
-  }
+  vendors: ProviderContextGroup
+  providers: ProviderContextGroup
 }
 
 export class ReportContextBuilder {
@@ -53,16 +56,28 @@ export class ReportContextBuilder {
           name: organization.company.companyName,
         }
       : {}
-    const vendors = snapshot.vendors.map((vendor) => this.vendorContext(vendor))
-    const vendorUses = (snapshot.serviceVendorUses ?? []).map((vendorUse) =>
-      this.vendorUseContext(vendorUse, vendors),
+    const legacySnapshot = snapshot as SecurityProgramSnapshot & {
+      vendors?: SecurityProgramSnapshot["organizationProviders"]
+      serviceVendorUses?: SecurityProgramSnapshot["serviceProviderUsage"]
+    }
+    const providers = (
+      legacySnapshot.organizationProviders ??
+      legacySnapshot.vendors ??
+      []
+    ).map((provider) =>
+      this.providerContext(provider),
     )
+    const providerUsage = (
+      legacySnapshot.serviceProviderUsage ??
+      legacySnapshot.serviceVendorUses ??
+      []
+    ).map((usage) => this.providerUsageContext(usage, providers))
     const services = organization
       ? organization.services.map((service) =>
           this.serviceContext(
             service,
             snapshot.businessActivities,
-            vendorUses,
+            providerUsage,
             organization.dataHandling.dataTypesStored,
             vocabulary,
           ),
@@ -92,19 +107,30 @@ export class ReportContextBuilder {
       infrastructure: organization?.infrastructure ?? {},
       dataHandling: organization?.dataHandling ?? {},
       access: organization?.access ?? {},
+      providers: this.providerGroups(services, providers, providerUsage),
       vendors: {
-        all: vendors,
-        uses: vendorUses,
-        dataProcessors: vendorUses.filter((vendorUse) =>
+        ...this.providerGroups(services, providers, providerUsage),
+      },
+    }
+  }
+
+  private providerGroups(
+    services: Array<Record<string, unknown>>,
+    providers: Array<Record<string, unknown>>,
+    providerUsage: Array<Record<string, unknown>>,
+  ) {
+    return {
+      all: providers,
+      uses: providerUsage,
+      dataProcessors: providerUsage.filter((usage) =>
           ["limited", "subprocessor"].includes(
-            String(vendorUse.dataProcessingLevel),
+            String(usage.dataProcessingLevel),
           ),
         ),
-        subprocessors: vendorUses.filter(
-          (vendorUse) => vendorUse.dataProcessingLevel === "subprocessor",
+      subprocessors: providerUsage.filter(
+          (usage) => usage.dataProcessingLevel === "subprocessor",
         ),
-        byService: this.vendorsByService(services, vendorUses),
-      },
+      byService: this.providersByService(services, providerUsage),
     }
   }
 
@@ -133,20 +159,26 @@ export class ReportContextBuilder {
   private serviceContext(
     service: ServiceProfile,
     activities: BusinessActivity[],
-    vendorUses: Array<Record<string, unknown>>,
+    providerUsage: Array<Record<string, unknown>>,
     dataTypes: StoredDataType[],
     vocabulary?: Vocabulary,
   ) {
-    const serviceVendorUses = vendorUses.filter(
-      (vendorUse) => vendorUse.serviceId === service.id,
+    const serviceProviderUsage = providerUsage.filter(
+      (usage) => usage.serviceId === service.id,
+    )
+    const analyticsProviders = serviceProviderUsage.filter(
+      (usage) => usage.systemType === "analytics",
+    )
+    const advertisingProviders = serviceProviderUsage.filter(
+      (usage) => usage.systemType === "advertising",
     )
     const serviceActivities = activities
       .filter((activity) => service.businessActivityIds.includes(activity.id))
       .map((activity) => this.businessActivityContext(activity, vocabulary))
     const dataTypeNames = new Set(
-      serviceVendorUses.flatMap((vendorUse) =>
-        Array.isArray(vendorUse.dataProcessed)
-          ? vendorUse.dataProcessed.map(String)
+      serviceProviderUsage.flatMap((usage) =>
+        Array.isArray(usage.dataProcessed)
+          ? usage.dataProcessed.map(String)
           : [],
       ),
     )
@@ -187,16 +219,16 @@ export class ReportContextBuilder {
           service.privacy.cookieTypes,
         ),
         analyticsProviders: this.providerNames(
-          service.privacy.analyticsProviders,
+          analyticsProviders,
         ),
         analyticsProviderIds: this.providerIds(
-          service.privacy.analyticsProviders,
+          analyticsProviders,
         ),
         advertisingProviders: this.providerNames(
-          service.privacy.advertisingProviders,
+          advertisingProviders,
         ),
         advertisingProviderIds: this.providerIds(
-          service.privacy.advertisingProviders,
+          advertisingProviders,
         ),
         primaryHostingRegion: service.privacy.primaryHostingRegion,
         primaryHostingRegionLabel: service.privacy.primaryHostingRegion
@@ -213,10 +245,12 @@ export class ReportContextBuilder {
           service.privacy.dataResidencyOptions,
         ),
       },
-      vendorUses: serviceVendorUses,
-      vendors: serviceVendorUses,
-      subprocessors: serviceVendorUses.filter(
-        (vendorUse) => vendorUse.dataProcessingLevel === "subprocessor",
+      providerUsage: serviceProviderUsage,
+      vendorUses: serviceProviderUsage,
+      providers: serviceProviderUsage,
+      vendors: serviceProviderUsage,
+      subprocessors: serviceProviderUsage.filter(
+        (usage) => usage.dataProcessingLevel === "subprocessor",
       ),
       dataTypes: dataTypes.filter((dataType) =>
         dataTypeNames.has(String(dataType.name)),
@@ -283,12 +317,16 @@ export class ReportContextBuilder {
     }
   }
 
-  private providerIds(providers: PrivacyProfile["organizationProviders"]) {
-    return providers.map((provider) => provider.providerId)
+  private providerIds(providers: Array<Record<string, unknown>>) {
+    return providers.map((provider) =>
+      String(provider.providerId ?? provider.organizationProviderId ?? ""),
+    )
   }
 
-  private providerNames(providers: PrivacyProfile["organizationProviders"]) {
-    return providers.map((provider) => provider.name ?? provider.providerId)
+  private providerNames(providers: Array<Record<string, unknown>>) {
+    return providers.map((provider) =>
+      String(provider.name ?? provider.providerName ?? provider.providerId ?? ""),
+    )
   }
 
   private securityContext(
@@ -422,48 +460,51 @@ export class ReportContextBuilder {
     return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : ""
   }
 
-  private vendorContext(vendor: Vendor) {
+  private providerContext(provider: OrganizationProvider) {
     return {
-      id: vendor.id,
-      name: vendor.name,
-      legalName: vendor.legalName,
-      displayName: vendor.displayName,
-      providerOrganizationName: vendor.providerOrganizationName,
-      providerOrganizationLegalName: vendor.providerOrganizationLegalName,
-      privacyPolicyUrl: vendor.privacyPolicyUrl,
-      dpaUrl: vendor.dpaUrl,
-      securityPageUrl: vendor.securityPageUrl,
-      category: vendor.category,
-      countryOfRegistration: vendor.countryOfRegistration,
-      hasSubprocessors: vendor.hasSubprocessors,
-      criticality: vendor.criticality,
-      owner: vendor.owner,
-      notes: vendor.notes,
+      id: provider.id,
+      providerId: provider.providerId,
+      systemTypes: provider.systemTypes,
+      name: provider.name,
+      legalName: provider.legalName,
+      category: provider.category,
+      countryOfRegistration: provider.countryOfRegistration,
+      criticality: provider.criticality,
+      notes: provider.notes,
     }
   }
 
-  private vendorUseContext(
-    vendorUse: ServiceVendorUse,
-    vendors: Array<Record<string, unknown>>,
+  private providerUsageContext(
+    providerUsage: ServiceProviderUsage,
+    providers: Array<Record<string, unknown>>,
   ) {
-    const vendor =
-      vendors.find((currentVendor) => currentVendor.id === vendorUse.vendorId) ??
+    const legacyUsage = providerUsage as ServiceProviderUsage & {
+      vendorName?: string
+    }
+    const provider =
+      providers.find(
+        (currentProvider) =>
+          currentProvider.id === providerUsage.organizationProviderId,
+      ) ??
       {}
 
     return {
-      ...vendor,
-      id: vendorUse.id,
-      serviceId: vendorUse.serviceId,
-      serviceName: vendorUse.serviceName,
-      vendorId: vendorUse.vendorId,
-      vendorName: vendorUse.vendorName,
-      name: vendorUse.vendorName,
-      purpose: vendorUse.purpose,
-      dataProcessingLevel: vendorUse.dataProcessingLevel,
-      dataProcessed: vendorUse.dataProcessed,
-      dpaStatus: vendorUse.dpaStatus,
-      dataRegions: vendorUse.dataRegions,
-      notes: vendorUse.notes || vendor.notes,
+      ...provider,
+      id: providerUsage.id,
+      serviceId: providerUsage.serviceId,
+      serviceName: providerUsage.serviceName,
+      organizationProviderId: providerUsage.organizationProviderId,
+      vendorId: providerUsage.organizationProviderId,
+      providerName: providerUsage.providerName || legacyUsage.vendorName || "",
+      vendorName: providerUsage.providerName || legacyUsage.vendorName || "",
+      systemType: providerUsage.systemType,
+      name: providerUsage.providerName || legacyUsage.vendorName || "",
+      purpose: providerUsage.purpose,
+      dataProcessingLevel: providerUsage.dataProcessingLevel,
+      dataProcessed: providerUsage.dataProcessed,
+      dpaStatus: providerUsage.dpaStatus,
+      dataRegions: providerUsage.dataRegions,
+      notes: providerUsage.notes || provider.notes,
     }
   }
 
@@ -494,14 +535,15 @@ export class ReportContextBuilder {
     }
   }
 
-  private vendorsByService(
+  private providersByService(
     services: Array<Record<string, unknown>>,
-    vendors: Array<Record<string, unknown>>,
+    providers: Array<Record<string, unknown>>,
   ) {
     return services.map((service) => ({
       serviceId: service.id,
       serviceName: service.name,
-      vendors: vendors.filter((vendor) => vendor.serviceId === service.id),
+      providers: providers.filter((provider) => provider.serviceId === service.id),
+      vendors: providers.filter((provider) => provider.serviceId === service.id),
     }))
   }
 }

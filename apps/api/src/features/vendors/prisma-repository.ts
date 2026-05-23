@@ -1,28 +1,28 @@
 import {
   mapBusinessActivityRecord,
-  mapServiceVendorUseRecord,
-  mapVendorRecord,
+  mapServiceProviderUsageRecord,
+  mapOrganizationProviderRecord,
   prisma,
   type PrismaClient,
 } from "@plyco/db"
 import {
   type BusinessActivity,
   type BusinessActivityInput,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
-  type VendorInput,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
+  type OrganizationProviderInput,
 } from "@plyco/shared"
 
 import { ApiError } from "../../errors.js"
 import { type OrganizationRepository } from "../organizations/repository.js"
-import { type VendorRepository } from "./repository.js"
+import { type ProviderRepository } from "./repository.js"
 
-const SERVICE_VENDOR_USE_INCLUDE = {
+const SERVICE_PROVIDER_USAGE_INCLUDE = {
   service: {
     select: { serviceName: true },
   },
-  vendor: {
+  organizationProvider: {
     select: { name: true },
   },
   dataTypes: {
@@ -31,7 +31,7 @@ const SERVICE_VENDOR_USE_INCLUDE = {
   },
 } as const
 
-export class PrismaVendorRepository implements VendorRepository {
+export class PrismaVendorRepository implements ProviderRepository {
   constructor(
     private readonly organizationRepository: OrganizationRepository,
     private readonly client: PrismaClient = prisma,
@@ -96,32 +96,35 @@ export class PrismaVendorRepository implements VendorRepository {
     return true
   }
 
-  async listVendors(organizationId: string): Promise<Vendor[]> {
-    const vendors = await this.client.vendorMaster.findMany({
+  async listOrganizationProviders(organizationId: string): Promise<OrganizationProvider[]> {
+    const providers = await this.client.organizationProvider.findMany({
       where: { organizationId },
       orderBy: { createdAt: "asc" },
     })
 
-    return vendors.map(mapVendorRecord)
+    return providers.map(mapOrganizationProviderRecord)
   }
 
-  async createVendor(organizationId: string, input: VendorInput): Promise<Vendor> {
-    const vendor = await this.client.vendorMaster.create({
+  async createOrganizationProvider(
+    organizationId: string,
+    input: OrganizationProviderInput,
+  ): Promise<OrganizationProvider> {
+    const provider = await this.client.organizationProvider.create({
       data: {
         organizationId,
-        ...this.vendorData(input),
+        ...this.organizationProviderData(input),
       },
     })
 
-    return mapVendorRecord(vendor)
+    return mapOrganizationProviderRecord(provider)
   }
 
-  async updateVendor(
+  async updateOrganizationProvider(
     organizationId: string,
     id: string,
-    input: VendorInput,
-  ): Promise<Vendor | null> {
-    const existing = await this.client.vendorMaster.findFirst({
+    input: OrganizationProviderInput,
+  ): Promise<OrganizationProvider | null> {
+    const existing = await this.client.organizationProvider.findFirst({
       where: { id, organizationId },
     })
 
@@ -129,16 +132,16 @@ export class PrismaVendorRepository implements VendorRepository {
       return null
     }
 
-    const vendor = await this.client.vendorMaster.update({
+    const provider = await this.client.organizationProvider.update({
       where: { id },
-      data: this.vendorData(input),
+      data: this.organizationProviderData(input),
     })
 
-    return mapVendorRecord(vendor)
+    return mapOrganizationProviderRecord(provider)
   }
 
-  async deleteVendor(organizationId: string, id: string): Promise<boolean> {
-    const existing = await this.client.vendorMaster.findFirst({
+  async deleteOrganizationProvider(organizationId: string, id: string): Promise<boolean> {
+    const existing = await this.client.organizationProvider.findFirst({
       where: { id, organizationId },
     })
 
@@ -146,54 +149,54 @@ export class PrismaVendorRepository implements VendorRepository {
       return false
     }
 
-    await this.client.vendorMaster.delete({ where: { id } })
+    await this.client.organizationProvider.delete({ where: { id } })
     return true
   }
 
-  async listServiceVendorUses(
+  async listServiceProviderUsage(
     organizationId: string,
-  ): Promise<ServiceVendorUse[]> {
-    const vendorUses = await this.client.serviceVendorUse.findMany({
+  ): Promise<ServiceProviderUsage[]> {
+    const providerUsage = await this.client.serviceProviderUsage.findMany({
       where: { organizationId },
-      include: SERVICE_VENDOR_USE_INCLUDE,
+      include: SERVICE_PROVIDER_USAGE_INCLUDE,
       orderBy: { createdAt: "asc" },
     })
 
-    return vendorUses.map(mapServiceVendorUseRecord)
+    return providerUsage.map(mapServiceProviderUsageRecord)
   }
 
-  async createServiceVendorUse(
+  async createServiceProviderUsage(
     organizationId: string,
-    input: ServiceVendorUseInput,
-  ): Promise<ServiceVendorUse> {
+    input: ServiceProviderUsageInput,
+  ): Promise<ServiceProviderUsage> {
     await this.validateServiceId(organizationId, input.serviceId)
-    await this.validateVendorId(organizationId, input.vendorId)
-    const dataProcessed = await this.validVendorDataTypeNames(
+    await this.validateOrganizationProviderId(organizationId, input.organizationProviderId)
+    const dataProcessed = await this.validProviderDataTypeNames(
       organizationId,
       input,
     )
-    const vendorUse = await this.client.serviceVendorUse.create({
+    const providerUsage = await this.client.serviceProviderUsage.create({
       data: {
         organizationId,
-        ...this.serviceVendorUseData(input),
+        ...this.serviceProviderUsageData(input),
         dataTypes: {
           create: dataProcessed.map((name) => ({
             organizationDataType: this.connectDataType(organizationId, name),
           })),
         },
       },
-      include: SERVICE_VENDOR_USE_INCLUDE,
+      include: SERVICE_PROVIDER_USAGE_INCLUDE,
     })
 
-    return mapServiceVendorUseRecord(vendorUse)
+    return mapServiceProviderUsageRecord(providerUsage)
   }
 
-  async updateServiceVendorUse(
+  async updateServiceProviderUsage(
     organizationId: string,
     id: string,
-    input: ServiceVendorUseInput,
-  ): Promise<ServiceVendorUse | null> {
-    const existing = await this.client.serviceVendorUse.findFirst({
+    input: ServiceProviderUsageInput,
+  ): Promise<ServiceProviderUsage | null> {
+    const existing = await this.client.serviceProviderUsage.findFirst({
       where: { id, organizationId },
     })
 
@@ -202,15 +205,15 @@ export class PrismaVendorRepository implements VendorRepository {
     }
 
     await this.validateServiceId(organizationId, input.serviceId)
-    await this.validateVendorId(organizationId, input.vendorId)
-    const dataProcessed = await this.validVendorDataTypeNames(
+    await this.validateOrganizationProviderId(organizationId, input.organizationProviderId)
+    const dataProcessed = await this.validProviderDataTypeNames(
       organizationId,
       input,
     )
-    const vendorUse = await this.client.serviceVendorUse.update({
+    const providerUsage = await this.client.serviceProviderUsage.update({
       where: { id },
       data: {
-        ...this.serviceVendorUseData(input),
+        ...this.serviceProviderUsageData(input),
         dataTypes: {
           deleteMany: {},
           create: dataProcessed.map((name) => ({
@@ -218,17 +221,17 @@ export class PrismaVendorRepository implements VendorRepository {
           })),
         },
       },
-      include: SERVICE_VENDOR_USE_INCLUDE,
+      include: SERVICE_PROVIDER_USAGE_INCLUDE,
     })
 
-    return mapServiceVendorUseRecord(vendorUse)
+    return mapServiceProviderUsageRecord(providerUsage)
   }
 
-  async deleteServiceVendorUse(
+  async deleteServiceProviderUsage(
     organizationId: string,
     id: string,
   ): Promise<boolean> {
-    const existing = await this.client.serviceVendorUse.findFirst({
+    const existing = await this.client.serviceProviderUsage.findFirst({
       where: { id, organizationId },
     })
 
@@ -236,13 +239,13 @@ export class PrismaVendorRepository implements VendorRepository {
       return false
     }
 
-    await this.client.serviceVendorUse.delete({ where: { id } })
+    await this.client.serviceProviderUsage.delete({ where: { id } })
     return true
   }
 
-  private async validVendorDataTypeNames(
+  private async validProviderDataTypeNames(
     organizationId: string,
-    input: ServiceVendorUseInput,
+    input: ServiceProviderUsageInput,
   ) {
     if (input.dataProcessingLevel === "none") {
       return []
@@ -263,8 +266,8 @@ export class PrismaVendorRepository implements VendorRepository {
 
     if (missingNames.length > 0) {
       throw new ApiError(
-        "VENDOR_DATA_TYPE_NOT_FOUND",
-        "Vendor data processed must reference data types stored on the organization.",
+        "PROVIDER_DATA_TYPE_NOT_FOUND",
+        "Provider data processed must reference data types stored on the organization.",
         400,
         { dataProcessed: missingNames },
       )
@@ -280,25 +283,28 @@ export class PrismaVendorRepository implements VendorRepository {
 
     if (!serviceIds.has(serviceId)) {
       throw new ApiError(
-        "VENDOR_SERVICE_NOT_FOUND",
-        "Vendor service must reference a service on the organization.",
+        "PROVIDER_SERVICE_NOT_FOUND",
+        "Provider usage must reference a service on the organization.",
         400,
         { serviceId },
       )
     }
   }
 
-  private async validateVendorId(organizationId: string, vendorId: string) {
-    const vendorIds = new Set(
-      await this.organizationRepository.listVendorIds(organizationId),
+  private async validateOrganizationProviderId(
+    organizationId: string,
+    organizationProviderId: string,
+  ) {
+    const providerIds = new Set(
+      await this.organizationRepository.listOrganizationProviderIds(organizationId),
     )
 
-    if (!vendorIds.has(vendorId)) {
+    if (!providerIds.has(organizationProviderId)) {
       throw new ApiError(
-        "SERVICE_VENDOR_NOT_FOUND",
-        "Service vendor use must reference a vendor on the organization.",
+        "SERVICE_PROVIDER_NOT_FOUND",
+        "Service provider usage must reference a provider on the organization.",
         400,
-        { vendorId },
+        { organizationProviderId },
       )
     }
   }
@@ -314,29 +320,24 @@ export class PrismaVendorRepository implements VendorRepository {
     }
   }
 
-  private vendorData(input: VendorInput) {
+  private organizationProviderData(input: OrganizationProviderInput) {
     return {
+      providerId: input.providerId || null,
+      systemTypes: input.systemTypes,
       name: input.name,
       legalName: input.legalName,
-      displayName: input.displayName,
-      providerOrganizationName: input.providerOrganizationName,
-      providerOrganizationLegalName: input.providerOrganizationLegalName,
-      privacyPolicyUrl: input.privacyPolicyUrl,
-      dpaUrl: input.dpaUrl,
-      securityPageUrl: input.securityPageUrl,
       category: input.category,
       countryOfRegistration: input.countryOfRegistration,
-      hasSubprocessors: input.hasSubprocessors,
       criticality: input.criticality,
-      owner: input.owner || null,
       notes: input.notes || null,
     }
   }
 
-  private serviceVendorUseData(input: ServiceVendorUseInput) {
+  private serviceProviderUsageData(input: ServiceProviderUsageInput) {
     return {
       serviceId: input.serviceId,
-      vendorId: input.vendorId,
+      organizationProviderId: input.organizationProviderId,
+      systemType: input.systemType,
       purpose: input.purpose,
       dataProcessingLevel: input.dataProcessingLevel,
       dpaStatus: input.dpaStatus,

@@ -4,19 +4,19 @@ import {
   businessActivitySchema,
   companyProfileSchema,
   dataHandlingProfileSchema,
+  organizationProviderInventorySchema,
   infrastructureProfileSchema,
   privacyProfileSchema,
   serviceProfileSchema,
-  serviceVendorUseSchema,
+  serviceProviderUsageSchema,
   documentSchema,
   type BusinessActivity,
   type OrganizationSecurityProfile,
   type Document,
-  type ServiceVendorUse,
+  type ServiceProviderUsage,
   type Template,
-  type Vendor,
+  type OrganizationProvider,
   templateSchema,
-  vendorSchema,
 } from "@plyco/shared"
 
 export const prisma = new PrismaClient()
@@ -128,10 +128,9 @@ export function mapOrganizationRecord(record: {
     vendorReviewCadence: string
     dpaRequiredForProcessors: boolean
   } | null
-  vendors: Array<{
-    serviceId: string | null
+  organizationProviders: Array<{
     providerId: string | null
-    systemType: string | null
+    systemTypes: string[]
     name: string
   }>
   dataHandlingProfile: {
@@ -183,20 +182,21 @@ export function mapOrganizationRecord(record: {
     complianceGoals: record.complianceGoals,
   })
   const infrastructure = infrastructureProfileSchema.parse({
-    organizationProviders: record.vendors.flatMap((provider) =>
-      provider.providerId &&
-      provider.serviceId === null &&
-      provider.systemType &&
-      ["auth", "source_control", "cloud", "password_manager"].includes(
-        provider.systemType,
-      )
-        ? [
-            {
-              providerId: provider.providerId,
-              systemType: provider.systemType,
-              name: provider.name,
-            },
-          ]
+    organizationProviders: record.organizationProviders.flatMap((provider) =>
+      provider.providerId
+        ? provider.systemTypes.flatMap((systemType) =>
+            ["auth", "source_control", "cloud", "password_manager"].includes(
+              systemType,
+            )
+              ? [
+                  {
+                    providerId: provider.providerId,
+                    systemType,
+                    name: provider.name,
+                  },
+                ]
+              : [],
+          )
         : [],
     ),
     mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? false,
@@ -259,32 +259,6 @@ export function mapOrganizationRecord(record: {
             privacy: {
               usesCookies: service.usesCookies,
               cookieTypes: service.cookieTypes,
-              analyticsProviders: record.vendors.flatMap((provider) =>
-                provider.serviceId === service.id &&
-                provider.providerId &&
-                provider.systemType === "analytics"
-                  ? [
-                      {
-                        providerId: provider.providerId,
-                        systemType: provider.systemType,
-                        name: provider.name,
-                      },
-                    ]
-                  : [],
-              ),
-              advertisingProviders: record.vendors.flatMap((provider) =>
-                provider.serviceId === service.id &&
-                provider.providerId &&
-                provider.systemType === "advertising"
-                  ? [
-                      {
-                        providerId: provider.providerId,
-                        systemType: provider.systemType,
-                        name: provider.name,
-                      },
-                    ]
-                  : [],
-              ),
               primaryHostingRegion: service.primaryHostingRegion,
               dataResidencyOptions: service.dataResidencyOptions,
             },
@@ -303,14 +277,13 @@ export function mapOrganizationRecord(record: {
     authorizedAgentSupported:
       record.privacyProfile?.authorizedAgentSupported ?? false,
     appealProcessExists: record.privacyProfile?.appealProcessExists ?? false,
-    organizationProviders: record.vendors.flatMap((provider) =>
+    organizationProviders: record.organizationProviders.flatMap((provider) =>
       provider.providerId &&
-      provider.serviceId === null &&
-      provider.systemType === "newsletter"
+      provider.systemTypes.includes("newsletter")
         ? [
             {
               providerId: provider.providerId,
-              systemType: provider.systemType,
+              systemType: "newsletter",
               name: provider.name,
             },
           ]
@@ -409,57 +382,45 @@ export function mapBusinessActivityRecord(record: {
   })
 }
 
-export function mapVendorRecord(record: {
+export function mapOrganizationProviderRecord(record: {
   id: string
   providerId?: string | null
+  systemTypes: string[]
   name: string
   legalName: string
-  displayName: string
-  providerOrganizationName: string
-  providerOrganizationLegalName: string
-  privacyPolicyUrl: string
-  dpaUrl: string
-  securityPageUrl: string
   category: string
   countryOfRegistration: string
-  hasSubprocessors: boolean
   criticality: string
-  owner: string | null
   notes: string | null
   createdAt: Date
   updatedAt: Date
-}): Vendor {
-  return vendorSchema.parse({
+}): OrganizationProvider {
+  return organizationProviderInventorySchema.parse({
     id: record.id,
+    providerId: record.providerId ?? "",
+    systemTypes: record.systemTypes,
     name: record.name,
     legalName: record.legalName,
-    displayName: record.displayName,
-    providerOrganizationName: record.providerOrganizationName,
-    providerOrganizationLegalName: record.providerOrganizationLegalName,
-    privacyPolicyUrl: record.privacyPolicyUrl,
-    dpaUrl: record.dpaUrl,
-    securityPageUrl: record.securityPageUrl,
     category: record.category,
     countryOfRegistration: record.countryOfRegistration,
-    hasSubprocessors: record.hasSubprocessors,
     criticality: record.criticality,
-    owner: record.owner ?? "",
     notes: record.notes ?? "",
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   })
 }
 
-export function mapServiceVendorUseRecord(record: {
+export function mapServiceProviderUsageRecord(record: {
   id: string
   serviceId: string
   service?: {
     serviceName: string
   } | null
-  vendorId: string
-  vendor?: {
+  organizationProviderId: string
+  organizationProvider?: {
     name: string
   } | null
+  systemType: string | null
   purpose: string
   dataProcessingLevel: string
   dpaStatus: string
@@ -472,13 +433,14 @@ export function mapServiceVendorUseRecord(record: {
   notes: string | null
   createdAt: Date
   updatedAt: Date
-}): ServiceVendorUse {
-  return serviceVendorUseSchema.parse({
+}): ServiceProviderUsage {
+  return serviceProviderUsageSchema.parse({
     id: record.id,
     serviceId: record.serviceId,
     serviceName: record.service?.serviceName ?? "",
-    vendorId: record.vendorId,
-    vendorName: record.vendor?.name ?? "",
+    organizationProviderId: record.organizationProviderId,
+    providerName: record.organizationProvider?.name ?? "",
+    systemType: record.systemType,
     purpose: record.purpose,
     dataProcessingLevel: record.dataProcessingLevel,
     dataProcessed: record.dataTypes.map(

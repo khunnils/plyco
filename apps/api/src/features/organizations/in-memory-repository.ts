@@ -1,5 +1,5 @@
 import {
-  type OrganizationProvider,
+  type ProviderSelection,
   type OrganizationSecurityProfile,
   type Provider,
   type ServiceProfile,
@@ -78,7 +78,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     )
   }
 
-  async listVendorIds(_organizationId: string): Promise<string[]> {
+  async listOrganizationProviderIds(_organizationId: string): Promise<string[]> {
     return []
   }
 
@@ -117,20 +117,6 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   ): SecurityProfileInput {
     return {
       ...input,
-      services: input.services.map((service) => ({
-        ...service,
-        privacy: {
-          ...service.privacy,
-          analyticsProviders: this.providerNames(
-            service.privacy.analyticsProviders,
-            providerCatalog,
-          ),
-          advertisingProviders: this.providerNames(
-            service.privacy.advertisingProviders,
-            providerCatalog,
-          ),
-        },
-      })),
       infrastructure: {
         ...input.infrastructure,
         organizationProviders: this.providerNames(
@@ -149,7 +135,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   }
 
   private providerNames(
-    selectedProviders: OrganizationProvider[],
+    selectedProviders: ProviderSelection[],
     providerCatalog: Provider[],
   ) {
     return selectedProviders.map((selectedProvider) => ({
@@ -160,7 +146,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
 
   private catalogProvider(
     providerCatalog: Provider[],
-    selectedProvider: OrganizationProvider,
+    selectedProvider: ProviderSelection,
   ) {
     const provider = providerCatalog.find(
       (catalogProvider) =>

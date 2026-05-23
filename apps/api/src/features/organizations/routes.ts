@@ -21,7 +21,7 @@ import {
   validateServiceProfileCodes,
 } from "../vocabulary/validation.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
-import { type VendorRepository } from "../vendors/repository.js"
+import { type ProviderRepository } from "../vendors/repository.js"
 import { type OrganizationRepository } from "./repository.js"
 
 const securityProfileBodySchema = z.object({
@@ -45,7 +45,7 @@ export async function registerOrganizationRoutes(
     accountRepository: AccountRepository
     organizationRepository: OrganizationRepository
     providerSource: ProviderSource
-    vendorRepository: VendorRepository
+    vendorRepository: ProviderRepository
     vocabularyRepository: VocabularyRepository
   },
 ) {
@@ -65,10 +65,10 @@ export async function registerOrganizationRoutes(
         businessActivities: await vendorRepository.listBusinessActivities(
           request.params.organizationId,
         ),
-        vendors: await vendorRepository.listVendors(
+        organizationProviders: await vendorRepository.listOrganizationProviders(
           request.params.organizationId,
         ),
-        serviceVendorUses: await vendorRepository.listServiceVendorUses(
+        serviceProviderUsage: await vendorRepository.listServiceProviderUsage(
           request.params.organizationId,
         ),
       }
@@ -123,30 +123,25 @@ export async function registerOrganizationRoutes(
         request.params.organizationId,
         body,
         body.infrastructure.organizationProviders.length > 0 ||
-          body.privacy.organizationProviders.length > 0 ||
-          body.services.some(
-            (service) =>
-              service.privacy.analyticsProviders.length > 0 ||
-              service.privacy.advertisingProviders.length > 0,
-          )
+          body.privacy.organizationProviders.length > 0
           ? await providerSource.listProviders()
           : [],
       )
-      const vendors = await vendorRepository.listVendors(
+      const organizationProviders = await vendorRepository.listOrganizationProviders(
         request.params.organizationId,
       )
       const businessActivities = await vendorRepository.listBusinessActivities(
         request.params.organizationId,
       )
-      const serviceVendorUses = await vendorRepository.listServiceVendorUses(
+      const serviceProviderUsage = await vendorRepository.listServiceProviderUsage(
         request.params.organizationId,
       )
 
       return reply.send({
         organization,
         businessActivities,
-        vendors,
-        serviceVendorUses,
+        organizationProviders,
+        serviceProviderUsage,
       })
     },
   )

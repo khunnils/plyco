@@ -16,7 +16,7 @@ import { type SystemTemplateSource } from "../../system-templates.js"
 import { type DocumentPdfStorage } from "../../document-pdfs.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type OrganizationRepository } from "../organizations/repository.js"
-import { type VendorRepository } from "../vendors/repository.js"
+import { type ProviderRepository } from "../vendors/repository.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
 import { type DocumentRepository } from "./repository.js"
 
@@ -36,7 +36,7 @@ export async function registerDocumentRoutes(
     documentPdfStorage: DocumentPdfStorage
     organizationRepository: OrganizationRepository
     systemTemplateSource: SystemTemplateSource
-    vendorRepository: VendorRepository
+    vendorRepository: ProviderRepository
     vocabularyRepository: VocabularyRepository
   },
 ) {
@@ -76,10 +76,10 @@ export async function registerDocumentRoutes(
         businessActivities: await vendorRepository.listBusinessActivities(
           request.params.organizationId,
         ),
-        vendors: await vendorRepository.listVendors(
+        organizationProviders: await vendorRepository.listOrganizationProviders(
           request.params.organizationId,
         ),
-        serviceVendorUses: await vendorRepository.listServiceVendorUses(
+        serviceProviderUsage: await vendorRepository.listServiceProviderUsage(
           request.params.organizationId,
         ),
       }
@@ -226,10 +226,10 @@ export async function registerDocumentRoutes(
         businessActivities: await vendorRepository.listBusinessActivities(
           request.params.organizationId,
         ),
-        vendors: await vendorRepository.listVendors(
+        organizationProviders: await vendorRepository.listOrganizationProviders(
           request.params.organizationId,
         ),
-        serviceVendorUses: await vendorRepository.listServiceVendorUses(
+        serviceProviderUsage: await vendorRepository.listServiceProviderUsage(
           request.params.organizationId,
         ),
       }

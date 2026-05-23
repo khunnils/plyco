@@ -10,9 +10,9 @@ import {
   templateCatalogSchema,
   businessActivitySchema,
   businessActivityInputSchema,
-  serviceVendorUseSchema,
-  serviceVendorUseInputSchema,
-  vendorSchema,
+  serviceProviderUsageSchema,
+  serviceProviderUsageInputSchema,
+  organizationProviderInventorySchema,
   createDocumentSchema,
   documentSchema,
   documentSummarySchema,
@@ -37,10 +37,10 @@ import {
   type TemplateInput,
   type BusinessActivity,
   type BusinessActivityInput,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
-  type VendorInput,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
+  type OrganizationProviderInput,
   type OrganizationSummary,
   type OrganizationMember,
 } from "@plyco/shared"
@@ -222,13 +222,13 @@ export const saveSecurityProfile = (
     }
   )
 
-export const createVendor = (
+export const createOrganizationProvider = (
   organizationId: string,
-  vendor: VendorInput
-): Promise<Vendor> =>
-  apiRequest(`/organizations/${organizationId}/vendors`, vendorSchema, {
+  provider: OrganizationProviderInput
+): Promise<OrganizationProvider> =>
+  apiRequest(`/organizations/${organizationId}/organization-providers`, organizationProviderInventorySchema, {
     method: "POST",
-    body: JSON.stringify(vendor),
+    body: JSON.stringify(provider),
   })
 
 export const createBusinessActivity = (
@@ -357,26 +357,30 @@ export const downloadDocumentPdf = async ({
   URL.revokeObjectURL(blobUrl)
 }
 
-export const updateVendor = ({
+export const updateOrganizationProvider = ({
   organizationId,
   id,
-  vendor,
+  provider,
 }: {
   organizationId: string
   id: string
-  vendor: VendorInput
-}): Promise<Vendor> =>
-  apiRequest(`/organizations/${organizationId}/vendors/${id}`, vendorSchema, {
-    method: "PUT",
-    body: JSON.stringify(vendor),
-  })
+  provider: OrganizationProviderInput
+}): Promise<OrganizationProvider> =>
+  apiRequest(
+    `/organizations/${organizationId}/organization-providers/${id}`,
+    organizationProviderInventorySchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(provider),
+    }
+  )
 
-export const deleteVendor = async (
+export const deleteOrganizationProvider = async (
   organizationId: string,
   id: string
 ): Promise<void> => {
   const response = await fetch(
-    `${API_URL}/organizations/${organizationId}/vendors/${id}`,
+    `${API_URL}/organizations/${organizationId}/organization-providers/${id}`,
     {
       credentials: "include",
       method: "DELETE",
@@ -392,43 +396,43 @@ export const deleteVendor = async (
   }
 }
 
-export const createServiceVendorUse = (
+export const createServiceProviderUsage = (
   organizationId: string,
-  vendorUse: ServiceVendorUseInput
-): Promise<ServiceVendorUse> =>
+  providerUsage: ServiceProviderUsageInput
+): Promise<ServiceProviderUsage> =>
   apiRequest(
-    `/organizations/${organizationId}/service-vendor-uses`,
-    serviceVendorUseSchema,
+    `/organizations/${organizationId}/service-provider-usage`,
+    serviceProviderUsageSchema,
     {
       method: "POST",
-      body: JSON.stringify(serviceVendorUseInputSchema.parse(vendorUse)),
+      body: JSON.stringify(serviceProviderUsageInputSchema.parse(providerUsage)),
     }
   )
 
-export const updateServiceVendorUse = ({
+export const updateServiceProviderUsage = ({
   organizationId,
   id,
-  vendorUse,
+  providerUsage,
 }: {
   organizationId: string
   id: string
-  vendorUse: ServiceVendorUseInput
-}): Promise<ServiceVendorUse> =>
+  providerUsage: ServiceProviderUsageInput
+}): Promise<ServiceProviderUsage> =>
   apiRequest(
-    `/organizations/${organizationId}/service-vendor-uses/${id}`,
-    serviceVendorUseSchema,
+    `/organizations/${organizationId}/service-provider-usage/${id}`,
+    serviceProviderUsageSchema,
     {
       method: "PUT",
-      body: JSON.stringify(serviceVendorUseInputSchema.parse(vendorUse)),
+      body: JSON.stringify(serviceProviderUsageInputSchema.parse(providerUsage)),
     }
   )
 
-export const deleteServiceVendorUse = async (
+export const deleteServiceProviderUsage = async (
   organizationId: string,
   id: string
 ): Promise<void> => {
   const response = await fetch(
-    `${API_URL}/organizations/${organizationId}/service-vendor-uses/${id}`,
+    `${API_URL}/organizations/${organizationId}/service-provider-usage/${id}`,
     {
       credentials: "include",
       method: "DELETE",

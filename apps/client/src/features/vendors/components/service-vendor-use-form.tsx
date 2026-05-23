@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Plus, Save, X } from "lucide-react"
 import {
-  serviceVendorUseInputSchema,
-  type ServiceVendorUseInput,
+  serviceProviderUsageInputSchema,
+  type ServiceProviderUsageInput,
 } from "@plyco/shared"
 import { useEffect } from "react"
 import { type Resolver, useForm, useWatch } from "react-hook-form"
@@ -14,7 +14,7 @@ import { TextField } from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
-export const ServiceVendorUseForm = ({
+export const ServiceProviderUsageForm = ({
   dataTypeOptions,
   dataProcessingLevelOptions,
   dataRegionOptions,
@@ -22,7 +22,7 @@ export const ServiceVendorUseForm = ({
   dpaStatusOptions,
   serviceOptions,
   showServiceField = true,
-  vendorOptions,
+  providerOptions,
   submitLabel,
   submitDisabled = false,
   onSubmit,
@@ -31,22 +31,22 @@ export const ServiceVendorUseForm = ({
   dataTypeOptions: Array<{ value: string; label: string }>
   dataProcessingLevelOptions: Option[]
   dataRegionOptions: Option[]
-  defaultValues: ServiceVendorUseInput
+  defaultValues: ServiceProviderUsageInput
   dpaStatusOptions: Option[]
   serviceOptions: Option[]
   showServiceField?: boolean
   submitLabel: string
   submitDisabled?: boolean
-  vendorOptions: Option[]
-  onSubmit: (vendorUse: ServiceVendorUseInput) => void
+  providerOptions: Option[]
+  onSubmit: (providerUsage: ServiceProviderUsageInput) => void
   onCancel?: () => void
 }) => {
-  const form = useForm<ServiceVendorUseInput>({
+  const form = useForm<ServiceProviderUsageInput>({
     defaultValues,
     mode: "onBlur",
     resolver: zodResolver(
-      serviceVendorUseInputSchema
-    ) as Resolver<ServiceVendorUseInput>,
+      serviceProviderUsageInputSchema
+    ) as Resolver<ServiceProviderUsageInput>,
   })
 
   useEffect(() => {
@@ -69,8 +69,8 @@ export const ServiceVendorUseForm = ({
     }
   }, [dataProcessingLevel, form])
 
-  const submitVendorUse = form.handleSubmit((vendorUse) => {
-    onSubmit(vendorUse)
+  const submitProviderUsage = form.handleSubmit((providerUsage) => {
+    onSubmit(providerUsage)
   })
 
   return (
@@ -86,9 +86,9 @@ export const ServiceVendorUseForm = ({
         ) : null}
         <SelectField
           control={form.control}
-          label="Vendor"
-          name="vendorId"
-          options={vendorOptions}
+          label="Provider"
+          name="organizationProviderId"
+          options={providerOptions}
         />
         <TextField
           error={form.formState.errors.purpose}
@@ -157,7 +157,7 @@ export const ServiceVendorUseForm = ({
         <Button
           disabled={submitDisabled}
           type="button"
-          onClick={submitVendorUse}
+          onClick={submitProviderUsage}
         >
           {submitDisabled ? (
             <Loader2 className="animate-spin" />

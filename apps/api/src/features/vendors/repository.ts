@@ -1,13 +1,13 @@
 import {
   type BusinessActivity,
   type BusinessActivityInput,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
-  type VendorInput,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
+  type OrganizationProviderInput,
 } from "@plyco/shared"
 
-export interface VendorRepository {
+export interface ProviderRepository {
   listBusinessActivities(organizationId: string): Promise<BusinessActivity[]>
   createBusinessActivity(
     organizationId: string,
@@ -19,23 +19,23 @@ export interface VendorRepository {
     input: BusinessActivityInput,
   ): Promise<BusinessActivity | null>
   deleteBusinessActivity(organizationId: string, id: string): Promise<boolean>
-  listVendors(organizationId: string): Promise<Vendor[]>
-  createVendor(organizationId: string, input: VendorInput): Promise<Vendor>
-  updateVendor(
+  listOrganizationProviders(organizationId: string): Promise<OrganizationProvider[]>
+  createOrganizationProvider(organizationId: string, input: OrganizationProviderInput): Promise<OrganizationProvider>
+  updateOrganizationProvider(
     organizationId: string,
     id: string,
-    input: VendorInput,
-  ): Promise<Vendor | null>
-  deleteVendor(organizationId: string, id: string): Promise<boolean>
-  listServiceVendorUses(organizationId: string): Promise<ServiceVendorUse[]>
-  createServiceVendorUse(
+    input: OrganizationProviderInput,
+  ): Promise<OrganizationProvider | null>
+  deleteOrganizationProvider(organizationId: string, id: string): Promise<boolean>
+  listServiceProviderUsage(organizationId: string): Promise<ServiceProviderUsage[]>
+  createServiceProviderUsage(
     organizationId: string,
-    input: ServiceVendorUseInput,
-  ): Promise<ServiceVendorUse>
-  updateServiceVendorUse(
+    input: ServiceProviderUsageInput,
+  ): Promise<ServiceProviderUsage>
+  updateServiceProviderUsage(
     organizationId: string,
     id: string,
-    input: ServiceVendorUseInput,
-  ): Promise<ServiceVendorUse | null>
-  deleteServiceVendorUse(organizationId: string, id: string): Promise<boolean>
+    input: ServiceProviderUsageInput,
+  ): Promise<ServiceProviderUsage | null>
+  deleteServiceProviderUsage(organizationId: string, id: string): Promise<boolean>
 }

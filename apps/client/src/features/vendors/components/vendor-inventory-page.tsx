@@ -2,76 +2,76 @@ import { Plus } from "lucide-react"
 import {
   type Country,
   type Provider,
-  type ServiceVendorUse,
-  type Vendor,
-  type VendorInput,
+  type ServiceProviderUsage,
+  type OrganizationProvider,
+  type OrganizationProviderInput,
   type Vocabulary,
 } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
 import { Section } from "@/features/shell/components/section"
 import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"
-import { VendorForm } from "@/features/vendors/components/vendor-form"
+import { OrganizationProviderForm } from "@/features/vendors/components/vendor-form"
 import { VendorList } from "@/features/vendors/components/vendor-list"
 import { ProviderSelector } from "@/features/vendors/components/provider-selector"
 import {
-  emptyVendorDraft,
-  toVendorInput,
-  vendorInputFromProvider,
+  emptyOrganizationProviderDraft,
+  toOrganizationProviderInput,
+  organizationProviderInputFromProvider,
 } from "@/features/security-profile/lib/profile"
 import { codeOptions, countryOptions } from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorInventoryPage = ({
   countries,
-  editingVendor,
+  editingProvider,
   isLoadingProviders,
   isMutationPending,
   providerError,
   providers,
-  serviceVendorUses,
+  serviceProviderUsage,
   showCustomVendorForm,
   showVendorCatalog,
   vocabulary,
-  vendors,
-  onSubmitVendor,
-  onCreateVendors,
-  onDeleteVendor,
-  onEditVendor,
+  organizationProviders,
+  onSubmitProvider,
+  onCreateProviders,
+  onDeleteProvider,
+  onEditProvider,
   onShowCustomVendorFormChange,
   onShowVendorCatalogChange,
 }: {
   countries: Country[]
-  editingVendor: Vendor | undefined
+  editingProvider: OrganizationProvider | undefined
   isLoadingProviders: boolean
   isMutationPending: boolean
   providerError?: string | null
   providers: Provider[]
-  serviceVendorUses: ServiceVendorUse[]
+  serviceProviderUsage: ServiceProviderUsage[]
   showCustomVendorForm: boolean
   showVendorCatalog: boolean
   vocabulary: Vocabulary | undefined
-  vendors: Vendor[]
-  onSubmitVendor: (vendor: VendorInput) => void
-  onCreateVendors: (vendors: VendorInput[]) => void
-  onDeleteVendor: (vendor: Vendor) => void
-  onEditVendor: (vendorId: string | null) => void
+  organizationProviders: OrganizationProvider[]
+  onSubmitProvider: (provider: OrganizationProviderInput) => void
+  onCreateProviders: (providers: OrganizationProviderInput[]) => void
+  onDeleteProvider: (provider: OrganizationProvider) => void
+  onEditProvider: (providerId: string | null) => void
   onShowCustomVendorFormChange: (show: boolean) => void
   onShowVendorCatalogChange: (show: boolean) => void
 }) => (
   <Section
-    description="Review organization vendors or add common providers from the catalog."
+    description="Review organization providers or add common providers from the catalog."
     action={
-      !showVendorCatalog && !showCustomVendorForm && !editingVendor ? (
+      !showVendorCatalog && !showCustomVendorForm && !editingProvider ? (
         <Button
           className="w-fit"
           type="button"
           onClick={() => {
-            onEditVendor(null)
+            onEditProvider(null)
             onShowVendorCatalogChange(true)
           }}
         >
           <Plus />
-          Add vendors
+          Add providers
         </Button>
       ) : null
     }
@@ -81,7 +81,7 @@ export const VendorInventoryPage = ({
       <div className="grid gap-4">
         <div>
           <h3 className="font-semibold text-slate-950">
-            Add vendors from catalog
+            Add providers from catalog
           </h3>
           <p className="mt-1 text-sm text-slate-500">
             Filter by category, then choose providers to add to the organization
@@ -90,11 +90,9 @@ export const VendorInventoryPage = ({
         </div>
         <ProviderSelector
           error={providerError ?? null}
-          existingProviderNames={vendors.flatMap((vendor) => [
-            vendor.name,
-            vendor.displayName,
-            vendor.providerOrganizationName,
-          ])}
+          existingProviderNames={organizationProviders.map(
+            (provider) => provider.name,
+          )}
           isLoading={isLoadingProviders}
           providers={providers}
           submitDisabled={isMutationPending}
@@ -103,55 +101,61 @@ export const VendorInventoryPage = ({
             onShowCustomVendorFormChange(false)
           }}
           onChooseOther={() => {
-            onEditVendor(null)
+            onEditProvider(null)
             onShowVendorCatalogChange(false)
             onShowCustomVendorFormChange(true)
           }}
           onChooseProviders={(selectedProviders) => {
-            onCreateVendors(selectedProviders.map(vendorInputFromProvider))
+            onCreateProviders(
+              selectedProviders.map(organizationProviderInputFromProvider),
+            )
           }}
         />
       </div>
     ) : null}
 
-    {(showCustomVendorForm || editingVendor) && (
-      <VendorForm
+    {(showCustomVendorForm || editingProvider) && (
+      <OrganizationProviderForm
         countryOptions={countryOptions(countries)}
         criticalityOptions={codeOptions(vocabulary, "vendor_criticality")}
-        defaultValues={editingVendor ? toVendorInput(editingVendor) : emptyVendorDraft}
+        defaultValues={
+          editingProvider
+            ? toOrganizationProviderInput(editingProvider)
+            : emptyOrganizationProviderDraft
+        }
         submitDisabled={isMutationPending}
-        submitLabel={editingVendor ? "Save" : "Add vendor"}
+        submitLabel={editingProvider ? "Save" : "Add provider"}
         vendorCategoryOptions={codeOptions(vocabulary, "vendor_category")}
         onCancel={
-          editingVendor
+          editingProvider
             ? () => {
-                onEditVendor(null)
+                onEditProvider(null)
                 onShowVendorCatalogChange(false)
                 onShowCustomVendorFormChange(false)
               }
             : undefined
         }
-        onSubmit={onSubmitVendor}
+        onSubmit={onSubmitProvider}
       />
     )}
 
-    {!showVendorCatalog && !showCustomVendorForm && !editingVendor ? (
-      vendors.length > 0 ? (
+    {!showVendorCatalog && !showCustomVendorForm && !editingProvider ? (
+      organizationProviders.length > 0 ? (
         <VendorList
           countries={countries}
-          serviceVendorUses={serviceVendorUses}
+          serviceProviderUsage={serviceProviderUsage}
           vocabulary={vocabulary}
-          vendors={vendors}
-          onDelete={onDeleteVendor}
-          onEdit={(vendor) => {
-            onEditVendor(vendor.id)
+          organizationProviders={organizationProviders}
+          onDelete={onDeleteProvider}
+          onEdit={(provider) => {
+            onEditProvider(provider.id)
             onShowCustomVendorFormChange(true)
           }}
         />
       ) : (
         <VendorEmptyState
           onAdd={() => {
-            onEditVendor(null)
+            onEditProvider(null)
             onShowVendorCatalogChange(true)
           }}
         />

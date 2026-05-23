@@ -1,10 +1,5 @@
 import { Plus, Trash2 } from "lucide-react"
-import {
-  emptyServiceProfile,
-  type OrganizationProvider,
-  type Provider,
-  type ProviderSystemType,
-} from "@plyco/shared"
+import { emptyServiceProfile } from "@plyco/shared"
 import { type FieldPath, type UseFormReturn, useFieldArray } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -20,58 +15,6 @@ const servicePath = (index: number, field: string) =>
 
 const servicePrivacyPath = (index: number, field: string) =>
   `services.${index}.privacy.${field}` as FieldPath<ProfileDraft>
-
-const selectedProviderIds = (providers: OrganizationProvider[]) =>
-  providers.map((provider) => provider.providerId)
-
-const providerOptions = (
-  providers: Provider[],
-  systemType: ProviderSystemType,
-) =>
-  providers
-    .filter((provider) => provider.systemTypes.includes(systemType))
-    .map((provider) => ({ value: provider.id, label: provider.name }))
-
-const ServiceProviderPicker = ({
-  form,
-  index,
-  label,
-  providers,
-  systemType,
-}: {
-  form: UseFormReturn<ProfileDraft>
-  index: number
-  label: string
-  providers: Provider[]
-  systemType: "analytics" | "advertising"
-}) => {
-  const field =
-    systemType === "analytics" ? "analyticsProviders" : "advertisingProviders"
-  const path = servicePrivacyPath(index, field)
-  const selectedProviders = form.watch(path) as OrganizationProvider[]
-  const options = providerOptions(providers, systemType)
-
-  return (
-    <MultiSelectField
-      control={form.control}
-      label={label}
-      name={path}
-      options={options}
-      placeholder={`Select ${label.toLowerCase()}`}
-      value={selectedProviderIds(selectedProviders)}
-      onValueChange={(providerIds) => {
-        form.setValue(
-          path,
-          providerIds.map((providerId) => ({
-            systemType,
-            providerId,
-          })) as never,
-          { shouldDirty: true, shouldValidate: true },
-        )
-      }}
-    />
-  )
-}
 
 const MinimumAgeField = ({
   form,
@@ -104,7 +47,6 @@ export const ServiceProfileFields = ({
   cookieTypeOptions,
   customerTypeOptions,
   form,
-  providers,
   regionOptions,
   userTypeOptions,
 }: {
@@ -112,7 +54,6 @@ export const ServiceProfileFields = ({
   cookieTypeOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
-  providers: Provider[]
   regionOptions: Option[]
   userTypeOptions: Option[]
 }) => {
@@ -229,20 +170,6 @@ export const ServiceProfileFields = ({
               name={servicePrivacyPath(index, "cookieTypes")}
               options={cookieTypeOptions}
               placeholder="Select cookie types"
-            />
-            <ServiceProviderPicker
-              form={form}
-              index={index}
-              label="Analytics providers"
-              providers={providers}
-              systemType="analytics"
-            />
-            <ServiceProviderPicker
-              form={form}
-              index={index}
-              label="Advertising providers"
-              providers={providers}
-              systemType="advertising"
             />
             <SelectField
               control={form.control}

@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  type OrganizationProvider,
+  type ProviderSelection,
   type Provider,
   privacyProfileSchema,
   type PrivacyProfile,
@@ -37,7 +37,7 @@ const toMarketingDraft = (privacy: PrivacyProfile): MarketingDraft => ({
   organizationProviders: privacy.organizationProviders,
 })
 
-const selectedNewsletterIds = (providers: OrganizationProvider[]) =>
+const selectedNewsletterIds = (providers: ProviderSelection[]) =>
   providers
     .filter((provider) => provider.systemType === "newsletter")
     .map((provider) => provider.providerId)

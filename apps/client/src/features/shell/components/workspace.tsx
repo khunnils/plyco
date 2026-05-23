@@ -19,7 +19,6 @@ import {
 import {
   type DocumentSummary,
   type AuthUser,
-  type Provider,
   type TemplateCatalog,
   type Vocabulary,
   type Country,
@@ -35,7 +34,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
   profileFromOrganization,
-  providerNamesForSystem,
 } from "@/features/security-profile/lib/profile"
 import {
   ProfileAccessFields,
@@ -68,17 +66,17 @@ import {
   useUpdateTemplate,
 } from "@/features/templates/hooks/use-templates"
 import {
-  useCreateVendor,
-  useCreateVendors,
+  useCreateOrganizationProvider,
+  useCreateOrganizationProviders,
   useCreateBusinessActivity,
-  useCreateServiceVendorUse,
+  useCreateServiceProviderUsage,
   useDeleteBusinessActivity,
-  useDeleteServiceVendorUse,
-  useDeleteVendor,
+  useDeleteServiceProviderUsage,
+  useDeleteOrganizationProvider,
   useProviders,
   useUpdateBusinessActivity,
-  useUpdateServiceVendorUse,
-  useUpdateVendor,
+  useUpdateServiceProviderUsage,
+  useUpdateOrganizationProvider,
 } from "@/features/vendors/hooks/use-vendors"
 import { Section } from "@/features/shell/components/section"
 import {
@@ -235,14 +233,12 @@ const CompanySectionFields = ({
   businessActivityOptions,
   countries,
   form,
-  providers,
   section,
   vocabulary,
 }: {
   businessActivityOptions: Option[]
   countries: Country[]
   form: ProfileFormReturn
-  providers: Provider[]
   section: CompanySectionId
   vocabulary: Vocabulary | undefined
 }) => {
@@ -269,7 +265,6 @@ const CompanySectionFields = ({
         cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
         customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
         form={form}
-        providers={providers}
         regionOptions={codeOptions(vocabulary, "regions")}
         userTypeOptions={codeOptions(vocabulary, "service_user_types")}
       />
@@ -301,14 +296,12 @@ const CompanySectionFields = ({
 const CompanyReadOnlySection = ({
   countries,
   profile,
-  providers,
   section,
   vocabulary,
   onEdit,
 }: {
   countries: Country[]
   profile: ProfileDraft
-  providers: Provider[]
   section: CompanySectionId
   vocabulary: Vocabulary | undefined
   onEdit: () => void
@@ -375,22 +368,6 @@ const CompanyReadOnlySection = ({
                     vocabulary,
                     "privacy_cookie_types",
                     service.privacy.cookieTypes
-                  ),
-                ],
-                [
-                  "Analytics providers",
-                  providerNamesForSystem(
-                    service.privacy.analyticsProviders,
-                    providers,
-                    "analytics"
-                  ),
-                ],
-                [
-                  "Advertising providers",
-                  providerNamesForSystem(
-                    service.privacy.advertisingProviders,
-                    providers,
-                    "advertising"
                   ),
                 ],
                 [
@@ -536,13 +513,13 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const createBusinessActivity = useCreateBusinessActivity()
   const updateBusinessActivity = useUpdateBusinessActivity()
   const deleteBusinessActivity = useDeleteBusinessActivity()
-  const createVendor = useCreateVendor()
-  const createVendors = useCreateVendors()
-  const updateVendor = useUpdateVendor()
-  const deleteVendor = useDeleteVendor()
-  const createServiceVendorUse = useCreateServiceVendorUse()
-  const updateServiceVendorUse = useUpdateServiceVendorUse()
-  const deleteServiceVendorUse = useDeleteServiceVendorUse()
+  const createProvider = useCreateOrganizationProvider()
+  const createProviders = useCreateOrganizationProviders()
+  const updateProvider = useUpdateOrganizationProvider()
+  const deleteProvider = useDeleteOrganizationProvider()
+  const createServiceProviderUsage = useCreateServiceProviderUsage()
+  const updateServiceProviderUsage = useUpdateServiceProviderUsage()
+  const deleteServiceProviderUsage = useDeleteServiceProviderUsage()
   const createVocabularyCode = useCreateVocabularyCode()
   const updateVocabularyCode = useUpdateVocabularyCode()
   const deleteVocabularyCode = useDeleteVocabularyCode()
@@ -554,8 +531,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
   const snapshot = securityProfile.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
-  const vendors = snapshot?.vendors ?? []
-  const serviceVendorUses = snapshot?.serviceVendorUses ?? []
+  const organizationProviders = snapshot?.organizationProviders ?? []
+  const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []
   const businessActivities = snapshot?.businessActivities ?? []
   const templatesData: TemplateCatalog = templates.data ?? {
     systemTemplates: [],
@@ -583,13 +560,13 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     deleteBusinessActivity.isPending
 
   const isVendorMutationPending =
-    createVendor.isPending ||
-    createVendors.isPending ||
-    updateVendor.isPending ||
-    deleteVendor.isPending ||
-    createServiceVendorUse.isPending ||
-    updateServiceVendorUse.isPending ||
-    deleteServiceVendorUse.isPending
+    createProvider.isPending ||
+    createProviders.isPending ||
+    updateProvider.isPending ||
+    deleteProvider.isPending ||
+    createServiceProviderUsage.isPending ||
+    updateServiceProviderUsage.isPending ||
+    deleteServiceProviderUsage.isPending
 
   const providersList = providers.data ?? []
   const countriesList = countries.data ?? []
@@ -624,7 +601,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     activeWorkspaceView === "companyService" && routeServiceId !== "new"
       ? routeServiceId
       : selectedServiceId
-  const editingVendor = vendors.find((vendor) => vendor.id === editingVendorId)
+  const editingProvider = organizationProviders.find(
+    (provider) => provider.id === editingVendorId
+  )
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === editingTemplateId
   )
@@ -738,7 +717,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         ? "Documents"
                         : activeWorkspaceView === "vocabulary"
                           ? "Vocabulary"
-                          : "Vendors"}
+                          : "Providers"}
               </p>
               <h1 className="mt-1 text-2xl font-semibold text-slate-950">
                 {activeWorkspaceView === "dashboard"
@@ -751,7 +730,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         ? "Generated documents"
                         : activeWorkspaceView === "vocabulary"
                           ? "Vocabulary"
-                          : "Vendor inventory"}
+                          : "Provider inventory"}
               </h1>
             </div>
             {activeCompanySectionId === "service" && !isCreatingService ? (
@@ -778,7 +757,10 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
           {activeWorkspaceView === "dashboard" && (
             <>
-              <SummaryTiles profile={defaultValues} vendors={vendors} />
+              <SummaryTiles
+                profile={defaultValues}
+                providers={organizationProviders}
+              />
               <Section
                 description="Current source-of-truth posture captured during onboarding."
                 title="Snapshot"
@@ -786,7 +768,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                 <CompanyReadOnlySection
                   countries={countriesList}
                   profile={defaultValues}
-                  providers={providersList}
                   section="profile"
                   vocabulary={vocabularyData}
                   onEdit={() => {
@@ -808,10 +789,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   isProfileMutationPending={saveProfile.isPending}
                   isVendorMutationPending={isVendorMutationPending}
                   profile={defaultValues}
-                  providers={providersList}
                   selectedServiceId={routedSelectedServiceId}
-                  serviceVendorUses={serviceVendorUses}
-                  vendors={vendors}
+                  serviceProviderUsage={serviceProviderUsage}
+                  organizationProviders={organizationProviders}
                   vocabulary={vocabularyData}
                   onCancelCreateService={() =>
                     navigate(
@@ -820,11 +800,13 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         : "/company/services"
                     )
                   }
-                  onCreateVendorUse={(vendorUse, onSuccess) =>
-                    createServiceVendorUse.mutate(vendorUse, { onSuccess })
+                  onCreateProviderUsage={(providerUsage, onSuccess) =>
+                    createServiceProviderUsage.mutate(providerUsage, {
+                      onSuccess,
+                    })
                   }
-                  onDeleteVendorUse={(vendorUse) =>
-                    deleteServiceVendorUse.mutate(vendorUse.id)
+                  onDeleteProviderUsage={(providerUsage) =>
+                    deleteServiceProviderUsage.mutate(providerUsage.id)
                   }
                   onSaveProfile={(profile, onSuccess) =>
                     saveProfile.mutate(profile, { onSuccess })
@@ -837,8 +819,8 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         : "/company/services"
                     )
                   }}
-                  onUpdateVendorUse={(input, onSuccess) =>
-                    updateServiceVendorUse.mutate(input, { onSuccess })
+                  onUpdateProviderUsage={(input, onSuccess) =>
+                    updateServiceProviderUsage.mutate(input, { onSuccess })
                   }
                 />
               ) : activeCompanySectionId === "dataHandling" ? (
@@ -937,7 +919,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                               businessActivityOptions={businessActivityOptions}
                               countries={countriesList}
                               form={form}
-                              providers={providersList}
                               section={section.id}
                               vocabulary={vocabularyData}
                             />
@@ -969,7 +950,6 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                       <CompanyReadOnlySection
                         countries={countriesList}
                         profile={defaultValues}
-                        providers={providersList}
                         section={section.id}
                         vocabulary={vocabularyData}
                         onEdit={() => setEditingCompanySection(section.id)}
@@ -984,32 +964,32 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           {activeWorkspaceView === "vendors" && (
             <VendorInventoryPage
               countries={countriesList}
-              editingVendor={editingVendor}
+              editingProvider={editingProvider}
               isLoadingProviders={providers.isLoading}
               isMutationPending={isVendorMutationPending}
               providerError={providers.error?.message ?? null}
               providers={providersList}
-              serviceVendorUses={serviceVendorUses}
+              serviceProviderUsage={serviceProviderUsage}
               showCustomVendorForm={showCustomVendorForm}
               showVendorCatalog={showVendorCatalog}
               vocabulary={vocabularyData}
-              vendors={vendors}
-              onCreateVendors={(vendorInputs) =>
-                createVendors.mutate(vendorInputs, {
+              organizationProviders={organizationProviders}
+              onCreateProviders={(providerInputs) =>
+                createProviders.mutate(providerInputs, {
                   onSuccess: () => {
                     setShowVendorCatalog(false)
                     setShowCustomVendorForm(false)
                   },
                 })
               }
-              onDeleteVendor={(vendor) => deleteVendor.mutate(vendor.id)}
-              onEditVendor={startEditingVendor}
+              onDeleteProvider={(provider) => deleteProvider.mutate(provider.id)}
+              onEditProvider={startEditingVendor}
               onShowCustomVendorFormChange={setShowCustomVendorForm}
               onShowVendorCatalogChange={setShowVendorCatalog}
-              onSubmitVendor={(vendor) => {
-                if (editingVendor) {
-                  updateVendor.mutate(
-                    { id: editingVendor.id, vendor },
+              onSubmitProvider={(provider) => {
+                if (editingProvider) {
+                  updateProvider.mutate(
+                    { id: editingProvider.id, provider },
                     {
                       onSuccess: () => {
                         startEditingVendor(null)
@@ -1021,7 +1001,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   return
                 }
 
-                createVendor.mutate(vendor, {
+                createProvider.mutate(provider, {
                   onSuccess: () => {
                     setShowVendorCatalog(false)
                     setShowCustomVendorForm(false)
@@ -1033,7 +1013,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
 
           {activeWorkspaceView === "vocabulary" && (
             <Section
-              description="Edit organization-owned vocabularies used by onboarding and vendor records."
+              description="Edit organization-owned vocabularies used by onboarding and provider records."
               title="Vocabulary"
             >
               <VocabularyManager

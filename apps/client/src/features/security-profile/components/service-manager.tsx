@@ -4,13 +4,10 @@ import {
   emptyServiceProfile,
   serviceProfileInputSchema,
   servicePrivacyProfileSchema,
-  type OrganizationProvider,
-  type Provider,
-  type ProviderSystemType,
   type ServiceProfileInput,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
   type Vocabulary,
 } from "@plyco/shared"
 import { useEffect, useState } from "react"
@@ -33,11 +30,10 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/security-profile/components/profile-panel-shell"
-import { ServiceVendorUseForm } from "@/features/vendors/components/service-vendor-use-form"
+import { ServiceProviderUsageForm } from "@/features/vendors/components/service-vendor-use-form"
 import {
-  emptyServiceVendorUseDraft,
-  providerNamesForSystem,
-  toServiceVendorUseInput,
+  emptyServiceProviderUsageDraft,
+  toServiceProviderUsageInput,
 } from "@/features/security-profile/lib/profile"
 import {
   type ProfileDraft,
@@ -82,17 +78,6 @@ const codeValueList = (
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
-const selectedProviderIds = (providers: OrganizationProvider[]) =>
-  providers.map((provider) => provider.providerId)
-
-const providerOptions = (
-  providers: Provider[],
-  systemType: ProviderSystemType
-) =>
-  providers
-    .filter((provider) => provider.systemTypes.includes(systemType))
-    .map((provider) => ({ value: provider.id, label: provider.name }))
-
 const serviceBasicsDraft = (
   service: ServiceProfileInput
 ): ServiceBasicsDraft => ({
@@ -118,7 +103,7 @@ const servicePrivacyDraft = (
   privacy: service.privacy,
 })
 
-const serviceVendorPurpose = (service: ServiceProfileInput) =>
+const serviceProviderPurpose = (service: ServiceProfileInput) =>
   `Used by ${service.serviceName.trim() || "this service"}`
 
 const FieldNumberInput = <T extends Record<string, unknown>>({
@@ -146,45 +131,6 @@ const FieldNumberInput = <T extends Record<string, unknown>>({
     ) : null}
   </label>
 )
-
-const ServiceProviderPicker = ({
-  form,
-  label,
-  providers,
-  systemType,
-}: {
-  form: UseFormReturn<ServicePrivacyDraft>
-  label: string
-  providers: Provider[]
-  systemType: "analytics" | "advertising"
-}) => {
-  const field =
-    systemType === "analytics" ? "analyticsProviders" : "advertisingProviders"
-  const path = privacyPath(field)
-  const selectedProviders = form.watch(path) as OrganizationProvider[]
-  const options = providerOptions(providers, systemType)
-
-  return (
-    <MultiSelectField
-      control={form.control}
-      label={label}
-      name={path}
-      options={options}
-      placeholder={`Select ${label.toLowerCase()}`}
-      value={selectedProviderIds(selectedProviders)}
-      onValueChange={(providerIds) => {
-        form.setValue(
-          path,
-          providerIds.map((providerId) => ({
-            systemType,
-            providerId,
-          })) as never,
-          { shouldDirty: true, shouldValidate: true }
-        )
-      }}
-    />
-  )
-}
 
 const ServiceBasicsFormFields = ({
   descriptionName,
@@ -468,7 +414,6 @@ const ServiceAudiencePanel = ({
 const ServicePrivacyPanel = ({
   cookieTypeOptions,
   isMutationPending,
-  providers,
   regionOptions,
   service,
   vocabulary,
@@ -476,7 +421,6 @@ const ServicePrivacyPanel = ({
 }: {
   cookieTypeOptions: Option[]
   isMutationPending: boolean
-  providers: Provider[]
   regionOptions: Option[]
   service: ServiceProfileInput
   vocabulary: Vocabulary | undefined
@@ -498,7 +442,7 @@ const ServicePrivacyPanel = ({
 
   return (
     <ProfilePanelShell
-      description="Cookie preferences, analytics and advertising partners, hosting regions, and data residency."
+      description="Cookie preferences, hosting regions, and data residency."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
@@ -511,22 +455,6 @@ const ServicePrivacyPanel = ({
                 vocabulary,
                 "privacy_cookie_types",
                 service.privacy.cookieTypes
-              ),
-            ],
-            [
-              "Analytics providers",
-              providerNamesForSystem(
-                service.privacy.analyticsProviders,
-                providers,
-                "analytics"
-              ),
-            ],
-            [
-              "Advertising providers",
-              providerNamesForSystem(
-                service.privacy.advertisingProviders,
-                providers,
-                "advertising"
               ),
             ],
             [
@@ -573,18 +501,6 @@ const ServicePrivacyPanel = ({
           options={cookieTypeOptions}
           placeholder="Select cookie types"
         />
-        <ServiceProviderPicker
-          form={form}
-          label="Analytics providers"
-          providers={providers}
-          systemType="analytics"
-        />
-        <ServiceProviderPicker
-          form={form}
-          label="Advertising providers"
-          providers={providers}
-          systemType="advertising"
-        />
         <SelectField
           control={form.control}
           label="Primary hosting region"
@@ -606,30 +522,30 @@ const ServicePrivacyPanel = ({
 }
 
 const AddVendorsForm = ({
-  selectedVendorIds,
-  vendors,
+  selectedProviderIds,
+  organizationProviders,
   onCancel,
   onSubmit,
 }: {
-  selectedVendorIds: Set<string>
-  vendors: Vendor[]
+  selectedProviderIds: Set<string>
+  organizationProviders: OrganizationProvider[]
   onCancel: () => void
-  onSubmit: (vendorIds: string[]) => void
+  onSubmit: (providerIds: string[]) => void
 }) => {
   const [checkedIds, setCheckedIds] = useState<string[]>([])
-  const toggleVendor = (vendorId: string, checked: boolean) => {
+  const toggleProvider = (providerId: string, checked: boolean) => {
     setCheckedIds((current) =>
       checked
-        ? [...current, vendorId]
-        : current.filter((currentId) => currentId !== vendorId)
+        ? [...current, providerId]
+        : current.filter((currentId) => currentId !== providerId)
     )
   }
 
   return (
     <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="grid gap-2">
-        {vendors.map((vendor) => {
-          const disabled = selectedVendorIds.has(vendor.id)
+        {organizationProviders.map((provider) => {
+          const disabled = selectedProviderIds.has(provider.id)
 
           return (
             <label
@@ -639,19 +555,19 @@ const AddVendorsForm = ({
                   ? "border-slate-200 text-slate-400"
                   : "border-slate-200 text-slate-800",
               ].join(" ")}
-              key={vendor.id}
+              key={provider.id}
             >
               <input
-                checked={disabled || checkedIds.includes(vendor.id)}
+                checked={disabled || checkedIds.includes(provider.id)}
                 className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
                 disabled={disabled}
                 type="checkbox"
                 onChange={(event) =>
-                  toggleVendor(vendor.id, event.target.checked)
+                  toggleProvider(provider.id, event.target.checked)
                 }
               />
               <span className="min-w-0 flex-1 truncate">
-                {vendor.displayName || vendor.name}
+                {provider.name}
               </span>
               {disabled ? <Badge variant="secondary">Selected</Badge> : null}
             </label>
@@ -675,15 +591,15 @@ const AddVendorsForm = ({
   )
 }
 
-const ServiceVendorPanel = ({
+const ServiceProviderUsagePanel = ({
   dataProcessingLevelOptions,
   dataRegionOptions,
   dataTypeOptions,
   dpaStatusOptions,
   isMutationPending,
   service,
-  serviceVendorUses,
-  vendors,
+  serviceProviderUsage,
+  organizationProviders,
   vocabulary,
   onCreate,
   onDelete,
@@ -695,33 +611,36 @@ const ServiceVendorPanel = ({
   dpaStatusOptions: Option[]
   isMutationPending: boolean
   service: ServiceProfileInput
-  serviceVendorUses: ServiceVendorUse[]
-  vendors: Vendor[]
+  serviceProviderUsage: ServiceProviderUsage[]
+  organizationProviders: OrganizationProvider[]
   vocabulary: Vocabulary | undefined
-  onCreate: (vendorUse: ServiceVendorUseInput, onSuccess?: () => void) => void
-  onDelete: (vendorUse: ServiceVendorUse) => void
+  onCreate: (
+    providerUsage: ServiceProviderUsageInput,
+    onSuccess?: () => void
+  ) => void
+  onDelete: (providerUsage: ServiceProviderUsage) => void
   onUpdate: (
-    input: { id: string; vendorUse: ServiceVendorUseInput },
+    input: { id: string; providerUsage: ServiceProviderUsageInput },
     onSuccess?: () => void
   ) => void
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [showAddVendors, setShowAddVendors] = useState(false)
+  const [showAddProviders, setShowAddProviders] = useState(false)
   const selectedServiceUses = service.id
-    ? serviceVendorUses.filter(
-        (vendorUse) => vendorUse.serviceId === service.id
+    ? serviceProviderUsage.filter(
+        (providerUsage) => providerUsage.serviceId === service.id
       )
     : []
-  const selectedVendorIds = new Set(
-    selectedServiceUses.map((vendorUse) => vendorUse.vendorId)
+  const selectedProviderIds = new Set(
+    selectedServiceUses.map((providerUsage) => providerUsage.organizationProviderId)
   )
-  const editingVendorUse = selectedServiceUses.find(
-    (vendorUse) => vendorUse.id === editingId
+  const editingProviderUsage = selectedServiceUses.find(
+    (providerUsage) => providerUsage.id === editingId
   )
-  const vendorOptions = vendors.map((vendor) => ({
-    value: vendor.id,
-    label: vendor.displayName || vendor.name,
+  const providerOptions = organizationProviders.map((provider) => ({
+    value: provider.id,
+    label: provider.name,
   }))
   const serviceOptions = service.id
     ? [{ value: service.id, label: service.serviceName || "Selected service" }]
@@ -731,72 +650,74 @@ const ServiceVendorPanel = ({
     <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-base font-semibold text-slate-950">Vendors</h3>
+          <h3 className="text-base font-semibold text-slate-950">Providers</h3>
           <p className="mt-1 text-sm text-slate-500">
-            Vendors used by this service and the data they process.
+            Providers used by this service and the data they process.
           </p>
         </div>
         <Button
           className="w-fit"
           disabled={
-            !service.id || vendors.length === 0 || Boolean(editingVendorUse)
+            !service.id ||
+            organizationProviders.length === 0 ||
+            Boolean(editingProviderUsage)
           }
           type="button"
           onClick={() => {
             setEditingId(null)
-            setShowAddVendors(true)
+            setShowAddProviders(true)
           }}
         >
           <Plus />
-          Add vendors
+          Add providers
         </Button>
       </div>
 
       {!service.id ? (
         <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          Save this service before assigning vendors.
+          Save this service before assigning providers.
         </div>
-      ) : vendors.length === 0 ? (
+      ) : organizationProviders.length === 0 ? (
         <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          Add vendors to the vendor inventory before assigning them to a
+          Add providers to the provider inventory before assigning them to a
           service.
         </div>
-      ) : showAddVendors ? (
+      ) : showAddProviders ? (
         <AddVendorsForm
-          selectedVendorIds={selectedVendorIds}
-          vendors={vendors}
-          onCancel={() => setShowAddVendors(false)}
-          onSubmit={(vendorIds) => {
-            vendorIds.forEach((vendorId) => {
+          selectedProviderIds={selectedProviderIds}
+          organizationProviders={organizationProviders}
+          onCancel={() => setShowAddProviders(false)}
+          onSubmit={(providerIds) => {
+            providerIds.forEach((organizationProviderId) => {
               onCreate({
-                ...emptyServiceVendorUseDraft,
+                ...emptyServiceProviderUsageDraft,
                 serviceId: service.id ?? "",
-                vendorId,
-                purpose: serviceVendorPurpose(service),
+                organizationProviderId,
+                purpose: serviceProviderPurpose(service),
               })
             })
-            setShowAddVendors(false)
+            setShowAddProviders(false)
           }}
         />
-      ) : editingVendorUse ? (
-        <ServiceVendorUseForm
+      ) : editingProviderUsage ? (
+        <ServiceProviderUsageForm
           dataProcessingLevelOptions={dataProcessingLevelOptions}
           dataRegionOptions={dataRegionOptions}
           dataTypeOptions={dataTypeOptions}
-          defaultValues={toServiceVendorUseInput(editingVendorUse)}
+          defaultValues={toServiceProviderUsageInput(editingProviderUsage)}
           dpaStatusOptions={dpaStatusOptions}
           serviceOptions={serviceOptions}
           showServiceField={false}
           submitDisabled={isMutationPending}
-          submitLabel="Save vendor use"
-          vendorOptions={vendorOptions}
+          submitLabel="Save provider usage"
+          providerOptions={providerOptions}
           onCancel={() => setEditingId(null)}
-          onSubmit={(vendorUse) => {
+          onSubmit={(providerUsage) => {
             onUpdate(
               {
-                id: editingVendorUse.id,
-                vendorUse: {
-                  ...vendorUse,
+                id: editingProviderUsage.id,
+                providerUsage: {
+                  ...providerUsage,
                   serviceId: service.id ?? "",
                 },
               },
@@ -806,12 +727,12 @@ const ServiceVendorPanel = ({
         />
       ) : selectedServiceUses.length === 0 ? (
         <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          No vendors selected for this service.
+          No providers selected for this service.
         </div>
       ) : (
         <div className="grid gap-3">
-          {selectedServiceUses.map((vendorUse) => {
-            const expanded = expandedId === vendorUse.id
+          {selectedServiceUses.map((providerUsage) => {
+            const expanded = expandedId === providerUsage.id
 
             return (
               <article
@@ -821,7 +742,7 @@ const ServiceVendorPanel = ({
                     ? "border-blue-300 ring-2 ring-blue-100"
                     : "border-slate-200",
                 ].join(" ")}
-                key={vendorUse.id}
+                key={providerUsage.id}
               >
                 <div className="flex items-start gap-2 p-4">
                   <button
@@ -830,15 +751,15 @@ const ServiceVendorPanel = ({
                     type="button"
                     onClick={() =>
                       setExpandedId((current) =>
-                        current === vendorUse.id ? null : vendorUse.id
+                        current === providerUsage.id ? null : providerUsage.id
                       )
                     }
                   >
                     <h4 className="text-sm font-semibold text-slate-950">
-                      {vendorUse.vendorName || "Selected vendor"}
+                      {providerUsage.providerName || "Selected provider"}
                     </h4>
                     <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
-                      {vendorUse.purpose}
+                      {providerUsage.purpose}
                     </p>
                   </button>
                   <div className="flex shrink-0 gap-2">
@@ -849,30 +770,30 @@ const ServiceVendorPanel = ({
                       variant="outline"
                       onClick={() =>
                         setExpandedId((current) =>
-                          current === vendorUse.id ? null : vendorUse.id
+                          current === providerUsage.id ? null : providerUsage.id
                         )
                       }
                     >
                       {expanded ? <ChevronUp /> : <ChevronDown />}
                     </Button>
                     <Button
-                      aria-label="Edit vendor use"
+                      aria-label="Edit provider usage"
                       size="icon-sm"
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        setShowAddVendors(false)
-                        setEditingId(vendorUse.id)
+                        setShowAddProviders(false)
+                        setEditingId(providerUsage.id)
                       }}
                     >
                       <Pencil />
                     </Button>
                     <Button
-                      aria-label="Delete vendor use"
+                      aria-label="Delete provider usage"
                       size="icon-sm"
                       type="button"
                       variant="outline"
-                      onClick={() => onDelete(vendorUse)}
+                      onClick={() => onDelete(providerUsage)}
                     >
                       <Trash2 />
                     </Button>
@@ -887,7 +808,7 @@ const ServiceVendorPanel = ({
                         codeLabel(
                           vocabulary,
                           "data_processing_level",
-                          vendorUse.dataProcessingLevel
+                          providerUsage.dataProcessingLevel
                         ),
                       ],
                       [
@@ -895,13 +816,13 @@ const ServiceVendorPanel = ({
                         codeLabel(
                           vocabulary,
                           "dpa_status",
-                          vendorUse.dpaStatus
+                          providerUsage.dpaStatus
                         ),
                       ],
                       [
                         "Data processed",
-                        vendorUse.dataProcessed.length > 0
-                          ? vendorUse.dataProcessed.join(", ")
+                        providerUsage.dataProcessed.length > 0
+                          ? providerUsage.dataProcessed.join(", ")
                           : "No data types selected",
                       ],
                       [
@@ -909,10 +830,10 @@ const ServiceVendorPanel = ({
                         codeValueList(
                           vocabulary,
                           "regions",
-                          vendorUse.dataRegions
+                          providerUsage.dataRegions
                         ),
                       ],
-                      ["Notes", vendorUse.notes || "Not set"],
+                      ["Notes", providerUsage.notes || "Not set"],
                     ]}
                   />
                 ) : null}
@@ -937,19 +858,18 @@ export const ServiceManager = ({
   isProfileMutationPending,
   isVendorMutationPending,
   profile,
-  providers,
   regionOptions,
   selectedServiceId,
-  serviceVendorUses,
+  serviceProviderUsage,
   userTypeOptions,
-  vendors,
+  organizationProviders,
   vocabulary,
   onCancelCreateService,
-  onCreateVendorUse,
-  onDeleteVendorUse,
+  onCreateProviderUsage,
+  onDeleteProviderUsage,
   onSaveProfile,
   onSelectService,
-  onUpdateVendorUse,
+  onUpdateProviderUsage,
 }: {
   businessActivityOptions: Option[]
   cookieTypeOptions: Option[]
@@ -962,25 +882,24 @@ export const ServiceManager = ({
   isProfileMutationPending: boolean
   isVendorMutationPending: boolean
   profile: ProfileDraft
-  providers: Provider[]
   regionOptions: Option[]
   selectedServiceId: string | null
-  serviceVendorUses: ServiceVendorUse[]
+  serviceProviderUsage: ServiceProviderUsage[]
   userTypeOptions: Option[]
-  vendors: Vendor[]
+  organizationProviders: OrganizationProvider[]
   vocabulary: Vocabulary | undefined
   onCancelCreateService: () => void
-  onCreateVendorUse: (
-    vendorUse: ServiceVendorUseInput,
+  onCreateProviderUsage: (
+    providerUsage: ServiceProviderUsageInput,
     onSuccess?: () => void
   ) => void
-  onDeleteVendorUse: (vendorUse: ServiceVendorUse) => void
+  onDeleteProviderUsage: (providerUsage: ServiceProviderUsage) => void
   onSaveProfile: SaveProfile
   onSelectService: (id: string | null) => void
-  onUpdateVendorUse: (
+  onUpdateProviderUsage: (
     input: {
       id: string
-      vendorUse: ServiceVendorUseInput
+      providerUsage: ServiceProviderUsageInput
     },
     onSuccess?: () => void
   ) => void
@@ -1070,25 +989,24 @@ export const ServiceManager = ({
       <ServicePrivacyPanel
         cookieTypeOptions={cookieTypeOptions}
         isMutationPending={isProfileMutationPending}
-        providers={providers}
         regionOptions={regionOptions}
         service={selectedService}
         vocabulary={vocabulary}
         onSave={saveServicePatch}
       />
-      <ServiceVendorPanel
+      <ServiceProviderUsagePanel
         dataProcessingLevelOptions={dataProcessingLevelOptions}
         dataRegionOptions={dataRegionOptions}
         dataTypeOptions={dataTypeOptions}
         dpaStatusOptions={dpaStatusOptions}
         isMutationPending={isVendorMutationPending}
         service={selectedService}
-        serviceVendorUses={serviceVendorUses}
-        vendors={vendors}
+        serviceProviderUsage={serviceProviderUsage}
+        organizationProviders={organizationProviders}
         vocabulary={vocabulary}
-        onCreate={onCreateVendorUse}
-        onDelete={onDeleteVendorUse}
-        onUpdate={onUpdateVendorUse}
+        onCreate={onCreateProviderUsage}
+        onDelete={onDeleteProviderUsage}
+        onUpdate={onUpdateProviderUsage}
       />
     </div>
   )

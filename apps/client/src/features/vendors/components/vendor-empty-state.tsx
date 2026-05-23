@@ -16,15 +16,15 @@ export const VendorEmptyState = ({ onAdd }: { onAdd: () => void }) => (
       <EmptyMedia variant="icon">
         <PackageOpen />
       </EmptyMedia>
-      <EmptyTitle>No vendors yet</EmptyTitle>
+      <EmptyTitle>No providers yet</EmptyTitle>
       <EmptyDescription>
         Add providers your organization uses so security reviews have a clear
-        vendor inventory.
+        provider inventory.
       </EmptyDescription>
     </EmptyHeader>
     <EmptyContent>
       <Button type="button" onClick={onAdd}>
-        Add vendor
+        Add provider
       </Button>
     </EmptyContent>
   </Empty>

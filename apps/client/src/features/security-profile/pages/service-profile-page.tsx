@@ -1,8 +1,7 @@
 import {
-  type Provider,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
   type Vocabulary,
 } from "@plyco/shared"
 
@@ -17,17 +16,16 @@ export const ServiceProfilePage = ({
   isProfileMutationPending,
   isVendorMutationPending,
   profile,
-  providers,
   selectedServiceId,
-  serviceVendorUses,
-  vendors,
+  serviceProviderUsage,
+  organizationProviders,
   vocabulary,
   onCancelCreateService,
-  onCreateVendorUse,
-  onDeleteVendorUse,
+  onCreateProviderUsage,
+  onDeleteProviderUsage,
   onSaveProfile,
   onSelectService,
-  onUpdateVendorUse,
+  onUpdateProviderUsage,
 }: {
   businessActivityOptions: Option[]
   dataTypeOptions: Array<{ value: string; label: string }>
@@ -35,23 +33,22 @@ export const ServiceProfilePage = ({
   isProfileMutationPending: boolean
   isVendorMutationPending: boolean
   profile: ProfileDraft
-  providers: Provider[]
   selectedServiceId: string | null
-  serviceVendorUses: ServiceVendorUse[]
-  vendors: Vendor[]
+  serviceProviderUsage: ServiceProviderUsage[]
+  organizationProviders: OrganizationProvider[]
   vocabulary: Vocabulary | undefined
   onCancelCreateService: () => void
-  onCreateVendorUse: (
-    vendorUse: ServiceVendorUseInput,
+  onCreateProviderUsage: (
+    providerUsage: ServiceProviderUsageInput,
     onSuccess?: () => void
   ) => void
-  onDeleteVendorUse: (vendorUse: ServiceVendorUse) => void
+  onDeleteProviderUsage: (providerUsage: ServiceProviderUsage) => void
   onSaveProfile: Parameters<typeof ServiceManager>[0]["onSaveProfile"]
   onSelectService: (id: string | null) => void
-  onUpdateVendorUse: (
+  onUpdateProviderUsage: (
     input: {
       id: string
-      vendorUse: ServiceVendorUseInput
+      providerUsage: ServiceProviderUsageInput
     },
     onSuccess?: () => void
   ) => void
@@ -71,18 +68,17 @@ export const ServiceProfilePage = ({
     isProfileMutationPending={isProfileMutationPending}
     isVendorMutationPending={isVendorMutationPending}
     profile={profile}
-    providers={providers}
     regionOptions={codeOptions(vocabulary, "regions")}
     selectedServiceId={selectedServiceId}
-    serviceVendorUses={serviceVendorUses}
+    serviceProviderUsage={serviceProviderUsage}
     userTypeOptions={codeOptions(vocabulary, "service_user_types")}
-    vendors={vendors}
+    organizationProviders={organizationProviders}
     vocabulary={vocabulary}
     onCancelCreateService={onCancelCreateService}
-    onCreateVendorUse={onCreateVendorUse}
-    onDeleteVendorUse={onDeleteVendorUse}
+    onCreateProviderUsage={onCreateProviderUsage}
+    onDeleteProviderUsage={onDeleteProviderUsage}
     onSaveProfile={onSaveProfile}
     onSelectService={onSelectService}
-    onUpdateVendorUse={onUpdateVendorUse}
+    onUpdateProviderUsage={onUpdateProviderUsage}
   />
 )

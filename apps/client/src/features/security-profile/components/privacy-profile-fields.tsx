@@ -1,5 +1,5 @@
 import {
-  type OrganizationProvider,
+  type ProviderSelection,
   type Provider,
   type ProviderSystemType,
 } from "@plyco/shared"
@@ -37,7 +37,7 @@ const ResponseTimelineField = ({
 )
 
 const selectedProviderIds = (
-  organizationProviders: OrganizationProvider[],
+  organizationProviders: ProviderSelection[],
   systemType: ProviderSystemType,
 ) =>
   organizationProviders

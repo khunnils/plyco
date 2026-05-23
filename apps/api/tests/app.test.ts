@@ -30,25 +30,6 @@ const serviceBody = {
   privacy: {
     usesCookies: true,
     cookieTypes: ["necessary", "analytics"],
-    analyticsProviders: [
-      {
-        systemType: "analytics",
-        providerId: "prov-google-analytics",
-        name: "Google Analytics",
-      },
-      {
-        systemType: "analytics",
-        providerId: "prov-posthog",
-        name: "PostHog",
-      },
-    ],
-    advertisingProviders: [
-      {
-        systemType: "advertising",
-        providerId: "prov-google-ads",
-        name: "Google Ads",
-      },
-    ],
     primaryHostingRegion: "us",
     dataResidencyOptions: ["us", "eu"],
   },
@@ -181,25 +162,20 @@ const profileBody = {
 }
 
 const vendorBody = {
+  providerId: "prov-github",
+  systemTypes: [],
   name: "GitHub",
   legalName: "GitHub, Inc.",
-  displayName: "GitHub",
-  providerOrganizationName: "GitHub",
-  providerOrganizationLegalName: "GitHub, Inc.",
-  privacyPolicyUrl: "https://github.com/privacy",
-  dpaUrl: "https://github.com/customer-terms/dpa",
-  securityPageUrl: "https://github.com/security",
   category: "source_control",
   countryOfRegistration: "US",
-  hasSubprocessors: true,
   criticality: "high",
-  owner: "Engineering",
   notes: "Critical engineering system",
 }
 
 const vendorUseBody = {
   serviceId: "service-platform",
-  vendorId: "vendor-limited",
+  organizationProviderId: "provider-limited",
+  systemType: null,
   purpose: "Code hosting and pull requests",
   dataProcessingLevel: "limited",
   dataProcessed: ["Customer account data"],
@@ -213,13 +189,12 @@ const subprocessorBody = {
   name: "Stripe",
   category: "payments",
   criticality: "medium",
-  owner: "Finance",
   notes: "Customer payment processor",
 }
 
 const subprocessorUseBody = {
   ...vendorUseBody,
-  vendorId: "vendor-subprocessor",
+  organizationProviderId: "provider-subprocessor",
   purpose: "Payment processing",
   dataProcessingLevel: "subprocessor",
   dataRegions: ["us", "eu"],
@@ -230,15 +205,13 @@ const noProcessingVendorBody = {
   ...vendorBody,
   name: "Linear",
   category: "project_management",
-  hasSubprocessors: false,
   criticality: "low",
-  owner: "Product",
   notes: "",
 }
 
 const noProcessingVendorUseBody = {
   ...vendorUseBody,
-  vendorId: "vendor-none",
+  organizationProviderId: "provider-none",
   purpose: "Issue tracking",
   dataProcessingLevel: "none",
   dataProcessed: [],
@@ -437,7 +410,7 @@ describe("security profile API", () => {
 
     const vendorResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/vendors",
+      url: "/organizations/org-test/organization-providers",
       payload: {
         ...vendorBody,
         name: "Stripe EU",
@@ -447,11 +420,11 @@ describe("security profile API", () => {
     expect(vendorResponse.statusCode).toBe(201)
     const vendorUseResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/service-vendor-uses",
+      url: "/organizations/org-test/service-provider-usage",
       payload: {
         ...vendorUseBody,
         serviceId: services[1].id,
-        vendorId: vendorResponse.json().id,
+        organizationProviderId: vendorResponse.json().id,
       },
     })
 
@@ -459,7 +432,7 @@ describe("security profile API", () => {
     expect(vendorUseResponse.json()).toMatchObject({
       serviceId: services[1].id,
       serviceName: "Acme EU",
-      vendorName: "Stripe EU",
+      providerName: "Stripe EU",
     })
     expect(vendorResponse.json()).toMatchObject({
       name: "Stripe EU",
@@ -467,17 +440,17 @@ describe("security profile API", () => {
 
     const invalidVendorResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/service-vendor-uses",
+      url: "/organizations/org-test/service-provider-usage",
       payload: {
         ...vendorUseBody,
-        vendorId: vendorResponse.json().id,
+        organizationProviderId: vendorResponse.json().id,
         serviceId: "service_missing",
       },
     })
 
     expect(invalidVendorResponse.statusCode).toBe(400)
     expect(invalidVendorResponse.json().error.code).toBe(
-      "VENDOR_SERVICE_NOT_FOUND",
+      "PROVIDER_SERVICE_NOT_FOUND",
     )
   })
 
@@ -564,27 +537,22 @@ describe("security profile API", () => {
     })
   })
 
-  it("rejects privacy providers that are not available for the selected system type", async () => {
+  it("rejects infrastructure providers that are not available for the selected system type", async () => {
     const app = await createTestApp()
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        services: [
-          {
-            ...serviceBody,
-            privacy: {
-              ...serviceBody.privacy,
-              analyticsProviders: [
-                {
-                  systemType: "analytics",
-                  providerId: "prov-google-ads",
-                },
-              ],
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            {
+              systemType: "source_control",
+              providerId: "prov-google-ads",
             },
-          },
-        ],
+          ],
+        },
       },
     })
 
@@ -594,7 +562,7 @@ describe("security profile API", () => {
         code: "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
         details: {
           providerId: "prov-google-ads",
-          systemType: "analytics",
+          systemType: "source_control",
         },
       },
     })
@@ -977,10 +945,10 @@ describe("security profile API", () => {
         usesCookies: true,
         cookieTypes: ["necessary", "analytics"],
         cookieTypeLabels: ["Necessary", "Analytics"],
-        analyticsProviders: ["Google Analytics", "PostHog"],
-        analyticsProviderIds: ["prov-google-analytics", "prov-posthog"],
-        advertisingProviders: ["Google Ads"],
-        advertisingProviderIds: ["prov-google-ads"],
+        analyticsProviders: [],
+        analyticsProviderIds: [],
+        advertisingProviders: [],
+        advertisingProviderIds: [],
         primaryHostingRegion: "us",
         primaryHostingRegionLabel: "United States",
         dataResidencyOptions: ["us", "eu"],
@@ -1169,7 +1137,7 @@ describe("security profile API", () => {
 
     const createResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/vendors",
+      url: "/organizations/org-test/organization-providers",
       payload: vendorBody,
     })
 
@@ -1180,21 +1148,21 @@ describe("security profile API", () => {
 
     const createUseResponse = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/service-vendor-uses",
-      payload: { ...vendorUseBody, serviceId, vendorId: createdVendor.id },
+      url: "/organizations/org-test/service-provider-usage",
+      payload: { ...vendorUseBody, serviceId, organizationProviderId: createdVendor.id },
     })
 
     expect(createUseResponse.statusCode).toBe(201)
-    const createdVendorUse = createUseResponse.json()
-    expect(createdVendorUse.dpaStatus).toBe("signed")
+    const createdProviderUsage = createUseResponse.json()
+    expect(createdProviderUsage.dpaStatus).toBe("signed")
 
     const updateResponse = await app.inject({
       method: "PUT",
-      url: `/organizations/org-test/service-vendor-uses/${createdVendorUse.id}`,
+      url: `/organizations/org-test/service-provider-usage/${createdProviderUsage.id}`,
       payload: {
         ...vendorUseBody,
         serviceId,
-        vendorId: createdVendor.id,
+        organizationProviderId: createdVendor.id,
         dpaStatus: "under_review",
         notes: "DPA being reviewed",
       },
@@ -1203,23 +1171,23 @@ describe("security profile API", () => {
     expect(updateResponse.statusCode).toBe(200)
     expect(updateResponse.json().dpaStatus).toBe("under_review")
 
-    const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/vendors" })
+    const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/organization-providers" })
     expect(listResponse.json()).toHaveLength(1)
     const useListResponse = await app.inject({
       method: "GET",
-      url: "/organizations/org-test/service-vendor-uses",
+      url: "/organizations/org-test/service-provider-usage",
     })
     expect(useListResponse.json()).toHaveLength(1)
 
     const deleteResponse = await app.inject({
       method: "DELETE",
-      url: `/organizations/org-test/vendors/${createdVendor.id}`,
+      url: `/organizations/org-test/organization-providers/${createdVendor.id}`,
     })
     expect(deleteResponse.statusCode).toBe(204)
 
     const emptyListResponse = await app.inject({
       method: "GET",
-      url: "/organizations/org-test/vendors",
+      url: "/organizations/org-test/organization-providers",
     })
     expect(emptyListResponse.json()).toHaveLength(0)
   })
@@ -1691,14 +1659,14 @@ describe("security profile API", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/organizations/org-test/service-vendor-uses",
+      url: "/organizations/org-test/service-provider-usage",
       payload: {
         ...vendorUseBody,
         serviceId,
-        vendorId: (
+        organizationProviderId: (
           await app.inject({
             method: "POST",
-            url: "/organizations/org-test/vendors",
+            url: "/organizations/org-test/organization-providers",
             payload: vendorBody,
           })
         ).json().id,
@@ -1709,7 +1677,7 @@ describe("security profile API", () => {
     expect(response.statusCode).toBe(400)
     expect(response.json()).toMatchObject({
       error: {
-        code: "VENDOR_DATA_TYPE_NOT_FOUND",
+        code: "PROVIDER_DATA_TYPE_NOT_FOUND",
         details: { dataProcessed: ["source_code"] },
       },
     })

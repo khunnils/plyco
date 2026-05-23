@@ -168,12 +168,15 @@ export const AppSidebar = ({
             )
           })}
         </div>
+        <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Vendors
+        </div>
         <SidebarMenuButton
           active={activeWorkspaceView === "vendors"}
           onClick={() => onWorkspaceViewChange("vendors")}
         >
           <Users className="size-4" />
-          Vendors
+          Providers
         </SidebarMenuButton>
         <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
           Policies and documents

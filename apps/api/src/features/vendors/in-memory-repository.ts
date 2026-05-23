@@ -1,18 +1,18 @@
 import {
   businessActivitySchema,
-  serviceVendorUseSchema,
-  vendorSchema,
+  organizationProviderInventorySchema,
+  serviceProviderUsageSchema,
   type BusinessActivity,
   type BusinessActivityInput,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
-  type VendorInput,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
+  type OrganizationProvider,
+  type OrganizationProviderInput,
 } from "@plyco/shared"
 
 import { ApiError } from "../../errors.js"
 import { type OrganizationRepository } from "../organizations/repository.js"
-import { type VendorRepository } from "./repository.js"
+import { type ProviderRepository } from "./repository.js"
 
 function now() {
   return new Date().toISOString()
@@ -22,17 +22,15 @@ function newId(prefix: string) {
   return `${prefix}_${crypto.randomUUID()}`
 }
 
-export class InMemoryVendorRepository implements VendorRepository {
+export class InMemoryVendorRepository implements ProviderRepository {
   private activities = new Map<BusinessActivity["id"], BusinessActivity & { organizationId: string }>()
-  private vendors = new Map<string, Vendor & { organizationId: string }>()
-  private serviceVendorUses = new Map<
+  private organizationProviders = new Map<string, OrganizationProvider & { organizationId: string }>()
+  private serviceProviderUsage = new Map<
     string,
-    ServiceVendorUse & { organizationId: string }
+    ServiceProviderUsage & { organizationId: string }
   >()
 
-  constructor(
-    private readonly organizationRepository: OrganizationRepository,
-  ) {}
+  constructor(private readonly organizationRepository: OrganizationRepository) {}
 
   async listBusinessActivities(organizationId: string) {
     return Array.from(this.activities.values()).filter(
@@ -67,11 +65,7 @@ export class InMemoryVendorRepository implements VendorRepository {
       return null
     }
 
-    const activity = {
-      ...current,
-      ...input,
-      updatedAt: now(),
-    }
+    const activity = { ...current, ...input, updatedAt: now() }
     this.activities.set(id, activity)
     return activity
   }
@@ -86,132 +80,137 @@ export class InMemoryVendorRepository implements VendorRepository {
     return this.activities.delete(id)
   }
 
-  async listVendors(organizationId: string): Promise<Vendor[]> {
-    return Array.from(this.vendors.values()).filter(
-      (vendor) => vendor.organizationId === organizationId,
+  async listOrganizationProviders(organizationId: string) {
+    return Array.from(this.organizationProviders.values()).filter(
+      (provider) => provider.organizationId === organizationId,
     )
   }
 
-  async createVendor(organizationId: string, input: VendorInput): Promise<Vendor> {
+  async createOrganizationProvider(
+    organizationId: string,
+    input: OrganizationProviderInput,
+  ) {
     const timestamp = now()
-    const vendor = vendorSchema.parse({
-      id: newId("vendor"),
+    const provider = organizationProviderInventorySchema.parse({
+      id: newId("provider"),
       ...input,
       createdAt: timestamp,
       updatedAt: timestamp,
-    }) as Vendor & { organizationId: string }
-    vendor.organizationId = organizationId
-    this.vendors.set(vendor.id, vendor)
-    return vendor
+    }) as OrganizationProvider & { organizationId: string }
+    provider.organizationId = organizationId
+    this.organizationProviders.set(provider.id, provider)
+    return provider
   }
 
-  async updateVendor(
+  async updateOrganizationProvider(
     organizationId: string,
     id: string,
-    input: VendorInput,
-  ): Promise<Vendor | null> {
-    const currentVendor = this.vendors.get(id)
+    input: OrganizationProviderInput,
+  ) {
+    const currentProvider = this.organizationProviders.get(id)
 
-    if (!currentVendor || currentVendor.organizationId !== organizationId) {
+    if (!currentProvider || currentProvider.organizationId !== organizationId) {
       return null
     }
 
-    const vendor = {
-      ...currentVendor,
-      ...input,
-      updatedAt: now(),
-    }
-    this.vendors.set(id, vendor)
-    return vendor
+    const provider = { ...currentProvider, ...input, updatedAt: now() }
+    this.organizationProviders.set(id, provider)
+    return provider
   }
 
-  async deleteVendor(organizationId: string, id: string): Promise<boolean> {
-    const currentVendor = this.vendors.get(id)
+  async deleteOrganizationProvider(organizationId: string, id: string) {
+    const currentProvider = this.organizationProviders.get(id)
 
-    if (!currentVendor || currentVendor.organizationId !== organizationId) {
+    if (!currentProvider || currentProvider.organizationId !== organizationId) {
       return false
     }
 
-    return this.vendors.delete(id)
+    return this.organizationProviders.delete(id)
   }
 
-  async listServiceVendorUses(
-    organizationId: string,
-  ): Promise<ServiceVendorUse[]> {
-    return Array.from(this.serviceVendorUses.values()).filter(
-      (vendorUse) => vendorUse.organizationId === organizationId,
+  async listServiceProviderUsage(organizationId: string) {
+    return Array.from(this.serviceProviderUsage.values()).filter(
+      (providerUsage) => providerUsage.organizationId === organizationId,
     )
   }
 
-  async createServiceVendorUse(
+  async createServiceProviderUsage(
     organizationId: string,
-    input: ServiceVendorUseInput,
+    input: ServiceProviderUsageInput,
   ) {
     await this.validateServiceId(organizationId, input.serviceId)
-    this.validateVendorId(organizationId, input.vendorId)
+    this.validateOrganizationProviderId(
+      organizationId,
+      input.organizationProviderId,
+    )
     const timestamp = now()
-    const dataProcessed = await this.validVendorDataTypeNames(
+    const dataProcessed = await this.validProviderDataTypeNames(
       organizationId,
       input,
     )
-    const vendorUse = serviceVendorUseSchema.parse({
-      id: newId("vendor_use"),
+    const providerUsage = serviceProviderUsageSchema.parse({
+      id: newId("provider_usage"),
       ...input,
       serviceName: await this.serviceName(organizationId, input.serviceId),
-      vendorName: this.vendors.get(input.vendorId)?.name ?? "",
+      providerName:
+        this.organizationProviders.get(input.organizationProviderId)?.name ?? "",
       dataProcessed,
       createdAt: timestamp,
       updatedAt: timestamp,
-    }) as ServiceVendorUse & { organizationId: string }
-    vendorUse.organizationId = organizationId
-    this.serviceVendorUses.set(vendorUse.id, vendorUse)
-    return vendorUse
+    }) as ServiceProviderUsage & { organizationId: string }
+    providerUsage.organizationId = organizationId
+    this.serviceProviderUsage.set(providerUsage.id, providerUsage)
+    return providerUsage
   }
 
-  async updateServiceVendorUse(
+  async updateServiceProviderUsage(
     organizationId: string,
     id: string,
-    input: ServiceVendorUseInput,
+    input: ServiceProviderUsageInput,
   ) {
-    const current = this.serviceVendorUses.get(id)
+    const current = this.serviceProviderUsage.get(id)
 
     if (!current || current.organizationId !== organizationId) {
       return null
     }
 
     await this.validateServiceId(organizationId, input.serviceId)
-    this.validateVendorId(organizationId, input.vendorId)
-    const dataProcessed = await this.validVendorDataTypeNames(
+    this.validateOrganizationProviderId(
+      organizationId,
+      input.organizationProviderId,
+    )
+    const dataProcessed = await this.validProviderDataTypeNames(
       organizationId,
       input,
     )
-    const vendorUse = serviceVendorUseSchema.parse({
+    const providerUsage = serviceProviderUsageSchema.parse({
       id,
       ...input,
       serviceName: await this.serviceName(organizationId, input.serviceId),
-      vendorName: this.vendors.get(input.vendorId)?.name ?? "",
+      providerName:
+        this.organizationProviders.get(input.organizationProviderId)?.name ?? "",
       dataProcessed,
       createdAt: current.createdAt,
       updatedAt: now(),
-    }) as ServiceVendorUse & { organizationId: string }
-    vendorUse.organizationId = organizationId
-    this.serviceVendorUses.set(id, vendorUse)
-    return vendorUse
+    }) as ServiceProviderUsage & { organizationId: string }
+    providerUsage.organizationId = organizationId
+    this.serviceProviderUsage.set(id, providerUsage)
+    return providerUsage
   }
 
-  async deleteServiceVendorUse(organizationId: string, id: string) {
-    const current = this.serviceVendorUses.get(id)
+  async deleteServiceProviderUsage(organizationId: string, id: string) {
+    const current = this.serviceProviderUsage.get(id)
 
     if (!current || current.organizationId !== organizationId) {
       return false
     }
 
-    return this.serviceVendorUses.delete(id)
+    return this.serviceProviderUsage.delete(id)
   }
 
-  private async validVendorDataTypeNames(
+  private async validProviderDataTypeNames(
     organizationId: string,
-    input: ServiceVendorUseInput,
+    input: ServiceProviderUsageInput,
   ) {
     if (input.dataProcessingLevel === "none") {
       return []
@@ -232,8 +231,8 @@ export class InMemoryVendorRepository implements VendorRepository {
 
     if (missingNames.length > 0) {
       throw new ApiError(
-        "VENDOR_DATA_TYPE_NOT_FOUND",
-        "Vendor data processed must reference data types stored on the organization.",
+        "PROVIDER_DATA_TYPE_NOT_FOUND",
+        "Provider data processed must reference data types stored on the organization.",
         400,
         { dataProcessed: missingNames },
       )
@@ -249,29 +248,33 @@ export class InMemoryVendorRepository implements VendorRepository {
 
     if (!serviceIds.has(serviceId)) {
       throw new ApiError(
-        "VENDOR_SERVICE_NOT_FOUND",
-        "Vendor service must reference a service on the organization.",
+        "PROVIDER_SERVICE_NOT_FOUND",
+        "Provider usage must reference a service on the organization.",
         400,
         { serviceId },
       )
     }
   }
 
-  private validateVendorId(organizationId: string, vendorId: string) {
-    const vendor = this.vendors.get(vendorId)
+  private validateOrganizationProviderId(
+    organizationId: string,
+    organizationProviderId: string,
+  ) {
+    const provider = this.organizationProviders.get(organizationProviderId)
 
-    if (!vendor || vendor.organizationId !== organizationId) {
+    if (!provider || provider.organizationId !== organizationId) {
       throw new ApiError(
-        "SERVICE_VENDOR_NOT_FOUND",
-        "Service vendor use must reference a vendor on the organization.",
+        "SERVICE_PROVIDER_NOT_FOUND",
+        "Service provider usage must reference a provider on the organization.",
         400,
-        { vendorId },
+        { organizationProviderId },
       )
     }
   }
 
   private async serviceName(organizationId: string, serviceId: string) {
-    const organization = await this.organizationRepository.getOrganization(organizationId)
+    const organization =
+      await this.organizationRepository.getOrganization(organizationId)
     return (
       organization?.services.find((service) => service.id === serviceId)
         ?.serviceName ?? ""

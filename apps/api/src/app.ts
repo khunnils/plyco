@@ -27,7 +27,7 @@ import { type OrganizationRepository } from "./features/organizations/repository
 import { registerOrganizationRoutes } from "./features/organizations/routes.js"
 import { InMemoryVendorRepository } from "./features/vendors/in-memory-repository.js"
 import { PrismaVendorRepository } from "./features/vendors/prisma-repository.js"
-import { type VendorRepository } from "./features/vendors/repository.js"
+import { type ProviderRepository } from "./features/vendors/repository.js"
 import { registerVendorRoutes } from "./features/vendors/routes.js"
 import { InMemoryVocabularyRepository } from "./features/vocabulary/in-memory-repository.js"
 import { PrismaVocabularyRepository } from "./features/vocabulary/prisma-repository.js"
@@ -48,7 +48,7 @@ export type CreateAppOptions = {
   auth?: false | AuthConfig
   accountRepository?: AccountRepository
   organizationRepository?: OrganizationRepository
-  vendorRepository?: VendorRepository
+  vendorRepository?: ProviderRepository
   vocabularyRepository?: VocabularyRepository
   documentRepository?: DocumentRepository
   documentPdfStorage?: DocumentPdfStorage
@@ -118,7 +118,7 @@ export async function createApp({
   await registerVendorRoutes(app, {
     accountRepository: repositories.accountRepository,
     providerSource,
-    vendorRepository: repositories.vendorRepository,
+    providerRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
   await registerOrganizationRoutes(app, {
@@ -250,7 +250,7 @@ function createRepositories({
   accountRepository?: AccountRepository
   documentRepository?: DocumentRepository
   organizationRepository?: OrganizationRepository
-  vendorRepository?: VendorRepository
+  vendorRepository?: ProviderRepository
   vocabularyRepository?: VocabularyRepository
 }) {
   const resolvedAccountRepository =

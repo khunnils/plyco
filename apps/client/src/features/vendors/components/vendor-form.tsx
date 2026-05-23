@@ -1,17 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Plus, Save, X } from "lucide-react"
-import { vendorInputSchema, type VendorInput } from "@plyco/shared"
+import {
+  organizationProviderInputSchema,
+  type OrganizationProviderInput,
+} from "@plyco/shared"
 import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
-import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
-export const VendorForm = ({
+export const OrganizationProviderForm = ({
   countryOptions,
   criticalityOptions,
   defaultValues,
@@ -23,25 +25,27 @@ export const VendorForm = ({
 }: {
   countryOptions: Option[]
   criticalityOptions: Option[]
-  defaultValues: VendorInput
+  defaultValues: OrganizationProviderInput
   submitLabel: string
   submitDisabled?: boolean
   vendorCategoryOptions: Option[]
-  onSubmit: (vendor: VendorInput) => void
+  onSubmit: (provider: OrganizationProviderInput) => void
   onCancel?: () => void
 }) => {
-  const form = useForm<VendorInput>({
+  const form = useForm<OrganizationProviderInput>({
     defaultValues,
     mode: "onBlur",
-    resolver: zodResolver(vendorInputSchema) as Resolver<VendorInput>,
+    resolver: zodResolver(
+      organizationProviderInputSchema,
+    ) as Resolver<OrganizationProviderInput>,
   })
 
   useEffect(() => {
     form.reset(defaultValues)
   }, [defaultValues, form])
 
-  const submitVendor = form.handleSubmit((vendor) => {
-    onSubmit(vendor)
+  const submitProvider = form.handleSubmit((provider) => {
+    onSubmit(provider)
   })
 
   return (
@@ -49,7 +53,7 @@ export const VendorForm = ({
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
           error={form.formState.errors.name}
-          label="Vendor name"
+          label="Provider name"
           name="name"
           placeholder="GitHub"
           register={form.register}
@@ -61,30 +65,9 @@ export const VendorForm = ({
           options={[{ value: "", label: "Not set" }, ...vendorCategoryOptions]}
         />
         <TextField
-          error={form.formState.errors.displayName}
-          label="Display name"
-          name="displayName"
-          placeholder="GitHub"
-          register={form.register}
-        />
-        <TextField
           error={form.formState.errors.legalName}
           label="Legal name"
           name="legalName"
-          placeholder="GitHub, Inc."
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.providerOrganizationName}
-          label="Provider organization"
-          name="providerOrganizationName"
-          placeholder="GitHub"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.providerOrganizationLegalName}
-          label="Provider organization legal name"
-          name="providerOrganizationLegalName"
           placeholder="GitHub, Inc."
           register={form.register}
         />
@@ -94,51 +77,18 @@ export const VendorForm = ({
           name="countryOfRegistration"
           options={[{ value: "", label: "Not set" }, ...countryOptions]}
         />
-        <TextField
-          error={form.formState.errors.owner}
-          label="Owner"
-          name="owner"
-          placeholder="Engineering"
-          register={form.register}
-        />
         <SelectField
           control={form.control}
           label="Criticality"
           name="criticality"
           options={criticalityOptions}
         />
-        <ToggleField
-          control={form.control}
-          label="Vendor uses subprocessors"
-          name="hasSubprocessors"
-        />
-        <TextField
-          error={form.formState.errors.privacyPolicyUrl}
-          label="Privacy policy URL"
-          name="privacyPolicyUrl"
-          placeholder="https://example.com/privacy"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.dpaUrl}
-          label="DPA URL"
-          name="dpaUrl"
-          placeholder="https://example.com/dpa"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.securityPageUrl}
-          label="Security page URL"
-          name="securityPageUrl"
-          placeholder="https://example.com/security"
-          register={form.register}
-        />
       </div>
       <TextAreaField
         error={form.formState.errors.notes}
         label="Notes"
         name="notes"
-        placeholder="Key contract, DPA, or review context"
+        placeholder="Key contract, review, or operational context"
         register={form.register}
       />
       <div className="flex items-center justify-end gap-2">
@@ -153,7 +103,7 @@ export const VendorForm = ({
             Cancel
           </Button>
         ) : null}
-        <Button disabled={submitDisabled} type="button" onClick={submitVendor}>
+        <Button disabled={submitDisabled} type="button" onClick={submitProvider}>
           {submitDisabled ? (
             <Loader2 className="animate-spin" />
           ) : onCancel ? (

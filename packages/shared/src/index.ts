@@ -10,14 +10,14 @@ export const dpaStatusSchema = z.enum([
   "unknown",
 ])
 
-export const vendorCriticalitySchema = z.enum([
+export const providerCriticalitySchema = z.enum([
   "low",
   "medium",
   "high",
   "critical",
 ])
 
-export const vendorDataProcessingLevelSchema = z.enum([
+export const providerDataProcessingLevelSchema = z.enum([
   "none",
   "limited",
   "subprocessor",
@@ -81,7 +81,7 @@ export const vocabularyCodeInputSchema = z.object({
   active: z.boolean().default(true),
 })
 
-export const organizationProviderSchema = z.object({
+export const providerSelectionSchema = z.object({
   systemType: providerSystemTypeSchema,
   providerId: z.string().trim().min(1),
   name: z.string().trim().optional(),
@@ -130,8 +130,6 @@ export const companyProfileSchema = z.object({
 export const servicePrivacyProfileSchema = z.object({
   usesCookies: z.boolean(),
   cookieTypes: z.array(codeIdSchema).default([]),
-  analyticsProviders: z.array(organizationProviderSchema).default([]),
-  advertisingProviders: z.array(organizationProviderSchema).default([]),
   primaryHostingRegion: codeIdSchema.or(z.literal("")).default(""),
   dataResidencyOptions: z.array(codeIdSchema).default([]),
 })
@@ -163,7 +161,7 @@ export const privacyProfileSchema = z.object({
   identityVerificationRequired: z.boolean(),
   authorizedAgentSupported: z.boolean(),
   appealProcessExists: z.boolean(),
-  organizationProviders: z.array(organizationProviderSchema).default([]),
+  organizationProviders: z.array(providerSelectionSchema).default([]),
   cookieConsentMechanism: codeIdSchema.or(z.literal("")).default(""),
   doNotTrackResponse: z.boolean(),
   globalPrivacyControlSupported: z.boolean(),
@@ -182,7 +180,7 @@ export const privacyProfileSchema = z.object({
 })
 
 export const infrastructureProfileSchema = z.object({
-  organizationProviders: z.array(organizationProviderSchema).default([]),
+  organizationProviders: z.array(providerSelectionSchema).default([]),
   mfaEnabled: z.boolean(),
   encryptedDevicesRequired: z.boolean(),
   backupsEnabled: z.boolean(),
@@ -231,42 +229,37 @@ export const accessProfileSchema = z.object({
   passwordManagerRequired: z.boolean().default(false),
 })
 
-export const vendorInputSchema = z.object({
-  name: z.string().trim().min(1, "Vendor name is required"),
+export const organizationProviderInputSchema = z.object({
+  providerId: z.string().trim().optional().or(z.literal("")),
+  systemTypes: z.array(providerSystemTypeSchema).default([]),
+  name: z.string().trim().min(1, "Provider name is required"),
   legalName: z.string().trim().default(""),
-  displayName: z.string().trim().default(""),
-  providerOrganizationName: z.string().trim().default(""),
-  providerOrganizationLegalName: z.string().trim().default(""),
-  privacyPolicyUrl: z.string().trim().default(""),
-  dpaUrl: z.string().trim().default(""),
-  securityPageUrl: z.string().trim().default(""),
   category: codeIdSchema.or(z.literal("")).default(""),
   countryOfRegistration: countryCodeSchema.or(z.literal("")).default(""),
-  hasSubprocessors: z.boolean().default(false),
-  criticality: vendorCriticalitySchema,
-  owner: z.string().trim().min(1).optional().or(z.literal("")),
+  criticality: providerCriticalitySchema,
   notes: z.string().trim().optional().or(z.literal("")),
 })
 
-export const vendorSchema = vendorInputSchema.extend({
+export const organizationProviderInventorySchema = organizationProviderInputSchema.extend({
   id: z.string().min(1),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
 
-const serviceVendorUseInputBaseSchema = z.object({
+const serviceProviderUsageInputBaseSchema = z.object({
   serviceId: z.string().trim().min(1, "Service is required"),
-  vendorId: z.string().trim().min(1, "Vendor is required"),
+  organizationProviderId: z.string().trim().min(1, "Provider is required"),
+  systemType: providerSystemTypeSchema.nullable().default(null),
   purpose: z.string().trim().min(1, "Purpose is required"),
-  dataProcessingLevel: vendorDataProcessingLevelSchema.default("limited"),
+  dataProcessingLevel: providerDataProcessingLevelSchema.default("limited"),
   dataProcessed: z.array(z.string().trim().min(1)).default([]),
   dpaStatus: dpaStatusSchema,
   dataRegions: z.array(codeIdSchema).default([]),
   notes: z.string().trim().optional().or(z.literal("")),
 })
 
-const normalizeVendorDataProcessingNone = <
-  T extends z.infer<typeof serviceVendorUseInputBaseSchema>,
+const normalizeProviderDataProcessingNone = <
+  T extends z.infer<typeof serviceProviderUsageInputBaseSchema>,
 >(
   value: T,
 ): T =>
@@ -279,20 +272,20 @@ const normalizeVendorDataProcessingNone = <
       } as T)
     : value
 
-export const serviceVendorUseInputSchema = serviceVendorUseInputBaseSchema.transform(
-  normalizeVendorDataProcessingNone,
+export const serviceProviderUsageInputSchema = serviceProviderUsageInputBaseSchema.transform(
+  normalizeProviderDataProcessingNone,
 )
 
-const serviceVendorUseStoredBaseSchema = serviceVendorUseInputBaseSchema.extend({
+const serviceProviderUsageStoredBaseSchema = serviceProviderUsageInputBaseSchema.extend({
   id: z.string().min(1),
   serviceName: z.string().trim().default(""),
-  vendorName: z.string().trim().default(""),
+  providerName: z.string().trim().default(""),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
 
-export const serviceVendorUseSchema = serviceVendorUseStoredBaseSchema.transform(
-  normalizeVendorDataProcessingNone,
+export const serviceProviderUsageSchema = serviceProviderUsageStoredBaseSchema.transform(
+  normalizeProviderDataProcessingNone,
 )
 
 export const providerSchema = z.object({
@@ -435,8 +428,8 @@ export const organizationSecurityProfileSchema = z.object({
 export const securityProgramSnapshotSchema = z.object({
   organization: organizationSecurityProfileSchema.nullable(),
   businessActivities: z.array(businessActivitySchema),
-  vendors: z.array(vendorSchema),
-  serviceVendorUses: z.array(serviceVendorUseSchema),
+  organizationProviders: z.array(organizationProviderInventorySchema),
+  serviceProviderUsage: z.array(serviceProviderUsageSchema),
 })
 
 export const structuredErrorSchema = z.object({
@@ -448,9 +441,9 @@ export const structuredErrorSchema = z.object({
 })
 
 export type DpaStatus = z.infer<typeof dpaStatusSchema>
-export type VendorCriticality = z.infer<typeof vendorCriticalitySchema>
-export type VendorDataProcessingLevel = z.infer<
-  typeof vendorDataProcessingLevelSchema
+export type ProviderCriticality = z.infer<typeof providerCriticalitySchema>
+export type ProviderDataProcessingLevel = z.infer<
+  typeof providerDataProcessingLevelSchema
 >
 export type ProviderSystemType = z.infer<typeof providerSystemTypeSchema>
 export type CodeId = z.infer<typeof codeIdSchema>
@@ -460,7 +453,7 @@ export type VocabularyCode = z.infer<typeof vocabularyCodeSchema>
 export type VocabularyCodeSet = z.infer<typeof vocabularyCodeSetSchema>
 export type Vocabulary = z.infer<typeof vocabularySchema>
 export type VocabularyCodeInput = z.infer<typeof vocabularyCodeInputSchema>
-export type OrganizationProvider = z.infer<typeof organizationProviderSchema>
+export type ProviderSelection = z.infer<typeof providerSelectionSchema>
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>
 export type BusinessActivityInput = z.infer<typeof businessActivityInputSchema>
 export type BusinessActivity = z.infer<typeof businessActivitySchema>
@@ -472,10 +465,10 @@ export type PrivacyProfile = z.infer<typeof privacyProfileSchema>
 export type InfrastructureProfile = z.infer<typeof infrastructureProfileSchema>
 export type DataHandlingProfile = z.infer<typeof dataHandlingProfileSchema>
 export type AccessProfile = z.infer<typeof accessProfileSchema>
-export type VendorInput = z.infer<typeof vendorInputSchema>
-export type Vendor = z.infer<typeof vendorSchema>
-export type ServiceVendorUseInput = z.infer<typeof serviceVendorUseInputSchema>
-export type ServiceVendorUse = z.infer<typeof serviceVendorUseSchema>
+export type OrganizationProviderInput = z.infer<typeof organizationProviderInputSchema>
+export type OrganizationProvider = z.infer<typeof organizationProviderInventorySchema>
+export type ServiceProviderUsageInput = z.infer<typeof serviceProviderUsageInputSchema>
+export type ServiceProviderUsage = z.infer<typeof serviceProviderUsageSchema>
 export type Provider = z.infer<typeof providerSchema>
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>
 export type Template = z.infer<typeof templateSchema>
@@ -534,8 +527,6 @@ export const emptyServiceProfile: ServiceProfileInput = {
   privacy: {
     usesCookies: false,
     cookieTypes: [],
-    analyticsProviders: [],
-    advertisingProviders: [],
     primaryHostingRegion: "",
     dataResidencyOptions: [],
   },

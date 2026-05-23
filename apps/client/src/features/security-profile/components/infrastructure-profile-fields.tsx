@@ -1,5 +1,5 @@
 import {
-  type OrganizationProvider,
+  type ProviderSelection,
   type Provider,
   type ProviderSystemType,
 } from "@plyco/shared"
@@ -42,7 +42,7 @@ const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
 ]
 
 const selectedProviderIds = (
-  organizationProviders: OrganizationProvider[],
+  organizationProviders: ProviderSelection[],
   systemType: ProviderSystemType
 ) =>
   organizationProviders

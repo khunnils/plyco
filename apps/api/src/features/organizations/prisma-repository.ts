@@ -4,7 +4,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
-  type OrganizationProvider,
+  type ProviderSelection,
   type OrganizationSecurityProfile,
   type PrivacyProfile,
   type Provider,
@@ -28,12 +28,11 @@ export const ORGANIZATION_INCLUDE = {
     include: { businessActivities: true },
     orderBy: { createdAt: "asc" },
   },
-  vendors: {
+  organizationProviders: {
     select: {
       name: true,
       providerId: true,
-      serviceId: true,
-      systemType: true,
+      systemTypes: true,
     },
   },
 } as const
@@ -138,13 +137,13 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return activities.map((activity) => activity.id)
   }
 
-  async listVendorIds(organizationId: string): Promise<string[]> {
-    const vendors = await this.client.vendorMaster.findMany({
+  async listOrganizationProviderIds(organizationId: string): Promise<string[]> {
+    const providers = await this.client.organizationProvider.findMany({
       where: { organizationId },
       select: { id: true },
     })
 
-    return vendors.map((vendor) => vendor.id)
+    return providers.map((provider) => provider.id)
   }
 
   private organizationData(input: CompanyProfile) {
@@ -352,25 +351,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     input: SecurityProfileInput,
     providerCatalog: Provider[],
   ) {
-    const selectedProviders: Array<OrganizationProvider & { serviceId?: string }> = [
-      ...input.infrastructure.organizationProviders.map((provider) => ({
-        ...provider,
-        serviceId: undefined,
-      })),
-      ...input.privacy.organizationProviders.map((provider) => ({
-        ...provider,
-        serviceId: undefined,
-      })),
-      ...input.services.flatMap((service) => [
-        ...service.privacy.analyticsProviders.map((provider) => ({
-          ...provider,
-          serviceId: service.id,
-        })),
-        ...service.privacy.advertisingProviders.map((provider) => ({
-          ...provider,
-          serviceId: service.id,
-        })),
-      ]),
+    const selectedProviders: ProviderSelection[] = [
+      ...input.infrastructure.organizationProviders,
+      ...input.privacy.organizationProviders,
     ]
     const catalogProviders = selectedProviders.map((selectedProvider) => ({
       selectedProvider,
@@ -381,35 +364,63 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       ),
     }))
 
-    await this.client.organizationProvider.deleteMany({
-      where: {
-        organizationId,
-        systemType: {
-          in: [
-            "auth",
-            "source_control",
-            "cloud",
-            "password_manager",
-            "analytics",
-            "advertising",
-            "newsletter",
-          ],
-        },
-      },
+    const managedSystemTypes = [
+      "auth",
+      "source_control",
+      "cloud",
+      "password_manager",
+      "newsletter",
+    ]
+    const currentProviders = await this.client.organizationProvider.findMany({
+      where: { organizationId },
     })
+    const selectedByProviderId = new Map<string, Set<ProviderSystemType>>()
+
+    for (const { provider, selectedProvider } of catalogProviders) {
+      const currentSystemTypes =
+        selectedByProviderId.get(provider.id) ?? new Set<ProviderSystemType>()
+      currentSystemTypes.add(selectedProvider.systemType)
+      selectedByProviderId.set(provider.id, currentSystemTypes)
+    }
 
     await Promise.all(
-      catalogProviders.map(({ provider, selectedProvider }) =>
-        this.client.organizationProvider.create({
+      currentProviders.map((provider) => {
+        const selectedSystemTypes = provider.providerId
+          ? selectedByProviderId.get(provider.providerId)
+          : undefined
+        const systemTypes = [
+          ...provider.systemTypes.filter(
+            (systemType) => !managedSystemTypes.includes(systemType),
+          ),
+          ...(selectedSystemTypes ? Array.from(selectedSystemTypes) : []),
+        ]
+
+        return this.client.organizationProvider.update({
+          where: { id: provider.id },
+          data: { systemTypes },
+        })
+      }),
+    )
+
+    await Promise.all(
+      catalogProviders.map(async ({ provider }) => {
+        const existing = await this.client.organizationProvider.findFirst({
+          where: { organizationId, providerId: provider.id },
+        })
+
+        if (existing) {
+          return existing
+        }
+
+        return this.client.organizationProvider.create({
           data: {
             organizationId,
-            serviceId: selectedProvider.serviceId ?? null,
             providerId: provider.id,
-            systemType: selectedProvider.systemType,
+            systemTypes: Array.from(selectedByProviderId.get(provider.id) ?? []),
             ...this.organizationProviderData(provider),
           },
         })
-      ),
+      }),
     )
   }
 
@@ -440,23 +451,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return {
       name: provider.name,
       legalName: "",
-      displayName: provider.name,
-      providerOrganizationName: provider.name,
-      providerOrganizationLegalName: "",
-      privacyPolicyUrl: "",
-      dpaUrl: "",
-      securityPageUrl: "",
       category: this.providerCategory(provider),
-      purpose: provider.url
-        ? `Operational provider listed at ${provider.url}`
-        : "Operational provider",
       countryOfRegistration: "",
-      hasSubprocessors: false,
-      dataProcessingLevel: provider.handlesCustomerData ? "limited" : "none",
-      dpaStatus: "not_started",
-      dataRegions: [],
       criticality: this.providerCriticality(provider),
-      owner: null,
       notes: provider.securityCriticality
         ? `Provider catalog criticality: ${provider.securityCriticality}`
         : null,

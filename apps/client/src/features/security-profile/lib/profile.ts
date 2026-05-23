@@ -6,13 +6,13 @@ import {
   emptyPrivacyProfile,
   emptyServiceProfile,
   type OrganizationProvider,
+  type OrganizationProviderInput,
   type OrganizationSecurityProfile,
   type Provider,
   type ProviderSystemType,
-  type ServiceVendorUse,
-  type ServiceVendorUseInput,
-  type Vendor,
-  type VendorInput,
+  type ProviderSelection,
+  type ServiceProviderUsage,
+  type ServiceProviderUsageInput,
 } from "@plyco/shared"
 
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
@@ -26,26 +26,21 @@ export const emptyProfileDraft: ProfileDraft = {
   access: emptyAccessProfile,
 }
 
-export const emptyVendorDraft: VendorInput = {
+export const emptyOrganizationProviderDraft: OrganizationProviderInput = {
+  providerId: "",
+  systemTypes: [],
   name: "",
   legalName: "",
-  displayName: "",
-  providerOrganizationName: "",
-  providerOrganizationLegalName: "",
-  privacyPolicyUrl: "",
-  dpaUrl: "",
-  securityPageUrl: "",
   category: "",
   countryOfRegistration: "",
-  hasSubprocessors: false,
   criticality: "medium",
-  owner: "",
   notes: "",
 }
 
-export const emptyServiceVendorUseDraft: ServiceVendorUseInput = {
+export const emptyServiceProviderUsageDraft: ServiceProviderUsageInput = {
   serviceId: "",
-  vendorId: "",
+  organizationProviderId: "",
+  systemType: null,
   purpose: "",
   dataProcessingLevel: "none",
   dataProcessed: [],
@@ -89,34 +84,31 @@ export const profileFromOrganization = (
   }
 }
 
-export const toVendorInput = (vendor: Vendor | VendorInput): VendorInput => ({
-  name: vendor.name,
-  legalName: vendor.legalName,
-  displayName: vendor.displayName,
-  providerOrganizationName: vendor.providerOrganizationName,
-  providerOrganizationLegalName: vendor.providerOrganizationLegalName,
-  privacyPolicyUrl: vendor.privacyPolicyUrl,
-  dpaUrl: vendor.dpaUrl,
-  securityPageUrl: vendor.securityPageUrl,
-  category: vendor.category,
-  countryOfRegistration: vendor.countryOfRegistration,
-  hasSubprocessors: vendor.hasSubprocessors,
-  criticality: vendor.criticality,
-  owner: vendor.owner,
-  notes: vendor.notes,
+export const toOrganizationProviderInput = (
+  provider: OrganizationProvider | OrganizationProviderInput,
+): OrganizationProviderInput => ({
+  providerId: provider.providerId,
+  systemTypes: provider.systemTypes,
+  name: provider.name,
+  legalName: provider.legalName,
+  category: provider.category,
+  countryOfRegistration: provider.countryOfRegistration,
+  criticality: provider.criticality,
+  notes: provider.notes,
 })
 
-export const toServiceVendorUseInput = (
-  vendorUse: ServiceVendorUse | ServiceVendorUseInput
-): ServiceVendorUseInput => ({
-  serviceId: vendorUse.serviceId,
-  vendorId: vendorUse.vendorId,
-  purpose: vendorUse.purpose,
-  dataProcessingLevel: vendorUse.dataProcessingLevel,
-  dataProcessed: vendorUse.dataProcessed,
-  dpaStatus: vendorUse.dpaStatus,
-  dataRegions: vendorUse.dataRegions,
-  notes: vendorUse.notes,
+export const toServiceProviderUsageInput = (
+  providerUsage: ServiceProviderUsage | ServiceProviderUsageInput
+): ServiceProviderUsageInput => ({
+  serviceId: providerUsage.serviceId,
+  organizationProviderId: providerUsage.organizationProviderId,
+  systemType: providerUsage.systemType,
+  purpose: providerUsage.purpose,
+  dataProcessingLevel: providerUsage.dataProcessingLevel,
+  dataProcessed: providerUsage.dataProcessed,
+  dpaStatus: providerUsage.dpaStatus,
+  dataRegions: providerUsage.dataRegions,
+  notes: providerUsage.notes,
 })
 
 export const dataTypeOptionsFromProfile = (
@@ -142,7 +134,7 @@ export const dataTypeOptionsFromProfile = (
 
 const providerCriticality = (
   provider: Provider
-): VendorInput["criticality"] => {
+): OrganizationProviderInput["criticality"] => {
   const normalizedCriticality = provider.securityCriticality?.toLowerCase()
 
   if (
@@ -159,7 +151,7 @@ const providerCriticality = (
   return "medium"
 }
 
-const providerCategory = (provider: Provider): VendorInput["category"] => {
+const providerCategory = (provider: Provider): OrganizationProviderInput["category"] => {
   const normalizedCategory = provider.category?.trim().toLowerCase()
 
   if (normalizedCategory === "source control") {
@@ -181,7 +173,7 @@ const valueList = (values: string[]) =>
   values.length > 0 ? values.join(", ") : "Not set"
 
 export const providerNamesForSystem = (
-  organizationProviders: OrganizationProvider[],
+  organizationProviders: ProviderSelection[],
   providers: Provider[],
   systemType: ProviderSystemType,
 ) => {
@@ -198,22 +190,16 @@ export const providerNamesForSystem = (
   return valueList(names)
 }
 
-export const vendorInputFromProvider = (
+export const organizationProviderInputFromProvider = (
   provider: Provider,
-): VendorInput => ({
+): OrganizationProviderInput => ({
+  providerId: provider.id,
+  systemTypes: [],
   name: provider.name,
   legalName: "",
-  displayName: provider.name,
-  providerOrganizationName: provider.name,
-  providerOrganizationLegalName: "",
-  privacyPolicyUrl: provider.url ?? "",
-  dpaUrl: "",
-  securityPageUrl: "",
   category: providerCategory(provider),
   countryOfRegistration: "",
-  hasSubprocessors: false,
   criticality: providerCriticality(provider),
-  owner: "",
   notes: provider.securityCriticality
     ? `Provider catalog criticality: ${provider.securityCriticality}`
     : "",

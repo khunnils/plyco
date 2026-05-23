@@ -6,8 +6,8 @@ import {
   type InfrastructureProfile,
   type PrivacyProfile,
   type ServiceProfileInput,
-  type ServiceVendorUseInput,
-  type VendorInput,
+  type ServiceProviderUsageInput,
+  type OrganizationProviderInput,
 } from "@plyco/shared"
 
 import { ApiError } from "../../errors.js"
@@ -334,42 +334,6 @@ export const validateServiceProfileCodes = async (
       service.privacy.dataResidencyOptions,
       `${fieldPrefix}.privacy.dataResidencyOptions`,
     ),
-    ...service.privacy.analyticsProviders.map((provider) => {
-      if (provider.systemType !== "analytics") {
-        throw new ApiError(
-          "SERVICE_PROVIDER_SYSTEM_TYPE_INVALID",
-          "Service analytics providers must use analytics system type.",
-          400,
-          { systemType: provider.systemType },
-        )
-      }
-
-      return assertCode(
-        vocabularyRepository,
-        organizationId,
-        "provider_system_type",
-        provider.systemType,
-        `${fieldPrefix}.privacy.analyticsProviders.systemType`,
-      )
-    }),
-    ...service.privacy.advertisingProviders.map((provider) => {
-      if (provider.systemType !== "advertising") {
-        throw new ApiError(
-          "SERVICE_PROVIDER_SYSTEM_TYPE_INVALID",
-          "Service advertising providers must use advertising system type.",
-          400,
-          { systemType: provider.systemType },
-        )
-      }
-
-      return assertCode(
-        vocabularyRepository,
-        organizationId,
-        "provider_system_type",
-        provider.systemType,
-        `${fieldPrefix}.privacy.advertisingProviders.systemType`,
-      )
-    }),
   ])
 }
 
@@ -439,62 +403,71 @@ export const validatePrivacyProfileCodes = async (
   ])
 }
 
-export const validateVendorCodes = async (
+export const validateOrganizationProviderCodes = async (
   vocabularyRepository: VocabularyRepository,
   organizationId: string,
-  vendor: VendorInput,
+  provider: OrganizationProviderInput,
 ) => {
   await Promise.all([
     assertCountry(
       vocabularyRepository,
-      "vendor.countryOfRegistration",
-      vendor.countryOfRegistration,
+      "provider.countryOfRegistration",
+      provider.countryOfRegistration,
     ),
-    vendor.category
+    provider.category
       ? assertCode(
           vocabularyRepository,
           organizationId,
           "vendor_category",
-          vendor.category,
-          "vendor.category",
+          provider.category,
+          "provider.category",
         )
       : Promise.resolve(),
     assertCode(
       vocabularyRepository,
       organizationId,
       "vendor_criticality",
-      vendor.criticality,
-      "vendor.criticality",
+      provider.criticality,
+      "provider.criticality",
     ),
   ])
 }
 
-export const validateServiceVendorUseCodes = async (
+export const validateServiceProviderUsageCodes = async (
   vocabularyRepository: VocabularyRepository,
   organizationId: string,
-  vendorUse: ServiceVendorUseInput,
+  providerUsage: ServiceProviderUsageInput,
 ) => {
   await Promise.all([
     assertCode(
       vocabularyRepository,
       organizationId,
       "data_processing_level",
-      vendorUse.dataProcessingLevel,
-      "serviceVendorUse.dataProcessingLevel",
+      providerUsage.dataProcessingLevel,
+      "serviceProviderUsage.dataProcessingLevel",
     ),
     assertCode(
       vocabularyRepository,
       organizationId,
       "dpa_status",
-      vendorUse.dpaStatus,
-      "serviceVendorUse.dpaStatus",
+      providerUsage.dpaStatus,
+      "serviceProviderUsage.dpaStatus",
     ),
     assertCodes(
       vocabularyRepository,
       organizationId,
       "regions",
-      vendorUse.dataRegions,
-      "serviceVendorUse.dataRegions",
+      providerUsage.dataRegions,
+      "serviceProviderUsage.dataRegions",
     ),
+    providerUsage.systemType
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "provider_system_type",
+          providerUsage.systemType,
+          "serviceProviderUsage.systemType",
+        )
+      : Promise.resolve(),
   ])
 }

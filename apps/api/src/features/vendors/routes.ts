@@ -1,7 +1,7 @@
 import {
   businessActivityInputSchema,
-  serviceVendorUseInputSchema,
-  vendorInputSchema,
+  serviceProviderUsageInputSchema,
+  organizationProviderInputSchema,
 } from "@plyco/shared"
 import { type FastifyInstance } from "fastify"
 
@@ -12,22 +12,22 @@ import { type AccountRepository } from "../accounts/repository.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
 import {
   validateBusinessActivityCodes,
-  validateServiceVendorUseCodes,
-  validateVendorCodes,
+  validateServiceProviderUsageCodes,
+  validateOrganizationProviderCodes,
 } from "../vocabulary/validation.js"
-import { type VendorRepository } from "./repository.js"
+import { type ProviderRepository } from "./repository.js"
 
 export async function registerVendorRoutes(
   app: FastifyInstance,
   {
     providerSource,
-    vendorRepository,
+    providerRepository,
     accountRepository,
     vocabularyRepository,
   }: {
     accountRepository: AccountRepository
     providerSource: ProviderSource
-    vendorRepository: VendorRepository
+    providerRepository: ProviderRepository
     vocabularyRepository: VocabularyRepository
   },
 ) {
@@ -42,7 +42,7 @@ export async function registerVendorRoutes(
         request.params.organizationId,
       )
 
-      return vendorRepository.listBusinessActivities(request.params.organizationId)
+      return providerRepository.listBusinessActivities(request.params.organizationId)
     },
   )
 
@@ -60,7 +60,7 @@ export async function registerVendorRoutes(
         request.params.organizationId,
         body,
       )
-      const activity = await vendorRepository.createBusinessActivity(
+      const activity = await providerRepository.createBusinessActivity(
         request.params.organizationId,
         body,
       )
@@ -83,7 +83,7 @@ export async function registerVendorRoutes(
         request.params.organizationId,
         body,
       )
-      const activity = await vendorRepository.updateBusinessActivity(
+      const activity = await providerRepository.updateBusinessActivity(
         request.params.organizationId,
         request.params.id,
         body,
@@ -109,7 +109,7 @@ export async function registerVendorRoutes(
         accountRepository,
         request.params.organizationId,
       )
-      const deleted = await vendorRepository.deleteBusinessActivity(
+      const deleted = await providerRepository.deleteBusinessActivity(
         request.params.organizationId,
         request.params.id,
       )
@@ -127,7 +127,7 @@ export async function registerVendorRoutes(
   )
 
   app.get<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/vendors",
+    "/organizations/:organizationId/organization-providers",
     async (request) => {
       await requireOrganizationMembership(
         request,
@@ -135,76 +135,76 @@ export async function registerVendorRoutes(
         request.params.organizationId,
       )
 
-      return vendorRepository.listVendors(request.params.organizationId)
+      return providerRepository.listOrganizationProviders(request.params.organizationId)
     },
   )
 
   app.post<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/vendors",
+    "/organizations/:organizationId/organization-providers",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const body = vendorInputSchema.parse(request.body)
-      await validateVendorCodes(
+      const body = organizationProviderInputSchema.parse(request.body)
+      await validateOrganizationProviderCodes(
         vocabularyRepository,
         request.params.organizationId,
         body,
       )
-      const vendor = await vendorRepository.createVendor(
+      const provider = await providerRepository.createOrganizationProvider(
         request.params.organizationId,
         body,
       )
 
-      return reply.status(201).send(vendor)
+      return reply.status(201).send(provider)
     },
   )
 
   app.put<{ Params: { organizationId: string; id: string } }>(
-    "/organizations/:organizationId/vendors/:id",
+    "/organizations/:organizationId/organization-providers/:id",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const body = vendorInputSchema.parse(request.body)
-      await validateVendorCodes(
+      const body = organizationProviderInputSchema.parse(request.body)
+      await validateOrganizationProviderCodes(
         vocabularyRepository,
         request.params.organizationId,
         body,
       )
-      const vendor = await vendorRepository.updateVendor(
+      const provider = await providerRepository.updateOrganizationProvider(
         request.params.organizationId,
         request.params.id,
         body,
       )
 
-      if (!vendor) {
-        throw new ApiError("VENDOR_NOT_FOUND", "Vendor was not found.", 404)
+      if (!provider) {
+        throw new ApiError("PROVIDER_NOT_FOUND", "Provider was not found.", 404)
       }
 
-      return reply.send(vendor)
+      return reply.send(provider)
     },
   )
 
   app.delete<{ Params: { organizationId: string; id: string } }>(
-    "/organizations/:organizationId/vendors/:id",
+    "/organizations/:organizationId/organization-providers/:id",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const deleted = await vendorRepository.deleteVendor(
+      const deleted = await providerRepository.deleteOrganizationProvider(
         request.params.organizationId,
         request.params.id,
       )
 
       if (!deleted) {
-        throw new ApiError("VENDOR_NOT_FOUND", "Vendor was not found.", 404)
+        throw new ApiError("PROVIDER_NOT_FOUND", "Provider was not found.", 404)
       }
 
       return reply.status(204).send()
@@ -212,7 +212,7 @@ export async function registerVendorRoutes(
   )
 
   app.get<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/service-vendor-uses",
+    "/organizations/:organizationId/service-provider-usage",
     async (request) => {
       await requireOrganizationMembership(
         request,
@@ -220,82 +220,82 @@ export async function registerVendorRoutes(
         request.params.organizationId,
       )
 
-      return vendorRepository.listServiceVendorUses(request.params.organizationId)
+      return providerRepository.listServiceProviderUsage(request.params.organizationId)
     },
   )
 
   app.post<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/service-vendor-uses",
+    "/organizations/:organizationId/service-provider-usage",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const body = serviceVendorUseInputSchema.parse(request.body)
-      await validateServiceVendorUseCodes(
+      const body = serviceProviderUsageInputSchema.parse(request.body)
+      await validateServiceProviderUsageCodes(
         vocabularyRepository,
         request.params.organizationId,
         body,
       )
-      const vendorUse = await vendorRepository.createServiceVendorUse(
+      const providerUsage = await providerRepository.createServiceProviderUsage(
         request.params.organizationId,
         body,
       )
 
-      return reply.status(201).send(vendorUse)
+      return reply.status(201).send(providerUsage)
     },
   )
 
   app.put<{ Params: { organizationId: string; id: string } }>(
-    "/organizations/:organizationId/service-vendor-uses/:id",
+    "/organizations/:organizationId/service-provider-usage/:id",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const body = serviceVendorUseInputSchema.parse(request.body)
-      await validateServiceVendorUseCodes(
+      const body = serviceProviderUsageInputSchema.parse(request.body)
+      await validateServiceProviderUsageCodes(
         vocabularyRepository,
         request.params.organizationId,
         body,
       )
-      const vendorUse = await vendorRepository.updateServiceVendorUse(
+      const providerUsage = await providerRepository.updateServiceProviderUsage(
         request.params.organizationId,
         request.params.id,
         body,
       )
 
-      if (!vendorUse) {
+      if (!providerUsage) {
         throw new ApiError(
-          "SERVICE_VENDOR_USE_NOT_FOUND",
-          "Service vendor use was not found.",
+          "SERVICE_PROVIDER_USAGE_NOT_FOUND",
+          "Service provider usage was not found.",
           404,
         )
       }
 
-      return reply.send(vendorUse)
+      return reply.send(providerUsage)
     },
   )
 
   app.delete<{ Params: { organizationId: string; id: string } }>(
-    "/organizations/:organizationId/service-vendor-uses/:id",
+    "/organizations/:organizationId/service-provider-usage/:id",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       )
-      const deleted = await vendorRepository.deleteServiceVendorUse(
+      const deleted = await providerRepository.deleteServiceProviderUsage(
         request.params.organizationId,
         request.params.id,
       )
 
       if (!deleted) {
         throw new ApiError(
-          "SERVICE_VENDOR_USE_NOT_FOUND",
-          "Service vendor use was not found.",
+          "SERVICE_PROVIDER_USAGE_NOT_FOUND",
+          "Service provider usage was not found.",
           404,
         )
       }

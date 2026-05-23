@@ -14,14 +14,14 @@ import {
   privacyProfileSchema,
   accessProfileSchema,
   infrastructureProfileSchema,
+  organizationProviderInputSchema,
+  providerCriticalitySchema,
   providerSystemTypeSchema,
   serviceProfileInputSchema,
   serviceProfileSchema,
-  serviceVendorUseInputSchema,
+  serviceProviderUsageInputSchema,
   templateInputSchema,
   templateSchema,
-  vendorInputSchema,
-  vendorCriticalitySchema,
   countryCodeSchema,
 } from "./index.js"
 
@@ -47,31 +47,26 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false)
   })
 
-  it("requires operational vendor fields", () => {
-    const result = vendorInputSchema.safeParse({
+  it("requires operational provider fields", () => {
+    const result = organizationProviderInputSchema.safeParse({
+      providerId: "prov-github",
+      systemTypes: [],
       name: "GitHub",
       legalName: "GitHub, Inc.",
-      displayName: "GitHub",
-      providerOrganizationName: "GitHub",
-      providerOrganizationLegalName: "GitHub, Inc.",
-      privacyPolicyUrl: "https://github.com/privacy",
-      dpaUrl: "https://github.com/customer-terms/dpa",
-      securityPageUrl: "https://github.com/security",
       category: "source_control",
       countryOfRegistration: "US",
-      hasSubprocessors: true,
       criticality: "high",
-      owner: "Engineering",
       notes: "",
     })
 
     expect(result.success).toBe(true)
   })
 
-  it("accepts service-specific vendor processing fields", () => {
-    const result = serviceVendorUseInputSchema.safeParse({
+  it("accepts service-specific provider processing fields", () => {
+    const result = serviceProviderUsageInputSchema.safeParse({
       serviceId: "service_1",
-      vendorId: "vendor_1",
+      organizationProviderId: "provider_1",
+      systemType: "analytics",
       purpose: "Code hosting",
       dataProcessingLevel: "limited",
       dataProcessed: ["source_code"],
@@ -83,10 +78,11 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true)
   })
 
-  it("normalizes non-processing vendor uses", () => {
-    const result = serviceVendorUseInputSchema.safeParse({
+  it("normalizes non-processing provider usage", () => {
+    const result = serviceProviderUsageInputSchema.safeParse({
       serviceId: "service_1",
-      vendorId: "vendor_1",
+      organizationProviderId: "provider_1",
+      systemType: null,
       purpose: "Issue tracking",
       dataProcessingLevel: "none",
       dataProcessed: ["source_code"],
@@ -141,8 +137,8 @@ describe("shared security profile schemas", () => {
     ).toBe(false)
   })
 
-  it("limits vendor criticality to the supported readiness levels", () => {
-    expect(vendorCriticalitySchema.safeParse("severe").success).toBe(false)
+  it("limits provider criticality to the supported readiness levels", () => {
+    expect(providerCriticalitySchema.safeParse("severe").success).toBe(false)
   })
 
   it("validates ISO alpha-2 country codes", () => {
@@ -218,8 +214,6 @@ describe("shared security profile schemas", () => {
         privacy: {
           usesCookies: false,
           cookieTypes: [],
-          analyticsProviders: [],
-          advertisingProviders: [],
           primaryHostingRegion: "",
           dataResidencyOptions: [],
         },
@@ -241,18 +235,6 @@ describe("shared security profile schemas", () => {
       privacy: {
         usesCookies: true,
         cookieTypes: ["necessary", "analytics"],
-        analyticsProviders: [
-          {
-            systemType: "analytics",
-            providerId: "prov-google-analytics",
-          },
-        ],
-        advertisingProviders: [
-          {
-            systemType: "advertising",
-            providerId: "prov-google-ads",
-          },
-        ],
         primaryHostingRegion: "us",
         dataResidencyOptions: ["us", "eu"],
       },

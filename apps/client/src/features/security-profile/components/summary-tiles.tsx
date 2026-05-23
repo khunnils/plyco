@@ -1,13 +1,13 @@
-import { type Vendor } from "@plyco/shared"
+import { type OrganizationProvider } from "@plyco/shared"
 
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 
 export const SummaryTiles = ({
   profile,
-  vendors,
+  providers,
 }: {
   profile: ProfileDraft
-  vendors: Vendor[]
+  providers: OrganizationProvider[]
 }) => {
   const completeBasics = [
     profile.infrastructure.mfaEnabled,
@@ -27,9 +27,9 @@ export const SummaryTiles = ({
         </p>
       </div>
       <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <p className="text-sm text-slate-500">Vendors tracked</p>
+        <p className="text-sm text-slate-500">Providers tracked</p>
         <p className="mt-2 text-2xl font-semibold text-slate-950">
-          {vendors.length}
+          {providers.length}
         </p>
       </div>
       <div className="rounded-lg border border-slate-200 bg-white p-4">
