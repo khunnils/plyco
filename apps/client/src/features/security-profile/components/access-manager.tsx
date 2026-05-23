@@ -1,0 +1,54 @@
+import { type AccessProfile, type Vocabulary } from "@plyco/shared"
+
+import { AccessAuthenticationPanel } from "@/features/security-profile/components/access-authentication-panel"
+import { AccessControlPanel } from "@/features/security-profile/components/access-control-panel"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
+import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
+
+export const AccessManager = ({
+  isMutationPending,
+  profile,
+  vocabulary,
+  onSaveProfile,
+}: {
+  isMutationPending: boolean
+  profile: ProfileDraft
+  vocabulary: Vocabulary | undefined
+  onSaveProfile: SaveProfile
+}) => {
+  const saveAccess = (
+    patch: Partial<AccessProfile>,
+    onSuccess?: () => void
+  ) => {
+    onSaveProfile(
+      {
+        ...profile,
+        access: {
+          ...profile.access,
+          ...patch,
+        },
+      },
+      onSuccess
+    )
+  }
+
+  return (
+    <div className="grid gap-10">
+      <AccessControlPanel
+        access={profile.access}
+        isMutationPending={isMutationPending}
+        securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
+        vocabulary={vocabulary}
+        onSave={saveAccess}
+      />
+      <AccessAuthenticationPanel
+        access={profile.access}
+        isMutationPending={isMutationPending}
+        onSave={saveAccess}
+      />
+    </div>
+  )
+}

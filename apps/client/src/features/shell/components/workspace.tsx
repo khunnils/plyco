@@ -36,12 +36,12 @@ import {
   profileFromOrganization,
 } from "@/features/security-profile/lib/profile"
 import {
-  ProfileAccessFields,
   ProfileDataHandlingFields,
   ProfileForm,
   type ProfileFormReturn,
   ProfileServiceFields,
 } from "@/features/security-profile/components/profile-form"
+import { AccessProfilePage } from "@/features/security-profile/pages/access-profile-page"
 import { CompanyProfilePage } from "@/features/security-profile/pages/company-profile-page"
 import { DataHandlingProfilePage } from "@/features/security-profile/pages/data-handling-profile-page"
 import { InfrastructureProfilePage } from "@/features/security-profile/pages/infrastructure-profile-page"
@@ -277,12 +277,7 @@ const CompanySectionFields = ({
     )
   }
 
-  return (
-    <ProfileAccessFields
-      form={form}
-      securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
-    />
-  )
+  return null
 }
 
 const CompanyReadOnlySection = ({
@@ -303,6 +298,7 @@ const CompanyReadOnlySection = ({
   }
 
   if (
+    section === "access" ||
     section === "dataHandling" ||
     section === "privacy" ||
     section === "infrastructure"
@@ -401,7 +397,12 @@ const CompanyReadOnlySection = ({
   const rowsBySection: Record<
     Exclude<
       CompanySectionId,
-      "activities" | "dataHandling" | "infrastructure" | "privacy" | "service"
+      | "access"
+      | "activities"
+      | "dataHandling"
+      | "infrastructure"
+      | "privacy"
+      | "service"
     >,
     Array<[string, string | number | null]>
   > = {
@@ -438,37 +439,6 @@ const CompanyReadOnlySection = ({
       ],
       ["Handles PII", boolText(profile.company.handlesPii)],
       ["Sensitive data", boolText(profile.company.handlesSensitiveData)],
-    ],
-    access: [
-      ["Least privilege", boolText(profile.access.leastPrivilege)],
-      ["Role-based access", boolText(profile.access.roleBasedAccess)],
-      [
-        "Access review cadence",
-        profile.access.accessReviewCadence
-          ? codeLabel(
-              vocabulary,
-              "security_cadences",
-              profile.access.accessReviewCadence
-            )
-          : "Not set",
-      ],
-      [
-        "Admin approval required",
-        boolText(profile.access.adminApprovalRequired),
-      ],
-      ["MFA required", boolText(profile.access.mfaRequired)],
-      ["SSO enabled", boolText(profile.access.ssoEnabled)],
-      [
-        "Password manager required",
-        boolText(profile.access.passwordManagerRequired),
-      ],
-      ["Shared accounts", boolText(profile.access.sharedAccountsExist)],
-      ["Offboarding", boolText(profile.access.offboardingProcessExists)],
-      ["Access reviews", boolText(profile.access.accessReviewsPerformed)],
-      [
-        "Privileged access restricted",
-        boolText(profile.access.privilegedAccessRestricted),
-      ],
     ],
   }
 
@@ -848,6 +818,15 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
               ) : activeCompanySectionId === "profile" ? (
                 <CompanyProfilePage
                   countries={countriesList}
+                  isMutationPending={saveProfile.isPending}
+                  profile={defaultValues}
+                  vocabulary={vocabularyData}
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
+                />
+              ) : activeCompanySectionId === "access" ? (
+                <AccessProfilePage
                   isMutationPending={saveProfile.isPending}
                   profile={defaultValues}
                   vocabulary={vocabularyData}

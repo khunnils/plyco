@@ -40,7 +40,7 @@ export const CompanyManager = ({
   }
 
   return (
-    <div className="grid gap-10">
+    <div className="grid gap-8">
       <CompanyDetailsPanel
         company={profile.company}
         countries={countries}
