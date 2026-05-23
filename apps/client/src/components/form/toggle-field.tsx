@@ -24,7 +24,7 @@ export const ToggleField = <T extends FieldValues>({
         <span>{label}</span>
         <input
           checked={Boolean(field.value)}
-          className="size-4 accent-blue-600"
+          className="size-4 accent-slate-900"
           type="checkbox"
           onBlur={field.onBlur}
           onChange={(event) => field.onChange(event.target.checked)}
