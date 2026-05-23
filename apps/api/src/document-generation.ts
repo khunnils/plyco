@@ -22,6 +22,10 @@ type ProviderContextGroup = {
   dataProcessors: Array<Record<string, unknown>>
   subprocessors: Array<Record<string, unknown>>
   byService: Array<Record<string, unknown>>
+  dataProcessorsAnswered: boolean
+  dataProcessorsHasValue: boolean
+  subprocessorsAnswered: boolean
+  subprocessorsHasValue: boolean
 }
 
 export type NormalizedTemplateContext = {
@@ -104,9 +108,13 @@ export class ReportContextBuilder {
             vocabulary,
           )
         : {},
-      infrastructure: organization?.infrastructure ?? {},
-      dataHandling: organization?.dataHandling ?? {},
-      access: organization?.access ?? {},
+      infrastructure: organization
+        ? this.withAnswerFlags(organization.infrastructure)
+        : {},
+      dataHandling: organization
+        ? this.withAnswerFlags(organization.dataHandling)
+        : {},
+      access: organization ? this.withAnswerFlags(organization.access) : {},
       providers: this.providerGroups(services, providers, providerUsage),
       vendors: {
         ...this.providerGroups(services, providers, providerUsage),
@@ -131,6 +139,14 @@ export class ReportContextBuilder {
           (usage) => usage.dataProcessingLevel === "subprocessor",
         ),
       byService: this.providersByService(services, providerUsage),
+      dataProcessorsAnswered: true,
+      dataProcessorsHasValue: providerUsage.some((usage) =>
+        ["limited", "subprocessor"].includes(String(usage.dataProcessingLevel)),
+      ),
+      subprocessorsAnswered: true,
+      subprocessorsHasValue: providerUsage.some(
+        (usage) => usage.dataProcessingLevel === "subprocessor",
+      ),
     }
   }
 
@@ -210,6 +226,16 @@ export class ReportContextBuilder {
       minimumUserAge: service.minimumUserAge,
       activities: serviceActivities,
       businessActivities: serviceActivities,
+      ...this.answerFlags({
+        name: service.serviceName,
+        description: service.serviceDescription,
+        url: service.serviceUrl,
+        userTypes: service.userTypes,
+        customerTypes: service.customerTypes,
+        availabilityRegions: service.availabilityRegions,
+        childrenDirected: service.childrenDirected,
+        minimumUserAge: service.minimumUserAge,
+      }),
       privacy: {
         usesCookies: service.privacy.usesCookies,
         cookieTypes: service.privacy.cookieTypes,
@@ -244,6 +270,7 @@ export class ReportContextBuilder {
           "regions",
           service.privacy.dataResidencyOptions,
         ),
+        ...this.answerFlags(service.privacy),
       },
       providerUsage: serviceProviderUsage,
       vendorUses: serviceProviderUsage,
@@ -314,6 +341,7 @@ export class ReportContextBuilder {
       euRepresentativeName: privacy.euRepresentativeName,
       euRepresentativeAddress: privacy.euRepresentativeAddress,
       usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
+      ...this.answerFlags(privacy),
     }
   }
 
@@ -345,11 +373,22 @@ export class ReportContextBuilder {
           access.accessReviewCadence,
         ),
         adminApprovalRequired: access.adminApprovalRequired,
+        ...this.answerFlags({
+          leastPrivilege: access.leastPrivilege,
+          roleBasedAccess: access.roleBasedAccess,
+          accessReviewCadence: access.accessReviewCadence,
+          adminApprovalRequired: access.adminApprovalRequired,
+        }),
       },
       authentication: {
         mfaRequired: access.mfaRequired,
         ssoSupported: access.ssoEnabled,
         passwordManagerRequired: access.passwordManagerRequired,
+        ...this.answerFlags({
+          mfaRequired: access.mfaRequired,
+          ssoSupported: access.ssoEnabled,
+          passwordManagerRequired: access.passwordManagerRequired,
+        }),
       },
       encryption: {
         atRestAlgorithm: infrastructure.atRestAlgorithm,
@@ -371,6 +410,12 @@ export class ReportContextBuilder {
           "security_key_management_providers",
           infrastructure.keyManagementProvider,
         ),
+        ...this.answerFlags({
+          atRestAlgorithm: infrastructure.atRestAlgorithm,
+          inTransitMinimumTlsVersion:
+            infrastructure.inTransitMinimumTlsVersion,
+          keyManagementProvider: infrastructure.keyManagementProvider,
+        }),
       },
       logging: {
         centralizedLogging: infrastructure.centralizedLoggingEnabled,
@@ -381,6 +426,11 @@ export class ReportContextBuilder {
           "security_monitoring_owners",
           infrastructure.securityMonitoringOwner,
         ),
+        ...this.answerFlags({
+          centralizedLogging: infrastructure.centralizedLoggingEnabled,
+          logRetentionDays: infrastructure.logRetentionDays,
+          securityMonitoringOwner: infrastructure.securityMonitoringOwner,
+        }),
       },
       vulnerabilityManagement: {
         scanningCadence: infrastructure.scanningCadence,
@@ -391,6 +441,11 @@ export class ReportContextBuilder {
         ),
         patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
         patchingSlaHighDays: infrastructure.patchingSlaHighDays,
+        ...this.answerFlags({
+          scanningCadence: infrastructure.scanningCadence,
+          patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
+          patchingSlaHighDays: infrastructure.patchingSlaHighDays,
+        }),
       },
       incidentResponse: {
         planExists: infrastructure.incidentResponsePlanExists,
@@ -408,6 +463,13 @@ export class ReportContextBuilder {
           infrastructure.customerNotificationProcess,
         ),
         lastTestedDate: infrastructure.incidentResponseLastTestedDate,
+        ...this.answerFlags({
+          planExists: infrastructure.incidentResponsePlanExists,
+          notificationTimeline: infrastructure.incidentNotificationTimeline,
+          customerNotificationProcess:
+            infrastructure.customerNotificationProcess,
+          lastTestedDate: infrastructure.incidentResponseLastTestedDate,
+        }),
       },
       backups: {
         backupCadence: infrastructure.backupCadence,
@@ -423,6 +485,11 @@ export class ReportContextBuilder {
           "security_cadences",
           infrastructure.restoreTestingCadence,
         ),
+        ...this.answerFlags({
+          backupCadence: infrastructure.backupCadence,
+          backupRetentionDays: infrastructure.backupRetentionDays,
+          restoreTestingCadence: infrastructure.restoreTestingCadence,
+        }),
       },
       vendorRisk: {
         vendorReviewRequired: infrastructure.vendorReviewRequired,
@@ -433,6 +500,11 @@ export class ReportContextBuilder {
           infrastructure.vendorReviewCadence,
         ),
         dpaRequiredForProcessors: infrastructure.dpaRequiredForProcessors,
+        ...this.answerFlags({
+          vendorReviewRequired: infrastructure.vendorReviewRequired,
+          vendorReviewCadence: infrastructure.vendorReviewCadence,
+          dpaRequiredForProcessors: infrastructure.dpaRequiredForProcessors,
+        }),
       },
     }
   }
@@ -440,13 +512,13 @@ export class ReportContextBuilder {
   private codeLabels(
     vocabulary: Vocabulary | undefined,
     codeSetId: string,
-    values: string[],
+    values: string[] | null,
   ) {
     const codeSet = vocabulary?.codeSets.find(
       (currentCodeSet) => currentCodeSet.codeSetId === codeSetId,
     )
 
-    return values.map(
+    return (values ?? []).map(
       (value) =>
         codeSet?.codes.find((code) => code.codeId === value)?.name ?? value,
     )
@@ -455,9 +527,55 @@ export class ReportContextBuilder {
   private codeLabel(
     vocabulary: Vocabulary | undefined,
     codeSetId: string,
-    value: string,
+    value: string | null,
   ) {
     return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : ""
+  }
+
+  private withAnswerFlags<T extends Record<string, unknown>>(value: T) {
+    return {
+      ...value,
+      ...this.answerFlags(value),
+    }
+  }
+
+  private answerFlags(values: Record<string, unknown>) {
+    return Object.fromEntries(
+      Object.entries(values)
+        .filter(([key]) => key !== "organizationProviders")
+        .flatMap(([key, value]) => [
+          [`${key}Answered`, this.answered(value)],
+          [`${key}HasValue`, this.hasValue(value)],
+        ]),
+    )
+  }
+
+  private answered(value: unknown) {
+    return value !== null && value !== undefined
+  }
+
+  private hasValue(value: unknown) {
+    if (!this.answered(value)) {
+      return false
+    }
+
+    if (Array.isArray(value)) {
+      return value.length > 0
+    }
+
+    if (typeof value === "boolean") {
+      return value
+    }
+
+    if (typeof value === "number") {
+      return value > 0
+    }
+
+    if (typeof value === "string") {
+      return value.trim().length > 0
+    }
+
+    return true
   }
 
   private providerContext(provider: OrganizationProvider) {

@@ -67,14 +67,15 @@ const audiencePath = (field: string) => field as FieldPath<ServiceAudienceDraft>
 const privacyPath = (field: string) =>
   `privacy.${field}` as FieldPath<ServicePrivacyDraft>
 
-const boolText = (value: boolean) => (value ? "Yes" : "No")
+const boolText = (value: boolean | null) =>
+  value === null ? "Not answered" : value ? "Yes" : "No"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[]
+  values: string[] | null
 ) =>
-  values.length > 0
+  values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
@@ -104,7 +105,7 @@ const servicePrivacyDraft = (
 })
 
 const serviceProviderPurpose = (service: ServiceProfileInput) =>
-  `Used by ${service.serviceName.trim() || "this service"}`
+  `Used by ${service.serviceName?.trim() || "this service"}`
 
 const FieldNumberInput = <T extends Record<string, unknown>>({
   error,
@@ -124,7 +125,9 @@ const FieldNumberInput = <T extends Record<string, unknown>>({
       inputMode="numeric"
       min={0}
       type="number"
-      {...register(name, { valueAsNumber: true })}
+      {...register(name, {
+        setValueAs: (value) => (value === "" ? null : Number(value)),
+      })}
     />
     {error?.message ? (
       <span className="text-xs text-red-700">{error.message}</span>
@@ -348,7 +351,11 @@ const ServiceAudiencePanel = ({
             ["Directed to children", boolText(service.childrenDirected)],
             [
               "Minimum user age",
-              service.minimumUserAge === 0 ? "Not set" : service.minimumUserAge,
+              service.minimumUserAge === null
+                ? "Not answered"
+                : service.minimumUserAge === 0
+                  ? "Not set"
+                  : service.minimumUserAge,
             ],
           ]}
         />

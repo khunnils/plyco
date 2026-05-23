@@ -186,7 +186,9 @@ const NumberField = ({
       inputMode="numeric"
       min={0}
       type="number"
-      {...form.register(name, { valueAsNumber: true })}
+      {...form.register(name, {
+        setValueAs: (value) => (value === "" ? null : Number(value)),
+      })}
     />
   </label>
 )

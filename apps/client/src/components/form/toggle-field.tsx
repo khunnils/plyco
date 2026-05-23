@@ -22,13 +22,22 @@ export const ToggleField = <T extends FieldValues>({
     render={({ field }) => (
       <label className="flex min-h-11 items-center justify-between gap-4 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800">
         <span>{label}</span>
-        <input
-          checked={Boolean(field.value)}
-          className="size-4 accent-slate-900"
-          type="checkbox"
-          onBlur={field.onBlur}
-          onChange={(event) => field.onChange(event.target.checked)}
-        />
+        <span className="flex items-center gap-2">
+          <span className="text-xs font-medium text-slate-500">
+            {field.value === null
+              ? "Unanswered"
+              : field.value
+                ? "Yes"
+                : "No"}
+          </span>
+          <input
+            checked={field.value === true}
+            className="size-4 accent-slate-900"
+            type="checkbox"
+            onBlur={field.onBlur}
+            onChange={(event) => field.onChange(event.target.checked)}
+          />
+        </span>
       </label>
     )}
   />

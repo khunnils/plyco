@@ -1897,6 +1897,22 @@
       ]
     },
     {
+      "key": "vendors.dataProcessorsHasValue",
+      "label": "Has data processors",
+      "type": "boolean",
+      "category": "Vendors",
+      "description": "Generated helper flag. True when the data processor collection has one or more values.",
+      "example": true
+    },
+    {
+      "key": "vendors.subprocessorsHasValue",
+      "label": "Has subprocessors",
+      "type": "boolean",
+      "category": "Vendors",
+      "description": "Generated helper flag. True when the subprocessor collection has one or more values.",
+      "example": true
+    },
+    {
       "key": "vendors.byService",
       "label": "Vendors by service",
       "type": "collection",

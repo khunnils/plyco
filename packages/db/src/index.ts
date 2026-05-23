@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import {
   accessProfileSchema,
   businessActivitySchema,
@@ -25,36 +25,42 @@ function toIsoString(value: Date) {
   return value.toISOString()
 }
 
+function stringArray(value: unknown): string[] | null {
+  return Array.isArray(value) && value.every((item) => typeof item === "string")
+    ? value
+    : null
+}
+
 export function mapOrganizationRecord(record: {
   id: string
   companyName: string
-  legalEntityName: string
-  website: string
-  contactEmail: string
-  securityContactEmail: string
-  privacyContactEmail: string
-  country: string
-  address: string
-  employeeCount: number
-  industries: string[]
-  regions: string[]
-  handlesPii: boolean
-  handlesSensitiveData: boolean
-  complianceGoals: string[]
+  legalEntityName: string | null
+  website: string | null
+  contactEmail: string | null
+  securityContactEmail: string | null
+  privacyContactEmail: string | null
+  country: string | null
+  address: string | null
+  employeeCount: number | null
+  industries: unknown
+  regions: unknown
+  handlesPii: boolean | null
+  handlesSensitiveData: boolean | null
+  complianceGoals: unknown
   serviceProfile?: {
     id: string
-    serviceName: string
-    serviceDescription: string
-    serviceUrl: string
-    userTypes: string[]
-    customerTypes: string[]
-    availabilityRegions: string[]
-    childrenDirected: boolean
-    minimumUserAge: number
-    usesCookies: boolean
-    cookieTypes: string[]
-    primaryHostingRegion: string
-    dataResidencyOptions: string[]
+    serviceName: string | null
+    serviceDescription: string | null
+    serviceUrl: string | null
+    userTypes: unknown
+    customerTypes: unknown
+    availabilityRegions: unknown
+    childrenDirected: boolean | null
+    minimumUserAge: number | null
+    usesCookies: boolean | null
+    cookieTypes: unknown
+    primaryHostingRegion: string | null
+    dataResidencyOptions: unknown
     businessActivities?: Array<{
       businessActivityId: string
     }>
@@ -63,18 +69,18 @@ export function mapOrganizationRecord(record: {
   } | null
   services?: Array<{
     id: string
-    serviceName: string
-    serviceDescription: string
-    serviceUrl: string
-    userTypes: string[]
-    customerTypes: string[]
-    availabilityRegions: string[]
-    childrenDirected: boolean
-    minimumUserAge: number
-    usesCookies: boolean
-    cookieTypes: string[]
-    primaryHostingRegion: string
-    dataResidencyOptions: string[]
+    serviceName: string | null
+    serviceDescription: string | null
+    serviceUrl: string | null
+    userTypes: unknown
+    customerTypes: unknown
+    availabilityRegions: unknown
+    childrenDirected: boolean | null
+    minimumUserAge: number | null
+    usesCookies: boolean | null
+    cookieTypes: unknown
+    primaryHostingRegion: string | null
+    dataResidencyOptions: unknown
     businessActivities?: Array<{
       businessActivityId: string
     }>
@@ -82,51 +88,51 @@ export function mapOrganizationRecord(record: {
     updatedAt: Date
   }>
   privacyProfile: {
-    supportedRights: string[]
-    requestMethods: string[]
-    responseTimelineDays: number
-    identityVerificationRequired: boolean
-    authorizedAgentSupported: boolean
-    appealProcessExists: boolean
-    cookieConsentMechanism: string
-    doNotTrackResponse: boolean
-    globalPrivacyControlSupported: boolean
-    sendsMarketingEmails: boolean
-    marketingOptOutMethod: string
-    transactionalEmailsSent: boolean
-    crossBorderTransfers: boolean
-    transferMechanisms: string[]
-    sellsOrSharesData: boolean
-    doNotSellLink: string
-    dpoName: string
-    dpoEmail: string
-    euRepresentativeName: string
-    euRepresentativeAddress: string
-    usesAutomatedDecisionMaking: boolean
+    supportedRights: unknown
+    requestMethods: unknown
+    responseTimelineDays: number | null
+    identityVerificationRequired: boolean | null
+    authorizedAgentSupported: boolean | null
+    appealProcessExists: boolean | null
+    cookieConsentMechanism: string | null
+    doNotTrackResponse: boolean | null
+    globalPrivacyControlSupported: boolean | null
+    sendsMarketingEmails: boolean | null
+    marketingOptOutMethod: string | null
+    transactionalEmailsSent: boolean | null
+    crossBorderTransfers: boolean | null
+    transferMechanisms: unknown
+    sellsOrSharesData: boolean | null
+    doNotSellLink: string | null
+    dpoName: string | null
+    dpoEmail: string | null
+    euRepresentativeName: string | null
+    euRepresentativeAddress: string | null
+    usesAutomatedDecisionMaking: boolean | null
   } | null
   infrastructureProfile: {
-    mfaEnabled: boolean
-    encryptedDevicesRequired: boolean
-    backupsEnabled: boolean
-    centralizedLoggingEnabled: boolean
-    atRestAlgorithm: string
-    inTransitMinimumTlsVersion: string
-    keyManagementProvider: string
-    logRetentionDays: number
-    securityMonitoringOwner: string
-    scanningCadence: string
-    patchingSlaCriticalDays: number
-    patchingSlaHighDays: number
-    incidentResponsePlanExists: boolean
-    incidentNotificationTimeline: string
-    customerNotificationProcess: string
-    incidentResponseLastTestedDate: string
-    backupCadence: string
-    backupRetentionDays: number
-    restoreTestingCadence: string
-    vendorReviewRequired: boolean
-    vendorReviewCadence: string
-    dpaRequiredForProcessors: boolean
+    mfaEnabled: boolean | null
+    encryptedDevicesRequired: boolean | null
+    backupsEnabled: boolean | null
+    centralizedLoggingEnabled: boolean | null
+    atRestAlgorithm: string | null
+    inTransitMinimumTlsVersion: string | null
+    keyManagementProvider: string | null
+    logRetentionDays: number | null
+    securityMonitoringOwner: string | null
+    scanningCadence: string | null
+    patchingSlaCriticalDays: number | null
+    patchingSlaHighDays: number | null
+    incidentResponsePlanExists: boolean | null
+    incidentNotificationTimeline: string | null
+    customerNotificationProcess: string | null
+    incidentResponseLastTestedDate: string | null
+    backupCadence: string | null
+    backupRetentionDays: number | null
+    restoreTestingCadence: string | null
+    vendorReviewRequired: boolean | null
+    vendorReviewCadence: string | null
+    dpaRequiredForProcessors: boolean | null
   } | null
   organizationProviders: Array<{
     providerId: string | null
@@ -134,33 +140,33 @@ export function mapOrganizationRecord(record: {
     name: string
   }>
   dataHandlingProfile: {
-    storesPii: boolean
-    storesHealthcareData: boolean
-    encryptionAtRest: boolean
-    encryptionInTransit: boolean
-    productionDataInDevelopment: boolean
-    retentionPolicyExists: boolean
+    storesPii: boolean | null
+    storesHealthcareData: boolean | null
+    encryptionAtRest: boolean | null
+    encryptionInTransit: boolean | null
+    productionDataInDevelopment: boolean | null
+    retentionPolicyExists: boolean | null
   } | null
   dataTypes: Array<{
     name: string
-    description: string
-    subjectTypes: string[]
-    collectionMethods: string[]
-    isSensitive: boolean
-    isRequired: boolean
+    description: string | null
+    subjectTypes: unknown
+    collectionMethods: unknown
+    isSensitive: boolean | null
+    isRequired: boolean | null
   }>
   accessProfile: {
-    mfaRequired: boolean
-    ssoEnabled: boolean
-    sharedAccountsExist: boolean
-    offboardingProcessExists: boolean
-    accessReviewsPerformed: boolean
-    privilegedAccessRestricted: boolean
-    leastPrivilege: boolean
-    roleBasedAccess: boolean
-    accessReviewCadence: string
-    adminApprovalRequired: boolean
-    passwordManagerRequired: boolean
+    mfaRequired: boolean | null
+    ssoEnabled: boolean | null
+    sharedAccountsExist: boolean | null
+    offboardingProcessExists: boolean | null
+    accessReviewsPerformed: boolean | null
+    privilegedAccessRestricted: boolean | null
+    leastPrivilege: boolean | null
+    roleBasedAccess: boolean | null
+    accessReviewCadence: string | null
+    adminApprovalRequired: boolean | null
+    passwordManagerRequired: boolean | null
   } | null
   createdAt: Date
   updatedAt: Date
@@ -175,11 +181,11 @@ export function mapOrganizationRecord(record: {
     country: record.country,
     address: record.address,
     employeeCount: record.employeeCount,
-    industries: record.industries,
-    regions: record.regions,
+    industries: stringArray(record.industries),
+    regions: stringArray(record.regions),
     handlesPii: record.handlesPii,
     handlesSensitiveData: record.handlesSensitiveData,
-    complianceGoals: record.complianceGoals,
+    complianceGoals: stringArray(record.complianceGoals),
   })
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.organizationProviders.flatMap((provider) =>
@@ -199,44 +205,44 @@ export function mapOrganizationRecord(record: {
           )
         : [],
     ),
-    mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? false,
+    mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? null,
     encryptedDevicesRequired:
-      record.infrastructureProfile?.encryptedDevicesRequired ?? false,
-    backupsEnabled: record.infrastructureProfile?.backupsEnabled ?? false,
+      record.infrastructureProfile?.encryptedDevicesRequired ?? null,
+    backupsEnabled: record.infrastructureProfile?.backupsEnabled ?? null,
     centralizedLoggingEnabled:
-      record.infrastructureProfile?.centralizedLoggingEnabled ?? false,
-    atRestAlgorithm: record.infrastructureProfile?.atRestAlgorithm ?? "",
+      record.infrastructureProfile?.centralizedLoggingEnabled ?? null,
+    atRestAlgorithm: record.infrastructureProfile?.atRestAlgorithm ?? null,
     inTransitMinimumTlsVersion:
-      record.infrastructureProfile?.inTransitMinimumTlsVersion ?? "",
+      record.infrastructureProfile?.inTransitMinimumTlsVersion ?? null,
     keyManagementProvider:
-      record.infrastructureProfile?.keyManagementProvider ?? "",
-    logRetentionDays: record.infrastructureProfile?.logRetentionDays ?? 0,
+      record.infrastructureProfile?.keyManagementProvider ?? null,
+    logRetentionDays: record.infrastructureProfile?.logRetentionDays ?? null,
     securityMonitoringOwner:
-      record.infrastructureProfile?.securityMonitoringOwner ?? "",
-    scanningCadence: record.infrastructureProfile?.scanningCadence ?? "",
+      record.infrastructureProfile?.securityMonitoringOwner ?? null,
+    scanningCadence: record.infrastructureProfile?.scanningCadence ?? null,
     patchingSlaCriticalDays:
-      record.infrastructureProfile?.patchingSlaCriticalDays ?? 0,
+      record.infrastructureProfile?.patchingSlaCriticalDays ?? null,
     patchingSlaHighDays:
-      record.infrastructureProfile?.patchingSlaHighDays ?? 0,
+      record.infrastructureProfile?.patchingSlaHighDays ?? null,
     incidentResponsePlanExists:
-      record.infrastructureProfile?.incidentResponsePlanExists ?? false,
+      record.infrastructureProfile?.incidentResponsePlanExists ?? null,
     incidentNotificationTimeline:
-      record.infrastructureProfile?.incidentNotificationTimeline ?? "",
+      record.infrastructureProfile?.incidentNotificationTimeline ?? null,
     customerNotificationProcess:
-      record.infrastructureProfile?.customerNotificationProcess ?? "",
+      record.infrastructureProfile?.customerNotificationProcess ?? null,
     incidentResponseLastTestedDate:
-      record.infrastructureProfile?.incidentResponseLastTestedDate ?? "",
-    backupCadence: record.infrastructureProfile?.backupCadence ?? "",
+      record.infrastructureProfile?.incidentResponseLastTestedDate ?? null,
+    backupCadence: record.infrastructureProfile?.backupCadence ?? null,
     backupRetentionDays:
-      record.infrastructureProfile?.backupRetentionDays ?? 0,
+      record.infrastructureProfile?.backupRetentionDays ?? null,
     restoreTestingCadence:
-      record.infrastructureProfile?.restoreTestingCadence ?? "",
+      record.infrastructureProfile?.restoreTestingCadence ?? null,
     vendorReviewRequired:
-      record.infrastructureProfile?.vendorReviewRequired ?? false,
+      record.infrastructureProfile?.vendorReviewRequired ?? null,
     vendorReviewCadence:
-      record.infrastructureProfile?.vendorReviewCadence ?? "",
+      record.infrastructureProfile?.vendorReviewCadence ?? null,
     dpaRequiredForProcessors:
-      record.infrastructureProfile?.dpaRequiredForProcessors ?? false,
+      record.infrastructureProfile?.dpaRequiredForProcessors ?? null,
   })
   const serviceRecords = record.services ?? (record.serviceProfile ? [record.serviceProfile] : [])
   const services = serviceRecords.flatMap((service) =>
@@ -251,16 +257,16 @@ export function mapOrganizationRecord(record: {
               service.businessActivities?.map(
                 (activity) => activity.businessActivityId,
               ) ?? [],
-            userTypes: service.userTypes,
-            customerTypes: service.customerTypes,
-            availabilityRegions: service.availabilityRegions,
+            userTypes: stringArray(service.userTypes),
+            customerTypes: stringArray(service.customerTypes),
+            availabilityRegions: stringArray(service.availabilityRegions),
             childrenDirected: service.childrenDirected,
             minimumUserAge: service.minimumUserAge,
             privacy: {
               usesCookies: service.usesCookies,
-              cookieTypes: service.cookieTypes,
+              cookieTypes: stringArray(service.cookieTypes),
               primaryHostingRegion: service.primaryHostingRegion,
-              dataResidencyOptions: service.dataResidencyOptions,
+              dataResidencyOptions: stringArray(service.dataResidencyOptions),
             },
             createdAt: toIsoString(service.createdAt),
             updatedAt: toIsoString(service.updatedAt),
@@ -269,14 +275,14 @@ export function mapOrganizationRecord(record: {
       : [],
   )
   const privacy = privacyProfileSchema.parse({
-    supportedRights: record.privacyProfile?.supportedRights ?? [],
-    requestMethods: record.privacyProfile?.requestMethods ?? [],
-    responseTimelineDays: record.privacyProfile?.responseTimelineDays ?? 0,
+    supportedRights: stringArray(record.privacyProfile?.supportedRights),
+    requestMethods: stringArray(record.privacyProfile?.requestMethods),
+    responseTimelineDays: record.privacyProfile?.responseTimelineDays ?? null,
     identityVerificationRequired:
-      record.privacyProfile?.identityVerificationRequired ?? false,
+      record.privacyProfile?.identityVerificationRequired ?? null,
     authorizedAgentSupported:
-      record.privacyProfile?.authorizedAgentSupported ?? false,
-    appealProcessExists: record.privacyProfile?.appealProcessExists ?? false,
+      record.privacyProfile?.authorizedAgentSupported ?? null,
+    appealProcessExists: record.privacyProfile?.appealProcessExists ?? null,
     organizationProviders: record.organizationProviders.flatMap((provider) =>
       provider.providerId &&
       provider.systemTypes.includes("newsletter")
@@ -290,61 +296,61 @@ export function mapOrganizationRecord(record: {
         : [],
     ),
     cookieConsentMechanism:
-      record.privacyProfile?.cookieConsentMechanism ?? "",
-    doNotTrackResponse: record.privacyProfile?.doNotTrackResponse ?? false,
+      record.privacyProfile?.cookieConsentMechanism ?? null,
+    doNotTrackResponse: record.privacyProfile?.doNotTrackResponse ?? null,
     globalPrivacyControlSupported:
-      record.privacyProfile?.globalPrivacyControlSupported ?? false,
-    sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? false,
-    marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? "",
+      record.privacyProfile?.globalPrivacyControlSupported ?? null,
+    sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? null,
+    marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? null,
     transactionalEmailsSent:
-      record.privacyProfile?.transactionalEmailsSent ?? false,
-    crossBorderTransfers: record.privacyProfile?.crossBorderTransfers ?? false,
-    transferMechanisms: record.privacyProfile?.transferMechanisms ?? [],
-    sellsOrSharesData: record.privacyProfile?.sellsOrSharesData ?? false,
-    doNotSellLink: record.privacyProfile?.doNotSellLink ?? "",
-    dpoName: record.privacyProfile?.dpoName ?? "",
-    dpoEmail: record.privacyProfile?.dpoEmail ?? "",
-    euRepresentativeName: record.privacyProfile?.euRepresentativeName ?? "",
-    euRepresentativeAddress: record.privacyProfile?.euRepresentativeAddress ?? "",
-    usesAutomatedDecisionMaking: record.privacyProfile?.usesAutomatedDecisionMaking ?? false,
+      record.privacyProfile?.transactionalEmailsSent ?? null,
+    crossBorderTransfers: record.privacyProfile?.crossBorderTransfers ?? null,
+    transferMechanisms: stringArray(record.privacyProfile?.transferMechanisms),
+    sellsOrSharesData: record.privacyProfile?.sellsOrSharesData ?? null,
+    doNotSellLink: record.privacyProfile?.doNotSellLink ?? null,
+    dpoName: record.privacyProfile?.dpoName ?? null,
+    dpoEmail: record.privacyProfile?.dpoEmail ?? null,
+    euRepresentativeName: record.privacyProfile?.euRepresentativeName ?? null,
+    euRepresentativeAddress: record.privacyProfile?.euRepresentativeAddress ?? null,
+    usesAutomatedDecisionMaking: record.privacyProfile?.usesAutomatedDecisionMaking ?? null,
   })
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
       name: dataType.name,
       description: dataType.description,
-      subjectTypes: dataType.subjectTypes,
-      collectionMethods: dataType.collectionMethods,
+      subjectTypes: stringArray(dataType.subjectTypes),
+      collectionMethods: stringArray(dataType.collectionMethods),
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
     })),
-    storesPii: record.dataHandlingProfile?.storesPii ?? false,
+    storesPii: record.dataHandlingProfile?.storesPii ?? null,
     storesHealthcareData:
-      record.dataHandlingProfile?.storesHealthcareData ?? false,
-    encryptionAtRest: record.dataHandlingProfile?.encryptionAtRest ?? false,
+      record.dataHandlingProfile?.storesHealthcareData ?? null,
+    encryptionAtRest: record.dataHandlingProfile?.encryptionAtRest ?? null,
     encryptionInTransit:
-      record.dataHandlingProfile?.encryptionInTransit ?? false,
+      record.dataHandlingProfile?.encryptionInTransit ?? null,
     productionDataInDevelopment:
-      record.dataHandlingProfile?.productionDataInDevelopment ?? false,
+      record.dataHandlingProfile?.productionDataInDevelopment ?? null,
     retentionPolicyExists:
-      record.dataHandlingProfile?.retentionPolicyExists ?? false,
+      record.dataHandlingProfile?.retentionPolicyExists ?? null,
   })
   const access = accessProfileSchema.parse({
-    mfaRequired: record.accessProfile?.mfaRequired ?? false,
-    ssoEnabled: record.accessProfile?.ssoEnabled ?? false,
-    sharedAccountsExist: record.accessProfile?.sharedAccountsExist ?? false,
+    mfaRequired: record.accessProfile?.mfaRequired ?? null,
+    ssoEnabled: record.accessProfile?.ssoEnabled ?? null,
+    sharedAccountsExist: record.accessProfile?.sharedAccountsExist ?? null,
     offboardingProcessExists:
-      record.accessProfile?.offboardingProcessExists ?? false,
+      record.accessProfile?.offboardingProcessExists ?? null,
     accessReviewsPerformed:
-      record.accessProfile?.accessReviewsPerformed ?? false,
+      record.accessProfile?.accessReviewsPerformed ?? null,
     privilegedAccessRestricted:
-      record.accessProfile?.privilegedAccessRestricted ?? false,
-    leastPrivilege: record.accessProfile?.leastPrivilege ?? false,
-    roleBasedAccess: record.accessProfile?.roleBasedAccess ?? false,
-    accessReviewCadence: record.accessProfile?.accessReviewCadence ?? "",
+      record.accessProfile?.privilegedAccessRestricted ?? null,
+    leastPrivilege: record.accessProfile?.leastPrivilege ?? null,
+    roleBasedAccess: record.accessProfile?.roleBasedAccess ?? null,
+    accessReviewCadence: record.accessProfile?.accessReviewCadence ?? null,
     adminApprovalRequired:
-      record.accessProfile?.adminApprovalRequired ?? false,
+      record.accessProfile?.adminApprovalRequired ?? null,
     passwordManagerRequired:
-      record.accessProfile?.passwordManagerRequired ?? false,
+      record.accessProfile?.passwordManagerRequired ?? null,
   })
 
   return {
@@ -414,7 +420,7 @@ export function mapServiceProviderUsageRecord(record: {
   id: string
   serviceId: string
   service?: {
-    serviceName: string
+    serviceName: string | null
   } | null
   organizationProviderId: string
   organizationProvider?: {
@@ -510,4 +516,5 @@ export function mapDocumentRecord(record: {
   })
 }
 
+export { Prisma }
 export type { PrismaClient }

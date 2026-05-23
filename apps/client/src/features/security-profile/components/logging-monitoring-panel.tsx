@@ -106,7 +106,9 @@ export const LoggingMonitoringPanel = ({
             inputMode="numeric"
             min={0}
             type="number"
-            {...form.register("logRetentionDays", { valueAsNumber: true })}
+            {...form.register("logRetentionDays", {
+              setValueAs: (value) => (value === "" ? null : Number(value)),
+            })}
           />
         </label>
         <SelectField

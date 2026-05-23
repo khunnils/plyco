@@ -1,1 +1,2 @@
-export const boolText = (value: boolean) => (value ? "Yes" : "No")
+export const boolText = (value: boolean | null) =>
+  value === null ? "Not answered" : value ? "Yes" : "No"

@@ -119,7 +119,7 @@ export const dataTypeOptionsFromProfile = (
       dataTypes
         .map((dataType) => ({
           name: dataType.name.trim(),
-          description: dataType.description.trim(),
+          description: dataType.description?.trim() ?? "",
         }))
         .filter((dataType) => dataType.name)
         .map((dataType) => [
@@ -169,8 +169,8 @@ const providerCategory = (provider: Provider): OrganizationProviderInput["catego
   return ""
 }
 
-const valueList = (values: string[]) =>
-  values.length > 0 ? values.join(", ") : "Not set"
+const valueList = (values: string[] | null) =>
+  values && values.length > 0 ? values.join(", ") : "Not set"
 
 export const providerNamesForSystem = (
   organizationProviders: ProviderSelection[],

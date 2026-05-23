@@ -22,7 +22,8 @@ const generalAttributesSchema = dataHandlingProfileSchema.pick({
 
 type GeneralAttributesDraft = z.infer<typeof generalAttributesSchema>
 
-const boolText = (value: boolean) => (value ? "Yes" : "No")
+const boolText = (value: boolean | null) =>
+  value === null ? "Not answered" : value ? "Yes" : "No"
 
 const attributeRows = (attributes: GeneralAttributesDraft) =>
   [

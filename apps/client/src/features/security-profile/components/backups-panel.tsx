@@ -121,7 +121,9 @@ export const BackupsPanel = ({
             inputMode="numeric"
             min={0}
             type="number"
-            {...form.register("backupRetentionDays", { valueAsNumber: true })}
+            {...form.register("backupRetentionDays", {
+              setValueAs: (value) => (value === "" ? null : Number(value)),
+            })}
           />
         </label>
         <SelectField

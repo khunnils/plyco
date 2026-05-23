@@ -85,7 +85,7 @@ export const ProfilePanelShell = ({
 export const ProfilePanelDetailGrid = ({
   rows,
 }: {
-  rows: ReadonlyArray<readonly [string, string | number]>
+  rows: ReadonlyArray<readonly [string, string | number | null]>
 }) => (
   <dl className="grid gap-3 sm:grid-cols-2">
     {rows.map(([label, value]) => (
@@ -94,7 +94,9 @@ export const ProfilePanelDetailGrid = ({
         key={label}
       >
         <dt className="text-xs font-medium text-slate-500">{label}</dt>
-        <dd className="mt-1 text-sm font-medium text-slate-900">{value}</dd>
+        <dd className="mt-1 text-sm font-medium text-slate-900">
+          {value ?? "Not answered"}
+        </dd>
       </div>
     ))}
   </dl>

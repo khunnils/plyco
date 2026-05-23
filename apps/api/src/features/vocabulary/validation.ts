@@ -16,7 +16,7 @@ import { type VocabularyRepository } from "./repository.js"
 const assertCountry = async (
   vocabularyRepository: VocabularyRepository,
   field: string,
-  value: string,
+  value: string | null,
 ) => {
   if (!value) {
     return
@@ -53,9 +53,13 @@ const assertCodes = async (
   vocabularyRepository: VocabularyRepository,
   organizationId: string,
   codeSetId: string,
-  values: string[],
+  values: string[] | null,
   field: string,
 ) => {
+  if (!values) {
+    return
+  }
+
   await Promise.all(
     Array.from(new Set(values)).map((value) =>
       assertCode(vocabularyRepository, organizationId, codeSetId, value, field),

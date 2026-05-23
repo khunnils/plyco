@@ -202,20 +202,20 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data).toEqual({
-        serviceName: "",
-        serviceDescription: "",
-        serviceUrl: "",
+        serviceName: null,
+        serviceDescription: null,
+        serviceUrl: null,
         businessActivityIds: [],
-        userTypes: [],
-        customerTypes: [],
-        availabilityRegions: [],
-        childrenDirected: false,
-        minimumUserAge: 0,
+        userTypes: null,
+        customerTypes: null,
+        availabilityRegions: null,
+        childrenDirected: null,
+        minimumUserAge: null,
         privacy: {
-          usesCookies: false,
-          cookieTypes: [],
-          primaryHostingRegion: "",
-          dataResidencyOptions: [],
+          usesCookies: null,
+          cookieTypes: null,
+          primaryHostingRegion: null,
+          dataResidencyOptions: null,
         },
       })
     }
@@ -278,60 +278,78 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data).toEqual({
-        supportedRights: [],
-        requestMethods: [],
-        responseTimelineDays: 0,
-        identityVerificationRequired: false,
-        authorizedAgentSupported: false,
-        appealProcessExists: false,
+        supportedRights: null,
+        requestMethods: null,
+        responseTimelineDays: null,
+        identityVerificationRequired: null,
+        authorizedAgentSupported: null,
+        appealProcessExists: null,
         organizationProviders: [],
-        cookieConsentMechanism: "",
-        doNotTrackResponse: false,
-        globalPrivacyControlSupported: false,
-        sendsMarketingEmails: false,
-        marketingOptOutMethod: "",
-        transactionalEmailsSent: false,
-        crossBorderTransfers: false,
-        transferMechanisms: [],
-        sellsOrSharesData: false,
-        doNotSellLink: "",
-        dpoName: "",
-        dpoEmail: "",
-        euRepresentativeName: "",
-        euRepresentativeAddress: "",
-        usesAutomatedDecisionMaking: false,
+        cookieConsentMechanism: null,
+        doNotTrackResponse: null,
+        globalPrivacyControlSupported: null,
+        sendsMarketingEmails: null,
+        marketingOptOutMethod: null,
+        transactionalEmailsSent: null,
+        crossBorderTransfers: null,
+        transferMechanisms: null,
+        sellsOrSharesData: null,
+        doNotSellLink: null,
+        dpoName: null,
+        dpoEmail: null,
+        euRepresentativeName: null,
+        euRepresentativeAddress: null,
+        usesAutomatedDecisionMaking: null,
       })
     }
   })
 
   it("accepts empty security control defaults", () => {
     expect(accessProfileSchema.parse(emptyAccessProfile)).toMatchObject({
-      leastPrivilege: false,
-      roleBasedAccess: false,
-      accessReviewCadence: "",
-      adminApprovalRequired: false,
-      passwordManagerRequired: false,
+      leastPrivilege: null,
+      roleBasedAccess: null,
+      accessReviewCadence: null,
+      adminApprovalRequired: null,
+      passwordManagerRequired: null,
     })
     expect(infrastructureProfileSchema.parse(emptyInfrastructureProfile)).toMatchObject({
-      atRestAlgorithm: "",
-      inTransitMinimumTlsVersion: "",
-      keyManagementProvider: "",
-      logRetentionDays: 0,
-      securityMonitoringOwner: "",
-      scanningCadence: "",
-      patchingSlaCriticalDays: 0,
-      patchingSlaHighDays: 0,
-      incidentResponsePlanExists: false,
-      incidentNotificationTimeline: "",
-      customerNotificationProcess: "",
-      incidentResponseLastTestedDate: "",
-      backupCadence: "",
-      backupRetentionDays: 0,
-      restoreTestingCadence: "",
-      vendorReviewRequired: false,
-      vendorReviewCadence: "",
-      dpaRequiredForProcessors: false,
+      atRestAlgorithm: null,
+      inTransitMinimumTlsVersion: null,
+      keyManagementProvider: null,
+      logRetentionDays: null,
+      securityMonitoringOwner: null,
+      scanningCadence: null,
+      patchingSlaCriticalDays: null,
+      patchingSlaHighDays: null,
+      incidentResponsePlanExists: null,
+      incidentNotificationTimeline: null,
+      customerNotificationProcess: null,
+      incidentResponseLastTestedDate: null,
+      backupCadence: null,
+      backupRetentionDays: null,
+      restoreTestingCadence: null,
+      vendorReviewRequired: null,
+      vendorReviewCadence: null,
+      dpaRequiredForProcessors: null,
     })
+  })
+
+  it("preserves explicit empty, false, and zero profile answers", () => {
+    const result = privacyProfileSchema.safeParse({
+      ...emptyPrivacyProfile,
+      supportedRights: [],
+      responseTimelineDays: 0,
+      identityVerificationRequired: false,
+      cookieConsentMechanism: "",
+    })
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.supportedRights).toEqual([])
+      expect(result.data.responseTimelineDays).toBe(0)
+      expect(result.data.identityVerificationRequired).toBe(false)
+      expect(result.data.cookieConsentMechanism).toBe("")
+    }
   })
 
   it("accepts populated security control detail", () => {

@@ -25,7 +25,7 @@ const ResponseTimelineField = ({
       min={0}
       type="number"
       {...form.register("privacy.responseTimelineDays", {
-        valueAsNumber: true,
+        setValueAs: (value) => (value === "" ? null : Number(value)),
       })}
     />
     {form.formState.errors.privacy?.responseTimelineDays && (

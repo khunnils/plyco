@@ -1,4 +1,4 @@
-import { mapOrganizationRecord, prisma, type PrismaClient } from "@plyco/db"
+import { mapOrganizationRecord, Prisma, prisma, type PrismaClient } from "@plyco/db"
 import {
   type AccessProfile,
   type CompanyProfile,
@@ -17,6 +17,9 @@ import {
   type SecurityProfileInput,
 } from "./repository.js"
 import { ApiError } from "../../errors.js"
+
+const jsonValue = (value: string[] | null) =>
+  value === null ? Prisma.DbNull : value
 
 export const ORGANIZATION_INCLUDE = {
   accessProfile: true,
@@ -157,11 +160,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       country: input.country,
       address: input.address,
       employeeCount: input.employeeCount,
-      industries: input.industries,
-      regions: input.regions,
+      industries: jsonValue(input.industries),
+      regions: jsonValue(input.regions),
       handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
-      complianceGoals: input.complianceGoals,
+      complianceGoals: jsonValue(input.complianceGoals),
     }
   }
 
@@ -197,15 +200,15 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       serviceName: input.serviceName,
       serviceDescription: input.serviceDescription,
       serviceUrl: input.serviceUrl,
-      userTypes: input.userTypes,
-      customerTypes: input.customerTypes,
-      availabilityRegions: input.availabilityRegions,
+      userTypes: jsonValue(input.userTypes),
+      customerTypes: jsonValue(input.customerTypes),
+      availabilityRegions: jsonValue(input.availabilityRegions),
       childrenDirected: input.childrenDirected,
       minimumUserAge: input.minimumUserAge,
       usesCookies: input.privacy.usesCookies,
-      cookieTypes: input.privacy.cookieTypes,
+      cookieTypes: jsonValue(input.privacy.cookieTypes),
       primaryHostingRegion: input.privacy.primaryHostingRegion,
-      dataResidencyOptions: input.privacy.dataResidencyOptions,
+      dataResidencyOptions: jsonValue(input.privacy.dataResidencyOptions),
     }
   }
 
@@ -322,8 +325,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private privacyData(input: PrivacyProfile) {
     return {
-      supportedRights: input.supportedRights,
-      requestMethods: input.requestMethods,
+      supportedRights: jsonValue(input.supportedRights),
+      requestMethods: jsonValue(input.requestMethods),
       responseTimelineDays: input.responseTimelineDays,
       identityVerificationRequired: input.identityVerificationRequired,
       authorizedAgentSupported: input.authorizedAgentSupported,
@@ -335,7 +338,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       marketingOptOutMethod: input.marketingOptOutMethod,
       transactionalEmailsSent: input.transactionalEmailsSent,
       crossBorderTransfers: input.crossBorderTransfers,
-      transferMechanisms: input.transferMechanisms,
+      transferMechanisms: jsonValue(input.transferMechanisms),
       sellsOrSharesData: input.sellsOrSharesData,
       doNotSellLink: input.doNotSellLink,
       dpoName: input.dpoName,
@@ -510,8 +513,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return input.dataTypesStored.map((dataType) => ({
       name: dataType.name,
       description: dataType.description,
-      subjectTypes: dataType.subjectTypes,
-      collectionMethods: dataType.collectionMethods,
+      subjectTypes: jsonValue(dataType.subjectTypes),
+      collectionMethods: jsonValue(dataType.collectionMethods),
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
     }))

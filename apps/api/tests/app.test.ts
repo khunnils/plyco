@@ -356,6 +356,55 @@ describe("security profile API", () => {
     expect(getResponse.json().organization.privacy).toEqual(profileBody.privacy)
   })
 
+  it("persists explicit empty, false, and zero profile answers", async () => {
+    const explicitEmptyProfile = {
+      ...profileBody,
+      company: {
+        ...profileBody.company,
+        industries: [],
+        handlesPii: false,
+        employeeCount: 1,
+        complianceGoals: [],
+      },
+      services: [
+        {
+          ...profileBody.services[0],
+          userTypes: [],
+          childrenDirected: false,
+          minimumUserAge: 0,
+          privacy: {
+            ...profileBody.services[0].privacy,
+            usesCookies: false,
+            cookieTypes: [],
+          },
+        },
+      ],
+      privacy: {
+        ...profileBody.privacy,
+        supportedRights: [],
+        responseTimelineDays: 0,
+        identityVerificationRequired: false,
+        cookieConsentMechanism: "",
+        transferMechanisms: [],
+      },
+    }
+    const app = await createTestApp()
+    const saveResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: explicitEmptyProfile,
+    })
+
+    expect(saveResponse.statusCode).toBe(200)
+    expect(saveResponse.json().organization.company.industries).toEqual([])
+    expect(saveResponse.json().organization.company.handlesPii).toBe(false)
+    expect(saveResponse.json().organization.services[0].userTypes).toEqual([])
+    expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0)
+    expect(saveResponse.json().organization.privacy.supportedRights).toEqual([])
+    expect(saveResponse.json().organization.privacy.responseTimelineDays).toBe(0)
+    expect(saveResponse.json().organization.privacy.identityVerificationRequired).toBe(false)
+  })
+
   it("rejects service profile codes that are not in organization vocabulary", async () => {
     const app = await createTestApp()
     const response = await app.inject({
@@ -825,6 +874,55 @@ describe("security profile API", () => {
         expect.objectContaining({ name: "Customer account data" }),
       ],
     })
+  })
+
+  it("adds answered and hasValue helper flags to report context fields", () => {
+    const context = new ReportContextBuilder().build({
+      organization: {
+        id: "org-test",
+        ...profileBody,
+        company: {
+          ...profileBody.company,
+          industries: [],
+          handlesPii: false,
+        },
+        services: [
+          {
+            ...storedService,
+            userTypes: null,
+            minimumUserAge: 0,
+            privacy: {
+              ...storedService.privacy,
+              cookieTypes: [],
+              usesCookies: false,
+            },
+          },
+        ],
+        privacy: {
+          ...profileBody.privacy,
+          supportedRights: null,
+          requestMethods: [],
+          identityVerificationRequired: false,
+        },
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+      },
+      businessActivities: [],
+      organizationProviders: [],
+      serviceProviderUsage: [],
+    })
+
+    expect(context.privacy.supportedRightsAnswered).toBe(false)
+    expect(context.privacy.requestMethodsAnswered).toBe(true)
+    expect(context.privacy.requestMethodsHasValue).toBe(false)
+    expect(context.privacy.identityVerificationRequiredAnswered).toBe(true)
+    expect(context.privacy.identityVerificationRequiredHasValue).toBe(false)
+    expect(context.service.userTypesAnswered).toBe(false)
+    expect(context.service.minimumUserAgeAnswered).toBe(true)
+    expect(context.service.minimumUserAgeHasValue).toBe(false)
+    expect(context.service.privacy.cookieTypesAnswered).toBe(true)
+    expect(context.service.privacy.cookieTypesHasValue).toBe(false)
+    expect(context.vendors.dataProcessorsHasValue).toBe(false)
   })
 
   it("loads the report builder variable schema", async () => {

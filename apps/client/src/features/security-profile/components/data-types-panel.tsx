@@ -14,15 +14,15 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[]
+  values: string[] | null
 ) =>
-  values.length > 0
+  values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
 const displayTitle = (dataType: StoredDataType, index: number) =>
   dataType.name.trim() ||
-  dataType.description.trim() ||
+  dataType.description?.trim() ||
   `Data type ${index + 1}`
 
 export const DataTypesPanel = ({

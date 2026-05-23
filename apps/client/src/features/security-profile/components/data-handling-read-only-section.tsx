@@ -7,14 +7,15 @@ import { Button } from "@/components/ui/button"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 
-const boolText = (value: boolean) => (value ? "Yes" : "No")
+const boolText = (value: boolean | null) =>
+  value === null ? "Not answered" : value ? "Yes" : "No"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[],
+  values: string[] | null,
 ) =>
-  values.length > 0
+  values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
@@ -55,7 +56,7 @@ export const DataHandlingReadOnlySection = ({
               {profile.dataHandling.dataTypesStored.map((dataType, index) => {
                 const displayTitle =
                   dataType.name.trim() ||
-                  dataType.description.trim() ||
+                  dataType.description?.trim() ||
                   `Data type ${index + 1}`
                 const expanded = expandedIndex === index
 

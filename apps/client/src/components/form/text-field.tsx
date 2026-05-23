@@ -30,7 +30,14 @@ export const TextField = <T extends FieldValues>({
       min={type === "number" ? 1 : undefined}
       placeholder={placeholder}
       type={type}
-      {...register(name, { valueAsNumber: type === "number" })}
+      {...register(name, {
+        setValueAs: (value) =>
+          type === "number"
+            ? value === ""
+              ? null
+              : Number(value)
+            : value,
+      })}
     />
     {error && <span className="text-xs text-red-700">{error.message}</span>}
   </label>

@@ -16,7 +16,7 @@ export const SummaryTiles = ({
     profile.dataHandling.encryptionInTransit,
     profile.access.offboardingProcessExists,
     profile.access.privilegedAccessRestricted,
-  ].filter(Boolean).length
+  ].filter((value) => value !== null).length
 
   return (
     <div className="grid gap-3 md:grid-cols-3">

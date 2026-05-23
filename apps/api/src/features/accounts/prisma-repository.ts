@@ -18,22 +18,6 @@ import {
 
 const toIsoString = (value: Date) => value.toISOString()
 
-const DEFAULT_PROFILE = {
-  legalEntityName: "",
-  website: "",
-  contactEmail: "",
-  securityContactEmail: "",
-  privacyContactEmail: "",
-  country: "",
-  address: "",
-  employeeCount: 1,
-  industries: [],
-  regions: [],
-  handlesPii: false,
-  handlesSensitiveData: false,
-  complianceGoals: [],
-}
-
 export class PrismaAccountRepository implements AccountRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
@@ -120,35 +104,6 @@ export class PrismaAccountRepository implements AccountRepository {
     const organization = await this.client.organization.create({
       data: {
         companyName: input.name,
-        ...DEFAULT_PROFILE,
-        accessProfile: {
-          create: {
-            mfaRequired: false,
-            ssoEnabled: false,
-            sharedAccountsExist: false,
-            offboardingProcessExists: false,
-            accessReviewsPerformed: false,
-            privilegedAccessRestricted: false,
-          },
-        },
-        dataHandlingProfile: {
-          create: {
-            storesPii: false,
-            storesHealthcareData: false,
-            encryptionAtRest: false,
-            encryptionInTransit: false,
-            productionDataInDevelopment: false,
-            retentionPolicyExists: false,
-          },
-        },
-        infrastructureProfile: {
-          create: {
-            mfaEnabled: false,
-            encryptedDevicesRequired: false,
-            backupsEnabled: false,
-            centralizedLoggingEnabled: false,
-          },
-        },
         memberships: {
           create: {
             userId,

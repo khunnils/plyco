@@ -34,7 +34,7 @@ const MinimumAgeField = ({
         min={0}
         type="number"
         {...form.register(servicePath(index, "minimumUserAge"), {
-          valueAsNumber: true,
+          setValueAs: (value) => (value === "" ? null : Number(value)),
         })}
       />
       {error && <span className="text-xs text-red-700">{error.message}</span>}

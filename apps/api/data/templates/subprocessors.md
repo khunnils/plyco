@@ -4,7 +4,7 @@
 
 # {{ organization.name }} Data Processors and Subprocessors
 
-{% if vendors.dataProcessors.length %}
+{% if vendors.dataProcessorsHasValue %}
 {{ organization.name }} uses the following vendors to process organization or customer data. This list includes vendors with limited data processing and vendors classified as subprocessors.
 
 | Vendor | Processing level | Purpose | Data processed | Data regions | DPA status |
@@ -18,7 +18,7 @@
 
 ## Subprocessors
 
-{% if vendors.subprocessors.length %}
+{% if vendors.subprocessorsHasValue %}
 The following vendors are classified as subprocessors:
 
 | Subprocessor | Purpose | Data processed | Data regions | DPA status |

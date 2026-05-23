@@ -213,9 +213,10 @@ const isCompanyView = (
   | "companyData"
   | "companyAccess" => companySectionByView.has(view)
 
-const boolText = (value: boolean) => (value ? "Yes" : "No")
+const boolText = (value: boolean | null) =>
+  value === null ? "Not answered" : value ? "Yes" : "No"
 
-const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
+const DetailGrid = ({ rows }: { rows: Array<[string, string | number | null]> }) => (
   <dl className="grid gap-3 sm:grid-cols-2">
     {rows.map(([label, value]) => (
       <div
@@ -223,7 +224,9 @@ const DetailGrid = ({ rows }: { rows: Array<[string, string | number]> }) => (
         key={label}
       >
         <dt className="text-xs font-medium text-slate-500">{label}</dt>
-        <dd className="mt-1 text-sm font-medium text-slate-900">{value}</dd>
+        <dd className="mt-1 text-sm font-medium text-slate-900">
+          {value ?? "Not answered"}
+        </dd>
       </div>
     ))}
   </dl>
@@ -357,9 +360,11 @@ const CompanyReadOnlySection = ({
                 ["Directed to children", boolText(service.childrenDirected)],
                 [
                   "Minimum user age",
-                  service.minimumUserAge === 0
-                    ? "Not set"
-                    : service.minimumUserAge,
+                  service.minimumUserAge === null
+                    ? "Not answered"
+                    : service.minimumUserAge === 0
+                      ? "Not set"
+                      : service.minimumUserAge,
                 ],
                 ["Uses cookies", boolText(service.privacy.usesCookies)],
                 [
@@ -409,7 +414,7 @@ const CompanyReadOnlySection = ({
       CompanySectionId,
       "activities" | "dataHandling" | "infrastructure" | "privacy" | "service"
     >,
-    Array<[string, string | number]>
+    Array<[string, string | number | null]>
   > = {
     profile: [
       ["Company name", profile.company.companyName || "Not set"],
@@ -636,7 +641,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     activeCompanySectionId === "service"
       ? isCreatingService
         ? "Add service"
-        : headerService?.serviceName.trim() || "Service"
+        : headerService?.serviceName?.trim() || "Service"
       : (activeCompanySection?.title ?? "Profile")
   const headerServiceIndex = Math.max(
     defaultValues.services.findIndex(

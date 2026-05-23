@@ -137,7 +137,9 @@ export const PrivacyRightsPanel = ({
             inputMode="numeric"
             min={0}
             type="number"
-            {...form.register("responseTimelineDays", { valueAsNumber: true })}
+            {...form.register("responseTimelineDays", {
+              setValueAs: (value) => (value === "" ? null : Number(value)),
+            })}
           />
         </label>
         <ToggleField
