@@ -31,10 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DocumentContent } from "@/features/documents/components/document-content"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
   profileFromOrganization,
@@ -52,7 +49,12 @@ import { DataHandlingProfilePage } from "@/features/security-profile/pages/data-
 import { InfrastructureProfilePage } from "@/features/security-profile/pages/infrastructure-profile-page"
 import { PrivacyProfilePage } from "@/features/security-profile/pages/privacy-profile-page"
 import { ServiceProfilePage } from "@/features/security-profile/pages/service-profile-page"
-import { useCreateDocument, useDocument, useDocuments, useDownloadDocumentPdf } from "@/features/documents/hooks/use-documents"
+import {
+  useCreateDocument,
+  useDocument,
+  useDocuments,
+  useDownloadDocumentPdf,
+} from "@/features/documents/hooks/use-documents"
 import { useLogout } from "@/features/auth/hooks/use-auth"
 import {
   useSaveSecurityProfile,
@@ -340,7 +342,7 @@ const CompanyReadOnlySection = ({
                   codeValueList(
                     vocabulary,
                     "service_user_types",
-                    service.userTypes,
+                    service.userTypes
                   ),
                 ],
                 [
@@ -348,12 +350,16 @@ const CompanyReadOnlySection = ({
                   codeValueList(
                     vocabulary,
                     "service_customer_types",
-                    service.customerTypes,
+                    service.customerTypes
                   ),
                 ],
                 [
                   "Availability regions",
-                  codeValueList(vocabulary, "regions", service.availabilityRegions),
+                  codeValueList(
+                    vocabulary,
+                    "regions",
+                    service.availabilityRegions
+                  ),
                 ],
                 ["Directed to children", boolText(service.childrenDirected)],
                 [
@@ -368,7 +374,7 @@ const CompanyReadOnlySection = ({
                   codeValueList(
                     vocabulary,
                     "privacy_cookie_types",
-                    service.privacy.cookieTypes,
+                    service.privacy.cookieTypes
                   ),
                 ],
                 [
@@ -376,7 +382,7 @@ const CompanyReadOnlySection = ({
                   providerNamesForSystem(
                     service.privacy.analyticsProviders,
                     providers,
-                    "analytics",
+                    "analytics"
                   ),
                 ],
                 [
@@ -384,7 +390,7 @@ const CompanyReadOnlySection = ({
                   providerNamesForSystem(
                     service.privacy.advertisingProviders,
                     providers,
-                    "advertising",
+                    "advertising"
                   ),
                 ],
                 [
@@ -393,7 +399,7 @@ const CompanyReadOnlySection = ({
                     ? codeLabel(
                         vocabulary,
                         "regions",
-                        service.privacy.primaryHostingRegion,
+                        service.privacy.primaryHostingRegion
                       )
                     : "Not set",
                 ],
@@ -402,7 +408,7 @@ const CompanyReadOnlySection = ({
                   codeValueList(
                     vocabulary,
                     "regions",
-                    service.privacy.dataResidencyOptions,
+                    service.privacy.dataResidencyOptions
                   ),
                 ],
               ]}
@@ -424,11 +430,7 @@ const CompanyReadOnlySection = ({
   const rowsBySection: Record<
     Exclude<
       CompanySectionId,
-      | "activities"
-      | "dataHandling"
-      | "infrastructure"
-      | "privacy"
-      | "service"
+      "activities" | "dataHandling" | "infrastructure" | "privacy" | "service"
     >,
     Array<[string, string | number]>
   > = {
@@ -437,10 +439,7 @@ const CompanyReadOnlySection = ({
       ["Legal entity", profile.company.legalEntityName || "Not set"],
       ["Website", profile.company.website || "Not set"],
       ["Contact email", profile.company.contactEmail || "Not set"],
-      [
-        "Security contact",
-        profile.company.securityContactEmail || "Not set",
-      ],
+      ["Security contact", profile.company.securityContactEmail || "Not set"],
       ["Privacy contact", profile.company.privacyContactEmail || "Not set"],
       [
         "Country",
@@ -454,13 +453,16 @@ const CompanyReadOnlySection = ({
         "Industries",
         codeValueList(vocabulary, "industries", profile.company.industries),
       ],
-      ["Regions", codeValueList(vocabulary, "regions", profile.company.regions)],
+      [
+        "Regions",
+        codeValueList(vocabulary, "regions", profile.company.regions),
+      ],
       [
         "Compliance goals",
         codeValueList(
           vocabulary,
           "compliance_goals",
-          profile.company.complianceGoals,
+          profile.company.complianceGoals
         ),
       ],
       ["Handles PII", boolText(profile.company.handlesPii)],
@@ -475,7 +477,7 @@ const CompanyReadOnlySection = ({
           ? codeLabel(
               vocabulary,
               "security_cadences",
-              profile.access.accessReviewCadence,
+              profile.access.accessReviewCadence
             )
           : "Not set",
       ],
@@ -551,14 +553,14 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const downloadDocumentPdf = useDownloadDocumentPdf()
 
   const snapshot = securityProfile.data
-  const defaultValues = profileFromOrganization(
-    snapshot?.organization ?? null
-  )
+  const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const vendors = snapshot?.vendors ?? []
   const serviceVendorUses = snapshot?.serviceVendorUses ?? []
   const businessActivities = snapshot?.businessActivities ?? []
-  const templatesData: TemplateCatalog =
-    templates.data ?? { systemTemplates: [], organizationTemplates: [] }
+  const templatesData: TemplateCatalog = templates.data ?? {
+    systemTemplates: [],
+    organizationTemplates: [],
+  }
   const documentsList: DocumentSummary[] = documents.data ?? []
 
   const workspaceDataError = [
@@ -598,7 +600,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const [showVendorCatalog, setShowVendorCatalog] = useState(false)
   const [showCustomVendorForm, setShowCustomVendorForm] = useState(false)
   const [showActivityForm, setShowActivityForm] = useState(false)
-  const [editingActivityId, setEditingActivityId] = useState<string | null>(null)
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(
+    null
+  )
   const {
     editingCompanySection,
     editingTemplateId,
@@ -642,20 +646,24 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
   const activeCompanySection = companySectionByView.get(activeWorkspaceView)
   const activeCompanySectionId = activeCompanySection?.id
   const headerService =
-    defaultValues.services.find((service) => service.id === routedSelectedServiceId) ??
-    defaultValues.services.find((service) => service.id === selectedServiceId) ??
+    defaultValues.services.find(
+      (service) => service.id === routedSelectedServiceId
+    ) ??
+    defaultValues.services.find(
+      (service) => service.id === selectedServiceId
+    ) ??
     defaultValues.services[0]
   const activeCompanyTitle =
     activeCompanySectionId === "service"
       ? isCreatingService
         ? "Add service"
-        : (headerService?.serviceName.trim() || "Service")
-      : activeCompanySection?.title ?? "Profile"
+        : headerService?.serviceName.trim() || "Service"
+      : (activeCompanySection?.title ?? "Profile")
   const headerServiceIndex = Math.max(
     defaultValues.services.findIndex(
-      (service) => service.id === routedSelectedServiceId,
+      (service) => service.id === routedSelectedServiceId
     ),
-    0,
+    0
   )
   const deleteSelectedService = () => {
     if (defaultValues.services.length === 1) {
@@ -663,12 +671,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
     }
 
     const nextServices = defaultValues.services.filter(
-      (_, index) => index !== headerServiceIndex,
+      (_, index) => index !== headerServiceIndex
     )
     const nextSelectedService =
-      nextServices[
-        Math.min(headerServiceIndex, nextServices.length - 1)
-      ] ?? null
+      nextServices[Math.min(headerServiceIndex, nextServices.length - 1)] ??
+      null
 
     saveProfile.mutate(
       {
@@ -684,7 +691,7 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
           setSelectedServiceId(nextSelectedService?.id ?? null)
           navigate(nextPath)
         },
-      },
+      }
     )
   }
 
@@ -706,7 +713,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
         onSelectService={(serviceId) => {
           setSelectedServiceId(serviceId)
           setServicesExpanded(true)
-          navigate(serviceId ? `/company/services/${serviceId}` : "/company/services")
+          navigate(
+            serviceId ? `/company/services/${serviceId}` : "/company/services"
+          )
         }}
         onServicesExpandedChange={setServicesExpanded}
         onWorkspaceViewChange={(view) => {
@@ -808,11 +817,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                     navigate(
                       routedSelectedServiceId
                         ? `/company/services/${routedSelectedServiceId}`
-                        : "/company/services",
+                        : "/company/services"
                     )
                   }
-                  onCreateVendorUse={(vendorUse) =>
-                    createServiceVendorUse.mutate(vendorUse)
+                  onCreateVendorUse={(vendorUse, onSuccess) =>
+                    createServiceVendorUse.mutate(vendorUse, { onSuccess })
                   }
                   onDeleteVendorUse={(vendorUse) =>
                     deleteServiceVendorUse.mutate(vendorUse.id)
@@ -825,11 +834,11 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                     navigate(
                       serviceId
                         ? `/company/services/${serviceId}`
-                        : "/company/services",
+                        : "/company/services"
                     )
                   }}
-                  onUpdateVendorUse={(input) =>
-                    updateServiceVendorUse.mutate(input)
+                  onUpdateVendorUse={(input, onSuccess) =>
+                    updateServiceVendorUse.mutate(input, { onSuccess })
                   }
                 />
               ) : activeCompanySectionId === "dataHandling" ? (
@@ -837,7 +846,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   isMutationPending={saveProfile.isPending}
                   profile={defaultValues}
                   vocabulary={vocabularyData}
-                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
                 />
               ) : activeCompanySectionId === "privacy" ? (
                 <PrivacyProfilePage
@@ -845,7 +856,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   profile={defaultValues}
                   providers={providersList}
                   vocabulary={vocabularyData}
-                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
                 />
               ) : activeCompanySectionId === "infrastructure" ? (
                 <InfrastructureProfilePage
@@ -853,99 +866,117 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                   profile={defaultValues}
                   providers={providersList}
                   vocabulary={vocabularyData}
-                  onSaveProfile={(profile) => saveProfile.mutate(profile)}
+                  onSaveProfile={(profile, onSuccess) =>
+                    saveProfile.mutate(profile, { onSuccess })
+                  }
                 />
               ) : (
                 [activeCompanySection].map((section) => (
-                <Section
-                  description={section.description}
-                  key={section.id}
-                  title={section.title}
-                  action={
-                    section.id === "activities" &&
-                    businessActivities.length > 0 &&
-                    !showActivityForm &&
-                    !editingActivityId ? (
-                      <Button
-                        className="w-fit"
-                        type="button"
-                        onClick={() => {
-                          setEditingActivityId(null)
-                          setShowActivityForm(true)
+                  <Section
+                    description={section.description}
+                    key={section.id}
+                    title={section.title}
+                    action={
+                      section.id === "activities" &&
+                      businessActivities.length > 0 &&
+                      !showActivityForm &&
+                      !editingActivityId ? (
+                        <Button
+                          className="w-fit"
+                          type="button"
+                          onClick={() => {
+                            setEditingActivityId(null)
+                            setShowActivityForm(true)
+                          }}
+                        >
+                          <Plus />
+                          Add activity
+                        </Button>
+                      ) : undefined
+                    }
+                  >
+                    {section.id === "activities" ? (
+                      <ActivitiesManager
+                        activities={businessActivities}
+                        isMutationPending={isActivityMutationPending}
+                        legalBasisOptions={codeOptions(
+                          vocabularyData,
+                          "legal_basis"
+                        )}
+                        roleOptions={codeOptions(
+                          vocabularyData,
+                          "activity_role"
+                        )}
+                        vocabulary={vocabularyData}
+                        onCreate={(activity, onSuccess) =>
+                          createBusinessActivity.mutate(activity, { onSuccess })
+                        }
+                        onDelete={(activity) =>
+                          deleteBusinessActivity.mutate(activity.id)
+                        }
+                        onUpdate={(input, onSuccess) =>
+                          updateBusinessActivity.mutate(input, { onSuccess })
+                        }
+                        showForm={showActivityForm}
+                        setShowForm={setShowActivityForm}
+                        editingActivityId={editingActivityId}
+                        setEditingActivityId={setEditingActivityId}
+                      />
+                    ) : editingCompanySection === section.id ? (
+                      <ProfileForm
+                        defaultValues={defaultValues}
+                        onSubmit={(profile) => {
+                          saveProfile.mutate(profile, {
+                            onSuccess: () => setEditingCompanySection(null),
+                          })
                         }}
                       >
-                        <Plus />
-                        Add activity
-                      </Button>
-                    ) : undefined
-                  }
-                >
-                  {section.id === "activities" ? (
-                    <ActivitiesManager
-                      activities={businessActivities}
-                      isMutationPending={isActivityMutationPending}
-                      legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
-                      roleOptions={codeOptions(vocabularyData, "activity_role")}
-                      vocabulary={vocabularyData}
-                      onCreate={(activity) => createBusinessActivity.mutate(activity)}
-                      onDelete={(activity) =>
-                        deleteBusinessActivity.mutate(activity.id)
-                      }
-                      onUpdate={(input) => updateBusinessActivity.mutate(input)}
-                      showForm={showActivityForm}
-                      setShowForm={setShowActivityForm}
-                      editingActivityId={editingActivityId}
-                      setEditingActivityId={setEditingActivityId}
-                    />
-                  ) : editingCompanySection === section.id ? (
-                    <ProfileForm
-                      defaultValues={defaultValues}
-                      onSubmit={(profile) => {
-                        saveProfile.mutate(profile)
-                        setEditingCompanySection(null)
-                      }}
-                    >
-                      {(form) => (
-                        <>
-                          <CompanySectionFields
-                            businessActivityOptions={businessActivityOptions}
-                            countries={countriesList}
-                            form={form}
-                            providers={providersList}
-                            section={section.id}
-                            vocabulary={vocabularyData}
-                          />
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              disabled={saveProfile.isPending}
-                              type="submit"
-                            >
-                              {saveProfile.isPending ? <Loader2 /> : <Save />}
-                              Save section
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setEditingCompanySection(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                    </ProfileForm>
-                  ) : (
-                    <CompanyReadOnlySection
-                      countries={countriesList}
-                      profile={defaultValues}
-                      providers={providersList}
-                      section={section.id}
-                      vocabulary={vocabularyData}
-                      onEdit={() => setEditingCompanySection(section.id)}
-                    />
-                  )}
-                </Section>
-              ))
+                        {(form) => (
+                          <>
+                            <CompanySectionFields
+                              businessActivityOptions={businessActivityOptions}
+                              countries={countriesList}
+                              form={form}
+                              providers={providersList}
+                              section={section.id}
+                              vocabulary={vocabularyData}
+                            />
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                disabled={saveProfile.isPending}
+                                type="submit"
+                              >
+                                {saveProfile.isPending ? (
+                                  <Loader2 className="animate-spin" />
+                                ) : (
+                                  <Save />
+                                )}
+                                Save section
+                              </Button>
+                              <Button
+                                disabled={saveProfile.isPending}
+                                type="button"
+                                variant="outline"
+                                onClick={() => setEditingCompanySection(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </ProfileForm>
+                    ) : (
+                      <CompanyReadOnlySection
+                        countries={countriesList}
+                        profile={defaultValues}
+                        providers={providersList}
+                        section={section.id}
+                        vocabulary={vocabularyData}
+                        onEdit={() => setEditingCompanySection(section.id)}
+                      />
+                    )}
+                  </Section>
+                ))
               )}
             </div>
           )}
@@ -985,14 +1016,17 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                         setShowVendorCatalog(false)
                         setShowCustomVendorForm(false)
                       },
-                    },
+                    }
                   )
                   return
                 }
 
-                createVendor.mutate(vendor)
-                setShowVendorCatalog(false)
-                setShowCustomVendorForm(false)
+                createVendor.mutate(vendor, {
+                  onSuccess: () => {
+                    setShowVendorCatalog(false)
+                    setShowCustomVendorForm(false)
+                  },
+                })
               }}
             />
           )}
@@ -1182,7 +1216,9 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                               <h3 className="font-semibold text-slate-950">
                                 {summary.template.name}
                               </h3>
-                              <Badge variant="code">{summary.template.slug}</Badge>
+                              <Badge variant="code">
+                                {summary.template.slug}
+                              </Badge>
                               <Badge
                                 variant={
                                   summary.status === "stale"

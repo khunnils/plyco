@@ -41,20 +41,29 @@ export const ServiceProfilePage = ({
   vendors: Vendor[]
   vocabulary: Vocabulary | undefined
   onCancelCreateService: () => void
-  onCreateVendorUse: (vendorUse: ServiceVendorUseInput) => void
+  onCreateVendorUse: (
+    vendorUse: ServiceVendorUseInput,
+    onSuccess?: () => void
+  ) => void
   onDeleteVendorUse: (vendorUse: ServiceVendorUse) => void
   onSaveProfile: Parameters<typeof ServiceManager>[0]["onSaveProfile"]
   onSelectService: (id: string | null) => void
-  onUpdateVendorUse: (input: {
-    id: string
-    vendorUse: ServiceVendorUseInput
-  }) => void
+  onUpdateVendorUse: (
+    input: {
+      id: string
+      vendorUse: ServiceVendorUseInput
+    },
+    onSuccess?: () => void
+  ) => void
 }) => (
   <ServiceManager
     businessActivityOptions={businessActivityOptions}
     cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
     customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
-    dataProcessingLevelOptions={codeOptions(vocabulary, "data_processing_level")}
+    dataProcessingLevelOptions={codeOptions(
+      vocabulary,
+      "data_processing_level"
+    )}
     dataRegionOptions={codeOptions(vocabulary, "regions")}
     dataTypeOptions={dataTypeOptions}
     dpaStatusOptions={codeOptions(vocabulary, "dpa_status")}

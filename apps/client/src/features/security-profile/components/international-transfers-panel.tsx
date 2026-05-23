@@ -15,7 +15,10 @@ import {
   ProfilePanelShell,
 } from "@/features/security-profile/components/profile-panel-shell"
 import { boolText } from "@/features/security-profile/lib/display"
-import { codeValueList, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeValueList,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
 
 const transfersSchema = privacyProfileSchema.pick({
   crossBorderTransfers: true,
@@ -29,7 +32,10 @@ const toTransfersDraft = (privacy: PrivacyProfile): TransfersDraft => ({
   transferMechanisms: privacy.transferMechanisms,
 })
 
-const transferRows = (draft: TransfersDraft, vocabulary: Vocabulary | undefined) =>
+const transferRows = (
+  draft: TransfersDraft,
+  vocabulary: Vocabulary | undefined
+) =>
   [
     ["Cross-border transfers", boolText(draft.crossBorderTransfers)],
     [
@@ -37,7 +43,7 @@ const transferRows = (draft: TransfersDraft, vocabulary: Vocabulary | undefined)
       codeValueList(
         vocabulary,
         "privacy_transfer_mechanisms",
-        draft.transferMechanisms,
+        draft.transferMechanisms
       ),
     ],
   ] as const
@@ -53,7 +59,7 @@ export const InternationalTransfersPanel = ({
   privacy: PrivacyProfile
   transferMechanismOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: TransfersDraft) => void
+  onSave: (patch: TransfersDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toTransfersDraft(privacy)
@@ -66,8 +72,7 @@ export const InternationalTransfersPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

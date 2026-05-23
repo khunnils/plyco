@@ -7,7 +7,7 @@ import {
   type Vocabulary,
 } from "@plyco/shared"
 import { useState } from "react"
-import { type Resolver, useForm } from "react-hook-form"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -45,7 +45,7 @@ const selectedNewsletterIds = (providers: OrganizationProvider[]) =>
 const marketingRows = (
   draft: MarketingDraft,
   vocabulary: Vocabulary | undefined,
-  catalogProviders: Provider[],
+  catalogProviders: Provider[]
 ) =>
   [
     ["Marketing emails", boolText(draft.sendsMarketingEmails)],
@@ -55,7 +55,7 @@ const marketingRows = (
         ? codeLabel(
             vocabulary,
             "privacy_marketing_opt_out_methods",
-            draft.marketingOptOutMethod,
+            draft.marketingOptOutMethod
           )
         : "Not set",
     ],
@@ -65,7 +65,7 @@ const marketingRows = (
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
-        "newsletter",
+        "newsletter"
       ),
     ],
   ] as const
@@ -85,7 +85,7 @@ export const MarketingCommunicationsPanel = ({
   newsletterProviderOptions: Option[]
   privacy: PrivacyProfile
   vocabulary: Vocabulary | undefined
-  onSave: (patch: MarketingDraft) => void
+  onSave: (patch: MarketingDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toMarketingDraft(privacy)
@@ -97,11 +97,14 @@ export const MarketingCommunicationsPanel = ({
     values: draft,
   })
 
-  const organizationProviders = form.watch("organizationProviders")
+  const organizationProviders =
+    useWatch({
+      control: form.control,
+      name: "organizationProviders",
+    }) ?? draft.organizationProviders
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -154,7 +157,7 @@ export const MarketingCommunicationsPanel = ({
           onValueChange={(providerIds) => {
             const selectedId = providerIds.slice(-1)
             const otherProviders = organizationProviders.filter(
-              (provider) => provider.systemType !== "newsletter",
+              (provider) => provider.systemType !== "newsletter"
             )
 
             form.setValue(
@@ -166,7 +169,7 @@ export const MarketingCommunicationsPanel = ({
                   providerId,
                 })),
               ],
-              { shouldDirty: true, shouldValidate: true },
+              { shouldDirty: true, shouldValidate: true }
             )
           }}
         />

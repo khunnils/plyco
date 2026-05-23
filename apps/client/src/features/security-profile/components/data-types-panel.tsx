@@ -14,14 +14,16 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[],
+  values: string[]
 ) =>
   values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
 const displayTitle = (dataType: StoredDataType, index: number) =>
-  dataType.name.trim() || dataType.description.trim() || `Data type ${index + 1}`
+  dataType.name.trim() ||
+  dataType.description.trim() ||
+  `Data type ${index + 1}`
 
 export const DataTypesPanel = ({
   collectionMethodOptions,
@@ -36,7 +38,7 @@ export const DataTypesPanel = ({
   isMutationPending: boolean
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (dataTypes: StoredDataType[]) => void
+  onSave: (dataTypes: StoredDataType[], onSuccess?: () => void) => void
 }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -59,8 +61,7 @@ export const DataTypesPanel = ({
   }
 
   const handleCreate = (dataType: StoredDataType) => {
-    onSave([...dataTypes, normalizeDataType(dataType)])
-    closeForm()
+    onSave([...dataTypes, normalizeDataType(dataType)], closeForm)
   }
 
   const handleUpdate = (dataType: StoredDataType) => {
@@ -70,10 +71,10 @@ export const DataTypesPanel = ({
 
     onSave(
       dataTypes.map((item, index) =>
-        index === editingIndex ? normalizeDataType(dataType) : item,
+        index === editingIndex ? normalizeDataType(dataType) : item
       ),
+      closeForm
     )
-    closeForm()
   }
 
   const handleDelete = (index: number) => {
@@ -126,7 +127,8 @@ export const DataTypesPanel = ({
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
           <p className="mt-1 text-sm text-slate-500">
-            Categories of data your organization stores and how they are handled.
+            Categories of data your organization stores and how they are
+            handled.
           </p>
         </div>
         <Button className="w-fit" type="button" onClick={startCreate}>
@@ -162,7 +164,7 @@ export const DataTypesPanel = ({
                     type="button"
                     onClick={() =>
                       setExpandedIndex((current) =>
-                        current === index ? null : index,
+                        current === index ? null : index
                       )
                     }
                   >
@@ -191,7 +193,7 @@ export const DataTypesPanel = ({
                       variant="outline"
                       onClick={() =>
                         setExpandedIndex((current) =>
-                          current === index ? null : index,
+                          current === index ? null : index
                         )
                       }
                     >
@@ -228,7 +230,7 @@ export const DataTypesPanel = ({
                         {codeValueList(
                           vocabulary,
                           "subject_types",
-                          dataType.subjectTypes,
+                          dataType.subjectTypes
                         )}
                       </dd>
                     </div>
@@ -240,7 +242,7 @@ export const DataTypesPanel = ({
                         {codeValueList(
                           vocabulary,
                           "collection_methods",
-                          dataType.collectionMethods,
+                          dataType.collectionMethods
                         )}
                       </dd>
                     </div>

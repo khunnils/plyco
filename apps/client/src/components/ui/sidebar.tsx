@@ -30,10 +30,12 @@ export const SidebarMenu = ({ children }: { children: ReactNode }) => (
 
 export const SidebarMenuButton = ({
   active = false,
+  className,
   children,
   onClick,
 }: {
   active?: boolean
+  className?: string
   children: ReactNode
   onClick: () => void
 }) => (
@@ -42,7 +44,8 @@ export const SidebarMenuButton = ({
       "flex h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium transition",
       active
         ? "bg-slate-100 text-slate-900"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+      className
     )}
     type="button"
     onClick={onClick}

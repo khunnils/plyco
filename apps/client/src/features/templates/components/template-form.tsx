@@ -193,7 +193,7 @@ export const TemplateForm = ({
       </label>
       <div className="flex gap-2">
         <Button disabled={isSaving} type="submit">
-          {isSaving ? <Loader2 /> : <Save />}
+          {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
           Save template
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>

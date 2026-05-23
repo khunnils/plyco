@@ -7,7 +7,6 @@ import {
   type OrganizationProvider,
   type Provider,
   type ProviderSystemType,
-  type SecurityProgramSnapshot,
   type ServiceProfileInput,
   type ServiceVendorUse,
   type ServiceVendorUseInput,
@@ -40,13 +39,11 @@ import {
   providerNamesForSystem,
   toServiceVendorUseInput,
 } from "@/features/security-profile/lib/profile"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-
-type SaveProfile = (
-  profile: ProfileDraft,
-  onSuccess?: (snapshot: SecurityProgramSnapshot) => void,
-) => void
 
 const serviceBasicsSchema = serviceProfileInputSchema.pick({
   serviceName: true,
@@ -79,7 +76,7 @@ const boolText = (value: boolean) => (value ? "Yes" : "No")
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[],
+  values: string[]
 ) =>
   values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
@@ -90,14 +87,14 @@ const selectedProviderIds = (providers: OrganizationProvider[]) =>
 
 const providerOptions = (
   providers: Provider[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) =>
   providers
     .filter((provider) => provider.systemTypes.includes(systemType))
     .map((provider) => ({ value: provider.id, label: provider.name }))
 
 const serviceBasicsDraft = (
-  service: ServiceProfileInput,
+  service: ServiceProfileInput
 ): ServiceBasicsDraft => ({
   serviceName: service.serviceName,
   serviceDescription: service.serviceDescription,
@@ -105,7 +102,7 @@ const serviceBasicsDraft = (
 })
 
 const serviceAudienceDraft = (
-  service: ServiceProfileInput,
+  service: ServiceProfileInput
 ): ServiceAudienceDraft => ({
   businessActivityIds: service.businessActivityIds,
   userTypes: service.userTypes,
@@ -116,7 +113,7 @@ const serviceAudienceDraft = (
 })
 
 const servicePrivacyDraft = (
-  service: ServiceProfileInput,
+  service: ServiceProfileInput
 ): ServicePrivacyDraft => ({
   privacy: service.privacy,
 })
@@ -182,7 +179,7 @@ const ServiceProviderPicker = ({
             systemType,
             providerId,
           })) as never,
-          { shouldDirty: true, shouldValidate: true },
+          { shouldDirty: true, shouldValidate: true }
         )
       }}
     />
@@ -285,7 +282,7 @@ const ServiceBasicsPanel = ({
 }: {
   isMutationPending: boolean
   service: ServiceProfileInput
-  onSave: (patch: ServiceBasicsDraft) => void
+  onSave: (patch: ServiceBasicsDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = serviceBasicsDraft(service)
@@ -296,8 +293,7 @@ const ServiceBasicsPanel = ({
     values: draft,
   })
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -351,7 +347,7 @@ const ServiceAudiencePanel = ({
   service: ServiceProfileInput
   userTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: ServiceAudienceDraft) => void
+  onSave: (patch: ServiceAudienceDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = serviceAudienceDraft(service)
@@ -359,19 +355,18 @@ const ServiceAudiencePanel = ({
     defaultValues: draft,
     mode: "onBlur",
     resolver: zodResolver(
-      serviceAudienceSchema,
+      serviceAudienceSchema
     ) as Resolver<ServiceAudienceDraft>,
     values: draft,
   })
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
   const activityLabels = service.businessActivityIds
     .map(
       (activityId) =>
         businessActivityOptions.find((option) => option.value === activityId)
-          ?.label ?? activityId,
+          ?.label ?? activityId
     )
     .join(", ")
 
@@ -386,14 +381,18 @@ const ServiceAudiencePanel = ({
             ["Business activities", activityLabels || "Not set"],
             [
               "User types",
-              codeValueList(vocabulary, "service_user_types", service.userTypes),
+              codeValueList(
+                vocabulary,
+                "service_user_types",
+                service.userTypes
+              ),
             ],
             [
               "Customer types",
               codeValueList(
                 vocabulary,
                 "service_customer_types",
-                service.customerTypes,
+                service.customerTypes
               ),
             ],
             [
@@ -481,7 +480,7 @@ const ServicePrivacyPanel = ({
   regionOptions: Option[]
   service: ServiceProfileInput
   vocabulary: Vocabulary | undefined
-  onSave: (patch: ServicePrivacyDraft) => void
+  onSave: (patch: ServicePrivacyDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = servicePrivacyDraft(service)
@@ -489,13 +488,12 @@ const ServicePrivacyPanel = ({
     defaultValues: draft,
     mode: "onBlur",
     resolver: zodResolver(
-      servicePrivacyDraftSchema,
+      servicePrivacyDraftSchema
     ) as Resolver<ServicePrivacyDraft>,
     values: draft,
   })
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -512,7 +510,7 @@ const ServicePrivacyPanel = ({
               codeValueList(
                 vocabulary,
                 "privacy_cookie_types",
-                service.privacy.cookieTypes,
+                service.privacy.cookieTypes
               ),
             ],
             [
@@ -520,7 +518,7 @@ const ServicePrivacyPanel = ({
               providerNamesForSystem(
                 service.privacy.analyticsProviders,
                 providers,
-                "analytics",
+                "analytics"
               ),
             ],
             [
@@ -528,7 +526,7 @@ const ServicePrivacyPanel = ({
               providerNamesForSystem(
                 service.privacy.advertisingProviders,
                 providers,
-                "advertising",
+                "advertising"
               ),
             ],
             [
@@ -537,7 +535,7 @@ const ServicePrivacyPanel = ({
                 ? codeLabel(
                     vocabulary,
                     "regions",
-                    service.privacy.primaryHostingRegion,
+                    service.privacy.primaryHostingRegion
                   )
                 : "Not set",
             ],
@@ -546,7 +544,7 @@ const ServicePrivacyPanel = ({
               codeValueList(
                 vocabulary,
                 "regions",
-                service.privacy.dataResidencyOptions,
+                service.privacy.dataResidencyOptions
               ),
             ],
           ]}
@@ -623,7 +621,7 @@ const AddVendorsForm = ({
     setCheckedIds((current) =>
       checked
         ? [...current, vendorId]
-        : current.filter((currentId) => currentId !== vendorId),
+        : current.filter((currentId) => currentId !== vendorId)
     )
   }
 
@@ -655,9 +653,7 @@ const AddVendorsForm = ({
               <span className="min-w-0 flex-1 truncate">
                 {vendor.displayName || vendor.name}
               </span>
-              {disabled ? (
-                <Badge variant="secondary">Selected</Badge>
-              ) : null}
+              {disabled ? <Badge variant="secondary">Selected</Badge> : null}
             </label>
           )
         })}
@@ -702,21 +698,26 @@ const ServiceVendorPanel = ({
   serviceVendorUses: ServiceVendorUse[]
   vendors: Vendor[]
   vocabulary: Vocabulary | undefined
-  onCreate: (vendorUse: ServiceVendorUseInput) => void
+  onCreate: (vendorUse: ServiceVendorUseInput, onSuccess?: () => void) => void
   onDelete: (vendorUse: ServiceVendorUse) => void
-  onUpdate: (input: { id: string; vendorUse: ServiceVendorUseInput }) => void
+  onUpdate: (
+    input: { id: string; vendorUse: ServiceVendorUseInput },
+    onSuccess?: () => void
+  ) => void
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddVendors, setShowAddVendors] = useState(false)
   const selectedServiceUses = service.id
-    ? serviceVendorUses.filter((vendorUse) => vendorUse.serviceId === service.id)
+    ? serviceVendorUses.filter(
+        (vendorUse) => vendorUse.serviceId === service.id
+      )
     : []
   const selectedVendorIds = new Set(
-    selectedServiceUses.map((vendorUse) => vendorUse.vendorId),
+    selectedServiceUses.map((vendorUse) => vendorUse.vendorId)
   )
   const editingVendorUse = selectedServiceUses.find(
-    (vendorUse) => vendorUse.id === editingId,
+    (vendorUse) => vendorUse.id === editingId
   )
   const vendorOptions = vendors.map((vendor) => ({
     value: vendor.id,
@@ -737,7 +738,9 @@ const ServiceVendorPanel = ({
         </div>
         <Button
           className="w-fit"
-          disabled={!service.id || vendors.length === 0 || Boolean(editingVendorUse)}
+          disabled={
+            !service.id || vendors.length === 0 || Boolean(editingVendorUse)
+          }
           type="button"
           onClick={() => {
             setEditingId(null)
@@ -755,7 +758,8 @@ const ServiceVendorPanel = ({
         </div>
       ) : vendors.length === 0 ? (
         <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          Add vendors to the vendor inventory before assigning them to a service.
+          Add vendors to the vendor inventory before assigning them to a
+          service.
         </div>
       ) : showAddVendors ? (
         <AddVendorsForm
@@ -788,14 +792,16 @@ const ServiceVendorPanel = ({
           vendorOptions={vendorOptions}
           onCancel={() => setEditingId(null)}
           onSubmit={(vendorUse) => {
-            onUpdate({
-              id: editingVendorUse.id,
-              vendorUse: {
-                ...vendorUse,
-                serviceId: service.id ?? "",
+            onUpdate(
+              {
+                id: editingVendorUse.id,
+                vendorUse: {
+                  ...vendorUse,
+                  serviceId: service.id ?? "",
+                },
               },
-            })
-            setEditingId(null)
+              () => setEditingId(null)
+            )
           }}
         />
       ) : selectedServiceUses.length === 0 ? (
@@ -824,7 +830,7 @@ const ServiceVendorPanel = ({
                     type="button"
                     onClick={() =>
                       setExpandedId((current) =>
-                        current === vendorUse.id ? null : vendorUse.id,
+                        current === vendorUse.id ? null : vendorUse.id
                       )
                     }
                   >
@@ -843,7 +849,7 @@ const ServiceVendorPanel = ({
                       variant="outline"
                       onClick={() =>
                         setExpandedId((current) =>
-                          current === vendorUse.id ? null : vendorUse.id,
+                          current === vendorUse.id ? null : vendorUse.id
                         )
                       }
                     >
@@ -881,10 +887,17 @@ const ServiceVendorPanel = ({
                         codeLabel(
                           vocabulary,
                           "data_processing_level",
-                          vendorUse.dataProcessingLevel,
+                          vendorUse.dataProcessingLevel
                         ),
                       ],
-                      ["DPA status", codeLabel(vocabulary, "dpa_status", vendorUse.dpaStatus)],
+                      [
+                        "DPA status",
+                        codeLabel(
+                          vocabulary,
+                          "dpa_status",
+                          vendorUse.dpaStatus
+                        ),
+                      ],
                       [
                         "Data processed",
                         vendorUse.dataProcessed.length > 0
@@ -893,7 +906,11 @@ const ServiceVendorPanel = ({
                       ],
                       [
                         "Data regions",
-                        codeValueList(vocabulary, "regions", vendorUse.dataRegions),
+                        codeValueList(
+                          vocabulary,
+                          "regions",
+                          vendorUse.dataRegions
+                        ),
                       ],
                       ["Notes", vendorUse.notes || "Not set"],
                     ]}
@@ -953,18 +970,24 @@ export const ServiceManager = ({
   vendors: Vendor[]
   vocabulary: Vocabulary | undefined
   onCancelCreateService: () => void
-  onCreateVendorUse: (vendorUse: ServiceVendorUseInput) => void
+  onCreateVendorUse: (
+    vendorUse: ServiceVendorUseInput,
+    onSuccess?: () => void
+  ) => void
   onDeleteVendorUse: (vendorUse: ServiceVendorUse) => void
   onSaveProfile: SaveProfile
   onSelectService: (id: string | null) => void
-  onUpdateVendorUse: (input: {
-    id: string
-    vendorUse: ServiceVendorUseInput
-  }) => void
+  onUpdateVendorUse: (
+    input: {
+      id: string
+      vendorUse: ServiceVendorUseInput
+    },
+    onSuccess?: () => void
+  ) => void
 }) => {
   const selectedIndex = Math.max(
     profile.services.findIndex((service) => service.id === selectedServiceId),
-    0,
+    0
   )
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
@@ -982,18 +1005,24 @@ export const ServiceManager = ({
     }
   }, [isCreatingService, onSelectService, profile.services, selectedServiceId])
 
-  const saveServicePatch = (patch: Partial<ServiceProfileInput>) => {
-    onSaveProfile({
-      ...profile,
-      services: profile.services.map((currentService, index) =>
-        index === selectedIndex
-          ? {
-              ...currentService,
-              ...patch,
-            }
-          : currentService,
-      ),
-    })
+  const saveServicePatch = (
+    patch: Partial<ServiceProfileInput>,
+    onSuccess?: () => void
+  ) => {
+    onSaveProfile(
+      {
+        ...profile,
+        services: profile.services.map((currentService, index) =>
+          index === selectedIndex
+            ? {
+                ...currentService,
+                ...patch,
+              }
+            : currentService
+        ),
+      },
+      onSuccess
+    )
   }
 
   const createService = (service: ServiceProfileInput) => {
@@ -1007,7 +1036,7 @@ export const ServiceManager = ({
 
         onSelectService(createdService?.id ?? null)
         onCancelCreateService()
-      },
+      }
     )
   }
 

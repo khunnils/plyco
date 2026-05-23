@@ -32,16 +32,19 @@ export const ActivitiesManager = ({
   roleOptions: Option[]
   legalBasisOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onCreate: (activity: BusinessActivityInput) => void
+  onCreate: (activity: BusinessActivityInput, onSuccess?: () => void) => void
   onDelete: (activity: BusinessActivity) => void
-  onUpdate: (input: { id: string; activity: BusinessActivityInput }) => void
+  onUpdate: (
+    input: { id: string; activity: BusinessActivityInput },
+    onSuccess?: () => void
+  ) => void
   showForm: boolean
   setShowForm: (show: boolean) => void
   editingActivityId: string | null
   setEditingActivityId: (id: string | null) => void
 }) => {
   const editingActivity = activities.find(
-    (activity) => activity.id === editingActivityId,
+    (activity) => activity.id === editingActivityId
   )
 
   const closeForm = () => {
@@ -63,7 +66,9 @@ export const ActivitiesManager = ({
     return (
       <ActivityForm
         defaultValues={
-          editingActivity ? toActivityInput(editingActivity) : emptyActivityDraft
+          editingActivity
+            ? toActivityInput(editingActivity)
+            : emptyActivityDraft
         }
         legalBasisOptions={legalBasisOptions}
         roleOptions={roleOptions}
@@ -72,11 +77,10 @@ export const ActivitiesManager = ({
         onCancel={closeForm}
         onSubmit={(activity) => {
           if (editingActivity) {
-            onUpdate({ id: editingActivity.id, activity })
+            onUpdate({ id: editingActivity.id, activity }, closeForm)
           } else {
-            onCreate(activity)
+            onCreate(activity, closeForm)
           }
-          closeForm()
         }}
       />
     )

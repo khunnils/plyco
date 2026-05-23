@@ -15,7 +15,10 @@ import {
   ProfilePanelShell,
 } from "@/features/security-profile/components/profile-panel-shell"
 import { boolText } from "@/features/security-profile/lib/display"
-import { codeValueList, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeValueList,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
 
 const rightsSchema = privacyProfileSchema.pick({
   supportedRights: true,
@@ -41,11 +44,19 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
   [
     [
       "Supported rights",
-      codeValueList(vocabulary, "privacy_supported_rights", draft.supportedRights),
+      codeValueList(
+        vocabulary,
+        "privacy_supported_rights",
+        draft.supportedRights
+      ),
     ],
     [
       "Request methods",
-      codeValueList(vocabulary, "privacy_request_methods", draft.requestMethods),
+      codeValueList(
+        vocabulary,
+        "privacy_request_methods",
+        draft.requestMethods
+      ),
     ],
     [
       "Response timeline",
@@ -69,7 +80,7 @@ export const PrivacyRightsPanel = ({
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: RightsDraft) => void
+  onSave: (patch: RightsDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toRightsDraft(privacy)
@@ -82,8 +93,7 @@ export const PrivacyRightsPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -92,9 +102,7 @@ export const PrivacyRightsPanel = ({
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={rightsRows(draft, vocabulary)}
-        />
+        <ProfilePanelDetailGrid rows={rightsRows(draft, vocabulary)} />
       }
       saveLabel="Save section"
       title="Privacy Rights & Request Handling"

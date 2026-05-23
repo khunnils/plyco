@@ -142,11 +142,12 @@ export const AppSidebar = ({
                         )
                       })}
                       <SidebarMenuButton
+                        className="h-8 text-xs text-slate-400 hover:text-slate-600 gap-2 px-2.5"
                         onClick={() => {
                           onAddService()
                         }}
                       >
-                        <Plus className="size-4" />
+                        <Plus className="size-3.5" />
                         Add service
                       </SidebarMenuButton>
                     </div>

@@ -26,7 +26,7 @@ const vendorRiskSchema = infrastructureProfileSchema.pick({
 type VendorRiskDraft = z.infer<typeof vendorRiskSchema>
 
 const toVendorRiskDraft = (
-  infrastructure: InfrastructureProfile,
+  infrastructure: InfrastructureProfile
 ): VendorRiskDraft => ({
   vendorReviewRequired: infrastructure.vendorReviewRequired,
   vendorReviewCadence: infrastructure.vendorReviewCadence,
@@ -35,7 +35,7 @@ const toVendorRiskDraft = (
 
 const vendorRiskRows = (
   draft: VendorRiskDraft,
-  vocabulary: Vocabulary | undefined,
+  vocabulary: Vocabulary | undefined
 ) =>
   [
     ["Vendor review required", boolText(draft.vendorReviewRequired)],
@@ -45,10 +45,7 @@ const vendorRiskRows = (
         ? codeLabel(vocabulary, "security_cadences", draft.vendorReviewCadence)
         : "Not set",
     ],
-    [
-      "DPA required for processors",
-      boolText(draft.dpaRequiredForProcessors),
-    ],
+    ["DPA required for processors", boolText(draft.dpaRequiredForProcessors)],
   ] as const
 
 export const VendorRiskPanel = ({
@@ -62,7 +59,7 @@ export const VendorRiskPanel = ({
   infrastructure: InfrastructureProfile
   securityCadenceOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: VendorRiskDraft) => void
+  onSave: (patch: VendorRiskDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toVendorRiskDraft(infrastructure)
@@ -75,8 +72,7 @@ export const VendorRiskPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

@@ -26,7 +26,9 @@ const backupsSchema = infrastructureProfileSchema.pick({
 
 type BackupsDraft = z.infer<typeof backupsSchema>
 
-const toBackupsDraft = (infrastructure: InfrastructureProfile): BackupsDraft => ({
+const toBackupsDraft = (
+  infrastructure: InfrastructureProfile
+): BackupsDraft => ({
   backupsEnabled: infrastructure.backupsEnabled,
   backupCadence: infrastructure.backupCadence,
   backupRetentionDays: infrastructure.backupRetentionDays,
@@ -49,7 +51,7 @@ const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) =>
         ? codeLabel(
             vocabulary,
             "security_cadences",
-            draft.restoreTestingCadence,
+            draft.restoreTestingCadence
           )
         : "Not set",
     ],
@@ -66,7 +68,7 @@ export const BackupsPanel = ({
   infrastructure: InfrastructureProfile
   securityCadenceOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: BackupsDraft) => void
+  onSave: (patch: BackupsDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toBackupsDraft(infrastructure)
@@ -79,8 +81,7 @@ export const BackupsPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

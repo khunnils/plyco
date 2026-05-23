@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Plus, Save, X } from "lucide-react"
+import { Loader2, Plus, Save, X } from "lucide-react"
 import {
   businessActivityInputSchema,
   type BusinessActivityInput,
@@ -35,7 +35,7 @@ export const ActivityForm = ({
     defaultValues,
     mode: "onBlur",
     resolver: zodResolver(
-      businessActivityInputSchema,
+      businessActivityInputSchema
     ) as Resolver<BusinessActivityInput>,
   })
 
@@ -45,9 +45,6 @@ export const ActivityForm = ({
 
   const submitActivity = form.handleSubmit((activity) => {
     onSubmit(activity)
-    if (!onCancel) {
-      form.reset(defaultValues)
-    }
   })
 
   return (
@@ -100,8 +97,18 @@ export const ActivityForm = ({
             Cancel
           </Button>
         ) : null}
-        <Button disabled={submitDisabled} type="button" onClick={submitActivity}>
-          {onCancel ? <Save /> : <Plus />}
+        <Button
+          disabled={submitDisabled}
+          type="button"
+          onClick={submitActivity}
+        >
+          {submitDisabled ? (
+            <Loader2 className="animate-spin" />
+          ) : onCancel ? (
+            <Save />
+          ) : (
+            <Plus />
+          )}
           {submitLabel}
         </Button>
       </div>

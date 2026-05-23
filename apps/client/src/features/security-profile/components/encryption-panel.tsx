@@ -24,7 +24,7 @@ const encryptionSchema = infrastructureProfileSchema.pick({
 type EncryptionDraft = z.infer<typeof encryptionSchema>
 
 const toEncryptionDraft = (
-  infrastructure: InfrastructureProfile,
+  infrastructure: InfrastructureProfile
 ): EncryptionDraft => ({
   atRestAlgorithm: infrastructure.atRestAlgorithm,
   inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
@@ -33,7 +33,7 @@ const toEncryptionDraft = (
 
 const encryptionRows = (
   draft: EncryptionDraft,
-  vocabulary: Vocabulary | undefined,
+  vocabulary: Vocabulary | undefined
 ) =>
   [
     [
@@ -42,7 +42,7 @@ const encryptionRows = (
         ? codeLabel(
             vocabulary,
             "security_encryption_algorithms",
-            draft.atRestAlgorithm,
+            draft.atRestAlgorithm
           )
         : "Not set",
     ],
@@ -52,7 +52,7 @@ const encryptionRows = (
         ? codeLabel(
             vocabulary,
             "security_tls_versions",
-            draft.inTransitMinimumTlsVersion,
+            draft.inTransitMinimumTlsVersion
           )
         : "Not set",
     ],
@@ -62,7 +62,7 @@ const encryptionRows = (
         ? codeLabel(
             vocabulary,
             "security_key_management_providers",
-            draft.keyManagementProvider,
+            draft.keyManagementProvider
           )
         : "Not set",
     ],
@@ -83,7 +83,7 @@ export const EncryptionPanel = ({
   securityKeyManagementProviderOptions: Option[]
   securityTlsVersionOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: EncryptionDraft) => void
+  onSave: (patch: EncryptionDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toEncryptionDraft(infrastructure)
@@ -96,8 +96,7 @@ export const EncryptionPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

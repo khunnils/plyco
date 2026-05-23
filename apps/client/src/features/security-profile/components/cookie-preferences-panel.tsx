@@ -39,15 +39,12 @@ const cookieRows = (draft: CookieDraft, vocabulary: Vocabulary | undefined) =>
         ? codeLabel(
             vocabulary,
             "privacy_cookie_consent_mechanisms",
-            draft.cookieConsentMechanism,
+            draft.cookieConsentMechanism
           )
         : "Not set",
     ],
     ["Do Not Track response", boolText(draft.doNotTrackResponse)],
-    [
-      "Global Privacy Control",
-      boolText(draft.globalPrivacyControlSupported),
-    ],
+    ["Global Privacy Control", boolText(draft.globalPrivacyControlSupported)],
   ] as const
 
 export const CookiePreferencesPanel = ({
@@ -61,7 +58,7 @@ export const CookiePreferencesPanel = ({
   isMutationPending: boolean
   privacy: PrivacyProfile
   vocabulary: Vocabulary | undefined
-  onSave: (patch: CookieDraft) => void
+  onSave: (patch: CookieDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toCookieDraft(privacy)
@@ -74,8 +71,7 @@ export const CookiePreferencesPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -83,7 +79,9 @@ export const CookiePreferencesPanel = ({
       description="Cookie consent models, policy document references, and visitor tracking options."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
-      readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows(draft, vocabulary)} />}
+      readOnlyContent={
+        <ProfilePanelDetailGrid rows={cookieRows(draft, vocabulary)} />
+      }
       saveLabel="Save section"
       title="Cookie Preferences"
       onCancel={() => {

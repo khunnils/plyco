@@ -1,9 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Plus, Save, X } from "lucide-react"
-import {
-  vendorInputSchema,
-  type VendorInput,
-} from "@plyco/shared"
+import { Loader2, Plus, Save, X } from "lucide-react"
+import { vendorInputSchema, type VendorInput } from "@plyco/shared"
 import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
@@ -45,7 +42,6 @@ export const VendorForm = ({
 
   const submitVendor = form.handleSubmit((vendor) => {
     onSubmit(vendor)
-    form.reset(defaultValues)
   })
 
   return (
@@ -158,7 +154,13 @@ export const VendorForm = ({
           </Button>
         ) : null}
         <Button disabled={submitDisabled} type="button" onClick={submitVendor}>
-          {onCancel ? <Save /> : <Plus />}
+          {submitDisabled ? (
+            <Loader2 className="animate-spin" />
+          ) : onCancel ? (
+            <Save />
+          ) : (
+            <Plus />
+          )}
           {submitLabel}
         </Button>
       </div>

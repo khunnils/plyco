@@ -2,7 +2,10 @@ import { type Vocabulary } from "@plyco/shared"
 
 import { DataTypesPanel } from "@/features/security-profile/components/data-types-panel"
 import { GeneralAttributesPanel } from "@/features/security-profile/components/general-attributes-panel"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const DataHandlingManager = ({
@@ -18,15 +21,19 @@ export const DataHandlingManager = ({
   profile: ProfileDraft
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSaveProfile: (profile: ProfileDraft) => void
+  onSaveProfile: SaveProfile
 }) => {
   const saveDataHandling = (
     dataHandling: ProfileDraft["dataHandling"],
+    onSuccess?: () => void
   ) => {
-    onSaveProfile({
-      ...profile,
-      dataHandling,
-    })
+    onSaveProfile(
+      {
+        ...profile,
+        dataHandling,
+      },
+      onSuccess
+    )
   }
 
   return (
@@ -34,11 +41,14 @@ export const DataHandlingManager = ({
       <GeneralAttributesPanel
         dataHandling={profile.dataHandling}
         isMutationPending={isMutationPending}
-        onSave={(attributes) =>
-          saveDataHandling({
-            ...profile.dataHandling,
-            ...attributes,
-          })
+        onSave={(attributes, onSuccess) =>
+          saveDataHandling(
+            {
+              ...profile.dataHandling,
+              ...attributes,
+            },
+            onSuccess
+          )
         }
       />
       <DataTypesPanel
@@ -47,11 +57,14 @@ export const DataHandlingManager = ({
         isMutationPending={isMutationPending}
         subjectTypeOptions={subjectTypeOptions}
         vocabulary={vocabulary}
-        onSave={(dataTypesStored) =>
-          saveDataHandling({
-            ...profile.dataHandling,
-            dataTypesStored,
-          })
+        onSave={(dataTypesStored, onSuccess) =>
+          saveDataHandling(
+            {
+              ...profile.dataHandling,
+              dataTypesStored,
+            },
+            onSuccess
+          )
         }
       />
     </div>

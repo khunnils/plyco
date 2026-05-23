@@ -6,7 +6,10 @@ import { InternationalTransfersPanel } from "@/features/security-profile/compone
 import { MarketingCommunicationsPanel } from "@/features/security-profile/components/marketing-communications-panel"
 import { PrivacyRepresentationPanel } from "@/features/security-profile/components/privacy-representation-panel"
 import { PrivacyRightsPanel } from "@/features/security-profile/components/privacy-rights-panel"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyManager = ({
@@ -32,16 +35,22 @@ export const PrivacyManager = ({
   supportedRightOptions: Option[]
   transferMechanismOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSaveProfile: (profile: ProfileDraft) => void
+  onSaveProfile: SaveProfile
 }) => {
-  const savePrivacy = (patch: Partial<ProfileDraft["privacy"]>) => {
-    onSaveProfile({
-      ...profile,
-      privacy: {
-        ...profile.privacy,
-        ...patch,
+  const savePrivacy = (
+    patch: Partial<ProfileDraft["privacy"]>,
+    onSuccess?: () => void
+  ) => {
+    onSaveProfile(
+      {
+        ...profile,
+        privacy: {
+          ...profile.privacy,
+          ...patch,
+        },
       },
-    })
+      onSuccess
+    )
   }
 
   return (

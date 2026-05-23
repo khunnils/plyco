@@ -1,7 +1,10 @@
 import { type Provider, type Vocabulary } from "@plyco/shared"
 
 import { PrivacyManager } from "@/features/security-profile/components/privacy-manager"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyProfilePage = ({
@@ -15,17 +18,17 @@ export const PrivacyProfilePage = ({
   profile: ProfileDraft
   providers: Provider[]
   vocabulary: Vocabulary | undefined
-  onSaveProfile: (profile: ProfileDraft) => void
+  onSaveProfile: SaveProfile
 }) => (
   <PrivacyManager
     cookieConsentMechanismOptions={codeOptions(
       vocabulary,
-      "privacy_cookie_consent_mechanisms",
+      "privacy_cookie_consent_mechanisms"
     )}
     isMutationPending={isMutationPending}
     marketingOptOutMethodOptions={codeOptions(
       vocabulary,
-      "privacy_marketing_opt_out_methods",
+      "privacy_marketing_opt_out_methods"
     )}
     newsletterProviderOptions={providers
       .filter((provider) => provider.systemTypes.includes("newsletter"))
@@ -39,7 +42,7 @@ export const PrivacyProfilePage = ({
     supportedRightOptions={codeOptions(vocabulary, "privacy_supported_rights")}
     transferMechanismOptions={codeOptions(
       vocabulary,
-      "privacy_transfer_mechanisms",
+      "privacy_transfer_mechanisms"
     )}
     vocabulary={vocabulary}
     onSaveProfile={onSaveProfile}

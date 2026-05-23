@@ -19,7 +19,9 @@ const representationSchema = privacyProfileSchema.pick({
 
 type RepresentationDraft = z.infer<typeof representationSchema>
 
-const toRepresentationDraft = (privacy: PrivacyProfile): RepresentationDraft => ({
+const toRepresentationDraft = (
+  privacy: PrivacyProfile
+): RepresentationDraft => ({
   dpoName: privacy.dpoName,
   dpoEmail: privacy.dpoEmail,
   euRepresentativeName: privacy.euRepresentativeName,
@@ -31,10 +33,7 @@ const representationRows = (draft: RepresentationDraft) =>
     ["DPO name", draft.dpoName || "Not set"],
     ["DPO email", draft.dpoEmail || "Not set"],
     ["EU representative", draft.euRepresentativeName || "Not set"],
-    [
-      "EU representative address",
-      draft.euRepresentativeAddress || "Not set",
-    ],
+    ["EU representative address", draft.euRepresentativeAddress || "Not set"],
   ] as const
 
 export const PrivacyRepresentationPanel = ({
@@ -44,7 +43,7 @@ export const PrivacyRepresentationPanel = ({
 }: {
   isMutationPending: boolean
   privacy: PrivacyProfile
-  onSave: (patch: RepresentationDraft) => void
+  onSave: (patch: RepresentationDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toRepresentationDraft(privacy)
@@ -52,13 +51,14 @@ export const PrivacyRepresentationPanel = ({
   const form = useForm<RepresentationDraft>({
     defaultValues: draft,
     mode: "onBlur",
-    resolver: zodResolver(representationSchema) as Resolver<RepresentationDraft>,
+    resolver: zodResolver(
+      representationSchema
+    ) as Resolver<RepresentationDraft>,
     values: draft,
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

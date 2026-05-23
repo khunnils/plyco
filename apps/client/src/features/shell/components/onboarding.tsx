@@ -182,8 +182,8 @@ export const Onboarding = ({
                       vocabulary.data,
                       "collection_methods"
                     )}
-	                    form={form}
-	                    subjectTypeOptions={codeOptions(
+                    form={form}
+                    subjectTypeOptions={codeOptions(
                       vocabulary.data,
                       "subject_types"
                     )}
@@ -211,7 +211,11 @@ export const Onboarding = ({
                   </Button>
                   {isFinalStep ? (
                     <Button disabled={isSaving} type="submit">
-                      {isSaving ? <Loader2 /> : <Save />}
+                      {isSaving ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <Save />
+                      )}
                       Finish onboarding
                     </Button>
                   ) : (

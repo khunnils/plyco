@@ -38,10 +38,19 @@ export const ProfilePanelShell = ({
         {children}
         <div className="flex justify-end gap-2">
           <Button disabled={isMutationPending} type="button" onClick={onSave}>
-            {isMutationPending ? <Loader2 /> : <Save />}
+            {isMutationPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Save />
+            )}
             {saveLabel}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button
+            disabled={isMutationPending}
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
             <X />
             Cancel
           </Button>

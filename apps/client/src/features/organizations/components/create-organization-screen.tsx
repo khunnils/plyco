@@ -69,7 +69,7 @@ export const CreateOrganizationPanel = ({
             Signed in as {user.email}
           </div>
           <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? <Loader2 /> : <Plus />}
+            {isSubmitting ? <Loader2 className="animate-spin" /> : <Plus />}
             Create organization
           </Button>
         </div>

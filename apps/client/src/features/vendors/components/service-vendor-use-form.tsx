@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Plus, Save, X } from "lucide-react"
+import { Loader2, Plus, Save, X } from "lucide-react"
 import {
   serviceVendorUseInputSchema,
   type ServiceVendorUseInput,
@@ -44,7 +44,9 @@ export const ServiceVendorUseForm = ({
   const form = useForm<ServiceVendorUseInput>({
     defaultValues,
     mode: "onBlur",
-    resolver: zodResolver(serviceVendorUseInputSchema) as Resolver<ServiceVendorUseInput>,
+    resolver: zodResolver(
+      serviceVendorUseInputSchema
+    ) as Resolver<ServiceVendorUseInput>,
   })
 
   useEffect(() => {
@@ -69,7 +71,6 @@ export const ServiceVendorUseForm = ({
 
   const submitVendorUse = form.handleSubmit((vendorUse) => {
     onSubmit(vendorUse)
-    form.reset(defaultValues)
   })
 
   return (
@@ -153,8 +154,18 @@ export const ServiceVendorUseForm = ({
             Cancel
           </Button>
         ) : null}
-        <Button disabled={submitDisabled} type="button" onClick={submitVendorUse}>
-          {onCancel ? <Save /> : <Plus />}
+        <Button
+          disabled={submitDisabled}
+          type="button"
+          onClick={submitVendorUse}
+        >
+          {submitDisabled ? (
+            <Loader2 className="animate-spin" />
+          ) : onCancel ? (
+            <Save />
+          ) : (
+            <Plus />
+          )}
           {submitLabel}
         </Button>
       </div>

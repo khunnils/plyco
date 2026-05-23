@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Save, X } from "lucide-react"
+import { Loader2, Save, X } from "lucide-react"
 import { storedDataTypeSchema, type StoredDataType } from "@plyco/shared"
 import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
@@ -31,9 +31,7 @@ export const DataTypeForm = ({
   const form = useForm<StoredDataType>({
     defaultValues,
     mode: "onBlur",
-    resolver: zodResolver(
-      storedDataTypeSchema,
-    ) as Resolver<StoredDataType>,
+    resolver: zodResolver(storedDataTypeSchema) as Resolver<StoredDataType>,
   })
 
   useEffect(() => {
@@ -98,8 +96,12 @@ export const DataTypeForm = ({
           <X />
           Cancel
         </Button>
-        <Button disabled={submitDisabled} type="button" onClick={submitDataType}>
-          <Save />
+        <Button
+          disabled={submitDisabled}
+          type="button"
+          onClick={submitDataType}
+        >
+          {submitDisabled ? <Loader2 className="animate-spin" /> : <Save />}
           {submitLabel}
         </Button>
       </div>

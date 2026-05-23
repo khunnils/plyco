@@ -27,18 +27,17 @@ const incidentSchema = infrastructureProfileSchema.pick({
 type IncidentDraft = z.infer<typeof incidentSchema>
 
 const toIncidentDraft = (
-  infrastructure: InfrastructureProfile,
+  infrastructure: InfrastructureProfile
 ): IncidentDraft => ({
   incidentResponsePlanExists: infrastructure.incidentResponsePlanExists,
   incidentNotificationTimeline: infrastructure.incidentNotificationTimeline,
   customerNotificationProcess: infrastructure.customerNotificationProcess,
-  incidentResponseLastTestedDate:
-    infrastructure.incidentResponseLastTestedDate,
+  incidentResponseLastTestedDate: infrastructure.incidentResponseLastTestedDate,
 })
 
 const incidentRows = (
   draft: IncidentDraft,
-  vocabulary: Vocabulary | undefined,
+  vocabulary: Vocabulary | undefined
 ) =>
   [
     ["Incident response plan", boolText(draft.incidentResponsePlanExists)],
@@ -48,7 +47,7 @@ const incidentRows = (
         ? codeLabel(
             vocabulary,
             "security_notification_timelines",
-            draft.incidentNotificationTimeline,
+            draft.incidentNotificationTimeline
           )
         : "Not set",
     ],
@@ -58,7 +57,7 @@ const incidentRows = (
         ? codeLabel(
             vocabulary,
             "security_customer_notification_processes",
-            draft.customerNotificationProcess,
+            draft.customerNotificationProcess
           )
         : "Not set",
     ],
@@ -81,7 +80,7 @@ export const IncidentResponsePanel = ({
   securityCustomerNotificationProcessOptions: Option[]
   securityNotificationTimelineOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: IncidentDraft) => void
+  onSave: (patch: IncidentDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toIncidentDraft(infrastructure)
@@ -94,8 +93,7 @@ export const IncidentResponsePanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

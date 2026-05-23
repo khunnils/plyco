@@ -28,24 +28,21 @@ const providersSchema = infrastructureProfileSchema.pick({
 })
 
 const toProvidersDraft = (
-  infrastructure: InfrastructureProfile,
+  infrastructure: InfrastructureProfile
 ): ProvidersDraft => ({
   organizationProviders: infrastructure.organizationProviders,
   mfaEnabled: infrastructure.mfaEnabled,
   encryptedDevicesRequired: infrastructure.encryptedDevicesRequired,
 })
 
-const providerRows = (
-  draft: ProvidersDraft,
-  catalogProviders: Provider[],
-) =>
+const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
   [
     [
       "Cloud providers",
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
-        "cloud",
+        "cloud"
       ),
     ],
     [
@@ -53,7 +50,7 @@ const providerRows = (
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
-        "source_control",
+        "source_control"
       ),
     ],
     [
@@ -61,7 +58,7 @@ const providerRows = (
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
-        "auth",
+        "auth"
       ),
     ],
     [
@@ -69,7 +66,7 @@ const providerRows = (
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
-        "password_manager",
+        "password_manager"
       ),
     ],
     ["MFA enabled", boolText(draft.mfaEnabled)],
@@ -85,7 +82,7 @@ export const InfrastructureProvidersPanel = ({
   catalogProviders: Provider[]
   isMutationPending: boolean
   infrastructure: InfrastructureProfile
-  onSave: (patch: ProvidersDraft) => void
+  onSave: (patch: ProvidersDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toProvidersDraft(infrastructure)
@@ -98,8 +95,7 @@ export const InfrastructureProvidersPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (
@@ -131,7 +127,11 @@ export const InfrastructureProvidersPanel = ({
               systemType={systemType}
             />
           ))}
-        <ToggleField control={form.control} label="MFA enabled" name="mfaEnabled" />
+        <ToggleField
+          control={form.control}
+          label="MFA enabled"
+          name="mfaEnabled"
+        />
         <ToggleField
           control={form.control}
           label="Encrypted devices required"

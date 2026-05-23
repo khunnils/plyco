@@ -30,10 +30,7 @@ const complianceRows = (draft: ComplianceDraft) =>
   [
     ["Sells or shares data (CCPA)", boolText(draft.sellsOrSharesData)],
     ["Do Not Sell link", draft.doNotSellLink || "Not set"],
-    [
-      "Automated decision making",
-      boolText(draft.usesAutomatedDecisionMaking),
-    ],
+    ["Automated decision making", boolText(draft.usesAutomatedDecisionMaking)],
   ] as const
 
 export const ComplianceDisclosuresPanel = ({
@@ -43,7 +40,7 @@ export const ComplianceDisclosuresPanel = ({
 }: {
   isMutationPending: boolean
   privacy: PrivacyProfile
-  onSave: (patch: ComplianceDraft) => void
+  onSave: (patch: ComplianceDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toComplianceDraft(privacy)
@@ -56,8 +53,7 @@ export const ComplianceDisclosuresPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

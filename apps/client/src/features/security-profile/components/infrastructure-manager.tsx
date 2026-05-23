@@ -7,7 +7,10 @@ import { InfrastructureProvidersPanel } from "@/features/security-profile/compon
 import { LoggingMonitoringPanel } from "@/features/security-profile/components/logging-monitoring-panel"
 import { VendorRiskPanel } from "@/features/security-profile/components/vendor-risk-panel"
 import { VulnerabilityManagementPanel } from "@/features/security-profile/components/vulnerability-management-panel"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const InfrastructureManager = ({
@@ -35,18 +38,22 @@ export const InfrastructureManager = ({
   securityNotificationTimelineOptions: Option[]
   securityTlsVersionOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSaveProfile: (profile: ProfileDraft) => void
+  onSaveProfile: SaveProfile
 }) => {
   const saveInfrastructure = (
     patch: Partial<ProfileDraft["infrastructure"]>,
+    onSuccess?: () => void
   ) => {
-    onSaveProfile({
-      ...profile,
-      infrastructure: {
-        ...profile.infrastructure,
-        ...patch,
+    onSaveProfile(
+      {
+        ...profile,
+        infrastructure: {
+          ...profile.infrastructure,
+          ...patch,
+        },
       },
-    })
+      onSuccess
+    )
   }
 
   return (
@@ -61,7 +68,9 @@ export const InfrastructureManager = ({
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
         securityEncryptionAlgorithmOptions={securityEncryptionAlgorithmOptions}
-        securityKeyManagementProviderOptions={securityKeyManagementProviderOptions}
+        securityKeyManagementProviderOptions={
+          securityKeyManagementProviderOptions
+        }
         securityTlsVersionOptions={securityTlsVersionOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
@@ -86,7 +95,9 @@ export const InfrastructureManager = ({
         securityCustomerNotificationProcessOptions={
           securityCustomerNotificationProcessOptions
         }
-        securityNotificationTimelineOptions={securityNotificationTimelineOptions}
+        securityNotificationTimelineOptions={
+          securityNotificationTimelineOptions
+        }
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
       />

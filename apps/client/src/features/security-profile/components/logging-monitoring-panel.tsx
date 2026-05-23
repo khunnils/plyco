@@ -26,17 +26,14 @@ const loggingSchema = infrastructureProfileSchema.pick({
 type LoggingDraft = z.infer<typeof loggingSchema>
 
 const toLoggingDraft = (
-  infrastructure: InfrastructureProfile,
+  infrastructure: InfrastructureProfile
 ): LoggingDraft => ({
   centralizedLoggingEnabled: infrastructure.centralizedLoggingEnabled,
   logRetentionDays: infrastructure.logRetentionDays,
   securityMonitoringOwner: infrastructure.securityMonitoringOwner,
 })
 
-const loggingRows = (
-  draft: LoggingDraft,
-  vocabulary: Vocabulary | undefined,
-) =>
+const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
   [
     ["Centralized logging", boolText(draft.centralizedLoggingEnabled)],
     ["Log retention days", draft.logRetentionDays],
@@ -46,7 +43,7 @@ const loggingRows = (
         ? codeLabel(
             vocabulary,
             "security_monitoring_owners",
-            draft.securityMonitoringOwner,
+            draft.securityMonitoringOwner
           )
         : "Not set",
     ],
@@ -63,7 +60,7 @@ export const LoggingMonitoringPanel = ({
   infrastructure: InfrastructureProfile
   securityMonitoringOwnerOptions: Option[]
   vocabulary: Vocabulary | undefined
-  onSave: (patch: LoggingDraft) => void
+  onSave: (patch: LoggingDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = toLoggingDraft(infrastructure)
@@ -76,8 +73,7 @@ export const LoggingMonitoringPanel = ({
   })
 
   const submit = form.handleSubmit((next) => {
-    onSave(next)
-    setIsEditing(false)
+    onSave(next, () => setIsEditing(false))
   })
 
   return (

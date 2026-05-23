@@ -1,6 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Save, X } from "lucide-react"
-import { dataHandlingProfileSchema, type DataHandlingProfile } from "@plyco/shared"
+import {
+  dataHandlingProfileSchema,
+  type DataHandlingProfile,
+} from "@plyco/shared"
 import { useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -35,7 +38,7 @@ const attributeRows = (attributes: GeneralAttributesDraft) =>
   ] as const
 
 const toGeneralAttributes = (
-  dataHandling: DataHandlingProfile,
+  dataHandling: DataHandlingProfile
 ): GeneralAttributesDraft => ({
   storesPii: dataHandling.storesPii,
   storesHealthcareData: dataHandling.storesHealthcareData,
@@ -52,7 +55,7 @@ export const GeneralAttributesPanel = ({
 }: {
   dataHandling: DataHandlingProfile
   isMutationPending: boolean
-  onSave: (attributes: GeneralAttributesDraft) => void
+  onSave: (attributes: GeneralAttributesDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const attributes = toGeneralAttributes(dataHandling)
@@ -61,14 +64,13 @@ export const GeneralAttributesPanel = ({
     defaultValues: attributes,
     mode: "onBlur",
     resolver: zodResolver(
-      generalAttributesSchema,
+      generalAttributesSchema
     ) as Resolver<GeneralAttributesDraft>,
     values: attributes,
   })
 
   const submitAttributes = form.handleSubmit((nextAttributes) => {
-    onSave(nextAttributes)
-    setIsEditing(false)
+    onSave(nextAttributes, () => setIsEditing(false))
   })
 
   if (isEditing) {
@@ -120,10 +122,15 @@ export const GeneralAttributesPanel = ({
             type="button"
             onClick={submitAttributes}
           >
-            {isMutationPending ? <Loader2 /> : <Save />}
+            {isMutationPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <Save />
+            )}
             Save attributes
           </Button>
           <Button
+            disabled={isMutationPending}
             type="button"
             variant="outline"
             onClick={() => {

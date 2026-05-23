@@ -4,6 +4,7 @@ import {
   type DataHandlingProfile,
   type InfrastructureProfile,
   type PrivacyProfile,
+  type SecurityProgramSnapshot,
   type ServiceProfileInput,
 } from "@plyco/shared"
 
@@ -15,3 +16,8 @@ export type ProfileDraft = {
   dataHandling: DataHandlingProfile
   access: AccessProfile
 }
+
+export type SaveProfile = (
+  profile: ProfileDraft,
+  onSuccess?: (snapshot: SecurityProgramSnapshot) => void
+) => void

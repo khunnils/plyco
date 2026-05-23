@@ -134,9 +134,7 @@ export const dataTypeOptionsFromProfile = (
           dataType.name,
           {
             value: dataType.name,
-            label: dataType.description
-              ? `${dataType.name} - ${dataType.description}`
-              : dataType.name,
+            label: dataType.name,
           },
         ])
     ).values()

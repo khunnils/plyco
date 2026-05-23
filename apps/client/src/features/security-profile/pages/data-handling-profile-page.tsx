@@ -1,7 +1,10 @@
 import { type Vocabulary } from "@plyco/shared"
 
 import { DataHandlingManager } from "@/features/security-profile/components/data-handling-manager"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/security-profile/types/security-profile"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 
 export const DataHandlingProfilePage = ({
@@ -13,7 +16,7 @@ export const DataHandlingProfilePage = ({
   isMutationPending: boolean
   profile: ProfileDraft
   vocabulary: Vocabulary | undefined
-  onSaveProfile: (profile: ProfileDraft) => void
+  onSaveProfile: SaveProfile
 }) => (
   <DataHandlingManager
     collectionMethodOptions={codeOptions(vocabulary, "collection_methods")}
