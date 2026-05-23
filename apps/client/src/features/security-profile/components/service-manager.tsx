@@ -28,6 +28,7 @@ import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   ProfilePanelDetailGrid,
@@ -655,9 +656,7 @@ const AddVendorsForm = ({
                 {vendor.displayName || vendor.name}
               </span>
               {disabled ? (
-                <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
-                  Selected
-                </span>
+                <Badge variant="secondary">Selected</Badge>
               ) : null}
             </label>
           )

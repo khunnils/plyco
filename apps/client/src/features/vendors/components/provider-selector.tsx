@@ -2,6 +2,7 @@ import { ExternalLink, Plus, X } from "lucide-react"
 import { type Provider } from "@plyco/shared"
 import { useMemo, useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -117,9 +118,7 @@ export const ProviderSelector = ({
                           {provider.name}
                         </h3>
                         {alreadyAdded ? (
-                          <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-500">
-                            Added
-                          </span>
+                          <Badge variant="secondary">Added</Badge>
                         ) : null}
                       </div>
                       <p className="mt-1 text-sm text-slate-500">
@@ -137,14 +136,12 @@ export const ProviderSelector = ({
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 pl-7">
                   {provider.securityCriticality ? (
-                    <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+                    <Badge variant="warning">
                       {provider.securityCriticality}
-                    </span>
+                    </Badge>
                   ) : null}
                   {provider.handlesCustomerData ? (
-                    <span className="rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                      Customer data
-                    </span>
+                    <Badge variant="info">Customer data</Badge>
                   ) : null}
                 </div>
                 {provider.url ? (

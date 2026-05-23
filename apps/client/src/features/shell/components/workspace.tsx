@@ -27,6 +27,7 @@ import {
 import { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DocumentContent } from "@/features/documents/components/document-content"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
@@ -1181,18 +1182,16 @@ export const Workspace = ({ user }: { user: AuthUser }) => {
                               <h3 className="font-semibold text-slate-950">
                                 {summary.template.name}
                               </h3>
-                              <span className="rounded-md bg-slate-50 px-2 py-1 font-mono text-xs text-slate-600 ring-1 ring-slate-200">
-                                {summary.template.slug}
-                              </span>
-                              <span
-                                className={
+                              <Badge variant="code">{summary.template.slug}</Badge>
+                              <Badge
+                                variant={
                                   summary.status === "stale"
-                                    ? "rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800"
-                                    : "rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600"
+                                    ? "warning"
+                                    : "secondary"
                                 }
                               >
                                 {documentStatusLabel(summary.status)}
-                              </span>
+                              </Badge>
                             </div>
                             <p className="mt-2 text-sm text-slate-500">
                               {summary.document

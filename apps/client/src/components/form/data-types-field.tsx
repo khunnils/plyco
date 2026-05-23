@@ -9,6 +9,7 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Combobox,
@@ -64,11 +65,26 @@ const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
 const dataTypeTitle = (item: StoredDataType, index: number) =>
   item.name.trim() || `Data type ${index + 1}`
 
+type DataTypeBadge = {
+  label: string
+  variant: "secondary" | "warning"
+}
+
 const dataTypeBadges = (item: StoredDataType) =>
   [
-    item.isSensitive ? "Sensitive" : null,
-    item.isRequired ? "Required" : null,
-  ].filter(Boolean)
+    item.isSensitive
+      ? {
+          label: "Sensitive",
+          variant: "warning",
+        }
+      : null,
+    item.isRequired
+      ? {
+          label: "Required",
+          variant: "secondary",
+        }
+      : null,
+  ].filter((badge): badge is DataTypeBadge => Boolean(badge))
 
 const FieldInput = ({
   label,
@@ -286,25 +302,20 @@ const DataTypesEditor = <T extends FieldValues>({
                     type="button"
                     onClick={() => toggleExpanded(index)}
                   >
-                    <p className="truncate text-sm font-semibold text-slate-950">
-                      {dataTypeTitle(item, index)}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-slate-950">
+                        {dataTypeTitle(item, index)}
+                      </p>
+                      {badges.map((badge) => (
+                        <Badge key={badge.label} variant={badge.variant}>
+                          {badge.label}
+                        </Badge>
+                      ))}
+                    </div>
                     {!expanded && item.description ? (
                       <p className="mt-1 line-clamp-2 text-xs font-normal leading-5 text-slate-500">
                         {item.description}
                       </p>
-                    ) : null}
-                    {!expanded && badges.length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {badges.map((badge) => (
-                          <span
-                            className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600"
-                            key={badge}
-                          >
-                            {badge}
-                          </span>
-                        ))}
-                      </div>
                     ) : null}
                   </button>
                   <div className="flex shrink-0 gap-2">

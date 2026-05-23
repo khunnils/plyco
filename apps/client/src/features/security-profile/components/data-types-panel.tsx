@@ -2,6 +2,7 @@ import { type StoredDataType, type Vocabulary } from "@plyco/shared"
 import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DataTypeForm } from "@/features/security-profile/components/data-type-form"
 import {
@@ -170,14 +171,10 @@ export const DataTypesPanel = ({
                         {title}
                       </h4>
                       {dataType.isSensitive ? (
-                        <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                          Sensitive
-                        </span>
+                        <Badge variant="warning">Sensitive</Badge>
                       ) : null}
                       {dataType.isRequired ? (
-                        <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                          Required
-                        </span>
+                        <Badge variant="secondary">Required</Badge>
                       ) : null}
                     </div>
                     {dataType.description ? (

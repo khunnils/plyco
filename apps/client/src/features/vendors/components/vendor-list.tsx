@@ -7,6 +7,7 @@ import {
 } from "@plyco/shared"
 import { useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { codeLabel, countryLabel } from "@/features/vocabulary/lib/vocabulary"
 
@@ -76,13 +77,13 @@ export const VendorList = ({
                     <h3 className="font-semibold text-slate-950">
                       {vendor.displayName || vendor.name}
                     </h3>
-                    <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                    <Badge variant="secondary">
                       {codeLabel(
                         vocabulary,
                         "vendor_criticality",
                         vendor.criticality,
                       )}
-                    </span>
+                    </Badge>
                   </div>
                   <p className="mt-2 text-xs text-slate-500">
                     {codeLabel(vocabulary, "vendor_category", vendor.category)}
@@ -154,12 +155,13 @@ export const VendorList = ({
                             {firstUse?.serviceName || "Unassigned service"}
                           </span>
                           {processingLabels.map((processingLabel) => (
-                            <span
-                              className="ml-2 rounded-md bg-white px-2 py-1 text-xs font-medium text-slate-600"
+                            <Badge
+                              className="ml-2"
                               key={processingLabel}
+                              variant="outline"
                             >
                               {processingLabel}
-                            </span>
+                            </Badge>
                           ))}
                         </span>
                       </div>

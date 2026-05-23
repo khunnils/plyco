@@ -1,6 +1,17 @@
-import { type Country, type Vocabulary } from "@plyco/shared"
+import {
+  type Country,
+  type Vocabulary,
+  type VocabularyCode,
+} from "@plyco/shared"
 
 export type Option = { value: string; label: string }
+
+const sortCodesBySequenceThenName = (
+  first: VocabularyCode,
+  second: VocabularyCode,
+) =>
+  first.sortOrder - second.sortOrder ||
+  first.name.localeCompare(second.name, undefined, { sensitivity: "base" })
 
 export const codeOptions = (
   vocabulary: Vocabulary | undefined,
@@ -9,6 +20,7 @@ export const codeOptions = (
   vocabulary?.codeSets
     .find((codeSet) => codeSet.codeSetId === codeSetId)
     ?.codes.filter((code) => code.active)
+    .sort(sortCodesBySequenceThenName)
     .map((code) => ({ value: code.codeId, label: code.name })) ?? []
 
 export const countryOptions = (countries: Country[] | undefined): Option[] =>

@@ -1,5 +1,7 @@
 import { type ReactNode } from "react"
 
+import { Badge } from "@/components/ui/badge"
+
 export const TemplateCard = ({
   template,
   children,
@@ -16,9 +18,7 @@ export const TemplateCard = ({
     <div>
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-semibold text-slate-950">{template.name}</h3>
-        <span className="rounded-md bg-white px-2 py-1 font-mono text-xs text-slate-600 ring-1 ring-slate-200">
-          {template.slug}
-        </span>
+        <Badge variant="code">{template.slug}</Badge>
       </div>
       {template.description ? (
         <p className="mt-2 text-sm text-slate-600">{template.description}</p>

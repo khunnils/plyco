@@ -2,6 +2,7 @@ import { type Vocabulary } from "@plyco/shared"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
@@ -84,14 +85,10 @@ export const DataHandlingReadOnlySection = ({
                             {displayTitle}
                           </h4>
                           {dataType.isSensitive ? (
-                            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                              Sensitive
-                            </span>
+                            <Badge variant="warning">Sensitive</Badge>
                           ) : null}
                           {dataType.isRequired ? (
-                            <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                              Required
-                            </span>
+                            <Badge variant="secondary">Required</Badge>
                           ) : null}
                         </div>
                         {dataType.description ? (

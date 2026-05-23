@@ -37,6 +37,29 @@ const stringField = (
   return ""
 }
 
+const numberField = (
+  fields: Record<string, unknown>,
+  ...names: string[]
+): number | undefined => {
+  for (const name of names) {
+    const value = fields[name]
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return Math.trunc(value)
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value.trim())
+
+      if (Number.isFinite(parsed)) {
+        return Math.trunc(parsed)
+      }
+    }
+  }
+
+  return undefined
+}
+
 const linkedRecordIds = (
   fields: Record<string, unknown>,
   ...names: string[]
@@ -190,9 +213,8 @@ export async function loadCodesFromAirtable({
   }
 
   const activeAirtableCodeRecordIds = new Set<string>()
-  let sortOrder = 0
 
-  for (const record of codeRecords) {
+  for (const [recordIndex, record] of codeRecords.entries()) {
     const linkedCodeSetId = linkedRecordIds(
       record.fields,
       "Code Set",
@@ -207,6 +229,9 @@ export async function loadCodesFromAirtable({
       ? stringField(codeSet.fields, "Id", "Key")
       : ""
     const codeId = stringField(record.fields, "Id", "Key")
+    const sortOrder =
+      numberField(record.fields, "Sequence", "Sort Order", "Sort", "Order") ??
+      recordIndex
 
     if (!codeSetId || !codeId) {
       throw new ApiError(
@@ -237,7 +262,6 @@ export async function loadCodesFromAirtable({
         active: true,
       },
     })
-    sortOrder += 1
   }
 
   await client.systemCode.updateMany({
