@@ -13,10 +13,12 @@ import {
   ProgressPanel,
 } from "@/features/dashboard/components/progress-panel"
 import { ProgressRow } from "@/features/dashboard/components/progress-row"
+import { MetricItem } from "@/features/dashboard/components/metric-item"
 import {
   dashboardProgress,
   groupProgress,
 } from "@/features/dashboard/lib/progress"
+import { useTemplates } from "@/features/templates/hooks/use-templates"
 
 export const DashboardPage = ({
   organizationProviders,
@@ -36,30 +38,40 @@ export const DashboardPage = ({
     progress.data.general,
     ...progress.data.dataTypes,
   ])
+  const templates = useTemplates()
+  const templatesData = templates.data ?? {
+    systemTemplates: [],
+    organizationTemplates: [],
+  }
+
+  const completedVendors = progress.vendors.filter(
+    (v) => v.totalFields > 0 && v.completedFields === v.totalFields
+  ).length
 
   return (
     <div className="grid gap-5">
-      <section className="border border-slate-200 bg-white p-6">
-        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-primary">
-              Readiness progress
-            </p>
-            <h2 className="mt-2 text-3xl font-semibold text-slate-950">
-              {progress.overall.percent}%
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {progress.overall.completedSections}/
-              {progress.overall.totalSections} areas complete -{" "}
-              {progress.overall.completedFields}/{progress.overall.totalFields}{" "}
-              readiness fields answered
-            </p>
-          </div>
-          <div className="w-full md:max-w-sm">
-            <ProgressBar percent={progress.overall.percent} />
-          </div>
-        </div>
-      </section>
+      <div className="grid gap-5 md:grid-cols-3">
+        {/* Panel 1: Readiness Progress */}
+        <MetricItem
+          value={`${progress.overall.percent}%`}
+          label="Readiness completion"
+          description={`${progress.overall.completedSections}/${progress.overall.totalSections} areas complete`}
+        />
+
+        {/* Panel 2: Vendors Defined */}
+        <MetricItem
+          value={organizationProviders.length}
+          label="Vendors defined"
+          description={`${completedVendors}/${organizationProviders.length} fully documented vendors`}
+        />
+
+        {/* Panel 3: Templates (simple counts) */}
+        <MetricItem
+          value={templatesData.organizationTemplates.length}
+          label="Templates"
+          description={`${templatesData.systemTemplates.length} system templates available`}
+        />
+      </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <ProgressPanel
