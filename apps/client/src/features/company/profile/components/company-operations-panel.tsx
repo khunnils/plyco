@@ -91,7 +91,7 @@ export const CompanyOperationsPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={operationsRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Operations"
       onCancel={() => {
         form.reset(draft)

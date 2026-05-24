@@ -82,7 +82,7 @@ export const CookiePreferencesPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={cookieRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Cookie Preferences"
       onCancel={() => {
         form.reset(draft)

@@ -62,7 +62,7 @@ export const ComplianceDisclosuresPanel = ({
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={complianceRows(draft)} />}
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Compliance & Disclosures"
       onCancel={() => {
         form.reset(draft)

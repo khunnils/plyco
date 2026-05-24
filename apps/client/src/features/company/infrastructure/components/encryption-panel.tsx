@@ -107,7 +107,7 @@ export const EncryptionPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={encryptionRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Encryption"
       onCancel={() => {
         form.reset(draft)

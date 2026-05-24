@@ -104,7 +104,7 @@ export const PrivacyRightsPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={rightsRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Privacy Rights & Request Handling"
       onCancel={() => {
         form.reset(draft)

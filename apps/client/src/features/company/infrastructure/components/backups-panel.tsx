@@ -92,7 +92,7 @@ export const BackupsPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={backupRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Backups"
       onCancel={() => {
         form.reset(draft)

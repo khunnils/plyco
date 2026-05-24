@@ -106,7 +106,7 @@ export const InfrastructureProvidersPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={providerRows(draft, catalogProviders)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Infrastructure Providers"
       onCancel={() => {
         form.reset(draft)

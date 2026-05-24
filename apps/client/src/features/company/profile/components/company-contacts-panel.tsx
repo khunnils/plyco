@@ -60,7 +60,7 @@ export const CompanyContactsPanel = ({
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={contactsRows(draft)} />}
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Contacts"
       onCancel={() => {
         form.reset(draft)

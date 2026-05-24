@@ -104,7 +104,7 @@ export const IncidentResponsePanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={incidentRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Incident Response"
       onCancel={() => {
         form.reset(draft)

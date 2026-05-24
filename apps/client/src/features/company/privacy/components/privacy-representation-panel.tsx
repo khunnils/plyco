@@ -69,7 +69,7 @@ export const PrivacyRepresentationPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={representationRows(draft)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Privacy Officers & Representation"
       onCancel={() => {
         form.reset(draft)

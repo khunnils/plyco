@@ -58,7 +58,7 @@ export const CompanyDataProfilePanel = ({
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={dataProfileRows(draft)} />}
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Data profile"
       onCancel={() => {
         form.reset(draft)

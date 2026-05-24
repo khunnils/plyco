@@ -84,7 +84,7 @@ export const LoggingMonitoringPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={loggingRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Logging & Monitoring"
       onCancel={() => {
         form.reset(draft)

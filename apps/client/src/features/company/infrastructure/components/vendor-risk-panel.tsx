@@ -83,7 +83,7 @@ export const VendorRiskPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={vendorRiskRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Vendor Risk"
       onCancel={() => {
         form.reset(draft)

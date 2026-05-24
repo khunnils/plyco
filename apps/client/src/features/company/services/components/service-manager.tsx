@@ -259,7 +259,7 @@ const ServiceBasicsPanel = ({
           ]}
         />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="General"
       onCancel={() => {
         form.reset(draft)
@@ -360,7 +360,7 @@ const ServiceAudiencePanel = ({
           ]}
         />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Audience and Availability"
       onCancel={() => {
         form.reset(draft)
@@ -485,7 +485,7 @@ const ServicePrivacyPanel = ({
           ]}
         />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Service Privacy"
       onCancel={() => {
         form.reset(draft)

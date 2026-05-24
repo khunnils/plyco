@@ -117,7 +117,7 @@ export const MarketingCommunicationsPanel = ({
           rows={marketingRows(draft, vocabulary, catalogProviders)}
         />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Marketing & Communications"
       onCancel={() => {
         form.reset(draft)

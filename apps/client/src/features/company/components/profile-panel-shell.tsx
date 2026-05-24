@@ -1,4 +1,4 @@
-import { Loader2, Save, X } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -26,39 +26,6 @@ export const ProfilePanelShell = ({
   onEdit: () => void
   onSave: () => void
 }) => {
-  if (isEditing) {
-    return (
-      <div className="grid gap-4 border border-slate-200 bg-slate-50 p-5 shadow-sm">
-        <div>
-          <h3 className="text-base font-semibold text-slate-950">{title}</h3>
-          {description ? (
-            <p className="mt-1 text-sm text-slate-500">{description}</p>
-          ) : null}
-        </div>
-        {children}
-        <div className="flex justify-end gap-2">
-          <Button disabled={isMutationPending} type="button" onClick={onSave}>
-            {isMutationPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Save />
-            )}
-            {saveLabel}
-          </Button>
-          <Button
-            disabled={isMutationPending}
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
-            <X />
-            Cancel
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
@@ -68,16 +35,43 @@ export const ProfilePanelShell = ({
             <p className="mt-1 text-sm text-slate-500">{description}</p>
           ) : null}
         </div>
-        <Button
-          className="align-self-end"
-          type="button"
-          variant="link"
-          onClick={onEdit}
-        >
-          Edit
-        </Button>
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <Button
+              disabled={isMutationPending}
+              type="button"
+              onClick={onSave}
+            >
+              {isMutationPending && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+              {saveLabel}
+            </Button>
+            <Button
+              disabled={isMutationPending}
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="align-self-end"
+            type="button"
+            variant="link"
+            onClick={onEdit}
+          >
+            Edit
+          </Button>
+        )}
       </div>
-      {readOnlyContent}
+      {isEditing ? (
+        <div className="border border-slate-200 bg-slate-50 p-5 shadow-sm">
+          {children}
+        </div>
+      ) : (
+        readOnlyContent
+      )}
     </div>
   )
 }

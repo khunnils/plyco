@@ -83,7 +83,7 @@ export const InternationalTransfersPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={transferRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="International Transfers"
       onCancel={() => {
         form.reset(draft)

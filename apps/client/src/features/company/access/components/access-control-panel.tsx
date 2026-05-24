@@ -93,7 +93,7 @@ export const AccessControlPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid rows={accessControlRows(draft, vocabulary)} />
       }
-      saveLabel="Save section"
+      saveLabel="Save"
       title="Access control"
       onCancel={() => {
         form.reset(draft)
