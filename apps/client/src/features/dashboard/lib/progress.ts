@@ -209,8 +209,10 @@ export const privacyProgress = (profile: ProfileDraft) => {
       field("Automated decision making", privacy.usesAutomatedDecisionMaking),
     ]),
     sectionProgress("Privacy Officers & Representation", [
+      field("DPO status", privacy.dpoStatus),
       field("DPO name", privacy.dpoName),
       field("DPO email", privacy.dpoEmail),
+      field("EU representative status", privacy.euRepresentativeStatus),
       field("EU representative", privacy.euRepresentativeName),
       field("EU representative address", privacy.euRepresentativeAddress),
     ]),

@@ -25,6 +25,11 @@ export const PrivacyProfilePage = ({
       vocabulary,
       "privacy_cookie_consent_mechanisms"
     )}
+    dpoStatusOptions={codeOptions(vocabulary, "privacy_dpo_statuses")}
+    euRepresentativeStatusOptions={codeOptions(
+      vocabulary,
+      "privacy_eu_representative_statuses"
+    )}
     isMutationPending={isMutationPending}
     marketingOptOutMethodOptions={codeOptions(
       vocabulary,

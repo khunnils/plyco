@@ -716,6 +716,22 @@
       "example": "https://acme.example/privacy/opt-out"
     },
     {
+      "key": "privacy.dpoStatus",
+      "label": "DPO status",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Whether a Data Protection Officer has been appointed.",
+      "example": "not_appointed"
+    },
+    {
+      "key": "privacy.dpoStatusLabel",
+      "label": "DPO status label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the DPO status.",
+      "example": "Not appointed"
+    },
+    {
       "key": "privacy.dpoName",
       "label": "DPO name",
       "type": "string",
@@ -730,6 +746,22 @@
       "category": "Privacy",
       "description": "Email address for the Data Protection Officer.",
       "example": "dpo@acme.example"
+    },
+    {
+      "key": "privacy.euRepresentativeStatus",
+      "label": "EU representative status",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Whether an EU representative has been appointed.",
+      "example": "not_appointed"
+    },
+    {
+      "key": "privacy.euRepresentativeStatusLabel",
+      "label": "EU representative status label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the EU representative status.",
+      "example": "Not appointed"
     },
     {
       "key": "privacy.euRepresentativeName",

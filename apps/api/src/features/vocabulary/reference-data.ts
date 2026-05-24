@@ -12,6 +12,8 @@ export const requiredCodeSetIds = [
   "privacy_cookie_consent_mechanisms",
   "privacy_marketing_opt_out_methods",
   "privacy_transfer_mechanisms",
+  "privacy_dpo_statuses",
+  "privacy_eu_representative_statuses",
   "security_cadences",
   "security_encryption_algorithms",
   "security_tls_versions",
@@ -385,6 +387,18 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["adequacy_decision", "Adequacy decision"],
     ["dpf", "Data Privacy Framework"],
     ["contractual_safeguards", "Contractual safeguards"],
+  ]),
+  codeSet("privacy_dpo_statuses", "Privacy DPO statuses", false, [
+    ["not_appointed", "Not appointed"],
+    ["appointed", "Appointed"],
+    ["exempt", "Exempt"],
+    ["not_required", "Not required"],
+  ]),
+  codeSet("privacy_eu_representative_statuses", "Privacy EU representative statuses", false, [
+    ["not_appointed", "Not appointed"],
+    ["appointed", "Appointed"],
+    ["exempt", "Exempt"],
+    ["not_required", "Not required"],
   ]),
   codeSet("security_cadences", "Security cadences", false, [
     ["continuous", "Continuous"],

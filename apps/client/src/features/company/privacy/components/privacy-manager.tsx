@@ -15,6 +15,8 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyManager = ({
   cookieConsentMechanismOptions,
+  dpoStatusOptions,
+  euRepresentativeStatusOptions,
   isMutationPending,
   marketingOptOutMethodOptions,
   newsletterProviderOptions,
@@ -27,6 +29,8 @@ export const PrivacyManager = ({
   onSaveProfile,
 }: {
   cookieConsentMechanismOptions: Option[]
+  dpoStatusOptions: Option[]
+  euRepresentativeStatusOptions: Option[]
   isMutationPending: boolean
   marketingOptOutMethodOptions: Option[]
   newsletterProviderOptions: Option[]
@@ -106,9 +110,12 @@ export const PrivacyManager = ({
         onSave={savePrivacy}
       />
       <PrivacyRepresentationPanel
+        dpoStatusOptions={dpoStatusOptions}
+        euRepresentativeStatusOptions={euRepresentativeStatusOptions}
         isMutationPending={isMutationPending}
         needsAttention={getNeedsAttention("Privacy Officers & Representation")}
         privacy={profile.privacy}
+        vocabulary={vocabulary}
         onSave={savePrivacy}
       />
     </div>

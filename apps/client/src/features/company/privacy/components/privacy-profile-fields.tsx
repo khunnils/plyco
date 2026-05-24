@@ -3,6 +3,7 @@ import {
   type Provider,
   type ProviderSystemType,
 } from "@plyco/shared"
+import { useEffect } from "react"
 import { type UseFormReturn } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -102,6 +103,8 @@ const PrivacyProviderPicker = ({
 
 export const PrivacyProfileFields = ({
   cookieConsentMechanismOptions,
+  dpoStatusOptions,
+  euRepresentativeStatusOptions,
   form,
   marketingOptOutMethodOptions,
   providers,
@@ -110,13 +113,35 @@ export const PrivacyProfileFields = ({
   transferMechanismOptions,
 }: {
   cookieConsentMechanismOptions: Option[]
+  dpoStatusOptions: Option[]
+  euRepresentativeStatusOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   marketingOptOutMethodOptions: Option[]
   providers: Provider[]
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
   transferMechanismOptions: Option[]
-}) => (
+}) => {
+  const dpoStatus = form.watch("privacy.dpoStatus")
+  const euRepresentativeStatus = form.watch("privacy.euRepresentativeStatus")
+  const dpoAppointed = dpoStatus === "appointed"
+  const euRepresentativeAppointed = euRepresentativeStatus === "appointed"
+
+  useEffect(() => {
+    if (!dpoAppointed) {
+      form.setValue("privacy.dpoName", null)
+      form.setValue("privacy.dpoEmail", null)
+    }
+  }, [dpoAppointed, form])
+
+  useEffect(() => {
+    if (!euRepresentativeAppointed) {
+      form.setValue("privacy.euRepresentativeName", null)
+      form.setValue("privacy.euRepresentativeAddress", null)
+    }
+  }, [euRepresentativeAppointed, form])
+
+  return (
   <div className="grid gap-6">
     <section className="grid gap-4">
       <h3 className="text-sm font-semibold text-slate-900">
@@ -265,32 +290,58 @@ export const PrivacyProfileFields = ({
       <h3 className="text-sm font-semibold text-slate-900">
         Privacy Officers & Representation
       </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <TextField
-          error={form.formState.errors.privacy?.dpoName}
-          label="DPO name"
-          name="privacy.dpoName"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.privacy?.dpoEmail}
-          label="DPO email"
-          name="privacy.dpoEmail"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.privacy?.euRepresentativeName}
-          label="EU representative name"
-          name="privacy.euRepresentativeName"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.privacy?.euRepresentativeAddress}
-          label="EU representative address"
-          name="privacy.euRepresentativeAddress"
-          register={form.register}
-        />
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4">
+          <SelectField
+            control={form.control}
+            label="DPO status"
+            name="privacy.dpoStatus"
+            options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
+            placeholder="Not set"
+          />
+          <TextField
+            disabled={!dpoAppointed}
+            error={form.formState.errors.privacy?.dpoName}
+            label="DPO name"
+            name="privacy.dpoName"
+            register={form.register}
+          />
+          <TextField
+            disabled={!dpoAppointed}
+            error={form.formState.errors.privacy?.dpoEmail}
+            label="DPO email"
+            name="privacy.dpoEmail"
+            register={form.register}
+          />
+        </div>
+        <div className="grid gap-4">
+          <SelectField
+            control={form.control}
+            label="EU representative status"
+            name="privacy.euRepresentativeStatus"
+            options={[
+              { value: "", label: "Not set" },
+              ...euRepresentativeStatusOptions,
+            ]}
+            placeholder="Not set"
+          />
+          <TextField
+            disabled={!euRepresentativeAppointed}
+            error={form.formState.errors.privacy?.euRepresentativeName}
+            label="EU representative name"
+            name="privacy.euRepresentativeName"
+            register={form.register}
+          />
+          <TextField
+            disabled={!euRepresentativeAppointed}
+            error={form.formState.errors.privacy?.euRepresentativeAddress}
+            label="EU representative address"
+            name="privacy.euRepresentativeAddress"
+            register={form.register}
+          />
+        </div>
       </div>
     </section>
   </div>
-)
+  )
+}

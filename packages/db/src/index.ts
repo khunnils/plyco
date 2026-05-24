@@ -104,8 +104,10 @@ export function mapOrganizationRecord(record: {
     transferMechanisms: unknown
     sellsOrSharesData: boolean | null
     doNotSellLink: string | null
+    dpoStatus: string | null
     dpoName: string | null
     dpoEmail: string | null
+    euRepresentativeStatus: string | null
     euRepresentativeName: string | null
     euRepresentativeAddress: string | null
     usesAutomatedDecisionMaking: boolean | null
@@ -308,8 +310,10 @@ export function mapOrganizationRecord(record: {
     transferMechanisms: stringArray(record.privacyProfile?.transferMechanisms),
     sellsOrSharesData: record.privacyProfile?.sellsOrSharesData ?? null,
     doNotSellLink: record.privacyProfile?.doNotSellLink ?? null,
+    dpoStatus: record.privacyProfile?.dpoStatus ?? null,
     dpoName: record.privacyProfile?.dpoName ?? null,
     dpoEmail: record.privacyProfile?.dpoEmail ?? null,
+    euRepresentativeStatus: record.privacyProfile?.euRepresentativeStatus ?? null,
     euRepresentativeName: record.privacyProfile?.euRepresentativeName ?? null,
     euRepresentativeAddress: record.privacyProfile?.euRepresentativeAddress ?? null,
     usesAutomatedDecisionMaking: record.privacyProfile?.usesAutomatedDecisionMaking ?? null,

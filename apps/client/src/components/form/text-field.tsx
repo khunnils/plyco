@@ -9,6 +9,7 @@ type TextFieldProps<T extends FieldValues> = {
   label: string
   name: FieldPath<T>
   register: UseFormRegister<T>
+  disabled?: boolean
   error?: FieldError
   placeholder?: string
   type?: "text" | "number"
@@ -18,6 +19,7 @@ export const TextField = <T extends FieldValues>({
   label,
   name,
   register,
+  disabled = false,
   error,
   placeholder,
   type = "text",
@@ -25,12 +27,14 @@ export const TextField = <T extends FieldValues>({
   <label className="grid gap-2 text-sm font-medium text-slate-800">
     {label}
     <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+      disabled={disabled}
       inputMode={type === "number" ? "numeric" : undefined}
       min={type === "number" ? 1 : undefined}
       placeholder={placeholder}
       type={type}
       {...register(name, {
+        disabled,
         setValueAs: (value) =>
           type === "number"
             ? value === ""
