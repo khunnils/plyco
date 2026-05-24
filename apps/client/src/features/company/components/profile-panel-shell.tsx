@@ -3,6 +3,8 @@ import { type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
 
+import { cn } from "@/lib/utils"
+
 export const ProfilePanelShell = ({
   children,
   description,
@@ -78,13 +80,15 @@ export const ProfilePanelShell = ({
 
 export const ProfilePanelDetailGrid = ({
   rows,
+  itemBgClassName = "bg-slate-50",
 }: {
   rows: ReadonlyArray<readonly [string, string | number | null]>
+  itemBgClassName?: string
 }) => (
   <dl className="grid gap-3 sm:grid-cols-2">
     {rows.map(([label, value]) => (
       <div
-        className="border border-slate-200 bg-slate-50 p-3"
+        className={cn("border border-slate-200 p-3", itemBgClassName)}
         key={label}
       >
         <dt className="text-xs font-medium text-slate-500">{label}</dt>

@@ -26,6 +26,7 @@ import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
@@ -654,10 +655,10 @@ const ServiceProviderUsagePanel = ({
     : []
 
   return (
-    <div className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
         <div>
-          <h3 className="text-base font-semibold text-slate-950">Providers</h3>
+          <h3 className="text-base font-semibold text-slate-950">Service Providers</h3>
           <p className="mt-1 text-sm text-slate-500">
             Providers used by this service and the data they process.
           </p>
@@ -680,175 +681,180 @@ const ServiceProviderUsagePanel = ({
         </Button>
       </div>
 
-      {!service.id ? (
-        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          Save this service before assigning providers.
-        </div>
-      ) : organizationProviders.length === 0 ? (
-        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          Add providers to the provider inventory before assigning them to a
-          service.
-        </div>
-      ) : showAddProviders ? (
-        <AddVendorsForm
-          selectedProviderIds={selectedProviderIds}
-          organizationProviders={organizationProviders}
-          onCancel={() => setShowAddProviders(false)}
-          onSubmit={(providerIds) => {
-            providerIds.forEach((organizationProviderId) => {
-              onCreate({
-                ...emptyServiceProviderUsageDraft,
-                serviceId: service.id ?? "",
-                organizationProviderId,
-                purpose: serviceProviderPurpose(service),
-              })
-            })
-            setShowAddProviders(false)
-          }}
-        />
-      ) : editingProviderUsage ? (
-        <ServiceProviderUsageForm
-          dataProcessingLevelOptions={dataProcessingLevelOptions}
-          dataRegionOptions={dataRegionOptions}
-          dataTypeOptions={dataTypeOptions}
-          defaultValues={toServiceProviderUsageInput(editingProviderUsage)}
-          dpaStatusOptions={dpaStatusOptions}
-          serviceOptions={serviceOptions}
-          showServiceField={false}
-          submitDisabled={isMutationPending}
-          submitLabel="Save provider usage"
-          providerOptions={providerOptions}
-          onCancel={() => setEditingId(null)}
-          onSubmit={(providerUsage) => {
-            onUpdate(
-              {
-                id: editingProviderUsage.id,
-                providerUsage: {
-                  ...providerUsage,
+      <div className="grid gap-4">
+        {!service.id ? (
+          <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            Save this service before assigning providers.
+          </div>
+        ) : organizationProviders.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            Add providers to the provider inventory before assigning them to a
+            service.
+          </div>
+        ) : showAddProviders ? (
+          <AddVendorsForm
+            selectedProviderIds={selectedProviderIds}
+            organizationProviders={organizationProviders}
+            onCancel={() => setShowAddProviders(false)}
+            onSubmit={(providerIds) => {
+              providerIds.forEach((organizationProviderId) => {
+                onCreate({
+                  ...emptyServiceProviderUsageDraft,
                   serviceId: service.id ?? "",
+                  organizationProviderId,
+                  purpose: serviceProviderPurpose(service),
+                })
+              })
+              setShowAddProviders(false)
+            }}
+          />
+        ) : editingProviderUsage ? (
+          <ServiceProviderUsageForm
+            dataProcessingLevelOptions={dataProcessingLevelOptions}
+            dataRegionOptions={dataRegionOptions}
+            dataTypeOptions={dataTypeOptions}
+            defaultValues={toServiceProviderUsageInput(editingProviderUsage)}
+            dpaStatusOptions={dpaStatusOptions}
+            serviceOptions={serviceOptions}
+            showServiceField={false}
+            submitDisabled={isMutationPending}
+            submitLabel="Save provider usage"
+            providerOptions={providerOptions}
+            onCancel={() => setEditingId(null)}
+            onSubmit={(providerUsage) => {
+              onUpdate(
+                {
+                  id: editingProviderUsage.id,
+                  providerUsage: {
+                    ...providerUsage,
+                    serviceId: service.id ?? "",
+                  },
                 },
-              },
-              () => setEditingId(null)
-            )
-          }}
-        />
-      ) : selectedServiceUses.length === 0 ? (
-        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          No providers selected for this service.
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {selectedServiceUses.map((providerUsage) => {
-            const expanded = expandedId === providerUsage.id
+                () => setEditingId(null)
+              )
+            }}
+          />
+        ) : selectedServiceUses.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            No providers selected for this service.
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {selectedServiceUses.map((providerUsage) => {
+              const expanded = expandedId === providerUsage.id
 
-            return (
-              <article
-                className={[
-                  "border bg-white",
-                  expanded
-                    ? "border-blue-300 ring-2 ring-blue-100"
-                    : "border-slate-200",
-                ].join(" ")}
-                key={providerUsage.id}
-              >
-                <div className="flex items-start gap-2 p-4">
-                  <button
-                    aria-expanded={expanded}
-                    className="min-w-0 flex-1 text-left"
-                    type="button"
-                    onClick={() =>
-                      setExpandedId((current) =>
-                        current === providerUsage.id ? null : providerUsage.id
-                      )
-                    }
-                  >
-                    <h4 className="text-sm font-semibold text-slate-950">
-                      {providerUsage.providerName || "Selected provider"}
-                    </h4>
-                    <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
-                      {providerUsage.purpose}
-                    </p>
-                  </button>
-                  <div className="flex shrink-0 gap-2">
-                    <Button
-                      aria-label={expanded ? "Collapse" : "Expand"}
-                      size="icon-sm"
+              return (
+                <article
+                  className={[
+                    "border bg-slate-50",
+                    expanded
+                      ? "border-blue-300 ring-2 ring-blue-100"
+                      : "border-slate-200",
+                  ].join(" ")}
+                  key={providerUsage.id}
+                >
+                  <div className="flex items-start gap-2 p-4">
+                    <button
+                      aria-expanded={expanded}
+                      className="min-w-0 flex-1 text-left"
                       type="button"
-                      variant="outline"
                       onClick={() =>
                         setExpandedId((current) =>
                           current === providerUsage.id ? null : providerUsage.id
                         )
                       }
                     >
-                      {expanded ? <ChevronUp /> : <ChevronDown />}
-                    </Button>
-                    <Button
-                      aria-label="Edit provider usage"
-                      size="icon-sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setShowAddProviders(false)
-                        setEditingId(providerUsage.id)
-                      }}
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button
-                      aria-label="Delete provider usage"
-                      size="icon-sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => onDelete(providerUsage)}
-                    >
-                      <Trash2 />
-                    </Button>
+                      <h4 className="text-sm font-semibold text-slate-950">
+                        {providerUsage.providerName || "Selected provider"}
+                      </h4>
+                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
+                        {providerUsage.purpose}
+                      </p>
+                    </button>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        aria-label={expanded ? "Collapse" : "Expand"}
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          setExpandedId((current) =>
+                            current === providerUsage.id ? null : providerUsage.id
+                          )
+                        }
+                      >
+                        {expanded ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                      <Button
+                        aria-label="Edit provider usage"
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowAddProviders(false)
+                          setEditingId(providerUsage.id)
+                        }}
+                      >
+                        <Pencil />
+                      </Button>
+                      <Button
+                        aria-label="Delete provider usage"
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() => onDelete(providerUsage)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                {expanded ? (
-                  <ProfilePanelDetailGrid
-                    rows={[
-                      [
-                        "Data processing",
-                        codeLabel(
-                          vocabulary,
-                          "data_processing_level",
-                          providerUsage.dataProcessingLevel
-                        ),
-                      ],
-                      [
-                        "DPA status",
-                        codeLabel(
-                          vocabulary,
-                          "dpa_status",
-                          providerUsage.dpaStatus
-                        ),
-                      ],
-                      [
-                        "Data processed",
-                        providerUsage.dataProcessed.length > 0
-                          ? providerUsage.dataProcessed.join(", ")
-                          : "No data types selected",
-                      ],
-                      [
-                        "Data regions",
-                        codeValueList(
-                          vocabulary,
-                          "regions",
-                          providerUsage.dataRegions
-                        ),
-                      ],
-                      ["Notes", providerUsage.notes || "Not set"],
-                    ]}
-                  />
-                ) : null}
-              </article>
-            )
-          })}
-        </div>
-      )}
+                  {expanded ? (
+                    <div className="px-4 pb-4 pt-3 border-t border-slate-100">
+                      <ProfilePanelDetailGrid
+                        itemBgClassName="bg-white"
+                        rows={[
+                          [
+                            "Data processing",
+                            codeLabel(
+                              vocabulary,
+                              "data_processing_level",
+                              providerUsage.dataProcessingLevel
+                            ),
+                          ],
+                          [
+                            "DPA status",
+                            codeLabel(
+                              vocabulary,
+                              "dpa_status",
+                              providerUsage.dpaStatus
+                            ),
+                          ],
+                          [
+                            "Data processed",
+                            providerUsage.dataProcessed.length > 0
+                              ? providerUsage.dataProcessed.join(", ")
+                              : "No data types selected",
+                          ],
+                          [
+                            "Data regions",
+                            codeValueList(
+                              vocabulary,
+                              "regions",
+                              providerUsage.dataRegions
+                            ),
+                          ],
+                          ["Notes", providerUsage.notes || "Not set"],
+                        ]}
+                      />
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -917,6 +923,12 @@ export const ServiceManager = ({
   )
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
+  const [activeTab, setActiveTab] = useState<"details" | "providers">("details")
+
+  useEffect(() => {
+    setActiveTab("details")
+  }, [selectedServiceId])
+
   useEffect(() => {
     if (
       !isCreatingService &&
@@ -977,44 +989,76 @@ export const ServiceManager = ({
   }
 
   return (
-    <div className="grid gap-5">
-      <ServiceBasicsPanel
-        isMutationPending={isProfileMutationPending}
-        service={selectedService}
-        onSave={saveServicePatch}
-      />
-      <ServiceAudiencePanel
-        businessActivityOptions={businessActivityOptions}
-        customerTypeOptions={customerTypeOptions}
-        isMutationPending={isProfileMutationPending}
-        regionOptions={regionOptions}
-        service={selectedService}
-        userTypeOptions={userTypeOptions}
-        vocabulary={vocabulary}
-        onSave={saveServicePatch}
-      />
-      <ServicePrivacyPanel
-        cookieTypeOptions={cookieTypeOptions}
-        isMutationPending={isProfileMutationPending}
-        regionOptions={regionOptions}
-        service={selectedService}
-        vocabulary={vocabulary}
-        onSave={saveServicePatch}
-      />
-      <ServiceProviderUsagePanel
-        dataProcessingLevelOptions={dataProcessingLevelOptions}
-        dataRegionOptions={dataRegionOptions}
-        dataTypeOptions={dataTypeOptions}
-        dpaStatusOptions={dpaStatusOptions}
-        isMutationPending={isVendorMutationPending}
-        service={selectedService}
-        serviceProviderUsage={serviceProviderUsage}
-        organizationProviders={organizationProviders}
-        vocabulary={vocabulary}
-        onCreate={onCreateProviderUsage}
-        onDelete={onDeleteProviderUsage}
-        onUpdate={onUpdateProviderUsage}
-      />
+    <div className="grid gap-6">
+      <div className="flex border-b border-slate-200 gap-6">
+        <button
+          type="button"
+          onClick={() => setActiveTab("details")}
+          className={cn(
+            "pb-3 text-sm font-medium transition-all border-b-2 mb-[-2px] cursor-pointer outline-none",
+            activeTab === "details"
+              ? "border-slate-900 text-slate-900 font-semibold"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          )}
+        >
+          Service details
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("providers")}
+          className={cn(
+            "pb-3 text-sm font-medium transition-all border-b-2 mb-[-2px] cursor-pointer outline-none",
+            activeTab === "providers"
+              ? "border-slate-900 text-slate-900 font-semibold"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          )}
+        >
+          Service Providers
+        </button>
+      </div>
+
+      {activeTab === "details" ? (
+        <div className="grid gap-5">
+          <ServiceBasicsPanel
+            isMutationPending={isProfileMutationPending}
+            service={selectedService}
+            onSave={saveServicePatch}
+          />
+          <ServiceAudiencePanel
+            businessActivityOptions={businessActivityOptions}
+            customerTypeOptions={customerTypeOptions}
+            isMutationPending={isProfileMutationPending}
+            regionOptions={regionOptions}
+            service={selectedService}
+            userTypeOptions={userTypeOptions}
+            vocabulary={vocabulary}
+            onSave={saveServicePatch}
+          />
+          <ServicePrivacyPanel
+            cookieTypeOptions={cookieTypeOptions}
+            isMutationPending={isProfileMutationPending}
+            regionOptions={regionOptions}
+            service={selectedService}
+            vocabulary={vocabulary}
+            onSave={saveServicePatch}
+          />
+        </div>
+      ) : (
+        <ServiceProviderUsagePanel
+          dataProcessingLevelOptions={dataProcessingLevelOptions}
+          dataRegionOptions={dataRegionOptions}
+          dataTypeOptions={dataTypeOptions}
+          dpaStatusOptions={dpaStatusOptions}
+          isMutationPending={isVendorMutationPending}
+          service={selectedService}
+          serviceProviderUsage={serviceProviderUsage}
+          organizationProviders={organizationProviders}
+          vocabulary={vocabulary}
+          onCreate={onCreateProviderUsage}
+          onDelete={onDeleteProviderUsage}
+          onUpdate={onUpdateProviderUsage}
+        />
+      )}
     </div>
   )
 }

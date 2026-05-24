@@ -125,8 +125,8 @@ export const DataTypesPanel = ({
   }
 
   return (
-    <div className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
           <p className="mt-1 text-sm text-slate-500">
@@ -140,118 +140,121 @@ export const DataTypesPanel = ({
         </Button>
       </div>
 
-      {dataTypes.length === 0 ? (
-        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-          No data types yet.
-        </div>
-      ) : (
-        <div className="grid gap-3">
-          {dataTypes.map((dataType, index) => {
-            const expanded = expandedIndex === index
-            const title = displayTitle(dataType, index)
+      <div className="grid gap-4">
+        {dataTypes.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            No data types yet.
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {dataTypes.map((dataType, index) => {
+              const expanded = expandedIndex === index
+              const title = displayTitle(dataType, index)
 
-            return (
-              <article
-                className={[
-                  "border bg-white",
-                  expanded
-                    ? "border-blue-300 ring-2 ring-blue-100"
-                    : "border-slate-200",
-                ].join(" ")}
-                key={`${dataType.name}-${index}`}
-              >
-                <div className="flex items-start gap-2 p-4">
-                  <button
-                    aria-expanded={expanded}
-                    className="min-w-0 flex-1 text-left"
-                    type="button"
-                    onClick={() =>
-                      setExpandedIndex((current) =>
-                        current === index ? null : index
-                      )
-                    }
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-sm font-semibold text-slate-950">
-                        {title}
-                      </h4>
-                      {dataType.isSensitive ? (
-                        <Badge variant="warning">Sensitive</Badge>
-                      ) : null}
-                      {dataType.isRequired ? (
-                        <Badge variant="secondary">Required</Badge>
-                      ) : null}
-                    </div>
-                    {dataType.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
-                        {dataType.description}
-                      </p>
-                    ) : null}
-                  </button>
-                  <div className="flex shrink-0 gap-2">
-                    <Button
-                      aria-label={expanded ? "Collapse" : "Expand"}
-                      size="icon-sm"
+              return (
+                <article
+                  className={[
+                    "border bg-slate-50",
+                    expanded
+                      ? "border-blue-300 ring-2 ring-blue-100"
+                      : "border-slate-200",
+                  ].join(" ")}
+                  key={`${dataType.name}-${index}`}
+                >
+                  <div className="flex items-start gap-2 p-4">
+                    <button
+                      aria-expanded={expanded}
+                      className="min-w-0 flex-1 text-left"
                       type="button"
-                      variant="outline"
                       onClick={() =>
                         setExpandedIndex((current) =>
                           current === index ? null : index
                         )
                       }
                     >
-                      {expanded ? <ChevronUp /> : <ChevronDown />}
-                    </Button>
-                    <Button
-                      aria-label="Edit data type"
-                      size="icon-sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => startEdit(index)}
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button
-                      aria-label="Delete data type"
-                      size="icon-sm"
-                      type="button"
-                      variant="outline"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <Trash2 />
-                    </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="text-sm font-semibold text-slate-950">
+                          {title}
+                        </h4>
+                        {dataType.isSensitive ? (
+                          <Badge variant="warning">Sensitive</Badge>
+                        ) : null}
+                        {dataType.isRequired ? (
+                          <Badge variant="secondary">Required</Badge>
+                        ) : null}
+                      </div>
+                      {dataType.description ? (
+                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
+                          {dataType.description}
+                        </p>
+                      ) : null}
+                    </button>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        aria-label={expanded ? "Collapse" : "Expand"}
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          setExpandedIndex((current) =>
+                            current === index ? null : index
+                          )
+                        }
+                      >
+                        {expanded ? <ChevronUp /> : <ChevronDown />}
+                      </Button>
+                      <Button
+                        aria-label="Edit data type"
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() => startEdit(index)}
+                      >
+                        <Pencil />
+                      </Button>
+                      <Button
+                        aria-label="Delete data type"
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDelete(index)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                {expanded ? (
-                  <div className="border-t border-slate-100 bg-slate-50 p-4">
-                    <ProfilePanelDetailGrid
-                      rows={[
-                        [
-                          "Subject type",
-                          codeValueList(
-                            vocabulary,
-                            "subject_types",
-                            dataType.subjectTypes
-                          ),
-                        ],
-                        [
-                          "Collection method",
-                          codeValueList(
-                            vocabulary,
-                            "collection_methods",
-                            dataType.collectionMethods
-                          ),
-                        ],
-                      ]}
-                    />
-                  </div>
-                ) : null}
-              </article>
-            )
-          })}
-        </div>
-      )}
+                  {expanded ? (
+                    <div className="px-4 pb-4 pt-3 border-t border-slate-100">
+                      <ProfilePanelDetailGrid
+                        itemBgClassName="bg-white"
+                        rows={[
+                          [
+                            "Subject type",
+                            codeValueList(
+                              vocabulary,
+                              "subject_types",
+                              dataType.subjectTypes
+                            ),
+                          ],
+                          [
+                            "Collection method",
+                            codeValueList(
+                              vocabulary,
+                              "collection_methods",
+                              dataType.collectionMethods
+                            ),
+                          ],
+                        ]}
+                      />
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
