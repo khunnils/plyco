@@ -1,12 +1,13 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import { ChevronDown, ChevronUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { ProgressBar } from "@/features/dashboard/components/progress-bar"
 import {
   type ProgressGroup,
   type ProgressItem,
 } from "@/features/dashboard/lib/progress"
-import { ProgressBar } from "@/features/dashboard/components/progress-bar"
-import { ProgressRow } from "@/features/dashboard/components/progress-row"
 
 type PanelGroup = Pick<
   ProgressGroup,
@@ -19,81 +20,152 @@ type PanelGroup = Pick<
 >
 
 export const ProgressPanel = ({
-  actionLabel,
   description,
   group,
   href,
   title,
 }: {
-  actionLabel: string
   description: string
   group: PanelGroup
   href: string
   title: string
-}) => (
-  <section className="border border-slate-200 bg-white p-5">
-    <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-      <div className="min-w-0">
-        <h2 className="text-base font-semibold text-slate-950">{title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
-      </div>
-      <Button asChild className="w-fit" type="button" variant="outline">
-        <Link to={href}>{actionLabel}</Link>
-      </Button>
-    </div>
-    <div className="mb-4 grid gap-2">
-      <div className="flex items-end justify-between gap-3">
-        <p className="text-2xl font-semibold text-slate-950">
-          {group.percent}%
-        </p>
-        <p className="text-sm text-slate-500">
-          {group.completedSections}/{group.totalSections} sections
-        </p>
-      </div>
-      <ProgressBar percent={group.percent} />
-    </div>
-    <div className="grid gap-3">
-      {group.sections.map((section) => (
-        <ProgressRow key={section.title} section={section} />
-      ))}
-    </div>
-  </section>
-)
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false)
 
-export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => (
-  <article className="border border-slate-200 bg-white p-4">
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        <h3 className="truncate text-sm font-semibold text-slate-950">
-          {item.title}
-        </h3>
-        <p className="mt-1 text-xs text-slate-500">
-          {item.completedSections}/{item.totalSections} sections -{" "}
-          {item.completedFields}/{item.totalFields} fields
-        </p>
+  return (
+    <section className="border border-slate-200 bg-white p-5 flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-baseline gap-2 min-w-0">
+            <h2 className="text-base font-semibold text-slate-950 hover:text-slate-700 hover:underline transition-colors">
+              <Link to={href}>{title}</Link>
+            </h2>
+            <span className="text-sm text-slate-500">
+              {group.completedSections}/{group.totalSections} sections
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="w-24 sm:w-32">
+              <ProgressBar percent={group.percent} />
+            </div>
+
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-150"
+              type="button"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-5 w-5" />
+              ) : (
+                <ChevronDown className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <p className="mt-2 text-sm text-slate-500">{description}</p>
+
+        {isExpanded && (
+          <div className="mt-4 border-t border-slate-100 pt-4 grid gap-2">
+            {group.sections.map((section) => {
+              const isComplete =
+                section.totalFields > 0 &&
+                section.completedFields === section.totalFields
+              return (
+                <div
+                  key={section.title}
+                  className="flex items-center justify-between py-1 text-sm border-b border-slate-50 last:border-0"
+                >
+                  <span className="font-medium text-slate-700">{section.title}</span>
+                  <span
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      isComplete
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-slate-100 text-slate-400"
+                    }`}
+                  >
+                    {isComplete ? "Yes" : "No"}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
-      {item.href ? (
-        <Button
-          asChild
-          className="w-fit"
-          size="sm"
-          type="button"
-          variant="link"
-        >
-          <Link to={item.href}>Open</Link>
-        </Button>
-      ) : null}
-    </div>
-    <div className="mb-4">
-      <ProgressBar percent={item.percent} />
-    </div>
-    <div className="grid gap-2">
-      {item.sections.map((section) => (
-        <ProgressRow key={section.title} section={section} />
-      ))}
-    </div>
-  </article>
-)
+    </section>
+  )
+}
+
+export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  return (
+    <article className="border border-slate-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-baseline gap-2 min-w-0">
+          <h3 className="text-sm font-semibold text-slate-950 hover:text-slate-700 hover:underline transition-colors truncate">
+            {item.href ? <Link to={item.href}>{item.title}</Link> : item.title}
+          </h3>
+          <span className="text-xs text-slate-500">
+            {item.completedSections}/{item.totalSections} sections
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-24 sm:w-32">
+            <ProgressBar percent={item.percent} />
+          </div>
+
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-150"
+            type="button"
+            aria-label={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <p className="mt-1.5 text-xs text-slate-500">
+        {item.completedFields}/{item.totalFields} fields complete
+      </p>
+
+      {isExpanded && (
+        <div className="mt-3 border-t border-slate-100 pt-3 grid gap-1.5">
+          {item.sections.map((section) => {
+            const isComplete =
+              section.totalFields > 0 &&
+              section.completedFields === section.totalFields
+            return (
+              <div
+                key={section.title}
+                className="flex items-center justify-between py-0.5 text-xs border-b border-slate-50 last:border-0"
+              >
+                <span className="font-medium text-slate-600">{section.title}</span>
+                <span
+                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                    isComplete
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-slate-100 text-slate-400"
+                  }`}
+                >
+                  {isComplete ? "Yes" : "No"}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </article>
+  )
+}
 
 export const PlaceholderPanel = ({
   actionLabel,

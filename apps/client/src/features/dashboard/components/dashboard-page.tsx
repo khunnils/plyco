@@ -42,7 +42,7 @@ export const DashboardPage = ({
       <section className="border border-slate-200 bg-white p-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-blue-700">
+            <p className="text-sm font-semibold text-primary">
               Readiness progress
             </p>
             <h2 className="mt-2 text-3xl font-semibold text-slate-950">
@@ -63,28 +63,24 @@ export const DashboardPage = ({
 
       <div className="grid gap-5 xl:grid-cols-2">
         <ProgressPanel
-          actionLabel="Open profile"
           description="Company identity, operating context, contacts, and high-level data posture."
           group={progress.profile}
           href="/company/profile"
           title="Profile"
         />
         <ProgressPanel
-          actionLabel="Open privacy"
           description="Rights handling, privacy preferences, transfers, disclosures, and representation."
           group={progress.privacy}
           href="/company/privacy"
           title="Privacy"
         />
         <ProgressPanel
-          actionLabel="Open infrastructure"
           description="Core systems, encryption, monitoring, incident response, backups, and vendor risk."
           group={progress.infrastructure}
           href="/company/infrastructure"
           title="Infrastructure"
         />
         <ProgressPanel
-          actionLabel="Open access"
           description="Access controls, authentication requirements, and account lifecycle hygiene."
           group={progress.access}
           href="/company/access"
