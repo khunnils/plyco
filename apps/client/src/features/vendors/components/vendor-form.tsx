@@ -20,6 +20,7 @@ export const OrganizationProviderForm = ({
   vendorCategoryOptions,
   submitLabel,
   submitDisabled = false,
+  title,
   onSubmit,
   onCancel,
 }: {
@@ -29,6 +30,7 @@ export const OrganizationProviderForm = ({
   submitLabel: string
   submitDisabled?: boolean
   vendorCategoryOptions: Option[]
+  title?: string
   onSubmit: (provider: OrganizationProviderInput) => void
   onCancel?: () => void
 }) => {
@@ -49,7 +51,10 @@ export const OrganizationProviderForm = ({
   })
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4">
+      {title && (
+        <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
           error={form.formState.errors.name}

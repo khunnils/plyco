@@ -58,7 +58,7 @@ export const VendorList = ({
 
         return (
           <article
-            className="rounded-lg border border-slate-200 bg-white p-4"
+            className="border border-slate-200 bg-slate-50 p-4"
             key={provider.id}
           >
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -146,7 +146,7 @@ export const VendorList = ({
 
                   return (
                     <div
-                      className="rounded-md bg-slate-50"
+                      className=" bg-white border border-slate-200"
                       key={`${provider.id}:${serviceKey}`}
                     >
                       <div className="flex w-full items-center justify-between gap-3 p-3 text-left">
@@ -165,10 +165,10 @@ export const VendorList = ({
                           ))}
                         </span>
                       </div>
-                      <div className="grid gap-2 border-t border-white px-3 pb-3 pt-2">
+                      <div className="grid gap-2 border-t border-white px-3 pb-4 pt-0">
                         {serviceUses.map((usage) => (
                           <div
-                            className="rounded-md bg-white px-3 py-2"
+                            className="rounded-md bg-white px-3 py-0"
                             key={usage.id}
                           >
                             <p className="text-sm text-slate-600">

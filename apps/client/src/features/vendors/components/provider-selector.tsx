@@ -92,7 +92,7 @@ export const ProviderSelector = ({
           return (
               <label
                 className={[
-                  "rounded-lg border border-slate-200 p-4 text-left transition",
+                  "border border-slate-200 p-4 text-left transition",
                   alreadyAdded
                     ? "bg-slate-50 text-slate-400"
                     : "cursor-pointer bg-white hover:border-blue-300 hover:bg-blue-50/40",

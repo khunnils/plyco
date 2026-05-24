@@ -102,6 +102,7 @@ export const DataTypesPanel = ({
         subjectTypeOptions={subjectTypeOptions}
         submitDisabled={isMutationPending}
         submitLabel="Add data type"
+        title="Add datatype"
         onCancel={closeForm}
         onSubmit={handleCreate}
       />
@@ -116,6 +117,7 @@ export const DataTypesPanel = ({
         subjectTypeOptions={subjectTypeOptions}
         submitDisabled={isMutationPending}
         submitLabel="Save data type"
+        title="Edit datatype"
         onCancel={closeForm}
         onSubmit={handleUpdate}
       />
