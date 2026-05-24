@@ -70,6 +70,7 @@ const encryptionRows = (
 
 export const EncryptionPanel = ({
   isMutationPending,
+  needsAttention,
   infrastructure,
   securityEncryptionAlgorithmOptions,
   securityKeyManagementProviderOptions,
@@ -78,6 +79,7 @@ export const EncryptionPanel = ({
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityEncryptionAlgorithmOptions: Option[]
   securityKeyManagementProviderOptions: Option[]
@@ -104,6 +106,7 @@ export const EncryptionPanel = ({
       description="Encryption algorithms, TLS requirements, and cryptographic key management."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={encryptionRows(draft, vocabulary)} />
       }

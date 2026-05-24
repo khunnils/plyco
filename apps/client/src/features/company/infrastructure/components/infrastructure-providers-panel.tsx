@@ -76,11 +76,13 @@ const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
 export const InfrastructureProvidersPanel = ({
   catalogProviders,
   isMutationPending,
+  needsAttention,
   infrastructure,
   onSave,
 }: {
   catalogProviders: Provider[]
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   onSave: (patch: ProvidersDraft, onSuccess?: () => void) => void
 }) => {
@@ -103,6 +105,7 @@ export const InfrastructureProvidersPanel = ({
       description="Hosting providers, databases, CDNs, and other infrastructure services used to deliver applications."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={providerRows(draft, catalogProviders)} />
       }

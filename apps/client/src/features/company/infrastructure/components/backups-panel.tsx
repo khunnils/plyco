@@ -59,12 +59,14 @@ const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) =>
 
 export const BackupsPanel = ({
   isMutationPending,
+  needsAttention,
   infrastructure,
   securityCadenceOptions,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityCadenceOptions: Option[]
   vocabulary: Vocabulary | undefined
@@ -89,6 +91,7 @@ export const BackupsPanel = ({
       description="Backup intervals, encryption status, and geographical distribution of recovery points."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={backupRows(draft, vocabulary)} />
       }

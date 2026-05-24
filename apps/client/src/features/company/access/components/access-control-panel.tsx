@@ -61,12 +61,14 @@ const accessControlRows = (
 export const AccessControlPanel = ({
   access,
   isMutationPending,
+  needsAttention,
   securityCadenceOptions,
   vocabulary,
   onSave,
 }: {
   access: AccessProfile
   isMutationPending: boolean
+  needsAttention?: boolean
   securityCadenceOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (patch: AccessControlDraft, onSuccess?: () => void) => void
@@ -90,6 +92,7 @@ export const AccessControlPanel = ({
       description="Access hygiene, review cadence, and privileged access controls."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={accessControlRows(draft, vocabulary)} />
       }

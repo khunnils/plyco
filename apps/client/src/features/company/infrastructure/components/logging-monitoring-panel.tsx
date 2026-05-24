@@ -51,12 +51,14 @@ const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
 
 export const LoggingMonitoringPanel = ({
   isMutationPending,
+  needsAttention,
   infrastructure,
   securityMonitoringOwnerOptions,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityMonitoringOwnerOptions: Option[]
   vocabulary: Vocabulary | undefined
@@ -81,6 +83,7 @@ export const LoggingMonitoringPanel = ({
       description="Centralized logs, retention policies, system monitoring ownership, and security alerts."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={loggingRows(draft, vocabulary)} />
       }

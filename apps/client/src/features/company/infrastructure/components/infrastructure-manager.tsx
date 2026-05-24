@@ -11,6 +11,7 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
+import { infrastructureProgress } from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const InfrastructureManager = ({
@@ -40,6 +41,14 @@ export const InfrastructureManager = ({
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
 }) => {
+  const progress = infrastructureProgress(profile)
+
+  const getNeedsAttention = (sectionTitle: string) => {
+    const section = progress.sections.find((s) => s.title === sectionTitle)
+    if (!section) return false
+    return section.totalFields > 0 && section.completedFields < section.totalFields
+  }
+
   const saveInfrastructure = (
     patch: Partial<ProfileDraft["infrastructure"]>,
     onSuccess?: () => void
@@ -62,11 +71,13 @@ export const InfrastructureManager = ({
         catalogProviders={providers}
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Infrastructure Providers")}
         onSave={saveInfrastructure}
       />
       <EncryptionPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Encryption")}
         securityEncryptionAlgorithmOptions={securityEncryptionAlgorithmOptions}
         securityKeyManagementProviderOptions={
           securityKeyManagementProviderOptions
@@ -78,6 +89,7 @@ export const InfrastructureManager = ({
       <LoggingMonitoringPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Logging & Monitoring")}
         securityMonitoringOwnerOptions={securityMonitoringOwnerOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
@@ -85,6 +97,7 @@ export const InfrastructureManager = ({
       <VulnerabilityManagementPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Vulnerability Management")}
         securityCadenceOptions={securityCadenceOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
@@ -92,6 +105,7 @@ export const InfrastructureManager = ({
       <IncidentResponsePanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Incident Response")}
         securityCustomerNotificationProcessOptions={
           securityCustomerNotificationProcessOptions
         }
@@ -104,6 +118,7 @@ export const InfrastructureManager = ({
       <BackupsPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Backups")}
         securityCadenceOptions={securityCadenceOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
@@ -111,6 +126,7 @@ export const InfrastructureManager = ({
       <VendorRiskPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Vendor Risk")}
         securityCadenceOptions={securityCadenceOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}

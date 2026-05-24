@@ -44,10 +44,12 @@ const authenticationRows = (draft: AuthenticationDraft) =>
 export const AccessAuthenticationPanel = ({
   access,
   isMutationPending,
+  needsAttention,
   onSave,
 }: {
   access: AccessProfile
   isMutationPending: boolean
+  needsAttention?: boolean
   onSave: (patch: AuthenticationDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -69,6 +71,7 @@ export const AccessAuthenticationPanel = ({
       description="Authentication requirements and account lifecycle practices."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={authenticationRows(draft)} />
       }

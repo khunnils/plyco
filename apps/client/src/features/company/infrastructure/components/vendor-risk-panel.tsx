@@ -50,12 +50,14 @@ const vendorRiskRows = (
 
 export const VendorRiskPanel = ({
   isMutationPending,
+  needsAttention,
   infrastructure,
   securityCadenceOptions,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityCadenceOptions: Option[]
   vocabulary: Vocabulary | undefined
@@ -80,6 +82,7 @@ export const VendorRiskPanel = ({
       description="Procedures for auditing third-party vendors, review cadences, and DPA mandates."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={vendorRiskRows(draft, vocabulary)} />
       }

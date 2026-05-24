@@ -69,6 +69,7 @@ const incidentRows = (
 
 export const IncidentResponsePanel = ({
   isMutationPending,
+  needsAttention,
   infrastructure,
   securityCustomerNotificationProcessOptions,
   securityNotificationTimelineOptions,
@@ -76,6 +77,7 @@ export const IncidentResponsePanel = ({
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityCustomerNotificationProcessOptions: Option[]
   securityNotificationTimelineOptions: Option[]
@@ -101,6 +103,7 @@ export const IncidentResponsePanel = ({
       description="Breach notification plans, customer communication processes, and reporting timelines."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={incidentRows(draft, vocabulary)} />
       }

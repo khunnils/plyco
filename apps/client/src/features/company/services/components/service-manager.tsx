@@ -924,10 +924,12 @@ export const ServiceManager = ({
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
   const [activeTab, setActiveTab] = useState<"details" | "providers">("details")
+  const [prevSelectedServiceId, setPrevSelectedServiceId] = useState(selectedServiceId)
 
-  useEffect(() => {
+  if (selectedServiceId !== prevSelectedServiceId) {
+    setPrevSelectedServiceId(selectedServiceId)
     setActiveTab("details")
-  }, [selectedServiceId])
+  }
 
   useEffect(() => {
     if (
