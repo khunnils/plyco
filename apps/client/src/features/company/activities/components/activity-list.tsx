@@ -18,7 +18,7 @@ export const ActivityList = ({
 }) => {
   if (activities.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">
+      <div className="border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">
         No activities added yet.
       </div>
     )
@@ -28,7 +28,7 @@ export const ActivityList = ({
     <div className="grid gap-4">
       {activities.map((activity) => (
         <article
-          className="rounded-lg border border-slate-200 bg-white p-4"
+          className="border border-slate-200 bg-white p-4"
           key={activity.id}
         >
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

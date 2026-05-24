@@ -49,8 +49,8 @@ export const DashboardPage = ({
   ).length
 
   return (
-    <div className="grid gap-5">
-      <div className="grid gap-5 md:grid-cols-3">
+    <div className="grid gap-6">
+      <div className="grid gap-5 md:grid-cols-3 mb-4">
         {/* Panel 1: Readiness Progress */}
         <MetricItem
           value={`${progress.overall.percent}%`}

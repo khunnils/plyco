@@ -10,7 +10,6 @@ import {
 } from "@/features/company/activities/hooks/use-activities"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import { Button } from "@/components/ui/button"
-import { Section } from "@/features/shell/components/section"
 import { ActivitiesManager } from "@/features/company/activities/components/activities-manager"
 import { PageHeader } from "@/features/shell/components/page-header"
 
@@ -38,15 +37,19 @@ export const ActivitiesRoutePage = () => {
   return (
     <>
       <PageHeader eyebrow="Company" title="Activities" />
-      <Section
-        description="Processing activities with purpose, role, and legal basis."
-        title="Activities"
-        action={
-          businessActivities.length > 0 &&
+      <div className="grid gap-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-950">Activities</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Processing activities with purpose, role, and legal basis.
+            </p>
+          </div>
+          {businessActivities.length > 0 &&
           !showActivityForm &&
           !editingActivityId ? (
             <Button
-              className="w-fit"
+              className="w-fit shrink-0"
               type="button"
               onClick={() => {
                 setEditingActivityId(null)
@@ -56,9 +59,8 @@ export const ActivitiesRoutePage = () => {
               <Plus />
               Add activity
             </Button>
-          ) : undefined
-        }
-      >
+          ) : null}
+        </div>
         <ActivitiesManager
           activities={businessActivities}
           isMutationPending={isActivityMutationPending}
@@ -79,7 +81,7 @@ export const ActivitiesRoutePage = () => {
           editingActivityId={editingActivityId}
           setEditingActivityId={setEditingActivityId}
         />
-      </Section>
+      </div>
     </>
   )
 }

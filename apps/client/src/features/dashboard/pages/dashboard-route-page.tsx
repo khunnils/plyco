@@ -12,7 +12,7 @@ export const DashboardRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Dashboard" title="Security readiness dashboard" />
+      <PageHeader eyebrow="Dashboard" title="Readiness Overview" />
       <DashboardPage
         organizationProviders={organizationProviders}
         profile={defaultValues}
