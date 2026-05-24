@@ -50,12 +50,14 @@ const transferRows = (
 
 export const InternationalTransfersPanel = ({
   isMutationPending,
+  needsAttention,
   privacy,
   transferMechanismOptions,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   privacy: PrivacyProfile
   transferMechanismOptions: Option[]
   vocabulary: Vocabulary | undefined
@@ -80,6 +82,7 @@ export const InternationalTransfersPanel = ({
       description="Cross-border data transfer methods, safeguards, and legal mechanisms."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={transferRows(draft, vocabulary)} />
       }

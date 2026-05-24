@@ -10,6 +10,7 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
+import { privacyProgress } from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyManager = ({
@@ -37,6 +38,14 @@ export const PrivacyManager = ({
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
 }) => {
+  const progress = privacyProgress(profile)
+
+  const getNeedsAttention = (sectionTitle: string) => {
+    const section = progress.sections.find((s) => s.title === sectionTitle)
+    if (!section) return false
+    return section.totalFields > 0 && section.completedFields < section.totalFields
+  }
+
   const savePrivacy = (
     patch: Partial<ProfileDraft["privacy"]>,
     onSuccess?: () => void
@@ -57,6 +66,7 @@ export const PrivacyManager = ({
     <div className="grid gap-10">
       <PrivacyRightsPanel
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Privacy Rights & Request Handling")}
         privacy={profile.privacy}
         requestMethodOptions={requestMethodOptions}
         supportedRightOptions={supportedRightOptions}
@@ -66,6 +76,7 @@ export const PrivacyManager = ({
       <CookiePreferencesPanel
         cookieConsentMechanismOptions={cookieConsentMechanismOptions}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Cookie Preferences")}
         privacy={profile.privacy}
         vocabulary={vocabulary}
         onSave={savePrivacy}
@@ -74,6 +85,7 @@ export const PrivacyManager = ({
         catalogProviders={providers}
         isMutationPending={isMutationPending}
         marketingOptOutMethodOptions={marketingOptOutMethodOptions}
+        needsAttention={getNeedsAttention("Marketing & Communications")}
         newsletterProviderOptions={newsletterProviderOptions}
         privacy={profile.privacy}
         vocabulary={vocabulary}
@@ -81,6 +93,7 @@ export const PrivacyManager = ({
       />
       <InternationalTransfersPanel
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("International Transfers")}
         privacy={profile.privacy}
         transferMechanismOptions={transferMechanismOptions}
         vocabulary={vocabulary}
@@ -88,11 +101,13 @@ export const PrivacyManager = ({
       />
       <ComplianceDisclosuresPanel
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Compliance & Disclosures")}
         privacy={profile.privacy}
         onSave={savePrivacy}
       />
       <PrivacyRepresentationPanel
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Privacy Officers & Representation")}
         privacy={profile.privacy}
         onSave={savePrivacy}
       />

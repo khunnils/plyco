@@ -38,10 +38,12 @@ const representationRows = (draft: RepresentationDraft) =>
 
 export const PrivacyRepresentationPanel = ({
   isMutationPending,
+  needsAttention,
   privacy,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   privacy: PrivacyProfile
   onSave: (patch: RepresentationDraft, onSuccess?: () => void) => void
 }) => {
@@ -66,6 +68,7 @@ export const PrivacyRepresentationPanel = ({
       description="Details of designated Data Protection Officers and legal representatives in foreign jurisdictions."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={representationRows(draft)} />
       }

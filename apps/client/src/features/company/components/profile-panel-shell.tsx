@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react"
+import { AlertCircle, Loader2 } from "lucide-react"
 import { type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ export const ProfilePanelShell = ({
   description,
   isEditing,
   isMutationPending,
+  needsAttention,
   readOnlyContent,
   saveLabel = "Save",
   title,
@@ -21,6 +22,7 @@ export const ProfilePanelShell = ({
   description?: string
   isEditing: boolean
   isMutationPending: boolean
+  needsAttention?: boolean
   readOnlyContent: ReactNode
   saveLabel?: string
   title: string
@@ -32,7 +34,16 @@ export const ProfilePanelShell = ({
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
         <div className="">
-          <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+            {needsAttention && (
+              <span title="Needs attention">
+                <AlertCircle
+                  className="h-4 w-4 text-amber-500 shrink-0"
+                />
+              </span>
+            )}
+          </div>
           {description ? (
             <p className="mt-1 text-sm text-slate-500">{description}</p>
           ) : null}

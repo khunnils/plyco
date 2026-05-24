@@ -50,12 +50,14 @@ const cookieRows = (draft: CookieDraft, vocabulary: Vocabulary | undefined) =>
 export const CookiePreferencesPanel = ({
   cookieConsentMechanismOptions,
   isMutationPending,
+  needsAttention,
   privacy,
   vocabulary,
   onSave,
 }: {
   cookieConsentMechanismOptions: Option[]
   isMutationPending: boolean
+  needsAttention?: boolean
   privacy: PrivacyProfile
   vocabulary: Vocabulary | undefined
   onSave: (patch: CookieDraft, onSuccess?: () => void) => void
@@ -79,6 +81,7 @@ export const CookiePreferencesPanel = ({
       description="Cookie consent models, policy document references, and visitor tracking options."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={cookieRows(draft, vocabulary)} />
       }

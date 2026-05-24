@@ -35,10 +35,12 @@ const complianceRows = (draft: ComplianceDraft) =>
 
 export const ComplianceDisclosuresPanel = ({
   isMutationPending,
+  needsAttention,
   privacy,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   privacy: PrivacyProfile
   onSave: (patch: ComplianceDraft, onSuccess?: () => void) => void
 }) => {
@@ -61,6 +63,7 @@ export const ComplianceDisclosuresPanel = ({
       description="CCPA, COPPA, and regulatory compliance disclosures, including opt-out mechanism links."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={<ProfilePanelDetailGrid rows={complianceRows(draft)} />}
       saveLabel="Save"
       title="Compliance & Disclosures"

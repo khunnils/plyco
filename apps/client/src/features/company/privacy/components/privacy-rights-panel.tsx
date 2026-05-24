@@ -69,6 +69,7 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
 
 export const PrivacyRightsPanel = ({
   isMutationPending,
+  needsAttention,
   privacy,
   requestMethodOptions,
   supportedRightOptions,
@@ -76,6 +77,7 @@ export const PrivacyRightsPanel = ({
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   privacy: PrivacyProfile
   requestMethodOptions: Option[]
   supportedRightOptions: Option[]
@@ -101,6 +103,7 @@ export const PrivacyRightsPanel = ({
       description="Rights supported and how requests are handled."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={rightsRows(draft, vocabulary)} />
       }

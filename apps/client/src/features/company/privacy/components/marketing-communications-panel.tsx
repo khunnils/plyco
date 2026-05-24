@@ -74,6 +74,7 @@ export const MarketingCommunicationsPanel = ({
   catalogProviders,
   isMutationPending,
   marketingOptOutMethodOptions,
+  needsAttention,
   newsletterProviderOptions,
   privacy,
   vocabulary,
@@ -82,6 +83,7 @@ export const MarketingCommunicationsPanel = ({
   catalogProviders: Provider[]
   isMutationPending: boolean
   marketingOptOutMethodOptions: Option[]
+  needsAttention?: boolean
   newsletterProviderOptions: Option[]
   privacy: PrivacyProfile
   vocabulary: Vocabulary | undefined
@@ -112,6 +114,7 @@ export const MarketingCommunicationsPanel = ({
       description="Marketing communication practices, newsletters, and opt-out methodologies."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={marketingRows(draft, vocabulary, catalogProviders)}
