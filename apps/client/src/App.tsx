@@ -1,3 +1,5 @@
+import { Routes, Route, Navigate } from "react-router-dom"
+
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
 import { CreateOrganizationScreen } from "@/features/organizations/components/create-organization-screen"
@@ -8,7 +10,21 @@ import { useSecurityProfile } from "@/features/company/hooks/use-company"
 import { startGoogleLogin } from "@/lib/api"
 import { LoadingState } from "@/features/shell/components/loading-state"
 import { Onboarding } from "@/features/shell/components/onboarding"
-import { Workspace } from "@/features/shell/components/workspace"
+import { WorkspaceLayout } from "@/features/shell/components/workspace-layout"
+
+// Route Pages
+import { DashboardRoutePage } from "@/features/dashboard/pages/dashboard-route-page"
+import { CompanyProfileRoutePage } from "@/features/company/profile/pages/company-profile-route-page"
+import { ServicesRoutePage } from "@/features/company/services/pages/services-route-page"
+import { ActivitiesRoutePage } from "@/features/company/activities/pages/activities-route-page"
+import { PrivacyProfileRoutePage } from "@/features/company/privacy/pages/privacy-profile-route-page"
+import { InfrastructureProfileRoutePage } from "@/features/company/infrastructure/pages/infrastructure-profile-route-page"
+import { DataHandlingProfileRoutePage } from "@/features/company/data-handling/pages/data-handling-profile-route-page"
+import { AccessProfileRoutePage } from "@/features/company/access/pages/access-profile-route-page"
+import { VendorsRoutePage } from "@/features/vendors/pages/vendors-route-page"
+import { VocabularyRoutePage } from "@/features/vocabulary/pages/vocabulary-route-page"
+import { TemplatesRoutePage } from "@/features/templates/pages/templates-route-page"
+import { DocumentsRoutePage } from "@/features/documents/pages/documents-route-page"
 
 export const App = () => {
   const authState = useAuthState()
@@ -64,7 +80,26 @@ export const App = () => {
     )
   }
 
-  return <Workspace user={user} />
+  return (
+    <Routes>
+      <Route element={<WorkspaceLayout user={user} />}>
+        <Route path="/" element={<DashboardRoutePage />} />
+        <Route path="/company/profile" element={<CompanyProfileRoutePage />} />
+        <Route path="/company/services" element={<ServicesRoutePage />} />
+        <Route path="/company/services/:serviceId" element={<ServicesRoutePage />} />
+        <Route path="/company/activities" element={<ActivitiesRoutePage />} />
+        <Route path="/company/privacy" element={<PrivacyProfileRoutePage />} />
+        <Route path="/company/infrastructure" element={<InfrastructureProfileRoutePage />} />
+        <Route path="/company/data" element={<DataHandlingProfileRoutePage />} />
+        <Route path="/company/access" element={<AccessProfileRoutePage />} />
+        <Route path="/vendors" element={<VendorsRoutePage />} />
+        <Route path="/vocabulary" element={<VocabularyRoutePage />} />
+        <Route path="/templates" element={<TemplatesRoutePage />} />
+        <Route path="/documents" element={<DocumentsRoutePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  )
 }
 
 export default App
