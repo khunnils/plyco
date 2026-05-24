@@ -34,19 +34,19 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
   dataTypeOptionsFromProfile,
   profileFromOrganization,
-} from "@/features/security-profile/lib/profile"
+} from "@/features/company/lib/profile"
 import {
   ProfileDataHandlingFields,
   ProfileForm,
   type ProfileFormReturn,
   ProfileServiceFields,
-} from "@/features/security-profile/components/profile-form"
-import { AccessProfilePage } from "@/features/security-profile/pages/access-profile-page"
-import { CompanyProfilePage } from "@/features/security-profile/pages/company-profile-page"
-import { DataHandlingProfilePage } from "@/features/security-profile/pages/data-handling-profile-page"
-import { InfrastructureProfilePage } from "@/features/security-profile/pages/infrastructure-profile-page"
-import { PrivacyProfilePage } from "@/features/security-profile/pages/privacy-profile-page"
-import { ServiceProfilePage } from "@/features/security-profile/pages/service-profile-page"
+} from "@/features/company/components/profile-form"
+import { AccessProfilePage } from "@/features/company/access/pages/access-profile-page"
+import { CompanyProfilePage } from "@/features/company/profile/pages/company-profile-page"
+import { DataHandlingProfilePage } from "@/features/company/data-handling/pages/data-handling-profile-page"
+import { InfrastructureProfilePage } from "@/features/company/infrastructure/pages/infrastructure-profile-page"
+import { PrivacyProfilePage } from "@/features/company/privacy/pages/privacy-profile-page"
+import { ServiceProfilePage } from "@/features/company/services/pages/service-profile-page"
 import {
   useCreateDocument,
   useDocument,
@@ -57,7 +57,7 @@ import { useLogout } from "@/features/auth/hooks/use-auth"
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
-} from "@/features/security-profile/hooks/use-security-profile"
+} from "@/features/company/hooks/use-company"
 import {
   useCreateTemplateFromSystem,
   useDeleteTemplate,
@@ -68,16 +68,18 @@ import {
 import {
   useCreateOrganizationProvider,
   useCreateOrganizationProviders,
-  useCreateBusinessActivity,
   useCreateServiceProviderUsage,
-  useDeleteBusinessActivity,
   useDeleteServiceProviderUsage,
   useDeleteOrganizationProvider,
   useProviders,
-  useUpdateBusinessActivity,
   useUpdateServiceProviderUsage,
   useUpdateOrganizationProvider,
 } from "@/features/vendors/hooks/use-vendors"
+import {
+  useCreateBusinessActivity,
+  useDeleteBusinessActivity,
+  useUpdateBusinessActivity,
+} from "@/features/company/activities/hooks/use-activities"
 import { Section } from "@/features/shell/components/section"
 import {
   AppSidebar,
@@ -85,11 +87,11 @@ import {
   type CompanySectionId,
   type WorkspaceView,
 } from "@/features/shell/components/app-sidebar"
-import { SummaryTiles } from "@/features/security-profile/components/summary-tiles"
+import { SummaryTiles } from "@/features/company/components/summary-tiles"
 import { VendorInventoryPage } from "@/features/vendors/components/vendor-inventory-page"
-import { ActivitiesManager } from "@/features/vendors/components/activities-manager"
+import { ActivitiesManager } from "@/features/company/activities/components/activities-manager"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { type ProfileDraft } from "@/features/company/types/company"
 import { TemplateCard } from "@/features/templates/components/template-card"
 import { TemplateForm } from "@/features/templates/components/template-form"
 import {

@@ -9,13 +9,13 @@ import {
   ProfileDataHandlingFields,
   ProfileForm,
   ProfileInfrastructureFields,
-} from "@/features/security-profile/components/profile-form"
-import { useSaveSecurityProfile } from "@/features/security-profile/hooks/use-security-profile"
+} from "@/features/company/components/profile-form"
+import { useSaveSecurityProfile } from "@/features/company/hooks/use-company"
 import { useProviders } from "@/features/vendors/hooks/use-vendors"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { type ProfileDraft } from "@/features/company/types/company"
 import {
   useCountries,
   useVocabulary,

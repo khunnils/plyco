@@ -46,7 +46,7 @@ import {
 } from "@plyco/shared"
 import { z } from "zod"
 
-import { type ProfileDraft } from "@/features/security-profile/types/security-profile"
+import { type ProfileDraft } from "@/features/company/types/company"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"
 

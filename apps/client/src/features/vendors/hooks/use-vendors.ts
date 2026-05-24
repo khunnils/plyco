@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  type BusinessActivityInput,
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
   type OrganizationProvider,
@@ -12,13 +11,10 @@ import { useSelectedOrganization } from "@/features/organizations/hooks/use-sele
 import { useAuthState } from "@/features/auth/hooks/use-auth"
 import {
   createOrganizationProvider,
-  createBusinessActivity,
   createServiceProviderUsage,
-  deleteBusinessActivity,
   deleteServiceProviderUsage,
   deleteOrganizationProvider,
   getProviders,
-  updateBusinessActivity,
   updateServiceProviderUsage,
   updateOrganizationProvider,
 } from "@/lib/api"
@@ -50,64 +46,6 @@ export const useCreateOrganizationProvider = () => {
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Could not add provider")
-    },
-  })
-}
-
-export const useCreateBusinessActivity = () => {
-  const queryClient = useQueryClient()
-  const { selectedOrganizationId } = useSelectedOrganization()
-
-  return useMutation({
-    mutationFn: (activity: BusinessActivityInput) =>
-      createBusinessActivity(selectedOrganizationId ?? "", activity),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
-      })
-      toast.success("Activity added")
-    },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Could not add activity")
-    },
-  })
-}
-
-export const useUpdateBusinessActivity = () => {
-  const queryClient = useQueryClient()
-  const { selectedOrganizationId } = useSelectedOrganization()
-  const organizationId = selectedOrganizationId ?? ""
-
-  return useMutation({
-    mutationFn: (input: { id: string; activity: BusinessActivityInput }) =>
-      updateBusinessActivity({ organizationId, ...input }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
-      })
-      toast.success("Activity updated")
-    },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Could not update activity")
-    },
-  })
-}
-
-export const useDeleteBusinessActivity = () => {
-  const queryClient = useQueryClient()
-  const { selectedOrganizationId } = useSelectedOrganization()
-  const organizationId = selectedOrganizationId ?? ""
-
-  return useMutation({
-    mutationFn: (id: string) => deleteBusinessActivity(organizationId, id),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
-      })
-      toast.success("Activity removed")
-    },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Could not remove activity")
     },
   })
 }

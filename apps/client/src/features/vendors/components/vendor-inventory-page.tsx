@@ -18,7 +18,7 @@ import {
   emptyOrganizationProviderDraft,
   toOrganizationProviderInput,
   organizationProviderInputFromProvider,
-} from "@/features/security-profile/lib/profile"
+} from "@/features/company/lib/profile"
 import { codeOptions, countryOptions } from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorInventoryPage = ({

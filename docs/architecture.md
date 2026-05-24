@@ -57,7 +57,7 @@ Client source is organized by product feature. Feature-specific screens,
 components, TanStack Query hooks (`features/<name>/hooks`), Zustand stores, and
 helpers live under folders such as
 `apps/client/src/features/documents`, `apps/client/src/features/organizations`,
-`apps/client/src/features/vendors`, `apps/client/src/features/security-profile`, and
+`apps/client/src/features/vendors`, `apps/client/src/features/company`, and
 `apps/client/src/features/shell`. Shared, feature-agnostic UI primitives remain under
 `apps/client/src/components`. Client mutations surface success and failure via `sonner` toasts.
 
