@@ -43,7 +43,7 @@ export const DataTypeForm = ({
   })
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4">
       <TextField
         error={form.formState.errors.name}
         label="Name"

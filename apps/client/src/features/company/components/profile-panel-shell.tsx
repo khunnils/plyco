@@ -28,7 +28,7 @@ export const ProfilePanelShell = ({
 }) => {
   if (isEditing) {
     return (
-      <div className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="grid gap-4 border border-slate-200 bg-slate-50 p-5 shadow-sm">
         <div>
           <h3 className="text-base font-semibold text-slate-950">{title}</h3>
           {description ? (

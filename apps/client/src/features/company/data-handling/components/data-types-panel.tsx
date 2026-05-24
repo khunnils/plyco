@@ -10,6 +10,7 @@ import {
   normalizeDataType,
 } from "@/features/company/data-handling/lib/data-type"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { ProfilePanelDetailGrid } from "@/features/company/components/profile-panel-shell"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
@@ -122,7 +123,7 @@ export const DataTypesPanel = ({
   }
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="grid gap-4 border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
@@ -138,7 +139,7 @@ export const DataTypesPanel = ({
       </div>
 
       {dataTypes.length === 0 ? (
-        <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+        <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
           No data types yet.
         </div>
       ) : (
@@ -150,7 +151,7 @@ export const DataTypesPanel = ({
             return (
               <article
                 className={[
-                  "rounded-md border bg-white",
+                  "border bg-white",
                   expanded
                     ? "border-blue-300 ring-2 ring-blue-100"
                     : "border-slate-200",
@@ -221,32 +222,28 @@ export const DataTypesPanel = ({
                 </div>
 
                 {expanded ? (
-                  <dl className="grid gap-3 border-t border-slate-100 bg-slate-50 p-4 sm:grid-cols-2">
-                    <div>
-                      <dt className="text-xs font-medium text-slate-500">
-                        Subject type
-                      </dt>
-                      <dd className="mt-1 text-sm font-medium text-slate-900">
-                        {codeValueList(
-                          vocabulary,
-                          "subject_types",
-                          dataType.subjectTypes
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-medium text-slate-500">
-                        Collection method
-                      </dt>
-                      <dd className="mt-1 text-sm font-medium text-slate-900">
-                        {codeValueList(
-                          vocabulary,
-                          "collection_methods",
-                          dataType.collectionMethods
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
+                  <div className="border-t border-slate-100 bg-slate-50 p-4">
+                    <ProfilePanelDetailGrid
+                      rows={[
+                        [
+                          "Subject type",
+                          codeValueList(
+                            vocabulary,
+                            "subject_types",
+                            dataType.subjectTypes
+                          ),
+                        ],
+                        [
+                          "Collection method",
+                          codeValueList(
+                            vocabulary,
+                            "collection_methods",
+                            dataType.collectionMethods
+                          ),
+                        ],
+                      ]}
+                    />
+                  </div>
                 ) : null}
               </article>
             )

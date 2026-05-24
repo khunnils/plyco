@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, Save, X } from "lucide-react"
 import {
   dataHandlingProfileSchema,
   type DataHandlingProfile,
@@ -9,7 +8,10 @@ import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { ToggleField } from "@/components/form/toggle-field"
-import { Button } from "@/components/ui/button"
+import {
+  ProfilePanelDetailGrid,
+  ProfilePanelShell,
+} from "@/features/company/components/profile-panel-shell"
 
 const generalAttributesSchema = dataHandlingProfileSchema.pick({
   storesPii: true,
@@ -74,110 +76,55 @@ export const GeneralAttributesPanel = ({
     onSave(nextAttributes, () => setIsEditing(false))
   })
 
-  if (isEditing) {
-    return (
-      <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <div>
-          <h3 className="text-base font-semibold text-slate-950">
-            General attributes
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Organization-wide data protection practices.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ToggleField
-            control={form.control}
-            label="Stores PII"
-            name="storesPii"
-          />
-          <ToggleField
-            control={form.control}
-            label="Stores healthcare data"
-            name="storesHealthcareData"
-          />
-          <ToggleField
-            control={form.control}
-            label="Encryption at rest"
-            name="encryptionAtRest"
-          />
-          <ToggleField
-            control={form.control}
-            label="Encryption in transit"
-            name="encryptionInTransit"
-          />
-          <ToggleField
-            control={form.control}
-            label="Production data used in development"
-            name="productionDataInDevelopment"
-          />
-          <ToggleField
-            control={form.control}
-            label="Retention policy exists"
-            name="retentionPolicyExists"
-          />
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button
-            disabled={isMutationPending}
-            type="button"
-            onClick={submitAttributes}
-          >
-            {isMutationPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              <Save />
-            )}
-            Save attributes
-          </Button>
-          <Button
-            disabled={isMutationPending}
-            type="button"
-            variant="outline"
-            onClick={() => {
-              form.reset(attributes)
-              setIsEditing(false)
-            }}
-          >
-            <X />
-            Cancel
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-base font-semibold text-slate-950">
-            General attributes
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Organization-wide data protection practices.
-          </p>
-        </div>
-        <Button
-          className="w-fit"
-          type="button"
-          variant="outline"
-          onClick={() => setIsEditing(true)}
-        >
-          Edit
-        </Button>
+    <ProfilePanelShell
+      description="Organization-wide data protection practices."
+      isEditing={isEditing}
+      isMutationPending={isMutationPending}
+      readOnlyContent={
+        <ProfilePanelDetailGrid rows={attributeRows(attributes)} />
+      }
+      saveLabel="Save attributes"
+      title="General attributes"
+      onCancel={() => {
+        form.reset(attributes)
+        setIsEditing(false)
+      }}
+      onEdit={() => setIsEditing(true)}
+      onSave={submitAttributes}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Stores PII"
+          name="storesPii"
+        />
+        <ToggleField
+          control={form.control}
+          label="Stores healthcare data"
+          name="storesHealthcareData"
+        />
+        <ToggleField
+          control={form.control}
+          label="Encryption at rest"
+          name="encryptionAtRest"
+        />
+        <ToggleField
+          control={form.control}
+          label="Encryption in transit"
+          name="encryptionInTransit"
+        />
+        <ToggleField
+          control={form.control}
+          label="Production data used in development"
+          name="productionDataInDevelopment"
+        />
+        <ToggleField
+          control={form.control}
+          label="Retention policy exists"
+          name="retentionPolicyExists"
+        />
       </div>
-      <dl className="grid gap-3 sm:grid-cols-2">
-        {attributeRows(attributes).map(([label, value]) => (
-          <div
-            className="rounded-md border border-slate-200 bg-slate-50 p-3"
-            key={label}
-          >
-            <dt className="text-xs font-medium text-slate-500">{label}</dt>
-            <dd className="mt-1 text-sm font-medium text-slate-900">{value}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
+    </ProfilePanelShell>
   )
 }
