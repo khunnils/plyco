@@ -175,7 +175,9 @@ export const privacyProgress = (profile: ProfileDraft) => {
       field("Supported rights", privacy.supportedRights),
       field("Request methods", privacy.requestMethods),
       field("Response timeline status", privacy.responseTimelineDaysStatus),
-      field("Response timeline days", privacy.responseTimelineDays, true),
+      ...(privacy.responseTimelineDaysStatus === "defined"
+        ? [field("Response timeline days", privacy.responseTimelineDays, true)]
+        : []),
       field(
         "Identity verification required",
         privacy.identityVerificationRequired

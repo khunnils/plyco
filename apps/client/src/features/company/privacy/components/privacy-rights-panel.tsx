@@ -75,11 +75,13 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
     ],
     [
       "Response timeline",
-      formatDays(draft.responseTimelineDays),
+      draft.responseTimelineDaysStatus === "not_defined"
+        ? "Not defined"
+        : formatDays(draft.responseTimelineDays),
       privacyHelperText.responseTimelineDays,
     ],
     [
-      "Identity verification",
+      "Identity verification required",
       boolText(draft.identityVerificationRequired),
       privacyHelperText.identityVerificationRequired,
     ],

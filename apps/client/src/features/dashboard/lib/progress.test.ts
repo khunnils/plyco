@@ -107,6 +107,39 @@ describe("dashboard progress", () => {
     expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
   })
 
+  it("skips response timeline days when status is not_defined", () => {
+    const progress = privacyProgress({
+      ...emptyProfileDraft,
+      privacy: {
+        ...emptyProfileDraft.privacy,
+        responseTimelineDaysStatus: "not_defined",
+        responseTimelineDays: null,
+      },
+    })
+    const rights = progress.sections.find(
+      (section) => section.title === "Privacy Rights & Request Handling"
+    )
+
+    expect(rights).toMatchObject({ totalFields: 6 })
+    expect(rights!.completedFields).toBeGreaterThanOrEqual(1)
+  })
+
+  it("includes response timeline days when status is defined", () => {
+    const progress = privacyProgress({
+      ...emptyProfileDraft,
+      privacy: {
+        ...emptyProfileDraft.privacy,
+        responseTimelineDaysStatus: "defined",
+        responseTimelineDays: null,
+      },
+    })
+    const rights = progress.sections.find(
+      (section) => section.title === "Privacy Rights & Request Handling"
+    )
+
+    expect(rights).toMatchObject({ totalFields: 7 })
+  })
+
   it("skips privacy officer and representation progress for non-GDPR profiles", () => {
     const progress = privacyProgress({
       ...emptyProfileDraft,
