@@ -10,6 +10,7 @@ import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { dataHelperText } from "./data-helper-text"
 
 export const DataTypeForm = ({
   collectionMethodOptions,
@@ -49,7 +50,8 @@ export const DataTypeForm = ({
       <h3 className="text-base font-semibold text-slate-950">{title}</h3>
       <TextField
         error={form.formState.errors.name}
-        label="Name"
+        helperText={dataHelperText.dataTypeName}
+        label="Data type name"
         name="name"
         placeholder="e.g. Customer billing details"
         register={form.register}
@@ -57,6 +59,7 @@ export const DataTypeForm = ({
       <TextAreaField
         error={form.formState.errors.description}
         label="Description"
+        helperText={dataHelperText.dataTypeDescription}
         name="description"
         placeholder="Additional details about how this data is used"
         register={form.register}
@@ -64,6 +67,7 @@ export const DataTypeForm = ({
       <MultiSelectField
         control={form.control}
         error={form.formState.errors.subjectTypes?.root}
+        helperText={dataHelperText.subjectTypes}
         label="Subject types"
         name="subjectTypes"
         options={subjectTypeOptions}
@@ -72,6 +76,7 @@ export const DataTypeForm = ({
       <MultiSelectField
         control={form.control}
         error={form.formState.errors.collectionMethods?.root}
+        helperText={dataHelperText.collectionMethods}
         label="Collection methods"
         name="collectionMethods"
         options={collectionMethodOptions}
@@ -80,12 +85,14 @@ export const DataTypeForm = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="Sensitive"
+          helperText={dataHelperText.isSensitive}
+          label="Sensitive data"
           name="isSensitive"
         />
         <ToggleField
           control={form.control}
-          label="Product required"
+          helperText={dataHelperText.isRequired}
+          label="Required for product"
           name="isRequired"
         />
       </div>

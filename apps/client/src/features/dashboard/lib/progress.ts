@@ -459,25 +459,25 @@ export const dataTypeProgress = (
   index: number
 ): ProgressSection =>
   sectionProgress(dataType.name.trim() || `Data type ${index + 1}`, [
-    field("Name", dataType.name),
+    field("Data type name", dataType.name),
     field("Description", dataType.description),
     field("Subject types", dataType.subjectTypes),
     field("Collection methods", dataType.collectionMethods),
-    field("Sensitive", dataType.isSensitive),
-    field("Required", dataType.isRequired),
+    field("Sensitive data", dataType.isSensitive),
+    field("Required for product", dataType.isRequired),
   ])
 
 export const dataProgress = (profile: ProfileDraft) => ({
   general: sectionProgress("General attributes", [
-    field("Stores PII", profile.dataHandling.storesPii),
-    field("Healthcare data", profile.dataHandling.storesHealthcareData),
-    field("Encryption at rest", profile.dataHandling.encryptionAtRest),
-    field("Encryption in transit", profile.dataHandling.encryptionInTransit),
+    field("Personal data stored", profile.dataHandling.storesPii),
+    field("Health data stored", profile.dataHandling.storesHealthcareData),
+    field("Data encrypted at rest", profile.dataHandling.encryptionAtRest),
+    field("Data encrypted in transit", profile.dataHandling.encryptionInTransit),
     field(
-      "Production data in development",
+      "Real customer data used in development",
       profile.dataHandling.productionDataInDevelopment
     ),
-    field("Retention policy", profile.dataHandling.retentionPolicyExists),
+    field("Retention policy exists", profile.dataHandling.retentionPolicyExists),
   ]),
   dataTypes: profile.dataHandling.dataTypesStored.map(dataTypeProgress),
 })

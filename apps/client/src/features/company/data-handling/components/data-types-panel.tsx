@@ -11,6 +11,7 @@ import {
 } from "@/features/company/data-handling/lib/data-type"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { ProfilePanelDetailGrid } from "@/features/company/components/profile-panel-shell"
+import { dataHelperText } from "./data-helper-text"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
@@ -236,6 +237,7 @@ export const DataTypesPanel = ({
                               "subject_types",
                               dataType.subjectTypes
                             ),
+                            dataHelperText.subjectTypes,
                           ],
                           [
                             "Collection method",
@@ -244,6 +246,7 @@ export const DataTypesPanel = ({
                               "collection_methods",
                               dataType.collectionMethods
                             ),
+                            dataHelperText.collectionMethods,
                           ],
                         ]}
                       />

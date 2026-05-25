@@ -12,6 +12,7 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
+import { dataHelperText } from "./data-helper-text"
 
 const generalAttributesSchema = dataHandlingProfileSchema.pick({
   storesPii: true,
@@ -29,15 +30,36 @@ const boolText = (value: boolean | null) =>
 
 const attributeRows = (attributes: GeneralAttributesDraft) =>
   [
-    ["Stores PII", boolText(attributes.storesPii)],
-    ["Healthcare data", boolText(attributes.storesHealthcareData)],
-    ["Encryption at rest", boolText(attributes.encryptionAtRest)],
-    ["Encryption in transit", boolText(attributes.encryptionInTransit)],
     [
-      "Production data in development",
-      boolText(attributes.productionDataInDevelopment),
+      "Personal data stored",
+      boolText(attributes.storesPii),
+      dataHelperText.storesPii,
     ],
-    ["Retention policy", boolText(attributes.retentionPolicyExists)],
+    [
+      "Health data stored",
+      boolText(attributes.storesHealthcareData),
+      dataHelperText.storesHealthcareData,
+    ],
+    [
+      "Data encrypted at rest",
+      boolText(attributes.encryptionAtRest),
+      dataHelperText.encryptionAtRest,
+    ],
+    [
+      "Data encrypted in transit",
+      boolText(attributes.encryptionInTransit),
+      dataHelperText.encryptionInTransit,
+    ],
+    [
+      "Real customer data used in development",
+      boolText(attributes.productionDataInDevelopment),
+      dataHelperText.productionDataInDevelopment,
+    ],
+    [
+      "Retention policy exists",
+      boolText(attributes.retentionPolicyExists),
+      dataHelperText.retentionPolicyExists,
+    ],
   ] as const
 
 const toGeneralAttributes = (
@@ -96,31 +118,37 @@ export const GeneralAttributesPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="Stores PII"
+          helperText={dataHelperText.storesPii}
+          label="Personal data stored"
           name="storesPii"
         />
         <ToggleField
           control={form.control}
-          label="Stores healthcare data"
+          helperText={dataHelperText.storesHealthcareData}
+          label="Health data stored"
           name="storesHealthcareData"
         />
         <ToggleField
           control={form.control}
-          label="Encryption at rest"
+          helperText={dataHelperText.encryptionAtRest}
+          label="Data encrypted at rest"
           name="encryptionAtRest"
         />
         <ToggleField
           control={form.control}
-          label="Encryption in transit"
+          helperText={dataHelperText.encryptionInTransit}
+          label="Data encrypted in transit"
           name="encryptionInTransit"
         />
         <ToggleField
           control={form.control}
-          label="Production data used in development"
+          helperText={dataHelperText.productionDataInDevelopment}
+          label="Real customer data used in development"
           name="productionDataInDevelopment"
         />
         <ToggleField
           control={form.control}
+          helperText={dataHelperText.retentionPolicyExists}
           label="Retention policy exists"
           name="retentionPolicyExists"
         />
