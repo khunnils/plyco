@@ -18,6 +18,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
+import { companyHelperText } from "./company-helper-text"
 
 const operationsSchema = companyProfileSchema.pick({
   employeeCount: true,
@@ -40,15 +41,25 @@ const operationsRows = (
   vocabulary: Vocabulary | undefined
 ) =>
   [
-    ["Employees", draft.employeeCount ?? "Not set"],
+    [
+      "Employees",
+      draft.employeeCount ?? "Not set",
+      companyHelperText.employeeCount,
+    ],
     [
       "Industries",
       codeValueList(vocabulary, "industries", draft.industries),
+      companyHelperText.industries,
     ],
-    ["Regions", codeValueList(vocabulary, "regions", draft.regions)],
+    [
+      "Regions",
+      codeValueList(vocabulary, "regions", draft.regions),
+      companyHelperText.regions,
+    ],
     [
       "Compliance goals",
       codeValueList(vocabulary, "compliance_goals", draft.complianceGoals),
+      companyHelperText.complianceGoals,
     ],
   ] as const
 
@@ -103,6 +114,7 @@ export const CompanyOperationsPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
           error={form.formState.errors.employeeCount}
+          helperText={companyHelperText.employeeCount}
           label="Employee count"
           name="employeeCount"
           register={form.register}
@@ -111,6 +123,7 @@ export const CompanyOperationsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.industries?.root}
+          helperText={companyHelperText.industries}
           label="Industries"
           name="industries"
           options={industryOptions}
@@ -119,6 +132,7 @@ export const CompanyOperationsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.regions?.root}
+          helperText={companyHelperText.regions}
           label="Operating regions"
           name="regions"
           options={regionOptions}
@@ -127,6 +141,7 @@ export const CompanyOperationsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.complianceGoals?.root}
+          helperText={companyHelperText.complianceGoals}
           label="Compliance goals"
           name="complianceGoals"
           options={complianceGoalOptions}

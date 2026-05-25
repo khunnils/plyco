@@ -10,6 +10,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
+import { companyHelperText } from "./company-helper-text"
 
 const dataProfileSchema = companyProfileSchema.pick({
   handlesPii: true,
@@ -25,8 +26,12 @@ const toDataProfileDraft = (company: CompanyProfile): DataProfileDraft => ({
 
 const dataProfileRows = (draft: DataProfileDraft) =>
   [
-    ["Handles PII", boolText(draft.handlesPii)],
-    ["Sensitive data", boolText(draft.handlesSensitiveData)],
+    ["Handles PII", boolText(draft.handlesPii), companyHelperText.handlesPii],
+    [
+      "Sensitive data",
+      boolText(draft.handlesSensitiveData),
+      companyHelperText.handlesSensitiveData,
+    ],
   ] as const
 
 export const CompanyDataProfilePanel = ({
@@ -70,11 +75,13 @@ export const CompanyDataProfilePanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={companyHelperText.handlesPii}
           label="Handles PII"
           name="handlesPii"
         />
         <ToggleField
           control={form.control}
+          helperText={companyHelperText.handlesSensitiveData}
           label="Handles sensitive data"
           name="handlesSensitiveData"
         />

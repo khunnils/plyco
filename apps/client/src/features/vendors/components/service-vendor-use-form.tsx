@@ -13,6 +13,7 @@ import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { serviceProviderUsageHelperText } from "./service-provider-usage-helper-text"
 
 export const ServiceProviderUsageForm = ({
   dataTypeOptions,
@@ -85,6 +86,7 @@ export const ServiceProviderUsageForm = ({
         {showServiceField ? (
           <SelectField
             control={form.control}
+            helperText={serviceProviderUsageHelperText.service}
             label="Service"
             name="serviceId"
             options={serviceOptions}
@@ -92,12 +94,14 @@ export const ServiceProviderUsageForm = ({
         ) : null}
         <SelectField
           control={form.control}
+          helperText={serviceProviderUsageHelperText.provider}
           label="Provider"
           name="organizationProviderId"
           options={providerOptions}
         />
         <TextField
           error={form.formState.errors.purpose}
+          helperText={serviceProviderUsageHelperText.purpose}
           label="Purpose"
           name="purpose"
           placeholder="Code hosting and reviews"
@@ -105,6 +109,7 @@ export const ServiceProviderUsageForm = ({
         />
         <SelectField
           control={form.control}
+          helperText={serviceProviderUsageHelperText.dataProcessingLevel}
           label="Data processing level"
           name="dataProcessingLevel"
           options={dataProcessingLevelOptions}
@@ -115,6 +120,7 @@ export const ServiceProviderUsageForm = ({
               control={form.control}
               error={form.formState.errors.dataProcessed?.root}
               emptyMessage="Add data types stored in the organization profile first."
+              helperText={serviceProviderUsageHelperText.dataProcessed}
               label="Data processed"
               name="dataProcessed"
               options={dataTypeOptions}
@@ -127,6 +133,7 @@ export const ServiceProviderUsageForm = ({
             <MultiSelectField
               control={form.control}
               error={form.formState.errors.dataRegions?.root}
+              helperText={serviceProviderUsageHelperText.dataRegions}
               label="Data regions"
               name="dataRegions"
               options={dataRegionOptions}
@@ -134,6 +141,7 @@ export const ServiceProviderUsageForm = ({
             />
             <SelectField
               control={form.control}
+              helperText={serviceProviderUsageHelperText.dpaStatus}
               label="DPA status"
               name="dpaStatus"
               options={dpaStatusOptions}
@@ -143,6 +151,7 @@ export const ServiceProviderUsageForm = ({
       </div>
       <TextAreaField
         error={form.formState.errors.notes}
+        helperText={serviceProviderUsageHelperText.notes}
         label="Notes"
         name="notes"
         placeholder="Service-specific processing context"

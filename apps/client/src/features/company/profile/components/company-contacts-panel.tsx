@@ -9,6 +9,7 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
+import { companyHelperText } from "./company-helper-text"
 
 const contactsSchema = companyProfileSchema.pick({
   contactEmail: true,
@@ -26,9 +27,21 @@ const toContactsDraft = (company: CompanyProfile): ContactsDraft => ({
 
 const contactsRows = (draft: ContactsDraft) =>
   [
-    ["Contact email", draft.contactEmail || "Not set"],
-    ["Security contact", draft.securityContactEmail || "Not set"],
-    ["Privacy contact", draft.privacyContactEmail || "Not set"],
+    [
+      "Contact email",
+      draft.contactEmail || "Not set",
+      companyHelperText.contactEmail,
+    ],
+    [
+      "Security contact",
+      draft.securityContactEmail || "Not set",
+      companyHelperText.securityContactEmail,
+    ],
+    [
+      "Privacy contact",
+      draft.privacyContactEmail || "Not set",
+      companyHelperText.privacyContactEmail,
+    ],
   ] as const
 
 export const CompanyContactsPanel = ({
@@ -72,6 +85,7 @@ export const CompanyContactsPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
           error={form.formState.errors.contactEmail}
+          helperText={companyHelperText.contactEmail}
           label="Contact email"
           name="contactEmail"
           placeholder="hello@acme.example"
@@ -79,6 +93,7 @@ export const CompanyContactsPanel = ({
         />
         <TextField
           error={form.formState.errors.securityContactEmail}
+          helperText={companyHelperText.securityContactEmail}
           label="Security contact email"
           name="securityContactEmail"
           placeholder="security@acme.example"
@@ -86,6 +101,7 @@ export const CompanyContactsPanel = ({
         />
         <TextField
           error={form.formState.errors.privacyContactEmail}
+          helperText={companyHelperText.privacyContactEmail}
           label="Privacy contact email"
           name="privacyContactEmail"
           placeholder="privacy@acme.example"

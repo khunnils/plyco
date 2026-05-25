@@ -6,6 +6,7 @@ import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { companyHelperText } from "./company-helper-text"
 
 export const CompanyProfileFields = ({
   complianceGoalOptions,
@@ -23,6 +24,7 @@ export const CompanyProfileFields = ({
   <div className="grid gap-4 md:grid-cols-2">
     <TextField
       error={form.formState.errors.company?.companyName}
+      helperText={companyHelperText.companyName}
       label="Company name"
       name="company.companyName"
       placeholder="Acme AI"
@@ -30,6 +32,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.legalEntityName}
+      helperText={companyHelperText.legalEntityName}
       label="Legal entity name"
       name="company.legalEntityName"
       placeholder="Acme AI, Inc."
@@ -37,6 +40,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.website}
+      helperText={companyHelperText.website}
       label="Website"
       name="company.website"
       placeholder="https://acme.example"
@@ -44,6 +48,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.contactEmail}
+      helperText={companyHelperText.contactEmail}
       label="Contact email"
       name="company.contactEmail"
       placeholder="hello@acme.example"
@@ -51,6 +56,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.securityContactEmail}
+      helperText={companyHelperText.securityContactEmail}
       label="Security contact email"
       name="company.securityContactEmail"
       placeholder="security@acme.example"
@@ -58,6 +64,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.privacyContactEmail}
+      helperText={companyHelperText.privacyContactEmail}
       label="Privacy contact email"
       name="company.privacyContactEmail"
       placeholder="privacy@acme.example"
@@ -65,6 +72,7 @@ export const CompanyProfileFields = ({
     />
     <SelectField
       control={form.control}
+      helperText={companyHelperText.country}
       label="Country"
       name="company.country"
       placeholder="United States"
@@ -72,6 +80,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.address}
+      helperText={companyHelperText.address}
       label="Address"
       name="company.address"
       placeholder="123 Market Street"
@@ -79,6 +88,7 @@ export const CompanyProfileFields = ({
     />
     <TextField
       error={form.formState.errors.company?.employeeCount}
+      helperText={companyHelperText.employeeCount}
       label="Employee count"
       name="company.employeeCount"
       register={form.register}
@@ -87,6 +97,7 @@ export const CompanyProfileFields = ({
     <MultiSelectField
       control={form.control}
       error={form.formState.errors.company?.industries?.root}
+      helperText={companyHelperText.industries}
       label="Industries"
       name="company.industries"
       options={industryOptions}
@@ -95,6 +106,7 @@ export const CompanyProfileFields = ({
     <MultiSelectField
       control={form.control}
       error={form.formState.errors.company?.regions?.root}
+      helperText={companyHelperText.regions}
       label="Operating regions"
       name="company.regions"
       options={regionOptions}
@@ -103,6 +115,7 @@ export const CompanyProfileFields = ({
     <MultiSelectField
       control={form.control}
       error={form.formState.errors.company?.complianceGoals?.root}
+      helperText={companyHelperText.complianceGoals}
       label="Compliance goals"
       name="company.complianceGoals"
       options={complianceGoalOptions}
@@ -111,11 +124,13 @@ export const CompanyProfileFields = ({
     <div className="grid gap-3">
       <ToggleField
         control={form.control}
+        helperText={companyHelperText.handlesPii}
         label="Handles PII"
         name="company.handlesPii"
       />
       <ToggleField
         control={form.control}
+        helperText={companyHelperText.handlesSensitiveData}
         label="Handles sensitive data"
         name="company.handlesSensitiveData"
       />

@@ -14,10 +14,8 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
-import {
-  countryLabel,
-  type Option,
-} from "@/features/vocabulary/lib/vocabulary"
+import { countryLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { companyHelperText } from "./company-helper-text"
 
 const detailsSchema = companyProfileSchema.pick({
   companyName: true,
@@ -37,19 +35,25 @@ const toDetailsDraft = (company: CompanyProfile): DetailsDraft => ({
   address: company.address,
 })
 
-const detailsRows = (
-  draft: DetailsDraft,
-  countries: Country[] | undefined
-) =>
+const detailsRows = (draft: DetailsDraft, countries: Country[] | undefined) =>
   [
-    ["Company name", draft.companyName || "Not set"],
-    ["Legal entity", draft.legalEntityName || "Not set"],
-    ["Website", draft.website || "Not set"],
+    [
+      "Company name",
+      draft.companyName || "Not set",
+      companyHelperText.companyName,
+    ],
+    [
+      "Legal entity",
+      draft.legalEntityName || "Not set",
+      companyHelperText.legalEntityName,
+    ],
+    ["Website", draft.website || "Not set", companyHelperText.website],
     [
       "Country",
       draft.country ? countryLabel(countries, draft.country) : "Not set",
+      companyHelperText.country,
     ],
-    ["Address", draft.address || "Not set"],
+    ["Address", draft.address || "Not set", companyHelperText.address],
   ] as const
 
 export const CompanyDetailsPanel = ({
@@ -99,6 +103,7 @@ export const CompanyDetailsPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <TextField
           error={form.formState.errors.companyName}
+          helperText={companyHelperText.companyName}
           label="Company name"
           name="companyName"
           placeholder="Acme AI"
@@ -106,6 +111,7 @@ export const CompanyDetailsPanel = ({
         />
         <TextField
           error={form.formState.errors.legalEntityName}
+          helperText={companyHelperText.legalEntityName}
           label="Legal entity name"
           name="legalEntityName"
           placeholder="Acme AI, Inc."
@@ -113,6 +119,7 @@ export const CompanyDetailsPanel = ({
         />
         <TextField
           error={form.formState.errors.website}
+          helperText={companyHelperText.website}
           label="Website"
           name="website"
           placeholder="https://acme.example"
@@ -120,6 +127,7 @@ export const CompanyDetailsPanel = ({
         />
         <SelectField
           control={form.control}
+          helperText={companyHelperText.country}
           label="Country"
           name="country"
           options={[{ value: "", label: "Not set" }, ...countryOptionList]}
@@ -127,6 +135,7 @@ export const CompanyDetailsPanel = ({
         />
         <TextField
           error={form.formState.errors.address}
+          helperText={companyHelperText.address}
           label="Address"
           name="address"
           placeholder="123 Market Street"

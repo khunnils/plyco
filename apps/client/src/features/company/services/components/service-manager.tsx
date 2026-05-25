@@ -38,6 +38,7 @@ import {
   emptyServiceProviderUsageDraft,
   toServiceProviderUsageInput,
 } from "@/features/company/lib/profile"
+import { serviceProviderUsageHelperText } from "@/features/vendors/components/service-provider-usage-helper-text"
 import {
   type ProfileDraft,
   type SaveProfile,
@@ -731,7 +732,7 @@ const ServiceProviderUsagePanel = ({
     onSuccess?: () => void
   ) => void
 }) => {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddProviders, setShowAddProviders] = useState(false)
   const [checkedProviderIds, setCheckedProviderIds] = useState<string[]>([])
@@ -755,6 +756,19 @@ const ServiceProviderUsagePanel = ({
   const serviceOptions = service.id
     ? [{ value: service.id, label: service.serviceName || "Selected service" }]
     : []
+  const toggleExpanded = (providerUsageId: string) => {
+    setExpandedIds((current) => {
+      const next = new Set(current)
+
+      if (next.has(providerUsageId)) {
+        next.delete(providerUsageId)
+      } else {
+        next.add(providerUsageId)
+      }
+
+      return next
+    })
+  }
 
   return (
     <div>
@@ -818,10 +832,7 @@ const ServiceProviderUsagePanel = ({
         ) : (
           <Button
             className="w-fit"
-            disabled={
-              !service.id ||
-              organizationProviders.length === 0
-            }
+            disabled={!service.id || organizationProviders.length === 0}
             type="button"
             onClick={() => {
               setEditingId(null)
@@ -886,49 +897,78 @@ const ServiceProviderUsagePanel = ({
         ) : (
           <div className="grid gap-3">
             {selectedServiceUses.map((providerUsage) => {
-              const expanded = expandedId === providerUsage.id
+              const expanded = expandedIds.has(providerUsage.id)
 
               return (
                 <article
-                  className={[
-                    "border bg-slate-50",
-                    expanded
-                      ? "border-blue-300 ring-2 ring-blue-100"
-                      : "border-slate-200",
-                  ].join(" ")}
+                  className="cursor-pointer border border-slate-200 bg-white p-4"
                   key={providerUsage.id}
+                  onClick={() => toggleExpanded(providerUsage.id)}
                 >
-                  <div className="flex items-start gap-2 p-4">
-                    <button
-                      aria-expanded={expanded}
-                      className="min-w-0 flex-1 text-left"
-                      type="button"
-                      onClick={() =>
-                        setExpandedId((current) =>
-                          current === providerUsage.id ? null : providerUsage.id
-                        )
-                      }
-                    >
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="grid flex-1 gap-3">
                       <h4 className="text-sm font-semibold text-slate-950">
                         {providerUsage.providerName || "Selected provider"}
                       </h4>
-                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
+                      <p className="line-clamp-2 text-sm leading-5 text-slate-600">
                         {providerUsage.purpose}
                       </p>
-                    </button>
+                      {expanded ? (
+                        <ProfilePanelDetailGrid
+                          rows={[
+                            [
+                              "Data processing",
+                              codeLabel(
+                                vocabulary,
+                                "data_processing_level",
+                                providerUsage.dataProcessingLevel
+                              ),
+                              serviceProviderUsageHelperText.dataProcessingLevel,
+                            ],
+                            [
+                              "DPA status",
+                              codeLabel(
+                                vocabulary,
+                                "dpa_status",
+                                providerUsage.dpaStatus
+                              ),
+                              serviceProviderUsageHelperText.dpaStatus,
+                            ],
+                            [
+                              "Data processed",
+                              providerUsage.dataProcessed.length > 0
+                                ? providerUsage.dataProcessed.join(", ")
+                                : "No data types selected",
+                              serviceProviderUsageHelperText.dataProcessed,
+                            ],
+                            [
+                              "Data regions",
+                              codeValueList(
+                                vocabulary,
+                                "regions",
+                                providerUsage.dataRegions
+                              ),
+                              serviceProviderUsageHelperText.dataRegions,
+                            ],
+                            [
+                              "Notes",
+                              providerUsage.notes || "Not set",
+                              serviceProviderUsageHelperText.notes,
+                            ],
+                          ]}
+                        />
+                      ) : null}
+                    </div>
                     <div className="flex shrink-0 gap-2">
                       <Button
                         aria-label={expanded ? "Collapse" : "Expand"}
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() =>
-                          setExpandedId((current) =>
-                            current === providerUsage.id
-                              ? null
-                              : providerUsage.id
-                          )
-                        }
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          toggleExpanded(providerUsage.id)
+                        }}
                       >
                         {expanded ? <ChevronUp /> : <ChevronDown />}
                       </Button>
@@ -937,7 +977,8 @@ const ServiceProviderUsagePanel = ({
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.stopPropagation()
                           setShowAddProviders(false)
                           setEditingId(providerUsage.id)
                         }}
@@ -949,53 +990,15 @@ const ServiceProviderUsagePanel = ({
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() => onDelete(providerUsage)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onDelete(providerUsage)
+                        }}
                       >
                         <Trash2 />
                       </Button>
                     </div>
                   </div>
-
-                  {expanded ? (
-                    <div className="border-t border-slate-100 px-4 pt-3 pb-4">
-                      <ProfilePanelDetailGrid
-                        itemBgClassName="bg-white"
-                        rows={[
-                          [
-                            "Data processing",
-                            codeLabel(
-                              vocabulary,
-                              "data_processing_level",
-                              providerUsage.dataProcessingLevel
-                            ),
-                          ],
-                          [
-                            "DPA status",
-                            codeLabel(
-                              vocabulary,
-                              "dpa_status",
-                              providerUsage.dpaStatus
-                            ),
-                          ],
-                          [
-                            "Data processed",
-                            providerUsage.dataProcessed.length > 0
-                              ? providerUsage.dataProcessed.join(", ")
-                              : "No data types selected",
-                          ],
-                          [
-                            "Data regions",
-                            codeValueList(
-                              vocabulary,
-                              "regions",
-                              providerUsage.dataRegions
-                            ),
-                          ],
-                          ["Notes", providerUsage.notes || "Not set"],
-                        ]}
-                      />
-                    </div>
-                  ) : null}
                 </article>
               )
             })}
