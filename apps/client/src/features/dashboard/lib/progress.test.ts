@@ -79,6 +79,8 @@ describe("dashboard progress", () => {
         doNotSellLink: null,
         transactionalEmailsSent: false,
         usesAutomatedDecisionMaking: false,
+        dpoStatus: "not_appointed",
+        euRepresentativeStatus: "not_appointed",
       },
     })
     const marketing = progress.sections.find(
@@ -90,10 +92,14 @@ describe("dashboard progress", () => {
     const disclosures = progress.sections.find(
       (section) => section.title === "Compliance & Disclosures"
     )
+    const representation = progress.sections.find(
+      (section) => section.title === "Privacy Officers & Representation"
+    )
 
     expect(marketing).toMatchObject({ completedFields: 2, totalFields: 2 })
     expect(transfers).toMatchObject({ completedFields: 1, totalFields: 1 })
     expect(disclosures).toMatchObject({ completedFields: 2, totalFields: 2 })
+    expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
   })
 
   it("handles empty service, data type, and vendor lists", () => {

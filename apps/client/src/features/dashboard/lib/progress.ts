@@ -210,11 +210,19 @@ export const privacyProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Privacy Officers & Representation", [
       field("DPO status", privacy.dpoStatus),
-      field("DPO name", privacy.dpoName),
-      field("DPO email", privacy.dpoEmail),
+      ...(privacy.dpoStatus === "appointed"
+        ? [
+            field("DPO name", privacy.dpoName),
+            field("DPO email", privacy.dpoEmail),
+          ]
+        : []),
       field("EU representative status", privacy.euRepresentativeStatus),
-      field("EU representative", privacy.euRepresentativeName),
-      field("EU representative address", privacy.euRepresentativeAddress),
+      ...(privacy.euRepresentativeStatus === "appointed"
+        ? [
+            field("EU representative", privacy.euRepresentativeName),
+            field("EU representative address", privacy.euRepresentativeAddress),
+          ]
+        : []),
     ]),
   ])
 }
