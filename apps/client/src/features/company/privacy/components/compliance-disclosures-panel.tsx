@@ -11,6 +11,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const complianceSchema = privacyProfileSchema.pick({
   sellsOrSharesData: true,
@@ -28,9 +29,21 @@ const toComplianceDraft = (privacy: PrivacyProfile): ComplianceDraft => ({
 
 const complianceRows = (draft: ComplianceDraft) =>
   [
-    ["Sells or shares data (CCPA)", boolText(draft.sellsOrSharesData)],
-    ["Do Not Sell link", draft.doNotSellLink || "Not set"],
-    ["Automated decision making", boolText(draft.usesAutomatedDecisionMaking)],
+    [
+      "Sells or shares data (CCPA)",
+      boolText(draft.sellsOrSharesData),
+      privacyHelperText.sellsOrSharesData,
+    ],
+    [
+      "Do Not Sell link",
+      draft.doNotSellLink || "Not set",
+      privacyHelperText.doNotSellLink,
+    ],
+    [
+      "Automated decision making",
+      boolText(draft.usesAutomatedDecisionMaking),
+      privacyHelperText.usesAutomatedDecisionMaking,
+    ],
   ] as const
 
 export const ComplianceDisclosuresPanel = ({
@@ -77,17 +90,20 @@ export const ComplianceDisclosuresPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.sellsOrSharesData}
           label="Sells or shares data (CCPA)"
           name="sellsOrSharesData"
         />
         <TextField
           error={form.formState.errors.doNotSellLink}
+          helperText={privacyHelperText.doNotSellLink}
           label="Do Not Sell link"
           name="doNotSellLink"
           register={form.register}
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.usesAutomatedDecisionMaking}
           label="Uses automated decision making"
           name="usesAutomatedDecisionMaking"
         />

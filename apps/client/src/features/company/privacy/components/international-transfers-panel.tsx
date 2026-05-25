@@ -19,6 +19,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const transfersSchema = privacyProfileSchema.pick({
   crossBorderTransfers: true,
@@ -37,7 +38,11 @@ const transferRows = (
   vocabulary: Vocabulary | undefined
 ) =>
   [
-    ["Cross-border transfers", boolText(draft.crossBorderTransfers)],
+    [
+      "Cross-border transfers",
+      boolText(draft.crossBorderTransfers),
+      privacyHelperText.crossBorderTransfers,
+    ],
     [
       "Transfer mechanisms",
       codeValueList(
@@ -45,6 +50,7 @@ const transferRows = (
         "privacy_transfer_mechanisms",
         draft.transferMechanisms
       ),
+      privacyHelperText.transferMechanisms,
     ],
   ] as const
 
@@ -98,12 +104,14 @@ export const InternationalTransfersPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.crossBorderTransfers}
           label="Cross-border transfers"
           name="crossBorderTransfers"
         />
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.transferMechanisms?.root}
+          helperText={privacyHelperText.transferMechanisms}
           label="Transfer mechanisms"
           name="transferMechanisms"
           options={transferMechanismOptions}

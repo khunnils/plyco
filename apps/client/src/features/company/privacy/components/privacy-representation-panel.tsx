@@ -15,6 +15,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const APPOINTED_STATUS = "appointed"
 
@@ -50,6 +51,7 @@ const dpoRows = (draft: RepresentationDraft, vocabulary: Vocabulary | undefined)
       draft.dpoStatus
         ? codeLabel(vocabulary, "privacy_dpo_statuses", draft.dpoStatus)
         : "Not set",
+      privacyHelperText.dpoStatus,
     ],
     ["DPO name", detailValue(draft.dpoStatus, draft.dpoName)],
     ["DPO email", detailValue(draft.dpoStatus, draft.dpoEmail)],
@@ -69,6 +71,7 @@ const euRepresentativeRows = (
             draft.euRepresentativeStatus
           )
         : "Not set",
+      privacyHelperText.euRepresentativeStatus,
     ],
     [
       "EU representative name",
@@ -183,6 +186,7 @@ export const PrivacyRepresentationPanel = ({
         <div className="grid gap-3">
           <SelectField
             control={form.control}
+            helperText={privacyHelperText.dpoStatus}
             label="DPO status"
             name="dpoStatus"
             options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
@@ -206,6 +210,7 @@ export const PrivacyRepresentationPanel = ({
         <div className="grid gap-3">
           <SelectField
             control={form.control}
+            helperText={privacyHelperText.euRepresentativeStatus}
             label="EU representative status"
             name="euRepresentativeStatus"
             options={[

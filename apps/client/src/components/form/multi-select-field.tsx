@@ -31,6 +31,7 @@ const visibleChipCount = 2
 type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
   error?: FieldError
+  helperText?: string
   label: string
   name: FieldPath<T>
   options: Array<{ value: TValue; label: string }>
@@ -43,6 +44,7 @@ type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
 export const MultiSelectField = <T extends FieldValues, TValue extends string>({
   control,
   error,
+  helperText,
   label,
   name,
   options,
@@ -65,6 +67,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
           <MultiSelectInput
             error={error}
             fieldId={fieldId}
+            helperText={helperText}
             label={label}
             options={options}
             emptyMessage={emptyMessage}
@@ -82,6 +85,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
 const MultiSelectInput = <TValue extends string>({
   error,
   fieldId,
+  helperText,
   label,
   options,
   emptyMessage,
@@ -92,6 +96,7 @@ const MultiSelectInput = <TValue extends string>({
 }: {
   error?: FieldError
   fieldId: string
+  helperText?: string
   label: string
   options: Array<{ value: TValue; label: string }>
   emptyMessage: string
@@ -111,6 +116,11 @@ const MultiSelectInput = <TValue extends string>({
   return (
     <div className="grid gap-2 text-sm font-medium text-slate-800">
       <label htmlFor={fieldId}>{label}</label>
+      {helperText ? (
+        <p className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+          {helperText}
+        </p>
+      ) : null}
       <Combobox<TValue, true>
         multiple
         items={options.map((option) => option.value)}

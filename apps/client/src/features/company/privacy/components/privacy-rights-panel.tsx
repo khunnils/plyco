@@ -19,6 +19,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const rightsSchema = privacyProfileSchema.pick({
   supportedRights: true,
@@ -49,6 +50,7 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
         "privacy_supported_rights",
         draft.supportedRights
       ),
+      privacyHelperText.supportedRights,
     ],
     [
       "Request methods",
@@ -57,14 +59,28 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
         "privacy_request_methods",
         draft.requestMethods
       ),
+      privacyHelperText.requestMethods,
     ],
     [
       "Response timeline",
       draft.responseTimelineDays === 0 ? "Not set" : draft.responseTimelineDays,
+      privacyHelperText.responseTimelineDays,
     ],
-    ["Identity verification", boolText(draft.identityVerificationRequired)],
-    ["Authorized agent", boolText(draft.authorizedAgentSupported)],
-    ["Appeal process", boolText(draft.appealProcessExists)],
+    [
+      "Identity verification",
+      boolText(draft.identityVerificationRequired),
+      privacyHelperText.identityVerificationRequired,
+    ],
+    [
+      "Authorized representative requests",
+      boolText(draft.authorizedAgentSupported),
+      privacyHelperText.authorizedAgentSupported,
+    ],
+    [
+      "Appeal process for denied requests",
+      boolText(draft.appealProcessExists),
+      privacyHelperText.appealProcessExists,
+    ],
   ] as const
 
 export const PrivacyRightsPanel = ({
@@ -120,6 +136,7 @@ export const PrivacyRightsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.supportedRights?.root}
+          helperText={privacyHelperText.supportedRights}
           label="Privacy supported rights"
           name="supportedRights"
           options={supportedRightOptions}
@@ -128,13 +145,17 @@ export const PrivacyRightsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.requestMethods?.root}
+          helperText={privacyHelperText.requestMethods}
           label="Request methods"
           name="requestMethods"
           options={requestMethodOptions}
           placeholder="Select request methods"
         />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
-          Response timeline days
+          <span>Response timeline days</span>
+          <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+            {privacyHelperText.responseTimelineDays}
+          </span>
           <input
             className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
             inputMode="numeric"
@@ -147,16 +168,19 @@ export const PrivacyRightsPanel = ({
         </label>
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.identityVerificationRequired}
           label="Identity verification required"
           name="identityVerificationRequired"
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.authorizedAgentSupported}
           label="Authorized agent supported"
           name="authorizedAgentSupported"
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.appealProcessExists}
           label="Appeal process exists"
           name="appealProcessExists"
         />

@@ -20,6 +20,7 @@ const comboboxInputClassName =
 type SelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
   emptyMessage?: string
+  helperText?: string
   label: string
   name: FieldPath<T>
   options: Array<{ value: TValue; label: string }>
@@ -29,6 +30,7 @@ type SelectFieldProps<T extends FieldValues, TValue extends string> = {
 export const SelectField = <T extends FieldValues, TValue extends string>({
   control,
   emptyMessage = "No options available",
+  helperText,
   label,
   name,
   options,
@@ -48,7 +50,12 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
           className="grid gap-2 text-sm font-medium text-slate-800"
           htmlFor={fieldId}
         >
-          {label}
+          <span>{label}</span>
+          {helperText ? (
+            <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+              {helperText}
+            </span>
+          ) : null}
           <Combobox<TValue>
             items={options.map((option) => option.value)}
             value={field.value ?? null}

@@ -20,6 +20,7 @@ import {
 import { boolText } from "@/features/company/lib/display"
 import { providerNamesForSystem } from "@/features/company/lib/profile"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const marketingSchema = privacyProfileSchema.pick({
   sendsMarketingEmails: true,
@@ -48,7 +49,11 @@ const marketingRows = (
   catalogProviders: Provider[]
 ) =>
   [
-    ["Marketing emails", boolText(draft.sendsMarketingEmails)],
+    [
+      "Marketing emails",
+      boolText(draft.sendsMarketingEmails),
+      privacyHelperText.sendsMarketingEmails,
+    ],
     [
       "Marketing opt-out method",
       draft.marketingOptOutMethod
@@ -58,8 +63,13 @@ const marketingRows = (
             draft.marketingOptOutMethod
           )
         : "Not set",
+      privacyHelperText.marketingOptOutMethod,
     ],
-    ["Transactional emails", boolText(draft.transactionalEmailsSent)],
+    [
+      "Transactional emails",
+      boolText(draft.transactionalEmailsSent),
+      privacyHelperText.transactionalEmailsSent,
+    ],
     [
       "Newsletter provider",
       providerNamesForSystem(
@@ -67,6 +77,7 @@ const marketingRows = (
         catalogProviders,
         "newsletter"
       ),
+      privacyHelperText.newsletterProvider,
     ],
   ] as const
 
@@ -132,11 +143,13 @@ export const MarketingCommunicationsPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.sendsMarketingEmails}
           label="Sends marketing emails"
           name="sendsMarketingEmails"
         />
         <SelectField
           control={form.control}
+          helperText={privacyHelperText.marketingOptOutMethod}
           label="Marketing opt-out method"
           name="marketingOptOutMethod"
           options={[
@@ -147,11 +160,13 @@ export const MarketingCommunicationsPanel = ({
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.transactionalEmailsSent}
           label="Transactional emails sent"
           name="transactionalEmailsSent"
         />
         <MultiSelectField
           control={form.control}
+          helperText={privacyHelperText.newsletterProvider}
           label="Newsletter provider"
           name="organizationProviders"
           options={newsletterProviderOptions}

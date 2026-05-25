@@ -16,6 +16,7 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { privacyHelperText } from "./privacy-helper-text"
 
 const cookieSchema = privacyProfileSchema.pick({
   cookieConsentMechanism: true,
@@ -42,9 +43,18 @@ const cookieRows = (draft: CookieDraft, vocabulary: Vocabulary | undefined) =>
             draft.cookieConsentMechanism
           )
         : "Not set",
+      privacyHelperText.cookieConsentMechanism,
     ],
-    ["Do Not Track response", boolText(draft.doNotTrackResponse)],
-    ["Global Privacy Control", boolText(draft.globalPrivacyControlSupported)],
+    [
+      "Do Not Track response",
+      boolText(draft.doNotTrackResponse),
+      privacyHelperText.doNotTrackResponse,
+    ],
+    [
+      "Global Privacy Control",
+      boolText(draft.globalPrivacyControlSupported),
+      privacyHelperText.globalPrivacyControlSupported,
+    ],
   ] as const
 
 export const CookiePreferencesPanel = ({
@@ -97,6 +107,7 @@ export const CookiePreferencesPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField
           control={form.control}
+          helperText={privacyHelperText.cookieConsentMechanism}
           label="Cookie consent mechanism"
           name="cookieConsentMechanism"
           options={[
@@ -107,11 +118,13 @@ export const CookiePreferencesPanel = ({
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.doNotTrackResponse}
           label="Responds to Do Not Track"
           name="doNotTrackResponse"
         />
         <ToggleField
           control={form.control}
+          helperText={privacyHelperText.globalPrivacyControlSupported}
           label="Global Privacy Control supported"
           name="globalPrivacyControlSupported"
         />

@@ -2,8 +2,15 @@ import { AlertCircle, Loader2 } from "lucide-react"
 import { type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
+import { InfoTooltip } from "@/components/ui/info-tooltip"
 
 import { cn } from "@/lib/utils"
+
+export type ProfilePanelDetailRow = readonly [
+  label: string,
+  value: string | number | null,
+  helperText?: string,
+]
 
 export const ProfilePanelShell = ({
   children,
@@ -93,16 +100,21 @@ export const ProfilePanelDetailGrid = ({
   rows,
   itemBgClassName = "bg-slate-50",
 }: {
-  rows: ReadonlyArray<readonly [string, string | number | null]>
+  rows: ReadonlyArray<ProfilePanelDetailRow>
   itemBgClassName?: string
 }) => (
   <dl className="grid gap-3 sm:grid-cols-2">
-    {rows.map(([label, value]) => (
+    {rows.map(([label, value, helperText]) => (
       <div
-        className={cn("border border-slate-200 p-3", itemBgClassName)}
+        className={cn("relative border border-slate-200 p-3", itemBgClassName)}
         key={label}
       >
-        <dt className="text-xs font-medium text-slate-500">{label}</dt>
+        <dt className="pr-7 text-xs font-medium text-slate-500">{label}</dt>
+        {helperText ? (
+          <div className="absolute right-2 top-2">
+            <InfoTooltip text={helperText} />
+          </div>
+        ) : null}
         <dd className="mt-1 text-sm font-medium text-slate-900">
           {value ?? "Not answered"}
         </dd>
