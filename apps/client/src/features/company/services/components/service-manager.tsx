@@ -647,20 +647,19 @@ const ServiceHostingPanel = ({
 const AddVendorsForm = ({
   selectedProviderIds,
   organizationProviders,
-  onCancel,
-  onSubmit,
+  checkedIds,
+  onChange,
 }: {
   selectedProviderIds: Set<string>
   organizationProviders: OrganizationProvider[]
-  onCancel: () => void
-  onSubmit: (providerIds: string[]) => void
+  checkedIds: string[]
+  onChange: (checkedIds: string[]) => void
 }) => {
-  const [checkedIds, setCheckedIds] = useState<string[]>([])
   const toggleProvider = (providerId: string, checked: boolean) => {
-    setCheckedIds((current) =>
+    onChange(
       checked
-        ? [...current, providerId]
-        : current.filter((currentId) => currentId !== providerId)
+        ? [...checkedIds, providerId]
+        : checkedIds.filter((currentId) => currentId !== providerId)
     )
   }
 
@@ -694,19 +693,6 @@ const AddVendorsForm = ({
             </label>
           )
         })}
-      </div>
-      <div className="flex justify-end gap-2">
-        <Button
-          disabled={checkedIds.length === 0}
-          type="button"
-          onClick={() => onSubmit(checkedIds)}
-        >
-          <Plus />
-          Add selected
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
       </div>
     </div>
   )
@@ -748,6 +734,7 @@ const ServiceProviderUsagePanel = ({
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAddProviders, setShowAddProviders] = useState(false)
+  const [checkedProviderIds, setCheckedProviderIds] = useState<string[]>([])
   const selectedServiceUses = service.id
     ? serviceProviderUsage.filter(
         (providerUsage) => providerUsage.serviceId === service.id
@@ -780,22 +767,72 @@ const ServiceProviderUsagePanel = ({
             Providers used by this service and the data they process.
           </p>
         </div>
-        <Button
-          className="w-fit"
-          disabled={
-            !service.id ||
-            organizationProviders.length === 0 ||
-            Boolean(editingProviderUsage)
-          }
-          type="button"
-          onClick={() => {
-            setEditingId(null)
-            setShowAddProviders(true)
-          }}
-        >
-          <Plus />
-          Add providers
-        </Button>
+        {showAddProviders ? (
+          <div className="flex gap-2">
+            <Button
+              disabled={checkedProviderIds.length === 0}
+              type="button"
+              onClick={() => {
+                checkedProviderIds.forEach((organizationProviderId) => {
+                  onCreate({
+                    ...emptyServiceProviderUsageDraft,
+                    serviceId: service.id ?? "",
+                    organizationProviderId,
+                    purpose: serviceProviderPurpose(service),
+                  })
+                })
+                setShowAddProviders(false)
+                setCheckedProviderIds([])
+              }}
+            >
+              Add
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowAddProviders(false)
+                setCheckedProviderIds([])
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : editingProviderUsage ? (
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              form="service-provider-usage-form"
+              disabled={isMutationPending}
+            >
+              Save
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditingId(null)}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-fit"
+            disabled={
+              !service.id ||
+              organizationProviders.length === 0
+            }
+            type="button"
+            onClick={() => {
+              setEditingId(null)
+              setShowAddProviders(true)
+              setCheckedProviderIds([])
+            }}
+          >
+            <Plus />
+            Add providers
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4">
@@ -812,18 +849,8 @@ const ServiceProviderUsagePanel = ({
           <AddVendorsForm
             selectedProviderIds={selectedProviderIds}
             organizationProviders={organizationProviders}
-            onCancel={() => setShowAddProviders(false)}
-            onSubmit={(providerIds) => {
-              providerIds.forEach((organizationProviderId) => {
-                onCreate({
-                  ...emptyServiceProviderUsageDraft,
-                  serviceId: service.id ?? "",
-                  organizationProviderId,
-                  purpose: serviceProviderPurpose(service),
-                })
-              })
-              setShowAddProviders(false)
-            }}
+            checkedIds={checkedProviderIds}
+            onChange={setCheckedProviderIds}
           />
         ) : editingProviderUsage ? (
           <ServiceProviderUsageForm
@@ -834,6 +861,7 @@ const ServiceProviderUsagePanel = ({
             dpaStatusOptions={dpaStatusOptions}
             serviceOptions={serviceOptions}
             showServiceField={false}
+            showButtons={false}
             submitDisabled={isMutationPending}
             submitLabel="Save provider usage"
             providerOptions={providerOptions}

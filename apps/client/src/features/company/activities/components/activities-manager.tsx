@@ -78,6 +78,7 @@ export const ActivitiesManager = ({
         retentionPolicyOptions={retentionPolicyOptions}
         roleOptions={roleOptions}
         showLegalBasis={showLegalBasis}
+        showButtons={false}
         submitDisabled={isMutationPending}
         submitLabel={editingActivity ? "Save activity" : "Add activity"}
         onCancel={closeForm}

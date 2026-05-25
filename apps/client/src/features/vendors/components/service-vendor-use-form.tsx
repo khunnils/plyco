@@ -27,6 +27,7 @@ export const ServiceProviderUsageForm = ({
   submitDisabled = false,
   onSubmit,
   onCancel,
+  showButtons = true,
 }: {
   dataTypeOptions: Array<{ value: string; label: string }>
   dataProcessingLevelOptions: Option[]
@@ -40,6 +41,7 @@ export const ServiceProviderUsageForm = ({
   providerOptions: Option[]
   onSubmit: (providerUsage: ServiceProviderUsageInput) => void
   onCancel?: () => void
+  showButtons?: boolean
 }) => {
   const form = useForm<ServiceProviderUsageInput>({
     defaultValues,
@@ -74,7 +76,11 @@ export const ServiceProviderUsageForm = ({
   })
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <form
+      id="service-provider-usage-form"
+      onSubmit={submitProviderUsage}
+      className="grid gap-4 border border-slate-200 bg-slate-50 p-4"
+    >
       <div className="grid gap-4 md:grid-cols-2">
         {showServiceField ? (
           <SelectField
@@ -142,33 +148,35 @@ export const ServiceProviderUsageForm = ({
         placeholder="Service-specific processing context"
         register={form.register}
       />
-      <div className="flex items-center justify-end gap-2">
-        {onCancel ? (
+      {showButtons ? (
+        <div className="flex items-center justify-end gap-2">
+          {onCancel ? (
+            <Button
+              disabled={submitDisabled}
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              <X />
+              Cancel
+            </Button>
+          ) : null}
           <Button
             disabled={submitDisabled}
             type="button"
-            variant="outline"
-            onClick={onCancel}
+            onClick={submitProviderUsage}
           >
-            <X />
-            Cancel
+            {submitDisabled ? (
+              <Loader2 className="animate-spin" />
+            ) : onCancel ? (
+              <Save />
+            ) : (
+              <Plus />
+            )}
+            {submitLabel}
           </Button>
-        ) : null}
-        <Button
-          disabled={submitDisabled}
-          type="button"
-          onClick={submitProviderUsage}
-        >
-          {submitDisabled ? (
-            <Loader2 className="animate-spin" />
-          ) : onCancel ? (
-            <Save />
-          ) : (
-            <Plus />
-          )}
-          {submitLabel}
-        </Button>
-      </div>
-    </div>
+        </div>
+      ) : null}
+    </form>
   )
 }

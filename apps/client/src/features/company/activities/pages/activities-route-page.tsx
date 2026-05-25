@@ -43,7 +43,7 @@ export const ActivitiesRoutePage = () => {
     <>
       <PageHeader eyebrow="Company" title="Activities" />
       <div className="grid gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-4">
           <div>
             <h2 className="text-base font-semibold text-slate-950">Activities</h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -52,9 +52,27 @@ export const ActivitiesRoutePage = () => {
                 : "Processing activities with purpose, role, and retention."}
             </p>
           </div>
-          {businessActivities.length > 0 &&
-          !showActivityForm &&
-          !editingActivityId ? (
+          {showActivityForm || editingActivityId ? (
+            <div className="flex gap-2">
+              <Button
+                type="submit"
+                form="business-activity-form"
+                disabled={isActivityMutationPending}
+              >
+                {editingActivityId ? "Save" : "Add"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowActivityForm(false)
+                  setEditingActivityId(null)
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : businessActivities.length > 0 ? (
             <Button
               className="w-fit shrink-0"
               type="button"

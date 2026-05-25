@@ -24,6 +24,7 @@ export const ActivityForm = ({
   submitDisabled = false,
   onSubmit,
   onCancel,
+  showButtons = true,
 }: {
   defaultValues: BusinessActivityInput
   roleOptions: Option[]
@@ -34,6 +35,7 @@ export const ActivityForm = ({
   submitDisabled?: boolean
   onSubmit: (activity: BusinessActivityInput) => void
   onCancel?: () => void
+  showButtons?: boolean
 }) => {
   const form = useForm<BusinessActivityInput>({
     defaultValues,
@@ -64,7 +66,11 @@ export const ActivityForm = ({
   })
 
   return (
-    <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <form
+      id="business-activity-form"
+      onSubmit={submitActivity}
+      className="grid gap-4 border border-slate-200 bg-slate-50 p-4"
+    >
       <TextField
         error={form.formState.errors.name}
         label="Activity name"
@@ -110,33 +116,35 @@ export const ActivityForm = ({
         register={form.register}
         type="number"
       />
-      <div className="flex items-center justify-end gap-2">
-        {onCancel ? (
+      {showButtons ? (
+        <div className="flex items-center justify-end gap-2">
+          {onCancel ? (
+            <Button
+              disabled={submitDisabled}
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              <X />
+              Cancel
+            </Button>
+          ) : null}
           <Button
             disabled={submitDisabled}
             type="button"
-            variant="outline"
-            onClick={onCancel}
+            onClick={submitActivity}
           >
-            <X />
-            Cancel
+            {submitDisabled ? (
+              <Loader2 className="animate-spin" />
+            ) : onCancel ? (
+              <Save />
+            ) : (
+              <Plus />
+            )}
+            {submitLabel}
           </Button>
-        ) : null}
-        <Button
-          disabled={submitDisabled}
-          type="button"
-          onClick={submitActivity}
-        >
-          {submitDisabled ? (
-            <Loader2 className="animate-spin" />
-          ) : onCancel ? (
-            <Save />
-          ) : (
-            <Plus />
-          )}
-          {submitLabel}
-        </Button>
-      </div>
-    </div>
+        </div>
+      ) : null}
+    </form>
   )
 }
