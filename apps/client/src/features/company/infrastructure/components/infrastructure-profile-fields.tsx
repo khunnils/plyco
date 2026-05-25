@@ -207,7 +207,9 @@ const DateField = ({
     <input
       className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
       type="date"
-      {...form.register(name)}
+      {...form.register(name, {
+        setValueAs: (value) => (value === "" ? null : value),
+      })}
     />
   </label>
 )

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { emptyProfileDraft } from "@/features/company/lib/profile"
 import {
   dashboardProgress,
+  infrastructureProgress,
   isAnswered,
   privacyProgress,
   serviceProgress,
@@ -100,6 +101,44 @@ describe("dashboard progress", () => {
     expect(transfers).toMatchObject({ completedFields: 1, totalFields: 1 })
     expect(disclosures).toMatchObject({ completedFields: 2, totalFields: 2 })
     expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
+  })
+
+  it("skips incident response last tested date when no plan exists", () => {
+    const progressNoPlan = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        incidentResponsePlanExists: false,
+        incidentNotificationTimeline: "none",
+        customerNotificationProcess: "none",
+        incidentResponseLastTestedDate: null,
+      },
+    })
+    const irNoPlan = progressNoPlan.sections.find(
+      (section) => section.title === "Incident Response"
+    )
+    expect(irNoPlan).toMatchObject({
+      completedFields: 3,
+      totalFields: 3,
+    })
+
+    const progressWithPlan = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        incidentResponsePlanExists: true,
+        incidentNotificationTimeline: "none",
+        customerNotificationProcess: "none",
+        incidentResponseLastTestedDate: null,
+      },
+    })
+    const irWithPlan = progressWithPlan.sections.find(
+      (section) => section.title === "Incident Response"
+    )
+    expect(irWithPlan).toMatchObject({
+      completedFields: 3,
+      totalFields: 4,
+    })
   })
 
   it("handles empty service, data type, and vendor lists", () => {

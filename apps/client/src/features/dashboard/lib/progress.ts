@@ -288,7 +288,9 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         "Customer notification process",
         infrastructure.customerNotificationProcess
       ),
-      field("Last tested date", infrastructure.incidentResponseLastTestedDate),
+      ...(infrastructure.incidentResponsePlanExists
+        ? [field("Last tested date", infrastructure.incidentResponseLastTestedDate)]
+        : []),
     ]),
     sectionProgress("Backups", [
       field("Backups enabled", infrastructure.backupsEnabled),
