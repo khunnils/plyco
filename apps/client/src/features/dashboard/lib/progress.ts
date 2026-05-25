@@ -256,7 +256,7 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Logging & Monitoring", [
       field("Centralized logging", infrastructure.centralizedLoggingEnabled),
-      field("Log retention days", infrastructure.logRetentionDays),
+      field("Log retention days", infrastructure.logRetentionDaysStatus),
       field(
         "Security monitoring owner",
         infrastructure.securityMonitoringOwner
@@ -264,8 +264,8 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Vulnerability Management", [
       field("Scanning cadence", infrastructure.scanningCadence),
-      field("Critical patch SLA days", infrastructure.patchingSlaCriticalDays),
-      field("High patch SLA days", infrastructure.patchingSlaHighDays),
+      field("Critical patch SLA days", infrastructure.patchingSlaCriticalDaysStatus),
+      field("High patch SLA days", infrastructure.patchingSlaHighDaysStatus),
     ]),
     sectionProgress("Incident Response", [
       field(
@@ -285,7 +285,7 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     sectionProgress("Backups", [
       field("Backups enabled", infrastructure.backupsEnabled),
       field("Backup cadence", infrastructure.backupCadence),
-      field("Backup retention days", infrastructure.backupRetentionDays),
+      field("Backup retention days", infrastructure.backupRetentionDaysStatus),
       field("Restore testing cadence", infrastructure.restoreTestingCadence),
     ]),
     sectionProgress("Vendor Risk", [

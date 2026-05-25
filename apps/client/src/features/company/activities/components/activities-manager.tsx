@@ -18,6 +18,7 @@ export const ActivitiesManager = ({
   isMutationPending,
   roleOptions,
   legalBasisOptions,
+  definedStatusesOptions,
   vocabulary,
   onCreate,
   onDelete,
@@ -31,6 +32,7 @@ export const ActivitiesManager = ({
   isMutationPending: boolean
   roleOptions: Option[]
   legalBasisOptions: Option[]
+  definedStatusesOptions: Option[]
   vocabulary: Vocabulary | undefined
   onCreate: (activity: BusinessActivityInput, onSuccess?: () => void) => void
   onDelete: (activity: BusinessActivity) => void
@@ -70,6 +72,7 @@ export const ActivitiesManager = ({
             ? toActivityInput(editingActivity)
             : emptyActivityDraft
         }
+        definedStatusesOptions={definedStatusesOptions}
         legalBasisOptions={legalBasisOptions}
         roleOptions={roleOptions}
         submitDisabled={isMutationPending}

@@ -436,6 +436,12 @@ export class ReportContextBuilder {
       logging: {
         centralizedLogging: infrastructure.centralizedLoggingEnabled,
         logRetentionDays: infrastructure.logRetentionDays,
+        logRetentionDaysStatus: infrastructure.logRetentionDaysStatus,
+        logRetentionDaysStatusLabel: this.codeLabel(
+          vocabulary,
+          "defined_statuses",
+          infrastructure.logRetentionDaysStatus,
+        ),
         securityMonitoringOwner: infrastructure.securityMonitoringOwner,
         securityMonitoringOwnerLabel: this.codeLabel(
           vocabulary,
@@ -456,7 +462,19 @@ export class ReportContextBuilder {
           infrastructure.scanningCadence,
         ),
         patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
+        patchingSlaCriticalDaysStatus: infrastructure.patchingSlaCriticalDaysStatus,
+        patchingSlaCriticalDaysStatusLabel: this.codeLabel(
+          vocabulary,
+          "defined_statuses",
+          infrastructure.patchingSlaCriticalDaysStatus,
+        ),
         patchingSlaHighDays: infrastructure.patchingSlaHighDays,
+        patchingSlaHighDaysStatus: infrastructure.patchingSlaHighDaysStatus,
+        patchingSlaHighDaysStatusLabel: this.codeLabel(
+          vocabulary,
+          "defined_statuses",
+          infrastructure.patchingSlaHighDaysStatus,
+        ),
         ...this.answerFlags({
           scanningCadence: infrastructure.scanningCadence,
           patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
@@ -495,6 +513,12 @@ export class ReportContextBuilder {
           infrastructure.backupCadence,
         ),
         backupRetentionDays: infrastructure.backupRetentionDays,
+        backupRetentionDaysStatus: infrastructure.backupRetentionDaysStatus,
+        backupRetentionDaysStatusLabel: this.codeLabel(
+          vocabulary,
+          "defined_statuses",
+          infrastructure.backupRetentionDaysStatus,
+        ),
         restoreTestingCadence: infrastructure.restoreTestingCadence,
         restoreTestingCadenceLabel: this.codeLabel(
           vocabulary,
@@ -662,10 +686,18 @@ export class ReportContextBuilder {
         activity.legalBasis,
       ),
       retentionDays: activity.retentionDays,
+      retentionDaysStatus: activity.retentionDaysStatus,
+      retentionDaysStatusLabel: this.codeLabel(
+        vocabulary,
+        "defined_statuses",
+        activity.retentionDaysStatus,
+      ),
       retentionLabel:
-        activity.retentionDays > 0
-          ? `${activity.retentionDays} days`
-          : "Not set",
+        activity.retentionDaysStatus === "not_defined"
+          ? "Not defined"
+          : activity.retentionDaysStatus === "defined" && activity.retentionDays > 0
+            ? `${activity.retentionDays} days`
+            : "Not set",
     }
   }
 

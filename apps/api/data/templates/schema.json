@@ -908,6 +908,22 @@
       "example": 365
     },
     {
+      "key": "security.logging.logRetentionDaysStatus",
+      "label": "Log retention days status",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether log retention days is defined or not.",
+      "example": "defined"
+    },
+    {
+      "key": "security.logging.logRetentionDaysStatusLabel",
+      "label": "Log retention days status label",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether log retention days is defined or not label.",
+      "example": "Defined"
+    },
+    {
       "key": "security.logging.securityMonitoringOwnerLabel",
       "label": "Security monitoring owner label",
       "type": "string",
@@ -932,12 +948,44 @@
       "example": 7
     },
     {
+      "key": "security.vulnerabilityManagement.patchingSlaCriticalDaysStatus",
+      "label": "Critical patching SLA days status",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether critical patching SLA days is defined or not.",
+      "example": "defined"
+    },
+    {
+      "key": "security.vulnerabilityManagement.patchingSlaCriticalDaysStatusLabel",
+      "label": "Critical patching SLA days status label",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether critical patching SLA days is defined or not label.",
+      "example": "Defined"
+    },
+    {
       "key": "security.vulnerabilityManagement.patchingSlaHighDays",
       "label": "High patching SLA days",
       "type": "number",
       "category": "Security",
       "description": "Target days to patch high vulnerabilities. A value of 0 means unset.",
       "example": 30
+    },
+    {
+      "key": "security.vulnerabilityManagement.patchingSlaHighDaysStatus",
+      "label": "High patching SLA days status",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether high patching SLA days is defined or not.",
+      "example": "defined"
+    },
+    {
+      "key": "security.vulnerabilityManagement.patchingSlaHighDaysStatusLabel",
+      "label": "High patching SLA days status label",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether high patching SLA days is defined or not label.",
+      "example": "Defined"
     },
     {
       "key": "security.incidentResponse.planExists",
@@ -986,6 +1034,22 @@
       "category": "Security",
       "description": "Number of days backups are retained. A value of 0 means unset.",
       "example": 30
+    },
+    {
+      "key": "security.backups.backupRetentionDaysStatus",
+      "label": "Backup retention days status",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether backup retention days is defined or not.",
+      "example": "defined"
+    },
+    {
+      "key": "security.backups.backupRetentionDaysStatusLabel",
+      "label": "Backup retention days status label",
+      "type": "string",
+      "category": "Security",
+      "description": "Whether backup retention days is defined or not label.",
+      "example": "Defined"
     },
     {
       "key": "security.backups.restoreTestingCadenceLabel",
@@ -1345,6 +1409,20 @@
 	          "type": "number",
 	          "description": "Number of days data for this activity is retained. A value of 0 means unset.",
 	          "example": 365
+	        },
+	        {
+	          "key": "retentionDaysStatus",
+	          "label": "Retention days status",
+	          "type": "string",
+	          "description": "Whether retention days is defined or not.",
+	          "example": "defined"
+	        },
+	        {
+	          "key": "retentionDaysStatusLabel",
+	          "label": "Retention days status label",
+	          "type": "string",
+	          "description": "Whether retention days is defined or not label.",
+	          "example": "Defined"
 	        }
 	      ]
 	    },

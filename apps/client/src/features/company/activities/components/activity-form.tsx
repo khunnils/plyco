@@ -18,6 +18,7 @@ export const ActivityForm = ({
   defaultValues,
   roleOptions,
   legalBasisOptions,
+  definedStatusesOptions,
   submitLabel,
   submitDisabled = false,
   onSubmit,
@@ -26,6 +27,7 @@ export const ActivityForm = ({
   defaultValues: BusinessActivityInput
   roleOptions: Option[]
   legalBasisOptions: Option[]
+  definedStatusesOptions: Option[]
   submitLabel: string
   submitDisabled?: boolean
   onSubmit: (activity: BusinessActivityInput) => void
@@ -42,6 +44,15 @@ export const ActivityForm = ({
   useEffect(() => {
     form.reset(defaultValues)
   }, [defaultValues, form])
+
+  const retentionDaysStatus = form.watch("retentionDaysStatus")
+  const isRetentionDaysDisabled = retentionDaysStatus !== "defined"
+
+  useEffect(() => {
+    if (retentionDaysStatus === "not_defined") {
+      form.setValue("retentionDays", 0)
+    }
+  }, [retentionDaysStatus, form])
 
   const submitActivity = form.handleSubmit((activity) => {
     onSubmit(activity)
@@ -77,7 +88,14 @@ export const ActivityForm = ({
         options={legalBasisOptions}
         placeholder="Select legal basis"
       />
+      <SelectField
+        control={form.control}
+        label="Retention days status"
+        name="retentionDaysStatus"
+        options={[{ value: "", label: "Not set" }, ...definedStatusesOptions]}
+      />
       <TextField
+        disabled={isRetentionDaysDisabled}
         error={form.formState.errors.retentionDays}
         label="Retention days"
         name="retentionDays"

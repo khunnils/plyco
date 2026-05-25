@@ -145,6 +145,15 @@ export const validateBusinessActivityCodes = async (
       activity.legalBasis,
       "businessActivity.legalBasis",
     ),
+    activity.retentionDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          activity.retentionDaysStatus,
+          "businessActivity.retentionDaysStatus",
+        )
+      : Promise.resolve(),
   ])
 }
 
@@ -201,6 +210,42 @@ export const validateInfrastructureProfileCodes = async (
           "security_key_management_providers",
           infrastructure.keyManagementProvider,
           "infrastructure.keyManagementProvider",
+        )
+      : Promise.resolve(),
+    infrastructure.logRetentionDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          infrastructure.logRetentionDaysStatus,
+          "infrastructure.logRetentionDaysStatus",
+        )
+      : Promise.resolve(),
+    infrastructure.patchingSlaCriticalDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          infrastructure.patchingSlaCriticalDaysStatus,
+          "infrastructure.patchingSlaCriticalDaysStatus",
+        )
+      : Promise.resolve(),
+    infrastructure.patchingSlaHighDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          infrastructure.patchingSlaHighDaysStatus,
+          "infrastructure.patchingSlaHighDaysStatus",
+        )
+      : Promise.resolve(),
+    infrastructure.backupRetentionDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          infrastructure.backupRetentionDaysStatus,
+          "infrastructure.backupRetentionDaysStatus",
         )
       : Promise.resolve(),
     infrastructure.securityMonitoringOwner

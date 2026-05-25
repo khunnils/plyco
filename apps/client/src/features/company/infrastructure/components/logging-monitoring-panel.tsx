@@ -4,7 +4,7 @@ import {
   type InfrastructureProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -15,11 +15,12 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { codeLabel, codeOptions, type Option } from "@/features/vocabulary/lib/vocabulary"
 
 const loggingSchema = infrastructureProfileSchema.pick({
   centralizedLoggingEnabled: true,
   logRetentionDays: true,
+  logRetentionDaysStatus: true,
   securityMonitoringOwner: true,
 })
 
@@ -30,13 +31,21 @@ const toLoggingDraft = (
 ): LoggingDraft => ({
   centralizedLoggingEnabled: infrastructure.centralizedLoggingEnabled,
   logRetentionDays: infrastructure.logRetentionDays,
+  logRetentionDaysStatus: infrastructure.logRetentionDaysStatus ?? null,
   securityMonitoringOwner: infrastructure.securityMonitoringOwner,
 })
 
 const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
   [
     ["Centralized logging", boolText(draft.centralizedLoggingEnabled)],
-    ["Log retention days", draft.logRetentionDays],
+    [
+      "Log retention days",
+      draft.logRetentionDaysStatus === "not_defined"
+        ? "Not defined"
+        : draft.logRetentionDaysStatus === "defined" && draft.logRetentionDays !== null
+          ? `${draft.logRetentionDays} days`
+          : "Not set",
+    ],
     [
       "Security monitoring owner",
       draft.securityMonitoringOwner
@@ -74,6 +83,15 @@ export const LoggingMonitoringPanel = ({
     values: draft,
   })
 
+  const logRetentionDaysStatus = form.watch("logRetentionDaysStatus")
+  const isLogRetentionDaysDisabled = logRetentionDaysStatus !== "defined"
+
+  useEffect(() => {
+    if (logRetentionDaysStatus === "not_defined") {
+      form.setValue("logRetentionDays", null)
+    }
+  }, [logRetentionDaysStatus, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -102,10 +120,21 @@ export const LoggingMonitoringPanel = ({
           label="Centralized logging enabled"
           name="centralizedLoggingEnabled"
         />
+        <SelectField
+          control={form.control}
+          label="Log retention days status"
+          name="logRetentionDaysStatus"
+          options={[
+            { value: "", label: "Not set" },
+            ...codeOptions(vocabulary, "defined_statuses"),
+          ]}
+          placeholder="Not set"
+        />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
           Log retention days
           <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+            disabled={isLogRetentionDaysDisabled}
             inputMode="numeric"
             min={0}
             type="number"

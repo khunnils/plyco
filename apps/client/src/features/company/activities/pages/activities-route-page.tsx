@@ -66,6 +66,7 @@ export const ActivitiesRoutePage = () => {
           isMutationPending={isActivityMutationPending}
           legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
           roleOptions={codeOptions(vocabularyData, "activity_role")}
+          definedStatusesOptions={codeOptions(vocabularyData, "defined_statuses")}
           vocabulary={vocabularyData}
           onCreate={(activity, onSuccess) =>
             createBusinessActivity.mutate(activity, { onSuccess })

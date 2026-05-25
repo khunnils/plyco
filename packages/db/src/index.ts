@@ -121,16 +121,20 @@ export function mapOrganizationRecord(record: {
     inTransitMinimumTlsVersion: string | null
     keyManagementProvider: string | null
     logRetentionDays: number | null
+    logRetentionDaysStatus: string | null
     securityMonitoringOwner: string | null
     scanningCadence: string | null
     patchingSlaCriticalDays: number | null
+    patchingSlaCriticalDaysStatus: string | null
     patchingSlaHighDays: number | null
+    patchingSlaHighDaysStatus: string | null
     incidentResponsePlanExists: boolean | null
     incidentNotificationTimeline: string | null
     customerNotificationProcess: string | null
     incidentResponseLastTestedDate: string | null
     backupCadence: string | null
     backupRetentionDays: number | null
+    backupRetentionDaysStatus: string | null
     restoreTestingCadence: string | null
     vendorReviewRequired: boolean | null
     vendorReviewCadence: string | null
@@ -219,13 +223,19 @@ export function mapOrganizationRecord(record: {
     keyManagementProvider:
       record.infrastructureProfile?.keyManagementProvider ?? null,
     logRetentionDays: record.infrastructureProfile?.logRetentionDays ?? null,
+    logRetentionDaysStatus:
+      record.infrastructureProfile?.logRetentionDaysStatus ?? null,
     securityMonitoringOwner:
       record.infrastructureProfile?.securityMonitoringOwner ?? null,
     scanningCadence: record.infrastructureProfile?.scanningCadence ?? null,
     patchingSlaCriticalDays:
       record.infrastructureProfile?.patchingSlaCriticalDays ?? null,
+    patchingSlaCriticalDaysStatus:
+      record.infrastructureProfile?.patchingSlaCriticalDaysStatus ?? null,
     patchingSlaHighDays:
       record.infrastructureProfile?.patchingSlaHighDays ?? null,
+    patchingSlaHighDaysStatus:
+      record.infrastructureProfile?.patchingSlaHighDaysStatus ?? null,
     incidentResponsePlanExists:
       record.infrastructureProfile?.incidentResponsePlanExists ?? null,
     incidentNotificationTimeline:
@@ -237,6 +247,8 @@ export function mapOrganizationRecord(record: {
     backupCadence: record.infrastructureProfile?.backupCadence ?? null,
     backupRetentionDays:
       record.infrastructureProfile?.backupRetentionDays ?? null,
+    backupRetentionDaysStatus:
+      record.infrastructureProfile?.backupRetentionDaysStatus ?? null,
     restoreTestingCadence:
       record.infrastructureProfile?.restoreTestingCadence ?? null,
     vendorReviewRequired:
@@ -377,6 +389,7 @@ export function mapBusinessActivityRecord(record: {
   role: string
   legalBasis: string[]
   retentionDays: number
+  retentionDaysStatus: string | null
   createdAt: Date
   updatedAt: Date
 }): BusinessActivity {
@@ -387,6 +400,7 @@ export function mapBusinessActivityRecord(record: {
     role: record.role,
     legalBasis: record.legalBasis,
     retentionDays: record.retentionDays,
+    retentionDaysStatus: record.retentionDaysStatus,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   })

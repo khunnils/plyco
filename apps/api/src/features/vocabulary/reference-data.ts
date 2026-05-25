@@ -32,6 +32,7 @@ export const requiredCodeSetIds = [
   "vendor_category",
   "data_processing_level",
   "provider_system_type",
+  "defined_statuses",
 ] as const
 
 export const countries: Country[] = [
@@ -538,5 +539,9 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["analytics", "Analytics"],
     ["advertising", "Advertising"],
     ["newsletter", "Newsletter"],
+  ]),
+  codeSet("defined_statuses", "Defined statuses", true, [
+    ["defined", "Defined"],
+    ["not_defined", "Not defined"],
   ]),
 ]

@@ -49,9 +49,11 @@ export const ActivityList = ({
               </p>
               <p className="text-xs text-slate-500">
                 <span className="font-medium text-slate-700">Retention: </span>
-                {activity.retentionDays > 0
-                  ? `${activity.retentionDays} days`
-                  : "Not set"}
+                {activity.retentionDaysStatus === "not_defined"
+                  ? "Not defined"
+                  : activity.retentionDaysStatus === "defined" && activity.retentionDays > 0
+                    ? `${activity.retentionDays} days`
+                    : "Not set"}
               </p>
             </div>
             <div className="flex gap-2">
