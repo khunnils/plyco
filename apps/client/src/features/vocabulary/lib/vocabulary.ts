@@ -30,15 +30,16 @@ export const codeOptions = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
 ): Option[] => {
-  const options =
+  let options =
     vocabulary?.codeSets
       .find((codeSet) => codeSet.codeSetId === codeSetId)
       ?.codes.filter((code) => code.active)
       .sort(sortCodesBySequenceThenName)
       .map((code) => ({ value: code.codeId, label: code.name })) ?? []
 
-  if (CODE_SETS_WITH_NONE.has(codeSetId) && !options.some((opt) => opt.value === "none")) {
-    options.push({ value: "none", label: "None" })
+  if (CODE_SETS_WITH_NONE.has(codeSetId)) {
+    options = options.filter((opt) => opt.value !== "none")
+    options.unshift({ value: "none", label: "None" })
   }
 
   return options
