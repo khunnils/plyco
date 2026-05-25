@@ -325,7 +325,6 @@ model AccessProfile {
   sharedAccountsExist        Boolean?     @map("shared_accounts_exist")
   offboardingProcessExists   Boolean?     @map("offboarding_process_exists")
   accessReviewsPerformed     Boolean?     @map("access_reviews_performed")
-  privilegedAccessRestricted Boolean?     @map("privileged_access_restricted")
   leastPrivilege             Boolean?     @map("least_privilege")
   roleBasedAccess            Boolean?     @map("role_based_access")
   accessReviewCadence        String?      @map("access_review_cadence")

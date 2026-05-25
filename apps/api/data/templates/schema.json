@@ -891,7 +891,7 @@
     },
     {
       "key": "security.authentication.mfaRequired",
-      "label": "MFA required",
+      "label": "Multi-factor authentication (MFA) required",
       "type": "boolean",
       "category": "Security",
       "description": "Whether multi-factor authentication is required.",
@@ -1522,7 +1522,7 @@
     },
     {
       "key": "access.mfaRequired",
-      "label": "MFA required",
+      "label": "Multi-factor authentication (MFA) required",
       "type": "boolean",
       "category": "Access",
       "description": "Whether users are required to use multi-factor authentication.",
@@ -1530,7 +1530,7 @@
     },
     {
       "key": "access.ssoEnabled",
-      "label": "SSO enabled",
+      "label": "Single sign-on supported",
       "type": "boolean",
       "category": "Access",
       "description": "Whether single sign-on is enabled for workforce access.",
@@ -1546,7 +1546,7 @@
     },
     {
       "key": "access.offboardingProcessExists",
-      "label": "Offboarding process exists",
+      "label": "Employee offboarding process exists",
       "type": "boolean",
       "category": "Access",
       "description": "Whether the organization has a defined process to remove access for departing personnel.",
@@ -1554,18 +1554,10 @@
     },
     {
       "key": "access.accessReviewsPerformed",
-      "label": "Access reviews performed",
+      "label": "Periodic access reviews are performed",
       "type": "boolean",
       "category": "Access",
       "description": "Whether access reviews are performed for critical systems.",
-      "example": true
-    },
-    {
-      "key": "access.privilegedAccessRestricted",
-      "label": "Privileged access restricted",
-      "type": "boolean",
-      "category": "Access",
-      "description": "Whether administrative or privileged access is limited to authorized users.",
       "example": true
     },
     {

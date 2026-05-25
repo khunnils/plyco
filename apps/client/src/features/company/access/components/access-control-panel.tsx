@@ -4,7 +4,7 @@ import {
   type AccessProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -13,9 +13,11 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { accessHelperText } from "./access-helper-text"
 
 const accessControlSchema = accessProfileSchema.pick({
   leastPrivilege: true,
@@ -23,7 +25,6 @@ const accessControlSchema = accessProfileSchema.pick({
   accessReviewCadence: true,
   adminApprovalRequired: true,
   accessReviewsPerformed: true,
-  privilegedAccessRestricted: true,
 })
 
 type AccessControlDraft = z.infer<typeof accessControlSchema>
@@ -34,29 +35,59 @@ const toAccessControlDraft = (access: AccessProfile): AccessControlDraft => ({
   accessReviewCadence: access.accessReviewCadence,
   adminApprovalRequired: access.adminApprovalRequired,
   accessReviewsPerformed: access.accessReviewsPerformed,
-  privilegedAccessRestricted: access.privilegedAccessRestricted,
 })
 
 const accessControlRows = (
   draft: AccessControlDraft,
   vocabulary: Vocabulary | undefined
-) =>
-  [
-    ["Least privilege", boolText(draft.leastPrivilege)],
-    ["Role-based access", boolText(draft.roleBasedAccess)],
+): ProfilePanelDetailRow[] => {
+  const rows: ProfilePanelDetailRow[] = [
     [
-      "Access review cadence",
+      "Least privilege access",
+      boolText(draft.leastPrivilege),
+      accessHelperText.leastPrivilege,
+    ],
+    [
+      "Role-based access",
+      boolText(draft.roleBasedAccess),
+      accessHelperText.roleBasedAccess,
+    ],
+    [
+      "Admin access requires approval",
+      boolText(draft.adminApprovalRequired),
+      accessHelperText.adminApprovalRequired,
+    ],
+    [
+      "Periodic access reviews are performed",
+      boolText(draft.accessReviewsPerformed),
+      accessHelperText.accessReviewsPerformed,
+    ],
+  ]
+
+  if (draft.accessReviewsPerformed === true) {
+    rows.push([
+      "Access review frequency",
       draft.accessReviewCadence
         ? codeLabel(vocabulary, "security_cadences", draft.accessReviewCadence)
         : "Not set",
-    ],
-    ["Admin approval required", boolText(draft.adminApprovalRequired)],
-    ["Access reviews performed", boolText(draft.accessReviewsPerformed)],
-    [
-      "Privileged access restricted",
-      boolText(draft.privilegedAccessRestricted),
-    ],
-  ] as const
+      accessHelperText.accessReviewCadence,
+    ])
+  }
+
+  return rows
+}
+
+const normalizeAccessControlDraft = (
+  draft: AccessControlDraft
+): AccessControlDraft => {
+  if (draft.accessReviewsPerformed === true) {
+    return draft
+  }
+  return {
+    ...draft,
+    accessReviewCadence: null,
+  }
+}
 
 export const AccessControlPanel = ({
   access,
@@ -83,8 +114,16 @@ export const AccessControlPanel = ({
     values: draft,
   })
 
+  const accessReviewsPerformed = form.watch("accessReviewsPerformed")
+
+  useEffect(() => {
+    if (accessReviewsPerformed !== true) {
+      form.setValue("accessReviewCadence", null)
+    }
+  }, [accessReviewsPerformed, form])
+
   const submit = form.handleSubmit((next) => {
-    onSave(next, () => setIsEditing(false))
+    onSave(normalizeAccessControlDraft(next), () => setIsEditing(false))
   })
 
   return (
@@ -108,36 +147,38 @@ export const AccessControlPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="Least privilege"
+          helperText={accessHelperText.leastPrivilege}
+          label="Least privilege access"
           name="leastPrivilege"
         />
         <ToggleField
           control={form.control}
+          helperText={accessHelperText.roleBasedAccess}
           label="Role-based access"
           name="roleBasedAccess"
         />
-        <SelectField
-          control={form.control}
-          label="Access review cadence"
-          name="accessReviewCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
         <ToggleField
           control={form.control}
-          label="Admin approval required"
+          helperText={accessHelperText.adminApprovalRequired}
+          label="Admin access requires approval"
           name="adminApprovalRequired"
         />
         <ToggleField
           control={form.control}
-          label="Access reviews performed"
+          helperText={accessHelperText.accessReviewsPerformed}
+          label="Periodic access reviews are performed"
           name="accessReviewsPerformed"
         />
-        <ToggleField
-          control={form.control}
-          label="Privileged access restricted"
-          name="privilegedAccessRestricted"
-        />
+        {accessReviewsPerformed === true && (
+          <SelectField
+            control={form.control}
+            helperText={accessHelperText.accessReviewCadence}
+            label="Access review frequency"
+            name="accessReviewCadence"
+            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+            placeholder="Not set"
+          />
+        )}
       </div>
     </ProfilePanelShell>
   )

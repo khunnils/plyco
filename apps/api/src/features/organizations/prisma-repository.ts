@@ -612,7 +612,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       sharedAccountsExist: input.sharedAccountsExist,
       offboardingProcessExists: input.offboardingProcessExists,
       accessReviewsPerformed: input.accessReviewsPerformed,
-      privilegedAccessRestricted: input.privilegedAccessRestricted,
       leastPrivilege: input.leastPrivilege,
       roleBasedAccess: input.roleBasedAccess,
       accessReviewCadence: input.accessReviewCadence,

@@ -190,12 +190,11 @@ Fields:
 
 Fields:
 
-- MFA required
-- SSO enabled
+- Multi-factor authentication (MFA) required
+- Single sign-on supported
 - shared accounts exist
-- offboarding process exists
-- access reviews performed
-- privileged access restricted
+- Employee offboarding process exists
+- Periodic access reviews are performed
 - least privilege
 - role-based access
 - access review cadence

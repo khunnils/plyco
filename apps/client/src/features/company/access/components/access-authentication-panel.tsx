@@ -8,8 +8,10 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
+import { accessHelperText } from "./access-helper-text"
 
 const authenticationSchema = accessProfileSchema.pick({
   mfaRequired: true,
@@ -29,17 +31,30 @@ const toAuthenticationDraft = (access: AccessProfile): AuthenticationDraft => ({
   offboardingProcessExists: access.offboardingProcessExists,
 })
 
-const authenticationRows = (draft: AuthenticationDraft) =>
+const authenticationRows = (draft: AuthenticationDraft): ProfilePanelDetailRow[] =>
   [
-    ["MFA required", boolText(draft.mfaRequired)],
-    ["SSO enabled", boolText(draft.ssoEnabled)],
+    [
+      "Multi-factor authentication (MFA) required",
+      boolText(draft.mfaRequired),
+      accessHelperText.mfaRequired,
+    ],
+    ["Single sign-on supported", boolText(draft.ssoEnabled), accessHelperText.ssoEnabled],
     [
       "Password manager required",
       boolText(draft.passwordManagerRequired),
+      accessHelperText.passwordManagerRequired,
     ],
-    ["Shared accounts", boolText(draft.sharedAccountsExist)],
-    ["Offboarding process", boolText(draft.offboardingProcessExists)],
-  ] as const
+    [
+      "Shared accounts exist",
+      boolText(draft.sharedAccountsExist),
+      accessHelperText.sharedAccountsExist,
+    ],
+    [
+      "Employee offboarding process exists",
+      boolText(draft.offboardingProcessExists),
+      accessHelperText.offboardingProcessExists,
+    ],
+  ]
 
 export const AccessAuthenticationPanel = ({
   access,
@@ -87,27 +102,32 @@ export const AccessAuthenticationPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="MFA required"
+          helperText={accessHelperText.mfaRequired}
+          label="Multi-factor authentication (MFA) required"
           name="mfaRequired"
         />
         <ToggleField
           control={form.control}
-          label="SSO enabled"
+          helperText={accessHelperText.ssoEnabled}
+          label="Single sign-on supported"
           name="ssoEnabled"
         />
         <ToggleField
           control={form.control}
+          helperText={accessHelperText.passwordManagerRequired}
           label="Password manager required"
           name="passwordManagerRequired"
         />
         <ToggleField
           control={form.control}
+          helperText={accessHelperText.sharedAccountsExist}
           label="Shared accounts exist"
           name="sharedAccountsExist"
         />
         <ToggleField
           control={form.control}
-          label="Offboarding process exists"
+          helperText={accessHelperText.offboardingProcessExists}
+          label="Employee offboarding process exists"
           name="offboardingProcessExists"
         />
       </div>

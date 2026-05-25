@@ -347,26 +347,33 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
 export const accessProgress = (profile: ProfileDraft) =>
   groupProgress([
     sectionProgress("Access control", [
-      field("Least privilege", profile.access.leastPrivilege),
+      field("Least privilege access", profile.access.leastPrivilege),
       field("Role-based access", profile.access.roleBasedAccess),
-      field("Access review cadence", profile.access.accessReviewCadence),
-      field("Admin approval required", profile.access.adminApprovalRequired),
-      field("Access reviews performed", profile.access.accessReviewsPerformed),
       field(
-        "Privileged access restricted",
-        profile.access.privilegedAccessRestricted
+        "Admin access requires approval",
+        profile.access.adminApprovalRequired
       ),
+      field(
+        "Periodic access reviews are performed",
+        profile.access.accessReviewsPerformed
+      ),
+      ...(profile.access.accessReviewsPerformed === true
+        ? [field("Access review frequency", profile.access.accessReviewCadence)]
+        : []),
     ]),
     sectionProgress("Authentication", [
-      field("MFA required", profile.access.mfaRequired),
-      field("SSO enabled", profile.access.ssoEnabled),
+      field(
+        "Multi-factor authentication (MFA) required",
+        profile.access.mfaRequired
+      ),
+      field("Single sign-on supported", profile.access.ssoEnabled),
       field(
         "Password manager required",
         profile.access.passwordManagerRequired
       ),
       field("Shared accounts exist", profile.access.sharedAccountsExist),
       field(
-        "Offboarding process exists",
+        "Employee offboarding process exists",
         profile.access.offboardingProcessExists
       ),
     ]),

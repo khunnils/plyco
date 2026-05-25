@@ -157,7 +157,6 @@ const profileBody = {
     sharedAccountsExist: false,
     offboardingProcessExists: true,
     accessReviewsPerformed: false,
-    privilegedAccessRestricted: true,
     leastPrivilege: true,
     roleBasedAccess: true,
     accessReviewCadence: "quarterly",

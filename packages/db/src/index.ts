@@ -170,7 +170,6 @@ export function mapOrganizationRecord(record: {
     sharedAccountsExist: boolean | null
     offboardingProcessExists: boolean | null
     accessReviewsPerformed: boolean | null
-    privilegedAccessRestricted: boolean | null
     leastPrivilege: boolean | null
     roleBasedAccess: boolean | null
     accessReviewCadence: string | null
@@ -368,8 +367,6 @@ export function mapOrganizationRecord(record: {
       record.accessProfile?.offboardingProcessExists ?? null,
     accessReviewsPerformed:
       record.accessProfile?.accessReviewsPerformed ?? null,
-    privilegedAccessRestricted:
-      record.accessProfile?.privilegedAccessRestricted ?? null,
     leastPrivilege: record.accessProfile?.leastPrivilege ?? null,
     roleBasedAccess: record.accessProfile?.roleBasedAccess ?? null,
     accessReviewCadence: record.accessProfile?.accessReviewCadence ?? null,
