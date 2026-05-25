@@ -90,10 +90,13 @@ export function mapOrganizationRecord(record: {
   privacyProfile: {
     supportedRights: unknown
     requestMethods: unknown
+    responseTimelineDaysStatus: string | null
     responseTimelineDays: number | null
     identityVerificationRequired: boolean | null
     authorizedAgentSupported: boolean | null
     appealProcessExists: boolean | null
+    usesCookiesOrTrackingTechnologies: boolean | null
+    cookieTrackingCategories: unknown
     cookieConsentMechanism: string | null
     doNotTrackResponse: boolean | null
     globalPrivacyControlSupported: boolean | null
@@ -291,6 +294,8 @@ export function mapOrganizationRecord(record: {
   const privacy = privacyProfileSchema.parse({
     supportedRights: stringArray(record.privacyProfile?.supportedRights),
     requestMethods: stringArray(record.privacyProfile?.requestMethods),
+    responseTimelineDaysStatus:
+      record.privacyProfile?.responseTimelineDaysStatus ?? null,
     responseTimelineDays: record.privacyProfile?.responseTimelineDays ?? null,
     identityVerificationRequired:
       record.privacyProfile?.identityVerificationRequired ?? null,
@@ -308,6 +313,11 @@ export function mapOrganizationRecord(record: {
             },
           ]
         : [],
+    ),
+    usesCookiesOrTrackingTechnologies:
+      record.privacyProfile?.usesCookiesOrTrackingTechnologies ?? null,
+    cookieTrackingCategories: stringArray(
+      record.privacyProfile?.cookieTrackingCategories,
     ),
     cookieConsentMechanism:
       record.privacyProfile?.cookieConsentMechanism ?? null,

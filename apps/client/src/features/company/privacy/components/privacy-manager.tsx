@@ -18,6 +18,7 @@ import { privacyProgress } from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyManager = ({
+  cookieTrackingCategoryOptions,
   cookieConsentMechanismOptions,
   dpoStatusOptions,
   euRepresentativeStatusOptions,
@@ -27,11 +28,13 @@ export const PrivacyManager = ({
   profile,
   providers,
   requestMethodOptions,
+  responseTimelineStatusOptions,
   supportedRightOptions,
   transferMechanismOptions,
   vocabulary,
   onSaveProfile,
 }: {
+  cookieTrackingCategoryOptions: Option[]
   cookieConsentMechanismOptions: Option[]
   dpoStatusOptions: Option[]
   euRepresentativeStatusOptions: Option[]
@@ -41,6 +44,7 @@ export const PrivacyManager = ({
   profile: ProfileDraft
   providers: Provider[]
   requestMethodOptions: Option[]
+  responseTimelineStatusOptions: Option[]
   supportedRightOptions: Option[]
   transferMechanismOptions: Option[]
   vocabulary: Vocabulary | undefined
@@ -49,13 +53,15 @@ export const PrivacyManager = ({
   const progress = privacyProgress(profile)
   const showPrivacyRepresentation = isComplianceFieldVisible(
     "privacy.dpoStatus",
-    profile.company.complianceGoals,
+    profile.company.complianceGoals
   )
 
   const getNeedsAttention = (sectionTitle: string) => {
     const section = progress.sections.find((s) => s.title === sectionTitle)
     if (!section) return false
-    return section.totalFields > 0 && section.completedFields < section.totalFields
+    return (
+      section.totalFields > 0 && section.completedFields < section.totalFields
+    )
   }
 
   const savePrivacy = (
@@ -81,11 +87,13 @@ export const PrivacyManager = ({
         needsAttention={getNeedsAttention("Privacy Rights & Request Handling")}
         privacy={profile.privacy}
         requestMethodOptions={requestMethodOptions}
+        responseTimelineStatusOptions={responseTimelineStatusOptions}
         supportedRightOptions={supportedRightOptions}
         vocabulary={vocabulary}
         onSave={savePrivacy}
       />
       <CookiePreferencesPanel
+        cookieTrackingCategoryOptions={cookieTrackingCategoryOptions}
         cookieConsentMechanismOptions={cookieConsentMechanismOptions}
         isMutationPending={isMutationPending}
         needsAttention={getNeedsAttention("Cookie Preferences")}
@@ -122,7 +130,9 @@ export const PrivacyManager = ({
           dpoStatusOptions={dpoStatusOptions}
           euRepresentativeStatusOptions={euRepresentativeStatusOptions}
           isMutationPending={isMutationPending}
-          needsAttention={getNeedsAttention("Privacy Officers & Representation")}
+          needsAttention={getNeedsAttention(
+            "Privacy Officers & Representation"
+          )}
           privacy={profile.privacy}
           vocabulary={vocabulary}
           onSave={savePrivacy}

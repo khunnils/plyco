@@ -140,10 +140,13 @@ Fields:
 
 - supported rights
 - request methods
+- response timeline status
 - response timeline days, where `0` means unset
 - identity verification required
 - authorized agent supported
 - appeal process exists
+- uses cookies or tracking technologies
+- cookie / tracking categories
 - cookie consent mechanism
 - Do Not Track response
 - Global Privacy Control supported

@@ -2,6 +2,8 @@ export const privacyHelperText = {
   supportedRights:
     "The privacy rights users can exercise, such as access, deletion, or correction.",
   requestMethods: "How users can submit privacy or data requests.",
+  responseTimelineDaysStatus:
+    "Whether you have a defined response timeline for privacy requests.",
   responseTimelineDays:
     "How many days you usually take to respond to privacy requests.",
   identityVerificationRequired:
@@ -10,6 +12,10 @@ export const privacyHelperText = {
     "Whether someone can submit a privacy request on a user's behalf.",
   appealProcessExists:
     "Whether users can appeal if you deny a privacy request.",
+  usesCookiesOrTrackingTechnologies:
+    "Whether your sites or services use cookies, pixels, SDKs, or similar tracking technologies.",
+  cookieTrackingCategories:
+    "The categories of cookies or tracking technologies you use.",
   cookieConsentMechanism:
     "How visitors can accept, reject, or manage cookie choices.",
   doNotTrackResponse:

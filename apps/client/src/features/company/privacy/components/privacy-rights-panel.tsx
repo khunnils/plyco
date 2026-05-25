@@ -4,11 +4,12 @@ import {
   type PrivacyProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
-import { type Resolver, useForm } from "react-hook-form"
+import { useEffect, useState } from "react"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
+import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
@@ -24,6 +25,7 @@ import { privacyHelperText } from "./privacy-helper-text"
 const rightsSchema = privacyProfileSchema.pick({
   supportedRights: true,
   requestMethods: true,
+  responseTimelineDaysStatus: true,
   responseTimelineDays: true,
   identityVerificationRequired: true,
   authorizedAgentSupported: true,
@@ -35,6 +37,7 @@ type RightsDraft = z.infer<typeof rightsSchema>
 const toRightsDraft = (privacy: PrivacyProfile): RightsDraft => ({
   supportedRights: privacy.supportedRights,
   requestMethods: privacy.requestMethods,
+  responseTimelineDaysStatus: privacy.responseTimelineDaysStatus,
   responseTimelineDays: privacy.responseTimelineDays,
   identityVerificationRequired: privacy.identityVerificationRequired,
   authorizedAgentSupported: privacy.authorizedAgentSupported,
@@ -62,8 +65,17 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
       privacyHelperText.requestMethods,
     ],
     [
+      "Response timeline status",
+      draft.responseTimelineDaysStatus
+        ? codeValueList(vocabulary, "defined_statuses", [
+            draft.responseTimelineDaysStatus,
+          ])
+        : "Not set",
+      privacyHelperText.responseTimelineDaysStatus,
+    ],
+    [
       "Response timeline",
-      draft.responseTimelineDays === 0 ? "Not set" : draft.responseTimelineDays,
+      formatDays(draft.responseTimelineDays),
       privacyHelperText.responseTimelineDays,
     ],
     [
@@ -88,6 +100,7 @@ export const PrivacyRightsPanel = ({
   needsAttention,
   privacy,
   requestMethodOptions,
+  responseTimelineStatusOptions,
   supportedRightOptions,
   vocabulary,
   onSave,
@@ -96,6 +109,7 @@ export const PrivacyRightsPanel = ({
   needsAttention?: boolean
   privacy: PrivacyProfile
   requestMethodOptions: Option[]
+  responseTimelineStatusOptions: Option[]
   supportedRightOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (patch: RightsDraft, onSuccess?: () => void) => void
@@ -109,6 +123,17 @@ export const PrivacyRightsPanel = ({
     resolver: zodResolver(rightsSchema) as Resolver<RightsDraft>,
     values: draft,
   })
+  const responseTimelineDaysStatus = useWatch({
+    control: form.control,
+    name: "responseTimelineDaysStatus",
+  })
+  const responseTimelineDaysDisabled = responseTimelineDaysStatus !== "defined"
+
+  useEffect(() => {
+    if (responseTimelineDaysStatus === "not_defined") {
+      form.setValue("responseTimelineDays", null)
+    }
+  }, [responseTimelineDaysStatus, form])
 
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
@@ -151,13 +176,25 @@ export const PrivacyRightsPanel = ({
           options={requestMethodOptions}
           placeholder="Select request methods"
         />
+        <SelectField
+          control={form.control}
+          helperText={privacyHelperText.responseTimelineDaysStatus}
+          label="Response timeline status"
+          name="responseTimelineDaysStatus"
+          options={[
+            { value: "", label: "Not set" },
+            ...responseTimelineStatusOptions,
+          ]}
+          placeholder="Not set"
+        />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
           <span>Response timeline days</span>
-          <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
             {privacyHelperText.responseTimelineDays}
           </span>
           <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+            disabled={responseTimelineDaysDisabled}
             inputMode="numeric"
             min={0}
             type="number"
@@ -187,4 +224,12 @@ export const PrivacyRightsPanel = ({
       </div>
     </ProfilePanelShell>
   )
+}
+
+const formatDays = (value: number | null) => {
+  if (value === null || value === 0) {
+    return "Not set"
+  }
+
+  return `${value} ${value === 1 ? "day" : "days"}`
 }

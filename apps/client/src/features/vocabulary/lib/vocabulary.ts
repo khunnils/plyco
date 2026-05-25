@@ -26,16 +26,30 @@ const CODE_SETS_WITH_NONE = new Set([
   "security_monitoring_owners",
 ])
 
+const codeSetsFor = (vocabulary: Vocabulary | undefined, codeSetId: string) =>
+  vocabulary?.codeSets.filter((codeSet) => codeSet.codeSetId === codeSetId) ??
+  []
+
+const activeCodesFor = (
+  vocabulary: Vocabulary | undefined,
+  codeSetId: string
+) =>
+  codeSetsFor(vocabulary, codeSetId)
+    .flatMap((codeSet) => codeSet.codes)
+    .filter(
+      (code, index, codes) =>
+        code.active &&
+        codes.findIndex((candidate) => candidate.codeId === code.codeId) ===
+          index
+    )
+
 export const codeOptions = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
 ): Option[] => {
-  let options =
-    vocabulary?.codeSets
-      .find((codeSet) => codeSet.codeSetId === codeSetId)
-      ?.codes.filter((code) => code.active)
-      .sort(sortCodesBySequenceThenName)
-      .map((code) => ({ value: code.codeId, label: code.name })) ?? []
+  let options = activeCodesFor(vocabulary, codeSetId)
+    .sort(sortCodesBySequenceThenName)
+    .map((code) => ({ value: code.codeId, label: code.name }))
 
   if (CODE_SETS_WITH_NONE.has(codeSetId)) {
     options = options.filter((opt) => opt.value !== "none")
@@ -60,9 +74,9 @@ export const codeLabel = (
     return "None"
   }
   return (
-    vocabulary?.codeSets
-      .find((codeSet) => codeSet.codeSetId === codeSetId)
-      ?.codes.find((code) => code.codeId === codeId)?.name ?? codeId
+    codeSetsFor(vocabulary, codeSetId)
+      .flatMap((codeSet) => codeSet.codes)
+      .find((code) => code.codeId === codeId)?.name ?? codeId
   )
 }
 

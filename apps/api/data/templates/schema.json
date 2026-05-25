@@ -574,6 +574,22 @@
       ]
     },
     {
+      "key": "privacy.responseTimelineDaysStatus",
+      "label": "Privacy response timeline status",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Defined status code for the privacy request response timeline.",
+      "example": "defined"
+    },
+    {
+      "key": "privacy.responseTimelineDaysStatusLabel",
+      "label": "Privacy response timeline status label",
+      "type": "string",
+      "category": "Privacy",
+      "description": "Human-readable label for the privacy response timeline status code.",
+      "example": "Defined"
+    },
+    {
       "key": "privacy.responseTimelineDays",
       "label": "Privacy response timeline days",
       "type": "number",
@@ -604,6 +620,36 @@
       "category": "Privacy",
       "description": "Whether the organization has an appeal process for denied privacy requests.",
       "example": false
+    },
+    {
+      "key": "privacy.usesCookiesOrTrackingTechnologies",
+      "label": "Uses cookies or tracking technologies",
+      "type": "boolean",
+      "category": "Privacy",
+      "description": "Whether the organization uses cookies or similar tracking technologies.",
+      "example": true
+    },
+    {
+      "key": "privacy.cookieTrackingCategories",
+      "label": "Cookie / tracking categories",
+      "type": "array",
+      "category": "Privacy",
+      "description": "Cookie and tracking category codes used by the organization.",
+      "example": [
+        "necessary",
+        "analytics"
+      ]
+    },
+    {
+      "key": "privacy.cookieTrackingCategoryLabels",
+      "label": "Cookie / tracking category labels",
+      "type": "array",
+      "category": "Privacy",
+      "description": "Human-readable labels for cookie and tracking category codes.",
+      "example": [
+        "Necessary",
+        "Analytics"
+      ]
     },
     {
       "key": "privacy.cookieConsentMechanism",

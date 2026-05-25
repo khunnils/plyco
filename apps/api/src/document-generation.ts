@@ -299,10 +299,26 @@ export class ReportContextBuilder {
         "privacy_request_methods",
         privacy.requestMethods,
       ),
+      responseTimelineDaysStatus: privacy.responseTimelineDaysStatus,
+      responseTimelineDaysStatusLabel: privacy.responseTimelineDaysStatus
+        ? this.codeLabels(
+            vocabulary,
+            "defined_statuses",
+            [privacy.responseTimelineDaysStatus],
+          )[0]
+        : "",
       responseTimelineDays: privacy.responseTimelineDays,
       identityVerificationRequired: privacy.identityVerificationRequired,
       authorizedAgentSupported: privacy.authorizedAgentSupported,
       appealProcessExists: privacy.appealProcessExists,
+      usesCookiesOrTrackingTechnologies:
+        privacy.usesCookiesOrTrackingTechnologies,
+      cookieTrackingCategories: privacy.cookieTrackingCategories,
+      cookieTrackingCategoryLabels: this.codeLabels(
+        vocabulary,
+        "cookie_tracking_categories",
+        privacy.cookieTrackingCategories,
+      ),
       cookieConsentMechanism: privacy.cookieConsentMechanism,
       cookieConsentMechanismLabel: privacy.cookieConsentMechanism
         ? this.codeLabels(

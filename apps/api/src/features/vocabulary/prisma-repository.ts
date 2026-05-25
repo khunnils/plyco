@@ -98,15 +98,20 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
 
     const existingCodeSets = await this.client.organizationCodeSet.findMany({
       where: { organizationId },
-      select: { id: true, systemCodeSetId: true },
+      select: {
+        id: true,
+        systemCodeSetId: true,
+        codes: { select: { codeId: true } },
+      },
     })
     const existingBySystemId = new Map(
-      existingCodeSets.map((record) => [record.systemCodeSetId, record.id]),
+      existingCodeSets.map((record) => [record.systemCodeSetId, record]),
     )
 
     await this.client.$transaction(async (tx) => {
       for (const codeSet of systemCodeSets) {
-        let organizationCodeSetId = existingBySystemId.get(codeSet.id)
+        const existingCodeSet = existingBySystemId.get(codeSet.id)
+        let organizationCodeSetId = existingCodeSet?.id
 
         if (!organizationCodeSetId) {
           const created = await tx.organizationCodeSet.create({
@@ -127,7 +132,32 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             },
           })
           organizationCodeSetId = created.id
-          existingBySystemId.set(codeSet.id, organizationCodeSetId)
+          existingBySystemId.set(codeSet.id, {
+            id: organizationCodeSetId,
+            systemCodeSetId: codeSet.id,
+            codes: codeSet.codes.map((code) => ({ codeId: code.codeId })),
+          })
+          continue
+        }
+
+        const existingCodeIds = new Set(
+          (existingCodeSet?.codes ?? []).map((code) => code.codeId),
+        )
+        const missingCodes = codeSet.codes.filter(
+          (code) => !existingCodeIds.has(code.codeId),
+        )
+
+        if (missingCodes.length > 0) {
+          await tx.organizationCode.createMany({
+            data: missingCodes.map((code) => ({
+              organizationCodeSetId,
+              systemCodeId: code.id,
+              codeId: code.codeId,
+              name: code.name,
+              sortOrder: code.sortOrder,
+              active: code.active,
+            })),
+          })
         }
       }
     })

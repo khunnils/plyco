@@ -406,6 +406,22 @@ export const validatePrivacyProfileCodes = async (
       privacy.requestMethods,
       "privacy.requestMethods",
     ),
+    privacy.responseTimelineDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          privacy.responseTimelineDaysStatus,
+          "privacy.responseTimelineDaysStatus",
+        )
+      : Promise.resolve(),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "cookie_tracking_categories",
+      privacy.cookieTrackingCategories,
+      "privacy.cookieTrackingCategories",
+    ),
     privacy.cookieConsentMechanism
       ? assertCode(
           vocabularyRepository,

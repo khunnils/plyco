@@ -331,10 +331,14 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return {
       supportedRights: jsonValue(input.supportedRights),
       requestMethods: jsonValue(input.requestMethods),
+      responseTimelineDaysStatus: input.responseTimelineDaysStatus,
       responseTimelineDays: input.responseTimelineDays,
       identityVerificationRequired: input.identityVerificationRequired,
       authorizedAgentSupported: input.authorizedAgentSupported,
       appealProcessExists: input.appealProcessExists,
+      usesCookiesOrTrackingTechnologies:
+        input.usesCookiesOrTrackingTechnologies,
+      cookieTrackingCategories: jsonValue(input.cookieTrackingCategories),
       cookieConsentMechanism: input.cookieConsentMechanism,
       doNotTrackResponse: input.doNotTrackResponse,
       globalPrivacyControlSupported: input.globalPrivacyControlSupported,

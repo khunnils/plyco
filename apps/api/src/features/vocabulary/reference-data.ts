@@ -8,6 +8,7 @@ export const requiredCodeSetIds = [
   "service_customer_types",
   "privacy_supported_rights",
   "privacy_request_methods",
+  "cookie_tracking_categories",
   "privacy_cookie_types",
   "privacy_cookie_consent_mechanisms",
   "privacy_marketing_opt_out_methods",
@@ -549,5 +550,12 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
   codeSet("defined_statuses", "Defined statuses", true, [
     ["defined", "Defined"],
     ["not_defined", "Not defined"],
+  ]),
+  codeSet("cookie_tracking_categories", "Cookie / tracking categories", false, [
+    ["necessary", "Necessary"],
+    ["analytics", "Analytics"],
+    ["marketing", "Marketing"],
+    ["functional", "Functional"],
+    ["preference", "Preference"],
   ]),
 ]

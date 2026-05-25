@@ -167,13 +167,14 @@ export const privacyProgress = (profile: ProfileDraft) => {
   )
   const showPrivacyRepresentation = isComplianceFieldVisible(
     "privacy.dpoStatus",
-    profile.company.complianceGoals,
+    profile.company.complianceGoals
   )
 
   return groupProgress([
     sectionProgress("Privacy Rights & Request Handling", [
       field("Supported rights", privacy.supportedRights),
       field("Request methods", privacy.requestMethods),
+      field("Response timeline status", privacy.responseTimelineDaysStatus),
       field("Response timeline days", privacy.responseTimelineDays, true),
       field(
         "Identity verification required",
@@ -183,12 +184,24 @@ export const privacyProgress = (profile: ProfileDraft) => {
       field("Appeal process exists", privacy.appealProcessExists),
     ]),
     sectionProgress("Cookie Preferences", [
-      field("Cookie consent mechanism", privacy.cookieConsentMechanism),
-      field("Do Not Track response", privacy.doNotTrackResponse),
       field(
-        "Global Privacy Control supported",
-        privacy.globalPrivacyControlSupported
+        "Uses cookies or tracking technologies",
+        privacy.usesCookiesOrTrackingTechnologies
       ),
+      ...(privacy.usesCookiesOrTrackingTechnologies
+        ? [
+            field(
+              "Cookie / tracking categories",
+              privacy.cookieTrackingCategories
+            ),
+            field("Cookie consent mechanism", privacy.cookieConsentMechanism),
+            field("Do Not Track response", privacy.doNotTrackResponse),
+            field(
+              "Global Privacy Control supported",
+              privacy.globalPrivacyControlSupported
+            ),
+          ]
+        : []),
     ]),
     sectionProgress("Marketing & Communications", [
       field("Marketing emails", privacy.sendsMarketingEmails),
@@ -229,7 +242,7 @@ export const privacyProgress = (profile: ProfileDraft) => {
                   field("EU representative", privacy.euRepresentativeName),
                   field(
                     "EU representative address",
-                    privacy.euRepresentativeAddress,
+                    privacy.euRepresentativeAddress
                   ),
                 ]
               : []),
@@ -284,7 +297,10 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Vulnerability Management", [
       field("Scanning cadence", infrastructure.scanningCadence),
-      field("Critical patch SLA days", infrastructure.patchingSlaCriticalDaysStatus),
+      field(
+        "Critical patch SLA days",
+        infrastructure.patchingSlaCriticalDaysStatus
+      ),
       field("High patch SLA days", infrastructure.patchingSlaHighDaysStatus),
     ]),
     sectionProgress("Incident Response", [
@@ -301,7 +317,12 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         infrastructure.customerNotificationProcess
       ),
       ...(infrastructure.incidentResponsePlanExists
-        ? [field("Last tested date", infrastructure.incidentResponseLastTestedDate)]
+        ? [
+            field(
+              "Last tested date",
+              infrastructure.incidentResponseLastTestedDate
+            ),
+          ]
         : []),
     ]),
     sectionProgress("Backups", [
