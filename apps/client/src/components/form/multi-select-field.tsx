@@ -21,10 +21,12 @@ import {
 import { cn } from "@/lib/utils"
 
 const comboboxChipsClassName =
-  "min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
+  "min-h-10 flex-nowrap overflow-hidden rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
 
 const comboboxChipClassName =
-  "h-6 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-100"
+  "h-6 shrink-0 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-100"
+
+const visibleChipCount = 2
 
 type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
@@ -102,6 +104,9 @@ const MultiSelectInput = <TValue extends string>({
   const optionLabelByValue = new Map(
     options.map((option) => [option.value, option.label])
   )
+  const visibleSelectedValues = selectedValues.slice(0, visibleChipCount)
+  const hiddenSelectedCount =
+    selectedValues.length - visibleSelectedValues.length
 
   return (
     <div className="grid gap-2 text-sm font-medium text-slate-800">
@@ -121,16 +126,27 @@ const MultiSelectInput = <TValue extends string>({
               "border-red-300 focus-within:border-red-500 focus-within:ring-red-100"
           )}
         >
-          {selectedValues.map((selectedValue) => (
+          {visibleSelectedValues.map((selectedValue) => (
             <ComboboxChip key={selectedValue} className={comboboxChipClassName}>
               {optionLabelByValue.get(selectedValue) ?? selectedValue}
             </ComboboxChip>
           ))}
+          {hiddenSelectedCount > 0 && (
+            <span
+              aria-label={`${hiddenSelectedCount} more selected options`}
+              className={comboboxChipClassName}
+            >
+              +{hiddenSelectedCount}
+            </span>
+          )}
           <ComboboxChipsInput
             id={fieldId}
             aria-invalid={!!error || undefined}
             placeholder={selectedValues.length === 0 ? placeholder : undefined}
-            className="text-sm font-normal text-slate-900 placeholder:text-slate-400"
+            className={cn(
+              "min-w-0 text-sm font-normal text-slate-900 placeholder:text-slate-400",
+              selectedValues.length > 0 && "w-0 flex-none"
+            )}
             onBlur={onBlur}
           />
           <ComboboxTrigger className="ml-auto rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />

@@ -1,4 +1,5 @@
 import {
+  isComplianceFieldVisible,
   type OrganizationProvider,
   type ServiceProviderUsage,
   type StoredDataType,
@@ -164,6 +165,10 @@ export const privacyProgress = (profile: ProfileDraft) => {
   const newsletterProviders = privacy.organizationProviders.filter(
     (provider) => provider.systemType === "newsletter"
   )
+  const showPrivacyRepresentation = isComplianceFieldVisible(
+    "privacy.dpoStatus",
+    profile.company.complianceGoals,
+  )
 
   return groupProgress([
     sectionProgress("Privacy Rights & Request Handling", [
@@ -208,22 +213,29 @@ export const privacyProgress = (profile: ProfileDraft) => {
         : []),
       field("Automated decision making", privacy.usesAutomatedDecisionMaking),
     ]),
-    sectionProgress("Privacy Officers & Representation", [
-      field("DPO status", privacy.dpoStatus),
-      ...(privacy.dpoStatus === "appointed"
-        ? [
-            field("DPO name", privacy.dpoName),
-            field("DPO email", privacy.dpoEmail),
-          ]
-        : []),
-      field("EU representative status", privacy.euRepresentativeStatus),
-      ...(privacy.euRepresentativeStatus === "appointed"
-        ? [
-            field("EU representative", privacy.euRepresentativeName),
-            field("EU representative address", privacy.euRepresentativeAddress),
-          ]
-        : []),
-    ]),
+    ...(showPrivacyRepresentation
+      ? [
+          sectionProgress("Privacy Officers & Representation", [
+            field("DPO status", privacy.dpoStatus),
+            ...(privacy.dpoStatus === "appointed"
+              ? [
+                  field("DPO name", privacy.dpoName),
+                  field("DPO email", privacy.dpoEmail),
+                ]
+              : []),
+            field("EU representative status", privacy.euRepresentativeStatus),
+            ...(privacy.euRepresentativeStatus === "appointed"
+              ? [
+                  field("EU representative", privacy.euRepresentativeName),
+                  field(
+                    "EU representative address",
+                    privacy.euRepresentativeAddress,
+                  ),
+                ]
+              : []),
+          ]),
+        ]
+      : []),
   ])
 }
 

@@ -68,7 +68,7 @@ const companySections: CompanySection[] = [
     id: "activities",
     path: "/company/activities",
     title: "Activities",
-    description: "Processing activities with purpose, role, and legal basis.",
+    description: "Processing activities services and documents reference.",
     icon: ClipboardList,
   },
   {

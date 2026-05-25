@@ -43,7 +43,7 @@ const toRightsDraft = (privacy: PrivacyProfile): RightsDraft => ({
 const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
   [
     [
-      "Supported rights",
+      "Privacy supported rights",
       codeValueList(
         vocabulary,
         "privacy_supported_rights",
@@ -120,7 +120,7 @@ export const PrivacyRightsPanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.supportedRights?.root}
-          label="Supported rights"
+          label="Privacy supported rights"
           name="supportedRights"
           options={supportedRightOptions}
           placeholder="Select supported rights"

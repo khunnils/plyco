@@ -153,6 +153,7 @@ Fields:
 - newsletter provider selected from provider catalog entries tagged as `newsletter`
 - cross-border transfers
 - transfer mechanisms
+- privacy officers and representation, shown when GDPR is selected as a compliance goal
 
 ### Infrastructure Profile
 
@@ -223,9 +224,14 @@ Fields:
 - activity name
 - purpose
 - role
-- legal basis
+- legal basis, shown when GDPR is selected as a compliance goal
+- retention policy
 - retention days
 - services that perform the activity
+
+Compliance-targeted fields are controlled by shared field metadata keyed by
+stable field IDs and compliance goal code IDs. Hidden field values are retained
+so users do not lose prior answers when compliance goals are toggled.
 
 ### Vocabulary
 

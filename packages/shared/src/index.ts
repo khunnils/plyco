@@ -94,6 +94,31 @@ const nullableBooleanSchema = z.boolean().nullable().default(null)
 const nullableCodeIdArraySchema = z.array(codeIdSchema).nullable().default(null)
 const nullableNumberSchema = (schema: z.ZodNumber) => schema.nullable().default(null)
 
+export const complianceFieldVisibility = {
+  "businessActivity.legalBasis": ["gdpr"],
+  "privacy.dpoStatus": ["gdpr"],
+  "privacy.dpoName": ["gdpr"],
+  "privacy.dpoEmail": ["gdpr"],
+  "privacy.euRepresentativeStatus": ["gdpr"],
+  "privacy.euRepresentativeName": ["gdpr"],
+  "privacy.euRepresentativeAddress": ["gdpr"],
+} as const
+
+export type ComplianceFieldKey = keyof typeof complianceFieldVisibility
+
+export const isComplianceFieldVisible = (
+  fieldKey: ComplianceFieldKey | string,
+  complianceGoals: string[] | null | undefined,
+) => {
+  const requiredGoals =
+    complianceFieldVisibility[fieldKey as ComplianceFieldKey]
+
+  return (
+    !requiredGoals ||
+    requiredGoals.some((goal) => complianceGoals?.includes(goal))
+  )
+}
+
 export const storedDataTypeSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
   description: nullableStringSchema,
@@ -108,8 +133,8 @@ export const businessActivityInputSchema = z.object({
   purpose: z.string().trim().default(""),
   role: codeIdSchema.or(z.literal("")).default(""),
   legalBasis: z.array(codeIdSchema).default([]),
+  retentionPolicy: nullableCodeIdSchema,
   retentionDays: z.number().int().min(0).default(0),
-  retentionDaysStatus: nullableCodeIdSchema,
 })
 
 export const businessActivitySchema = businessActivityInputSchema.extend({

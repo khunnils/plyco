@@ -14,6 +14,7 @@ import {
   privacyProfileSchema,
   accessProfileSchema,
   infrastructureProfileSchema,
+  isComplianceFieldVisible,
   organizationProviderInputSchema,
   providerCriticalitySchema,
   providerSystemTypeSchema,
@@ -179,6 +180,31 @@ describe("shared security profile schemas", () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it("shows GDPR-targeted fields only when GDPR is a compliance goal", () => {
+    expect(
+      isComplianceFieldVisible("businessActivity.legalBasis", ["gdpr"]),
+    ).toBe(true)
+    expect(
+      isComplianceFieldVisible("businessActivity.legalBasis", ["soc_2"]),
+    ).toBe(false)
+    expect(isComplianceFieldVisible("businessActivity.legalBasis", [])).toBe(
+      false,
+    )
+    expect(isComplianceFieldVisible("businessActivity.legalBasis", null)).toBe(
+      false,
+    )
+    expect(isComplianceFieldVisible("privacy.dpoStatus", ["gdpr"])).toBe(true)
+    expect(isComplianceFieldVisible("privacy.dpoStatus", ["soc_2"])).toBe(
+      false,
+    )
+  })
+
+  it("shows untargeted fields by default", () => {
+    expect(isComplianceFieldVisible("businessActivity.purpose", null)).toBe(
+      true,
+    )
   })
 
   it("accepts blank template policy metadata defaults", () => {

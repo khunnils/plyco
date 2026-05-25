@@ -18,7 +18,8 @@ export const ActivitiesManager = ({
   isMutationPending,
   roleOptions,
   legalBasisOptions,
-  definedStatusesOptions,
+  retentionPolicyOptions,
+  showLegalBasis,
   vocabulary,
   onCreate,
   onDelete,
@@ -32,7 +33,8 @@ export const ActivitiesManager = ({
   isMutationPending: boolean
   roleOptions: Option[]
   legalBasisOptions: Option[]
-  definedStatusesOptions: Option[]
+  retentionPolicyOptions: Option[]
+  showLegalBasis: boolean
   vocabulary: Vocabulary | undefined
   onCreate: (activity: BusinessActivityInput, onSuccess?: () => void) => void
   onDelete: (activity: BusinessActivity) => void
@@ -72,9 +74,10 @@ export const ActivitiesManager = ({
             ? toActivityInput(editingActivity)
             : emptyActivityDraft
         }
-        definedStatusesOptions={definedStatusesOptions}
         legalBasisOptions={legalBasisOptions}
+        retentionPolicyOptions={retentionPolicyOptions}
         roleOptions={roleOptions}
+        showLegalBasis={showLegalBasis}
         submitDisabled={isMutationPending}
         submitLabel={editingActivity ? "Save activity" : "Add activity"}
         onCancel={closeForm}
@@ -97,6 +100,7 @@ export const ActivitiesManager = ({
     <div className="grid gap-4">
       <ActivityList
         activities={activities}
+        showLegalBasis={showLegalBasis}
         vocabulary={vocabulary}
         onDelete={onDelete}
         onEdit={startEdit}

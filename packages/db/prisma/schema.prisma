@@ -287,8 +287,8 @@ model BusinessActivity {
   purpose            String                    @default("")
   role               String                    @default("")
   legalBasis         String[]                  @default([]) @map("legal_basis")
+  retentionPolicy    String?                   @map("retention_policy")
   retentionDays      Int                       @default(0) @map("retention_days")
-  retentionDaysStatus String?                  @map("retention_days_status")
   services           ServiceBusinessActivity[]
   createdAt          DateTime                  @default(now()) @map("created_at")
   updatedAt          DateTime                  @updatedAt @map("updated_at")

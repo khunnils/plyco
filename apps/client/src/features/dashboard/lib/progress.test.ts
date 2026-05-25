@@ -70,6 +70,10 @@ describe("dashboard progress", () => {
   it("skips privacy dependent fields when negative answers make them irrelevant", () => {
     const progress = privacyProgress({
       ...emptyProfileDraft,
+      company: {
+        ...emptyProfileDraft.company,
+        complianceGoals: ["gdpr"],
+      },
       privacy: {
         ...emptyProfileDraft.privacy,
         sendsMarketingEmails: false,
@@ -101,6 +105,27 @@ describe("dashboard progress", () => {
     expect(transfers).toMatchObject({ completedFields: 1, totalFields: 1 })
     expect(disclosures).toMatchObject({ completedFields: 2, totalFields: 2 })
     expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
+  })
+
+  it("skips privacy officer and representation progress for non-GDPR profiles", () => {
+    const progress = privacyProgress({
+      ...emptyProfileDraft,
+      company: {
+        ...emptyProfileDraft.company,
+        complianceGoals: ["soc_2"],
+      },
+      privacy: {
+        ...emptyProfileDraft.privacy,
+        dpoStatus: null,
+        euRepresentativeStatus: null,
+      },
+    })
+
+    expect(
+      progress.sections.find(
+        (section) => section.title === "Privacy Officers & Representation",
+      ),
+    ).toBeUndefined()
   })
 
   it("skips incident response last tested date when no plan exists", () => {

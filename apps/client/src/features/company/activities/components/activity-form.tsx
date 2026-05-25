@@ -5,7 +5,7 @@ import {
   type BusinessActivityInput,
 } from "@plyco/shared"
 import { useEffect } from "react"
-import { type Resolver, useForm } from "react-hook-form"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
@@ -18,7 +18,8 @@ export const ActivityForm = ({
   defaultValues,
   roleOptions,
   legalBasisOptions,
-  definedStatusesOptions,
+  retentionPolicyOptions,
+  showLegalBasis,
   submitLabel,
   submitDisabled = false,
   onSubmit,
@@ -27,7 +28,8 @@ export const ActivityForm = ({
   defaultValues: BusinessActivityInput
   roleOptions: Option[]
   legalBasisOptions: Option[]
-  definedStatusesOptions: Option[]
+  retentionPolicyOptions: Option[]
+  showLegalBasis: boolean
   submitLabel: string
   submitDisabled?: boolean
   onSubmit: (activity: BusinessActivityInput) => void
@@ -45,14 +47,17 @@ export const ActivityForm = ({
     form.reset(defaultValues)
   }, [defaultValues, form])
 
-  const retentionDaysStatus = form.watch("retentionDaysStatus")
-  const isRetentionDaysDisabled = retentionDaysStatus !== "defined"
+  const retentionPolicy = useWatch({
+    control: form.control,
+    name: "retentionPolicy",
+  })
+  const isRetentionDaysDisabled = retentionPolicy !== "fixed"
 
   useEffect(() => {
-    if (retentionDaysStatus === "not_defined") {
+    if (retentionPolicy !== "fixed") {
       form.setValue("retentionDays", 0)
     }
-  }, [retentionDaysStatus, form])
+  }, [retentionPolicy, form])
 
   const submitActivity = form.handleSubmit((activity) => {
     onSubmit(activity)
@@ -80,19 +85,21 @@ export const ActivityForm = ({
         name="role"
         options={[{ value: "", label: "Not set" }, ...roleOptions]}
       />
-      <MultiSelectField
-        control={form.control}
-        error={form.formState.errors.legalBasis?.root}
-        label="Legal basis"
-        name="legalBasis"
-        options={legalBasisOptions}
-        placeholder="Select legal basis"
-      />
+      {showLegalBasis ? (
+        <MultiSelectField
+          control={form.control}
+          error={form.formState.errors.legalBasis?.root}
+          label="Legal basis"
+          name="legalBasis"
+          options={legalBasisOptions}
+          placeholder="Select legal basis"
+        />
+      ) : null}
       <SelectField
         control={form.control}
-        label="Retention days status"
-        name="retentionDaysStatus"
-        options={[{ value: "", label: "Not set" }, ...definedStatusesOptions]}
+        label="Retention policy"
+        name="retentionPolicy"
+        options={[{ value: "", label: "Not set" }, ...retentionPolicyOptions]}
       />
       <TextField
         disabled={isRetentionDaysDisabled}

@@ -32,6 +32,7 @@ export const requiredCodeSetIds = [
   "vendor_category",
   "data_processing_level",
   "provider_system_type",
+  "activity_retention_policies",
   "defined_statuses",
 ] as const
 
@@ -540,6 +541,10 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["analytics", "Analytics"],
     ["advertising", "Advertising"],
     ["newsletter", "Newsletter"],
+  ]),
+  codeSet("activity_retention_policies", "Activity retention policies", true, [
+    ["fixed", "Fixed"],
+    ["not_defined", "Not defined"],
   ]),
   codeSet("defined_statuses", "Defined statuses", true, [
     ["defined", "Defined"],

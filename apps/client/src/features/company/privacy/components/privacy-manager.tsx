@@ -1,4 +1,8 @@
-import { type Provider, type Vocabulary } from "@plyco/shared"
+import {
+  isComplianceFieldVisible,
+  type Provider,
+  type Vocabulary,
+} from "@plyco/shared"
 
 import { ComplianceDisclosuresPanel } from "@/features/company/privacy/components/compliance-disclosures-panel"
 import { CookiePreferencesPanel } from "@/features/company/privacy/components/cookie-preferences-panel"
@@ -43,6 +47,10 @@ export const PrivacyManager = ({
   onSaveProfile: SaveProfile
 }) => {
   const progress = privacyProgress(profile)
+  const showPrivacyRepresentation = isComplianceFieldVisible(
+    "privacy.dpoStatus",
+    profile.company.complianceGoals,
+  )
 
   const getNeedsAttention = (sectionTitle: string) => {
     const section = progress.sections.find((s) => s.title === sectionTitle)
@@ -109,15 +117,17 @@ export const PrivacyManager = ({
         privacy={profile.privacy}
         onSave={savePrivacy}
       />
-      <PrivacyRepresentationPanel
-        dpoStatusOptions={dpoStatusOptions}
-        euRepresentativeStatusOptions={euRepresentativeStatusOptions}
-        isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Privacy Officers & Representation")}
-        privacy={profile.privacy}
-        vocabulary={vocabulary}
-        onSave={savePrivacy}
-      />
+      {showPrivacyRepresentation ? (
+        <PrivacyRepresentationPanel
+          dpoStatusOptions={dpoStatusOptions}
+          euRepresentativeStatusOptions={euRepresentativeStatusOptions}
+          isMutationPending={isMutationPending}
+          needsAttention={getNeedsAttention("Privacy Officers & Representation")}
+          privacy={profile.privacy}
+          vocabulary={vocabulary}
+          onSave={savePrivacy}
+        />
+      ) : null}
     </div>
   )
 }

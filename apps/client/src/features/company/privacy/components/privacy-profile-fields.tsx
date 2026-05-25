@@ -151,7 +151,7 @@ export const PrivacyProfileFields = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.privacy?.supportedRights?.root}
-          label="Supported rights"
+          label="Privacy supported rights"
           name="privacy.supportedRights"
           options={supportedRightOptions}
           placeholder="Select supported rights"

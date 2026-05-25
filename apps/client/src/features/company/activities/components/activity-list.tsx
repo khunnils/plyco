@@ -7,11 +7,13 @@ import { codeValueList } from "@/features/company/activities/lib/activity-displa
 
 export const ActivityList = ({
   activities,
+  showLegalBasis,
   vocabulary,
   onDelete,
   onEdit,
 }: {
   activities: BusinessActivity[]
+  showLegalBasis: boolean
   vocabulary: Vocabulary | undefined
   onEdit: (activity: BusinessActivity) => void
   onDelete: (activity: BusinessActivity) => void
@@ -43,17 +45,27 @@ export const ActivityList = ({
                   ? codeLabel(vocabulary, "activity_role", activity.role)
                   : "Not set"}
               </p>
-              <p className="text-xs text-slate-500">
-                <span className="font-medium text-slate-700">Legal basis: </span>
-                {codeValueList(vocabulary, "legal_basis", activity.legalBasis)}
-              </p>
+              {showLegalBasis ? (
+                <p className="text-xs text-slate-500">
+                  <span className="font-medium text-slate-700">
+                    Legal basis:{" "}
+                  </span>
+                  {codeValueList(vocabulary, "legal_basis", activity.legalBasis)}
+                </p>
+              ) : null}
               <p className="text-xs text-slate-500">
                 <span className="font-medium text-slate-700">Retention: </span>
-                {activity.retentionDaysStatus === "not_defined"
+                {activity.retentionPolicy === "not_defined"
                   ? "Not defined"
-                  : activity.retentionDaysStatus === "defined" && activity.retentionDays > 0
+                  : activity.retentionPolicy === "fixed" && activity.retentionDays > 0
                     ? `${activity.retentionDays} days`
-                    : "Not set"}
+                    : activity.retentionPolicy
+                      ? codeLabel(
+                          vocabulary,
+                          "activity_retention_policies",
+                          activity.retentionPolicy,
+                        )
+                      : "Not set"}
               </p>
             </div>
             <div className="flex gap-2">

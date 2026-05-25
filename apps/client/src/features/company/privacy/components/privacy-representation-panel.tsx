@@ -5,7 +5,7 @@ import {
   type Vocabulary,
 } from "@plyco/shared"
 import { useEffect, useState } from "react"
-import { type Resolver, useForm } from "react-hook-form"
+import { type Resolver, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
 import { SelectField } from "@/components/form/select-field"
@@ -128,8 +128,14 @@ export const PrivacyRepresentationPanel = ({
     values: draft,
   })
 
-  const dpoStatus = form.watch("dpoStatus")
-  const euRepresentativeStatus = form.watch("euRepresentativeStatus")
+  const dpoStatus = useWatch({
+    control: form.control,
+    name: "dpoStatus",
+  })
+  const euRepresentativeStatus = useWatch({
+    control: form.control,
+    name: "euRepresentativeStatus",
+  })
   const dpoAppointed = dpoStatus === APPOINTED_STATUS
   const euRepresentativeAppointed =
     euRepresentativeStatus === APPOINTED_STATUS

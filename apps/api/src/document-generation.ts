@@ -686,18 +686,22 @@ export class ReportContextBuilder {
         activity.legalBasis,
       ),
       retentionDays: activity.retentionDays,
-      retentionDaysStatus: activity.retentionDaysStatus,
-      retentionDaysStatusLabel: this.codeLabel(
+      retentionPolicy: activity.retentionPolicy,
+      retentionPolicyLabel: this.codeLabel(
         vocabulary,
-        "defined_statuses",
-        activity.retentionDaysStatus,
+        "activity_retention_policies",
+        activity.retentionPolicy,
       ),
       retentionLabel:
-        activity.retentionDaysStatus === "not_defined"
+        activity.retentionPolicy === "not_defined"
           ? "Not defined"
-          : activity.retentionDaysStatus === "defined" && activity.retentionDays > 0
+          : activity.retentionPolicy === "fixed" && activity.retentionDays > 0
             ? `${activity.retentionDays} days`
-            : "Not set",
+            : this.codeLabel(
+                vocabulary,
+                "activity_retention_policies",
+                activity.retentionPolicy,
+              ) || "Not set",
     }
   }
 

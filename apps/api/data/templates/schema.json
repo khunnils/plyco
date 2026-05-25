@@ -1411,18 +1411,18 @@
 	          "example": 365
 	        },
 	        {
-	          "key": "retentionDaysStatus",
-	          "label": "Retention days status",
+	          "key": "retentionPolicy",
+	          "label": "Retention policy",
 	          "type": "string",
-	          "description": "Whether retention days is defined or not.",
-	          "example": "defined"
+	          "description": "Policy used to describe how long data for this activity is retained.",
+	          "example": "fixed"
 	        },
 	        {
-	          "key": "retentionDaysStatusLabel",
-	          "label": "Retention days status label",
+	          "key": "retentionPolicyLabel",
+	          "label": "Retention policy label",
 	          "type": "string",
-	          "description": "Whether retention days is defined or not label.",
-	          "example": "Defined"
+	          "description": "Retention policy label.",
+	          "example": "Fixed"
 	        }
 	      ]
 	    },

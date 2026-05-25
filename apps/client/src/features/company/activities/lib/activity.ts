@@ -8,8 +8,8 @@ export const emptyActivityDraft: BusinessActivityInput = {
   purpose: "",
   role: "",
   legalBasis: [],
+  retentionPolicy: null,
   retentionDays: 0,
-  retentionDaysStatus: null,
 }
 
 export const toActivityInput = (
@@ -19,6 +19,6 @@ export const toActivityInput = (
   purpose: activity.purpose,
   role: activity.role,
   legalBasis: activity.legalBasis,
+  retentionPolicy: activity.retentionPolicy ?? null,
   retentionDays: activity.retentionDays,
-  retentionDaysStatus: activity.retentionDaysStatus ?? null,
 })

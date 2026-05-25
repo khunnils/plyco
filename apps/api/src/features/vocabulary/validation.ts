@@ -145,13 +145,13 @@ export const validateBusinessActivityCodes = async (
       activity.legalBasis,
       "businessActivity.legalBasis",
     ),
-    activity.retentionDaysStatus
+    activity.retentionPolicy
       ? assertCode(
           vocabularyRepository,
           organizationId,
-          "defined_statuses",
-          activity.retentionDaysStatus,
-          "businessActivity.retentionDaysStatus",
+          "activity_retention_policies",
+          activity.retentionPolicy,
+          "businessActivity.retentionPolicy",
         )
       : Promise.resolve(),
   ])

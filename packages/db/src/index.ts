@@ -389,7 +389,7 @@ export function mapBusinessActivityRecord(record: {
   role: string
   legalBasis: string[]
   retentionDays: number
-  retentionDaysStatus: string | null
+  retentionPolicy: string | null
   createdAt: Date
   updatedAt: Date
 }): BusinessActivity {
@@ -399,8 +399,8 @@ export function mapBusinessActivityRecord(record: {
     purpose: record.purpose,
     role: record.role,
     legalBasis: record.legalBasis,
+    retentionPolicy: record.retentionPolicy,
     retentionDays: record.retentionDays,
-    retentionDaysStatus: record.retentionDaysStatus,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   })

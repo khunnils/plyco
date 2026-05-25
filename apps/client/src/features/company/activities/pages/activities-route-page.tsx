@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
+import { isComplianceFieldVisible } from "@plyco/shared"
 
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
@@ -22,6 +23,10 @@ export const ActivitiesRoutePage = () => {
 
   const snapshot = securityProfile.data
   const businessActivities = snapshot?.businessActivities ?? []
+  const showLegalBasis = isComplianceFieldVisible(
+    "businessActivity.legalBasis",
+    snapshot?.organization?.company.complianceGoals,
+  )
   const vocabularyData = vocabulary.data
 
   const [showActivityForm, setShowActivityForm] = useState(false)
@@ -42,7 +47,9 @@ export const ActivitiesRoutePage = () => {
           <div>
             <h2 className="text-base font-semibold text-slate-950">Activities</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Processing activities with purpose, role, and legal basis.
+              {showLegalBasis
+                ? "Processing activities with purpose, role, legal basis, and retention."
+                : "Processing activities with purpose, role, and retention."}
             </p>
           </div>
           {businessActivities.length > 0 &&
@@ -66,7 +73,11 @@ export const ActivitiesRoutePage = () => {
           isMutationPending={isActivityMutationPending}
           legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
           roleOptions={codeOptions(vocabularyData, "activity_role")}
-          definedStatusesOptions={codeOptions(vocabularyData, "defined_statuses")}
+          retentionPolicyOptions={codeOptions(
+            vocabularyData,
+            "activity_retention_policies",
+          )}
+          showLegalBasis={showLegalBasis}
           vocabulary={vocabularyData}
           onCreate={(activity, onSuccess) =>
             createBusinessActivity.mutate(activity, { onSuccess })
