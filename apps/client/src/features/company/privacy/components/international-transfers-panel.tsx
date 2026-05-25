@@ -13,6 +13,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import {
@@ -36,14 +37,17 @@ const toTransfersDraft = (privacy: PrivacyProfile): TransfersDraft => ({
 const transferRows = (
   draft: TransfersDraft,
   vocabulary: Vocabulary | undefined
-) =>
-  [
+): ProfilePanelDetailRow[] => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Cross-border transfers",
       boolText(draft.crossBorderTransfers),
       privacyHelperText.crossBorderTransfers,
     ],
-    [
+  ]
+
+  if (draft.crossBorderTransfers === true) {
+    rows.push([
       "Transfer mechanisms",
       codeValueList(
         vocabulary,
@@ -51,8 +55,11 @@ const transferRows = (
         draft.transferMechanisms
       ),
       privacyHelperText.transferMechanisms,
-    ],
-  ] as const
+    ])
+  }
+
+  return rows
+}
 
 export const InternationalTransfersPanel = ({
   isMutationPending,

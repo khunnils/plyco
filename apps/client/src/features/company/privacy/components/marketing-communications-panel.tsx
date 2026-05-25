@@ -16,6 +16,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { providerNamesForSystem } from "@/features/company/lib/profile"
@@ -47,14 +48,17 @@ const marketingRows = (
   draft: MarketingDraft,
   vocabulary: Vocabulary | undefined,
   catalogProviders: Provider[]
-) =>
-  [
+): ProfilePanelDetailRow[] => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Marketing emails",
       boolText(draft.sendsMarketingEmails),
       privacyHelperText.sendsMarketingEmails,
     ],
-    [
+  ]
+
+  if (draft.sendsMarketingEmails === true) {
+    rows.push([
       "Marketing opt-out method",
       draft.marketingOptOutMethod
         ? codeLabel(
@@ -64,13 +68,17 @@ const marketingRows = (
           )
         : "Not set",
       privacyHelperText.marketingOptOutMethod,
-    ],
-    [
-      "Transactional emails",
-      boolText(draft.transactionalEmailsSent),
-      privacyHelperText.transactionalEmailsSent,
-    ],
-    [
+    ])
+  }
+
+  rows.push([
+    "Transactional emails",
+    boolText(draft.transactionalEmailsSent),
+    privacyHelperText.transactionalEmailsSent,
+  ])
+
+  if (draft.sendsMarketingEmails === true) {
+    rows.push([
       "Newsletter provider",
       providerNamesForSystem(
         draft.organizationProviders,
@@ -78,8 +86,11 @@ const marketingRows = (
         "newsletter"
       ),
       privacyHelperText.newsletterProvider,
-    ],
-  ] as const
+    ])
+  }
+
+  return rows
+}
 
 export const MarketingCommunicationsPanel = ({
   catalogProviders,

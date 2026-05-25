@@ -9,6 +9,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { privacyHelperText } from "./privacy-helper-text"
@@ -27,24 +28,31 @@ const toComplianceDraft = (privacy: PrivacyProfile): ComplianceDraft => ({
   usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
 })
 
-const complianceRows = (draft: ComplianceDraft) =>
-  [
+const complianceRows = (draft: ComplianceDraft): ProfilePanelDetailRow[] => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Sells or shares data (CCPA)",
       boolText(draft.sellsOrSharesData),
       privacyHelperText.sellsOrSharesData,
     ],
-    [
+  ]
+
+  if (draft.sellsOrSharesData === true) {
+    rows.push([
       "Do Not Sell link",
       draft.doNotSellLink || "Not set",
       privacyHelperText.doNotSellLink,
-    ],
-    [
-      "Automated decision making",
-      boolText(draft.usesAutomatedDecisionMaking),
-      privacyHelperText.usesAutomatedDecisionMaking,
-    ],
-  ] as const
+    ])
+  }
+
+  rows.push([
+    "Automated decision making",
+    boolText(draft.usesAutomatedDecisionMaking),
+    privacyHelperText.usesAutomatedDecisionMaking,
+  ])
+
+  return rows
+}
 
 export const ComplianceDisclosuresPanel = ({
   isMutationPending,

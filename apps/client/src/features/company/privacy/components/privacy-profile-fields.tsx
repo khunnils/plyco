@@ -250,7 +250,7 @@ export const PrivacyProfileFields = ({
       <div className="grid gap-4 md:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="Cross-border transfers"
+          label="Transfers data internationally"
           name="privacy.crossBorderTransfers"
         />
         <MultiSelectField

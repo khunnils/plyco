@@ -14,6 +14,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import {
@@ -44,8 +45,11 @@ const toRightsDraft = (privacy: PrivacyProfile): RightsDraft => ({
   appealProcessExists: privacy.appealProcessExists,
 })
 
-const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
-  [
+const rightsRows = (
+  draft: RightsDraft,
+  vocabulary: Vocabulary | undefined
+): ProfilePanelDetailRow[] => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Privacy supported rights",
       codeValueList(
@@ -73,13 +77,17 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
         : "Not set",
       privacyHelperText.responseTimelineDaysStatus,
     ],
-    [
+  ]
+
+  if (draft.responseTimelineDaysStatus === "defined") {
+    rows.push([
       "Response timeline",
-      draft.responseTimelineDaysStatus === "not_defined"
-        ? "Not defined"
-        : formatDays(draft.responseTimelineDays),
+      formatDays(draft.responseTimelineDays),
       privacyHelperText.responseTimelineDays,
-    ],
+    ])
+  }
+
+  rows.push(
     [
       "Identity verification required",
       boolText(draft.identityVerificationRequired),
@@ -94,8 +102,11 @@ const rightsRows = (draft: RightsDraft, vocabulary: Vocabulary | undefined) =>
       "Appeal process for denied requests",
       boolText(draft.appealProcessExists),
       privacyHelperText.appealProcessExists,
-    ],
-  ] as const
+    ]
+  )
+
+  return rows
+}
 
 export const PrivacyRightsPanel = ({
   isMutationPending,
