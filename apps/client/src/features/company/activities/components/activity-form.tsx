@@ -12,6 +12,7 @@ import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
+import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ActivityForm = ({
@@ -87,6 +88,7 @@ export const ActivityForm = ({
       />
       <SelectField
         control={form.control}
+        helperText={activityHelperText.role}
         label="Role"
         name="role"
         options={[{ value: "", label: "Not set" }, ...roleOptions]}
@@ -103,6 +105,7 @@ export const ActivityForm = ({
       ) : null}
       <SelectField
         control={form.control}
+        helperText={activityHelperText.retentionPolicy}
         label="Retention policy"
         name="retentionPolicy"
         options={[{ value: "", label: "Not set" }, ...retentionPolicyOptions]}
@@ -110,6 +113,7 @@ export const ActivityForm = ({
       <TextField
         disabled={isRetentionDaysDisabled}
         error={form.formState.errors.retentionDays}
+        helperText={activityHelperText.retentionDays}
         label="Retention days"
         name="retentionDays"
         placeholder="0"

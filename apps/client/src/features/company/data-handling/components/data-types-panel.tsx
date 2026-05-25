@@ -45,7 +45,9 @@ export const DataTypesPanel = ({
   vocabulary: Vocabulary | undefined
   onSave: (dataTypes: StoredDataType[], onSuccess?: () => void) => void
 }) => {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
+  const [expandedIndexes, setExpandedIndexes] = useState<Set<number>>(
+    () => new Set()
+  )
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
@@ -62,7 +64,11 @@ export const DataTypesPanel = ({
   const startEdit = (index: number) => {
     setShowCreateForm(false)
     setEditingIndex(index)
-    setExpandedIndex(null)
+    setExpandedIndexes((current) => {
+      const next = new Set(current)
+      next.delete(index)
+      return next
+    })
   }
 
   const handleCreate = (dataType: StoredDataType) => {
@@ -84,18 +90,36 @@ export const DataTypesPanel = ({
 
   const handleDelete = (index: number) => {
     onSave(dataTypes.filter((_, currentIndex) => currentIndex !== index))
-    setExpandedIndex((current) => {
-      if (current === null) {
-        return null
-      }
-      if (current === index) {
-        return null
-      }
-      return current > index ? current - 1 : current
+    setExpandedIndexes((current) => {
+      const next = new Set<number>()
+
+      current.forEach((currentIndex) => {
+        if (currentIndex < index) {
+          next.add(currentIndex)
+        } else if (currentIndex > index) {
+          next.add(currentIndex - 1)
+        }
+      })
+
+      return next
     })
     if (editingIndex === index) {
       closeForm()
     }
+  }
+
+  const toggleExpanded = (index: number) => {
+    setExpandedIndexes((current) => {
+      const next = new Set(current)
+
+      if (next.has(index)) {
+        next.delete(index)
+      } else {
+        next.add(index)
+      }
+
+      return next
+    })
   }
 
   if (showCreateForm) {
@@ -104,7 +128,7 @@ export const DataTypesPanel = ({
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
+      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
           <p className="mt-1 text-sm text-slate-500">
@@ -112,7 +136,8 @@ export const DataTypesPanel = ({
             handled.
           </p>
         </div>
-        {showCreateForm || (editingIndex !== null && dataTypes[editingIndex]) ? (
+        {showCreateForm ||
+        (editingIndex !== null && dataTypes[editingIndex]) ? (
           <div className="flex gap-2">
             <Button
               type="submit"
@@ -121,11 +146,7 @@ export const DataTypesPanel = ({
             >
               {showCreateForm ? "Add" : "Save"}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={closeForm}
-            >
+            <Button type="button" variant="outline" onClick={closeForm}>
               Cancel
             </Button>
           </div>
@@ -169,30 +190,17 @@ export const DataTypesPanel = ({
         ) : (
           <div className="grid gap-3">
             {dataTypes.map((dataType, index) => {
-              const expanded = expandedIndex === index
+              const expanded = expandedIndexes.has(index)
               const title = displayTitle(dataType, index)
 
               return (
                 <article
-                  className={[
-                    "border bg-slate-50",
-                    expanded
-                      ? "border-blue-300 ring-2 ring-blue-100"
-                      : "border-slate-200",
-                  ].join(" ")}
+                  className="cursor-pointer border border-slate-200 bg-white p-4"
                   key={`${dataType.name}-${index}`}
+                  onClick={() => toggleExpanded(index)}
                 >
-                  <div className="flex items-start gap-2 p-4">
-                    <button
-                      aria-expanded={expanded}
-                      className="min-w-0 flex-1 text-left"
-                      type="button"
-                      onClick={() =>
-                        setExpandedIndex((current) =>
-                          current === index ? null : index
-                        )
-                      }
-                    >
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="grid flex-1 gap-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="text-sm font-semibold text-slate-950">
                           {title}
@@ -209,18 +217,45 @@ export const DataTypesPanel = ({
                           {dataType.description}
                         </p>
                       ) : null}
-                    </button>
+                      {expanded ? (
+                        <ProfilePanelDetailGrid
+                          rows={
+                            [
+                              [
+                                "Subject type",
+                                codeValueList(
+                                  vocabulary,
+                                  "subject_types",
+                                  dataType.subjectTypes
+                                ),
+                                dataHelperText.subjectTypes,
+                              ],
+                              [
+                                "Collection method",
+                                codeValueList(
+                                  vocabulary,
+                                  "collection_methods",
+                                  dataType.collectionMethods
+                                ),
+                                dataHelperText.collectionMethods,
+                              ],
+                            ] as const satisfies readonly ProfilePanelDetailRow[]
+                          }
+                        />
+                      ) : null}
+                    </div>
                     <div className="flex shrink-0 gap-2">
                       <Button
-                        aria-label={expanded ? "Collapse" : "Expand"}
+                        aria-label={
+                          expanded ? "Collapse data type" : "Expand data type"
+                        }
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() =>
-                          setExpandedIndex((current) =>
-                            current === index ? null : index
-                          )
-                        }
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          toggleExpanded(index)
+                        }}
                       >
                         {expanded ? <ChevronUp /> : <ChevronDown />}
                       </Button>
@@ -229,7 +264,10 @@ export const DataTypesPanel = ({
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() => startEdit(index)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          startEdit(index)
+                        }}
                       >
                         <Pencil />
                       </Button>
@@ -238,40 +276,15 @@ export const DataTypesPanel = ({
                         size="icon-sm"
                         type="button"
                         variant="outline"
-                        onClick={() => handleDelete(index)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleDelete(index)
+                        }}
                       >
                         <Trash2 />
                       </Button>
                     </div>
                   </div>
-
-                  {expanded ? (
-                    <div className="px-4 pb-4 pt-3 border-t border-slate-100">
-                      <ProfilePanelDetailGrid
-                        itemBgClassName="bg-white"
-                        rows={[
-                          [
-                            "Subject type",
-                            codeValueList(
-                              vocabulary,
-                              "subject_types",
-                              dataType.subjectTypes
-                            ),
-                            dataHelperText.subjectTypes,
-                          ],
-                          [
-                            "Collection method",
-                            codeValueList(
-                              vocabulary,
-                              "collection_methods",
-                              dataType.collectionMethods
-                            ),
-                            dataHelperText.collectionMethods,
-                          ],
-                        ] as const satisfies readonly ProfilePanelDetailRow[]}
-                      />
-                    </div>
-                  ) : null}
                 </article>
               )
             })}

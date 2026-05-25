@@ -1,9 +1,15 @@
-import { Pencil, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react"
 import { type BusinessActivity, type Vocabulary } from "@plyco/shared"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { ProfilePanelDetailGrid } from "@/features/company/components/profile-panel-shell"
+import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
-import { codeValueList } from "@/features/company/activities/lib/activity-display"
+import {
+  activityRetentionLabel,
+  codeValueList,
+} from "@/features/company/activities/lib/activity-display"
 
 export const ActivityList = ({
   activities,
@@ -18,6 +24,10 @@ export const ActivityList = ({
   onEdit: (activity: BusinessActivity) => void
   onDelete: (activity: BusinessActivity) => void
 }) => {
+  const [expandedActivityIds, setExpandedActivityIds] = useState<Set<string>>(
+    () => new Set()
+  )
+
   if (activities.length === 0) {
     return (
       <div className="border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-500">
@@ -28,67 +38,126 @@ export const ActivityList = ({
 
   return (
     <div className="grid gap-4">
-      {activities.map((activity) => (
-        <article
-          className="border border-slate-200 bg-white p-4"
-          key={activity.id}
-        >
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="grid gap-2">
-              <h3 className="font-semibold text-slate-950">{activity.name}</h3>
-              <p className="text-sm text-slate-600">
-                {activity.purpose.trim() || "No purpose"}
-              </p>
-              <p className="text-xs text-slate-500">
-                <span className="font-medium text-slate-700">Role: </span>
-                {activity.role
-                  ? codeLabel(vocabulary, "activity_role", activity.role)
-                  : "Not set"}
-              </p>
-              {showLegalBasis ? (
-                <p className="text-xs text-slate-500">
-                  <span className="font-medium text-slate-700">
-                    Legal basis:{" "}
-                  </span>
-                  {codeValueList(vocabulary, "legal_basis", activity.legalBasis)}
+      {activities.map((activity) => {
+        const expanded = expandedActivityIds.has(activity.id)
+
+        return (
+          <article
+            className="cursor-pointer border border-slate-200 bg-white p-4"
+            key={activity.id}
+            onClick={() =>
+              setExpandedActivityIds((current) => {
+                const next = new Set(current)
+
+                if (next.has(activity.id)) {
+                  next.delete(activity.id)
+                } else {
+                  next.add(activity.id)
+                }
+
+                return next
+              })
+            }
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div className="grid flex-1 gap-3">
+                <h3 className="font-semibold text-slate-950">
+                  {activity.name}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  {activity.purpose.trim() || "No purpose"}
                 </p>
-              ) : null}
-              <p className="text-xs text-slate-500">
-                <span className="font-medium text-slate-700">Retention: </span>
-                {activity.retentionPolicy === "not_defined"
-                  ? "Not defined"
-                  : activity.retentionPolicy === "fixed" && activity.retentionDays > 0
-                    ? `${activity.retentionDays} days`
-                    : activity.retentionPolicy
-                      ? codeLabel(
+                {showLegalBasis ? (
+                  <p className="text-xs text-slate-500">
+                    <span className="font-medium text-slate-700">
+                      Legal basis:{" "}
+                    </span>
+                    {codeValueList(
+                      vocabulary,
+                      "legal_basis",
+                      activity.legalBasis
+                    )}
+                  </p>
+                ) : null}
+                {expanded ? (
+                  <ProfilePanelDetailGrid
+                    rows={[
+                      [
+                        "Role",
+                        activity.role
+                          ? codeLabel(
+                              vocabulary,
+                              "activity_role",
+                              activity.role
+                            )
+                          : "Not set",
+                        activityHelperText.role,
+                      ],
+                      [
+                        "Retention",
+                        activityRetentionLabel(
                           vocabulary,
-                          "activity_retention_policies",
                           activity.retentionPolicy,
-                        )
-                      : "Not set"}
-              </p>
+                          activity.retentionDays
+                        ),
+                        activityHelperText.retentionPolicy,
+                      ],
+                    ]}
+                  />
+                ) : null}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  aria-label={
+                    expanded ? "Collapse activity" : "Expand activity"
+                  }
+                  size="icon-sm"
+                  type="button"
+                  variant="outline"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setExpandedActivityIds((current) => {
+                      const next = new Set(current)
+
+                      if (next.has(activity.id)) {
+                        next.delete(activity.id)
+                      } else {
+                        next.add(activity.id)
+                      }
+
+                      return next
+                    })
+                  }}
+                >
+                  {expanded ? <ChevronUp /> : <ChevronDown />}
+                </Button>
+                <Button
+                  size="icon-sm"
+                  type="button"
+                  variant="outline"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onEdit(activity)
+                  }}
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  size="icon-sm"
+                  type="button"
+                  variant="outline"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onDelete(activity)
+                  }}
+                >
+                  <Trash2 />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                size="icon-sm"
-                type="button"
-                variant="outline"
-                onClick={() => onEdit(activity)}
-              >
-                <Pencil />
-              </Button>
-              <Button
-                size="icon-sm"
-                type="button"
-                variant="outline"
-                onClick={() => onDelete(activity)}
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        )
+      })}
     </div>
   )
 }
