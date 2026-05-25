@@ -20,6 +20,7 @@ import {
 import { boolText } from "@/features/company/lib/display"
 import { infrastructureSystemTypes } from "@/features/company/infrastructure/lib/infrastructure-provider-utils"
 import { providerNamesForSystem } from "@/features/company/lib/profile"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const providersSchema = infrastructureProfileSchema.pick({
   organizationProviders: true,
@@ -44,22 +45,25 @@ const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
         catalogProviders,
         "cloud"
       ),
+      infrastructureHelperText.cloudProviders,
     ],
     [
-      "Source control",
+      "Code repository",
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
         "source_control"
       ),
+      infrastructureHelperText.sourceControlProvider,
     ],
     [
-      "Auth provider",
+      "Login provider",
       providerNamesForSystem(
         draft.organizationProviders,
         catalogProviders,
         "auth"
       ),
+      infrastructureHelperText.authProvider,
     ],
     [
       "Password manager",
@@ -68,9 +72,18 @@ const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
         catalogProviders,
         "password_manager"
       ),
+      infrastructureHelperText.passwordManager,
     ],
-    ["MFA enabled", boolText(draft.mfaEnabled)],
-    ["Encrypted devices", boolText(draft.encryptedDevicesRequired)],
+    [
+      "MFA enabled",
+      boolText(draft.mfaEnabled),
+      infrastructureHelperText.mfaEnabled,
+    ],
+    [
+      "Work devices encrypted",
+      boolText(draft.encryptedDevicesRequired),
+      infrastructureHelperText.encryptedDevicesRequired,
+    ],
   ] as const
 
 export const InfrastructureProvidersPanel = ({
@@ -119,12 +132,23 @@ export const InfrastructureProvidersPanel = ({
       onSave={submit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <CloudProviderField form={form} providers={catalogProviders} />
+        <CloudProviderField
+          form={form}
+          helperText={infrastructureHelperText.cloudProviders}
+          providers={catalogProviders}
+        />
         {infrastructureSystemTypes
           .filter((systemType) => systemType !== "cloud")
           .map((systemType) => (
             <SingleProviderField
               form={form}
+              helperText={
+                systemType === "source_control"
+                  ? infrastructureHelperText.sourceControlProvider
+                  : systemType === "auth"
+                    ? infrastructureHelperText.authProvider
+                    : infrastructureHelperText.passwordManager
+              }
               key={systemType}
               providers={catalogProviders}
               systemType={systemType}
@@ -132,12 +156,14 @@ export const InfrastructureProvidersPanel = ({
           ))}
         <ToggleField
           control={form.control}
+          helperText={infrastructureHelperText.mfaEnabled}
           label="MFA enabled"
           name="mfaEnabled"
         />
         <ToggleField
           control={form.control}
-          label="Encrypted devices required"
+          helperText={infrastructureHelperText.encryptedDevicesRequired}
+          label="Work devices encrypted"
           name="encryptedDevicesRequired"
         />
       </div>

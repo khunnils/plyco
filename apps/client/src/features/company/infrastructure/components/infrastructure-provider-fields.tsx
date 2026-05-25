@@ -25,7 +25,7 @@ const comboboxInputClassName =
 
 const selectedProviderIds = (
   organizationProviders: ProviderSelection[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) =>
   organizationProviders
     .filter((provider) => provider.systemType === systemType)
@@ -33,7 +33,7 @@ const selectedProviderIds = (
 
 const providerOptions = (
   providers: Provider[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) => [
   { value: "none", label: "None" },
   ...providers
@@ -43,9 +43,11 @@ const providerOptions = (
 
 export const CloudProviderField = ({
   form,
+  helperText,
   providers,
 }: {
   form: UseFormReturn<ProvidersDraft>
+  helperText?: string
   providers: Provider[]
 }) => {
   const organizationProviders = form.watch("organizationProviders")
@@ -55,6 +57,7 @@ export const CloudProviderField = ({
   return (
     <MultiSelectField
       control={form.control}
+      helperText={helperText}
       label="Cloud providers"
       name="organizationProviders"
       options={options}
@@ -62,7 +65,7 @@ export const CloudProviderField = ({
       value={selectedIds}
       onValueChange={(providerIds) => {
         const otherProviders = organizationProviders.filter(
-          (provider) => provider.systemType !== "cloud",
+          (provider) => provider.systemType !== "cloud"
         )
 
         let nextIds = providerIds
@@ -83,7 +86,7 @@ export const CloudProviderField = ({
               providerId,
             })),
           ],
-          { shouldDirty: true, shouldValidate: true },
+          { shouldDirty: true, shouldValidate: true }
         )
       }}
     />
@@ -92,10 +95,12 @@ export const CloudProviderField = ({
 
 export const SingleProviderField = ({
   form,
+  helperText,
   providers,
   systemType,
 }: {
   form: UseFormReturn<ProvidersDraft>
+  helperText?: string
   providers: Provider[]
   systemType: InfrastructureProviderSystemType
 }) => {
@@ -106,19 +111,19 @@ export const SingleProviderField = ({
     ...providerOptions(providers, systemType),
   ]
   const optionLabelByValue = new Map(
-    options.map((option) => [option.value, option.label]),
+    options.map((option) => [option.value, option.label])
   )
   const fieldId = `provider-${systemType}`
 
   const setSystemProvider = (providerId: string) => {
     const otherProviders = organizationProviders.filter(
-      (provider) => provider.systemType !== systemType,
+      (provider) => provider.systemType !== systemType
     )
 
     form.setValue(
       "organizationProviders",
       [...otherProviders, ...(providerId ? [{ systemType, providerId }] : [])],
-      { shouldDirty: true, shouldValidate: true },
+      { shouldDirty: true, shouldValidate: true }
     )
   }
 
@@ -127,7 +132,12 @@ export const SingleProviderField = ({
       className="grid gap-2 text-sm font-medium text-slate-800"
       htmlFor={fieldId}
     >
-      {infrastructureProviderLabels[systemType]}
+      <span>{infrastructureProviderLabels[systemType]}</span>
+      {helperText ? (
+        <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+          {helperText}
+        </span>
+      ) : null}
       <Combobox
         items={options.map((option) => option.value)}
         value={selectedIds[0] ?? ""}

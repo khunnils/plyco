@@ -1,6 +1,4 @@
-import {
-  type ProviderSystemType,
-} from "@plyco/shared"
+import { type ProviderSystemType } from "@plyco/shared"
 
 export type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
@@ -18,8 +16,8 @@ export const infrastructureProviderLabels: Record<
   InfrastructureProviderSystemType,
   string
 > = {
-  auth: "Auth provider",
-  source_control: "Source control provider",
-  cloud: "Cloud provider",
+  auth: "Login provider",
+  source_control: "Code repository",
+  cloud: "Cloud providers",
   password_manager: "Password manager",
 }

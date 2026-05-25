@@ -16,6 +16,7 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const vendorRiskSchema = infrastructureProfileSchema.pick({
   vendorReviewRequired: true,
@@ -38,14 +39,23 @@ const vendorRiskRows = (
   vocabulary: Vocabulary | undefined
 ) =>
   [
-    ["Vendor review required", boolText(draft.vendorReviewRequired)],
     [
-      "Vendor review cadence",
+      "Vendor review required",
+      boolText(draft.vendorReviewRequired),
+      infrastructureHelperText.vendorReviewRequired,
+    ],
+    [
+      "Vendor review frequency",
       draft.vendorReviewCadence
         ? codeLabel(vocabulary, "security_cadences", draft.vendorReviewCadence)
         : "Not set",
+      infrastructureHelperText.vendorReviewCadence,
     ],
-    ["DPA required for processors", boolText(draft.dpaRequiredForProcessors)],
+    [
+      "DPA required for processors",
+      boolText(draft.dpaRequiredForProcessors),
+      infrastructureHelperText.dpaRequiredForProcessors,
+    ],
   ] as const
 
 export const VendorRiskPanel = ({
@@ -98,18 +108,21 @@ export const VendorRiskPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={infrastructureHelperText.vendorReviewRequired}
           label="Vendor review required"
           name="vendorReviewRequired"
         />
         <SelectField
           control={form.control}
-          label="Vendor review cadence"
+          helperText={infrastructureHelperText.vendorReviewCadence}
+          label="Vendor review frequency"
           name="vendorReviewCadence"
           options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
           placeholder="Not set"
         />
         <ToggleField
           control={form.control}
+          helperText={infrastructureHelperText.dpaRequiredForProcessors}
           label="DPA required for processors"
           name="dpaRequiredForProcessors"
         />

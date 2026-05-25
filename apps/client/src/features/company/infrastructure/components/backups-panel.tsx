@@ -15,7 +15,12 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { codeLabel, codeOptions, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeLabel,
+  codeOptions,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const backupsSchema = infrastructureProfileSchema.pick({
   backupsEnabled: true,
@@ -39,23 +44,30 @@ const toBackupsDraft = (
 
 const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) =>
   [
-    ["Backups", boolText(draft.backupsEnabled)],
     [
-      "Backup cadence",
+      "Backups enabled",
+      boolText(draft.backupsEnabled),
+      infrastructureHelperText.backupsEnabled,
+    ],
+    [
+      "Backup frequency",
       draft.backupCadence
         ? codeLabel(vocabulary, "security_cadences", draft.backupCadence)
         : "Not set",
+      infrastructureHelperText.backupCadence,
     ],
     [
       "Backup retention days",
       draft.backupRetentionDaysStatus === "not_defined"
         ? "Not defined"
-        : draft.backupRetentionDaysStatus === "defined" && draft.backupRetentionDays !== null
+        : draft.backupRetentionDaysStatus === "defined" &&
+            draft.backupRetentionDays !== null
           ? `${draft.backupRetentionDays} days`
           : "Not set",
+      infrastructureHelperText.backupRetentionDays,
     ],
     [
-      "Restore testing cadence",
+      "Restore test frequency",
       draft.restoreTestingCadence
         ? codeLabel(
             vocabulary,
@@ -63,6 +75,7 @@ const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) =>
             draft.restoreTestingCadence
           )
         : "Not set",
+      infrastructureHelperText.restoreTestingCadence,
     ],
   ] as const
 
@@ -125,19 +138,22 @@ export const BackupsPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={infrastructureHelperText.backupsEnabled}
           label="Backups enabled"
           name="backupsEnabled"
         />
         <SelectField
           control={form.control}
-          label="Backup cadence"
+          helperText={infrastructureHelperText.backupCadence}
+          label="Backup frequency"
           name="backupCadence"
           options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
           placeholder="Not set"
         />
         <SelectField
           control={form.control}
-          label="Backup retention days status"
+          helperText={infrastructureHelperText.backupRetentionDaysStatus}
+          label="Backup retention status"
           name="backupRetentionDaysStatus"
           options={[
             { value: "", label: "Not set" },
@@ -146,7 +162,10 @@ export const BackupsPanel = ({
           placeholder="Not set"
         />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
-          Backup retention days
+          <span>Backup retention days</span>
+          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+            {infrastructureHelperText.backupRetentionDays}
+          </span>
           <input
             className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
             disabled={isBackupRetentionDaysDisabled}
@@ -160,7 +179,8 @@ export const BackupsPanel = ({
         </label>
         <SelectField
           control={form.control}
-          label="Restore testing cadence"
+          helperText={infrastructureHelperText.restoreTestingCadence}
+          label="Restore test frequency"
           name="restoreTestingCadence"
           options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
           placeholder="Not set"

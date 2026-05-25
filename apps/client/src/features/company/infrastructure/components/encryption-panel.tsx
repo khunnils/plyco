@@ -14,6 +14,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const encryptionSchema = infrastructureProfileSchema.pick({
   atRestAlgorithm: true,
@@ -37,7 +38,7 @@ const encryptionRows = (
 ) =>
   [
     [
-      "At-rest algorithm",
+      "Stored data encryption",
       draft.atRestAlgorithm
         ? codeLabel(
             vocabulary,
@@ -45,6 +46,7 @@ const encryptionRows = (
             draft.atRestAlgorithm
           )
         : "Not set",
+      infrastructureHelperText.atRestAlgorithm,
     ],
     [
       "Minimum TLS version",
@@ -55,6 +57,7 @@ const encryptionRows = (
             draft.inTransitMinimumTlsVersion
           )
         : "Not set",
+      infrastructureHelperText.inTransitMinimumTlsVersion,
     ],
     [
       "Key management",
@@ -65,6 +68,7 @@ const encryptionRows = (
             draft.keyManagementProvider
           )
         : "Not set",
+      infrastructureHelperText.keyManagementProvider,
     ],
   ] as const
 
@@ -122,7 +126,8 @@ export const EncryptionPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField
           control={form.control}
-          label="At-rest algorithm"
+          helperText={infrastructureHelperText.atRestAlgorithm}
+          label="Stored data encryption"
           name="atRestAlgorithm"
           options={[
             { value: "", label: "Not set" },
@@ -132,6 +137,7 @@ export const EncryptionPanel = ({
         />
         <SelectField
           control={form.control}
+          helperText={infrastructureHelperText.inTransitMinimumTlsVersion}
           label="Minimum TLS version"
           name="inTransitMinimumTlsVersion"
           options={[
@@ -142,7 +148,8 @@ export const EncryptionPanel = ({
         />
         <SelectField
           control={form.control}
-          label="Key management provider"
+          helperText={infrastructureHelperText.keyManagementProvider}
+          label="Key management"
           name="keyManagementProvider"
           options={[
             { value: "", label: "Not set" },

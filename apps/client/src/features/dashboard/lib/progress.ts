@@ -264,11 +264,11 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         providersForType(infrastructure.organizationProviders, "cloud")
       ),
       field(
-        "Source control",
+        "Code repository",
         providersForType(infrastructure.organizationProviders, "source_control")
       ),
       field(
-        "Auth",
+        "Login provider",
         providersForType(infrastructure.organizationProviders, "auth")
       ),
       field(
@@ -279,39 +279,39 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         )
       ),
       field("MFA enabled", infrastructure.mfaEnabled),
-      field(
-        "Encrypted devices required",
-        infrastructure.encryptedDevicesRequired
-      ),
+      field("Work devices encrypted", infrastructure.encryptedDevicesRequired),
     ]),
     sectionProgress("Encryption", [
-      field("At-rest algorithm", infrastructure.atRestAlgorithm),
+      field("Stored data encryption", infrastructure.atRestAlgorithm),
       field("Minimum TLS version", infrastructure.inTransitMinimumTlsVersion),
-      field("Key management provider", infrastructure.keyManagementProvider),
+      field("Key management", infrastructure.keyManagementProvider),
     ]),
     sectionProgress("Logging & Monitoring", [
-      field("Centralized logging", infrastructure.centralizedLoggingEnabled),
-      field("Log retention days", infrastructure.logRetentionDaysStatus),
       field(
-        "Security monitoring owner",
-        infrastructure.securityMonitoringOwner
+        "Centralized logging enabled",
+        infrastructure.centralizedLoggingEnabled
       ),
+      field("Log retention status", infrastructure.logRetentionDaysStatus),
+      field("Monitoring owner", infrastructure.securityMonitoringOwner),
     ]),
     sectionProgress("Vulnerability Management", [
-      field("Scanning cadence", infrastructure.scanningCadence),
+      field("Vulnerability scan frequency", infrastructure.scanningCadence),
       field(
-        "Critical patch SLA days",
+        "Critical patch timeline status",
         infrastructure.patchingSlaCriticalDaysStatus
       ),
-      field("High patch SLA days", infrastructure.patchingSlaHighDaysStatus),
+      field(
+        "High patch timeline status",
+        infrastructure.patchingSlaHighDaysStatus
+      ),
     ]),
     sectionProgress("Incident Response", [
       field(
-        "Incident response plan",
+        "Incident response plan exists",
         infrastructure.incidentResponsePlanExists
       ),
       field(
-        "Incident notification timeline",
+        "Notification timeline",
         infrastructure.incidentNotificationTimeline
       ),
       field(
@@ -329,13 +329,16 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Backups", [
       field("Backups enabled", infrastructure.backupsEnabled),
-      field("Backup cadence", infrastructure.backupCadence),
-      field("Backup retention days", infrastructure.backupRetentionDaysStatus),
-      field("Restore testing cadence", infrastructure.restoreTestingCadence),
+      field("Backup frequency", infrastructure.backupCadence),
+      field(
+        "Backup retention status",
+        infrastructure.backupRetentionDaysStatus
+      ),
+      field("Restore test frequency", infrastructure.restoreTestingCadence),
     ]),
     sectionProgress("Vendor Risk", [
       field("Vendor review required", infrastructure.vendorReviewRequired),
-      field("Vendor review cadence", infrastructure.vendorReviewCadence),
+      field("Vendor review frequency", infrastructure.vendorReviewCadence),
       field(
         "DPA required for processors",
         infrastructure.dpaRequiredForProcessors

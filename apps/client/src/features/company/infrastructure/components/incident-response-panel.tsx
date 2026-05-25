@@ -16,6 +16,7 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const incidentSchema = infrastructureProfileSchema.pick({
   incidentResponsePlanExists: true,
@@ -40,9 +41,13 @@ const incidentRows = (
   vocabulary: Vocabulary | undefined
 ) =>
   [
-    ["Incident response plan", boolText(draft.incidentResponsePlanExists)],
     [
-      "Incident notification timeline",
+      "Incident response plan exists",
+      boolText(draft.incidentResponsePlanExists),
+      infrastructureHelperText.incidentResponsePlanExists,
+    ],
+    [
+      "Notification timeline",
       draft.incidentNotificationTimeline
         ? codeLabel(
             vocabulary,
@@ -50,6 +55,7 @@ const incidentRows = (
             draft.incidentNotificationTimeline
           )
         : "Not set",
+      infrastructureHelperText.incidentNotificationTimeline,
     ],
     [
       "Customer notification process",
@@ -60,10 +66,12 @@ const incidentRows = (
             draft.customerNotificationProcess
           )
         : "Not set",
+      infrastructureHelperText.customerNotificationProcess,
     ],
     [
-      "Incident response last tested",
+      "Last tested date",
       draft.incidentResponseLastTestedDate || "Not set",
+      infrastructureHelperText.incidentResponseLastTestedDate,
     ],
   ] as const
 
@@ -119,11 +127,13 @@ export const IncidentResponsePanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
-          label="Plan exists"
+          helperText={infrastructureHelperText.incidentResponsePlanExists}
+          label="Incident response plan exists"
           name="incidentResponsePlanExists"
         />
         <SelectField
           control={form.control}
+          helperText={infrastructureHelperText.incidentNotificationTimeline}
           label="Notification timeline"
           name="incidentNotificationTimeline"
           options={[
@@ -134,6 +144,7 @@ export const IncidentResponsePanel = ({
         />
         <SelectField
           control={form.control}
+          helperText={infrastructureHelperText.customerNotificationProcess}
           label="Customer notification process"
           name="customerNotificationProcess"
           options={[
@@ -143,7 +154,10 @@ export const IncidentResponsePanel = ({
           placeholder="Not set"
         />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
-          Last tested date
+          <span>Last tested date</span>
+          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+            {infrastructureHelperText.incidentResponseLastTestedDate}
+          </span>
           <input
             className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
             type="date"

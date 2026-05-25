@@ -15,7 +15,12 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { codeLabel, codeOptions, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeLabel,
+  codeOptions,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
+import { infrastructureHelperText } from "./infrastructure-helper-text"
 
 const loggingSchema = infrastructureProfileSchema.pick({
   centralizedLoggingEnabled: true,
@@ -37,17 +42,23 @@ const toLoggingDraft = (
 
 const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
   [
-    ["Centralized logging", boolText(draft.centralizedLoggingEnabled)],
+    [
+      "Centralized logging enabled",
+      boolText(draft.centralizedLoggingEnabled),
+      infrastructureHelperText.centralizedLoggingEnabled,
+    ],
     [
       "Log retention days",
       draft.logRetentionDaysStatus === "not_defined"
         ? "Not defined"
-        : draft.logRetentionDaysStatus === "defined" && draft.logRetentionDays !== null
+        : draft.logRetentionDaysStatus === "defined" &&
+            draft.logRetentionDays !== null
           ? `${draft.logRetentionDays} days`
           : "Not set",
+      infrastructureHelperText.logRetentionDays,
     ],
     [
-      "Security monitoring owner",
+      "Monitoring owner",
       draft.securityMonitoringOwner
         ? codeLabel(
             vocabulary,
@@ -55,6 +66,7 @@ const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
             draft.securityMonitoringOwner
           )
         : "Not set",
+      infrastructureHelperText.securityMonitoringOwner,
     ],
   ] as const
 
@@ -117,12 +129,14 @@ export const LoggingMonitoringPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={infrastructureHelperText.centralizedLoggingEnabled}
           label="Centralized logging enabled"
           name="centralizedLoggingEnabled"
         />
         <SelectField
           control={form.control}
-          label="Log retention days status"
+          helperText={infrastructureHelperText.logRetentionDaysStatus}
+          label="Log retention status"
           name="logRetentionDaysStatus"
           options={[
             { value: "", label: "Not set" },
@@ -131,7 +145,10 @@ export const LoggingMonitoringPanel = ({
           placeholder="Not set"
         />
         <label className="grid gap-2 text-sm font-medium text-slate-800">
-          Log retention days
+          <span>Log retention days</span>
+          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+            {infrastructureHelperText.logRetentionDays}
+          </span>
           <input
             className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
             disabled={isLogRetentionDaysDisabled}
@@ -145,7 +162,8 @@ export const LoggingMonitoringPanel = ({
         </label>
         <SelectField
           control={form.control}
-          label="Security monitoring owner"
+          helperText={infrastructureHelperText.securityMonitoringOwner}
+          label="Monitoring owner"
           name="securityMonitoringOwner"
           options={[
             { value: "", label: "Not set" },
