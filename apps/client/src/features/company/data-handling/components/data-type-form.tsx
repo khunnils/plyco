@@ -21,6 +21,7 @@ export const DataTypeForm = ({
   title,
   onCancel,
   onSubmit,
+  showButtons = true,
 }: {
   collectionMethodOptions: Option[]
   defaultValues: StoredDataType
@@ -30,6 +31,7 @@ export const DataTypeForm = ({
   title: string
   onCancel: () => void
   onSubmit: (dataType: StoredDataType) => void
+  showButtons?: boolean
 }) => {
   const form = useForm<StoredDataType>({
     defaultValues,
@@ -46,7 +48,11 @@ export const DataTypeForm = ({
   })
 
   return (
-    <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4">
+    <form
+      id="data-type-form"
+      onSubmit={submitDataType}
+      className="grid gap-4 border border-slate-200 bg-slate-50 p-4"
+    >
       <h3 className="text-base font-semibold text-slate-950">{title}</h3>
       <TextField
         error={form.formState.errors.name}
@@ -96,25 +102,27 @@ export const DataTypeForm = ({
           name="isRequired"
         />
       </div>
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          disabled={submitDisabled}
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-        >
-          <X />
-          Cancel
-        </Button>
-        <Button
-          disabled={submitDisabled}
-          type="button"
-          onClick={submitDataType}
-        >
-          {submitDisabled ? <Loader2 className="animate-spin" /> : <Save />}
-          {submitLabel}
-        </Button>
-      </div>
-    </div>
+      {showButtons ? (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            disabled={submitDisabled}
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            <X />
+            Cancel
+          </Button>
+          <Button
+            disabled={submitDisabled}
+            type="button"
+            onClick={submitDataType}
+          >
+            {submitDisabled ? <Loader2 className="animate-spin" /> : <Save />}
+            {submitLabel}
+          </Button>
+        </div>
+      ) : null}
+    </form>
   )
 }

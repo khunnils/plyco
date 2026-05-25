@@ -10,7 +10,10 @@ import {
   normalizeDataType,
 } from "@/features/company/data-handling/lib/data-type"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { ProfilePanelDetailGrid } from "@/features/company/components/profile-panel-shell"
+import {
+  ProfilePanelDetailGrid,
+  type ProfilePanelDetailRow,
+} from "@/features/company/components/profile-panel-shell"
 import { dataHelperText } from "./data-helper-text"
 
 const codeValueList = (
@@ -96,33 +99,7 @@ export const DataTypesPanel = ({
   }
 
   if (showCreateForm) {
-    return (
-      <DataTypeForm
-        collectionMethodOptions={collectionMethodOptions}
-        defaultValues={emptyDataTypeDraft()}
-        subjectTypeOptions={subjectTypeOptions}
-        submitDisabled={isMutationPending}
-        submitLabel="Add data type"
-        title="Add datatype"
-        onCancel={closeForm}
-        onSubmit={handleCreate}
-      />
-    )
-  }
-
-  if (editingIndex !== null && dataTypes[editingIndex]) {
-    return (
-      <DataTypeForm
-        collectionMethodOptions={collectionMethodOptions}
-        defaultValues={normalizeDataType(dataTypes[editingIndex])}
-        subjectTypeOptions={subjectTypeOptions}
-        submitDisabled={isMutationPending}
-        submitLabel="Save data type"
-        title="Edit datatype"
-        onCancel={closeForm}
-        onSubmit={handleUpdate}
-      />
-    )
+    // we handle rendering inside the main return block now
   }
 
   return (
@@ -135,14 +112,57 @@ export const DataTypesPanel = ({
             handled.
           </p>
         </div>
-        <Button className="w-fit" type="button" onClick={startCreate}>
-          <Plus />
-          Add datatype
-        </Button>
+        {showCreateForm || (editingIndex !== null && dataTypes[editingIndex]) ? (
+          <div className="flex gap-2">
+            <Button
+              type="submit"
+              form="data-type-form"
+              disabled={isMutationPending}
+            >
+              {showCreateForm ? "Add" : "Save"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeForm}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button className="w-fit" type="button" onClick={startCreate}>
+            <Plus />
+            Add datatype
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4">
-        {dataTypes.length === 0 ? (
+        {showCreateForm ? (
+          <DataTypeForm
+            collectionMethodOptions={collectionMethodOptions}
+            defaultValues={emptyDataTypeDraft()}
+            subjectTypeOptions={subjectTypeOptions}
+            submitDisabled={isMutationPending}
+            submitLabel="Add data type"
+            title="Add datatype"
+            onCancel={closeForm}
+            onSubmit={handleCreate}
+            showButtons={false}
+          />
+        ) : editingIndex !== null && dataTypes[editingIndex] ? (
+          <DataTypeForm
+            collectionMethodOptions={collectionMethodOptions}
+            defaultValues={normalizeDataType(dataTypes[editingIndex])}
+            subjectTypeOptions={subjectTypeOptions}
+            submitDisabled={isMutationPending}
+            submitLabel="Save data type"
+            title="Edit datatype"
+            onCancel={closeForm}
+            onSubmit={handleUpdate}
+            showButtons={false}
+          />
+        ) : dataTypes.length === 0 ? (
           <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
             No data types yet.
           </div>
@@ -248,7 +268,7 @@ export const DataTypesPanel = ({
                             ),
                             dataHelperText.collectionMethods,
                           ],
-                        ]}
+                        ] as const satisfies readonly ProfilePanelDetailRow[]}
                       />
                     </div>
                   ) : null}
