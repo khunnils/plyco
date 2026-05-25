@@ -441,6 +441,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["infrastructure", "Infrastructure"],
     ["operations", "Operations"],
     ["external_mssp", "External MSSP"],
+    ["none", "None"],
   ]),
   codeSet("security_notification_timelines", "Security notification timelines", false, [
     ["without_undue_delay", "Without undue delay"],

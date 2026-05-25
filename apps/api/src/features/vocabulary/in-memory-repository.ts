@@ -134,6 +134,10 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     codeId: string,
   ): Promise<boolean> {
+    if (codeId === "none") {
+      return true
+    }
+
     const vocabulary = await this.listVocabulary(organizationId)
     return vocabulary.codeSets
       .find((codeSet) => codeSet.codeSetId === codeSetId)

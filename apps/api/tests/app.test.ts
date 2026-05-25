@@ -619,6 +619,55 @@ describe("security profile API", () => {
     })
   })
 
+  it("supports saving multiple 'none' infrastructure providers", async () => {
+    const app = await createTestApp()
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            {
+              systemType: "cloud",
+              providerId: "none",
+            },
+            {
+              systemType: "source_control",
+              providerId: "none",
+            },
+            {
+              systemType: "password_manager",
+              providerId: "none",
+            },
+          ],
+        },
+      },
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json().organization.infrastructure.organizationProviders).toEqual(
+      expect.arrayContaining([
+        {
+          systemType: "cloud",
+          providerId: "none",
+          name: "None",
+        },
+        {
+          systemType: "source_control",
+          providerId: "none",
+          name: "None",
+        },
+        {
+          systemType: "password_manager",
+          providerId: "none",
+          name: "None",
+        },
+      ]),
+    )
+  })
+
   it("rejects invalid marketing opt-out method codes", async () => {
     const app = await createTestApp()
     const response = await app.inject({

@@ -384,19 +384,25 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       where: { organizationId },
     })
     const selectedByProviderId = new Map<string, Set<ProviderSystemType>>()
+    const selectedByName = new Map<string, Set<ProviderSystemType>>()
 
     for (const { provider, selectedProvider } of catalogProviders) {
       const currentSystemTypes =
         selectedByProviderId.get(provider.id) ?? new Set<ProviderSystemType>()
       currentSystemTypes.add(selectedProvider.systemType)
       selectedByProviderId.set(provider.id, currentSystemTypes)
+
+      const nameSystemTypes =
+        selectedByName.get(provider.name) ?? new Set<ProviderSystemType>()
+      nameSystemTypes.add(selectedProvider.systemType)
+      selectedByName.set(provider.name, nameSystemTypes)
     }
 
     await Promise.all(
       currentProviders.map((provider) => {
-        const selectedSystemTypes = provider.providerId
-          ? selectedByProviderId.get(provider.providerId)
-          : undefined
+        const selectedSystemTypes =
+          (provider.providerId ? selectedByProviderId.get(provider.providerId) : undefined) ??
+          selectedByName.get(provider.name)
         const systemTypes = [
           ...provider.systemTypes.filter(
             (systemType) => !managedSystemTypes.includes(systemType),
@@ -411,13 +417,31 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       }),
     )
 
+    const uniqueCatalogProviders = Array.from(
+      new Map(
+        catalogProviders.map(({ provider }) => [provider.id, provider]),
+      ).values(),
+    )
+
     await Promise.all(
-      catalogProviders.map(async ({ provider }) => {
+      uniqueCatalogProviders.map(async (provider) => {
         const existing = await this.client.organizationProvider.findFirst({
-          where: { organizationId, providerId: provider.id },
+          where: {
+            organizationId,
+            OR: [
+              { providerId: provider.id },
+              { name: provider.name },
+            ],
+          },
         })
 
         if (existing) {
+          if (existing.providerId !== provider.id) {
+            return this.client.organizationProvider.update({
+              where: { id: existing.id },
+              data: { providerId: provider.id },
+            })
+          }
           return existing
         }
 
@@ -438,6 +462,18 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     systemType: ProviderSystemType,
     providerId: string,
   ) {
+    if (providerId === "none") {
+      return {
+        id: "none",
+        name: "None",
+        url: "",
+        category: "",
+        systemTypes: [systemType],
+        securityCriticality: "Low",
+        handlesCustomerData: false,
+      }
+    }
+
     const provider = providerCatalog.find(
       (catalogProvider) =>
         catalogProvider.id === providerId &&

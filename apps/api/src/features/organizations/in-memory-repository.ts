@@ -148,6 +148,18 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     providerCatalog: Provider[],
     selectedProvider: ProviderSelection,
   ) {
+    if (selectedProvider.providerId === "none") {
+      return {
+        id: "none",
+        name: "None",
+        url: "",
+        category: "",
+        systemTypes: [selectedProvider.systemType],
+        securityCriticality: "Low",
+        handlesCustomerData: false,
+      }
+    }
+
     const provider = providerCatalog.find(
       (catalogProvider) =>
         catalogProvider.id === selectedProvider.providerId &&

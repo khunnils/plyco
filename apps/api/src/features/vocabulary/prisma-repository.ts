@@ -235,6 +235,10 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     codeId: string,
   ): Promise<boolean> {
+    if (codeId === "none") {
+      return true
+    }
+
     const systemCode = await this.client.systemCode.findFirst({
       where: { codeSetId, codeId, active: true, codeSet: { isSystem: true } },
       select: { id: true },

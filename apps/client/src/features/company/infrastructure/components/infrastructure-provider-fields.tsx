@@ -34,10 +34,12 @@ const selectedProviderIds = (
 const providerOptions = (
   providers: Provider[],
   systemType: ProviderSystemType,
-) =>
-  providers
+) => [
+  { value: "none", label: "None" },
+  ...providers
     .filter((provider) => provider.systemTypes.includes(systemType))
-    .map((provider) => ({ value: provider.id, label: provider.name }))
+    .map((provider) => ({ value: provider.id, label: provider.name })),
+]
 
 export const CloudProviderField = ({
   form,
@@ -63,11 +65,20 @@ export const CloudProviderField = ({
           (provider) => provider.systemType !== "cloud",
         )
 
+        let nextIds = providerIds
+        const hadNone = selectedIds.includes("none")
+        const hasNone = providerIds.includes("none")
+        if (hasNone && !hadNone) {
+          nextIds = ["none"]
+        } else if (hasNone && providerIds.length > 1) {
+          nextIds = providerIds.filter((id) => id !== "none")
+        }
+
         form.setValue(
           "organizationProviders",
           [
             ...otherProviders,
-            ...providerIds.map((providerId) => ({
+            ...nextIds.map((providerId) => ({
               systemType: "cloud" as const,
               providerId,
             })),
