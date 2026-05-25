@@ -35,12 +35,15 @@ export const PrivacyProfilePage = ({
       vocabulary,
       "privacy_marketing_opt_out_methods"
     )}
-    newsletterProviderOptions={providers
-      .filter((provider) => provider.systemTypes.includes("newsletter"))
-      .map((provider) => ({
-        value: provider.id,
-        label: provider.name,
-      }))}
+    newsletterProviderOptions={[
+      { value: "none", label: "None" },
+      ...providers
+        .filter((provider) => provider.systemTypes.includes("newsletter"))
+        .map((provider) => ({
+          value: provider.id,
+          label: provider.name,
+        })),
+    ]}
     profile={profile}
     providers={providers}
     requestMethodOptions={codeOptions(vocabulary, "privacy_request_methods")}

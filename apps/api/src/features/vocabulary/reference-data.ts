@@ -350,6 +350,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["opt_out", "Opt-out"],
     ["restriction", "Restriction"],
     ["objection", "Objection"],
+    ["none", "None"],
   ]),
   codeSet("privacy_request_methods", "Privacy request methods", false, [
     ["email", "Email"],
@@ -357,6 +358,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["in_app", "In-app"],
     ["support_portal", "Support portal"],
     ["postal_mail", "Postal mail"],
+    ["none", "None"],
   ]),
   codeSet("privacy_cookie_types", "Privacy cookie types", false, [
     ["necessary", "Necessary"],
@@ -381,12 +383,14 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["account_settings", "Account settings"],
     ["email_request", "Email request"],
     ["support_portal", "Support portal"],
+    ["none", "None"],
   ]),
   codeSet("privacy_transfer_mechanisms", "Privacy transfer mechanisms", false, [
     ["sccs", "SCCs"],
     ["adequacy_decision", "Adequacy decision"],
     ["dpf", "Data Privacy Framework"],
     ["contractual_safeguards", "Contractual safeguards"],
+    ["none", "None"],
   ]),
   codeSet("privacy_dpo_statuses", "Privacy DPO statuses", false, [
     ["not_appointed", "Not appointed"],
@@ -409,6 +413,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["semi_annually", "Semi-annually"],
     ["annually", "Annually"],
     ["ad_hoc", "Ad hoc"],
+    ["none", "None"],
   ]),
   codeSet("security_encryption_algorithms", "Security encryption algorithms", false, [
     ["aes_256", "AES-256"],
@@ -427,6 +432,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["cloud_kms", "Cloud KMS"],
     ["provider_managed", "Provider managed"],
     ["customer_managed", "Customer managed"],
+    ["none", "None"],
   ]),
   codeSet("security_monitoring_owners", "Security monitoring owners", false, [
     ["engineering", "Engineering"],
@@ -441,6 +447,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["within_48_hours", "Within 48 hours"],
     ["within_72_hours", "Within 72 hours"],
     ["contractual_commitment", "Contractual commitment"],
+    ["none", "None"],
   ]),
   codeSet("security_customer_notification_processes", "Security customer notification processes", false, [
     ["email_notice", "Email notice"],
@@ -448,6 +455,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["account_manager", "Account manager"],
     ["status_page", "Status page"],
     ["support_portal", "Support portal"],
+    ["none", "None"],
   ]),
   codeSet("data_categories", "Data categories", false, [
     ["account_data", "Account Data"],

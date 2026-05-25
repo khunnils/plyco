@@ -364,9 +364,13 @@ export class ReportContextBuilder {
   }
 
   private providerNames(providers: Array<Record<string, unknown>>) {
-    return providers.map((provider) =>
-      String(provider.name ?? provider.providerName ?? provider.providerId ?? ""),
-    )
+    return providers.map((provider) => {
+      const id = String(provider.providerId ?? provider.organizationProviderId ?? "")
+      if (id === "none") {
+        return "None"
+      }
+      return String(provider.name ?? provider.providerName ?? id ?? "")
+    })
   }
 
   private securityContext(

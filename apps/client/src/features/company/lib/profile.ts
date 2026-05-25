@@ -180,6 +180,9 @@ export const providerNamesForSystem = (
   const names = organizationProviders
     .filter((provider) => provider.systemType === systemType)
     .map((provider) => {
+      if (provider.providerId === "none") {
+        return "None"
+      }
       const catalogProvider = providers.find(
         (catalogProvider) => catalogProvider.id === provider.providerId,
       )
