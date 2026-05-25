@@ -39,7 +39,7 @@ const ResponseTimelineField = ({
 
 const selectedProviderIds = (
   organizationProviders: ProviderSelection[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) =>
   organizationProviders
     .filter((provider) => provider.systemType === systemType)
@@ -47,7 +47,7 @@ const selectedProviderIds = (
 
 const providerOptions = (
   providers: Provider[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) =>
   providers
     .filter((provider) => provider.systemTypes.includes(systemType))
@@ -82,7 +82,7 @@ const PrivacyProviderPicker = ({
         const selectedProviderIds =
           multiple === false ? providerIds.slice(-1) : providerIds
         const otherProviders = organizationProviders.filter(
-          (provider) => provider.systemType !== systemType,
+          (provider) => provider.systemType !== systemType
         )
 
         form.setValue(
@@ -94,7 +94,7 @@ const PrivacyProviderPicker = ({
               providerId,
             })),
           ],
-          { shouldDirty: true, shouldValidate: true },
+          { shouldDirty: true, shouldValidate: true }
         )
       }}
     />
@@ -102,7 +102,6 @@ const PrivacyProviderPicker = ({
 }
 
 export const PrivacyProfileFields = ({
-  cookieConsentMechanismOptions,
   dpoStatusOptions,
   euRepresentativeStatusOptions,
   form,
@@ -112,7 +111,6 @@ export const PrivacyProfileFields = ({
   supportedRightOptions,
   transferMechanismOptions,
 }: {
-  cookieConsentMechanismOptions: Option[]
   dpoStatusOptions: Option[]
   euRepresentativeStatusOptions: Option[]
   form: UseFormReturn<ProfileDraft>
@@ -142,206 +140,179 @@ export const PrivacyProfileFields = ({
   }, [euRepresentativeAppointed, form])
 
   return (
-  <div className="grid gap-6">
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Privacy Rights & Request Handling
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.supportedRights?.root}
-          label="Privacy supported rights"
-          name="privacy.supportedRights"
-          options={supportedRightOptions}
-          placeholder="Select supported rights"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.requestMethods?.root}
-          label="Request methods"
-          name="privacy.requestMethods"
-          options={requestMethodOptions}
-          placeholder="Select request methods"
-        />
-        <ResponseTimelineField form={form} />
-        <ToggleField
-          control={form.control}
-          label="Identity verification required"
-          name="privacy.identityVerificationRequired"
-        />
-        <ToggleField
-          control={form.control}
-          label="Authorized agent supported"
-          name="privacy.authorizedAgentSupported"
-        />
-        <ToggleField
-          control={form.control}
-          label="Appeal process exists"
-          name="privacy.appealProcessExists"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Cookie Preferences
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <SelectField
-          control={form.control}
-          label="Cookie consent mechanism"
-          name="privacy.cookieConsentMechanism"
-          options={[
-            { value: "", label: "Not set" },
-            ...cookieConsentMechanismOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          label="Responds to Do Not Track"
-          name="privacy.doNotTrackResponse"
-        />
-        <ToggleField
-          control={form.control}
-          label="Global Privacy Control supported"
-          name="privacy.globalPrivacyControlSupported"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Marketing & Communications
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Sends marketing emails"
-          name="privacy.sendsMarketingEmails"
-        />
-        <SelectField
-          control={form.control}
-          label="Marketing opt-out method"
-          name="privacy.marketingOptOutMethod"
-          options={[
-            { value: "", label: "Not set" },
-            ...marketingOptOutMethodOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          label="Transactional emails sent"
-          name="privacy.transactionalEmailsSent"
-        />
-        <PrivacyProviderPicker
-          form={form}
-          label="Newsletter provider"
-          multiple={false}
-          providers={providers}
-          systemType="newsletter"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        International Transfers
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Transfers data internationally"
-          name="privacy.crossBorderTransfers"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.transferMechanisms?.root}
-          label="Transfer mechanisms"
-          name="privacy.transferMechanisms"
-          options={transferMechanismOptions}
-          placeholder="Select transfer mechanisms"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Compliance & Disclosures
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Sells or shares data (CCPA)"
-          name="privacy.sellsOrSharesData"
-        />
-        <TextField
-          error={form.formState.errors.privacy?.doNotSellLink}
-          label="Do Not Sell link"
-          name="privacy.doNotSellLink"
-          register={form.register}
-        />
-        <ToggleField
-          control={form.control}
-          label="Uses automated decision making"
-          name="privacy.usesAutomatedDecisionMaking"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Privacy Officers & Representation
-      </h3>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="grid gap-4">
-          <SelectField
+    <div className="grid gap-6">
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Privacy Rights & Request Handling
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <MultiSelectField
             control={form.control}
-            label="DPO status"
-            name="privacy.dpoStatus"
-            options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
-            placeholder="Not set"
+            error={form.formState.errors.privacy?.supportedRights?.root}
+            label="Privacy supported rights"
+            name="privacy.supportedRights"
+            options={supportedRightOptions}
+            placeholder="Select supported rights"
           />
-          <TextField
-            disabled={!dpoAppointed}
-            error={form.formState.errors.privacy?.dpoName}
-            label="DPO name"
-            name="privacy.dpoName"
-            register={form.register}
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.privacy?.requestMethods?.root}
+            label="Request methods"
+            name="privacy.requestMethods"
+            options={requestMethodOptions}
+            placeholder="Select request methods"
           />
-          <TextField
-            disabled={!dpoAppointed}
-            error={form.formState.errors.privacy?.dpoEmail}
-            label="DPO email"
-            name="privacy.dpoEmail"
-            register={form.register}
+          <ResponseTimelineField form={form} />
+          <ToggleField
+            control={form.control}
+            label="Identity verification required"
+            name="privacy.identityVerificationRequired"
+          />
+          <ToggleField
+            control={form.control}
+            label="Authorized agent supported"
+            name="privacy.authorizedAgentSupported"
+          />
+          <ToggleField
+            control={form.control}
+            label="Appeal process exists"
+            name="privacy.appealProcessExists"
           />
         </div>
-        <div className="grid gap-4">
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Marketing & Communications
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Sends marketing emails"
+            name="privacy.sendsMarketingEmails"
+          />
           <SelectField
             control={form.control}
-            label="EU representative status"
-            name="privacy.euRepresentativeStatus"
+            label="Marketing opt-out method"
+            name="privacy.marketingOptOutMethod"
             options={[
               { value: "", label: "Not set" },
-              ...euRepresentativeStatusOptions,
+              ...marketingOptOutMethodOptions,
             ]}
             placeholder="Not set"
           />
-          <TextField
-            disabled={!euRepresentativeAppointed}
-            error={form.formState.errors.privacy?.euRepresentativeName}
-            label="EU representative name"
-            name="privacy.euRepresentativeName"
-            register={form.register}
+          <ToggleField
+            control={form.control}
+            label="Transactional emails sent"
+            name="privacy.transactionalEmailsSent"
           />
-          <TextField
-            disabled={!euRepresentativeAppointed}
-            error={form.formState.errors.privacy?.euRepresentativeAddress}
-            label="EU representative address"
-            name="privacy.euRepresentativeAddress"
-            register={form.register}
+          <PrivacyProviderPicker
+            form={form}
+            label="Newsletter provider"
+            multiple={false}
+            providers={providers}
+            systemType="newsletter"
           />
         </div>
-      </div>
-    </section>
-  </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          International Transfers
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Transfers data internationally"
+            name="privacy.crossBorderTransfers"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.privacy?.transferMechanisms?.root}
+            label="Transfer mechanisms"
+            name="privacy.transferMechanisms"
+            options={transferMechanismOptions}
+            placeholder="Select transfer mechanisms"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Compliance & Disclosures
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Sells or shares data (CCPA)"
+            name="privacy.sellsOrSharesData"
+          />
+          <TextField
+            error={form.formState.errors.privacy?.doNotSellLink}
+            label="Do Not Sell link"
+            name="privacy.doNotSellLink"
+            register={form.register}
+          />
+          <ToggleField
+            control={form.control}
+            label="Uses automated decision making"
+            name="privacy.usesAutomatedDecisionMaking"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Privacy Officers & Representation
+        </h3>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4">
+            <SelectField
+              control={form.control}
+              label="DPO status"
+              name="privacy.dpoStatus"
+              options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
+              placeholder="Not set"
+            />
+            <TextField
+              disabled={!dpoAppointed}
+              error={form.formState.errors.privacy?.dpoName}
+              label="DPO name"
+              name="privacy.dpoName"
+              register={form.register}
+            />
+            <TextField
+              disabled={!dpoAppointed}
+              error={form.formState.errors.privacy?.dpoEmail}
+              label="DPO email"
+              name="privacy.dpoEmail"
+              register={form.register}
+            />
+          </div>
+          <div className="grid gap-4">
+            <SelectField
+              control={form.control}
+              label="EU representative status"
+              name="privacy.euRepresentativeStatus"
+              options={[
+                { value: "", label: "Not set" },
+                ...euRepresentativeStatusOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <TextField
+              disabled={!euRepresentativeAppointed}
+              error={form.formState.errors.privacy?.euRepresentativeName}
+              label="EU representative name"
+              name="privacy.euRepresentativeName"
+              register={form.register}
+            />
+            <TextField
+              disabled={!euRepresentativeAppointed}
+              error={form.formState.errors.privacy?.euRepresentativeAddress}
+              label="EU representative address"
+              name="privacy.euRepresentativeAddress"
+              register={form.register}
+            />
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

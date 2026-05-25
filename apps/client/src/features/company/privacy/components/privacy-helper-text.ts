@@ -12,16 +12,6 @@ export const privacyHelperText = {
     "Whether someone can submit a privacy request on a user's behalf.",
   appealProcessExists:
     "Whether users can appeal if you deny a privacy request.",
-  usesCookiesOrTrackingTechnologies:
-    "Whether your sites or services use cookies, pixels, SDKs, or similar tracking technologies.",
-  cookieTrackingCategories:
-    "The categories of cookies or tracking technologies you use.",
-  cookieConsentMechanism:
-    "How visitors can accept, reject, or manage cookie choices.",
-  doNotTrackResponse:
-    "Whether your service changes tracking behavior for browser Do Not Track signals.",
-  globalPrivacyControlSupported:
-    "Whether your service honors Global Privacy Control opt-out signals.",
   sendsMarketingEmails:
     "Whether you send promotional or newsletter-style emails.",
   marketingOptOutMethod:

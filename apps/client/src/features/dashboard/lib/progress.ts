@@ -185,26 +185,6 @@ export const privacyProgress = (profile: ProfileDraft) => {
       field("Authorized agent supported", privacy.authorizedAgentSupported),
       field("Appeal process exists", privacy.appealProcessExists),
     ]),
-    sectionProgress("Cookie Preferences", [
-      field(
-        "Uses cookies or tracking technologies",
-        privacy.usesCookiesOrTrackingTechnologies
-      ),
-      ...(privacy.usesCookiesOrTrackingTechnologies
-        ? [
-            field(
-              "Cookie / tracking categories",
-              privacy.cookieTrackingCategories
-            ),
-            field("Cookie consent mechanism", privacy.cookieConsentMechanism),
-            field("Do Not Track response", privacy.doNotTrackResponse),
-            field(
-              "Global Privacy Control supported",
-              privacy.globalPrivacyControlSupported
-            ),
-          ]
-        : []),
-    ]),
     sectionProgress("Marketing & Communications", [
       field("Marketing emails", privacy.sendsMarketingEmails),
       ...(privacy.sendsMarketingEmails
@@ -431,11 +411,33 @@ export const serviceProgress = (
           ? [field("Minimum user age", service.minimumUserAge, true)]
           : []),
       ]),
-      sectionProgress("Service Privacy", [
-        field("Uses cookies", service.privacy.usesCookies),
-        ...(service.privacy.usesCookies
-          ? [field("Cookie types", service.privacy.cookieTypes)]
+      sectionProgress("Cookie Preferences", [
+        field(
+          "Uses cookies or tracking technologies",
+          service.privacy.usesCookiesOrTrackingTechnologies
+        ),
+        ...(service.privacy.usesCookiesOrTrackingTechnologies
+          ? [
+              field(
+                "Cookie / tracking categories",
+                service.privacy.cookieTrackingCategories
+              ),
+              field(
+                "Cookie consent mechanism",
+                service.privacy.cookieConsentMechanism
+              ),
+              field(
+                "Do Not Track response",
+                service.privacy.doNotTrackResponse
+              ),
+              field(
+                "Global Privacy Control supported",
+                service.privacy.globalPrivacyControlSupported
+              ),
+            ]
           : []),
+      ]),
+      sectionProgress("Hosting & Data Residency", [
         field("Primary hosting region", service.privacy.primaryHostingRegion),
         field("Data residency options", service.privacy.dataResidencyOptions),
       ]),
@@ -475,12 +477,18 @@ export const dataProgress = (profile: ProfileDraft) => ({
     field("Personal data stored", profile.dataHandling.storesPii),
     field("Health data stored", profile.dataHandling.storesHealthcareData),
     field("Data encrypted at rest", profile.dataHandling.encryptionAtRest),
-    field("Data encrypted in transit", profile.dataHandling.encryptionInTransit),
+    field(
+      "Data encrypted in transit",
+      profile.dataHandling.encryptionInTransit
+    ),
     field(
       "Real customer data used in development",
       profile.dataHandling.productionDataInDevelopment
     ),
-    field("Retention policy exists", profile.dataHandling.retentionPolicyExists),
+    field(
+      "Retention policy exists",
+      profile.dataHandling.retentionPolicyExists
+    ),
   ]),
   dataTypes: profile.dataHandling.dataTypesStored.map(dataTypeProgress),
 })

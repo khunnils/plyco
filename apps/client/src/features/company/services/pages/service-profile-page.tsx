@@ -55,7 +55,14 @@ export const ServiceProfilePage = ({
 }) => (
   <ServiceManager
     businessActivityOptions={businessActivityOptions}
-    cookieTypeOptions={codeOptions(vocabulary, "privacy_cookie_types")}
+    cookieConsentMechanismOptions={codeOptions(
+      vocabulary,
+      "privacy_cookie_consent_mechanisms"
+    )}
+    cookieTrackingCategoryOptions={codeOptions(
+      vocabulary,
+      "cookie_tracking_categories"
+    )}
     customerTypeOptions={codeOptions(vocabulary, "service_customer_types")}
     dataProcessingLevelOptions={codeOptions(
       vocabulary,

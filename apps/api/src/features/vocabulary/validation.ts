@@ -8,10 +8,10 @@ import {
   type ServiceProfileInput,
   type ServiceProviderUsageInput,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
-import { ApiError } from "../../errors.js"
-import { type VocabularyRepository } from "./repository.js"
+import { ApiError } from "../../errors.js";
+import { type VocabularyRepository } from "./repository.js";
 
 const assertCountry = async (
   vocabularyRepository: VocabularyRepository,
@@ -19,7 +19,7 @@ const assertCountry = async (
   value: string | null,
 ) => {
   if (!value) {
-    return
+    return;
   }
 
   if (!(await vocabularyRepository.countryExists(value))) {
@@ -28,9 +28,9 @@ const assertCountry = async (
       "Selected country is not available.",
       400,
       { field, value },
-    )
+    );
   }
-}
+};
 
 const assertCode = async (
   vocabularyRepository: VocabularyRepository,
@@ -39,15 +39,17 @@ const assertCode = async (
   value: string,
   field: string,
 ) => {
-  if (!(await vocabularyRepository.codeExists(organizationId, codeSetId, value))) {
+  if (
+    !(await vocabularyRepository.codeExists(organizationId, codeSetId, value))
+  ) {
     throw new ApiError(
       "CODE_NOT_FOUND",
       "Selected code is not available.",
       400,
       { codeSetId, field, value },
-    )
+    );
   }
-}
+};
 
 const assertCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -57,15 +59,15 @@ const assertCodes = async (
   field: string,
 ) => {
   if (!values) {
-    return
+    return;
   }
 
   await Promise.all(
     Array.from(new Set(values)).map((value) =>
       assertCode(vocabularyRepository, organizationId, codeSetId, value, field),
     ),
-  )
-}
+  );
+};
 
 export const validateCompanyProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -95,8 +97,8 @@ export const validateCompanyProfileCodes = async (
       company.complianceGoals,
       "company.complianceGoals",
     ),
-  ])
-}
+  ]);
+};
 
 export const validateDataHandlingProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -119,9 +121,9 @@ export const validateDataHandlingProfileCodes = async (
         dataType.collectionMethods,
         "dataHandling.dataTypesStored.collectionMethods",
       ),
-    ])
+    ]);
   }
-}
+};
 
 export const validateBusinessActivityCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -154,8 +156,8 @@ export const validateBusinessActivityCodes = async (
           "businessActivity.retentionPolicy",
         )
       : Promise.resolve(),
-  ])
-}
+  ]);
+};
 
 export const validateInfrastructureProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -174,7 +176,7 @@ export const validateInfrastructureProfileCodes = async (
           "Infrastructure providers must use cloud, source control, auth, or password manager system types.",
           400,
           { systemType: provider.systemType },
-        )
+        );
       }
 
       return assertCode(
@@ -183,7 +185,7 @@ export const validateInfrastructureProfileCodes = async (
         "provider_system_type",
         provider.systemType,
         "infrastructure.organizationProviders.systemType",
-      )
+      );
     }),
     infrastructure.atRestAlgorithm
       ? assertCode(
@@ -311,8 +313,8 @@ export const validateInfrastructureProfileCodes = async (
           "infrastructure.vendorReviewCadence",
         )
       : Promise.resolve(),
-  ])
-}
+  ]);
+};
 
 export const validateAccessProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -329,8 +331,8 @@ export const validateAccessProfileCodes = async (
           "access.accessReviewCadence",
         )
       : Promise.resolve(),
-  ])
-}
+  ]);
+};
 
 export const validateServiceProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -363,10 +365,19 @@ export const validateServiceProfileCodes = async (
     assertCodes(
       vocabularyRepository,
       organizationId,
-      "privacy_cookie_types",
-      service.privacy.cookieTypes,
-      `${fieldPrefix}.privacy.cookieTypes`,
+      "cookie_tracking_categories",
+      service.privacy.cookieTrackingCategories,
+      `${fieldPrefix}.privacy.cookieTrackingCategories`,
     ),
+    service.privacy.cookieConsentMechanism
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "privacy_cookie_consent_mechanisms",
+          service.privacy.cookieConsentMechanism,
+          `${fieldPrefix}.privacy.cookieConsentMechanism`,
+        )
+      : Promise.resolve(),
     service.privacy.primaryHostingRegion
       ? assertCode(
           vocabularyRepository,
@@ -383,8 +394,8 @@ export const validateServiceProfileCodes = async (
       service.privacy.dataResidencyOptions,
       `${fieldPrefix}.privacy.dataResidencyOptions`,
     ),
-  ])
-}
+  ]);
+};
 
 export const validatePrivacyProfileCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -415,22 +426,6 @@ export const validatePrivacyProfileCodes = async (
           "privacy.responseTimelineDaysStatus",
         )
       : Promise.resolve(),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "cookie_tracking_categories",
-      privacy.cookieTrackingCategories,
-      "privacy.cookieTrackingCategories",
-    ),
-    privacy.cookieConsentMechanism
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "privacy_cookie_consent_mechanisms",
-          privacy.cookieConsentMechanism,
-          "privacy.cookieConsentMechanism",
-        )
-      : Promise.resolve(),
     privacy.marketingOptOutMethod
       ? assertCode(
           vocabularyRepository,
@@ -454,7 +449,7 @@ export const validatePrivacyProfileCodes = async (
           "Privacy providers must use newsletter system type.",
           400,
           { systemType: provider.systemType },
-        )
+        );
       }
 
       return assertCode(
@@ -463,10 +458,10 @@ export const validatePrivacyProfileCodes = async (
         "provider_system_type",
         provider.systemType,
         "privacy.organizationProviders.systemType",
-      )
+      );
     }),
-  ])
-}
+  ]);
+};
 
 export const validateOrganizationProviderCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -495,8 +490,8 @@ export const validateOrganizationProviderCodes = async (
       provider.criticality,
       "provider.criticality",
     ),
-  ])
-}
+  ]);
+};
 
 export const validateServiceProviderUsageCodes = async (
   vocabularyRepository: VocabularyRepository,
@@ -534,5 +529,5 @@ export const validateServiceProviderUsageCodes = async (
           "serviceProviderUsage.systemType",
         )
       : Promise.resolve(),
-  ])
-}
+  ]);
+};

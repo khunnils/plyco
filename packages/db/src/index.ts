@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
   accessProfileSchema,
   businessActivitySchema,
@@ -17,167 +17,168 @@ import {
   type Template,
   type OrganizationProvider,
   templateSchema,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
-export const prisma = new PrismaClient()
+export const prisma = new PrismaClient();
 
 function toIsoString(value: Date) {
-  return value.toISOString()
+  return value.toISOString();
 }
 
 function stringArray(value: unknown): string[] | null {
   return Array.isArray(value) && value.every((item) => typeof item === "string")
     ? value
-    : null
+    : null;
 }
 
 export function mapOrganizationRecord(record: {
-  id: string
-  companyName: string
-  legalEntityName: string | null
-  website: string | null
-  contactEmail: string | null
-  securityContactEmail: string | null
-  privacyContactEmail: string | null
-  country: string | null
-  address: string | null
-  employeeCount: number | null
-  industries: unknown
-  regions: unknown
-  handlesPii: boolean | null
-  handlesSensitiveData: boolean | null
-  complianceGoals: unknown
+  id: string;
+  companyName: string;
+  legalEntityName: string | null;
+  website: string | null;
+  contactEmail: string | null;
+  securityContactEmail: string | null;
+  privacyContactEmail: string | null;
+  country: string | null;
+  address: string | null;
+  employeeCount: number | null;
+  industries: unknown;
+  regions: unknown;
+  handlesPii: boolean | null;
+  handlesSensitiveData: boolean | null;
+  complianceGoals: unknown;
   serviceProfile?: {
-    id: string
-    serviceName: string | null
-    serviceDescription: string | null
-    serviceUrl: string | null
-    userTypes: unknown
-    customerTypes: unknown
-    availabilityRegions: unknown
-    childrenDirected: boolean | null
-    minimumUserAge: number | null
-    usesCookies: boolean | null
-    cookieTypes: unknown
-    primaryHostingRegion: string | null
-    dataResidencyOptions: unknown
+    id: string;
+    serviceName: string | null;
+    serviceDescription: string | null;
+    serviceUrl: string | null;
+    userTypes: unknown;
+    customerTypes: unknown;
+    availabilityRegions: unknown;
+    childrenDirected: boolean | null;
+    minimumUserAge: number | null;
+    usesCookiesOrTrackingTechnologies: boolean | null;
+    cookieTrackingCategories: unknown;
+    cookieConsentMechanism: string | null;
+    doNotTrackResponse: boolean | null;
+    globalPrivacyControlSupported: boolean | null;
+    primaryHostingRegion: string | null;
+    dataResidencyOptions: unknown;
     businessActivities?: Array<{
-      businessActivityId: string
-    }>
-    createdAt: Date
-    updatedAt: Date
-  } | null
+      businessActivityId: string;
+    }>;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
   services?: Array<{
-    id: string
-    serviceName: string | null
-    serviceDescription: string | null
-    serviceUrl: string | null
-    userTypes: unknown
-    customerTypes: unknown
-    availabilityRegions: unknown
-    childrenDirected: boolean | null
-    minimumUserAge: number | null
-    usesCookies: boolean | null
-    cookieTypes: unknown
-    primaryHostingRegion: string | null
-    dataResidencyOptions: unknown
+    id: string;
+    serviceName: string | null;
+    serviceDescription: string | null;
+    serviceUrl: string | null;
+    userTypes: unknown;
+    customerTypes: unknown;
+    availabilityRegions: unknown;
+    childrenDirected: boolean | null;
+    minimumUserAge: number | null;
+    usesCookiesOrTrackingTechnologies: boolean | null;
+    cookieTrackingCategories: unknown;
+    cookieConsentMechanism: string | null;
+    doNotTrackResponse: boolean | null;
+    globalPrivacyControlSupported: boolean | null;
+    primaryHostingRegion: string | null;
+    dataResidencyOptions: unknown;
     businessActivities?: Array<{
-      businessActivityId: string
-    }>
-    createdAt: Date
-    updatedAt: Date
-  }>
+      businessActivityId: string;
+    }>;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
   privacyProfile: {
-    supportedRights: unknown
-    requestMethods: unknown
-    responseTimelineDaysStatus: string | null
-    responseTimelineDays: number | null
-    identityVerificationRequired: boolean | null
-    authorizedAgentSupported: boolean | null
-    appealProcessExists: boolean | null
-    usesCookiesOrTrackingTechnologies: boolean | null
-    cookieTrackingCategories: unknown
-    cookieConsentMechanism: string | null
-    doNotTrackResponse: boolean | null
-    globalPrivacyControlSupported: boolean | null
-    sendsMarketingEmails: boolean | null
-    marketingOptOutMethod: string | null
-    transactionalEmailsSent: boolean | null
-    crossBorderTransfers: boolean | null
-    transferMechanisms: unknown
-    sellsOrSharesData: boolean | null
-    doNotSellLink: string | null
-    dpoStatus: string | null
-    dpoName: string | null
-    dpoEmail: string | null
-    euRepresentativeStatus: string | null
-    euRepresentativeName: string | null
-    euRepresentativeAddress: string | null
-    usesAutomatedDecisionMaking: boolean | null
-  } | null
+    supportedRights: unknown;
+    requestMethods: unknown;
+    responseTimelineDaysStatus: string | null;
+    responseTimelineDays: number | null;
+    identityVerificationRequired: boolean | null;
+    authorizedAgentSupported: boolean | null;
+    appealProcessExists: boolean | null;
+    sendsMarketingEmails: boolean | null;
+    marketingOptOutMethod: string | null;
+    transactionalEmailsSent: boolean | null;
+    crossBorderTransfers: boolean | null;
+    transferMechanisms: unknown;
+    sellsOrSharesData: boolean | null;
+    doNotSellLink: string | null;
+    dpoStatus: string | null;
+    dpoName: string | null;
+    dpoEmail: string | null;
+    euRepresentativeStatus: string | null;
+    euRepresentativeName: string | null;
+    euRepresentativeAddress: string | null;
+    usesAutomatedDecisionMaking: boolean | null;
+  } | null;
   infrastructureProfile: {
-    mfaEnabled: boolean | null
-    encryptedDevicesRequired: boolean | null
-    backupsEnabled: boolean | null
-    centralizedLoggingEnabled: boolean | null
-    atRestAlgorithm: string | null
-    inTransitMinimumTlsVersion: string | null
-    keyManagementProvider: string | null
-    logRetentionDays: number | null
-    logRetentionDaysStatus: string | null
-    securityMonitoringOwner: string | null
-    scanningCadence: string | null
-    patchingSlaCriticalDays: number | null
-    patchingSlaCriticalDaysStatus: string | null
-    patchingSlaHighDays: number | null
-    patchingSlaHighDaysStatus: string | null
-    incidentResponsePlanExists: boolean | null
-    incidentNotificationTimeline: string | null
-    customerNotificationProcess: string | null
-    incidentResponseLastTestedDate: string | null
-    backupCadence: string | null
-    backupRetentionDays: number | null
-    backupRetentionDaysStatus: string | null
-    restoreTestingCadence: string | null
-    vendorReviewRequired: boolean | null
-    vendorReviewCadence: string | null
-    dpaRequiredForProcessors: boolean | null
-  } | null
+    mfaEnabled: boolean | null;
+    encryptedDevicesRequired: boolean | null;
+    backupsEnabled: boolean | null;
+    centralizedLoggingEnabled: boolean | null;
+    atRestAlgorithm: string | null;
+    inTransitMinimumTlsVersion: string | null;
+    keyManagementProvider: string | null;
+    logRetentionDays: number | null;
+    logRetentionDaysStatus: string | null;
+    securityMonitoringOwner: string | null;
+    scanningCadence: string | null;
+    patchingSlaCriticalDays: number | null;
+    patchingSlaCriticalDaysStatus: string | null;
+    patchingSlaHighDays: number | null;
+    patchingSlaHighDaysStatus: string | null;
+    incidentResponsePlanExists: boolean | null;
+    incidentNotificationTimeline: string | null;
+    customerNotificationProcess: string | null;
+    incidentResponseLastTestedDate: string | null;
+    backupCadence: string | null;
+    backupRetentionDays: number | null;
+    backupRetentionDaysStatus: string | null;
+    restoreTestingCadence: string | null;
+    vendorReviewRequired: boolean | null;
+    vendorReviewCadence: string | null;
+    dpaRequiredForProcessors: boolean | null;
+  } | null;
   organizationProviders: Array<{
-    providerId: string | null
-    systemTypes: string[]
-    name: string
-  }>
+    providerId: string | null;
+    systemTypes: string[];
+    name: string;
+  }>;
   dataHandlingProfile: {
-    storesPii: boolean | null
-    storesHealthcareData: boolean | null
-    encryptionAtRest: boolean | null
-    encryptionInTransit: boolean | null
-    productionDataInDevelopment: boolean | null
-    retentionPolicyExists: boolean | null
-  } | null
+    storesPii: boolean | null;
+    storesHealthcareData: boolean | null;
+    encryptionAtRest: boolean | null;
+    encryptionInTransit: boolean | null;
+    productionDataInDevelopment: boolean | null;
+    retentionPolicyExists: boolean | null;
+  } | null;
   dataTypes: Array<{
-    name: string
-    description: string | null
-    subjectTypes: unknown
-    collectionMethods: unknown
-    isSensitive: boolean | null
-    isRequired: boolean | null
-  }>
+    name: string;
+    description: string | null;
+    subjectTypes: unknown;
+    collectionMethods: unknown;
+    isSensitive: boolean | null;
+    isRequired: boolean | null;
+  }>;
   accessProfile: {
-    mfaRequired: boolean | null
-    ssoEnabled: boolean | null
-    sharedAccountsExist: boolean | null
-    offboardingProcessExists: boolean | null
-    accessReviewsPerformed: boolean | null
-    leastPrivilege: boolean | null
-    roleBasedAccess: boolean | null
-    accessReviewCadence: string | null
-    adminApprovalRequired: boolean | null
-    passwordManagerRequired: boolean | null
-  } | null
-  createdAt: Date
-  updatedAt: Date
+    mfaRequired: boolean | null;
+    ssoEnabled: boolean | null;
+    sharedAccountsExist: boolean | null;
+    offboardingProcessExists: boolean | null;
+    accessReviewsPerformed: boolean | null;
+    leastPrivilege: boolean | null;
+    roleBasedAccess: boolean | null;
+    accessReviewCadence: string | null;
+    adminApprovalRequired: boolean | null;
+    passwordManagerRequired: boolean | null;
+  } | null;
+  createdAt: Date;
+  updatedAt: Date;
 }): OrganizationSecurityProfile {
   const company = companyProfileSchema.parse({
     companyName: record.companyName,
@@ -194,7 +195,7 @@ export function mapOrganizationRecord(record: {
     handlesPii: record.handlesPii,
     handlesSensitiveData: record.handlesSensitiveData,
     complianceGoals: stringArray(record.complianceGoals),
-  })
+  });
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.organizationProviders.flatMap((provider) =>
       provider.providerId
@@ -259,8 +260,9 @@ export function mapOrganizationRecord(record: {
       record.infrastructureProfile?.vendorReviewCadence ?? null,
     dpaRequiredForProcessors:
       record.infrastructureProfile?.dpaRequiredForProcessors ?? null,
-  })
-  const serviceRecords = record.services ?? (record.serviceProfile ? [record.serviceProfile] : [])
+  });
+  const serviceRecords =
+    record.services ?? (record.serviceProfile ? [record.serviceProfile] : []);
   const services = serviceRecords.flatMap((service) =>
     service
       ? [
@@ -279,8 +281,15 @@ export function mapOrganizationRecord(record: {
             childrenDirected: service.childrenDirected,
             minimumUserAge: service.minimumUserAge,
             privacy: {
-              usesCookies: service.usesCookies,
-              cookieTypes: stringArray(service.cookieTypes),
+              usesCookiesOrTrackingTechnologies:
+                service.usesCookiesOrTrackingTechnologies,
+              cookieTrackingCategories: stringArray(
+                service.cookieTrackingCategories,
+              ),
+              cookieConsentMechanism: service.cookieConsentMechanism,
+              doNotTrackResponse: service.doNotTrackResponse,
+              globalPrivacyControlSupported:
+                service.globalPrivacyControlSupported,
               primaryHostingRegion: service.primaryHostingRegion,
               dataResidencyOptions: stringArray(service.dataResidencyOptions),
             },
@@ -289,7 +298,7 @@ export function mapOrganizationRecord(record: {
           }),
         ]
       : [],
-  )
+  );
   const privacy = privacyProfileSchema.parse({
     supportedRights: stringArray(record.privacyProfile?.supportedRights),
     requestMethods: stringArray(record.privacyProfile?.requestMethods),
@@ -302,8 +311,7 @@ export function mapOrganizationRecord(record: {
       record.privacyProfile?.authorizedAgentSupported ?? null,
     appealProcessExists: record.privacyProfile?.appealProcessExists ?? null,
     organizationProviders: record.organizationProviders.flatMap((provider) =>
-      provider.providerId &&
-      provider.systemTypes.includes("newsletter")
+      provider.providerId && provider.systemTypes.includes("newsletter")
         ? [
             {
               providerId: provider.providerId,
@@ -313,16 +321,6 @@ export function mapOrganizationRecord(record: {
           ]
         : [],
     ),
-    usesCookiesOrTrackingTechnologies:
-      record.privacyProfile?.usesCookiesOrTrackingTechnologies ?? null,
-    cookieTrackingCategories: stringArray(
-      record.privacyProfile?.cookieTrackingCategories,
-    ),
-    cookieConsentMechanism:
-      record.privacyProfile?.cookieConsentMechanism ?? null,
-    doNotTrackResponse: record.privacyProfile?.doNotTrackResponse ?? null,
-    globalPrivacyControlSupported:
-      record.privacyProfile?.globalPrivacyControlSupported ?? null,
     sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? null,
     marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? null,
     transactionalEmailsSent:
@@ -334,11 +332,14 @@ export function mapOrganizationRecord(record: {
     dpoStatus: record.privacyProfile?.dpoStatus ?? null,
     dpoName: record.privacyProfile?.dpoName ?? null,
     dpoEmail: record.privacyProfile?.dpoEmail ?? null,
-    euRepresentativeStatus: record.privacyProfile?.euRepresentativeStatus ?? null,
+    euRepresentativeStatus:
+      record.privacyProfile?.euRepresentativeStatus ?? null,
     euRepresentativeName: record.privacyProfile?.euRepresentativeName ?? null,
-    euRepresentativeAddress: record.privacyProfile?.euRepresentativeAddress ?? null,
-    usesAutomatedDecisionMaking: record.privacyProfile?.usesAutomatedDecisionMaking ?? null,
-  })
+    euRepresentativeAddress:
+      record.privacyProfile?.euRepresentativeAddress ?? null,
+    usesAutomatedDecisionMaking:
+      record.privacyProfile?.usesAutomatedDecisionMaking ?? null,
+  });
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
       name: dataType.name,
@@ -358,7 +359,7 @@ export function mapOrganizationRecord(record: {
       record.dataHandlingProfile?.productionDataInDevelopment ?? null,
     retentionPolicyExists:
       record.dataHandlingProfile?.retentionPolicyExists ?? null,
-  })
+  });
   const access = accessProfileSchema.parse({
     mfaRequired: record.accessProfile?.mfaRequired ?? null,
     ssoEnabled: record.accessProfile?.ssoEnabled ?? null,
@@ -370,11 +371,10 @@ export function mapOrganizationRecord(record: {
     leastPrivilege: record.accessProfile?.leastPrivilege ?? null,
     roleBasedAccess: record.accessProfile?.roleBasedAccess ?? null,
     accessReviewCadence: record.accessProfile?.accessReviewCadence ?? null,
-    adminApprovalRequired:
-      record.accessProfile?.adminApprovalRequired ?? null,
+    adminApprovalRequired: record.accessProfile?.adminApprovalRequired ?? null,
     passwordManagerRequired:
       record.accessProfile?.passwordManagerRequired ?? null,
-  })
+  });
 
   return {
     id: record.id,
@@ -386,19 +386,19 @@ export function mapOrganizationRecord(record: {
     access,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
-  }
+  };
 }
 
 export function mapBusinessActivityRecord(record: {
-  id: string
-  name: string
-  purpose: string
-  role: string
-  legalBasis: string[]
-  retentionDays: number
-  retentionPolicy: string | null
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  name: string;
+  purpose: string;
+  role: string;
+  legalBasis: string[];
+  retentionDays: number;
+  retentionPolicy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }): BusinessActivity {
   return businessActivitySchema.parse({
     id: record.id,
@@ -410,21 +410,21 @@ export function mapBusinessActivityRecord(record: {
     retentionDays: record.retentionDays,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
-  })
+  });
 }
 
 export function mapOrganizationProviderRecord(record: {
-  id: string
-  providerId?: string | null
-  systemTypes: string[]
-  name: string
-  legalName: string
-  category: string
-  countryOfRegistration: string
-  criticality: string
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  providerId?: string | null;
+  systemTypes: string[];
+  name: string;
+  legalName: string;
+  category: string;
+  countryOfRegistration: string;
+  criticality: string;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }): OrganizationProvider {
   return organizationProviderInventorySchema.parse({
     id: record.id,
@@ -438,32 +438,32 @@ export function mapOrganizationProviderRecord(record: {
     notes: record.notes ?? "",
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
-  })
+  });
 }
 
 export function mapServiceProviderUsageRecord(record: {
-  id: string
-  serviceId: string
+  id: string;
+  serviceId: string;
   service?: {
-    serviceName: string | null
-  } | null
-  organizationProviderId: string
+    serviceName: string | null;
+  } | null;
+  organizationProviderId: string;
   organizationProvider?: {
-    name: string
-  } | null
-  systemType: string | null
-  purpose: string
-  dataProcessingLevel: string
-  dpaStatus: string
-  dataRegions: string[]
+    name: string;
+  } | null;
+  systemType: string | null;
+  purpose: string;
+  dataProcessingLevel: string;
+  dpaStatus: string;
+  dataRegions: string[];
   dataTypes: Array<{
     organizationDataType: {
-      name: string
-    }
-  }>
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
+      name: string;
+    };
+  }>;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }): ServiceProviderUsage {
   return serviceProviderUsageSchema.parse({
     id: record.id,
@@ -482,24 +482,24 @@ export function mapServiceProviderUsageRecord(record: {
     notes: record.notes ?? "",
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
-  })
+  });
 }
 
 export function mapTemplateRecord(record: {
-  id: string
-  organizationId: string
-  name: string
-  slug: string
-  sourceSystemTemplateSlug: string
-  content: string
-  policyEffectiveDate: string
-  policyLastReviewedDate: string
-  policyVersion: string
-  policyOwnerUserId: string | null
-  policyApproverUserId: string | null
-  policyReviewCadence: string
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  organizationId: string;
+  name: string;
+  slug: string;
+  sourceSystemTemplateSlug: string;
+  content: string;
+  policyEffectiveDate: string;
+  policyLastReviewedDate: string;
+  policyVersion: string;
+  policyOwnerUserId: string | null;
+  policyApproverUserId: string | null;
+  policyReviewCadence: string;
+  createdAt: Date;
+  updatedAt: Date;
 }): Template {
   return templateSchema.parse({
     id: record.id,
@@ -516,18 +516,18 @@ export function mapTemplateRecord(record: {
     policyReviewCadence: record.policyReviewCadence,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
-  })
+  });
 }
 
 export function mapDocumentRecord(record: {
-  id: string
-  organizationId: string
-  templateId: string
-  title: string
-  renderedContent: string
-  pdfObjectPath: string | null
-  sourceHash: string
-  generatedAt: Date
+  id: string;
+  organizationId: string;
+  templateId: string;
+  title: string;
+  renderedContent: string;
+  pdfObjectPath: string | null;
+  sourceHash: string;
+  generatedAt: Date;
 }): Document {
   return documentSchema.parse({
     id: record.id,
@@ -538,8 +538,8 @@ export function mapDocumentRecord(record: {
     hasPdf: Boolean(record.pdfObjectPath),
     sourceHash: record.sourceHash,
     generatedAt: toIsoString(record.generatedAt),
-  })
+  });
 }
 
-export { Prisma }
-export type { PrismaClient }
+export { Prisma };
+export type { PrismaClient };

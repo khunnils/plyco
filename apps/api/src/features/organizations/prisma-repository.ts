@@ -1,4 +1,9 @@
-import { mapOrganizationRecord, Prisma, prisma, type PrismaClient } from "@plyco/db"
+import {
+  mapOrganizationRecord,
+  Prisma,
+  prisma,
+  type PrismaClient,
+} from "@plyco/db";
 import {
   type AccessProfile,
   type CompanyProfile,
@@ -10,16 +15,16 @@ import {
   type Provider,
   type ProviderSystemType,
   type ServiceProfileInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
 import {
   type OrganizationRepository,
   type SecurityProfileInput,
-} from "./repository.js"
-import { ApiError } from "../../errors.js"
+} from "./repository.js";
+import { ApiError } from "../../errors.js";
 
 const jsonValue = (value: string[] | null) =>
-  value === null ? Prisma.DbNull : value
+  value === null ? Prisma.DbNull : value;
 
 export const ORGANIZATION_INCLUDE = {
   accessProfile: true,
@@ -38,7 +43,7 @@ export const ORGANIZATION_INCLUDE = {
       systemTypes: true,
     },
   },
-} as const
+} as const;
 
 export class PrismaOrganizationRepository implements OrganizationRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
@@ -49,9 +54,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const organization = await this.client.organization.findUnique({
       where: { id: organizationId },
       include: ORGANIZATION_INCLUDE,
-    })
+    });
 
-    return organization ? mapOrganizationRecord(organization) : null
+    return organization ? mapOrganizationRecord(organization) : null;
   }
 
   async upsertProfile(
@@ -59,11 +64,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     input: SecurityProfileInput,
     providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
-    const organizationData = this.organizationData(input.company)
-    const infrastructureData = this.infrastructureData(input.infrastructure)
-    const dataHandlingData = this.dataHandlingData(input.dataHandling)
-    const privacyData = this.privacyData(input.privacy)
-    const accessData = this.accessData(input.access)
+    const organizationData = this.organizationData(input.company);
+    const infrastructureData = this.infrastructureData(input.infrastructure);
+    const dataHandlingData = this.dataHandlingData(input.dataHandling);
+    const privacyData = this.privacyData(input.privacy);
+    const accessData = this.accessData(input.access);
 
     const organization = await this.client.organization.update({
       where: { id: organizationId },
@@ -95,58 +100,58 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         },
       },
       include: ORGANIZATION_INCLUDE,
-    })
+    });
 
-    await this.syncOrganizationDataTypes(organization.id, input.dataHandling)
-    const services = await this.syncServices(organization.id, input.services)
+    await this.syncOrganizationDataTypes(organization.id, input.dataHandling);
+    const services = await this.syncServices(organization.id, input.services);
     await this.syncOrganizationProviders(
       organization.id,
       { ...input, services },
       providerCatalog,
-    )
+    );
 
     return mapOrganizationRecord(
       await this.client.organization.findUniqueOrThrow({
         where: { id: organization.id },
         include: ORGANIZATION_INCLUDE,
       }),
-    )
+    );
   }
 
   async listDataTypeNames(organizationId: string): Promise<string[]> {
     const dataTypes = await this.client.organizationDataType.findMany({
       where: { organizationId },
       select: { name: true },
-    })
+    });
 
-    return dataTypes.map((dataType) => dataType.name)
+    return dataTypes.map((dataType) => dataType.name);
   }
 
   async listServiceIds(organizationId: string): Promise<string[]> {
     const services = await this.client.serviceProfile.findMany({
       where: { organizationId },
       select: { id: true },
-    })
+    });
 
-    return services.map((service) => service.id)
+    return services.map((service) => service.id);
   }
 
   async listBusinessActivityIds(organizationId: string): Promise<string[]> {
     const activities = await this.client.businessActivity.findMany({
       where: { organizationId },
       select: { id: true },
-    })
+    });
 
-    return activities.map((activity) => activity.id)
+    return activities.map((activity) => activity.id);
   }
 
   async listOrganizationProviderIds(organizationId: string): Promise<string[]> {
     const providers = await this.client.organizationProvider.findMany({
       where: { organizationId },
       select: { id: true },
-    })
+    });
 
-    return providers.map((provider) => provider.id)
+    return providers.map((provider) => provider.id);
   }
 
   private organizationData(input: CompanyProfile) {
@@ -165,7 +170,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
       complianceGoals: jsonValue(input.complianceGoals),
-    }
+    };
   }
 
   private infrastructureData(input: InfrastructureProfile) {
@@ -196,7 +201,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vendorReviewRequired: input.vendorReviewRequired,
       vendorReviewCadence: input.vendorReviewCadence,
       dpaRequiredForProcessors: input.dpaRequiredForProcessors,
-    }
+    };
   }
 
   private serviceData(input: ServiceProfileInput) {
@@ -209,11 +214,18 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       availabilityRegions: jsonValue(input.availabilityRegions),
       childrenDirected: input.childrenDirected,
       minimumUserAge: input.minimumUserAge,
-      usesCookies: input.privacy.usesCookies,
-      cookieTypes: jsonValue(input.privacy.cookieTypes),
+      usesCookiesOrTrackingTechnologies:
+        input.privacy.usesCookiesOrTrackingTechnologies,
+      cookieTrackingCategories: jsonValue(
+        input.privacy.cookieTrackingCategories,
+      ),
+      cookieConsentMechanism: input.privacy.cookieConsentMechanism,
+      doNotTrackResponse: input.privacy.doNotTrackResponse,
+      globalPrivacyControlSupported:
+        input.privacy.globalPrivacyControlSupported,
       primaryHostingRegion: input.privacy.primaryHostingRegion,
       dataResidencyOptions: jsonValue(input.privacy.dataResidencyOptions),
-    }
+    };
   }
 
   private async syncServices(
@@ -223,19 +235,19 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const existingServices = await this.client.serviceProfile.findMany({
       where: { organizationId },
       select: { id: true },
-    })
+    });
     const existingBusinessActivityIds = new Set(
       await this.listBusinessActivityIds(organizationId),
-    )
-    const existingIds = new Set(existingServices.map((service) => service.id))
+    );
+    const existingIds = new Set(existingServices.map((service) => service.id));
     const resolvedServices = services.map((service, index) => ({
       ...service,
       id: service.id ?? existingServices[index]?.id,
-    }))
+    }));
     const requestedIds = resolvedServices.flatMap((service) =>
       service.id ? [service.id] : [],
-    )
-    const unknownId = requestedIds.find((id) => !existingIds.has(id))
+    );
+    const unknownId = requestedIds.find((id) => !existingIds.has(id));
 
     if (unknownId) {
       throw new ApiError(
@@ -243,15 +255,17 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         "Service was not found for this organization.",
         400,
         { serviceId: unknownId },
-      )
+      );
     }
 
     const requestedActivityIds = Array.from(
-      new Set(resolvedServices.flatMap((service) => service.businessActivityIds)),
-    )
+      new Set(
+        resolvedServices.flatMap((service) => service.businessActivityIds),
+      ),
+    );
     const unknownActivityId = requestedActivityIds.find(
       (id) => !existingBusinessActivityIds.has(id),
-    )
+    );
 
     if (unknownActivityId) {
       throw new ApiError(
@@ -259,7 +273,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         "Service activity must reference a business activity on the organization.",
         400,
         { businessActivityId: unknownActivityId },
-      )
+      );
     }
 
     await this.client.serviceProfile.deleteMany({
@@ -267,7 +281,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         organizationId,
         ...(requestedIds.length > 0 ? { id: { notIn: requestedIds } } : {}),
       },
-    })
+    });
 
     return Promise.all(
       resolvedServices.map(async (service) => {
@@ -281,23 +295,23 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
                 organizationId,
                 ...this.serviceData(service),
               },
-            })
+            });
 
         await this.syncServiceBusinessActivities(
           record.id,
           service.businessActivityIds,
-        )
+        );
 
-        return { ...service, id: record.id }
+        return { ...service, id: record.id };
       }),
-    )
+    );
   }
 
   private async syncServiceBusinessActivities(
     serviceId: string,
     businessActivityIds: string[],
   ) {
-    const requestedIds = Array.from(new Set(businessActivityIds))
+    const requestedIds = Array.from(new Set(businessActivityIds));
 
     await this.client.serviceBusinessActivity.deleteMany({
       where: {
@@ -306,7 +320,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           ? { businessActivityId: { notIn: requestedIds } }
           : {}),
       },
-    })
+    });
 
     await Promise.all(
       requestedIds.map((businessActivityId) =>
@@ -324,7 +338,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           update: {},
         }),
       ),
-    )
+    );
   }
 
   private privacyData(input: PrivacyProfile) {
@@ -336,12 +350,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       identityVerificationRequired: input.identityVerificationRequired,
       authorizedAgentSupported: input.authorizedAgentSupported,
       appealProcessExists: input.appealProcessExists,
-      usesCookiesOrTrackingTechnologies:
-        input.usesCookiesOrTrackingTechnologies,
-      cookieTrackingCategories: jsonValue(input.cookieTrackingCategories),
-      cookieConsentMechanism: input.cookieConsentMechanism,
-      doNotTrackResponse: input.doNotTrackResponse,
-      globalPrivacyControlSupported: input.globalPrivacyControlSupported,
       sendsMarketingEmails: input.sendsMarketingEmails,
       marketingOptOutMethod: input.marketingOptOutMethod,
       transactionalEmailsSent: input.transactionalEmailsSent,
@@ -356,7 +364,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       euRepresentativeName: input.euRepresentativeName,
       euRepresentativeAddress: input.euRepresentativeAddress,
       usesAutomatedDecisionMaking: input.usesAutomatedDecisionMaking,
-    }
+    };
   }
 
   private async syncOrganizationProviders(
@@ -367,7 +375,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const selectedProviders: ProviderSelection[] = [
       ...input.infrastructure.organizationProviders,
       ...input.privacy.organizationProviders,
-    ]
+    ];
     const catalogProviders = selectedProviders.map((selectedProvider) => ({
       selectedProvider,
       provider: this.catalogProvider(
@@ -375,7 +383,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         selectedProvider.systemType,
         selectedProvider.providerId,
       ),
-    }))
+    }));
 
     const managedSystemTypes = [
       "auth",
@@ -383,82 +391,82 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       "cloud",
       "password_manager",
       "newsletter",
-    ]
+    ];
     const currentProviders = await this.client.organizationProvider.findMany({
       where: { organizationId },
-    })
-    const selectedByProviderId = new Map<string, Set<ProviderSystemType>>()
-    const selectedByName = new Map<string, Set<ProviderSystemType>>()
+    });
+    const selectedByProviderId = new Map<string, Set<ProviderSystemType>>();
+    const selectedByName = new Map<string, Set<ProviderSystemType>>();
 
     for (const { provider, selectedProvider } of catalogProviders) {
       const currentSystemTypes =
-        selectedByProviderId.get(provider.id) ?? new Set<ProviderSystemType>()
-      currentSystemTypes.add(selectedProvider.systemType)
-      selectedByProviderId.set(provider.id, currentSystemTypes)
+        selectedByProviderId.get(provider.id) ?? new Set<ProviderSystemType>();
+      currentSystemTypes.add(selectedProvider.systemType);
+      selectedByProviderId.set(provider.id, currentSystemTypes);
 
       const nameSystemTypes =
-        selectedByName.get(provider.name) ?? new Set<ProviderSystemType>()
-      nameSystemTypes.add(selectedProvider.systemType)
-      selectedByName.set(provider.name, nameSystemTypes)
+        selectedByName.get(provider.name) ?? new Set<ProviderSystemType>();
+      nameSystemTypes.add(selectedProvider.systemType);
+      selectedByName.set(provider.name, nameSystemTypes);
     }
 
     await Promise.all(
       currentProviders.map((provider) => {
         const selectedSystemTypes =
-          (provider.providerId ? selectedByProviderId.get(provider.providerId) : undefined) ??
-          selectedByName.get(provider.name)
+          (provider.providerId
+            ? selectedByProviderId.get(provider.providerId)
+            : undefined) ?? selectedByName.get(provider.name);
         const systemTypes = [
           ...provider.systemTypes.filter(
             (systemType) => !managedSystemTypes.includes(systemType),
           ),
           ...(selectedSystemTypes ? Array.from(selectedSystemTypes) : []),
-        ]
+        ];
 
         return this.client.organizationProvider.update({
           where: { id: provider.id },
           data: { systemTypes },
-        })
+        });
       }),
-    )
+    );
 
     const uniqueCatalogProviders = Array.from(
       new Map(
         catalogProviders.map(({ provider }) => [provider.id, provider]),
       ).values(),
-    )
+    );
 
     await Promise.all(
       uniqueCatalogProviders.map(async (provider) => {
         const existing = await this.client.organizationProvider.findFirst({
           where: {
             organizationId,
-            OR: [
-              { providerId: provider.id },
-              { name: provider.name },
-            ],
+            OR: [{ providerId: provider.id }, { name: provider.name }],
           },
-        })
+        });
 
         if (existing) {
           if (existing.providerId !== provider.id) {
             return this.client.organizationProvider.update({
               where: { id: existing.id },
               data: { providerId: provider.id },
-            })
+            });
           }
-          return existing
+          return existing;
         }
 
         return this.client.organizationProvider.create({
           data: {
             organizationId,
             providerId: provider.id,
-            systemTypes: Array.from(selectedByProviderId.get(provider.id) ?? []),
+            systemTypes: Array.from(
+              selectedByProviderId.get(provider.id) ?? [],
+            ),
             ...this.organizationProviderData(provider),
           },
-        })
+        });
       }),
-    )
+    );
   }
 
   private catalogProvider(
@@ -475,14 +483,14 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         systemTypes: [systemType],
         securityCriticality: "Low",
         handlesCustomerData: false,
-      }
+      };
     }
 
     const provider = providerCatalog.find(
       (catalogProvider) =>
         catalogProvider.id === providerId &&
         catalogProvider.systemTypes.includes(systemType),
-    )
+    );
 
     if (!provider) {
       throw new ApiError(
@@ -490,10 +498,10 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         "Selected provider is not available for the requested system type.",
         400,
         { providerId, systemType },
-      )
+      );
     }
 
-    return provider
+    return provider;
   }
 
   private organizationProviderData(provider: Provider) {
@@ -506,42 +514,42 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       notes: provider.securityCriticality
         ? `Provider catalog criticality: ${provider.securityCriticality}`
         : null,
-    }
+    };
   }
 
   private providerCategory(provider: Provider) {
-    const normalizedCategory = provider.category?.trim().toLowerCase()
+    const normalizedCategory = provider.category?.trim().toLowerCase();
 
     if (normalizedCategory === "source control") {
-      return "source_control"
+      return "source_control";
     }
 
     if (normalizedCategory === "payments") {
-      return "payments"
+      return "payments";
     }
 
     if (normalizedCategory === "project management") {
-      return "project_management"
+      return "project_management";
     }
 
-    return "provider"
+    return "provider";
   }
 
   private providerCriticality(provider: Provider) {
-    const normalizedCriticality = provider.securityCriticality?.toLowerCase()
+    const normalizedCriticality = provider.securityCriticality?.toLowerCase();
 
     if (
       normalizedCriticality === "critical" ||
       normalizedCriticality === "high"
     ) {
-      return "high"
+      return "high";
     }
 
     if (normalizedCriticality === "low") {
-      return "low"
+      return "low";
     }
 
-    return "medium"
+    return "medium";
   }
 
   private dataHandlingData(input: DataHandlingProfile) {
@@ -552,7 +560,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       encryptionInTransit: input.encryptionInTransit,
       productionDataInDevelopment: input.productionDataInDevelopment,
       retentionPolicyExists: input.retentionPolicyExists,
-    }
+    };
   }
 
   private organizationDataTypes(input: DataHandlingProfile) {
@@ -563,22 +571,22 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       collectionMethods: jsonValue(dataType.collectionMethods),
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
-    }))
+    }));
   }
 
   private async syncOrganizationDataTypes(
     organizationId: string,
     input: DataHandlingProfile,
   ) {
-    const dataTypes = this.organizationDataTypes(input)
-    const names = dataTypes.map((dataType) => dataType.name)
+    const dataTypes = this.organizationDataTypes(input);
+    const names = dataTypes.map((dataType) => dataType.name);
 
     await this.client.organizationDataType.deleteMany({
       where: {
         organizationId,
         name: { notIn: names },
       },
-    })
+    });
 
     await Promise.all(
       dataTypes.map((dataType) =>
@@ -602,7 +610,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           },
         }),
       ),
-    )
+    );
   }
 
   private accessData(input: AccessProfile) {
@@ -617,6 +625,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       accessReviewCadence: input.accessReviewCadence,
       adminApprovalRequired: input.adminApprovalRequired,
       passwordManagerRequired: input.passwordManagerRequired,
-    }
+    };
   }
 }

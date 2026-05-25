@@ -151,62 +151,60 @@ model OrganizationMembership {
 }
 
 model ServiceProfile {
-  id                  String                 @id(map: "service_profiles_pkey") @default(cuid())
-  organizationId      String                 @map("organization_id")
-  organization        Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
-  serviceProviderUsage ServiceProviderUsage[]
-  businessActivities   ServiceBusinessActivity[]
-  serviceName         String?                @map("service_name")
-  serviceDescription  String?                @map("service_description")
-  serviceUrl          String?                @map("service_url")
-  userTypes           Json?                  @map("user_types")
-  customerTypes       Json?                  @map("customer_types")
-  availabilityRegions Json?                  @map("availability_regions")
-  childrenDirected    Boolean?               @map("children_directed")
-  minimumUserAge      Int?                   @map("minimum_user_age")
-  usesCookies         Boolean?               @map("uses_cookies")
-  cookieTypes         Json?                  @map("cookie_types")
-  primaryHostingRegion String?               @map("primary_hosting_region")
-  dataResidencyOptions Json?                 @map("data_residency_options")
-  createdAt           DateTime               @default(now()) @map("created_at")
-  updatedAt           DateTime               @updatedAt @map("updated_at")
+  id                                String                    @id(map: "service_profiles_pkey") @default(cuid())
+  organizationId                    String                    @map("organization_id")
+  organization                      Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
+  serviceProviderUsage              ServiceProviderUsage[]
+  businessActivities                ServiceBusinessActivity[]
+  serviceName                       String?                   @map("service_name")
+  serviceDescription                String?                   @map("service_description")
+  serviceUrl                        String?                   @map("service_url")
+  userTypes                         Json?                     @map("user_types")
+  customerTypes                     Json?                     @map("customer_types")
+  availabilityRegions               Json?                     @map("availability_regions")
+  childrenDirected                  Boolean?                  @map("children_directed")
+  minimumUserAge                    Int?                      @map("minimum_user_age")
+  usesCookiesOrTrackingTechnologies Boolean?                  @map("uses_cookies_or_tracking_technologies")
+  cookieTrackingCategories          Json?                     @map("cookie_tracking_categories")
+  cookieConsentMechanism            String?                   @map("cookie_consent_mechanism")
+  doNotTrackResponse                Boolean?                  @map("do_not_track_response")
+  globalPrivacyControlSupported     Boolean?                  @map("global_privacy_control_supported")
+  primaryHostingRegion              String?                   @map("primary_hosting_region")
+  dataResidencyOptions              Json?                     @map("data_residency_options")
+  createdAt                         DateTime                  @default(now()) @map("created_at")
+  updatedAt                         DateTime                  @updatedAt @map("updated_at")
 
   @@index([organizationId], map: "idx_service_profiles_organization_id")
   @@map("service_profiles")
 }
 
 model PrivacyProfile {
-  id                            String       @id(map: "privacy_profiles_pkey") @default(cuid())
-  organizationId                String       @unique(map: "privacy_profiles_organization_id_key") @map("organization_id")
-  organization                  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "privacy_profiles_organization_id_fkey")
-  supportedRights               Json?        @map("supported_rights")
-  requestMethods                Json?        @map("request_methods")
-  responseTimelineDaysStatus    String?      @map("response_timeline_days_status")
-  responseTimelineDays          Int?         @map("response_timeline_days")
-  identityVerificationRequired  Boolean?     @map("identity_verification_required")
-  authorizedAgentSupported      Boolean?     @map("authorized_agent_supported")
-  appealProcessExists           Boolean?     @map("appeal_process_exists")
-  usesCookiesOrTrackingTechnologies Boolean? @map("uses_cookies_or_tracking_technologies")
-  cookieTrackingCategories      Json?        @map("cookie_tracking_categories")
-  cookieConsentMechanism        String?      @map("cookie_consent_mechanism")
-  doNotTrackResponse            Boolean?     @map("do_not_track_response")
-  globalPrivacyControlSupported Boolean?     @map("global_privacy_control_supported")
-  sendsMarketingEmails          Boolean?     @map("sends_marketing_emails")
-  marketingOptOutMethod         String?      @map("marketing_opt_out_method")
-  transactionalEmailsSent       Boolean?     @map("transactional_emails_sent")
-  crossBorderTransfers          Boolean?     @map("cross_border_transfers")
-  transferMechanisms            Json?        @map("transfer_mechanisms")
-  sellsOrSharesData             Boolean?     @map("sells_or_shares_data")
-  doNotSellLink                 String?      @map("do_not_sell_link")
-  dpoStatus                     String?      @map("dpo_status")
-  dpoName                       String?      @map("dpo_name")
-  dpoEmail                      String?      @map("dpo_email")
-  euRepresentativeStatus        String?      @map("eu_representative_status")
-  euRepresentativeName          String?      @map("eu_representative_name")
-  euRepresentativeAddress       String?      @map("eu_representative_address")
-  usesAutomatedDecisionMaking   Boolean?     @map("uses_automated_decision_making")
-  createdAt                     DateTime     @default(now()) @map("created_at")
-  updatedAt                     DateTime     @updatedAt @map("updated_at")
+  id                           String       @id(map: "privacy_profiles_pkey") @default(cuid())
+  organizationId               String       @unique(map: "privacy_profiles_organization_id_key") @map("organization_id")
+  organization                 Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "privacy_profiles_organization_id_fkey")
+  supportedRights              Json?        @map("supported_rights")
+  requestMethods               Json?        @map("request_methods")
+  responseTimelineDaysStatus   String?      @map("response_timeline_days_status")
+  responseTimelineDays         Int?         @map("response_timeline_days")
+  identityVerificationRequired Boolean?     @map("identity_verification_required")
+  authorizedAgentSupported     Boolean?     @map("authorized_agent_supported")
+  appealProcessExists          Boolean?     @map("appeal_process_exists")
+  sendsMarketingEmails         Boolean?     @map("sends_marketing_emails")
+  marketingOptOutMethod        String?      @map("marketing_opt_out_method")
+  transactionalEmailsSent      Boolean?     @map("transactional_emails_sent")
+  crossBorderTransfers         Boolean?     @map("cross_border_transfers")
+  transferMechanisms           Json?        @map("transfer_mechanisms")
+  sellsOrSharesData            Boolean?     @map("sells_or_shares_data")
+  doNotSellLink                String?      @map("do_not_sell_link")
+  dpoStatus                    String?      @map("dpo_status")
+  dpoName                      String?      @map("dpo_name")
+  dpoEmail                     String?      @map("dpo_email")
+  euRepresentativeStatus       String?      @map("eu_representative_status")
+  euRepresentativeName         String?      @map("eu_representative_name")
+  euRepresentativeAddress      String?      @map("eu_representative_address")
+  usesAutomatedDecisionMaking  Boolean?     @map("uses_automated_decision_making")
+  createdAt                    DateTime     @default(now()) @map("created_at")
+  updatedAt                    DateTime     @updatedAt @map("updated_at")
 
   @@map("privacy_profiles")
 }
@@ -264,18 +262,18 @@ model DataHandlingProfile {
 }
 
 model OrganizationDataType {
-  id                     String           @id(map: "organization_data_types_pkey") @default(cuid())
-  organizationId         String           @map("organization_id")
-  organization           Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
+  id                     String                  @id(map: "organization_data_types_pkey") @default(cuid())
+  organizationId         String                  @map("organization_id")
+  organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
   name                   String
   description            String?
-  subjectTypes           Json?            @map("subject_types")
-  collectionMethods      Json?            @map("collection_methods")
-  isSensitive            Boolean?         @map("is_sensitive")
-  isRequired             Boolean?         @map("is_required")
+  subjectTypes           Json?                   @map("subject_types")
+  collectionMethods      Json?                   @map("collection_methods")
+  isSensitive            Boolean?                @map("is_sensitive")
+  isRequired             Boolean?                @map("is_required")
   providerUsageDataTypes ProviderUsageDataType[]
-  createdAt              DateTime         @default(now()) @map("created_at")
-  updatedAt              DateTime         @updatedAt @map("updated_at")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "organization_data_types_organization_id_name_key")
   @@index([organizationId], map: "idx_organization_data_types_organization_id")
@@ -283,18 +281,18 @@ model OrganizationDataType {
 }
 
 model BusinessActivity {
-  id                 String                    @id(map: "business_activities_pkey") @default(cuid())
-  organizationId     String                    @map("organization_id")
-  organization       Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
-  name               String
-  purpose            String                    @default("")
-  role               String                    @default("")
-  legalBasis         String[]                  @default([]) @map("legal_basis")
-  retentionPolicy    String?                   @map("retention_policy")
-  retentionDays      Int                       @default(0) @map("retention_days")
-  services           ServiceBusinessActivity[]
-  createdAt          DateTime                  @default(now()) @map("created_at")
-  updatedAt          DateTime                  @updatedAt @map("updated_at")
+  id              String                    @id(map: "business_activities_pkey") @default(cuid())
+  organizationId  String                    @map("organization_id")
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
+  name            String
+  purpose         String                    @default("")
+  role            String                    @default("")
+  legalBasis      String[]                  @default([]) @map("legal_basis")
+  retentionPolicy String?                   @map("retention_policy")
+  retentionDays   Int                       @default(0) @map("retention_days")
+  services        ServiceBusinessActivity[]
+  createdAt       DateTime                  @default(now()) @map("created_at")
+  updatedAt       DateTime                  @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "business_activities_organization_id_name_key")
   @@index([organizationId], map: "idx_business_activities_organization_id")
@@ -317,40 +315,40 @@ model ServiceBusinessActivity {
 }
 
 model AccessProfile {
-  id                         String       @id(map: "access_profiles_pkey") @default(cuid())
-  organizationId             String       @unique(map: "access_profiles_organization_id_key") @map("organization_id")
-  organization               Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "access_profiles_organization_id_fkey")
-  mfaRequired                Boolean?     @map("mfa_required")
-  ssoEnabled                 Boolean?     @map("sso_enabled")
-  sharedAccountsExist        Boolean?     @map("shared_accounts_exist")
-  offboardingProcessExists   Boolean?     @map("offboarding_process_exists")
-  accessReviewsPerformed     Boolean?     @map("access_reviews_performed")
-  leastPrivilege             Boolean?     @map("least_privilege")
-  roleBasedAccess            Boolean?     @map("role_based_access")
-  accessReviewCadence        String?      @map("access_review_cadence")
-  adminApprovalRequired      Boolean?     @map("admin_approval_required")
-  passwordManagerRequired    Boolean?     @map("password_manager_required")
-  createdAt                  DateTime     @default(now()) @map("created_at")
-  updatedAt                  DateTime     @updatedAt @map("updated_at")
+  id                       String       @id(map: "access_profiles_pkey") @default(cuid())
+  organizationId           String       @unique(map: "access_profiles_organization_id_key") @map("organization_id")
+  organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "access_profiles_organization_id_fkey")
+  mfaRequired              Boolean?     @map("mfa_required")
+  ssoEnabled               Boolean?     @map("sso_enabled")
+  sharedAccountsExist      Boolean?     @map("shared_accounts_exist")
+  offboardingProcessExists Boolean?     @map("offboarding_process_exists")
+  accessReviewsPerformed   Boolean?     @map("access_reviews_performed")
+  leastPrivilege           Boolean?     @map("least_privilege")
+  roleBasedAccess          Boolean?     @map("role_based_access")
+  accessReviewCadence      String?      @map("access_review_cadence")
+  adminApprovalRequired    Boolean?     @map("admin_approval_required")
+  passwordManagerRequired  Boolean?     @map("password_manager_required")
+  createdAt                DateTime     @default(now()) @map("created_at")
+  updatedAt                DateTime     @updatedAt @map("updated_at")
 
   @@map("access_profiles")
 }
 
 model OrganizationProvider {
-  id                            String             @id(map: "vendors_pkey") @default(cuid())
-  organizationId                String             @map("organization_id")
-  organization                  Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "vendors_organization_id_fkey")
-  providerId                    String?            @map("provider_id")
-  systemTypes                   String[]           @default([]) @map("system_types")
-  name                          String
-  legalName                     String             @default("") @map("legal_name")
-  category                      String
-  countryOfRegistration         String             @default("") @map("country_of_registration")
-  criticality                   String
-  notes                         String?
-  serviceUsage                  ServiceProviderUsage[]
-  createdAt                     DateTime           @default(now()) @map("created_at")
-  updatedAt                     DateTime           @updatedAt @map("updated_at")
+  id                    String                 @id(map: "vendors_pkey") @default(cuid())
+  organizationId        String                 @map("organization_id")
+  organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "vendors_organization_id_fkey")
+  providerId            String?                @map("provider_id")
+  systemTypes           String[]               @default([]) @map("system_types")
+  name                  String
+  legalName             String                 @default("") @map("legal_name")
+  category              String
+  countryOfRegistration String                 @default("") @map("country_of_registration")
+  criticality           String
+  notes                 String?
+  serviceUsage          ServiceProviderUsage[]
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "vendors_organization_id_name_key")
   @@index([organizationId], map: "idx_vendors_organization_id")
@@ -360,21 +358,21 @@ model OrganizationProvider {
 
 model ServiceProviderUsage {
   id                     String                  @id(map: "service_vendor_uses_pkey") @default(cuid())
-  organizationId      String              @map("organization_id")
-  organization        Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_vendor_uses_organization_id_fkey")
-  serviceId           String              @map("service_id")
-  service             ServiceProfile      @relation(fields: [serviceId], references: [id], onDelete: Cascade, map: "service_vendor_uses_service_id_fkey")
-  organizationProviderId String           @map("organization_provider_id")
-  organizationProvider   OrganizationProvider @relation(fields: [organizationProviderId], references: [id], onDelete: Cascade, map: "service_vendor_uses_vendor_id_fkey")
-  systemType          String?             @map("system_type")
-  purpose             String
-  dataProcessingLevel String              @default("limited") @map("data_processing_level")
-  dpaStatus           String              @map("dpa_status")
-  dataRegions         String[]            @default([]) @map("data_regions")
-  notes               String?
-  dataTypes           ProviderUsageDataType[]
-  createdAt           DateTime            @default(now()) @map("created_at")
-  updatedAt           DateTime            @updatedAt @map("updated_at")
+  organizationId         String                  @map("organization_id")
+  organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_vendor_uses_organization_id_fkey")
+  serviceId              String                  @map("service_id")
+  service                ServiceProfile          @relation(fields: [serviceId], references: [id], onDelete: Cascade, map: "service_vendor_uses_service_id_fkey")
+  organizationProviderId String                  @map("organization_provider_id")
+  organizationProvider   OrganizationProvider    @relation(fields: [organizationProviderId], references: [id], onDelete: Cascade, map: "service_vendor_uses_vendor_id_fkey")
+  systemType             String?                 @map("system_type")
+  purpose                String
+  dataProcessingLevel    String                  @default("limited") @map("data_processing_level")
+  dpaStatus              String                  @map("dpa_status")
+  dataRegions            String[]                @default([]) @map("data_regions")
+  notes                  String?
+  dataTypes              ProviderUsageDataType[]
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
 
   @@unique([serviceId, organizationProviderId, systemType], map: "service_provider_usage_service_provider_system_key")
   @@index([organizationId], map: "idx_service_vendor_uses_organization_id")

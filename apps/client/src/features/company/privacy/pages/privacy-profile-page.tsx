@@ -21,14 +21,6 @@ export const PrivacyProfilePage = ({
   onSaveProfile: SaveProfile
 }) => (
   <PrivacyManager
-    cookieTrackingCategoryOptions={codeOptions(
-      vocabulary,
-      "cookie_tracking_categories"
-    )}
-    cookieConsentMechanismOptions={codeOptions(
-      vocabulary,
-      "privacy_cookie_consent_mechanisms"
-    )}
     dpoStatusOptions={codeOptions(vocabulary, "privacy_dpo_statuses")}
     euRepresentativeStatusOptions={codeOptions(
       vocabulary,

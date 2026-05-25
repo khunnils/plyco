@@ -42,8 +42,11 @@ describe("dashboard progress", () => {
         childrenDirected: false,
         minimumUserAge: 0,
         privacy: {
-          usesCookies: false,
-          cookieTypes: [],
+          usesCookiesOrTrackingTechnologies: false,
+          cookieTrackingCategories: [],
+          cookieConsentMechanism: null,
+          doNotTrackResponse: null,
+          globalPrivacyControlSupported: null,
           primaryHostingRegion: "us",
           dataResidencyOptions: ["us"],
         },
@@ -53,17 +56,24 @@ describe("dashboard progress", () => {
     const audience = progress.sections.find(
       (section) => section.title === "Audience and Availability"
     )
-    const servicePrivacy = progress.sections.find(
-      (section) => section.title === "Service Privacy"
+    const cookiePreferences = progress.sections.find(
+      (section) => section.title === "Cookie Preferences"
+    )
+    const hosting = progress.sections.find(
+      (section) => section.title === "Hosting & Data Residency"
     )
 
     expect(audience).toMatchObject({
       completedFields: 5,
       totalFields: 5,
     })
-    expect(servicePrivacy).toMatchObject({
-      completedFields: 3,
-      totalFields: 3,
+    expect(cookiePreferences).toMatchObject({
+      completedFields: 1,
+      totalFields: 1,
+    })
+    expect(hosting).toMatchObject({
+      completedFields: 2,
+      totalFields: 2,
     })
   })
 
@@ -156,8 +166,8 @@ describe("dashboard progress", () => {
 
     expect(
       progress.sections.find(
-        (section) => section.title === "Privacy Officers & Representation",
-      ),
+        (section) => section.title === "Privacy Officers & Representation"
+      )
     ).toBeUndefined()
   })
 

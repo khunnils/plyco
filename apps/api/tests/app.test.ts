@@ -1,22 +1,22 @@
-import { readFile } from "node:fs/promises"
-import { fileURLToPath } from "node:url"
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
-import { type SecurityProgramSnapshot } from "@plyco/shared"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { type SecurityProgramSnapshot } from "@plyco/shared";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createApp, createTestApp } from "../src/app.js"
-import { readAuthConfig } from "../src/config.js"
+import { createApp, createTestApp } from "../src/app.js";
+import { readAuthConfig } from "../src/config.js";
 import {
   Jinja2Renderer,
   ReportContextBuilder,
-} from "../src/document-generation.js"
-import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js"
-import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-repository.js"
-import { InMemoryOrganizationRepository } from "../src/features/organizations/in-memory-repository.js"
-import { InMemoryVendorRepository } from "../src/features/vendors/in-memory-repository.js"
-import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js"
-import { AirtableProviderSource } from "../src/providers.js"
-import { parseSystemTemplate } from "../src/system-templates.js"
+} from "../src/document-generation.js";
+import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js";
+import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-repository.js";
+import { InMemoryOrganizationRepository } from "../src/features/organizations/in-memory-repository.js";
+import { InMemoryVendorRepository } from "../src/features/vendors/in-memory-repository.js";
+import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
+import { AirtableProviderSource } from "../src/providers.js";
+import { parseSystemTemplate } from "../src/system-templates.js";
 
 const serviceBody = {
   serviceName: "Acme AI Platform",
@@ -28,19 +28,22 @@ const serviceBody = {
   childrenDirected: false,
   minimumUserAge: 13,
   privacy: {
-    usesCookies: true,
-    cookieTypes: ["necessary", "analytics"],
+    usesCookiesOrTrackingTechnologies: true,
+    cookieTrackingCategories: ["necessary", "analytics"],
+    cookieConsentMechanism: "cookie_banner",
+    doNotTrackResponse: false,
+    globalPrivacyControlSupported: true,
     primaryHostingRegion: "us",
     dataResidencyOptions: ["us", "eu"],
   },
-}
+};
 
 const storedService = {
   id: "service-platform",
   ...serviceBody,
   createdAt: "2026-05-15T00:00:00.000Z",
   updatedAt: "2026-05-15T00:00:00.000Z",
-}
+};
 
 const profileBody = {
   company: {
@@ -75,11 +78,6 @@ const profileBody = {
         name: "Mailchimp",
       },
     ],
-    usesCookiesOrTrackingTechnologies: true,
-    cookieTrackingCategories: ["necessary", "analytics"],
-    cookieConsentMechanism: "cookie_banner",
-    doNotTrackResponse: false,
-    globalPrivacyControlSupported: true,
     sendsMarketingEmails: true,
     marketingOptOutMethod: "unsubscribe_link",
     transactionalEmailsSent: true,
@@ -163,7 +161,7 @@ const profileBody = {
     adminApprovalRequired: true,
     passwordManagerRequired: true,
   },
-}
+};
 
 const vendorBody = {
   providerId: "prov-github",
@@ -174,7 +172,7 @@ const vendorBody = {
   countryOfRegistration: "US",
   criticality: "high",
   notes: "Critical engineering system",
-}
+};
 
 const vendorUseBody = {
   serviceId: "service-platform",
@@ -186,7 +184,7 @@ const vendorUseBody = {
   dpaStatus: "signed",
   dataRegions: ["us"],
   notes: "Critical engineering system",
-}
+};
 
 const subprocessorBody = {
   ...vendorBody,
@@ -194,7 +192,7 @@ const subprocessorBody = {
   category: "payments",
   criticality: "medium",
   notes: "Customer payment processor",
-}
+};
 
 const subprocessorUseBody = {
   ...vendorUseBody,
@@ -203,7 +201,7 @@ const subprocessorUseBody = {
   dataProcessingLevel: "subprocessor",
   dataRegions: ["us", "eu"],
   notes: "Customer payment processor",
-}
+};
 
 const noProcessingVendorBody = {
   ...vendorBody,
@@ -211,7 +209,7 @@ const noProcessingVendorBody = {
   category: "project_management",
   criticality: "low",
   notes: "",
-}
+};
 
 const noProcessingVendorUseBody = {
   ...vendorUseBody,
@@ -222,7 +220,7 @@ const noProcessingVendorUseBody = {
   dpaStatus: "not_required",
   dataRegions: [],
   notes: "",
-}
+};
 
 const authConfig = {
   apiPublicUrl: "http://localhost:4000",
@@ -232,84 +230,83 @@ const authConfig = {
   sessionKey: "test-session-key-with-at-least-32-chars",
   cookieSecure: false,
   cookieSameSite: "lax" as const,
-}
+};
 
 describe("security profile API", () => {
   afterEach(() => {
-    vi.unstubAllGlobals()
-  })
+    vi.unstubAllGlobals();
+  });
 
   it("returns health status", async () => {
-    const app = await createTestApp()
-    const response = await app.inject({ method: "GET", url: "/health" })
+    const app = await createTestApp();
+    const response = await app.inject({ method: "GET", url: "/health" });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ status: "ok" })
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ status: "ok" });
+  });
 
   it("rejects protected routes when authentication is enabled", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
       auth: authConfig,
-    })
+    });
     const response = await app.inject({
       method: "GET",
       url: "/organizations/org-test/security-profile",
-    })
+    });
 
-    expect(response.statusCode).toBe(401)
+    expect(response.statusCode).toBe(401);
     expect(response.json()).toMatchObject({
       error: {
         code: "AUTHENTICATION_REQUIRED",
         message: "Authentication is required.",
       },
-    })
-  })
+    });
+  });
 
   it("returns anonymous auth state before login", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
       auth: authConfig,
-    })
-    const response = await app.inject({ method: "GET", url: "/auth/me" })
+    });
+    const response = await app.inject({ method: "GET", url: "/auth/me" });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ user: null, organizations: [] })
-  })
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ user: null, organizations: [] });
+  });
 
   it("supports idempotent logout without a session", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
       auth: authConfig,
-    })
-    const response = await app.inject({ method: "POST", url: "/auth/logout" })
+    });
+    const response = await app.inject({ method: "POST", url: "/auth/logout" });
 
-    expect(response.statusCode).toBe(204)
-  })
+    expect(response.statusCode).toBe(204);
+  });
 
   it("clears stale authenticated sessions whose user no longer exists", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
       auth: authConfig,
-    })
+    });
 
     const staleCookieResponse = await app.inject({
       method: "GET",
       url: "/auth/me",
       cookies: {
-        cf_session:
-          "Fe26.2**stale-session-cookie-placeholder**placeholder",
+        cf_session: "Fe26.2**stale-session-cookie-placeholder**placeholder",
       },
-    })
+    });
 
-    expect(staleCookieResponse.statusCode).toBe(200)
-  })
+    expect(staleCookieResponse.statusCode).toBe(200);
+  });
 
   it("requires auth config values when auth config is read", () => {
     expect(() => readAuthConfig({} as NodeJS.ProcessEnv)).toThrow(
       "SESSION_KEY is required",
-    )
-  })
+    );
+  });
 
   it("requires a high entropy session key", () => {
     expect(() =>
@@ -320,45 +317,51 @@ describe("security profile API", () => {
         GOOGLE_OAUTH_CLIENT_ID: "client",
         GOOGLE_OAUTH_CLIENT_SECRET: "secret",
       } as NodeJS.ProcessEnv),
-    ).toThrow("SESSION_KEY must be at least 32 characters")
-  })
+    ).toThrow("SESSION_KEY must be at least 32 characters");
+  });
 
   it("creates and returns organization security profile services", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const saveResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
 
-    expect(saveResponse.statusCode).toBe(200)
-    expect(saveResponse.json().organization.company.companyName).toBe("Acme AI")
+    expect(saveResponse.statusCode).toBe(200);
+    expect(saveResponse.json().organization.company.companyName).toBe(
+      "Acme AI",
+    );
     expect(saveResponse.json().organization.company.legalEntityName).toBe(
       "Acme AI, Inc.",
-    )
+    );
     expect(
       saveResponse.json().organization.dataHandling.dataTypesStored,
-    ).toEqual(profileBody.dataHandling.dataTypesStored)
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
     expect(saveResponse.json().organization.services).toEqual([
       expect.objectContaining(profileBody.services[0]),
-    ])
-    expect(saveResponse.json().organization.privacy).toEqual(profileBody.privacy)
+    ]);
+    expect(saveResponse.json().organization.privacy).toEqual(
+      profileBody.privacy,
+    );
 
     const getResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/security-profile",
-    })
+    });
 
-    expect(getResponse.statusCode).toBe(200)
-    expect(getResponse.json().organization.company.companyName).toBe("Acme AI")
+    expect(getResponse.statusCode).toBe(200);
+    expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
     expect(
       getResponse.json().organization.dataHandling.dataTypesStored,
-    ).toEqual(profileBody.dataHandling.dataTypesStored)
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
     expect(getResponse.json().organization.services).toEqual([
       expect.objectContaining(profileBody.services[0]),
-    ])
-    expect(getResponse.json().organization.privacy).toEqual(profileBody.privacy)
-  })
+    ]);
+    expect(getResponse.json().organization.privacy).toEqual(
+      profileBody.privacy,
+    );
+  });
 
   it("persists explicit empty, false, and zero profile answers", async () => {
     const explicitEmptyProfile = {
@@ -378,8 +381,9 @@ describe("security profile API", () => {
           minimumUserAge: 0,
           privacy: {
             ...profileBody.services[0].privacy,
-            usesCookies: false,
-            cookieTypes: [],
+            usesCookiesOrTrackingTechnologies: false,
+            cookieTrackingCategories: [],
+            cookieConsentMechanism: "",
           },
         },
       ],
@@ -389,31 +393,34 @@ describe("security profile API", () => {
         responseTimelineDaysStatus: "defined",
         responseTimelineDays: 0,
         identityVerificationRequired: false,
-        usesCookiesOrTrackingTechnologies: false,
-        cookieTrackingCategories: [],
-        cookieConsentMechanism: "",
         transferMechanisms: [],
       },
-    }
-    const app = await createTestApp()
+    };
+    const app = await createTestApp();
     const saveResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: explicitEmptyProfile,
-    })
+    });
 
-    expect(saveResponse.statusCode).toBe(200)
-    expect(saveResponse.json().organization.company.industries).toEqual([])
-    expect(saveResponse.json().organization.company.handlesPii).toBe(false)
-    expect(saveResponse.json().organization.services[0].userTypes).toEqual([])
-    expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0)
-    expect(saveResponse.json().organization.privacy.supportedRights).toEqual([])
-    expect(saveResponse.json().organization.privacy.responseTimelineDays).toBe(0)
-    expect(saveResponse.json().organization.privacy.identityVerificationRequired).toBe(false)
-  })
+    expect(saveResponse.statusCode).toBe(200);
+    expect(saveResponse.json().organization.company.industries).toEqual([]);
+    expect(saveResponse.json().organization.company.handlesPii).toBe(false);
+    expect(saveResponse.json().organization.services[0].userTypes).toEqual([]);
+    expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0);
+    expect(saveResponse.json().organization.privacy.supportedRights).toEqual(
+      [],
+    );
+    expect(saveResponse.json().organization.privacy.responseTimelineDays).toBe(
+      0,
+    );
+    expect(
+      saveResponse.json().organization.privacy.identityVerificationRequired,
+    ).toBe(false);
+  });
 
   it("rejects service profile codes that are not in organization vocabulary", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -426,9 +433,9 @@ describe("security profile API", () => {
           },
         ],
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -438,11 +445,11 @@ describe("security profile API", () => {
           value: "not_a_real_user_type",
         },
       },
-    })
-  })
+    });
+  });
 
   it("supports multiple services and service-scoped vendor inventory", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const saveResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -458,11 +465,11 @@ describe("security profile API", () => {
           },
         ],
       },
-    })
+    });
 
-    expect(saveResponse.statusCode).toBe(200)
-    const services = saveResponse.json().organization.services
-    expect(services).toHaveLength(2)
+    expect(saveResponse.statusCode).toBe(200);
+    const services = saveResponse.json().organization.services;
+    expect(services).toHaveLength(2);
 
     const vendorResponse = await app.inject({
       method: "POST",
@@ -471,9 +478,9 @@ describe("security profile API", () => {
         ...vendorBody,
         name: "Stripe EU",
       },
-    })
+    });
 
-    expect(vendorResponse.statusCode).toBe(201)
+    expect(vendorResponse.statusCode).toBe(201);
     const vendorUseResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/service-provider-usage",
@@ -482,17 +489,17 @@ describe("security profile API", () => {
         serviceId: services[1].id,
         organizationProviderId: vendorResponse.json().id,
       },
-    })
+    });
 
-    expect(vendorUseResponse.statusCode).toBe(201)
+    expect(vendorUseResponse.statusCode).toBe(201);
     expect(vendorUseResponse.json()).toMatchObject({
       serviceId: services[1].id,
       serviceName: "Acme EU",
       providerName: "Stripe EU",
-    })
+    });
     expect(vendorResponse.json()).toMatchObject({
       name: "Stripe EU",
-    })
+    });
 
     const invalidVendorResponse = await app.inject({
       method: "POST",
@@ -502,16 +509,16 @@ describe("security profile API", () => {
         organizationProviderId: vendorResponse.json().id,
         serviceId: "service_missing",
       },
-    })
+    });
 
-    expect(invalidVendorResponse.statusCode).toBe(400)
+    expect(invalidVendorResponse.statusCode).toBe(400);
     expect(invalidVendorResponse.json().error.code).toBe(
       "PROVIDER_SERVICE_NOT_FOUND",
-    )
-  })
+    );
+  });
 
   it("rejects privacy profile codes that are not in organization vocabulary", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -522,9 +529,9 @@ describe("security profile API", () => {
           supportedRights: ["not_a_real_right"],
         },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -534,11 +541,11 @@ describe("security profile API", () => {
           value: "not_a_real_right",
         },
       },
-    })
-  })
+    });
+  });
 
-  it("rejects privacy cookie tracking codes that are not in organization vocabulary", async () => {
-    const app = await createTestApp()
+  it("rejects service cookie tracking codes that are not in organization vocabulary", async () => {
+    const app = await createTestApp();
     const invalidCookieTypeResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -549,52 +556,57 @@ describe("security profile API", () => {
             ...serviceBody,
             privacy: {
               ...serviceBody.privacy,
-              cookieTypes: ["not_a_real_cookie_type"],
+              cookieTrackingCategories: ["not_a_real_cookie_type"],
             },
           },
         ],
       },
-    })
+    });
 
-    expect(invalidCookieTypeResponse.statusCode).toBe(400)
+    expect(invalidCookieTypeResponse.statusCode).toBe(400);
     expect(invalidCookieTypeResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
         details: {
-          codeSetId: "privacy_cookie_types",
-          field: "services.0.privacy.cookieTypes",
+          codeSetId: "cookie_tracking_categories",
+          field: "services.0.privacy.cookieTrackingCategories",
           value: "not_a_real_cookie_type",
         },
       },
-    })
+    });
 
     const invalidConsentResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        privacy: {
-          ...profileBody.privacy,
-          cookieConsentMechanism: "not_a_real_mechanism",
-        },
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieConsentMechanism: "not_a_real_mechanism",
+            },
+          },
+        ],
       },
-    })
+    });
 
-    expect(invalidConsentResponse.statusCode).toBe(400)
+    expect(invalidConsentResponse.statusCode).toBe(400);
     expect(invalidConsentResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
         details: {
           codeSetId: "privacy_cookie_consent_mechanisms",
-          field: "privacy.cookieConsentMechanism",
+          field: "services.0.privacy.cookieConsentMechanism",
           value: "not_a_real_mechanism",
         },
       },
-    })
-  })
+    });
+  });
 
   it("rejects infrastructure providers that are not available for the selected system type", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -610,9 +622,9 @@ describe("security profile API", () => {
           ],
         },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       error: {
         code: "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
@@ -621,11 +633,11 @@ describe("security profile API", () => {
           systemType: "source_control",
         },
       },
-    })
-  })
+    });
+  });
 
   it("supports saving multiple 'none' infrastructure providers", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -649,10 +661,12 @@ describe("security profile API", () => {
           ],
         },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
-    expect(response.json().organization.infrastructure.organizationProviders).toEqual(
+    expect(response.statusCode).toBe(200);
+    expect(
+      response.json().organization.infrastructure.organizationProviders,
+    ).toEqual(
       expect.arrayContaining([
         {
           systemType: "cloud",
@@ -670,11 +684,11 @@ describe("security profile API", () => {
           name: "None",
         },
       ]),
-    )
-  })
+    );
+  });
 
   it("rejects invalid marketing opt-out method codes", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -685,9 +699,9 @@ describe("security profile API", () => {
           marketingOptOutMethod: "phone_call",
         },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -697,11 +711,11 @@ describe("security profile API", () => {
           value: "phone_call",
         },
       },
-    })
-  })
+    });
+  });
 
   it("rejects invalid international transfer codes", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const invalidTransferResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -712,9 +726,9 @@ describe("security profile API", () => {
           transferMechanisms: ["not_a_real_mechanism"],
         },
       },
-    })
+    });
 
-    expect(invalidTransferResponse.statusCode).toBe(400)
+    expect(invalidTransferResponse.statusCode).toBe(400);
     expect(invalidTransferResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -724,7 +738,7 @@ describe("security profile API", () => {
           value: "not_a_real_mechanism",
         },
       },
-    })
+    });
 
     const invalidRegionResponse = await app.inject({
       method: "PUT",
@@ -741,9 +755,9 @@ describe("security profile API", () => {
           },
         ],
       },
-    })
+    });
 
-    expect(invalidRegionResponse.statusCode).toBe(400)
+    expect(invalidRegionResponse.statusCode).toBe(400);
     expect(invalidRegionResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -753,7 +767,7 @@ describe("security profile API", () => {
           value: "antarctica",
         },
       },
-    })
+    });
 
     const invalidResidencyResponse = await app.inject({
       method: "PUT",
@@ -770,9 +784,9 @@ describe("security profile API", () => {
           },
         ],
       },
-    })
+    });
 
-    expect(invalidResidencyResponse.statusCode).toBe(400)
+    expect(invalidResidencyResponse.statusCode).toBe(400);
     expect(invalidResidencyResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -782,11 +796,11 @@ describe("security profile API", () => {
           value: "antarctica",
         },
       },
-    })
-  })
+    });
+  });
 
   it("rejects invalid security control codes", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const invalidAccessResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -797,9 +811,9 @@ describe("security profile API", () => {
           accessReviewCadence: "every_quarter",
         },
       },
-    })
+    });
 
-    expect(invalidAccessResponse.statusCode).toBe(400)
+    expect(invalidAccessResponse.statusCode).toBe(400);
     expect(invalidAccessResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -809,7 +823,7 @@ describe("security profile API", () => {
           value: "every_quarter",
         },
       },
-    })
+    });
 
     const invalidInfrastructureResponse = await app.inject({
       method: "PUT",
@@ -821,9 +835,9 @@ describe("security profile API", () => {
           atRestAlgorithm: "aes_512",
         },
       },
-    })
+    });
 
-    expect(invalidInfrastructureResponse.statusCode).toBe(400)
+    expect(invalidInfrastructureResponse.statusCode).toBe(400);
     expect(invalidInfrastructureResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
@@ -833,8 +847,8 @@ describe("security profile API", () => {
           value: "aes_512",
         },
       },
-    })
-  })
+    });
+  });
 
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
@@ -844,12 +858,12 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-	      },
-	      businessActivities: [],
-	      vendors: [
+      },
+      businessActivities: [],
+      vendors: [
         {
-	          id: "vendor-limited",
-	          ...vendorBody,
+          id: "vendor-limited",
+          ...vendorBody,
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
@@ -865,51 +879,51 @@ describe("security profile API", () => {
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
-	      ],
-	      serviceVendorUses: [
-	        {
-	          id: "vendor-use-limited",
-	          ...vendorUseBody,
-	          vendorName: "GitHub",
-	          serviceName: "Acme AI Platform",
-	          createdAt: "2026-05-15T00:00:00.000Z",
-	          updatedAt: "2026-05-15T00:00:00.000Z",
-	        },
-	        {
-	          id: "vendor-use-subprocessor",
-	          ...subprocessorUseBody,
-	          vendorName: "Stripe",
-	          serviceName: "Acme AI Platform",
-	          createdAt: "2026-05-15T00:00:00.000Z",
-	          updatedAt: "2026-05-15T00:00:00.000Z",
-	        },
-	        {
-	          id: "vendor-use-none",
-	          ...noProcessingVendorUseBody,
-	          vendorName: "Linear",
-	          serviceName: "Acme AI Platform",
-	          createdAt: "2026-05-15T00:00:00.000Z",
-	          updatedAt: "2026-05-15T00:00:00.000Z",
-	        },
-	      ],
-	    }
+      ],
+      serviceVendorUses: [
+        {
+          id: "vendor-use-limited",
+          ...vendorUseBody,
+          vendorName: "GitHub",
+          serviceName: "Acme AI Platform",
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        {
+          id: "vendor-use-subprocessor",
+          ...subprocessorUseBody,
+          vendorName: "Stripe",
+          serviceName: "Acme AI Platform",
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        {
+          id: "vendor-use-none",
+          ...noProcessingVendorUseBody,
+          vendorName: "Linear",
+          serviceName: "Acme AI Platform",
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+      ],
+    };
 
-    const context = new ReportContextBuilder().build(snapshot)
+    const context = new ReportContextBuilder().build(snapshot);
 
-    expect(context.organization.name).toBe("Acme AI")
-    expect(context.organization.employeeCount).toBe(12)
-    expect(context.company.name).toBe("Acme AI")
+    expect(context.organization.name).toBe("Acme AI");
+    expect(context.organization.employeeCount).toBe(12);
+    expect(context.company.name).toBe("Acme AI");
     expect(context.vendors.all.map((vendor) => vendor.name)).toEqual([
       "GitHub",
       "Stripe",
       "Linear",
-    ])
-	    expect(context.vendors.dataProcessors.map((vendor) => vendor.name)).toEqual(
-	      ["GitHub", "Stripe"],
-	    )
+    ]);
+    expect(context.vendors.dataProcessors.map((vendor) => vendor.name)).toEqual(
+      ["GitHub", "Stripe"],
+    );
     expect(context.vendors.subprocessors.map((vendor) => vendor.name)).toEqual([
       "Stripe",
-    ])
+    ]);
     expect(context.vendors.byService).toEqual([
       expect.objectContaining({
         serviceId: "service-platform",
@@ -919,18 +933,16 @@ describe("security profile API", () => {
           expect.objectContaining({ name: "Stripe" }),
         ]),
       }),
-    ])
+    ]);
     expect(context.services.all[0]).toMatchObject({
       vendors: expect.arrayContaining([
         expect.objectContaining({ name: "GitHub" }),
         expect.objectContaining({ name: "Stripe" }),
       ]),
       subprocessors: [expect.objectContaining({ name: "Stripe" })],
-      dataTypes: [
-        expect.objectContaining({ name: "Customer account data" }),
-      ],
-    })
-  })
+      dataTypes: [expect.objectContaining({ name: "Customer account data" })],
+    });
+  });
 
   it("adds answered and hasValue helper flags to report context fields", () => {
     const context = new ReportContextBuilder().build({
@@ -949,8 +961,8 @@ describe("security profile API", () => {
             minimumUserAge: 0,
             privacy: {
               ...storedService.privacy,
-              cookieTypes: [],
-              usesCookies: false,
+              cookieTrackingCategories: [],
+              usesCookiesOrTrackingTechnologies: false,
             },
           },
         ],
@@ -966,28 +978,30 @@ describe("security profile API", () => {
       businessActivities: [],
       organizationProviders: [],
       serviceProviderUsage: [],
-    })
+    });
 
-    expect(context.privacy.supportedRightsAnswered).toBe(false)
-    expect(context.privacy.requestMethodsAnswered).toBe(true)
-    expect(context.privacy.requestMethodsHasValue).toBe(false)
-    expect(context.privacy.identityVerificationRequiredAnswered).toBe(true)
-    expect(context.privacy.identityVerificationRequiredHasValue).toBe(false)
-    expect(context.service.userTypesAnswered).toBe(false)
-    expect(context.service.minimumUserAgeAnswered).toBe(true)
-    expect(context.service.minimumUserAgeHasValue).toBe(false)
-    expect(context.service.privacy.cookieTypesAnswered).toBe(true)
-    expect(context.service.privacy.cookieTypesHasValue).toBe(false)
-    expect(context.vendors.dataProcessorsHasValue).toBe(false)
-  })
+    expect(context.privacy.supportedRightsAnswered).toBe(false);
+    expect(context.privacy.requestMethodsAnswered).toBe(true);
+    expect(context.privacy.requestMethodsHasValue).toBe(false);
+    expect(context.privacy.identityVerificationRequiredAnswered).toBe(true);
+    expect(context.privacy.identityVerificationRequiredHasValue).toBe(false);
+    expect(context.service.userTypesAnswered).toBe(false);
+    expect(context.service.minimumUserAgeAnswered).toBe(true);
+    expect(context.service.minimumUserAgeHasValue).toBe(false);
+    expect(context.service.privacy.cookieTrackingCategoriesAnswered).toBe(true);
+    expect(context.service.privacy.cookieTrackingCategoriesHasValue).toBe(
+      false,
+    );
+    expect(context.vendors.dataProcessorsHasValue).toBe(false);
+  });
 
   it("loads the report builder variable schema", async () => {
     const schemaPath = fileURLToPath(
       new URL("../data/templates/schema.json", import.meta.url),
-    )
-    const schema = JSON.parse(await readFile(schemaPath, "utf8"))
+    );
+    const schema = JSON.parse(await readFile(schemaPath, "utf8"));
 
-    expect(schema.version).toBe(1)
+    expect(schema.version).toBe(1);
     expect(schema.variables).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ key: "organization.name" }),
@@ -1004,6 +1018,25 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "service.availabilityRegionLabels" }),
         expect.objectContaining({ key: "service.childrenDirected" }),
         expect.objectContaining({ key: "service.minimumUserAge" }),
+        expect.objectContaining({
+          key: "service.privacy.usesCookiesOrTrackingTechnologies",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieTrackingCategories",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieTrackingCategoryLabels",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentMechanism",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentMechanismLabel",
+        }),
+        expect.objectContaining({ key: "service.privacy.doNotTrackResponse" }),
+        expect.objectContaining({
+          key: "service.privacy.globalPrivacyControlSupported",
+        }),
         expect.objectContaining({ key: "services.all" }),
         expect.objectContaining({ key: "services.primary" }),
         expect.objectContaining({ key: "privacy.supportedRights" }),
@@ -1020,21 +1053,6 @@ describe("security profile API", () => {
         }),
         expect.objectContaining({ key: "privacy.authorizedAgentSupported" }),
         expect.objectContaining({ key: "privacy.appealProcessExists" }),
-        expect.objectContaining({
-          key: "privacy.usesCookiesOrTrackingTechnologies",
-        }),
-        expect.objectContaining({ key: "privacy.cookieTrackingCategories" }),
-        expect.objectContaining({
-          key: "privacy.cookieTrackingCategoryLabels",
-        }),
-        expect.objectContaining({ key: "privacy.cookieConsentMechanism" }),
-        expect.objectContaining({
-          key: "privacy.cookieConsentMechanismLabel",
-        }),
-        expect.objectContaining({ key: "privacy.doNotTrackResponse" }),
-        expect.objectContaining({
-          key: "privacy.globalPrivacyControlSupported",
-        }),
         expect.objectContaining({ key: "privacy.sendsMarketingEmails" }),
         expect.objectContaining({ key: "privacy.marketingOptOutMethod" }),
         expect.objectContaining({ key: "privacy.marketingOptOutMethodLabel" }),
@@ -1044,7 +1062,9 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "privacy.transferMechanismLabels" }),
         expect.objectContaining({ key: "privacy.newsletterProvider" }),
         expect.objectContaining({ key: "privacy.newsletterProviderId" }),
-        expect.objectContaining({ key: "security.accessControl.leastPrivilege" }),
+        expect.objectContaining({
+          key: "security.accessControl.leastPrivilege",
+        }),
         expect.objectContaining({
           key: "security.authentication.mfaRequired",
         }),
@@ -1067,12 +1087,12 @@ describe("security profile API", () => {
         expect.objectContaining({ key: "vendors.subprocessors" }),
         expect.objectContaining({ key: "vendors.byService" }),
       ]),
-    )
-  })
+    );
+  });
 
   it("exposes profile values and resolved labels in the document context", async () => {
-    const vocabularyRepository = new InMemoryVocabularyRepository()
-    const vocabulary = await vocabularyRepository.listVocabulary("org-test")
+    const vocabularyRepository = new InMemoryVocabularyRepository();
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
     const snapshot: SecurityProgramSnapshot = {
       organization: {
         id: "org-test",
@@ -1080,18 +1100,18 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-	      },
-	      businessActivities: [],
-	      vendors: [],
-	      serviceVendorUses: [],
-	    }
+      },
+      businessActivities: [],
+      vendors: [],
+      serviceVendorUses: [],
+    };
 
     const context = new ReportContextBuilder().build(
       snapshot,
       undefined,
       [],
       vocabulary,
-    )
+    );
 
     expect(context.service).toMatchObject({
       id: "service-platform",
@@ -1107,9 +1127,13 @@ describe("security profile API", () => {
       childrenDirected: false,
       minimumUserAge: 13,
       privacy: {
-        usesCookies: true,
-        cookieTypes: ["necessary", "analytics"],
-        cookieTypeLabels: ["Necessary", "Analytics"],
+        usesCookiesOrTrackingTechnologies: true,
+        cookieTrackingCategories: ["necessary", "analytics"],
+        cookieTrackingCategoryLabels: ["Necessary", "Analytics"],
+        cookieConsentMechanism: "cookie_banner",
+        cookieConsentMechanismLabel: "Cookie banner",
+        doNotTrackResponse: false,
+        globalPrivacyControlSupported: true,
         analyticsProviders: [],
         analyticsProviderIds: [],
         advertisingProviders: [],
@@ -1119,9 +1143,9 @@ describe("security profile API", () => {
         dataResidencyOptions: ["us", "eu"],
         dataResidencyOptionLabels: ["United States", "European Union"],
       },
-    })
-    expect(context.services.primary).toMatchObject(context.service)
-    expect(context.services.all).toHaveLength(1)
+    });
+    expect(context.services.primary).toMatchObject(context.service);
+    expect(context.services.all).toHaveLength(1);
     expect(context.privacy).toMatchObject({
       supportedRights: ["access", "deletion", "correction", "opt_out"],
       supportedRightLabels: ["Access", "Deletion", "Correction", "Opt-out"],
@@ -1133,13 +1157,6 @@ describe("security profile API", () => {
       identityVerificationRequired: true,
       authorizedAgentSupported: true,
       appealProcessExists: false,
-      usesCookiesOrTrackingTechnologies: true,
-      cookieTrackingCategories: ["necessary", "analytics"],
-      cookieTrackingCategoryLabels: ["Necessary", "Analytics"],
-      cookieConsentMechanism: "cookie_banner",
-      cookieConsentMechanismLabel: "Cookie banner",
-      doNotTrackResponse: false,
-      globalPrivacyControlSupported: true,
       sendsMarketingEmails: true,
       marketingOptOutMethod: "unsubscribe_link",
       marketingOptOutMethodLabel: "Unsubscribe link",
@@ -1149,7 +1166,7 @@ describe("security profile API", () => {
       transferMechanismLabels: ["SCCs", "Data Privacy Framework"],
       newsletterProvider: "Mailchimp",
       newsletterProviderId: "prov-mailchimp",
-    })
+    });
     expect(context.security).toMatchObject({
       accessControl: {
         leastPrivilege: true,
@@ -1204,17 +1221,17 @@ describe("security profile API", () => {
         vendorReviewCadenceLabel: "Annually",
         dpaRequiredForProcessors: true,
       },
-    })
-  })
+    });
+  });
 
   it("renders the subprocessors system template with data processors", async () => {
     const templatePath = fileURLToPath(
       new URL("../data/templates/subprocessors.md", import.meta.url),
-    )
+    );
     const systemTemplate = parseSystemTemplate(
       await readFile(templatePath, "utf8"),
       "subprocessors.md",
-    )
+    );
     const context = new ReportContextBuilder().build({
       organization: {
         id: "org-test",
@@ -1222,9 +1239,9 @@ describe("security profile API", () => {
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
-	      },
-	      businessActivities: [],
-	      vendors: [
+      },
+      businessActivities: [],
+      vendors: [
         {
           id: "vendor-limited",
           ...vendorBody,
@@ -1237,26 +1254,26 @@ describe("security profile API", () => {
           createdAt: "2026-05-15T00:00:00.000Z",
           updatedAt: "2026-05-15T00:00:00.000Z",
         },
-	      ],
-	      serviceVendorUses: [
-	        {
-	          id: "vendor-use-limited",
-	          ...vendorUseBody,
-	          vendorName: "GitHub",
-	          serviceName: "Acme AI Platform",
-	          createdAt: "2026-05-15T00:00:00.000Z",
-	          updatedAt: "2026-05-15T00:00:00.000Z",
-	        },
-	        {
-	          id: "vendor-use-subprocessor",
-	          ...subprocessorUseBody,
-	          vendorName: "Stripe",
-	          serviceName: "Acme AI Platform",
-	          createdAt: "2026-05-15T00:00:00.000Z",
-	          updatedAt: "2026-05-15T00:00:00.000Z",
-	        },
-	      ],
-	    })
+      ],
+      serviceVendorUses: [
+        {
+          id: "vendor-use-limited",
+          ...vendorUseBody,
+          vendorName: "GitHub",
+          serviceName: "Acme AI Platform",
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        {
+          id: "vendor-use-subprocessor",
+          ...subprocessorUseBody,
+          vendorName: "Stripe",
+          serviceName: "Acme AI Platform",
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+      ],
+    });
     const renderedContent = new Jinja2Renderer().render(
       {
         id: "template-subprocessors",
@@ -1273,16 +1290,16 @@ describe("security profile API", () => {
         ...systemTemplate,
       },
       context,
-    )
+    );
 
-    expect(renderedContent).toContain("# Acme AI Data Processors")
-    expect(renderedContent).toContain("| GitHub | limited |")
-    expect(renderedContent).toContain("| Stripe | subprocessor |")
-    expect(renderedContent).toContain("| Stripe | Payment processing |")
-  })
+    expect(renderedContent).toContain("# Acme AI Data Processors");
+    expect(renderedContent).toContain("| GitHub | limited |");
+    expect(renderedContent).toContain("| Stripe | subprocessor |");
+    expect(renderedContent).toContain("| Stripe | Payment processing |");
+  });
 
   it("returns structured validation errors", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -1290,41 +1307,45 @@ describe("security profile API", () => {
         ...profileBody,
         company: { ...profileBody.company, companyName: "" },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json().error.code).toBe("VALIDATION_FAILED")
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("VALIDATION_FAILED");
+  });
 
   it("supports vendor CRUD", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const profileResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
-    const serviceId = profileResponse.json().organization.services[0].id
+    });
+    const serviceId = profileResponse.json().organization.services[0].id;
 
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/organization-providers",
       payload: vendorBody,
-    })
+    });
 
-    expect(createResponse.statusCode).toBe(201)
-    const createdVendor = createResponse.json()
-    expect(createdVendor.name).toBe("GitHub")
-    expect(createdVendor.countryOfRegistration).toBe("US")
+    expect(createResponse.statusCode).toBe(201);
+    const createdVendor = createResponse.json();
+    expect(createdVendor.name).toBe("GitHub");
+    expect(createdVendor.countryOfRegistration).toBe("US");
 
     const createUseResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/service-provider-usage",
-      payload: { ...vendorUseBody, serviceId, organizationProviderId: createdVendor.id },
-    })
+      payload: {
+        ...vendorUseBody,
+        serviceId,
+        organizationProviderId: createdVendor.id,
+      },
+    });
 
-    expect(createUseResponse.statusCode).toBe(201)
-    const createdProviderUsage = createUseResponse.json()
-    expect(createdProviderUsage.dpaStatus).toBe("signed")
+    expect(createUseResponse.statusCode).toBe(201);
+    const createdProviderUsage = createUseResponse.json();
+    expect(createdProviderUsage.dpaStatus).toBe("signed");
 
     const updateResponse = await app.inject({
       method: "PUT",
@@ -1336,52 +1357,58 @@ describe("security profile API", () => {
         dpaStatus: "under_review",
         notes: "DPA being reviewed",
       },
-    })
+    });
 
-    expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json().dpaStatus).toBe("under_review")
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json().dpaStatus).toBe("under_review");
 
-    const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/organization-providers" })
-    expect(listResponse.json()).toHaveLength(1)
+    const listResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/organization-providers",
+    });
+    expect(listResponse.json()).toHaveLength(1);
     const useListResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/service-provider-usage",
-    })
-    expect(useListResponse.json()).toHaveLength(1)
+    });
+    expect(useListResponse.json()).toHaveLength(1);
 
     const deleteResponse = await app.inject({
       method: "DELETE",
       url: `/organizations/org-test/organization-providers/${createdVendor.id}`,
-    })
-    expect(deleteResponse.statusCode).toBe(204)
+    });
+    expect(deleteResponse.statusCode).toBe(204);
 
     const emptyListResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/organization-providers",
-    })
-    expect(emptyListResponse.json()).toHaveLength(0)
-  })
+    });
+    expect(emptyListResponse.json()).toHaveLength(0);
+  });
 
   it("returns countries and organization vocabulary", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const countriesResponse = await app.inject({
       method: "GET",
       url: "/countries",
-    })
+    });
 
-    expect(countriesResponse.statusCode).toBe(200)
+    expect(countriesResponse.statusCode).toBe(200);
     expect(countriesResponse.json()).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ code: "US", name: "United States of America" }),
+        expect.objectContaining({
+          code: "US",
+          name: "United States of America",
+        }),
       ]),
-    )
+    );
 
     const vocabularyResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/vocabulary",
-    })
+    });
 
-    expect(vocabularyResponse.statusCode).toBe(200)
+    expect(vocabularyResponse.statusCode).toBe(200);
     expect(vocabularyResponse.json().codeSets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -1393,11 +1420,11 @@ describe("security profile API", () => {
           isSystem: true,
         }),
       ]),
-    )
-  })
+    );
+  });
 
   it("supports editing organization vocabulary codes", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/vocabulary/industries/codes",
@@ -1406,14 +1433,14 @@ describe("security profile API", () => {
         name: "Robotics",
         active: true,
       },
-    })
+    });
 
-    expect(createResponse.statusCode).toBe(201)
+    expect(createResponse.statusCode).toBe(201);
     expect(createResponse.json()).toMatchObject({
       codeId: "robotics",
       name: "Robotics",
       isSystem: false,
-    })
+    });
 
     const updateResponse = await app.inject({
       method: "PUT",
@@ -1423,21 +1450,21 @@ describe("security profile API", () => {
         name: "Robotics and automation",
         active: true,
       },
-    })
+    });
 
-    expect(updateResponse.statusCode).toBe(200)
-    expect(updateResponse.json().name).toBe("Robotics and automation")
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json().name).toBe("Robotics and automation");
 
     const deleteResponse = await app.inject({
       method: "DELETE",
       url: "/organizations/org-test/vocabulary/industries/codes/robotics",
-    })
+    });
 
-    expect(deleteResponse.statusCode).toBe(204)
-  })
+    expect(deleteResponse.statusCode).toBe(204);
+  });
 
   it("rejects unknown controlled codes and countries", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
@@ -1448,17 +1475,20 @@ describe("security profile API", () => {
           country: "ZZ",
         },
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json().error.code).toBe("COUNTRY_NOT_FOUND")
-  })
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("COUNTRY_NOT_FOUND");
+  });
 
   it("returns system and organization templates", async () => {
-    const app = await createTestApp()
-    const response = await app.inject({ method: "GET", url: "/organizations/org-test/templates" })
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/templates",
+    });
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       systemTemplates: [
         {
@@ -1479,19 +1509,19 @@ describe("security profile API", () => {
         },
       ],
       organizationTemplates: [],
-    })
-  })
+    });
+  });
 
   it("copies, edits, and deletes organization templates", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
       payload: { sourceSystemTemplateSlug: "security-policy" },
-    })
+    });
 
-    expect(createResponse.statusCode).toBe(201)
-    const createdTemplate = createResponse.json()
+    expect(createResponse.statusCode).toBe(201);
+    const createdTemplate = createResponse.json();
     expect(createdTemplate).toMatchObject({
       name: "Security Policy",
       slug: "security-policy",
@@ -1503,7 +1533,7 @@ describe("security profile API", () => {
       policyOwnerUserId: "",
       policyApproverUserId: "",
       policyReviewCadence: "",
-    })
+    });
 
     const updateResponse = await app.inject({
       method: "PUT",
@@ -1519,9 +1549,9 @@ describe("security profile API", () => {
         policyApproverUserId: "",
         policyReviewCadence: "Annual",
       },
-    })
+    });
 
-    expect(updateResponse.statusCode).toBe(200)
+    expect(updateResponse.statusCode).toBe(200);
     expect(updateResponse.json()).toMatchObject({
       name: "Customer Security Policy",
       slug: "customer-security-policy",
@@ -1533,43 +1563,46 @@ describe("security profile API", () => {
       policyOwnerUserId: "",
       policyApproverUserId: "",
       policyReviewCadence: "Annual",
-    })
+    });
 
-    const listResponse = await app.inject({ method: "GET", url: "/organizations/org-test/templates" })
-    expect(listResponse.json().organizationTemplates).toHaveLength(1)
+    const listResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/templates",
+    });
+    expect(listResponse.json().organizationTemplates).toHaveLength(1);
 
     const deleteResponse = await app.inject({
       method: "DELETE",
       url: `/organizations/org-test/templates/${createdTemplate.id}`,
-    })
-    expect(deleteResponse.statusCode).toBe(204)
-  })
+    });
+    expect(deleteResponse.statusCode).toBe(204);
+  });
 
   it("rejects missing system templates", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
       payload: { sourceSystemTemplateSlug: "missing-template" },
-    })
+    });
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().error.code).toBe("SYSTEM_TEMPLATE_NOT_FOUND")
-  })
+    expect(response.statusCode).toBe(404);
+    expect(response.json().error.code).toBe("SYSTEM_TEMPLATE_NOT_FOUND");
+  });
 
   it("generates documents from templates and reports stale documents", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
     const createTemplateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
       payload: { sourceSystemTemplateSlug: "security-policy" },
-    })
-    const template = createTemplateResponse.json()
+    });
+    const template = createTemplateResponse.json();
 
     await app.inject({
       method: "PUT",
@@ -1578,7 +1611,7 @@ describe("security profile API", () => {
         name: "Security Policy",
         slug: "security-policy",
         content:
-          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
+          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n',
         policyEffectiveDate: "2026-05-18",
         policyLastReviewedDate: "2026-05-18",
         policyVersion: "1.0",
@@ -1586,47 +1619,47 @@ describe("security profile API", () => {
         policyApproverUserId: "",
         policyReviewCadence: "Annual",
       },
-    })
+    });
 
     const emptyDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
-    expect(emptyDocumentsResponse.statusCode).toBe(200)
+    });
+    expect(emptyDocumentsResponse.statusCode).toBe(200);
     expect(emptyDocumentsResponse.json()).toMatchObject([
       {
         template: { id: template.id, slug: "security-policy" },
         document: null,
         status: "not_generated",
       },
-    ])
+    ]);
 
     const generateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/documents",
       payload: { templateId: template.id },
-    })
+    });
 
-    expect(generateResponse.statusCode).toBe(201)
+    expect(generateResponse.statusCode).toBe(201);
     expect(generateResponse.json()).toMatchObject({
       templateId: template.id,
       title: "Security Policy",
       renderedContent:
         "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
       hasPdf: false,
-    })
-    expect(generateResponse.json().sourceHash).toHaveLength(64)
+    });
+    expect(generateResponse.json().sourceHash).toHaveLength(64);
 
     const currentDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(currentDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "current",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
@@ -1638,33 +1671,33 @@ describe("security profile API", () => {
           supportedRights: ["access", "deletion"],
         },
       },
-    })
+    });
     const privacyStaleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(privacyStaleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
     const restoredDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(restoredDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "current",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
@@ -1681,23 +1714,23 @@ describe("security profile API", () => {
           },
         ],
       },
-    })
+    });
     const transferStaleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(transferStaleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
 
     await app.inject({
       method: "PUT",
@@ -1709,23 +1742,23 @@ describe("security profile API", () => {
           logRetentionDays: 180,
         },
       },
-    })
+    });
     const securityStaleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(securityStaleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
 
     await app.inject({
       method: "PUT",
@@ -1737,45 +1770,49 @@ describe("security profile API", () => {
             ...serviceBody,
             privacy: {
               ...serviceBody.privacy,
-              cookieTypes: ["necessary", "analytics", "personalization"],
+              cookieTrackingCategories: [
+                "necessary",
+                "analytics",
+                "preference",
+              ],
             },
           },
         ],
       },
-    })
+    });
     const cookieStaleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(cookieStaleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
       },
-    ])
+    ]);
 
     await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
+    });
 
     const duplicateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/documents",
       payload: { templateId: template.id },
-    })
-    expect(duplicateResponse.statusCode).toBe(409)
-    expect(duplicateResponse.json().error.code).toBe("DOCUMENT_ALREADY_EXISTS")
+    });
+    expect(duplicateResponse.statusCode).toBe(409);
+    expect(duplicateResponse.json().error.code).toBe("DOCUMENT_ALREADY_EXISTS");
 
     const documentResponse = await app.inject({
       method: "GET",
       url: `/organizations/org-test/documents/${generateResponse.json().id}`,
-    })
-    expect(documentResponse.statusCode).toBe(200)
+    });
+    expect(documentResponse.statusCode).toBe(200);
     expect(documentResponse.json().renderedContent).toBe(
       "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
-    )
+    );
 
     await app.inject({
       method: "PUT",
@@ -1784,7 +1821,7 @@ describe("security profile API", () => {
         name: "Security Policy",
         slug: "security-policy",
         content:
-          "# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(\", \") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(\", \") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n",
+          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n',
         policyEffectiveDate: "2026-05-18",
         policyLastReviewedDate: "2026-05-18",
         policyVersion: "1.1",
@@ -1792,40 +1829,40 @@ describe("security profile API", () => {
         policyApproverUserId: "",
         policyReviewCadence: "Annual",
       },
-    })
+    });
 
     const staleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
-    })
+    });
     expect(staleDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
         status: "stale",
       },
-    ])
-  })
+    ]);
+  });
 
   it("rejects document generation for missing templates", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const response = await app.inject({
       method: "POST",
       url: "/organizations/org-test/documents",
       payload: { templateId: "template_missing" },
-    })
+    });
 
-    expect(response.statusCode).toBe(404)
-    expect(response.json().error.code).toBe("TEMPLATE_NOT_FOUND")
-  })
+    expect(response.statusCode).toBe(404);
+    expect(response.json().error.code).toBe("TEMPLATE_NOT_FOUND");
+  });
 
   it("rejects vendor data processed outside organization data types", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     const profileResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: profileBody,
-    })
-    const serviceId = profileResponse.json().organization.services[0].id
+    });
+    const serviceId = profileResponse.json().organization.services[0].id;
 
     const response = await app.inject({
       method: "POST",
@@ -1842,22 +1879,22 @@ describe("security profile API", () => {
         ).json().id,
         dataProcessed: ["source_code"],
       },
-    })
+    });
 
-    expect(response.statusCode).toBe(400)
+    expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       error: {
         code: "PROVIDER_DATA_TYPE_NOT_FOUND",
         details: { dataProcessed: ["source_code"] },
       },
-    })
-  })
+    });
+  });
 
   it("returns provider catalog entries", async () => {
-    const app = await createTestApp()
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    const app = await createTestApp();
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([
       {
         id: "prov-github",
@@ -1904,8 +1941,8 @@ describe("security profile API", () => {
         securityCriticality: "Medium",
         handlesCustomerData: true,
       },
-    ])
-  })
+    ]);
+  });
 
   it("returns provider catalog upstream failures as structured gateway errors", async () => {
     vi.stubGlobal(
@@ -1919,17 +1956,17 @@ describe("security profile API", () => {
             },
           }),
           { status: 401, statusText: "Unauthorized" },
-        )
+        );
       }),
-    )
+    );
     const app = await createApp({
       auth: false,
       ...createInMemoryRepositories(),
       providerSource: new AirtableProviderSource("app-test", "pat-test"),
-    })
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    });
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(502)
+    expect(response.statusCode).toBe(502);
     expect(response.json()).toMatchObject({
       error: {
         code: "PROVIDER_CATALOG_LOAD_FAILED",
@@ -1938,45 +1975,45 @@ describe("security profile API", () => {
           statusText: "Unauthorized",
         },
       },
-    })
-  })
+    });
+  });
 
   it("logs unexpected request failures with error details", async () => {
-    let logOutput = ""
+    let logOutput = "";
     const app = await createApp({
       auth: false,
       logger: {
         level: "error",
         stream: {
           write(chunk) {
-            logOutput += chunk
+            logOutput += chunk;
           },
         },
       },
       ...createInMemoryRepositories(),
       providerSource: {
         async listProviders() {
-          throw new Error("catalog exploded")
+          throw new Error("catalog exploded");
         },
       },
-    })
-    const response = await app.inject({ method: "GET", url: "/providers" })
+    });
+    const response = await app.inject({ method: "GET", url: "/providers" });
 
-    expect(response.statusCode).toBe(500)
-    expect(logOutput).toContain("request failed")
-    expect(logOutput).toContain("catalog exploded")
-    expect(logOutput).toContain("/providers")
-  })
-})
+    expect(response.statusCode).toBe(500);
+    expect(logOutput).toContain("request failed");
+    expect(logOutput).toContain("catalog exploded");
+    expect(logOutput).toContain("/providers");
+  });
+});
 
 function createInMemoryRepositories() {
-  const accountRepository = new InMemoryAccountRepository()
-  const organizationRepository = new InMemoryOrganizationRepository()
+  const accountRepository = new InMemoryAccountRepository();
+  const organizationRepository = new InMemoryOrganizationRepository();
 
   return {
     accountRepository,
     documentRepository: new InMemoryDocumentRepository(organizationRepository),
     organizationRepository,
     vendorRepository: new InMemoryVendorRepository(organizationRepository),
-  }
+  };
 }

@@ -79,10 +79,7 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Industries the organization operates in.",
-      "example": [
-        "SaaS",
-        "AI"
-      ]
+      "example": ["SaaS", "AI"]
     },
     {
       "key": "organization.regions",
@@ -90,10 +87,7 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Geographic regions where the organization operates.",
-      "example": [
-        "US",
-        "EU"
-      ]
+      "example": ["US", "EU"]
     },
     {
       "key": "organization.handlesPii",
@@ -117,10 +111,7 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Compliance programs or customer security goals the organization is working toward.",
-      "example": [
-        "SOC 2",
-        "GDPR"
-      ]
+      "example": ["SOC 2", "GDPR"]
     },
     {
       "key": "service.name",
@@ -152,10 +143,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "User type codes for the primary service.",
-      "example": [
-        "workspace_admins",
-        "end_users"
-      ]
+      "example": ["workspace_admins", "end_users"]
     },
     {
       "key": "service.userTypeLabels",
@@ -163,10 +151,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service user type codes.",
-      "example": [
-        "Workspace admins",
-        "End users"
-      ]
+      "example": ["Workspace admins", "End users"]
     },
     {
       "key": "service.customerTypes",
@@ -174,10 +159,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "Customer type codes for the primary service.",
-      "example": [
-        "smb",
-        "mid_market"
-      ]
+      "example": ["smb", "mid_market"]
     },
     {
       "key": "service.customerTypeLabels",
@@ -185,10 +167,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service customer type codes.",
-      "example": [
-        "SMB",
-        "Mid-market"
-      ]
+      "example": ["SMB", "Mid-market"]
     },
     {
       "key": "service.availabilityRegions",
@@ -196,10 +175,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "Region codes where the primary service is available.",
-      "example": [
-        "us",
-        "eu"
-      ]
+      "example": ["us", "eu"]
     },
     {
       "key": "service.availabilityRegionLabels",
@@ -207,10 +183,7 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service availability region codes.",
-      "example": [
-        "United States",
-        "European Union"
-      ]
+      "example": ["United States", "European Union"]
     },
     {
       "key": "service.childrenDirected",
@@ -229,6 +202,62 @@
       "example": 13
     },
     {
+      "key": "service.privacy.usesCookiesOrTrackingTechnologies",
+      "label": "Uses cookies or tracking technologies",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service uses cookies or similar tracking technologies.",
+      "example": true
+    },
+    {
+      "key": "service.privacy.cookieTrackingCategories",
+      "label": "Cookie / tracking categories",
+      "type": "string[]",
+      "category": "Service",
+      "description": "Cookie and tracking category codes used by the primary service.",
+      "example": ["necessary", "analytics"]
+    },
+    {
+      "key": "service.privacy.cookieTrackingCategoryLabels",
+      "label": "Cookie / tracking category labels",
+      "type": "string[]",
+      "category": "Service",
+      "description": "Human-readable cookie and tracking category labels for the primary service.",
+      "example": ["Necessary", "Analytics"]
+    },
+    {
+      "key": "service.privacy.cookieConsentMechanism",
+      "label": "Cookie consent mechanism",
+      "type": "string",
+      "category": "Service",
+      "description": "Cookie consent mechanism code used by the primary service.",
+      "example": "cookie_banner"
+    },
+    {
+      "key": "service.privacy.cookieConsentMechanismLabel",
+      "label": "Cookie consent mechanism label",
+      "type": "string",
+      "category": "Service",
+      "description": "Human-readable label for the primary service's cookie consent mechanism.",
+      "example": "Cookie banner"
+    },
+    {
+      "key": "service.privacy.doNotTrackResponse",
+      "label": "Do Not Track response",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service responds to browser Do Not Track signals.",
+      "example": false
+    },
+    {
+      "key": "service.privacy.globalPrivacyControlSupported",
+      "label": "Global Privacy Control supported",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service supports Global Privacy Control signals.",
+      "example": true
+    },
+    {
       "key": "services.all",
       "label": "All services",
       "type": "collection",
@@ -241,22 +270,15 @@
           "description": "Cloud software for managing customer security reviews",
           "url": "https://app.acme.example",
           "privacy": {
-            "usesCookies": true,
-            "cookieTypes": [
-              "necessary",
-              "analytics"
-            ],
-            "analyticsProviders": [
-              "Google Analytics"
-            ],
-            "advertisingProviders": [
-              "Google Ads"
-            ],
+            "usesCookiesOrTrackingTechnologies": true,
+            "cookieTrackingCategories": ["necessary", "analytics"],
+            "cookieConsentMechanism": "cookie_banner",
+            "doNotTrackResponse": false,
+            "globalPrivacyControlSupported": true,
+            "analyticsProviders": ["Google Analytics"],
+            "advertisingProviders": ["Google Ads"],
             "primaryHostingRegion": "us",
-            "dataResidencyOptions": [
-              "us",
-              "eu"
-            ]
+            "dataResidencyOptions": ["us", "eu"]
           },
           "vendors": [
             {
@@ -312,60 +334,42 @@
           "label": "User types",
           "type": "string[]",
           "description": "Service user type codes.",
-          "example": [
-            "workspace_admins",
-            "end_users"
-          ]
+          "example": ["workspace_admins", "end_users"]
         },
         {
           "key": "userTypeLabels",
           "label": "User type labels",
           "type": "string[]",
           "description": "Human-readable service user type labels.",
-          "example": [
-            "Workspace admins",
-            "End users"
-          ]
+          "example": ["Workspace admins", "End users"]
         },
         {
           "key": "customerTypes",
           "label": "Customer types",
           "type": "string[]",
           "description": "Service customer type codes.",
-          "example": [
-            "smb",
-            "mid_market"
-          ]
+          "example": ["smb", "mid_market"]
         },
         {
           "key": "customerTypeLabels",
           "label": "Customer type labels",
           "type": "string[]",
           "description": "Human-readable service customer type labels.",
-          "example": [
-            "SMB",
-            "Mid-market"
-          ]
+          "example": ["SMB", "Mid-market"]
         },
         {
           "key": "availabilityRegions",
           "label": "Availability regions",
           "type": "string[]",
           "description": "Region codes where the service is available.",
-          "example": [
-            "us",
-            "eu"
-          ]
+          "example": ["us", "eu"]
         },
         {
           "key": "availabilityRegionLabels",
           "label": "Availability region labels",
           "type": "string[]",
           "description": "Human-readable availability region labels.",
-          "example": [
-            "United States",
-            "European Union"
-          ]
+          "example": ["United States", "European Union"]
         },
         {
           "key": "childrenDirected",
@@ -382,67 +386,81 @@
           "example": 13
         },
         {
-          "key": "privacy.usesCookies",
-          "label": "Uses cookies",
+          "key": "privacy.usesCookiesOrTrackingTechnologies",
+          "label": "Uses cookies or tracking technologies",
           "type": "boolean",
           "description": "Whether this service uses cookies or similar tracking technologies.",
           "example": true
         },
         {
-          "key": "privacy.cookieTypes",
-          "label": "Cookie types",
+          "key": "privacy.cookieTrackingCategories",
+          "label": "Cookie / tracking categories",
           "type": "string[]",
-          "description": "Cookie type codes used by this service.",
-          "example": [
-            "necessary",
-            "analytics"
-          ]
+          "description": "Cookie and tracking category codes used by this service.",
+          "example": ["necessary", "analytics"]
         },
         {
-          "key": "privacy.cookieTypeLabels",
-          "label": "Cookie type labels",
+          "key": "privacy.cookieTrackingCategoryLabels",
+          "label": "Cookie / tracking category labels",
           "type": "string[]",
-          "description": "Human-readable cookie type labels for this service.",
-          "example": [
-            "Necessary",
-            "Analytics"
-          ]
+          "description": "Human-readable cookie and tracking category labels for this service.",
+          "example": ["Necessary", "Analytics"]
+        },
+        {
+          "key": "privacy.cookieConsentMechanism",
+          "label": "Cookie consent mechanism",
+          "type": "string",
+          "description": "Cookie consent mechanism code used by this service.",
+          "example": "cookie_banner"
+        },
+        {
+          "key": "privacy.cookieConsentMechanismLabel",
+          "label": "Cookie consent mechanism label",
+          "type": "string",
+          "description": "Human-readable label for this service's cookie consent mechanism.",
+          "example": "Cookie banner"
+        },
+        {
+          "key": "privacy.doNotTrackResponse",
+          "label": "Do Not Track response",
+          "type": "boolean",
+          "description": "Whether this service responds to browser Do Not Track signals.",
+          "example": false
+        },
+        {
+          "key": "privacy.globalPrivacyControlSupported",
+          "label": "Global Privacy Control supported",
+          "type": "boolean",
+          "description": "Whether this service supports Global Privacy Control signals.",
+          "example": true
         },
         {
           "key": "privacy.analyticsProviders",
           "label": "Analytics providers",
           "type": "string[]",
           "description": "Names of analytics providers used by this service.",
-          "example": [
-            "Google Analytics"
-          ]
+          "example": ["Google Analytics"]
         },
         {
           "key": "privacy.analyticsProviderIds",
           "label": "Analytics provider IDs",
           "type": "string[]",
           "description": "Catalog provider IDs for service analytics providers.",
-          "example": [
-            "prov-google-analytics"
-          ]
+          "example": ["prov-google-analytics"]
         },
         {
           "key": "privacy.advertisingProviders",
           "label": "Advertising providers",
           "type": "string[]",
           "description": "Names of advertising providers used by this service.",
-          "example": [
-            "Google Ads"
-          ]
+          "example": ["Google Ads"]
         },
         {
           "key": "privacy.advertisingProviderIds",
           "label": "Advertising provider IDs",
           "type": "string[]",
           "description": "Catalog provider IDs for service advertising providers.",
-          "example": [
-            "prov-google-ads"
-          ]
+          "example": ["prov-google-ads"]
         },
         {
           "key": "privacy.primaryHostingRegion",
@@ -463,20 +481,14 @@
           "label": "Data residency options",
           "type": "string[]",
           "description": "Region codes available for service data residency.",
-          "example": [
-            "us",
-            "eu"
-          ]
+          "example": ["us", "eu"]
         },
         {
           "key": "privacy.dataResidencyOptionLabels",
           "label": "Data residency option labels",
           "type": "string[]",
           "description": "Human-readable data residency labels for this service.",
-          "example": [
-            "United States",
-            "European Union"
-          ]
+          "example": ["United States", "European Union"]
         },
         {
           "key": "vendors",
@@ -533,11 +545,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Privacy right codes supported by the organization.",
-      "example": [
-        "access",
-        "deletion",
-        "correction"
-      ]
+      "example": ["access", "deletion", "correction"]
     },
     {
       "key": "privacy.supportedRightLabels",
@@ -545,11 +553,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for supported privacy right codes.",
-      "example": [
-        "Access",
-        "Deletion",
-        "Correction"
-      ]
+      "example": ["Access", "Deletion", "Correction"]
     },
     {
       "key": "privacy.requestMethods",
@@ -557,10 +561,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Request method codes accepted for privacy rights requests.",
-      "example": [
-        "email",
-        "web_form"
-      ]
+      "example": ["email", "web_form"]
     },
     {
       "key": "privacy.requestMethodLabels",
@@ -568,10 +569,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for privacy request method codes.",
-      "example": [
-        "Email",
-        "Web form"
-      ]
+      "example": ["Email", "Web form"]
     },
     {
       "key": "privacy.responseTimelineDaysStatus",
@@ -622,68 +620,6 @@
       "example": false
     },
     {
-      "key": "privacy.usesCookiesOrTrackingTechnologies",
-      "label": "Uses cookies or tracking technologies",
-      "type": "boolean",
-      "category": "Privacy",
-      "description": "Whether the organization uses cookies or similar tracking technologies.",
-      "example": true
-    },
-    {
-      "key": "privacy.cookieTrackingCategories",
-      "label": "Cookie / tracking categories",
-      "type": "array",
-      "category": "Privacy",
-      "description": "Cookie and tracking category codes used by the organization.",
-      "example": [
-        "necessary",
-        "analytics"
-      ]
-    },
-    {
-      "key": "privacy.cookieTrackingCategoryLabels",
-      "label": "Cookie / tracking category labels",
-      "type": "array",
-      "category": "Privacy",
-      "description": "Human-readable labels for cookie and tracking category codes.",
-      "example": [
-        "Necessary",
-        "Analytics"
-      ]
-    },
-    {
-      "key": "privacy.cookieConsentMechanism",
-      "label": "Cookie consent mechanism",
-      "type": "string",
-      "category": "Privacy",
-      "description": "Cookie consent mechanism code used by the organization.",
-      "example": "cookie_banner"
-    },
-    {
-      "key": "privacy.cookieConsentMechanismLabel",
-      "label": "Cookie consent mechanism label",
-      "type": "string",
-      "category": "Privacy",
-      "description": "Human-readable label for the cookie consent mechanism code.",
-      "example": "Cookie banner"
-    },
-    {
-      "key": "privacy.doNotTrackResponse",
-      "label": "Do Not Track response",
-      "type": "boolean",
-      "category": "Privacy",
-      "description": "Whether the organization responds to browser Do Not Track signals.",
-      "example": false
-    },
-    {
-      "key": "privacy.globalPrivacyControlSupported",
-      "label": "Global Privacy Control supported",
-      "type": "boolean",
-      "category": "Privacy",
-      "description": "Whether the organization supports Global Privacy Control signals.",
-      "example": true
-    },
-    {
       "key": "privacy.sendsMarketingEmails",
       "label": "Sends marketing emails",
       "type": "boolean",
@@ -729,10 +665,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Transfer mechanism codes used for cross-border data transfers.",
-      "example": [
-        "sccs",
-        "dpf"
-      ]
+      "example": ["sccs", "dpf"]
     },
     {
       "key": "privacy.transferMechanismLabels",
@@ -740,10 +673,7 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for transfer mechanism codes.",
-      "example": [
-        "SCCs",
-        "Data Privacy Framework"
-      ]
+      "example": ["SCCs", "Data Privacy Framework"]
     },
     {
       "key": "privacy.sellsOrSharesData",
@@ -1344,13 +1274,8 @@
         {
           "name": "customer account data",
           "description": "Profile and billing contact details",
-          "subjectTypes": [
-            "customers",
-            "admins"
-          ],
-          "collectionMethods": [
-            "signup form"
-          ],
+          "subjectTypes": ["customers", "admins"],
+          "collectionMethods": ["signup form"],
           "isSensitive": true,
           "isRequired": true
         }
@@ -1375,19 +1300,14 @@
           "label": "Subject types",
           "type": "string[]",
           "description": "People or account types the data category relates to.",
-          "example": [
-            "customers",
-            "admins"
-          ]
+          "example": ["customers", "admins"]
         },
         {
           "key": "collectionMethods",
           "label": "Collection methods",
           "type": "string[]",
           "description": "Ways this data category is collected.",
-          "example": [
-            "signup form"
-          ]
+          "example": ["signup form"]
         },
         {
           "key": "isSensitive",
@@ -1405,75 +1325,75 @@
         }
       ]
     },
-	    {
-	      "key": "services.all[].activities",
-	      "label": "Service activities",
-	      "type": "collection",
-	      "category": "Services",
-	      "description": "Business activities performed by each service, including purpose, role, legal basis, and retention.",
-	      "example": [
-	        {
-	          "name": "Account management",
-	          "purpose": "Operate user accounts",
-	          "role": "controller",
-	          "legalBasis": ["contract"],
-	          "retentionDays": 365
-	        }
-	      ],
-	      "itemFields": [
-	        {
-	          "key": "name",
-	          "label": "Name",
-	          "type": "string",
-	          "description": "Name of the business activity.",
-	          "example": "Account management"
-	        },
-	        {
-	          "key": "purpose",
-	          "label": "Purpose",
-	          "type": "string",
-	          "description": "What this processing activity covers.",
-	          "example": "Operate user accounts"
-	        },
-	        {
-	          "key": "role",
-	          "label": "Role",
-	          "type": "string",
-	          "description": "Controller or processor role for this activity.",
-	          "example": "controller"
-	        },
-	        {
-	          "key": "legalBasis",
-	          "label": "Legal basis",
-	          "type": "string[]",
-	          "description": "Legal bases for this processing activity.",
-	          "example": ["contract"]
-	        },
-	        {
-	          "key": "retentionDays",
-	          "label": "Retention days",
-	          "type": "number",
-	          "description": "Number of days data for this activity is retained. A value of 0 means unset.",
-	          "example": 365
-	        },
-	        {
-	          "key": "retentionPolicy",
-	          "label": "Retention policy",
-	          "type": "string",
-	          "description": "Policy used to describe how long data for this activity is retained.",
-	          "example": "fixed"
-	        },
-	        {
-	          "key": "retentionPolicyLabel",
-	          "label": "Retention policy label",
-	          "type": "string",
-	          "description": "Retention policy label.",
-	          "example": "Fixed"
-	        }
-	      ]
-	    },
-	    {
-	      "key": "dataHandling.storesPii",
+    {
+      "key": "services.all[].activities",
+      "label": "Service activities",
+      "type": "collection",
+      "category": "Services",
+      "description": "Business activities performed by each service, including purpose, role, legal basis, and retention.",
+      "example": [
+        {
+          "name": "Account management",
+          "purpose": "Operate user accounts",
+          "role": "controller",
+          "legalBasis": ["contract"],
+          "retentionDays": 365
+        }
+      ],
+      "itemFields": [
+        {
+          "key": "name",
+          "label": "Name",
+          "type": "string",
+          "description": "Name of the business activity.",
+          "example": "Account management"
+        },
+        {
+          "key": "purpose",
+          "label": "Purpose",
+          "type": "string",
+          "description": "What this processing activity covers.",
+          "example": "Operate user accounts"
+        },
+        {
+          "key": "role",
+          "label": "Role",
+          "type": "string",
+          "description": "Controller or processor role for this activity.",
+          "example": "controller"
+        },
+        {
+          "key": "legalBasis",
+          "label": "Legal basis",
+          "type": "string[]",
+          "description": "Legal bases for this processing activity.",
+          "example": ["contract"]
+        },
+        {
+          "key": "retentionDays",
+          "label": "Retention days",
+          "type": "number",
+          "description": "Number of days data for this activity is retained. A value of 0 means unset.",
+          "example": 365
+        },
+        {
+          "key": "retentionPolicy",
+          "label": "Retention policy",
+          "type": "string",
+          "description": "Policy used to describe how long data for this activity is retained.",
+          "example": "fixed"
+        },
+        {
+          "key": "retentionPolicyLabel",
+          "label": "Retention policy label",
+          "type": "string",
+          "description": "Retention policy label.",
+          "example": "Fixed"
+        }
+      ]
+    },
+    {
+      "key": "dataHandling.storesPii",
       "label": "Stores PII",
       "type": "boolean",
       "category": "Data Handling",
@@ -1574,13 +1494,9 @@
           "countryOfRegistration": "United States",
           "hasSubprocessors": true,
           "dataProcessingLevel": "limited",
-          "dataProcessed": [
-            "customer account data"
-          ],
+          "dataProcessed": ["customer account data"],
           "dpaStatus": "signed",
-          "dataRegions": [
-            "US"
-          ],
+          "dataRegions": ["US"],
           "criticality": "high",
           "owner": "Engineering",
           "notes": "Critical engineering system"
@@ -1683,9 +1599,7 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": [
-            "customer account data"
-          ]
+          "example": ["customer account data"]
         },
         {
           "key": "dpaStatus",
@@ -1699,9 +1613,7 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Regions where the vendor processes or stores data.",
-          "example": [
-            "US"
-          ]
+          "example": ["US"]
         },
         {
           "key": "criticality",
@@ -1737,13 +1649,9 @@
           "name": "GitHub",
           "countryOfRegistration": "United States",
           "dataProcessingLevel": "limited",
-          "dataProcessed": [
-            "customer account data"
-          ],
+          "dataProcessed": ["customer account data"],
           "dpaStatus": "signed",
-          "dataRegions": [
-            "US"
-          ]
+          "dataRegions": ["US"]
         }
       ],
       "itemFields": [
@@ -1843,9 +1751,7 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": [
-            "customer account data"
-          ]
+          "example": ["customer account data"]
         },
         {
           "key": "dpaStatus",
@@ -1859,9 +1765,7 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Regions where the vendor processes or stores data.",
-          "example": [
-            "US"
-          ]
+          "example": ["US"]
         },
         {
           "key": "criticality",
@@ -1897,10 +1801,7 @@
           "name": "Stripe",
           "purpose": "Payment processing",
           "countryOfRegistration": "United States",
-          "dataRegions": [
-            "US",
-            "EU"
-          ],
+          "dataRegions": ["US", "EU"],
           "dpaStatus": "signed"
         }
       ],
@@ -2001,9 +1902,7 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": [
-            "customer account data"
-          ]
+          "example": ["customer account data"]
         },
         {
           "key": "dpaStatus",
@@ -2017,9 +1916,7 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Regions where the vendor processes or stores data.",
-          "example": [
-            "US"
-          ]
+          "example": ["US"]
         },
         {
           "key": "criticality",

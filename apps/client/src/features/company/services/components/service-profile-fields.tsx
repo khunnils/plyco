@@ -1,6 +1,10 @@
 import { Plus, Trash2 } from "lucide-react"
 import { emptyServiceProfile } from "@plyco/shared"
-import { type FieldPath, type UseFormReturn, useFieldArray } from "react-hook-form"
+import {
+  type FieldPath,
+  type UseFormReturn,
+  useFieldArray,
+} from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
@@ -44,14 +48,16 @@ const MinimumAgeField = ({
 
 export const ServiceProfileFields = ({
   businessActivityOptions,
-  cookieTypeOptions,
+  cookieConsentMechanismOptions,
+  cookieTrackingCategoryOptions,
   customerTypeOptions,
   form,
   regionOptions,
   userTypeOptions,
 }: {
   businessActivityOptions: Option[]
-  cookieTypeOptions: Option[]
+  cookieConsentMechanismOptions: Option[]
+  cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   regionOptions: Option[]
@@ -153,23 +159,46 @@ export const ServiceProfileFields = ({
           <MinimumAgeField form={form} index={index} />
           <div className="grid gap-4 border-t border-slate-200 pt-4 md:col-span-2 md:grid-cols-2">
             <h4 className="text-sm font-semibold text-slate-900 md:col-span-2">
-              Service privacy
+              Privacy & Hosting
             </h4>
             <ToggleField
               control={form.control}
-              label="Uses cookies"
-              name={servicePrivacyPath(index, "usesCookies")}
+              label="Uses cookies or tracking technologies"
+              name={servicePrivacyPath(
+                index,
+                "usesCookiesOrTrackingTechnologies"
+              )}
             />
             <MultiSelectField
               control={form.control}
               error={
-                form.formState.errors.services?.[index]?.privacy?.cookieTypes
-                  ?.root
+                form.formState.errors.services?.[index]?.privacy
+                  ?.cookieTrackingCategories?.root
               }
-              label="Cookie types"
-              name={servicePrivacyPath(index, "cookieTypes")}
-              options={cookieTypeOptions}
-              placeholder="Select cookie types"
+              label="Cookie / tracking categories"
+              name={servicePrivacyPath(index, "cookieTrackingCategories")}
+              options={cookieTrackingCategoryOptions}
+              placeholder="Select cookie / tracking categories"
+            />
+            <SelectField
+              control={form.control}
+              label="Cookie consent mechanism"
+              name={servicePrivacyPath(index, "cookieConsentMechanism")}
+              options={[
+                { value: "", label: "Not set" },
+                ...cookieConsentMechanismOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              label="Responds to Do Not Track"
+              name={servicePrivacyPath(index, "doNotTrackResponse")}
+            />
+            <ToggleField
+              control={form.control}
+              label="Global Privacy Control supported"
+              name={servicePrivacyPath(index, "globalPrivacyControlSupported")}
             />
             <SelectField
               control={form.control}

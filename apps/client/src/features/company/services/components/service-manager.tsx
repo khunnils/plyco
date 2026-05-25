@@ -16,6 +16,7 @@ import {
   type Resolver,
   type UseFormReturn,
   useForm,
+  useWatch,
 } from "react-hook-form"
 import { z } from "zod"
 
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { ServiceProviderUsageForm } from "@/features/vendors/components/service-vendor-use-form"
 import {
@@ -245,7 +247,6 @@ const ServiceBasicsPanel = ({
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
-
   return (
     <ProfilePanelShell
       description="Core identification and public details of the service or product."
@@ -420,14 +421,150 @@ const ServiceAudiencePanel = ({
 }
 
 const ServicePrivacyPanel = ({
-  cookieTypeOptions,
+  cookieConsentMechanismOptions,
+  cookieTrackingCategoryOptions,
+  isMutationPending,
+  service,
+  vocabulary,
+  onSave,
+}: {
+  cookieConsentMechanismOptions: Option[]
+  cookieTrackingCategoryOptions: Option[]
+  isMutationPending: boolean
+  service: ServiceProfileInput
+  vocabulary: Vocabulary | undefined
+  onSave: (patch: ServicePrivacyDraft, onSuccess?: () => void) => void
+}) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const draft = servicePrivacyDraft(service)
+  const form = useForm<ServicePrivacyDraft>({
+    defaultValues: draft,
+    mode: "onBlur",
+    resolver: zodResolver(
+      servicePrivacyDraftSchema
+    ) as Resolver<ServicePrivacyDraft>,
+    values: draft,
+  })
+  const usesCookiesOrTrackingTechnologies = useWatch({
+    control: form.control,
+    name: privacyPath("usesCookiesOrTrackingTechnologies"),
+  })
+  const showCookieDetails = usesCookiesOrTrackingTechnologies === true
+
+  useEffect(() => {
+    if (usesCookiesOrTrackingTechnologies === false) {
+      form.setValue(privacyPath("cookieTrackingCategories"), null)
+      form.setValue(privacyPath("cookieConsentMechanism"), null)
+      form.setValue(privacyPath("doNotTrackResponse"), null)
+      form.setValue(privacyPath("globalPrivacyControlSupported"), null)
+    }
+  }, [usesCookiesOrTrackingTechnologies, form])
+
+  const submit = form.handleSubmit((next) => {
+    onSave(next, () => setIsEditing(false))
+  })
+  const cookieRows: ProfilePanelDetailRow[] = [
+    [
+      "Uses cookies or tracking technologies",
+      boolText(service.privacy.usesCookiesOrTrackingTechnologies),
+    ],
+  ]
+
+  if (service.privacy.usesCookiesOrTrackingTechnologies) {
+    cookieRows.push(
+      [
+        "Cookie / tracking categories",
+        codeValueList(
+          vocabulary,
+          "cookie_tracking_categories",
+          service.privacy.cookieTrackingCategories
+        ),
+      ],
+      [
+        "Cookie consent mechanism",
+        service.privacy.cookieConsentMechanism
+          ? codeLabel(
+              vocabulary,
+              "privacy_cookie_consent_mechanisms",
+              service.privacy.cookieConsentMechanism
+            )
+          : "Not set",
+      ],
+      ["Do Not Track response", boolText(service.privacy.doNotTrackResponse)],
+      [
+        "Global Privacy Control",
+        boolText(service.privacy.globalPrivacyControlSupported),
+      ]
+    )
+  }
+
+  return (
+    <ProfilePanelShell
+      description="Cookie consent, browser signals, and visitor tracking options."
+      isEditing={isEditing}
+      isMutationPending={isMutationPending}
+      readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows} />}
+      saveLabel="Save"
+      title="Cookie Preferences"
+      onCancel={() => {
+        form.reset(draft)
+        setIsEditing(false)
+      }}
+      onEdit={() => setIsEditing(true)}
+      onSave={submit}
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          label="Uses cookies or tracking technologies"
+          name={privacyPath("usesCookiesOrTrackingTechnologies")}
+        />
+        {showCookieDetails ? (
+          <>
+            <MultiSelectField
+              control={form.control}
+              error={
+                form.formState.errors.privacy?.cookieTrackingCategories?.root
+              }
+              label="Cookie / tracking categories"
+              name={privacyPath("cookieTrackingCategories")}
+              options={cookieTrackingCategoryOptions}
+              placeholder="Select cookie / tracking categories"
+            />
+            <SelectField
+              control={form.control}
+              label="Cookie consent mechanism"
+              name={privacyPath("cookieConsentMechanism")}
+              options={[
+                { value: "", label: "Not set" },
+                ...cookieConsentMechanismOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              label="Responds to Do Not Track"
+              name={privacyPath("doNotTrackResponse")}
+            />
+            <ToggleField
+              control={form.control}
+              label="Global Privacy Control supported"
+              name={privacyPath("globalPrivacyControlSupported")}
+            />
+          </>
+        ) : null}
+      </div>
+    </ProfilePanelShell>
+  )
+}
+
+const ServiceHostingPanel = ({
   isMutationPending,
   regionOptions,
   service,
   vocabulary,
   onSave,
 }: {
-  cookieTypeOptions: Option[]
   isMutationPending: boolean
   regionOptions: Option[]
   service: ServiceProfileInput
@@ -450,21 +587,12 @@ const ServicePrivacyPanel = ({
 
   return (
     <ProfilePanelShell
-      description="Cookie preferences, hosting regions, and data residency."
+      description="Hosting regions and data residency options for this service."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[
-            ["Uses cookies", boolText(service.privacy.usesCookies)],
-            [
-              "Cookie types",
-              codeValueList(
-                vocabulary,
-                "privacy_cookie_types",
-                service.privacy.cookieTypes
-              ),
-            ],
             [
               "Primary hosting region",
               service.privacy.primaryHostingRegion
@@ -487,7 +615,7 @@ const ServicePrivacyPanel = ({
         />
       }
       saveLabel="Save"
-      title="Service Privacy"
+      title="Hosting & Data Residency"
       onCancel={() => {
         form.reset(draft)
         setIsEditing(false)
@@ -496,19 +624,6 @@ const ServicePrivacyPanel = ({
       onSave={submit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Uses cookies"
-          name={privacyPath("usesCookies")}
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.cookieTypes?.root}
-          label="Cookie types"
-          name={privacyPath("cookieTypes")}
-          options={cookieTypeOptions}
-          placeholder="Select cookie types"
-        />
         <SelectField
           control={form.control}
           label="Primary hosting region"
@@ -574,9 +689,7 @@ const AddVendorsForm = ({
                   toggleProvider(provider.id, event.target.checked)
                 }
               />
-              <span className="min-w-0 flex-1 truncate">
-                {provider.name}
-              </span>
+              <span className="min-w-0 flex-1 truncate">{provider.name}</span>
               {disabled ? <Badge variant="secondary">Selected</Badge> : null}
             </label>
           )
@@ -641,7 +754,9 @@ const ServiceProviderUsagePanel = ({
       )
     : []
   const selectedProviderIds = new Set(
-    selectedServiceUses.map((providerUsage) => providerUsage.organizationProviderId)
+    selectedServiceUses.map(
+      (providerUsage) => providerUsage.organizationProviderId
+    )
   )
   const editingProviderUsage = selectedServiceUses.find(
     (providerUsage) => providerUsage.id === editingId
@@ -656,9 +771,11 @@ const ServiceProviderUsagePanel = ({
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
+      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h3 className="text-base font-semibold text-slate-950">Service Providers</h3>
+          <h3 className="text-base font-semibold text-slate-950">
+            Service Providers
+          </h3>
           <p className="mt-1 text-sm text-slate-500">
             Providers used by this service and the data they process.
           </p>
@@ -779,7 +896,9 @@ const ServiceProviderUsagePanel = ({
                         variant="outline"
                         onClick={() =>
                           setExpandedId((current) =>
-                            current === providerUsage.id ? null : providerUsage.id
+                            current === providerUsage.id
+                              ? null
+                              : providerUsage.id
                           )
                         }
                       >
@@ -810,7 +929,7 @@ const ServiceProviderUsagePanel = ({
                   </div>
 
                   {expanded ? (
-                    <div className="px-4 pb-4 pt-3 border-t border-slate-100">
+                    <div className="border-t border-slate-100 px-4 pt-3 pb-4">
                       <ProfilePanelDetailGrid
                         itemBgClassName="bg-white"
                         rows={[
@@ -861,7 +980,8 @@ const ServiceProviderUsagePanel = ({
 
 export const ServiceManager = ({
   businessActivityOptions,
-  cookieTypeOptions,
+  cookieConsentMechanismOptions,
+  cookieTrackingCategoryOptions,
   customerTypeOptions,
   dataProcessingLevelOptions,
   dataRegionOptions,
@@ -885,7 +1005,8 @@ export const ServiceManager = ({
   onUpdateProviderUsage,
 }: {
   businessActivityOptions: Option[]
-  cookieTypeOptions: Option[]
+  cookieConsentMechanismOptions: Option[]
+  cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   dataProcessingLevelOptions: Option[]
   dataRegionOptions: Option[]
@@ -924,7 +1045,8 @@ export const ServiceManager = ({
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
   const [activeTab, setActiveTab] = useState<"details" | "providers">("details")
-  const [prevSelectedServiceId, setPrevSelectedServiceId] = useState(selectedServiceId)
+  const [prevSelectedServiceId, setPrevSelectedServiceId] =
+    useState(selectedServiceId)
 
   if (selectedServiceId !== prevSelectedServiceId) {
     setPrevSelectedServiceId(selectedServiceId)
@@ -992,14 +1114,14 @@ export const ServiceManager = ({
 
   return (
     <div className="grid gap-6">
-      <div className="flex border-b border-slate-200 gap-6">
+      <div className="flex gap-6 border-b border-slate-200">
         <button
           type="button"
           onClick={() => setActiveTab("details")}
           className={cn(
-            "pb-3 text-sm font-medium transition-all border-b-2 mb-[-2px] cursor-pointer outline-none",
+            "mb-[-2px] cursor-pointer border-b-2 pb-3 text-sm font-medium transition-all outline-none",
             activeTab === "details"
-              ? "border-slate-900 text-slate-900 font-semibold"
+              ? "border-slate-900 font-semibold text-slate-900"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -1009,9 +1131,9 @@ export const ServiceManager = ({
           type="button"
           onClick={() => setActiveTab("providers")}
           className={cn(
-            "pb-3 text-sm font-medium transition-all border-b-2 mb-[-2px] cursor-pointer outline-none",
+            "mb-[-2px] cursor-pointer border-b-2 pb-3 text-sm font-medium transition-all outline-none",
             activeTab === "providers"
-              ? "border-slate-900 text-slate-900 font-semibold"
+              ? "border-slate-900 font-semibold text-slate-900"
               : "border-transparent text-slate-500 hover:text-slate-800"
           )}
         >
@@ -1037,7 +1159,14 @@ export const ServiceManager = ({
             onSave={saveServicePatch}
           />
           <ServicePrivacyPanel
-            cookieTypeOptions={cookieTypeOptions}
+            cookieConsentMechanismOptions={cookieConsentMechanismOptions}
+            cookieTrackingCategoryOptions={cookieTrackingCategoryOptions}
+            isMutationPending={isProfileMutationPending}
+            service={selectedService}
+            vocabulary={vocabulary}
+            onSave={saveServicePatch}
+          />
+          <ServiceHostingPanel
             isMutationPending={isProfileMutationPending}
             regionOptions={regionOptions}
             service={selectedService}

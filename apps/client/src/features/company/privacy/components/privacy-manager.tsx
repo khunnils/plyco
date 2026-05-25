@@ -5,7 +5,6 @@ import {
 } from "@plyco/shared"
 
 import { ComplianceDisclosuresPanel } from "@/features/company/privacy/components/compliance-disclosures-panel"
-import { CookiePreferencesPanel } from "@/features/company/privacy/components/cookie-preferences-panel"
 import { InternationalTransfersPanel } from "@/features/company/privacy/components/international-transfers-panel"
 import { MarketingCommunicationsPanel } from "@/features/company/privacy/components/marketing-communications-panel"
 import { PrivacyRepresentationPanel } from "@/features/company/privacy/components/privacy-representation-panel"
@@ -18,8 +17,6 @@ import { privacyProgress } from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const PrivacyManager = ({
-  cookieTrackingCategoryOptions,
-  cookieConsentMechanismOptions,
   dpoStatusOptions,
   euRepresentativeStatusOptions,
   isMutationPending,
@@ -34,8 +31,6 @@ export const PrivacyManager = ({
   vocabulary,
   onSaveProfile,
 }: {
-  cookieTrackingCategoryOptions: Option[]
-  cookieConsentMechanismOptions: Option[]
   dpoStatusOptions: Option[]
   euRepresentativeStatusOptions: Option[]
   isMutationPending: boolean
@@ -89,15 +84,6 @@ export const PrivacyManager = ({
         requestMethodOptions={requestMethodOptions}
         responseTimelineStatusOptions={responseTimelineStatusOptions}
         supportedRightOptions={supportedRightOptions}
-        vocabulary={vocabulary}
-        onSave={savePrivacy}
-      />
-      <CookiePreferencesPanel
-        cookieTrackingCategoryOptions={cookieTrackingCategoryOptions}
-        cookieConsentMechanismOptions={cookieConsentMechanismOptions}
-        isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Cookie Preferences")}
-        privacy={profile.privacy}
         vocabulary={vocabulary}
         onSave={savePrivacy}
       />

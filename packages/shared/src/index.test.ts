@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest";
 
 import {
   authStateSchema,
@@ -24,7 +24,7 @@ import {
   templateInputSchema,
   templateSchema,
   countryCodeSchema,
-} from "./index.js"
+} from "./index.js";
 
 describe("shared security profile schemas", () => {
   it("requires a company name and a positive employee count", () => {
@@ -43,10 +43,10 @@ describe("shared security profile schemas", () => {
       handlesPii: false,
       handlesSensitiveData: false,
       complianceGoals: [],
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("requires operational provider fields", () => {
     const result = organizationProviderInputSchema.safeParse({
@@ -58,10 +58,10 @@ describe("shared security profile schemas", () => {
       countryOfRegistration: "US",
       criticality: "high",
       notes: "",
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("accepts service-specific provider processing fields", () => {
     const result = serviceProviderUsageInputSchema.safeParse({
@@ -74,10 +74,10 @@ describe("shared security profile schemas", () => {
       dpaStatus: "signed",
       dataRegions: ["us"],
       notes: "",
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("normalizes non-processing provider usage", () => {
     const result = serviceProviderUsageInputSchema.safeParse({
@@ -90,17 +90,17 @@ describe("shared security profile schemas", () => {
       dpaStatus: "signed",
       dataRegions: ["us"],
       notes: "",
-    })
+    });
 
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toMatchObject({
         dataProcessed: [],
         dpaStatus: "not_required",
         dataRegions: [],
-      })
+      });
     }
-  })
+  });
 
   it("accepts authenticated user state", () => {
     expect(
@@ -121,12 +121,14 @@ describe("shared security profile schemas", () => {
           },
         ],
       }).success,
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   it("requires organization creation to include a name", () => {
-    expect(createOrganizationSchema.safeParse({ name: "" }).success).toBe(false)
-  })
+    expect(createOrganizationSchema.safeParse({ name: "" }).success).toBe(
+      false,
+    );
+  });
 
   it("requires auth users to have a valid email", () => {
     expect(
@@ -135,17 +137,17 @@ describe("shared security profile schemas", () => {
         email: "not-an-email",
         name: "Startup Founder",
       }).success,
-    ).toBe(false)
-  })
+    ).toBe(false);
+  });
 
   it("limits provider criticality to the supported readiness levels", () => {
-    expect(providerCriticalitySchema.safeParse("severe").success).toBe(false)
-  })
+    expect(providerCriticalitySchema.safeParse("severe").success).toBe(false);
+  });
 
   it("validates ISO alpha-2 country codes", () => {
-    expect(countryCodeSchema.safeParse("US").success).toBe(true)
-    expect(countryCodeSchema.safeParse("United States").success).toBe(false)
-  })
+    expect(countryCodeSchema.safeParse("US").success).toBe(true);
+    expect(countryCodeSchema.safeParse("United States").success).toBe(false);
+  });
 
   it("accepts rich stored data type details", () => {
     const result = dataHandlingProfileSchema.safeParse({
@@ -165,10 +167,10 @@ describe("shared security profile schemas", () => {
       encryptionInTransit: true,
       productionDataInDevelopment: false,
       retentionPolicyExists: true,
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("accepts business activity purpose, role, and legal basis", () => {
     const result = businessActivityInputSchema.safeParse({
@@ -177,35 +179,35 @@ describe("shared security profile schemas", () => {
       role: "controller",
       legalBasis: ["contract"],
       retentionDays: 365,
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("shows GDPR-targeted fields only when GDPR is a compliance goal", () => {
     expect(
       isComplianceFieldVisible("businessActivity.legalBasis", ["gdpr"]),
-    ).toBe(true)
+    ).toBe(true);
     expect(
       isComplianceFieldVisible("businessActivity.legalBasis", ["soc_2"]),
-    ).toBe(false)
+    ).toBe(false);
     expect(isComplianceFieldVisible("businessActivity.legalBasis", [])).toBe(
       false,
-    )
+    );
     expect(isComplianceFieldVisible("businessActivity.legalBasis", null)).toBe(
       false,
-    )
-    expect(isComplianceFieldVisible("privacy.dpoStatus", ["gdpr"])).toBe(true)
+    );
+    expect(isComplianceFieldVisible("privacy.dpoStatus", ["gdpr"])).toBe(true);
     expect(isComplianceFieldVisible("privacy.dpoStatus", ["soc_2"])).toBe(
       false,
-    )
-  })
+    );
+  });
 
   it("shows untargeted fields by default", () => {
     expect(isComplianceFieldVisible("businessActivity.purpose", null)).toBe(
       true,
-    )
-  })
+    );
+  });
 
   it("accepts blank template policy metadata defaults", () => {
     expect(
@@ -219,13 +221,13 @@ describe("shared security profile schemas", () => {
         createdAt: "2026-05-14T00:00:00.000Z",
         updatedAt: "2026-05-14T00:00:00.000Z",
       }).success,
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   it("accepts the empty service profile defaults", () => {
-    const result = serviceProfileInputSchema.safeParse(emptyServiceProfile)
+    const result = serviceProfileInputSchema.safeParse(emptyServiceProfile);
 
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toEqual({
         serviceName: null,
@@ -238,14 +240,17 @@ describe("shared security profile schemas", () => {
         childrenDirected: null,
         minimumUserAge: null,
         privacy: {
-          usesCookies: null,
-          cookieTypes: null,
+          usesCookiesOrTrackingTechnologies: null,
+          cookieTrackingCategories: null,
+          cookieConsentMechanism: null,
+          doNotTrackResponse: null,
+          globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
           dataResidencyOptions: null,
         },
-      })
+      });
     }
-  })
+  });
 
   it("accepts a populated service profile with code-array fields", () => {
     const result = serviceProfileInputSchema.safeParse({
@@ -259,33 +264,36 @@ describe("shared security profile schemas", () => {
       childrenDirected: false,
       minimumUserAge: 13,
       privacy: {
-        usesCookies: true,
-        cookieTypes: ["necessary", "analytics"],
+        usesCookiesOrTrackingTechnologies: true,
+        cookieTrackingCategories: ["necessary", "analytics"],
+        cookieConsentMechanism: "cookie_banner",
+        doNotTrackResponse: false,
+        globalPrivacyControlSupported: true,
         primaryHostingRegion: "us",
         dataResidencyOptions: ["us", "eu"],
       },
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("rejects service profile code array values that violate the code id format", () => {
     const result = serviceProfileInputSchema.safeParse({
       ...emptyServiceProfile,
       userTypes: ["Invalid User"],
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("rejects negative minimum user age values", () => {
     const result = serviceProfileInputSchema.safeParse({
       ...emptyServiceProfile,
       minimumUserAge: -1,
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("accepts persisted service profile identity fields", () => {
     const result = serviceProfileSchema.safeParse({
@@ -293,15 +301,15 @@ describe("shared security profile schemas", () => {
       id: "service_1",
       createdAt: "2026-05-14T00:00:00.000Z",
       updatedAt: "2026-05-14T00:00:00.000Z",
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("accepts the empty privacy profile defaults", () => {
-    const result = privacyProfileSchema.safeParse(emptyPrivacyProfile)
+    const result = privacyProfileSchema.safeParse(emptyPrivacyProfile);
 
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toEqual({
         supportedRights: null,
@@ -312,11 +320,6 @@ describe("shared security profile schemas", () => {
         authorizedAgentSupported: null,
         appealProcessExists: null,
         organizationProviders: [],
-        usesCookiesOrTrackingTechnologies: null,
-        cookieTrackingCategories: null,
-        cookieConsentMechanism: null,
-        doNotTrackResponse: null,
-        globalPrivacyControlSupported: null,
         sendsMarketingEmails: null,
         marketingOptOutMethod: null,
         transactionalEmailsSent: null,
@@ -331,9 +334,9 @@ describe("shared security profile schemas", () => {
         euRepresentativeName: null,
         euRepresentativeAddress: null,
         usesAutomatedDecisionMaking: null,
-      })
+      });
     }
-  })
+  });
 
   it("accepts empty security control defaults", () => {
     expect(accessProfileSchema.parse(emptyAccessProfile)).toMatchObject({
@@ -342,8 +345,10 @@ describe("shared security profile schemas", () => {
       accessReviewCadence: null,
       adminApprovalRequired: null,
       passwordManagerRequired: null,
-    })
-    expect(infrastructureProfileSchema.parse(emptyInfrastructureProfile)).toMatchObject({
+    });
+    expect(
+      infrastructureProfileSchema.parse(emptyInfrastructureProfile),
+    ).toMatchObject({
       atRestAlgorithm: null,
       inTransitMinimumTlsVersion: null,
       keyManagementProvider: null,
@@ -366,8 +371,8 @@ describe("shared security profile schemas", () => {
       vendorReviewRequired: null,
       vendorReviewCadence: null,
       dpaRequiredForProcessors: null,
-    })
-  })
+    });
+  });
 
   it("preserves explicit empty, false, and zero profile answers", () => {
     const result = privacyProfileSchema.safeParse({
@@ -375,17 +380,15 @@ describe("shared security profile schemas", () => {
       supportedRights: [],
       responseTimelineDays: 0,
       identityVerificationRequired: false,
-      cookieConsentMechanism: "",
-    })
+    });
 
-    expect(result.success).toBe(true)
+    expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.supportedRights).toEqual([])
-      expect(result.data.responseTimelineDays).toBe(0)
-      expect(result.data.identityVerificationRequired).toBe(false)
-      expect(result.data.cookieConsentMechanism).toBe("")
+      expect(result.data.supportedRights).toEqual([]);
+      expect(result.data.responseTimelineDays).toBe(0);
+      expect(result.data.identityVerificationRequired).toBe(false);
     }
-  })
+  });
 
   it("accepts populated security control detail", () => {
     expect(
@@ -397,7 +400,7 @@ describe("shared security profile schemas", () => {
         adminApprovalRequired: true,
         passwordManagerRequired: true,
       }).success,
-    ).toBe(true)
+    ).toBe(true);
     expect(
       infrastructureProfileSchema.safeParse({
         ...emptyInfrastructureProfile,
@@ -420,8 +423,8 @@ describe("shared security profile schemas", () => {
         vendorReviewCadence: "annually",
         dpaRequiredForProcessors: true,
       }).success,
-    ).toBe(true)
-  })
+    ).toBe(true);
+  });
 
   it("rejects invalid security control codes and negative day counts", () => {
     expect(
@@ -429,20 +432,20 @@ describe("shared security profile schemas", () => {
         ...emptyAccessProfile,
         accessReviewCadence: "Every Quarter",
       }).success,
-    ).toBe(false)
+    ).toBe(false);
     expect(
       infrastructureProfileSchema.safeParse({
         ...emptyInfrastructureProfile,
         atRestAlgorithm: "AES 256",
       }).success,
-    ).toBe(false)
+    ).toBe(false);
     expect(
       infrastructureProfileSchema.safeParse({
         ...emptyInfrastructureProfile,
         logRetentionDays: -1,
       }).success,
-    ).toBe(false)
-  })
+    ).toBe(false);
+  });
 
   it("accepts a populated privacy profile with code-array fields", () => {
     const result = privacyProfileSchema.safeParse({
@@ -459,68 +462,66 @@ describe("shared security profile schemas", () => {
           providerId: "prov-mailchimp",
         },
       ],
-      usesCookiesOrTrackingTechnologies: true,
-      cookieTrackingCategories: ["necessary", "analytics"],
-      cookieConsentMechanism: "cookie_banner",
-      doNotTrackResponse: false,
-      globalPrivacyControlSupported: true,
       sendsMarketingEmails: true,
       marketingOptOutMethod: "unsubscribe_link",
       transactionalEmailsSent: true,
       crossBorderTransfers: true,
       transferMechanisms: ["sccs", "dpf"],
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
+    expect(result.success).toBe(true);
+  });
 
   it("rejects privacy profile code array values that violate the code id format", () => {
     const result = privacyProfileSchema.safeParse({
       ...emptyPrivacyProfile,
       supportedRights: ["Opt Out"],
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("rejects negative privacy response timeline values", () => {
     const result = privacyProfileSchema.safeParse({
       ...emptyPrivacyProfile,
       responseTimelineDays: -1,
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("rejects service privacy values that violate the code id format", () => {
     const result = serviceProfileInputSchema.safeParse({
       ...emptyServiceProfile,
       privacy: {
         ...emptyServiceProfile.privacy,
-        cookieTypes: ["Analytics Cookies"],
+        cookieTrackingCategories: ["Analytics Cookies"],
       },
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
-  it("rejects privacy cookie consent mechanism values that violate the code id format", () => {
-    const result = privacyProfileSchema.safeParse({
-      ...emptyPrivacyProfile,
-      cookieConsentMechanism: "Cookie Banner",
-    })
+  it("rejects service cookie consent mechanism values that violate the code id format", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        cookieConsentMechanism: "Cookie Banner",
+      },
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("rejects privacy marketing opt-out method values that violate the code id format", () => {
     const result = privacyProfileSchema.safeParse({
       ...emptyPrivacyProfile,
       marketingOptOutMethod: "Unsubscribe Link",
-    })
+    });
 
-    expect(result.success).toBe(false)
-  })
+    expect(result.success).toBe(false);
+  });
 
   it("rejects privacy transfer values that violate the code id format", () => {
     expect(
@@ -528,8 +529,8 @@ describe("shared security profile schemas", () => {
         ...emptyPrivacyProfile,
         transferMechanisms: ["Standard Contractual Clauses"],
       }).success,
-    ).toBe(false)
-  })
+    ).toBe(false);
+  });
 
   it("rejects service privacy residency values that violate the code id format", () => {
     expect(
@@ -540,7 +541,7 @@ describe("shared security profile schemas", () => {
           primaryHostingRegion: "United States",
         },
       }).success,
-    ).toBe(false)
+    ).toBe(false);
     expect(
       serviceProfileInputSchema.safeParse({
         ...emptyServiceProfile,
@@ -549,14 +550,16 @@ describe("shared security profile schemas", () => {
           dataResidencyOptions: ["European Union"],
         },
       }).success,
-    ).toBe(false)
-  })
+    ).toBe(false);
+  });
 
   it("accepts analytics and advertising provider system types", () => {
-    expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true)
-    expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(true)
-    expect(providerSystemTypeSchema.safeParse("newsletter").success).toBe(true)
-  })
+    expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true);
+    expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(
+      true,
+    );
+    expect(providerSystemTypeSchema.safeParse("newsletter").success).toBe(true);
+  });
 
   it("accepts template input policy metadata fields", () => {
     const result = templateInputSchema.safeParse({
@@ -569,8 +572,8 @@ describe("shared security profile schemas", () => {
       policyOwnerUserId: "user_security",
       policyApproverUserId: "user_legal",
       policyReviewCadence: "Annual",
-    })
+    });
 
-    expect(result.success).toBe(true)
-  })
-})
+    expect(result.success).toBe(true);
+  });
+});

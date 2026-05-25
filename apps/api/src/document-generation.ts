@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto"
+import { createHash } from "node:crypto";
 
-import nunjucks from "nunjucks"
+import nunjucks from "nunjucks";
 import {
   type AccessProfile,
   type BusinessActivity,
@@ -14,37 +14,37 @@ import {
   type Template,
   type OrganizationProvider,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
 type ProviderContextGroup = {
-  all: Array<Record<string, unknown>>
-  uses: Array<Record<string, unknown>>
-  dataProcessors: Array<Record<string, unknown>>
-  subprocessors: Array<Record<string, unknown>>
-  byService: Array<Record<string, unknown>>
-  dataProcessorsAnswered: boolean
-  dataProcessorsHasValue: boolean
-  subprocessorsAnswered: boolean
-  subprocessorsHasValue: boolean
-}
+  all: Array<Record<string, unknown>>;
+  uses: Array<Record<string, unknown>>;
+  dataProcessors: Array<Record<string, unknown>>;
+  subprocessors: Array<Record<string, unknown>>;
+  byService: Array<Record<string, unknown>>;
+  dataProcessorsAnswered: boolean;
+  dataProcessorsHasValue: boolean;
+  subprocessorsAnswered: boolean;
+  subprocessorsHasValue: boolean;
+};
 
 export type NormalizedTemplateContext = {
-  organization: Record<string, unknown>
-  company: Record<string, unknown>
-  policy: Record<string, unknown>
-  service: Record<string, unknown>
+  organization: Record<string, unknown>;
+  company: Record<string, unknown>;
+  policy: Record<string, unknown>;
+  service: Record<string, unknown>;
   services: {
-    all: Array<Record<string, unknown>>
-    primary: Record<string, unknown>
-  }
-  privacy: Record<string, unknown>
-  security: Record<string, unknown>
-  infrastructure: Record<string, unknown>
-  dataHandling: Record<string, unknown>
-  access: Record<string, unknown>
-  vendors: ProviderContextGroup
-  providers: ProviderContextGroup
-}
+    all: Array<Record<string, unknown>>;
+    primary: Record<string, unknown>;
+  };
+  privacy: Record<string, unknown>;
+  security: Record<string, unknown>;
+  infrastructure: Record<string, unknown>;
+  dataHandling: Record<string, unknown>;
+  access: Record<string, unknown>;
+  vendors: ProviderContextGroup;
+  providers: ProviderContextGroup;
+};
 
 export class ReportContextBuilder {
   build(
@@ -53,29 +53,27 @@ export class ReportContextBuilder {
     members: OrganizationMember[] = [],
     vocabulary?: Vocabulary,
   ): NormalizedTemplateContext {
-    const organization = snapshot.organization
+    const organization = snapshot.organization;
     const organizationContext = organization
       ? {
           ...organization.company,
           name: organization.company.companyName,
         }
-      : {}
+      : {};
     const legacySnapshot = snapshot as SecurityProgramSnapshot & {
-      vendors?: SecurityProgramSnapshot["organizationProviders"]
-      serviceVendorUses?: SecurityProgramSnapshot["serviceProviderUsage"]
-    }
+      vendors?: SecurityProgramSnapshot["organizationProviders"];
+      serviceVendorUses?: SecurityProgramSnapshot["serviceProviderUsage"];
+    };
     const providers = (
       legacySnapshot.organizationProviders ??
       legacySnapshot.vendors ??
       []
-    ).map((provider) =>
-      this.providerContext(provider),
-    )
+    ).map((provider) => this.providerContext(provider));
     const providerUsage = (
       legacySnapshot.serviceProviderUsage ??
       legacySnapshot.serviceVendorUses ??
       []
-    ).map((usage) => this.providerUsageContext(usage, providers))
+    ).map((usage) => this.providerUsageContext(usage, providers));
     const services = organization
       ? organization.services.map((service) =>
           this.serviceContext(
@@ -86,8 +84,8 @@ export class ReportContextBuilder {
             vocabulary,
           ),
         )
-      : []
-    const primaryService = services[0] ?? {}
+      : [];
+    const primaryService = services[0] ?? {};
 
     return {
       organization: organizationContext,
@@ -119,7 +117,7 @@ export class ReportContextBuilder {
       vendors: {
         ...this.providerGroups(services, providers, providerUsage),
       },
-    }
+    };
   }
 
   private providerGroups(
@@ -131,13 +129,11 @@ export class ReportContextBuilder {
       all: providers,
       uses: providerUsage,
       dataProcessors: providerUsage.filter((usage) =>
-          ["limited", "subprocessor"].includes(
-            String(usage.dataProcessingLevel),
-          ),
-        ),
+        ["limited", "subprocessor"].includes(String(usage.dataProcessingLevel)),
+      ),
       subprocessors: providerUsage.filter(
-          (usage) => usage.dataProcessingLevel === "subprocessor",
-        ),
+        (usage) => usage.dataProcessingLevel === "subprocessor",
+      ),
       byService: this.providersByService(services, providerUsage),
       dataProcessorsAnswered: true,
       dataProcessorsHasValue: providerUsage.some((usage) =>
@@ -147,16 +143,16 @@ export class ReportContextBuilder {
       subprocessorsHasValue: providerUsage.some(
         (usage) => usage.dataProcessingLevel === "subprocessor",
       ),
-    }
+    };
   }
 
   private policyContext(template: Template, members: OrganizationMember[]) {
     const owner = members.find(
       (member) => member.userId === template.policyOwnerUserId,
-    )
+    );
     const approver = members.find(
       (member) => member.userId === template.policyApproverUserId,
-    )
+    );
 
     return {
       effectiveDate: template.policyEffectiveDate,
@@ -169,7 +165,7 @@ export class ReportContextBuilder {
       approverName: approver?.name ?? "",
       approverEmail: approver?.email ?? "",
       reviewCadence: template.policyReviewCadence,
-    }
+    };
   }
 
   private serviceContext(
@@ -181,23 +177,23 @@ export class ReportContextBuilder {
   ) {
     const serviceProviderUsage = providerUsage.filter(
       (usage) => usage.serviceId === service.id,
-    )
+    );
     const analyticsProviders = serviceProviderUsage.filter(
       (usage) => usage.systemType === "analytics",
-    )
+    );
     const advertisingProviders = serviceProviderUsage.filter(
       (usage) => usage.systemType === "advertising",
-    )
+    );
     const serviceActivities = activities
       .filter((activity) => service.businessActivityIds.includes(activity.id))
-      .map((activity) => this.businessActivityContext(activity, vocabulary))
+      .map((activity) => this.businessActivityContext(activity, vocabulary));
     const dataTypeNames = new Set(
       serviceProviderUsage.flatMap((usage) =>
         Array.isArray(usage.dataProcessed)
           ? usage.dataProcessed.map(String)
           : [],
       ),
-    )
+    );
 
     return {
       id: service.id,
@@ -237,32 +233,32 @@ export class ReportContextBuilder {
         minimumUserAge: service.minimumUserAge,
       }),
       privacy: {
-        usesCookies: service.privacy.usesCookies,
-        cookieTypes: service.privacy.cookieTypes,
-        cookieTypeLabels: this.codeLabels(
+        usesCookiesOrTrackingTechnologies:
+          service.privacy.usesCookiesOrTrackingTechnologies,
+        cookieTrackingCategories: service.privacy.cookieTrackingCategories,
+        cookieTrackingCategoryLabels: this.codeLabels(
           vocabulary,
-          "privacy_cookie_types",
-          service.privacy.cookieTypes,
+          "cookie_tracking_categories",
+          service.privacy.cookieTrackingCategories,
         ),
-        analyticsProviders: this.providerNames(
-          analyticsProviders,
-        ),
-        analyticsProviderIds: this.providerIds(
-          analyticsProviders,
-        ),
-        advertisingProviders: this.providerNames(
-          advertisingProviders,
-        ),
-        advertisingProviderIds: this.providerIds(
-          advertisingProviders,
-        ),
+        cookieConsentMechanism: service.privacy.cookieConsentMechanism,
+        cookieConsentMechanismLabel: service.privacy.cookieConsentMechanism
+          ? this.codeLabels(vocabulary, "privacy_cookie_consent_mechanisms", [
+              service.privacy.cookieConsentMechanism,
+            ])[0]
+          : "",
+        doNotTrackResponse: service.privacy.doNotTrackResponse,
+        globalPrivacyControlSupported:
+          service.privacy.globalPrivacyControlSupported,
+        analyticsProviders: this.providerNames(analyticsProviders),
+        analyticsProviderIds: this.providerIds(analyticsProviders),
+        advertisingProviders: this.providerNames(advertisingProviders),
+        advertisingProviderIds: this.providerIds(advertisingProviders),
         primaryHostingRegion: service.privacy.primaryHostingRegion,
         primaryHostingRegionLabel: service.privacy.primaryHostingRegion
-          ? this.codeLabels(
-              vocabulary,
-              "regions",
-              [service.privacy.primaryHostingRegion],
-            )[0]
+          ? this.codeLabels(vocabulary, "regions", [
+              service.privacy.primaryHostingRegion,
+            ])[0]
           : "",
         dataResidencyOptions: service.privacy.dataResidencyOptions,
         dataResidencyOptionLabels: this.codeLabels(
@@ -282,7 +278,7 @@ export class ReportContextBuilder {
       dataTypes: dataTypes.filter((dataType) =>
         dataTypeNames.has(String(dataType.name)),
       ),
-    }
+    };
   }
 
   private privacyContext(privacy: PrivacyProfile, vocabulary?: Vocabulary) {
@@ -301,42 +297,20 @@ export class ReportContextBuilder {
       ),
       responseTimelineDaysStatus: privacy.responseTimelineDaysStatus,
       responseTimelineDaysStatusLabel: privacy.responseTimelineDaysStatus
-        ? this.codeLabels(
-            vocabulary,
-            "defined_statuses",
-            [privacy.responseTimelineDaysStatus],
-          )[0]
+        ? this.codeLabels(vocabulary, "defined_statuses", [
+            privacy.responseTimelineDaysStatus,
+          ])[0]
         : "",
       responseTimelineDays: privacy.responseTimelineDays,
       identityVerificationRequired: privacy.identityVerificationRequired,
       authorizedAgentSupported: privacy.authorizedAgentSupported,
       appealProcessExists: privacy.appealProcessExists,
-      usesCookiesOrTrackingTechnologies:
-        privacy.usesCookiesOrTrackingTechnologies,
-      cookieTrackingCategories: privacy.cookieTrackingCategories,
-      cookieTrackingCategoryLabels: this.codeLabels(
-        vocabulary,
-        "cookie_tracking_categories",
-        privacy.cookieTrackingCategories,
-      ),
-      cookieConsentMechanism: privacy.cookieConsentMechanism,
-      cookieConsentMechanismLabel: privacy.cookieConsentMechanism
-        ? this.codeLabels(
-            vocabulary,
-            "privacy_cookie_consent_mechanisms",
-            [privacy.cookieConsentMechanism],
-          )[0]
-        : "",
-      doNotTrackResponse: privacy.doNotTrackResponse,
-      globalPrivacyControlSupported: privacy.globalPrivacyControlSupported,
       sendsMarketingEmails: privacy.sendsMarketingEmails,
       marketingOptOutMethod: privacy.marketingOptOutMethod,
       marketingOptOutMethodLabel: privacy.marketingOptOutMethod
-        ? this.codeLabels(
-            vocabulary,
-            "privacy_marketing_opt_out_methods",
-            [privacy.marketingOptOutMethod],
-          )[0]
+        ? this.codeLabels(vocabulary, "privacy_marketing_opt_out_methods", [
+            privacy.marketingOptOutMethod,
+          ])[0]
         : "",
       transactionalEmailsSent: privacy.transactionalEmailsSent,
       newsletterProvider:
@@ -370,23 +344,25 @@ export class ReportContextBuilder {
       euRepresentativeAddress: privacy.euRepresentativeAddress,
       usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
       ...this.answerFlags(privacy),
-    }
+    };
   }
 
   private providerIds(providers: Array<Record<string, unknown>>) {
     return providers.map((provider) =>
       String(provider.providerId ?? provider.organizationProviderId ?? ""),
-    )
+    );
   }
 
   private providerNames(providers: Array<Record<string, unknown>>) {
     return providers.map((provider) => {
-      const id = String(provider.providerId ?? provider.organizationProviderId ?? "")
+      const id = String(
+        provider.providerId ?? provider.organizationProviderId ?? "",
+      );
       if (id === "none") {
-        return "None"
+        return "None";
       }
-      return String(provider.name ?? provider.providerName ?? id ?? "")
-    })
+      return String(provider.name ?? provider.providerName ?? id ?? "");
+    });
   }
 
   private securityContext(
@@ -429,8 +405,7 @@ export class ReportContextBuilder {
           "security_encryption_algorithms",
           infrastructure.atRestAlgorithm,
         ),
-        inTransitMinimumTlsVersion:
-          infrastructure.inTransitMinimumTlsVersion,
+        inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
         inTransitMinimumTlsVersionLabel: this.codeLabel(
           vocabulary,
           "security_tls_versions",
@@ -444,8 +419,7 @@ export class ReportContextBuilder {
         ),
         ...this.answerFlags({
           atRestAlgorithm: infrastructure.atRestAlgorithm,
-          inTransitMinimumTlsVersion:
-            infrastructure.inTransitMinimumTlsVersion,
+          inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
           keyManagementProvider: infrastructure.keyManagementProvider,
         }),
       },
@@ -478,7 +452,8 @@ export class ReportContextBuilder {
           infrastructure.scanningCadence,
         ),
         patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
-        patchingSlaCriticalDaysStatus: infrastructure.patchingSlaCriticalDaysStatus,
+        patchingSlaCriticalDaysStatus:
+          infrastructure.patchingSlaCriticalDaysStatus,
         patchingSlaCriticalDaysStatusLabel: this.codeLabel(
           vocabulary,
           "defined_statuses",
@@ -505,8 +480,7 @@ export class ReportContextBuilder {
           "security_notification_timelines",
           infrastructure.incidentNotificationTimeline,
         ),
-        customerNotificationProcess:
-          infrastructure.customerNotificationProcess,
+        customerNotificationProcess: infrastructure.customerNotificationProcess,
         customerNotificationProcessLabel: this.codeLabel(
           vocabulary,
           "security_customer_notification_processes",
@@ -562,7 +536,7 @@ export class ReportContextBuilder {
           dpaRequiredForProcessors: infrastructure.dpaRequiredForProcessors,
         }),
       },
-    }
+    };
   }
 
   private codeLabels(
@@ -572,12 +546,12 @@ export class ReportContextBuilder {
   ) {
     const codeSet = vocabulary?.codeSets.find(
       (currentCodeSet) => currentCodeSet.codeSetId === codeSetId,
-    )
+    );
 
     return (values ?? []).map(
       (value) =>
         codeSet?.codes.find((code) => code.codeId === value)?.name ?? value,
-    )
+    );
   }
 
   private codeLabel(
@@ -585,14 +559,14 @@ export class ReportContextBuilder {
     codeSetId: string,
     value: string | null,
   ) {
-    return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : ""
+    return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : "";
   }
 
   private withAnswerFlags<T extends Record<string, unknown>>(value: T) {
     return {
       ...value,
       ...this.answerFlags(value),
-    }
+    };
   }
 
   private answerFlags(values: Record<string, unknown>) {
@@ -603,35 +577,35 @@ export class ReportContextBuilder {
           [`${key}Answered`, this.answered(value)],
           [`${key}HasValue`, this.hasValue(value)],
         ]),
-    )
+    );
   }
 
   private answered(value: unknown) {
-    return value !== null && value !== undefined
+    return value !== null && value !== undefined;
   }
 
   private hasValue(value: unknown) {
     if (!this.answered(value)) {
-      return false
+      return false;
     }
 
     if (Array.isArray(value)) {
-      return value.length > 0
+      return value.length > 0;
     }
 
     if (typeof value === "boolean") {
-      return value
+      return value;
     }
 
     if (typeof value === "number") {
-      return value > 0
+      return value > 0;
     }
 
     if (typeof value === "string") {
-      return value.trim().length > 0
+      return value.trim().length > 0;
     }
 
-    return true
+    return true;
   }
 
   private providerContext(provider: OrganizationProvider) {
@@ -645,7 +619,7 @@ export class ReportContextBuilder {
       countryOfRegistration: provider.countryOfRegistration,
       criticality: provider.criticality,
       notes: provider.notes,
-    }
+    };
   }
 
   private providerUsageContext(
@@ -653,14 +627,13 @@ export class ReportContextBuilder {
     providers: Array<Record<string, unknown>>,
   ) {
     const legacyUsage = providerUsage as ServiceProviderUsage & {
-      vendorName?: string
-    }
+      vendorName?: string;
+    };
     const provider =
       providers.find(
         (currentProvider) =>
           currentProvider.id === providerUsage.organizationProviderId,
-      ) ??
-      {}
+      ) ?? {};
 
     return {
       ...provider,
@@ -679,7 +652,7 @@ export class ReportContextBuilder {
       dpaStatus: providerUsage.dpaStatus,
       dataRegions: providerUsage.dataRegions,
       notes: providerUsage.notes || provider.notes,
-    }
+    };
   }
 
   private businessActivityContext(
@@ -692,8 +665,8 @@ export class ReportContextBuilder {
       purpose: activity.purpose,
       role: activity.role,
       roleLabel: activity.role
-        ? this.codeLabels(vocabulary, "activity_role", [activity.role])[0] ??
-          activity.role
+        ? (this.codeLabels(vocabulary, "activity_role", [activity.role])[0] ??
+          activity.role)
         : "",
       legalBasis: activity.legalBasis,
       legalBasisLabels: this.codeLabels(
@@ -718,7 +691,7 @@ export class ReportContextBuilder {
                 "activity_retention_policies",
                 activity.retentionPolicy,
               ) || "Not set",
-    }
+    };
   }
 
   private providersByService(
@@ -728,15 +701,19 @@ export class ReportContextBuilder {
     return services.map((service) => ({
       serviceId: service.id,
       serviceName: service.name,
-      providers: providers.filter((provider) => provider.serviceId === service.id),
-      vendors: providers.filter((provider) => provider.serviceId === service.id),
-    }))
+      providers: providers.filter(
+        (provider) => provider.serviceId === service.id,
+      ),
+      vendors: providers.filter(
+        (provider) => provider.serviceId === service.id,
+      ),
+    }));
   }
 }
 
 export class Jinja2Renderer {
   render(template: Template, context: NormalizedTemplateContext): string {
-    return nunjucks.renderString(template.content, context)
+    return nunjucks.renderString(template.content, context);
   }
 }
 
@@ -746,21 +723,21 @@ export function templateSourceHash(
 ) {
   return createHash("sha256")
     .update(stableStringify({ content: template.content, context }))
-    .digest("hex")
+    .digest("hex");
 }
 
 function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(",")}]`
+    return `[${value.map(stableStringify).join(",")}]`;
   }
 
   if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>
+    const record = value as Record<string, unknown>;
     return `{${Object.keys(record)
       .sort()
       .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
-      .join(",")}}`
+      .join(",")}}`;
   }
 
-  return JSON.stringify(value)
+  return JSON.stringify(value);
 }
