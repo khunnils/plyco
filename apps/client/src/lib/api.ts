@@ -8,6 +8,8 @@ import {
   vocabularyCodeSchema,
   vocabularyCodeInputSchema,
   templateCatalogSchema,
+  templatePreviewSchema,
+  templateVariableCatalogSchema,
   businessActivitySchema,
   businessActivityInputSchema,
   serviceProviderUsageSchema,
@@ -35,6 +37,8 @@ import {
   type Template,
   type TemplateCatalog,
   type TemplateInput,
+  type TemplatePreview,
+  type TemplateVariableCatalog,
   type BusinessActivity,
   type BusinessActivityInput,
   type ServiceProviderUsage,
@@ -199,6 +203,27 @@ export const getOrganizationTemplates = (
   apiRequest(
     `/organizations/${organizationId}/templates`,
     templateCatalogSchema
+  )
+
+export const getTemplateVariableCatalog = (
+  organizationId: string
+): Promise<TemplateVariableCatalog> =>
+  apiRequest(
+    `/organizations/${organizationId}/templates/schema`,
+    templateVariableCatalogSchema
+  )
+
+export const previewTemplate = (
+  organizationId: string,
+  template: TemplateInput
+): Promise<TemplatePreview> =>
+  apiRequest(
+    `/organizations/${organizationId}/templates/preview`,
+    templatePreviewSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(template),
+    }
   )
 
 export const getOrganizationDocuments = (

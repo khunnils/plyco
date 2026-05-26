@@ -16,6 +16,16 @@ export const securityProfileQueryKey = (organizationId: string) =>
 export const templatesQueryKey = (organizationId: string) =>
   ["templates", organizationId] as const
 
+export const templateSchemaQueryKey = (organizationId: string) =>
+  ["template-schema", organizationId] as const
+
+export const templatePreviewQueryKey = (
+  organizationId: string,
+  name: string,
+  content: string,
+  policyVersion: string
+) => ["template-preview", organizationId, name, content, policyVersion] as const
+
 export const documentsQueryKey = (organizationId: string) =>
   ["documents", organizationId] as const
 

@@ -385,6 +385,46 @@ export const templateInputSchema = z.object({
   policyVersion: z.string().default(""),
 });
 
+export const templatePreviewInputSchema = templateInputSchema;
+
+export const templatePreviewSchema = z.object({
+  renderedContent: z.string(),
+});
+
+type InternalTemplateVariableField = {
+  key: string;
+  label: string;
+  type: string;
+  category?: string;
+  description?: string;
+  example?: unknown;
+  itemFields?: InternalTemplateVariableField[];
+};
+
+export const templateVariableFieldSchema: z.ZodType<InternalTemplateVariableField> =
+  z.lazy(() =>
+    z.object({
+      key: z.string().min(1),
+      label: z.string().min(1),
+      type: z.string().min(1).default("unknown"),
+      category: z.string().min(1).optional(),
+      description: z.string().optional(),
+      example: z.unknown().optional(),
+      itemFields: z.array(templateVariableFieldSchema).optional(),
+    }),
+  );
+
+export const templateVariableSchema = templateVariableFieldSchema.and(
+  z.object({
+    category: z.string().min(1),
+  }),
+);
+
+export const templateVariableCatalogSchema = z.object({
+  version: z.number().int().positive(),
+  variables: z.array(templateVariableSchema),
+});
+
 export const createTemplateFromSystemSchema = z.object({
   sourceSystemTemplateSlug: templateSlugSchema,
 });
@@ -520,6 +560,13 @@ export type Provider = z.infer<typeof providerSchema>;
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>;
 export type Template = z.infer<typeof templateSchema>;
 export type TemplateInput = z.infer<typeof templateInputSchema>;
+export type TemplatePreviewInput = z.infer<typeof templatePreviewInputSchema>;
+export type TemplatePreview = z.infer<typeof templatePreviewSchema>;
+export type TemplateVariable = z.infer<typeof templateVariableSchema>;
+export type TemplateVariableField = z.infer<typeof templateVariableFieldSchema>;
+export type TemplateVariableCatalog = z.infer<
+  typeof templateVariableCatalogSchema
+>;
 export type CreateTemplateFromSystem = z.infer<
   typeof createTemplateFromSystemSchema
 >;

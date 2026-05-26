@@ -1569,6 +1569,81 @@ describe("security profile API", () => {
     });
   });
 
+  it("returns template schema variables", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/templates/schema",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      version: 1,
+      variables: expect.arrayContaining([
+        expect.objectContaining({
+          key: "organization.name",
+          type: "string",
+          category: "Organization",
+        }),
+        expect.objectContaining({
+          key: "vendors.dataProcessors",
+          type: "collection",
+          category: "Vendors",
+          itemFields: expect.arrayContaining([
+            expect.objectContaining({ key: "name", type: "string" }),
+          ]),
+        }),
+      ]),
+    });
+  });
+
+  it("previews draft templates without generating documents", async () => {
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates/preview",
+      payload: {
+        name: "Security Policy",
+        content:
+          "# {{ company.name }} Security Policy\nVersion {{ policy.version }}\n",
+        policyVersion: "1.0",
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      renderedContent: "# Acme AI Security Policy\nVersion 1.0\n",
+    });
+
+    const documentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    });
+    expect(documentsResponse.json()).toEqual([]);
+  });
+
+  it("returns structured errors for invalid template previews", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates/preview",
+      payload: {
+        name: "Broken Policy",
+        content: "{% if company.name %}",
+        policyVersion: "",
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("TEMPLATE_RENDER_FAILED");
+  });
+
   it("copies, edits, and deletes organization templates", async () => {
     const app = await createTestApp();
     const createResponse = await app.inject({

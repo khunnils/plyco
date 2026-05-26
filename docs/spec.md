@@ -308,6 +308,8 @@ The app includes a Policies & Documents sidebar option. The page shows organizat
 
 Organization templates can be edited or deleted after they are added. Editing covers name, slug, per-template policy metadata, and markdown content. Organization templates created from scratch have no source system template.
 
+The template editor includes a schema picker, markdown/Jinja content editor, and live preview. The schema picker is populated from the canonical template variable schema and groups available organization, service, privacy, security, and vendor fields by category. Users can click or drag variables into the editor. Scalar variables insert Jinja placeholders such as `{{ organization.name }}`. Collection variables insert loop snippets such as `{% for vendor in vendors.dataProcessors -%}` with an item placeholder and `{% endfor %}`. The live preview renders the unsaved draft template against the current organization state after a short typing pause. Previewing does not save the template, create a generated document, or create a PDF export.
+
 Documents are generated from organization templates and the current security profile source-of-truth:
 
 Documents are generated through:

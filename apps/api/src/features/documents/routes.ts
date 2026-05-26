@@ -1,7 +1,12 @@
+import { readFile } from "node:fs/promises";
+
 import {
   createDocumentSchema,
   createTemplateFromSystemSchema,
   templateInputSchema,
+  templatePreviewInputSchema,
+  templateVariableCatalogSchema,
+  type Template,
 } from "@plyco/shared";
 import { type FastifyInstance } from "fastify";
 
@@ -58,6 +63,85 @@ export async function registerDocumentRoutes(
           request.params.organizationId,
         ),
       };
+    },
+  );
+
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/templates/schema",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const schema = JSON.parse(
+        await readFile(
+          new URL("../../../data/templates/schema.json", import.meta.url),
+          "utf8",
+        ),
+      );
+
+      return templateVariableCatalogSchema.parse(schema);
+    },
+  );
+
+  app.post<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/templates/preview",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const draft = templatePreviewInputSchema.parse(request.body);
+      const now = new Date().toISOString();
+      const template: Template = {
+        id: "preview",
+        organizationId: request.params.organizationId,
+        name: draft.name,
+        slug: "preview",
+        sourceSystemTemplateSlug: null,
+        content: draft.content,
+        policyVersion: draft.policyVersion,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const snapshot = {
+        organization: await organizationRepository.getOrganization(
+          request.params.organizationId,
+        ),
+        businessActivities: await vendorRepository.listBusinessActivities(
+          request.params.organizationId,
+        ),
+        organizationProviders: await vendorRepository.listOrganizationProviders(
+          request.params.organizationId,
+        ),
+        serviceProviderUsage: await vendorRepository.listServiceProviderUsage(
+          request.params.organizationId,
+        ),
+      };
+      const context = contextBuilder.build(
+        snapshot,
+        template,
+        await accountRepository.listOrganizationMembers(
+          request.params.organizationId,
+        ),
+        await vocabularyRepository.listVocabulary(
+          request.params.organizationId,
+        ),
+      );
+
+      try {
+        return { renderedContent: renderer.render(template, context) };
+      } catch (error) {
+        throw new ApiError(
+          "TEMPLATE_RENDER_FAILED",
+          error instanceof Error
+            ? error.message
+            : "Template preview could not be rendered.",
+          400,
+        );
+      }
     },
   );
 

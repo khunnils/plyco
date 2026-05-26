@@ -14,11 +14,15 @@ import {
   deleteTemplate,
   getOrganizationMembers,
   getOrganizationTemplates,
+  getTemplateVariableCatalog,
+  previewTemplate,
   updateTemplate,
 } from "@/lib/api"
 import {
   documentsQueryKey,
   organizationMembersQueryKey,
+  templatePreviewQueryKey,
+  templateSchemaQueryKey,
   templatesQueryKey,
 } from "@/lib/query-keys"
 
@@ -43,6 +47,41 @@ export const useOrganizationMembers = (enabled = true) => {
     enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
     queryKey: organizationMembersQueryKey(selectedOrganizationId ?? ""),
     queryFn: () => getOrganizationMembers(selectedOrganizationId ?? ""),
+  })
+}
+
+export const useTemplateVariableCatalog = (enabled = true) => {
+  const { data: auth } = useAuthState()
+  const user = auth?.user ?? null
+  const { selectedOrganizationId } = useSelectedOrganization()
+
+  return useQuery({
+    enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
+    queryKey: templateSchemaQueryKey(selectedOrganizationId ?? ""),
+    queryFn: () => getTemplateVariableCatalog(selectedOrganizationId ?? ""),
+  })
+}
+
+export const useTemplatePreview = (template: TemplateInput, enabled = true) => {
+  const { data: auth } = useAuthState()
+  const user = auth?.user ?? null
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+
+  return useQuery({
+    enabled:
+      enabled &&
+      Boolean(user) &&
+      Boolean(organizationId) &&
+      template.name.trim().length > 0,
+    queryKey: templatePreviewQueryKey(
+      organizationId,
+      template.name,
+      template.content,
+      template.policyVersion
+    ),
+    queryFn: () => previewTemplate(organizationId, template),
+    retry: false,
   })
 }
 

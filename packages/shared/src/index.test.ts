@@ -22,7 +22,10 @@ import {
   serviceProfileSchema,
   serviceProviderUsageInputSchema,
   templateInputSchema,
+  templatePreviewInputSchema,
+  templatePreviewSchema,
   templateSchema,
+  templateVariableCatalogSchema,
   countryCodeSchema,
 } from "./index.js";
 
@@ -555,6 +558,53 @@ describe("shared security profile schemas", () => {
       name: "Privacy Policy",
       content: "# Privacy Policy\n",
       policyVersion: "1.0",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts template preview input and output", () => {
+    expect(
+      templatePreviewInputSchema.safeParse({
+        name: "Security Policy",
+        content: "# {{ company.name }}",
+        policyVersion: "1.0",
+      }).success,
+    ).toBe(true);
+    expect(
+      templatePreviewSchema.safeParse({
+        renderedContent: "# Acme AI",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("accepts template variable catalogs with collection item fields", () => {
+    const result = templateVariableCatalogSchema.safeParse({
+      version: 1,
+      variables: [
+        {
+          key: "organization.name",
+          label: "Organization name",
+          type: "string",
+          category: "Organization",
+          description: "Legal or display name.",
+          example: "Acme AI",
+        },
+        {
+          key: "vendors.dataProcessors",
+          label: "Data processors",
+          type: "collection",
+          category: "Vendors",
+          itemFields: [
+            {
+              key: "name",
+              label: "Name",
+              type: "string",
+              example: "GitHub",
+            },
+          ],
+        },
+      ],
     });
 
     expect(result.success).toBe(true);
