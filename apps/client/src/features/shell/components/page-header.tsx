@@ -20,11 +20,12 @@ export const PageHeader = ({
 }) => {
   const items = breadcrumbs ?? [{ label: eyebrow }, { label: title }]
 
+  const newLocal = "flex flex-wrap items-center gap-2 text-sm text-white"
   return (
-    <header className="fixed inset-x-0 top-0 z-30 border-b border-white/10 bg-primary px-4 py-2 text-primary-foreground shadow-sm md:left-64 md:px-12">
+    <header className="fixed inset-x-0 top-0 z-30 border-b border-white/10 bg-primary px-4 py-1 text-primary-foreground md:left-64 md:px-12">
       <div className="flex min-h-8 flex-col justify-between gap-2 md:flex-row md:items-center">
         <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-2 text-base font-semibold text-white">
+          <ol className={newLocal}>
             {items.map((item, index) => {
               const isLast = index === items.length - 1
 
