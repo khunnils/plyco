@@ -5,7 +5,7 @@ import {
   type TemplateVariable,
   type TemplateVariableField,
 } from "@plyco/shared"
-import { Braces, Columns, Eye, FileCode, ListTree, Loader2, Save, Search } from "lucide-react"
+import { Braces, ChevronDown, ChevronRight, Columns, Eye, FileCode, ListTree, Loader2, Save, Search } from "lucide-react"
 import {
   useMemo,
   useEffect,
@@ -98,6 +98,14 @@ export const TemplateForm = ({
 
   const [isSchemaOpen, setIsSchemaOpen] = useState(true)
   const [editorMode, setEditorMode] = useState<"content" | "preview" | "compare">("compare")
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({})
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }))
+  }
 
   const gridColsClass = useMemo(() => {
     if (isSchemaOpen) {
@@ -263,7 +271,7 @@ export const TemplateForm = ({
         </div>
       </div>
 
-      <div className={`grid min-h-[620px] gap-4 ${gridColsClass}`}>
+      <div className={`grid h-[calc(100vh-385px)] min-h-[620px] gap-4 ${gridColsClass}`}>
         <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${!isSchemaOpen ? "hidden" : ""}`}>
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
@@ -292,87 +300,106 @@ export const TemplateForm = ({
             ) : (
               <div className="grid gap-4">
                 {Object.entries(variablesByCategory).map(
-                  ([category, variables]) => (
-                    <div className="grid gap-2" key={category}>
-                      <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                        {category}
-                      </h3>
-                      <div className="grid gap-2">
-                        {variables.map((variable) => {
-                          const snippet = variableSnippet(variable)
+                  ([category, variables]) => {
+                    const isCollapsed = collapsedCategories[category] ?? false
+                    return (
+                      <div className="grid gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0" key={category}>
+                        <button
+                          type="button"
+                          onClick={() => toggleCategory(category)}
+                          className="flex w-full items-center justify-between text-left hover:bg-slate-50 p-1.5 rounded transition cursor-pointer"
+                        >
+                          <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                            {category}
+                          </h3>
+                          {isCollapsed ? (
+                            <ChevronRight className="size-3.5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="size-3.5 text-slate-400" />
+                          )}
+                        </button>
+                        {!isCollapsed && (
+                          <div className="grid gap-2 mt-1">
+                            {variables.map((variable) => {
+                              const snippet = variableSnippet(variable)
 
-                          return (
-                            <div
-                              className="grid gap-2 rounded-md border border-slate-200 p-2"
-                              key={variable.key}
-                            >
-                              <button
-                                className="grid gap-1 text-left"
-                                draggable
-                                type="button"
-                                onClick={() => insertSnippet(snippet)}
-                                onDragStart={handleDragStart(snippet)}
-                              >
-                                <span className="flex items-start gap-2 text-sm font-medium text-slate-900">
-                                  <Braces className="mt-0.5 size-3.5 text-slate-400" />
-                                  {variable.label}
-                                </span>
-                                <span className="font-mono text-xs break-all text-slate-500">
-                                  {variable.key}
-                                </span>
-                              </button>
-                              {variable.type === "collection" &&
-                              variable.itemFields?.length ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {variable.itemFields
-                                    .filter(
-                                      (field) => field.type !== "collection"
-                                    )
-                                    .slice(0, 6)
-                                    .map((field) => {
-                                      const fieldSnippet = itemFieldSnippet(
-                                        variable,
-                                        field
-                                      )
+                              return (
+                                <div
+                                  className="grid gap-2 rounded-md border border-slate-200 p-2"
+                                  key={variable.key}
+                                >
+                                  <button
+                                    className="grid gap-1 text-left"
+                                    draggable
+                                    type="button"
+                                    onClick={() => insertSnippet(snippet)}
+                                    onDragStart={handleDragStart(snippet)}
+                                  >
+                                    <span className="flex items-start gap-2 text-sm font-medium text-slate-900">
+                                      <Braces className="mt-0.5 size-3.5 text-slate-400" />
+                                      {variable.label}
+                                    </span>
+                                    <span className="font-mono text-xs break-all text-slate-500">
+                                      {variable.key}
+                                    </span>
+                                  </button>
+                                  {variable.type === "collection" &&
+                                  variable.itemFields?.length ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {variable.itemFields
+                                        .filter(
+                                          (field) => field.type !== "collection"
+                                        )
+                                        .slice(0, 6)
+                                        .map((field) => {
+                                          const fieldSnippet = itemFieldSnippet(
+                                            variable,
+                                            field
+                                          )
 
-                                      return (
-                                        <button
-                                          className="rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                                          draggable
-                                          key={field.key}
-                                          type="button"
-                                          onClick={() =>
-                                            insertItemFieldSnippet(
-                                              variable,
-                                              field
-                                            )
-                                          }
-                                          onDragStart={handleDragStart(
-                                            fieldSnippet
-                                          )}
-                                        >
-                                          {field.label}
-                                        </button>
-                                      )
-                                    })}
+                                          return (
+                                            <button
+                                              className="rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                                              draggable
+                                              key={field.key}
+                                              type="button"
+                                              onClick={() =>
+                                                insertItemFieldSnippet(
+                                                  variable,
+                                                  field
+                                                )
+                                              }
+                                              onDragStart={handleDragStart(
+                                                fieldSnippet
+                                              )}
+                                            >
+                                              {field.label}
+                                            </button>
+                                          )
+                                        })}
+                                    </div>
+                                  ) : null}
                                 </div>
-                              ) : null}
-                            </div>
-                          )
-                        })}
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )
+                    )
+                  }
                 )}
               </div>
             )}
           </div>
         </section>
 
-        <label className={`grid min-h-0 grid-rows-[auto_1fr] gap-1 ${editorMode === "preview" ? "hidden" : ""}`}>
-          <span className="text-sm font-medium text-slate-700">Content</span>
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${editorMode === "preview" ? "hidden" : ""}`}>
+          <div className="flex items-center gap-2">
+            <FileCode className="size-4 text-slate-500" />
+            <h2 className="text-sm font-semibold text-slate-950">Content</h2>
+          </div>
           <textarea
-            className="min-h-80 resize-none rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="h-full w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 overflow-y-auto"
             ref={textareaRef}
             value={draft.content}
             onChange={(event) =>
@@ -384,7 +411,7 @@ export const TemplateForm = ({
             onDragOver={(event) => event.preventDefault()}
             onDrop={handleDrop}
           />
-        </label>
+        </section>
 
         <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${editorMode === "content" ? "hidden" : ""}`}>
           <div className="flex items-center justify-between gap-3">
