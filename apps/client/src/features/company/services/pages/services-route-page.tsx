@@ -93,121 +93,133 @@ const ServiceSelectorPage = ({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      {availableServices.map((service, index) => {
-        const serviceUses = service.id
-          ? serviceProviderUsage.filter(
-              (usage) => usage.serviceId === service.id
-            )
-          : []
-        const activityLabels = service.businessActivityIds
-          .map(
-            (activityId) =>
-              businessActivityOptions.find(
-                (option) => option.value === activityId
-              )?.label ?? activityId
-          )
-          .join(", ")
-        const url = service.serviceUrl?.trim()
-
-        return (
-          <Link
-            className="group grid min-h-72 grid-rows-[auto_1fr_auto] overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
-            key={service.id ?? `service-${index}`}
-            to={
-              service.id
-                ? `/company/services/${service.id}`
-                : "/company/services"
-            }
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-slate-950 p-5 text-white">
-              <div className="min-w-0">
-                <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-white/10 text-white">
-                  <Box className="size-5" />
-                </div>
-                <h2 className="truncate text-lg font-semibold">
-                  {service.serviceName?.trim() || `Service ${index + 1}`}
-                </h2>
-                {url ? (
-                  <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-sm text-slate-300">
-                    <Globe2 className="size-3.5 shrink-0" />
-                    <span className="truncate">{url}</span>
-                  </p>
-                ) : null}
-              </div>
-              <ArrowRight className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-white" />
-            </div>
-
-            <div className="grid gap-5 p-5">
-              <p className="line-clamp-3 text-sm leading-6 text-slate-600">
-                {service.serviceDescription?.trim() ||
-                  "No service description has been provided."}
-              </p>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <Layers3 className="size-3.5" />
-                    Activities
-                  </span>
-                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
-                    {activityLabels || "Not set"}
-                  </span>
-                </div>
-                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <Building2 className="size-3.5" />
-                    Audience
-                  </span>
-                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
-                    {codeValueList(
-                      vocabulary,
-                      "service_customer_types",
-                      service.customerTypes
-                    )}
-                  </span>
-                </div>
-                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <MapPin className="size-3.5" />
-                    Regions
-                  </span>
-                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
-                    {codeValueList(
-                      vocabulary,
-                      "regions",
-                      service.availabilityRegions
-                    )}
-                  </span>
-                </div>
-                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                    <RadioTower className="size-3.5" />
-                    Providers
-                  </span>
-                  <span className="text-sm font-medium text-slate-900">
-                    {serviceUses.length === 1
-                      ? "1 provider"
-                      : `${serviceUses.length} providers`}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-xs font-medium text-slate-500">
-              <span>
-                Cookies and tracking:{" "}
-                {service.privacy.usesCookiesOrTrackingTechnologies === null
-                  ? "Not answered"
-                  : service.privacy.usesCookiesOrTrackingTechnologies
-                    ? "Yes"
-                    : "No"}
-              </span>
-              <span className="text-slate-900">View service</span>
-            </div>
+    <div className="grid gap-5">
+      <div className="flex justify-end">
+        <Button asChild className="w-fit" type="button">
+          <Link to="/company/services/new">
+            <Plus />
+            Add service
           </Link>
-        )
-      })}
+        </Button>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {availableServices.map((service, index) => {
+          const serviceUses = service.id
+            ? serviceProviderUsage.filter(
+                (usage) => usage.serviceId === service.id
+              )
+            : []
+          const activityLabels = service.businessActivityIds
+            .map(
+              (activityId) =>
+                businessActivityOptions.find(
+                  (option) => option.value === activityId
+                )?.label ?? activityId
+            )
+            .join(", ")
+          const url = service.serviceUrl?.trim()
+
+          return (
+            <Link
+              className="group grid min-h-72 grid-rows-[auto_1fr_auto] overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+              key={service.id ?? `service-${index}`}
+              to={
+                service.id
+                  ? `/company/services/${service.id}`
+                  : "/company/services"
+              }
+            >
+              <div className="h-1 bg-primary" />
+              <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
+                <div className="min-w-0">
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-slate-100 text-slate-900">
+                    <Box className="size-5" />
+                  </div>
+                  <h2 className="truncate text-lg font-semibold text-slate-950">
+                    {service.serviceName?.trim() || `Service ${index + 1}`}
+                  </h2>
+                  {url ? (
+                    <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-sm text-slate-500">
+                      <Globe2 className="size-3.5 shrink-0" />
+                      <span className="truncate">{url}</span>
+                    </p>
+                  ) : null}
+                </div>
+                <ArrowRight className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-900" />
+              </div>
+
+              <div className="grid gap-5 p-5">
+                <p className="line-clamp-3 text-sm leading-6 text-slate-600">
+                  {service.serviceDescription?.trim() ||
+                    "No service description has been provided."}
+                </p>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <Layers3 className="size-3.5" />
+                      Activities
+                    </span>
+                    <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                      {activityLabels || "Not set"}
+                    </span>
+                  </div>
+                  <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <Building2 className="size-3.5" />
+                      Audience
+                    </span>
+                    <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                      {codeValueList(
+                        vocabulary,
+                        "service_customer_types",
+                        service.customerTypes
+                      )}
+                    </span>
+                  </div>
+                  <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <MapPin className="size-3.5" />
+                      Regions
+                    </span>
+                    <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                      {codeValueList(
+                        vocabulary,
+                        "regions",
+                        service.availabilityRegions
+                      )}
+                    </span>
+                  </div>
+                  <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <RadioTower className="size-3.5" />
+                      Providers
+                    </span>
+                    <span className="text-sm font-medium text-slate-900">
+                      {serviceUses.length === 1
+                        ? "1 provider"
+                        : `${serviceUses.length} providers`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-xs font-medium text-slate-500">
+                <span>
+                  Cookies and tracking:{" "}
+                  {service.privacy.usesCookiesOrTrackingTechnologies === null
+                    ? "Not answered"
+                    : service.privacy.usesCookiesOrTrackingTechnologies
+                      ? "Yes"
+                      : "No"}
+                </span>
+                <span className="text-slate-900">View service</span>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -271,20 +283,7 @@ export const ServicesRoutePage = () => {
         breadcrumbs={breadcrumbs}
         eyebrow="Company"
         title={activeCompanyTitle}
-      >
-        {!serviceId ? (
-          <Button
-            asChild
-            className="w-fit border-white bg-white text-primary hover:bg-white/90"
-            type="button"
-          >
-            <Link to="/company/services/new">
-              <Plus />
-              Add service
-            </Link>
-          </Button>
-        ) : null}
-      </PageHeader>
+      />
 
       {!serviceId ? (
         <ServiceSelectorPage

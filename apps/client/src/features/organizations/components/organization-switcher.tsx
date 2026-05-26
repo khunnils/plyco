@@ -82,10 +82,7 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
           setOpen((current) => !current)
         }}
       >
-        <span className="flex min-w-0 items-center gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-50">
-            <Building2 className="size-4" />
-          </span>
+        <span className="flex min-w-0 items-center">          
           <span className="grid min-w-0 gap-0.5">
             <span className="truncate text-sm font-semibold">
               {selectedOrganization?.name}
