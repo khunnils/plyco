@@ -6,27 +6,27 @@ import {
   type Vocabulary,
   type VocabularyCode,
   type VocabularyCodeInput,
-} from "@plyco/shared"
-import { prisma, type PrismaClient } from "@plyco/db"
+} from "@plyco/shared";
+import { prisma, type PrismaClient } from "@plyco/db";
 
-import { countries } from "./reference-data.js"
-import { type VocabularyRepository } from "./repository.js"
+import { countries } from "./reference-data.js";
+import { type VocabularyRepository } from "./repository.js";
 
 export class PrismaVocabularyRepository implements VocabularyRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
 
   async listCountries(): Promise<Country[]> {
-    await this.seedCountries()
+    await this.seedCountries();
     const records = await this.client.country.findMany({
       where: { active: true },
       orderBy: { name: "asc" },
-    })
+    });
 
-    return records.map((record) => countrySchema.parse(record))
+    return records.map((record) => countrySchema.parse(record));
   }
 
   async listVocabulary(organizationId: string): Promise<Vocabulary> {
-    await this.cloneOrganizationVocabulary(organizationId)
+    await this.cloneOrganizationVocabulary(organizationId);
     const [systemCodeSets, organizationCodeSets] = await Promise.all([
       this.client.systemCodeSet.findMany({
         where: { isSystem: true },
@@ -38,11 +38,14 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       this.client.organizationCodeSet.findMany({
         where: { organizationId },
         include: {
-          codes: { orderBy: [{ sortOrder: "asc" }, { name: "asc" }] },
+          codes: {
+            where: { deletedAt: null },
+            orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+          },
         },
         orderBy: { name: "asc" },
       }),
-    ])
+    ]);
 
     return {
       codeSets: [
@@ -85,7 +88,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
           }),
         ),
       ],
-    }
+    };
   }
 
   async cloneOrganizationVocabulary(organizationId: string): Promise<void> {
@@ -94,7 +97,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       include: {
         codes: { orderBy: [{ sortOrder: "asc" }, { name: "asc" }] },
       },
-    })
+    });
 
     const existingCodeSets = await this.client.organizationCodeSet.findMany({
       where: { organizationId },
@@ -103,15 +106,15 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         systemCodeSetId: true,
         codes: { select: { codeId: true } },
       },
-    })
+    });
     const existingBySystemId = new Map(
       existingCodeSets.map((record) => [record.systemCodeSetId, record]),
-    )
+    );
 
     await this.client.$transaction(async (tx) => {
       for (const codeSet of systemCodeSets) {
-        const existingCodeSet = existingBySystemId.get(codeSet.id)
-        let organizationCodeSetId = existingCodeSet?.id
+        const existingCodeSet = existingBySystemId.get(codeSet.id);
+        let organizationCodeSetId = existingCodeSet?.id;
 
         if (!organizationCodeSetId) {
           const created = await tx.organizationCodeSet.create({
@@ -130,22 +133,22 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
                 })),
               },
             },
-          })
-          organizationCodeSetId = created.id
+          });
+          organizationCodeSetId = created.id;
           existingBySystemId.set(codeSet.id, {
             id: organizationCodeSetId,
             systemCodeSetId: codeSet.id,
             codes: codeSet.codes.map((code) => ({ codeId: code.codeId })),
-          })
-          continue
+          });
+          continue;
         }
 
         const existingCodeIds = new Set(
           (existingCodeSet?.codes ?? []).map((code) => code.codeId),
-        )
+        );
         const missingCodes = codeSet.codes.filter(
           (code) => !existingCodeIds.has(code.codeId),
-        )
+        );
 
         if (missingCodes.length > 0) {
           await tx.organizationCode.createMany({
@@ -157,10 +160,10 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
               sortOrder: code.sortOrder,
               active: code.active,
             })),
-          })
+          });
         }
       }
-    })
+    });
   }
 
   async createOrganizationCode(
@@ -168,15 +171,24 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     input: VocabularyCodeInput,
   ): Promise<VocabularyCode | null> {
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
 
     if (!codeSet) {
-      return null
+      return null;
+    }
+
+    const existing = await this.client.organizationCode.findFirst({
+      where: { organizationCodeSetId: codeSet.id, codeId: input.codeId },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return null;
     }
 
     const count = await this.client.organizationCode.count({
       where: { organizationCodeSetId: codeSet.id },
-    })
+    });
     const code = await this.client.organizationCode.create({
       data: {
         organizationCodeSetId: codeSet.id,
@@ -185,7 +197,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         active: input.active,
         sortOrder: count,
       },
-    })
+    });
 
     return vocabularyCodeSchema.parse({
       id: code.id,
@@ -194,7 +206,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       sortOrder: code.sortOrder,
       active: code.active,
       isSystem: false,
-    })
+    });
   }
 
   async updateOrganizationCode(
@@ -203,18 +215,29 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
     codeId: string,
     input: VocabularyCodeInput,
   ): Promise<VocabularyCode | null> {
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
 
     if (!codeSet) {
-      return null
+      return null;
     }
 
     const current = await this.client.organizationCode.findFirst({
-      where: { organizationCodeSetId: codeSet.id, codeId },
-    })
+      where: { organizationCodeSetId: codeSet.id, codeId, deletedAt: null },
+    });
 
     if (!current) {
-      return null
+      return null;
+    }
+
+    if (input.codeId !== codeId) {
+      const duplicate = await this.client.organizationCode.findFirst({
+        where: { organizationCodeSetId: codeSet.id, codeId: input.codeId },
+        select: { id: true },
+      });
+
+      if (duplicate) {
+        return null;
+      }
     }
 
     const code = await this.client.organizationCode.update({
@@ -224,7 +247,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         name: input.name,
         active: input.active,
       },
-    })
+    });
 
     return vocabularyCodeSchema.parse({
       id: code.id,
@@ -233,7 +256,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       sortOrder: code.sortOrder,
       active: code.active,
       isSystem: false,
-    })
+    });
   }
 
   async deleteOrganizationCode(
@@ -241,23 +264,26 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     codeId: string,
   ): Promise<boolean> {
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
 
     if (!codeSet) {
-      return false
+      return false;
     }
 
     const code = await this.client.organizationCode.findFirst({
-      where: { organizationCodeSetId: codeSet.id, codeId },
+      where: { organizationCodeSetId: codeSet.id, codeId, deletedAt: null },
       select: { id: true },
-    })
+    });
 
     if (!code) {
-      return false
+      return false;
     }
 
-    await this.client.organizationCode.delete({ where: { id: code.id } })
-    return true
+    await this.client.organizationCode.update({
+      where: { id: code.id },
+      data: { deletedAt: new Date() },
+    });
+    return true;
   }
 
   async codeExists(
@@ -266,38 +292,39 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
     codeId: string,
   ): Promise<boolean> {
     if (codeId === "none") {
-      return true
+      return true;
     }
 
     const systemCode = await this.client.systemCode.findFirst({
       where: { codeSetId, codeId, active: true, codeSet: { isSystem: true } },
       select: { id: true },
-    })
+    });
 
     if (systemCode) {
-      return true
+      return true;
     }
 
     const organizationCode = await this.client.organizationCode.findFirst({
       where: {
         codeId,
         active: true,
+        deletedAt: null,
         organizationCodeSet: { organizationId, systemCodeSetId: codeSetId },
       },
       select: { id: true },
-    })
+    });
 
-    return Boolean(organizationCode)
+    return Boolean(organizationCode);
   }
 
   async countryExists(code: string): Promise<boolean> {
-    await this.seedCountries()
+    await this.seedCountries();
     const country = await this.client.country.findUnique({
       where: { code },
       select: { active: true },
-    })
+    });
 
-    return country?.active ?? false
+    return country?.active ?? false;
   }
 
   private async seedCountries() {
@@ -309,11 +336,11 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
           update: { name: country.name, active: country.active },
         }),
       ),
-    )
+    );
   }
 
   private async organizationCodeSet(organizationId: string, codeSetId: string) {
-    await this.cloneOrganizationVocabulary(organizationId)
+    await this.cloneOrganizationVocabulary(organizationId);
     return this.client.organizationCodeSet.findUnique({
       where: {
         organizationId_systemCodeSetId: {
@@ -322,6 +349,6 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         },
       },
       select: { id: true },
-    })
+    });
   }
 }

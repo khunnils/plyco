@@ -1,4 +1,4 @@
-import { Building2, Check, ChevronDown, Plus, X } from "lucide-react"
+import { Check, ChevronDown, Plus, X } from "lucide-react"
 import { type AuthUser } from "@plyco/shared"
 import { useEffect, useRef, useState } from "react"
 
@@ -73,7 +73,7 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
   return (
     <div ref={containerRef} className="relative">
       <Button
-        className="h-auto w-full gap-2 py-2 justify-between text-left text-slate-600 hover:bg-slate-50"
+        className="h-auto w-full justify-between gap-2 py-2 text-left text-slate-600 hover:bg-slate-50"
         type="button"
         variant="ghost"
         aria-expanded={open}
@@ -82,14 +82,12 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
           setOpen((current) => !current)
         }}
       >
-        <span className="flex min-w-0 items-center">          
+        <span className="flex min-w-0 items-center">
           <span className="grid min-w-0 gap-0.5">
             <span className="truncate text-sm font-semibold">
               {selectedOrganization?.name}
             </span>
-            <span className="text-xs font-medium">
-              All workspace data
-            </span>
+            <span className="text-xs font-medium">All workspace data</span>
           </span>
         </span>
         <ChevronDown className="size-4 shrink-0" />

@@ -1458,6 +1458,72 @@ describe("security profile API", () => {
     });
 
     expect(deleteResponse.statusCode).toBe(204);
+
+    const deleteSystemDerivedResponse = await app.inject({
+      method: "DELETE",
+      url: "/organizations/org-test/vocabulary/industries/codes/edtech",
+    });
+
+    expect(deleteSystemDerivedResponse.statusCode).toBe(204);
+
+    const vocabularyAfterDeleteResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/vocabulary",
+    });
+    const industriesAfterDelete = vocabularyAfterDeleteResponse
+      .json()
+      .codeSets.find(
+        (codeSet: { codeSetId: string }) => codeSet.codeSetId === "industries",
+      );
+
+    expect(vocabularyAfterDeleteResponse.statusCode).toBe(200);
+    expect(
+      industriesAfterDelete.codes.map(
+        (code: { codeId: string }) => code.codeId,
+      ),
+    ).not.toContain("edtech");
+
+    const vocabularyAfterBackfillResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/vocabulary",
+    });
+    const industriesAfterBackfill = vocabularyAfterBackfillResponse
+      .json()
+      .codeSets.find(
+        (codeSet: { codeSetId: string }) => codeSet.codeSetId === "industries",
+      );
+
+    expect(
+      industriesAfterBackfill.codes.map(
+        (code: { codeId: string }) => code.codeId,
+      ),
+    ).not.toContain("edtech");
+
+    const recreateDeletedResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/vocabulary/industries/codes",
+      payload: {
+        codeId: "edtech",
+        name: "EdTech",
+        active: true,
+      },
+    });
+
+    expect(recreateDeletedResponse.statusCode).toBe(404);
+
+    const saveDeletedCodeResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        company: {
+          ...profileBody.company,
+          industries: ["edtech"],
+        },
+      },
+    });
+
+    expect(saveDeletedCodeResponse.statusCode).toBe(400);
   });
 
   it("rejects unknown controlled codes and countries", async () => {

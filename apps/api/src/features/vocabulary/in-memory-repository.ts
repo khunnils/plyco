@@ -5,43 +5,58 @@ import {
   type VocabularyCode,
   type VocabularyCodeSet,
   type VocabularyCodeInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
-import {
-  countries,
-  defaultVocabularyCodeSets,
-} from "./reference-data.js"
-import { type VocabularyRepository } from "./repository.js"
+import { countries, defaultVocabularyCodeSets } from "./reference-data.js";
+import { type VocabularyRepository } from "./repository.js";
 
 export class InMemoryVocabularyRepository implements VocabularyRepository {
   private readonly countriesByCode = new Map(
     countries.map((country) => [country.code, country]),
-  )
+  );
   private readonly systemCodeSets = new Map(
     defaultVocabularyCodeSets
       .filter((codeSet) => codeSet.isSystem)
       .map((codeSet) => [codeSet.codeSetId, codeSet]),
-  )
-  private readonly organizationCodeSets = new Map<string, VocabularyCodeSet[]>()
+  );
+  private readonly organizationCodeSets = new Map<
+    string,
+    VocabularyCodeSet[]
+  >();
+  private readonly deletedOrganizationCodes = new Set<string>();
 
   async listCountries(): Promise<Country[]> {
-    return Array.from(this.countriesByCode.values())
+    return Array.from(this.countriesByCode.values());
   }
 
   async listVocabulary(organizationId: string): Promise<Vocabulary> {
-    await this.cloneOrganizationVocabulary(organizationId)
+    await this.cloneOrganizationVocabulary(organizationId);
 
     return {
       codeSets: [
         ...Array.from(this.systemCodeSets.values()),
-        ...(this.organizationCodeSets.get(organizationId) ?? []),
+        ...(this.organizationCodeSets.get(organizationId) ?? []).map(
+          (codeSet) => ({
+            ...codeSet,
+            codes: codeSet.codes.filter(
+              (code) =>
+                !this.deletedOrganizationCodes.has(
+                  this.organizationCodeKey(
+                    organizationId,
+                    codeSet.codeSetId,
+                    code.codeId,
+                  ),
+                ),
+            ),
+          }),
+        ),
       ],
-    }
+    };
   }
 
   async cloneOrganizationVocabulary(organizationId: string): Promise<void> {
     if (this.organizationCodeSets.has(organizationId)) {
-      return
+      return;
     }
 
     this.organizationCodeSets.set(
@@ -58,7 +73,7 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
             isSystem: false,
           })),
         })),
-    )
+    );
   }
 
   async createOrganizationCode(
@@ -66,11 +81,14 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     input: VocabularyCodeInput,
   ): Promise<VocabularyCode | null> {
-    const parsed = vocabularyCodeInputSchema.parse(input)
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
+    const parsed = vocabularyCodeInputSchema.parse(input);
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
 
-    if (!codeSet || codeSet.codes.some((code) => code.codeId === parsed.codeId)) {
-      return null
+    if (
+      !codeSet ||
+      codeSet.codes.some((code) => code.codeId === parsed.codeId)
+    ) {
+      return null;
     }
 
     const code: VocabularyCode = {
@@ -80,10 +98,10 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
       sortOrder: codeSet.codes.length,
       active: parsed.active,
       isSystem: false,
-    }
+    };
 
-    codeSet.codes.push(code)
-    return code
+    codeSet.codes.push(code);
+    return code;
   }
 
   async updateOrganizationCode(
@@ -92,25 +110,31 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
     codeId: string,
     input: VocabularyCodeInput,
   ): Promise<VocabularyCode | null> {
-    const parsed = vocabularyCodeInputSchema.parse(input)
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
-    const code = codeSet?.codes.find((current) => current.codeId === codeId)
+    const parsed = vocabularyCodeInputSchema.parse(input);
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
+    const code = codeSet?.codes.find(
+      (current) =>
+        current.codeId === codeId &&
+        !this.deletedOrganizationCodes.has(
+          this.organizationCodeKey(organizationId, codeSetId, current.codeId),
+        ),
+    );
 
     if (!codeSet || !code) {
-      return null
+      return null;
     }
 
     if (
       parsed.codeId !== codeId &&
       codeSet.codes.some((current) => current.codeId === parsed.codeId)
     ) {
-      return null
+      return null;
     }
 
-    code.codeId = parsed.codeId
-    code.name = parsed.name
-    code.active = parsed.active
-    return code
+    code.codeId = parsed.codeId;
+    code.name = parsed.name;
+    code.active = parsed.active;
+    return code;
   }
 
   async deleteOrganizationCode(
@@ -118,15 +142,28 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
     codeSetId: string,
     codeId: string,
   ): Promise<boolean> {
-    const codeSet = await this.organizationCodeSet(organizationId, codeSetId)
+    const codeSet = await this.organizationCodeSet(organizationId, codeSetId);
 
     if (!codeSet) {
-      return false
+      return false;
     }
 
-    const originalLength = codeSet.codes.length
-    codeSet.codes = codeSet.codes.filter((code) => code.codeId !== codeId)
-    return codeSet.codes.length !== originalLength
+    const code = codeSet.codes.find(
+      (current) =>
+        current.codeId === codeId &&
+        !this.deletedOrganizationCodes.has(
+          this.organizationCodeKey(organizationId, codeSetId, current.codeId),
+        ),
+    );
+
+    if (!code) {
+      return false;
+    }
+
+    this.deletedOrganizationCodes.add(
+      this.organizationCodeKey(organizationId, codeSetId, code.codeId),
+    );
+    return true;
   }
 
   async codeExists(
@@ -135,26 +172,33 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
     codeId: string,
   ): Promise<boolean> {
     if (codeId === "none") {
-      return true
+      return true;
     }
 
-    const vocabulary = await this.listVocabulary(organizationId)
-    return vocabulary.codeSets
-      .find((codeSet) => codeSet.codeSetId === codeSetId)
-      ?.codes.some((code) => code.codeId === codeId && code.active) ?? false
+    const vocabulary = await this.listVocabulary(organizationId);
+    return (
+      vocabulary.codeSets
+        .find((codeSet) => codeSet.codeSetId === codeSetId)
+        ?.codes.some((code) => code.codeId === codeId && code.active) ?? false
+    );
   }
 
   async countryExists(code: string): Promise<boolean> {
-    return this.countriesByCode.has(code)
+    return this.countriesByCode.has(code);
   }
 
-  private async organizationCodeSet(
-    organizationId: string,
-    codeSetId: string,
-  ) {
-    await this.cloneOrganizationVocabulary(organizationId)
+  private async organizationCodeSet(organizationId: string, codeSetId: string) {
+    await this.cloneOrganizationVocabulary(organizationId);
     return this.organizationCodeSets
       .get(organizationId)
-      ?.find((codeSet) => codeSet.codeSetId === codeSetId)
+      ?.find((codeSet) => codeSet.codeSetId === codeSetId);
+  }
+
+  private organizationCodeKey(
+    organizationId: string,
+    codeSetId: string,
+    codeId: string,
+  ) {
+    return `${organizationId}:${codeSetId}:${codeId}`;
   }
 }
