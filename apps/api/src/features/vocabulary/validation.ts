@@ -387,13 +387,6 @@ export const validateServiceProfileCodes = async (
           `${fieldPrefix}.privacy.primaryHostingRegion`,
         )
       : Promise.resolve(),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "regions",
-      service.privacy.dataResidencyOptions,
-      `${fieldPrefix}.privacy.dataResidencyOptions`,
-    ),
   ]);
 };
 

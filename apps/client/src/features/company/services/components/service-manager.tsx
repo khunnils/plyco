@@ -348,7 +348,7 @@ const ServiceAudiencePanel = ({
               ),
             ],
             [
-              "Availability regions",
+              "Available regions",
               codeValueList(vocabulary, "regions", service.availabilityRegions),
             ],
             ["Directed to children", boolText(service.childrenDirected)],
@@ -588,7 +588,7 @@ const ServiceHostingPanel = ({
 
   return (
     <ProfilePanelShell
-      description="Hosting regions and data residency options for this service."
+      description="Primary hosting region for this service."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={
@@ -604,19 +604,11 @@ const ServiceHostingPanel = ({
                   )
                 : "Not set",
             ],
-            [
-              "Data residency options",
-              codeValueList(
-                vocabulary,
-                "regions",
-                service.privacy.dataResidencyOptions
-              ),
-            ],
           ]}
         />
       }
       saveLabel="Save"
-      title="Hosting & Data Residency"
+      title="Service Hosting"
       onCancel={() => {
         form.reset(draft)
         setIsEditing(false)
@@ -631,14 +623,6 @@ const ServiceHostingPanel = ({
           name={privacyPath("primaryHostingRegion")}
           options={[{ value: "", label: "Not set" }, ...regionOptions]}
           placeholder="Not set"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.privacy?.dataResidencyOptions?.root}
-          label="Data residency options"
-          name={privacyPath("dataResidencyOptions")}
-          options={regionOptions}
-          placeholder="Select data residency options"
         />
       </div>
     </ProfilePanelShell>
@@ -1173,7 +1157,7 @@ export const ServiceManager = ({
       </div>
 
       {activeTab === "details" ? (
-        <div className="grid gap-5">
+        <div className="grid gap-10">
           <ServiceBasicsPanel
             isMutationPending={isProfileMutationPending}
             service={selectedService}

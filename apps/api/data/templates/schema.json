@@ -277,8 +277,7 @@
             "globalPrivacyControlSupported": true,
             "analyticsProviders": ["Google Analytics"],
             "advertisingProviders": ["Google Ads"],
-            "primaryHostingRegion": "us",
-            "dataResidencyOptions": ["us", "eu"]
+            "primaryHostingRegion": "us"
           },
           "vendors": [
             {
@@ -475,20 +474,6 @@
           "type": "string",
           "description": "Human-readable primary hosting region for this service.",
           "example": "United States"
-        },
-        {
-          "key": "privacy.dataResidencyOptions",
-          "label": "Data residency options",
-          "type": "string[]",
-          "description": "Region codes available for service data residency.",
-          "example": ["us", "eu"]
-        },
-        {
-          "key": "privacy.dataResidencyOptionLabels",
-          "label": "Data residency option labels",
-          "type": "string[]",
-          "description": "Human-readable data residency labels for this service.",
-          "example": ["United States", "European Union"]
         },
         {
           "key": "vendors",

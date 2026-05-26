@@ -207,17 +207,6 @@ export const ServiceProfileFields = ({
               options={[{ value: "", label: "Not set" }, ...regionOptions]}
               placeholder="Not set"
             />
-            <MultiSelectField
-              control={form.control}
-              error={
-                form.formState.errors.services?.[index]?.privacy
-                  ?.dataResidencyOptions?.root
-              }
-              label="Data residency options"
-              name={servicePrivacyPath(index, "dataResidencyOptions")}
-              options={regionOptions}
-              placeholder="Select data residency options"
-            />
           </div>
         </div>
       ))}

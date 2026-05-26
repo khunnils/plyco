@@ -177,7 +177,6 @@ export const servicePrivacyProfileSchema = z.object({
   doNotTrackResponse: nullableBooleanSchema,
   globalPrivacyControlSupported: nullableBooleanSchema,
   primaryHostingRegion: nullableCodeIdSchema,
-  dataResidencyOptions: nullableCodeIdArraySchema,
 });
 
 export const serviceProfileInputSchema = z.object({
@@ -590,7 +589,6 @@ export const emptyServiceProfile: ServiceProfileInput = {
     doNotTrackResponse: null,
     globalPrivacyControlSupported: null,
     primaryHostingRegion: null,
-    dataResidencyOptions: null,
   },
 };
 

@@ -170,7 +170,6 @@ model ServiceProfile {
   doNotTrackResponse                Boolean?                  @map("do_not_track_response")
   globalPrivacyControlSupported     Boolean?                  @map("global_privacy_control_supported")
   primaryHostingRegion              String?                   @map("primary_hosting_region")
-  dataResidencyOptions              Json?                     @map("data_residency_options")
   createdAt                         DateTime                  @default(now()) @map("created_at")
   updatedAt                         DateTime                  @updatedAt @map("updated_at")
 

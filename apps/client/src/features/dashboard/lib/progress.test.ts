@@ -48,7 +48,6 @@ describe("dashboard progress", () => {
           doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: "us",
-          dataResidencyOptions: ["us"],
         },
       },
       []
@@ -60,7 +59,7 @@ describe("dashboard progress", () => {
       (section) => section.title === "Cookie Preferences"
     )
     const hosting = progress.sections.find(
-      (section) => section.title === "Hosting & Data Residency"
+      (section) => section.title === "Service Hosting"
     )
 
     expect(audience).toMatchObject({
@@ -72,8 +71,8 @@ describe("dashboard progress", () => {
       totalFields: 1,
     })
     expect(hosting).toMatchObject({
-      completedFields: 2,
-      totalFields: 2,
+      completedFields: 1,
+      totalFields: 1,
     })
   })
 

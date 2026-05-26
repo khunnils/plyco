@@ -34,7 +34,6 @@ const serviceBody = {
     doNotTrackResponse: false,
     globalPrivacyControlSupported: true,
     primaryHostingRegion: "us",
-    dataResidencyOptions: ["us", "eu"],
   },
 };
 
@@ -769,7 +768,7 @@ describe("security profile API", () => {
       },
     });
 
-    const invalidResidencyResponse = await app.inject({
+    const invalidHostingRegionResponse = await app.inject({
       method: "PUT",
       url: "/organizations/org-test/security-profile",
       payload: {
@@ -779,20 +778,20 @@ describe("security profile API", () => {
             ...serviceBody,
             privacy: {
               ...serviceBody.privacy,
-              dataResidencyOptions: ["antarctica"],
+              primaryHostingRegion: "antarctica",
             },
           },
         ],
       },
     });
 
-    expect(invalidResidencyResponse.statusCode).toBe(400);
-    expect(invalidResidencyResponse.json()).toMatchObject({
+    expect(invalidHostingRegionResponse.statusCode).toBe(400);
+    expect(invalidHostingRegionResponse.json()).toMatchObject({
       error: {
         code: "CODE_NOT_FOUND",
         details: {
           codeSetId: "regions",
-          field: "services.0.privacy.dataResidencyOptions",
+          field: "services.0.privacy.primaryHostingRegion",
           value: "antarctica",
         },
       },
@@ -1140,8 +1139,6 @@ describe("security profile API", () => {
         advertisingProviderIds: [],
         primaryHostingRegion: "us",
         primaryHostingRegionLabel: "United States",
-        dataResidencyOptions: ["us", "eu"],
-        dataResidencyOptionLabels: ["United States", "European Union"],
       },
     });
     expect(context.services.primary).toMatchObject(context.service);
@@ -1709,7 +1706,7 @@ describe("security profile API", () => {
             ...serviceBody,
             privacy: {
               ...serviceBody.privacy,
-              dataResidencyOptions: ["eu"],
+              primaryHostingRegion: "eu",
             },
           },
         ],

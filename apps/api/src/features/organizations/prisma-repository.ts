@@ -224,7 +224,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       globalPrivacyControlSupported:
         input.privacy.globalPrivacyControlSupported,
       primaryHostingRegion: input.privacy.primaryHostingRegion,
-      dataResidencyOptions: jsonValue(input.privacy.dataResidencyOptions),
     };
   }
 

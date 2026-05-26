@@ -112,7 +112,7 @@ Fields:
 
 ### Service Profiles
 
-The workspace supports multiple product or service profiles per organization. Services are selected from an expandable Services group in the app sidebar and edited one service at a time from the Company workspace navigation. The selected service is organized into editable panels for basics, audience and availability, service privacy, and vendors. New services start with only basic details before users fill out the remaining service panels. Services are not part of onboarding. Service-specific cookie, tracking, hosting, data-residency, and vendor-use details live on each service. Organization-level profile sections such as shared Privacy rights, Infrastructure, Data Handling, and Access stay shared across services.
+The workspace supports multiple product or service profiles per organization. Services are selected from an expandable Services group in the app sidebar and edited one service at a time from the Company workspace navigation. The selected service is organized into editable panels for basics, audience and availability, service privacy, and vendors. New services start with only basic details before users fill out the remaining service panels. Services are not part of onboarding. Service-specific cookie, tracking, hosting, and vendor-use details live on each service. Organization-level profile sections such as shared Privacy rights, Infrastructure, Data Handling, and Access stay shared across services.
 
 Fields:
 
@@ -133,7 +133,6 @@ Fields:
 - analytics providers selected from provider catalog entries tagged as `analytics`
 - advertising providers selected from provider catalog entries tagged as `advertising`
 - primary hosting region
-- data residency options
 
 ### Privacy Profile
 

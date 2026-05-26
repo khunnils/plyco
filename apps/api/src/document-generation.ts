@@ -260,12 +260,6 @@ export class ReportContextBuilder {
               service.privacy.primaryHostingRegion,
             ])[0]
           : "",
-        dataResidencyOptions: service.privacy.dataResidencyOptions,
-        dataResidencyOptionLabels: this.codeLabels(
-          vocabulary,
-          "regions",
-          service.privacy.dataResidencyOptions,
-        ),
         ...this.answerFlags(service.privacy),
       },
       providerUsage: serviceProviderUsage,

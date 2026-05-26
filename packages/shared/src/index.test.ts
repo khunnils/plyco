@@ -246,7 +246,6 @@ describe("shared security profile schemas", () => {
           doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
-          dataResidencyOptions: null,
         },
       });
     }
@@ -270,7 +269,6 @@ describe("shared security profile schemas", () => {
         doNotTrackResponse: false,
         globalPrivacyControlSupported: true,
         primaryHostingRegion: "us",
-        dataResidencyOptions: ["us", "eu"],
       },
     });
 
@@ -532,22 +530,13 @@ describe("shared security profile schemas", () => {
     ).toBe(false);
   });
 
-  it("rejects service privacy residency values that violate the code id format", () => {
+  it("rejects service privacy hosting region values that violate the code id format", () => {
     expect(
       serviceProfileInputSchema.safeParse({
         ...emptyServiceProfile,
         privacy: {
           ...emptyServiceProfile.privacy,
           primaryHostingRegion: "United States",
-        },
-      }).success,
-    ).toBe(false);
-    expect(
-      serviceProfileInputSchema.safeParse({
-        ...emptyServiceProfile,
-        privacy: {
-          ...emptyServiceProfile.privacy,
-          dataResidencyOptions: ["European Union"],
         },
       }).success,
     ).toBe(false);

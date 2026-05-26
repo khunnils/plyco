@@ -437,9 +437,8 @@ export const serviceProgress = (
             ]
           : []),
       ]),
-      sectionProgress("Hosting & Data Residency", [
+      sectionProgress("Service Hosting", [
         field("Primary hosting region", service.privacy.primaryHostingRegion),
-        field("Data residency options", service.privacy.dataResidencyOptions),
       ]),
       sectionProgress("Providers", [
         field("Selected providers", selectedServiceUses),

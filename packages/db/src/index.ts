@@ -63,7 +63,6 @@ export function mapOrganizationRecord(record: {
     doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
-    dataResidencyOptions: unknown;
     businessActivities?: Array<{
       businessActivityId: string;
     }>;
@@ -86,7 +85,6 @@ export function mapOrganizationRecord(record: {
     doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
-    dataResidencyOptions: unknown;
     businessActivities?: Array<{
       businessActivityId: string;
     }>;
@@ -291,7 +289,6 @@ export function mapOrganizationRecord(record: {
               globalPrivacyControlSupported:
                 service.globalPrivacyControlSupported,
               primaryHostingRegion: service.primaryHostingRegion,
-              dataResidencyOptions: stringArray(service.dataResidencyOptions),
             },
             createdAt: toIsoString(service.createdAt),
             updatedAt: toIsoString(service.updatedAt),
