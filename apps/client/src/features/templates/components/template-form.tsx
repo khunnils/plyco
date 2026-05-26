@@ -5,7 +5,7 @@ import {
   type TemplateVariable,
   type TemplateVariableField,
 } from "@plyco/shared"
-import { Braces, Eye, ListTree, Loader2, Save, Search } from "lucide-react"
+import { Braces, Columns, Eye, FileCode, ListTree, Loader2, Save, Search } from "lucide-react"
 import {
   useMemo,
   useEffect,
@@ -14,12 +14,13 @@ import {
   type DragEvent,
   type FormEvent,
 } from "react"
+import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/ui/button"
 import {
   useTemplatePreview,
   useTemplateVariableCatalog,
-} from "@/features/templates/hooks/use-templates"
+} from "../hooks/use-templates"
 import {
   isCursorInsideCollectionLoop,
   itemFieldPlaceholderSnippet,
@@ -76,7 +77,7 @@ export const TemplateForm = ({
       return variables
     }
 
-    return variables.filter((variable) =>
+    return variables.filter((variable: TemplateVariable) =>
       [
         variable.key,
         variable.label,
@@ -93,6 +94,29 @@ export const TemplateForm = ({
     [filteredVariables]
   )
   const previewContent = preview.data?.renderedContent ?? ""
+
+  const [isSchemaOpen, setIsSchemaOpen] = useState(true)
+  const [editorMode, setEditorMode] = useState<"content" | "preview" | "compare">("compare")
+
+  const gridColsClass = useMemo(() => {
+    if (isSchemaOpen) {
+      if (editorMode === "compare") {
+        return "xl:grid-cols-[280px_minmax(0,1fr)_minmax(320px,0.9fr)]"
+      } else {
+        return "xl:grid-cols-[280px_1fr]"
+      }
+    } else {
+      if (editorMode === "compare") {
+        return "xl:grid-cols-[1fr_1fr]"
+      } else {
+        return "xl:grid-cols-1"
+      }
+    }
+  }, [isSchemaOpen, editorMode])
+
+  const markdownStyles = useMemo(() => {
+    return "prose-custom [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4 [&_h1]:text-slate-900 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-5 [&_h2]:mb-3 [&_h2]:text-slate-900 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_h3]:text-slate-900 [&_p]:mb-4 [&_p]:leading-relaxed [&_p]:text-slate-800 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_li]:mb-1 [&_strong]:font-bold [&_strong]:text-slate-950 [&_em]:italic [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:my-4 [&_code]:font-mono [&_code]:text-xs [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-slate-900 [&_pre]:bg-slate-900 [&_pre]:text-slate-100 [&_pre]:p-4 [&_pre]:rounded-md [&_pre]:overflow-x-auto [&_pre]:my-4 [&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0 [&_hr]:my-6 [&_hr]:border-slate-200"
+  }, [])
 
   const insertSnippet = (snippet: string) => {
     const textarea = textareaRef.current
@@ -183,8 +207,63 @@ export const TemplateForm = ({
         </label>
       </div>
 
-      <div className="grid min-h-[620px] gap-4 xl:grid-cols-[280px_minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <section className="grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border border-slate-200 bg-slate-50 p-2 rounded-md">
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant={isSchemaOpen ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setIsSchemaOpen((prev) => !prev)}
+            className="gap-1.5"
+            title={isSchemaOpen ? "Collapse Schema" : "Expand Schema"}
+          >
+            <ListTree className="size-4" />
+            <span>{isSchemaOpen ? "Hide Schema" : "Show Schema"}</span>
+          </Button>
+        </div>
+
+        <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-xs">
+          <button
+            type="button"
+            onClick={() => setEditorMode("content")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+              editorMode === "content"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <FileCode className="size-3.5" />
+            Content
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditorMode("preview")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+              editorMode === "preview"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <Eye className="size-3.5" />
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditorMode("compare")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+              editorMode === "compare"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+            }`}
+          >
+            <Columns className="size-3.5" />
+            Compare
+          </button>
+        </div>
+      </div>
+
+      <div className={`grid min-h-[620px] gap-4 ${gridColsClass}`}>
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${!isSchemaOpen ? "hidden" : ""}`}>
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
               <ListTree className="size-4 text-slate-500" />
@@ -289,7 +368,7 @@ export const TemplateForm = ({
           </div>
         </section>
 
-        <label className="grid min-h-0 grid-rows-[auto_1fr] gap-1">
+        <label className={`grid min-h-0 grid-rows-[auto_1fr] gap-1 ${editorMode === "preview" ? "hidden" : ""}`}>
           <span className="text-sm font-medium text-slate-700">Content</span>
           <textarea
             className="min-h-80 resize-none rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -306,7 +385,7 @@ export const TemplateForm = ({
           />
         </label>
 
-        <section className="grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4">
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${editorMode === "content" ? "hidden" : ""}`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Eye className="size-4 text-slate-500" />
@@ -318,7 +397,7 @@ export const TemplateForm = ({
               <Loader2 className="size-4 animate-spin text-slate-400" />
             ) : null}
           </div>
-          <div className="min-h-0 overflow-y-auto rounded-md border border-slate-100 bg-slate-50 p-4 font-mono text-sm leading-6 whitespace-pre-wrap text-slate-800">
+          <div className="min-h-0 overflow-y-auto rounded-md border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-800">
             {!draft.name.trim() ? (
               <p className="font-sans text-sm text-slate-500">
                 Add a template name to render the preview.
@@ -328,7 +407,9 @@ export const TemplateForm = ({
                 {preview.error.message}
               </p>
             ) : previewContent ? (
-              previewContent
+              <div className={`font-sans ${markdownStyles}`}>
+                <ReactMarkdown>{previewContent}</ReactMarkdown>
+              </div>
             ) : preview.isLoading ? (
               <p className="font-sans text-sm text-slate-500">
                 Rendering preview...
