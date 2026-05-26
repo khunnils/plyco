@@ -20,7 +20,7 @@ import {
 import { boolText } from "@/features/company/lib/display"
 import { infrastructureSystemTypes } from "@/features/company/infrastructure/lib/infrastructure-provider-utils"
 import { providerNamesForSystem } from "@/features/company/lib/profile"
-import { infrastructureHelperText } from "./infrastructure-helper-text"
+import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const providersSchema = infrastructureProfileSchema.pick({
   organizationProviders: true,

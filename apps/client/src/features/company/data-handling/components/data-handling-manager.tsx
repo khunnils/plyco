@@ -2,8 +2,8 @@ import { type Vocabulary } from "@plyco/shared"
 import { useState } from "react"
 
 import { cn } from "@/lib/utils"
-import { DataTypesPanel } from "@/features/company/data-handling/components/data-types-panel"
-import { GeneralAttributesPanel } from "@/features/company/data-handling/components/general-attributes-panel"
+import { DataTypesPanel } from "@/features/company/data-handling/components/panels/data-types-panel"
+import { GeneralAttributesPanel } from "@/features/company/data-handling/components/panels/general-attributes-panel"
 import {
   type ProfileDraft,
   type SaveProfile,

@@ -18,7 +18,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
-import { companyHelperText } from "./company-helper-text"
+import { companyHelperText } from "../company-helper-text"
 
 const operationsSchema = companyProfileSchema.pick({
   employeeCount: true,

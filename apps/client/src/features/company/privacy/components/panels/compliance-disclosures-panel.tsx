@@ -12,7 +12,7 @@ import {
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { privacyHelperText } from "./privacy-helper-text"
+import { privacyHelperText } from "../privacy-helper-text"
 
 const complianceSchema = privacyProfileSchema.pick({
   sellsOrSharesData: true,

@@ -1,7 +1,7 @@
 import { type AccessProfile, type Vocabulary } from "@plyco/shared"
 
-import { AccessAuthenticationPanel } from "@/features/company/access/components/access-authentication-panel"
-import { AccessControlPanel } from "@/features/company/access/components/access-control-panel"
+import { AccessAuthenticationPanel } from "@/features/company/access/components/panels/access-authentication-panel"
+import { AccessControlPanel } from "@/features/company/access/components/panels/access-control-panel"
 import {
   type ProfileDraft,
   type SaveProfile,

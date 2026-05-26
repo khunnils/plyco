@@ -20,7 +20,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
-import { privacyHelperText } from "./privacy-helper-text"
+import { privacyHelperText } from "../privacy-helper-text"
 
 const transfersSchema = privacyProfileSchema.pick({
   crossBorderTransfers: true,

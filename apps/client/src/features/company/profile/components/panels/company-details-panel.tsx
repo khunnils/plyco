@@ -15,7 +15,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { countryLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { companyHelperText } from "./company-helper-text"
+import { companyHelperText } from "../company-helper-text"
 
 const detailsSchema = companyProfileSchema.pick({
   companyName: true,

@@ -1,9 +1,9 @@
 import { type CompanyProfile, type Country, type Vocabulary } from "@plyco/shared"
 
-import { CompanyContactsPanel } from "@/features/company/profile/components/company-contacts-panel"
-import { CompanyDataProfilePanel } from "@/features/company/profile/components/company-data-profile-panel"
-import { CompanyDetailsPanel } from "@/features/company/profile/components/company-details-panel"
-import { CompanyOperationsPanel } from "@/features/company/profile/components/company-operations-panel"
+import { CompanyContactsPanel } from "@/features/company/profile/components/panels/company-contacts-panel"
+import { CompanyDataProfilePanel } from "@/features/company/profile/components/panels/company-data-profile-panel"
+import { CompanyDetailsPanel } from "@/features/company/profile/components/panels/company-details-panel"
+import { CompanyOperationsPanel } from "@/features/company/profile/components/panels/company-operations-panel"
 import {
   type ProfileDraft,
   type SaveProfile,

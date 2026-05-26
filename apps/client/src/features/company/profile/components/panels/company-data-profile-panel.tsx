@@ -10,7 +10,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { companyHelperText } from "./company-helper-text"
+import { companyHelperText } from "../company-helper-text"
 
 const dataProfileSchema = companyProfileSchema.pick({
   handlesPii: true,

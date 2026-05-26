@@ -21,7 +21,7 @@ import {
   codeValueList,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
-import { privacyHelperText } from "./privacy-helper-text"
+import { privacyHelperText } from "../privacy-helper-text"
 
 const rightsSchema = privacyProfileSchema.pick({
   supportedRights: true,

@@ -21,7 +21,7 @@ import {
 import { boolText } from "@/features/company/lib/display"
 import { providerNamesForSystem } from "@/features/company/lib/profile"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { privacyHelperText } from "./privacy-helper-text"
+import { privacyHelperText } from "../privacy-helper-text"
 
 const marketingSchema = privacyProfileSchema.pick({
   sendsMarketingEmails: true,

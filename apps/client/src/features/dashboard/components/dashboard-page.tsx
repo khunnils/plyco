@@ -11,7 +11,7 @@ import {
   PlaceholderPanel,
   ProgressItemPanel,
   ProgressPanel,
-} from "@/features/dashboard/components/progress-panel"
+} from "@/features/dashboard/components/panels/progress-panel"
 import { ProgressRow } from "@/features/dashboard/components/progress-row"
 import { MetricItem } from "@/features/dashboard/components/metric-item"
 import {

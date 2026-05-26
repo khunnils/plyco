@@ -12,7 +12,7 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
-import { dataHelperText } from "./data-helper-text"
+import { dataHelperText } from "../data-helper-text"
 
 const generalAttributesSchema = dataHandlingProfileSchema.pick({
   storesPii: true,

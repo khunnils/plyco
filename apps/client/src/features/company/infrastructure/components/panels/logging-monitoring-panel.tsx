@@ -20,7 +20,7 @@ import {
   codeOptions,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
-import { infrastructureHelperText } from "./infrastructure-helper-text"
+import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const loggingSchema = infrastructureProfileSchema.pick({
   centralizedLoggingEnabled: true,

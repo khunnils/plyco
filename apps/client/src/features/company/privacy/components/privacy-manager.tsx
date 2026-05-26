@@ -4,11 +4,11 @@ import {
   type Vocabulary,
 } from "@plyco/shared"
 
-import { ComplianceDisclosuresPanel } from "@/features/company/privacy/components/compliance-disclosures-panel"
-import { InternationalTransfersPanel } from "@/features/company/privacy/components/international-transfers-panel"
-import { MarketingCommunicationsPanel } from "@/features/company/privacy/components/marketing-communications-panel"
-import { PrivacyRepresentationPanel } from "@/features/company/privacy/components/privacy-representation-panel"
-import { PrivacyRightsPanel } from "@/features/company/privacy/components/privacy-rights-panel"
+import { ComplianceDisclosuresPanel } from "@/features/company/privacy/components/panels/compliance-disclosures-panel"
+import { InternationalTransfersPanel } from "@/features/company/privacy/components/panels/international-transfers-panel"
+import { MarketingCommunicationsPanel } from "@/features/company/privacy/components/panels/marketing-communications-panel"
+import { PrivacyRepresentationPanel } from "@/features/company/privacy/components/panels/privacy-representation-panel"
+import { PrivacyRightsPanel } from "@/features/company/privacy/components/panels/privacy-rights-panel"
 import {
   type ProfileDraft,
   type SaveProfile,

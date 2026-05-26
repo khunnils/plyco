@@ -1,12 +1,12 @@
 import { type Provider, type Vocabulary } from "@plyco/shared"
 
-import { BackupsPanel } from "@/features/company/infrastructure/components/backups-panel"
-import { EncryptionPanel } from "@/features/company/infrastructure/components/encryption-panel"
-import { IncidentResponsePanel } from "@/features/company/infrastructure/components/incident-response-panel"
-import { InfrastructureProvidersPanel } from "@/features/company/infrastructure/components/infrastructure-providers-panel"
-import { LoggingMonitoringPanel } from "@/features/company/infrastructure/components/logging-monitoring-panel"
-import { VendorRiskPanel } from "@/features/company/infrastructure/components/vendor-risk-panel"
-import { VulnerabilityManagementPanel } from "@/features/company/infrastructure/components/vulnerability-management-panel"
+import { BackupsPanel } from "@/features/company/infrastructure/components/panels/backups-panel"
+import { EncryptionPanel } from "@/features/company/infrastructure/components/panels/encryption-panel"
+import { IncidentResponsePanel } from "@/features/company/infrastructure/components/panels/incident-response-panel"
+import { InfrastructureProvidersPanel } from "@/features/company/infrastructure/components/panels/infrastructure-providers-panel"
+import { LoggingMonitoringPanel } from "@/features/company/infrastructure/components/panels/logging-monitoring-panel"
+import { VendorRiskPanel } from "@/features/company/infrastructure/components/panels/vendor-risk-panel"
+import { VulnerabilityManagementPanel } from "@/features/company/infrastructure/components/panels/vulnerability-management-panel"
 import {
   type ProfileDraft,
   type SaveProfile,

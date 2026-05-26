@@ -11,7 +11,7 @@ import {
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { accessHelperText } from "./access-helper-text"
+import { accessHelperText } from "../access-helper-text"
 
 const authenticationSchema = accessProfileSchema.pick({
   mfaRequired: true,

@@ -15,7 +15,7 @@ import {
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { privacyHelperText } from "./privacy-helper-text"
+import { privacyHelperText } from "../privacy-helper-text"
 
 const APPOINTED_STATUS = "appointed"
 

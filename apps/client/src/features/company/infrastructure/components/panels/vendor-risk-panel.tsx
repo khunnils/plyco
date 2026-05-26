@@ -16,7 +16,7 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { infrastructureHelperText } from "./infrastructure-helper-text"
+import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const vendorRiskSchema = infrastructureProfileSchema.pick({
   vendorReviewRequired: true,

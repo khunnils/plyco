@@ -9,7 +9,7 @@ import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
-import { companyHelperText } from "./company-helper-text"
+import { companyHelperText } from "../company-helper-text"
 
 const contactsSchema = companyProfileSchema.pick({
   contactEmail: true,

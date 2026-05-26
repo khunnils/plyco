@@ -14,7 +14,7 @@ import {
   ProfilePanelDetailGrid,
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
-import { dataHelperText } from "./data-helper-text"
+import { dataHelperText } from "../data-helper-text"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
