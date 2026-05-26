@@ -1,11 +1,8 @@
 import {
   Box,
-  ChevronDown,
-  ChevronRight,
   FileText,
   LayoutDashboard,
   LogOut,
-  Plus,
   ScrollText,
   Tags,
   Users,
@@ -18,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { type AuthUser, type ServiceProfileInput } from "@plyco/shared"
+import { type AuthUser } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,7 +27,6 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
 import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
-import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 
 export type CompanySectionId =
   | "profile"
@@ -103,23 +99,15 @@ const companySections: CompanySection[] = [
 
 export const AppSidebar = ({
   onLogout,
-  services,
   user,
 }: {
   onLogout: () => void
-  services: ServiceProfileInput[]
   user: AuthUser
 }) => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { servicesExpanded, setServicesExpanded, setSelectedServiceId } =
-    useSecurityUiStore()
 
   const pathname = location.pathname
-
-  const serviceIdMatch = pathname.match(/^\/company\/services\/([^/]+)$/)
-  const currentServiceId = serviceIdMatch?.[1] ?? null
-  const isCompanyServicePath = pathname.startsWith("/company/services")
 
   return (
     <Sidebar>
@@ -135,78 +123,18 @@ export const AppSidebar = ({
             <LayoutDashboard className="size-4" />
             Dashboard
           </SidebarMenuButton>
-          <div className="px-3 pb-1 pt-3 text-xs text-slate-600">
-            Company
-          </div>
+          <div className="px-3 pt-3 pb-1 text-xs text-slate-600">Company</div>
           <div className="ml-1 grid gap-1">
             {companySections.map((section) => {
               const Icon = section.icon
 
-              if (section.id === "service") {
-                return (
-                  <div className="grid gap-1" key={section.id}>
-                    <SidebarMenuButton
-                      onClick={() => {
-                        setServicesExpanded(!servicesExpanded)
-                      }}
-                    >
-                      <Box className="size-4" />
-                      <span className="min-w-0 flex-1 text-left">
-                        {section.title}
-                      </span>
-                      {servicesExpanded ? (
-                        <ChevronDown className="size-4" />
-                      ) : (
-                        <ChevronRight className="size-4" />
-                      )}
-                    </SidebarMenuButton>
-                    {servicesExpanded ? (
-                      <div className="ml-6 grid gap-1">
-                        {services.map((service, index) => {
-                          const serviceId = service.id ?? null
-                          const selected =
-                            isCompanyServicePath &&
-                            (currentServiceId === serviceId ||
-                              (!currentServiceId && index === 0 && pathname === "/company/services"))
-
-                          return (
-                            <SidebarMenuButton
-                              active={selected}
-                              key={service.id ?? `service-${index}`}
-                              onClick={() => {
-                                setSelectedServiceId(serviceId)
-                                navigate(
-                                  serviceId
-                                    ? `/company/services/${serviceId}`
-                                    : "/company/services"
-                                )
-                              }}
-                            >
-                              <span className="truncate">
-                                {service.serviceName || `Service ${index + 1}`}
-                              </span>
-                            </SidebarMenuButton>
-                          )
-                        })}
-                        <SidebarMenuButton
-                          className="h-8 text-xs text-slate-400 hover:text-slate-600 gap-2 px-2.5"
-                          onClick={() => {
-                            setSelectedServiceId(null)
-                            navigate("/company/services/new")
-                          }}
-                        >
-                          <Plus className="size-3.5" />
-                          Add service
-                        </SidebarMenuButton>
-                      </div>
-                    ) : null}
-                  </div>
-                )
-              }
-
               return (
                 <SidebarMenuButton
-                  active={pathname === section.path}
+                  active={
+                    section.id === "service"
+                      ? pathname.startsWith(section.path)
+                      : pathname === section.path
+                  }
                   key={section.id}
                   onClick={() => navigate(section.path)}
                 >
@@ -216,7 +144,7 @@ export const AppSidebar = ({
               )
             })}
           </div>
-          <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
             Vendors
           </div>
           <SidebarMenuButton
@@ -226,7 +154,7 @@ export const AppSidebar = ({
             <Users className="size-4" />
             Providers
           </SidebarMenuButton>
-          <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
             Policies and documents
           </div>
           <SidebarMenuButton
@@ -246,7 +174,7 @@ export const AppSidebar = ({
         </SidebarMenu>
         <div className="pt-4">
           <SidebarMenu>
-            <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
               Settings
             </div>
             <SidebarMenuButton

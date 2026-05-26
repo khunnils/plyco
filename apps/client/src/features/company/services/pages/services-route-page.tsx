@@ -1,6 +1,19 @@
-import { useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { Trash2 } from "lucide-react"
+import {
+  type ServiceProfileInput,
+  type ServiceProviderUsage,
+  type Vocabulary,
+} from "@plyco/shared"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import {
+  ArrowRight,
+  Box,
+  Building2,
+  Globe2,
+  Layers3,
+  MapPin,
+  RadioTower,
+  Plus,
+} from "lucide-react"
 
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import {
@@ -16,9 +29,188 @@ import {
   profileFromOrganization,
   dataTypeOptionsFromProfile,
 } from "@/features/company/lib/profile"
-import { Button } from "@/components/ui/button"
 import { ServiceProfilePage } from "./service-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { Button } from "@/components/ui/button"
+import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+
+const codeValueList = (
+  vocabulary: Vocabulary | undefined,
+  codeSetId: string,
+  values: string[] | null
+) =>
+  values && values.length > 0
+    ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
+    : "Not set"
+
+const ServiceSelectorPage = ({
+  businessActivityOptions,
+  serviceProviderUsage,
+  services,
+  vocabulary,
+}: {
+  businessActivityOptions: Option[]
+  serviceProviderUsage: ServiceProviderUsage[]
+  services: ServiceProfileInput[]
+  vocabulary: Vocabulary | undefined
+}) => {
+  const availableServices = services.filter((service) => service.id)
+
+  if (availableServices.length === 0) {
+    return (
+      <Empty className="min-h-[420px] border-slate-200 bg-white">
+        <EmptyHeader>
+          <EmptyMedia
+            className="size-12 rounded-full border-slate-200 bg-slate-50"
+            variant="icon"
+          >
+            <Box />
+          </EmptyMedia>
+          <EmptyTitle>No services available</EmptyTitle>
+          <EmptyDescription>
+            Services will appear here once they have been added to this
+            workspace.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild type="button">
+            <Link to="/company/services/new">
+              <Plus />
+              Add service
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
+    )
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {availableServices.map((service, index) => {
+        const serviceUses = service.id
+          ? serviceProviderUsage.filter(
+              (usage) => usage.serviceId === service.id
+            )
+          : []
+        const activityLabels = service.businessActivityIds
+          .map(
+            (activityId) =>
+              businessActivityOptions.find(
+                (option) => option.value === activityId
+              )?.label ?? activityId
+          )
+          .join(", ")
+        const url = service.serviceUrl?.trim()
+
+        return (
+          <Link
+            className="group grid min-h-72 grid-rows-[auto_1fr_auto] overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+            key={service.id ?? `service-${index}`}
+            to={
+              service.id
+                ? `/company/services/${service.id}`
+                : "/company/services"
+            }
+          >
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-slate-950 p-5 text-white">
+              <div className="min-w-0">
+                <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-white/10 text-white">
+                  <Box className="size-5" />
+                </div>
+                <h2 className="truncate text-lg font-semibold">
+                  {service.serviceName?.trim() || `Service ${index + 1}`}
+                </h2>
+                {url ? (
+                  <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-sm text-slate-300">
+                    <Globe2 className="size-3.5 shrink-0" />
+                    <span className="truncate">{url}</span>
+                  </p>
+                ) : null}
+              </div>
+              <ArrowRight className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-white" />
+            </div>
+
+            <div className="grid gap-5 p-5">
+              <p className="line-clamp-3 text-sm leading-6 text-slate-600">
+                {service.serviceDescription?.trim() ||
+                  "No service description has been provided."}
+              </p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <Layers3 className="size-3.5" />
+                    Activities
+                  </span>
+                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                    {activityLabels || "Not set"}
+                  </span>
+                </div>
+                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <Building2 className="size-3.5" />
+                    Audience
+                  </span>
+                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                    {codeValueList(
+                      vocabulary,
+                      "service_customer_types",
+                      service.customerTypes
+                    )}
+                  </span>
+                </div>
+                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <MapPin className="size-3.5" />
+                    Regions
+                  </span>
+                  <span className="line-clamp-2 text-sm font-medium text-slate-900">
+                    {codeValueList(
+                      vocabulary,
+                      "regions",
+                      service.availabilityRegions
+                    )}
+                  </span>
+                </div>
+                <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <RadioTower className="size-3.5" />
+                    Providers
+                  </span>
+                  <span className="text-sm font-medium text-slate-900">
+                    {serviceUses.length === 1
+                      ? "1 provider"
+                      : `${serviceUses.length} providers`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-xs font-medium text-slate-500">
+              <span>
+                Cookies and tracking:{" "}
+                {service.privacy.usesCookiesOrTrackingTechnologies === null
+                  ? "Not answered"
+                  : service.privacy.usesCookiesOrTrackingTechnologies
+                    ? "Yes"
+                    : "No"}
+              </span>
+              <span className="text-slate-900">View service</span>
+            </div>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
 
 export const ServicesRoutePage = () => {
   const { serviceId } = useParams()
@@ -38,14 +230,8 @@ export const ServicesRoutePage = () => {
   const vocabularyData = vocabulary.data
 
   const isCreatingService = serviceId === "new"
-  const routedSelectedServiceId = serviceId && serviceId !== "new" ? serviceId : null
-
-  // Sync URL to first service if none selected
-  useEffect(() => {
-    if (!serviceId && defaultValues.services[0]?.id) {
-      navigate(`/company/services/${defaultValues.services[0].id}`, { replace: true })
-    }
-  }, [serviceId, defaultValues.services, navigate])
+  const routedSelectedServiceId =
+    serviceId && serviceId !== "new" ? serviceId : null
 
   const headerService =
     defaultValues.services.find(
@@ -54,43 +240,16 @@ export const ServicesRoutePage = () => {
 
   const activeCompanyTitle = isCreatingService
     ? "Add service"
-    : headerService?.serviceName?.trim() || "Service"
-
-  const headerServiceIndex = Math.max(
-    defaultValues.services.findIndex(
-      (service) => service.id === routedSelectedServiceId
-    ),
-    0
-  )
-
-  const deleteSelectedService = () => {
-    if (defaultValues.services.length === 1) {
-      return
-    }
-
-    const nextServices = defaultValues.services.filter(
-      (_, index) => index !== headerServiceIndex
-    )
-    const nextSelectedService =
-      nextServices[Math.min(headerServiceIndex, nextServices.length - 1)] ??
-      null
-
-    saveProfile.mutate(
-      {
-        ...defaultValues,
-        services: nextServices,
-      },
-      {
-        onSuccess: () => {
-          const nextPath = nextSelectedService?.id
-            ? `/company/services/${nextSelectedService.id}`
-            : "/company/services"
-
-          navigate(nextPath)
-        },
-      }
-    )
-  }
+    : !serviceId
+      ? "Services"
+      : headerService?.serviceName?.trim() || "Service"
+  const breadcrumbs = serviceId
+    ? [
+        { label: "Company" },
+        { label: "Services", href: "/company/services" },
+        { label: activeCompanyTitle },
+      ]
+    : undefined
 
   const isVendorMutationPending =
     createServiceProviderUsage.isPending ||
@@ -108,63 +267,72 @@ export const ServicesRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title={activeCompanyTitle}>
-        {!isCreatingService ? (
+      <PageHeader
+        breadcrumbs={breadcrumbs}
+        eyebrow="Company"
+        title={activeCompanyTitle}
+      >
+        {!serviceId ? (
           <Button
-            className="w-fit"
-            disabled={
-              defaultValues.services.length === 1 || saveProfile.isPending
-            }
+            asChild
+            className="w-fit border-white bg-white text-primary hover:bg-white/90"
             type="button"
-            variant="outline"
-            onClick={deleteSelectedService}
           >
-            <Trash2 />
-            Delete service
+            <Link to="/company/services/new">
+              <Plus />
+              Add service
+            </Link>
           </Button>
         ) : null}
       </PageHeader>
 
-      <ServiceProfilePage
-        businessActivityOptions={businessActivityOptions}
-        dataTypeOptions={dataTypeOptions}
-        isCreatingService={isCreatingService}
-        isProfileMutationPending={saveProfile.isPending}
-        isVendorMutationPending={isVendorMutationPending}
-        profile={defaultValues}
-        selectedServiceId={routedSelectedServiceId}
-        serviceProviderUsage={serviceProviderUsage}
-        organizationProviders={organizationProviders}
-        vocabulary={vocabularyData}
-        onCancelCreateService={() =>
-          navigate(
-            routedSelectedServiceId
-              ? `/company/services/${routedSelectedServiceId}`
-              : "/company/services"
-          )
-        }
-        onCreateProviderUsage={(providerUsage, onSuccess) =>
-          createServiceProviderUsage.mutate(providerUsage, {
-            onSuccess,
-          })
-        }
-        onDeleteProviderUsage={(providerUsage) =>
-          deleteServiceProviderUsage.mutate(providerUsage.id)
-        }
-        onSaveProfile={(profile, onSuccess) =>
-          saveProfile.mutate(profile, { onSuccess })
-        }
-        onSelectService={(serviceId) => {
-          navigate(
-            serviceId
-              ? `/company/services/${serviceId}`
-              : "/company/services"
-          )
-        }}
-        onUpdateProviderUsage={(input, onSuccess) =>
-          updateServiceProviderUsage.mutate(input, { onSuccess })
-        }
-      />
+      {!serviceId ? (
+        <ServiceSelectorPage
+          businessActivityOptions={businessActivityOptions}
+          serviceProviderUsage={serviceProviderUsage}
+          services={defaultValues.services}
+          vocabulary={vocabularyData}
+        />
+      ) : (
+        <ServiceProfilePage
+          businessActivityOptions={businessActivityOptions}
+          dataTypeOptions={dataTypeOptions}
+          isCreatingService={isCreatingService}
+          isProfileMutationPending={saveProfile.isPending}
+          isVendorMutationPending={isVendorMutationPending}
+          profile={defaultValues}
+          selectedServiceId={routedSelectedServiceId}
+          serviceProviderUsage={serviceProviderUsage}
+          organizationProviders={organizationProviders}
+          vocabulary={vocabularyData}
+          onCancelCreateService={() =>
+            navigate(
+              routedSelectedServiceId
+                ? `/company/services/${routedSelectedServiceId}`
+                : "/company/services"
+            )
+          }
+          onCreateProviderUsage={(providerUsage, onSuccess) =>
+            createServiceProviderUsage.mutate(providerUsage, {
+              onSuccess,
+            })
+          }
+          onDeleteProviderUsage={(providerUsage) =>
+            deleteServiceProviderUsage.mutate(providerUsage.id)
+          }
+          onSaveProfile={(profile, onSuccess) =>
+            saveProfile.mutate(profile, { onSuccess })
+          }
+          onSelectService={(serviceId) => {
+            navigate(
+              serviceId ? `/company/services/${serviceId}` : "/company/services"
+            )
+          }}
+          onUpdateProviderUsage={(input, onSuccess) =>
+            updateServiceProviderUsage.mutate(input, { onSuccess })
+          }
+        />
+      )}
     </>
   )
 }
