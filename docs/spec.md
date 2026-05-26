@@ -64,8 +64,7 @@ The MVP includes:
 5. Policy Generation
 6. Security Summary Generation
 7. Readiness Dashboard
-8. Document Templates
-9. Generated Documents
+8. Policies & Documents
 
 # Core MVP Features
 
@@ -287,11 +286,11 @@ Evidence:
 - GitHub MFA enforcement screenshot
 ```
 
-# 8. Document Templates
+# 8. Policies & Documents
 
 ## Goal
 
-Provide reusable markdown templates for security documents and customer-facing policy drafts.
+Provide reusable markdown templates and generated customer-facing policy documents in one workspace.
 
 System templates are versioned markdown files in the repository. Each file starts with basic metadata:
 
@@ -305,20 +304,11 @@ Template content uses Jinja-style placeholders such as `{{ company.name }}`.
 
 ## UX
 
-The app includes a Templates sidebar option.
+The app includes a Policies & Documents sidebar option. The page shows organization templates only. If no organization templates exist, it shows an empty state with an Add action. Add opens a selector where users can copy available system templates or create a new organization template from scratch. Already-added system templates are shown as added and cannot be selected again.
 
-The Templates screen shows:
+Organization templates can be edited or deleted after they are added. Editing covers name, slug, per-template policy metadata, and markdown content. Organization templates created from scratch have no source system template.
 
-- System templates at the top, with slug, name, description, and an Add action.
-- Organization templates below, created by copying a system template.
-
-Organization templates can be edited or deleted after they are added. Editing covers name, slug, per-template policy metadata, and markdown content.
-
-# 9. Generated Documents
-
-## Goal
-
-Generate stored markdown documents from organization templates and the current security profile source-of-truth.
+Documents are generated from organization templates and the current security profile source-of-truth:
 
 Documents are generated through:
 
@@ -331,15 +321,12 @@ Report Context Builder
 
 Generated documents retain a source hash so the app can show when a document is outdated after template, policy metadata, service context, privacy context, or profile changes. Each generated document also has a private PDF export that can be downloaded through the authenticated app.
 
-## UX
-
-The app includes a separate Documents sidebar option.
-
-The Documents screen shows one row per organization template:
+The Policies & Documents page shows one row per organization template:
 
 - templates with no document use an outline ghost style and show Generate
 - generated documents show View
 - generated documents with a PDF export show Download
 - outdated generated documents show an Outdated badge and View
+- each template row indicates whether a document has never been generated or was last generated on a specific date
 
 Generated documents are read-only in this version.

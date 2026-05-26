@@ -4,24 +4,24 @@ import {
   type SystemTemplate,
   type Template,
   type TemplateInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
-import { ApiError } from "../../errors.js"
-import { type OrganizationRepository } from "../organizations/repository.js"
-import { type DocumentRepository } from "./repository.js"
+import { ApiError } from "../../errors.js";
+import { type OrganizationRepository } from "../organizations/repository.js";
+import { type DocumentRepository } from "./repository.js";
 
 function now() {
-  return new Date().toISOString()
+  return new Date().toISOString();
 }
 
 function newId(prefix: string) {
-  return `${prefix}_${crypto.randomUUID()}`
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
 export class InMemoryDocumentRepository implements DocumentRepository {
-  private templates = new Map<string, Template>()
-  private documents = new Map<string, Document>()
-  private documentPdfObjectPaths = new Map<string, string>()
+  private templates = new Map<string, Template>();
+  private documents = new Map<string, Document>();
+  private documentPdfObjectPaths = new Map<string, string>();
 
   constructor(
     private readonly organizationRepository: OrganizationRepository,
@@ -30,19 +30,19 @@ export class InMemoryDocumentRepository implements DocumentRepository {
   async listTemplates(organizationId: string): Promise<Template[]> {
     return Array.from(this.templates.values()).filter(
       (template) => template.organizationId === organizationId,
-    )
+    );
   }
 
   async createTemplateFromSystem(
     organizationId: string,
     systemTemplate: SystemTemplate,
   ): Promise<Template> {
-    const timestamp = now()
+    const timestamp = now();
     const existing = Array.from(this.templates.values()).find(
       (template) =>
         template.organizationId === organizationId &&
         template.slug === systemTemplate.slug,
-    )
+    );
 
     if (existing) {
       throw new ApiError(
@@ -50,7 +50,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         "A template with this slug already exists.",
         409,
         { slug: systemTemplate.slug },
-      )
+      );
     }
 
     const template: Template = {
@@ -68,10 +68,43 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       policyReviewCadence: "",
       createdAt: timestamp,
       updatedAt: timestamp,
+    };
+
+    this.templates.set(template.id, template);
+    return template;
+  }
+
+  async createTemplate(
+    organizationId: string,
+    input: TemplateInput,
+  ): Promise<Template> {
+    const timestamp = now();
+    const existing = Array.from(this.templates.values()).find(
+      (template) =>
+        template.organizationId === organizationId &&
+        template.slug === input.slug,
+    );
+
+    if (existing) {
+      throw new ApiError(
+        "TEMPLATE_SLUG_EXISTS",
+        "A template with this slug already exists.",
+        409,
+        { slug: input.slug },
+      );
     }
 
-    this.templates.set(template.id, template)
-    return template
+    const template: Template = {
+      id: newId("template"),
+      organizationId,
+      sourceSystemTemplateSlug: null,
+      ...input,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
+    this.templates.set(template.id, template);
+    return template;
   }
 
   async updateTemplate(
@@ -79,10 +112,10 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     id: string,
     input: TemplateInput,
   ): Promise<Template | null> {
-    const currentTemplate = this.templates.get(id)
+    const currentTemplate = this.templates.get(id);
 
     if (!currentTemplate || currentTemplate.organizationId !== organizationId) {
-      return null
+      return null;
     }
 
     const duplicate = Array.from(this.templates.values()).find(
@@ -90,7 +123,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         template.id !== id &&
         template.organizationId === currentTemplate.organizationId &&
         template.slug === input.slug,
-    )
+    );
 
     if (duplicate) {
       throw new ApiError(
@@ -98,38 +131,38 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         "A template with this slug already exists.",
         409,
         { slug: input.slug },
-      )
+      );
     }
 
     const template: Template = {
       ...currentTemplate,
       ...input,
       updatedAt: now(),
-    }
+    };
 
-    this.templates.set(id, template)
-    return template
+    this.templates.set(id, template);
+    return template;
   }
 
   async deleteTemplate(organizationId: string, id: string): Promise<boolean> {
-    const currentTemplate = this.templates.get(id)
+    const currentTemplate = this.templates.get(id);
 
     if (!currentTemplate || currentTemplate.organizationId !== organizationId) {
-      return false
+      return false;
     }
 
-    const deleted = this.templates.delete(id)
+    const deleted = this.templates.delete(id);
 
     if (deleted) {
       for (const [documentId, document] of this.documents) {
         if (document.templateId === id) {
-          this.documents.delete(documentId)
-          this.documentPdfObjectPaths.delete(documentId)
+          this.documents.delete(documentId);
+          this.documentPdfObjectPaths.delete(documentId);
         }
       }
     }
 
-    return deleted
+    return deleted;
   }
 
   async listDocumentSummaries(
@@ -139,33 +172,33 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     return Array.from(this.templates.values())
       .filter((template) => template.organizationId === organizationId)
       .map((template) => {
-      const document =
-        Array.from(this.documents.values()).find(
-          (currentDocument) => currentDocument.templateId === template.id,
-        ) ?? null
+        const document =
+          Array.from(this.documents.values()).find(
+            (currentDocument) => currentDocument.templateId === template.id,
+          ) ?? null;
 
-      return {
-        template,
-        document,
-        status: !document
-          ? "not_generated"
-          : document.sourceHash === sourceHashForTemplate(template)
-            ? "current"
-            : "stale",
-      }
-    })
+        return {
+          template,
+          document,
+          status: !document
+            ? "not_generated"
+            : document.sourceHash === sourceHashForTemplate(template)
+              ? "current"
+              : "stale",
+        };
+      });
   }
 
   async createDocument(input: {
-    template: Template
-    title: string
-    renderedContent: string
-    pdfObjectPath: string | null
-    sourceHash: string
+    template: Template;
+    title: string;
+    renderedContent: string;
+    pdfObjectPath: string | null;
+    sourceHash: string;
   }): Promise<Document> {
     const existingDocument = Array.from(this.documents.values()).find(
       (document) => document.templateId === input.template.id,
-    )
+    );
 
     if (existingDocument) {
       throw new ApiError(
@@ -173,7 +206,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         "A document has already been generated for this template.",
         409,
         { templateId: input.template.id },
-      )
+      );
     }
 
     const document: Document = {
@@ -185,33 +218,33 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       hasPdf: Boolean(input.pdfObjectPath),
       sourceHash: input.sourceHash,
       generatedAt: now(),
-    }
+    };
 
-    this.documents.set(document.id, document)
+    this.documents.set(document.id, document);
 
     if (input.pdfObjectPath) {
-      this.documentPdfObjectPaths.set(document.id, input.pdfObjectPath)
+      this.documentPdfObjectPaths.set(document.id, input.pdfObjectPath);
     }
 
-    return document
+    return document;
   }
 
   async getDocument(
     organizationId: string,
     id: string,
   ): Promise<Document | null> {
-    const document = this.documents.get(id) ?? null
+    const document = this.documents.get(id) ?? null;
 
-    return document?.organizationId === organizationId ? document : null
+    return document?.organizationId === organizationId ? document : null;
   }
 
   async getDocumentPdfObjectPath(
     organizationId: string,
     id: string,
   ): Promise<string | null> {
-    const document = await this.getDocument(organizationId, id)
+    const document = await this.getDocument(organizationId, id);
 
-    return document ? (this.documentPdfObjectPaths.get(id) ?? null) : null
+    return document ? (this.documentPdfObjectPaths.get(id) ?? null) : null;
   }
 
   async getDocumentForTemplate(
@@ -223,8 +256,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         (currentDocument) =>
           currentDocument.organizationId === organizationId &&
           currentDocument.templateId === templateId,
-      ) ?? null
+      ) ?? null;
 
-    return document
+    return document;
   }
 }

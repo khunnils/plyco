@@ -226,10 +226,14 @@ export const createOrganizationProvider = (
   organizationId: string,
   provider: OrganizationProviderInput
 ): Promise<OrganizationProvider> =>
-  apiRequest(`/organizations/${organizationId}/organization-providers`, organizationProviderInventorySchema, {
-    method: "POST",
-    body: JSON.stringify(provider),
-  })
+  apiRequest(
+    `/organizations/${organizationId}/organization-providers`,
+    organizationProviderInventorySchema,
+    {
+      method: "POST",
+      body: JSON.stringify(provider),
+    }
+  )
 
 export const createBusinessActivity = (
   organizationId: string,
@@ -290,6 +294,15 @@ export const createTemplateFromSystem = (
   apiRequest(`/organizations/${organizationId}/templates`, templateSchema, {
     method: "POST",
     body: JSON.stringify(input),
+  })
+
+export const createTemplate = (
+  organizationId: string,
+  template: TemplateInput
+): Promise<Template> =>
+  apiRequest(`/organizations/${organizationId}/templates`, templateSchema, {
+    method: "POST",
+    body: JSON.stringify(template),
   })
 
 export const updateTemplate = ({
@@ -405,7 +418,9 @@ export const createServiceProviderUsage = (
     serviceProviderUsageSchema,
     {
       method: "POST",
-      body: JSON.stringify(serviceProviderUsageInputSchema.parse(providerUsage)),
+      body: JSON.stringify(
+        serviceProviderUsageInputSchema.parse(providerUsage)
+      ),
     }
   )
 
@@ -423,7 +438,9 @@ export const updateServiceProviderUsage = ({
     serviceProviderUsageSchema,
     {
       method: "PUT",
-      body: JSON.stringify(serviceProviderUsageInputSchema.parse(providerUsage)),
+      body: JSON.stringify(
+        serviceProviderUsageInputSchema.parse(providerUsage)
+      ),
     }
   )
 

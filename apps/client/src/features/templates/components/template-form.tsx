@@ -15,7 +15,7 @@ export const TemplateForm = ({
   onCancel,
   onSubmit,
 }: {
-  defaultValues: Template
+  defaultValues: Template | TemplateInput
   isSaving: boolean
   members: OrganizationMember[]
   onCancel: () => void

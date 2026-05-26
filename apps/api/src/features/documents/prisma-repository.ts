@@ -3,18 +3,18 @@ import {
   mapTemplateRecord,
   prisma,
   type PrismaClient,
-} from "@plyco/db"
+} from "@plyco/db";
 import {
   type Document,
   type DocumentSummary,
   type SystemTemplate,
   type Template,
   type TemplateInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
-import { ApiError } from "../../errors.js"
-import { type OrganizationRepository } from "../organizations/repository.js"
-import { type DocumentRepository } from "./repository.js"
+import { ApiError } from "../../errors.js";
+import { type OrganizationRepository } from "../organizations/repository.js";
+import { type DocumentRepository } from "./repository.js";
 
 export class PrismaDocumentRepository implements DocumentRepository {
   constructor(
@@ -26,9 +26,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
     const templates = await this.client.template.findMany({
       where: { organizationId },
       orderBy: { createdAt: "asc" },
-    })
+    });
 
-    return templates.map(mapTemplateRecord)
+    return templates.map(mapTemplateRecord);
   }
 
   async createTemplateFromSystem(
@@ -50,11 +50,38 @@ export class PrismaDocumentRepository implements DocumentRepository {
           policyApproverUserId: null,
           policyReviewCadence: "",
         },
-      })
+      });
 
-      return mapTemplateRecord(template)
+      return mapTemplateRecord(template);
     } catch (error) {
-      this.throwTemplateConflict(error, systemTemplate.slug)
+      this.throwTemplateConflict(error, systemTemplate.slug);
+    }
+  }
+
+  async createTemplate(
+    organizationId: string,
+    input: TemplateInput,
+  ): Promise<Template> {
+    try {
+      const template = await this.client.template.create({
+        data: {
+          organizationId,
+          name: input.name,
+          slug: input.slug,
+          sourceSystemTemplateSlug: null,
+          content: input.content,
+          policyEffectiveDate: input.policyEffectiveDate,
+          policyLastReviewedDate: input.policyLastReviewedDate,
+          policyVersion: input.policyVersion,
+          policyOwnerUserId: input.policyOwnerUserId || null,
+          policyApproverUserId: input.policyApproverUserId || null,
+          policyReviewCadence: input.policyReviewCadence,
+        },
+      });
+
+      return mapTemplateRecord(template);
+    } catch (error) {
+      this.throwTemplateConflict(error, input.slug);
     }
   }
 
@@ -65,10 +92,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
   ): Promise<Template | null> {
     const existing = await this.client.template.findFirst({
       where: { id, organizationId },
-    })
+    });
 
     if (!existing) {
-      return null
+      return null;
     }
 
     try {
@@ -85,25 +112,25 @@ export class PrismaDocumentRepository implements DocumentRepository {
           policyApproverUserId: input.policyApproverUserId || null,
           policyReviewCadence: input.policyReviewCadence,
         },
-      })
+      });
 
-      return mapTemplateRecord(template)
+      return mapTemplateRecord(template);
     } catch (error) {
-      this.throwTemplateConflict(error, input.slug)
+      this.throwTemplateConflict(error, input.slug);
     }
   }
 
   async deleteTemplate(organizationId: string, id: string): Promise<boolean> {
     const existing = await this.client.template.findFirst({
       where: { id, organizationId },
-    })
+    });
 
     if (!existing) {
-      return false
+      return false;
     }
 
-    await this.client.template.delete({ where: { id } })
-    return true
+    await this.client.template.delete({ where: { id } });
+    return true;
   }
 
   async listDocumentSummaries(
@@ -114,12 +141,14 @@ export class PrismaDocumentRepository implements DocumentRepository {
       where: { organizationId },
       include: { documents: true },
       orderBy: { createdAt: "asc" },
-    })
+    });
 
     return templates.map((templateRecord) => {
-      const template = mapTemplateRecord(templateRecord)
-      const documentRecord = templateRecord.documents[0] ?? null
-      const document = documentRecord ? mapDocumentRecord(documentRecord) : null
+      const template = mapTemplateRecord(templateRecord);
+      const documentRecord = templateRecord.documents[0] ?? null;
+      const document = documentRecord
+        ? mapDocumentRecord(documentRecord)
+        : null;
 
       return {
         template,
@@ -129,16 +158,16 @@ export class PrismaDocumentRepository implements DocumentRepository {
           : document.sourceHash === sourceHashForTemplate(template)
             ? "current"
             : "stale",
-      }
-    })
+      };
+    });
   }
 
   async createDocument(input: {
-    template: Template
-    title: string
-    renderedContent: string
-    pdfObjectPath: string | null
-    sourceHash: string
+    template: Template;
+    title: string;
+    renderedContent: string;
+    pdfObjectPath: string | null;
+    sourceHash: string;
   }): Promise<Document> {
     try {
       const document = await this.client.document.create({
@@ -150,11 +179,11 @@ export class PrismaDocumentRepository implements DocumentRepository {
           pdfObjectPath: input.pdfObjectPath,
           sourceHash: input.sourceHash,
         },
-      })
+      });
 
-      return mapDocumentRecord(document)
+      return mapDocumentRecord(document);
     } catch (error) {
-      this.throwDocumentConflict(error, input.template.id)
+      this.throwDocumentConflict(error, input.template.id);
     }
   }
 
@@ -164,9 +193,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
   ): Promise<Document | null> {
     const document = await this.client.document.findFirst({
       where: { id, organizationId },
-    })
+    });
 
-    return document ? mapDocumentRecord(document) : null
+    return document ? mapDocumentRecord(document) : null;
   }
 
   async getDocumentPdfObjectPath(
@@ -176,9 +205,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
     const document = await this.client.document.findFirst({
       where: { id, organizationId },
       select: { pdfObjectPath: true },
-    })
+    });
 
-    return document?.pdfObjectPath ?? null
+    return document?.pdfObjectPath ?? null;
   }
 
   async getDocumentForTemplate(
@@ -187,9 +216,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
   ): Promise<Document | null> {
     const document = await this.client.document.findFirst({
       where: { organizationId, templateId },
-    })
+    });
 
-    return document ? mapDocumentRecord(document) : null
+    return document ? mapDocumentRecord(document) : null;
   }
 
   private throwTemplateConflict(error: unknown, slug: string): never {
@@ -204,10 +233,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
         "A template with this slug already exists.",
         409,
         { slug },
-      )
+      );
     }
 
-    throw error
+    throw error;
   }
 
   private throwDocumentConflict(error: unknown, templateId: string): never {
@@ -222,9 +251,9 @@ export class PrismaDocumentRepository implements DocumentRepository {
         "A document has already been generated for this template.",
         409,
         { templateId },
-      )
+      );
     }
 
-    throw error
+    throw error;
   }
 }

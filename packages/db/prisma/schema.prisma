@@ -388,7 +388,7 @@ model Template {
   organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "templates_organization_id_fkey")
   name                     String
   slug                     String
-  sourceSystemTemplateSlug String       @map("source_system_template_slug")
+  sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
   policyEffectiveDate      String       @default("") @map("policy_effective_date")
   policyLastReviewedDate   String       @default("") @map("policy_last_reviewed_date")

@@ -487,7 +487,7 @@ export function mapTemplateRecord(record: {
   organizationId: string;
   name: string;
   slug: string;
-  sourceSystemTemplateSlug: string;
+  sourceSystemTemplateSlug: string | null;
   content: string;
   policyEffectiveDate: string;
   policyLastReviewedDate: string;

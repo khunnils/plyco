@@ -10,7 +10,7 @@ export const TemplateCard = ({
     slug: string
     name: string
     description?: string
-    sourceSystemTemplateSlug?: string
+    sourceSystemTemplateSlug?: string | null
   }
   children: ReactNode
 }) => (

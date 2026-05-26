@@ -1641,6 +1641,70 @@ describe("security profile API", () => {
     expect(deleteResponse.statusCode).toBe(204);
   });
 
+  it("creates custom organization templates from scratch", async () => {
+    const app = await createTestApp();
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Custom Policy",
+        slug: "custom-policy",
+        content: "# Custom policy\n",
+        policyEffectiveDate: "",
+        policyLastReviewedDate: "",
+        policyVersion: "",
+        policyOwnerUserId: "",
+        policyApproverUserId: "",
+        policyReviewCadence: "",
+      },
+    });
+
+    expect(createResponse.statusCode).toBe(201);
+    expect(createResponse.json()).toMatchObject({
+      name: "Custom Policy",
+      slug: "custom-policy",
+      sourceSystemTemplateSlug: null,
+      content: "# Custom policy\n",
+    });
+
+    const duplicateResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Duplicate Custom Policy",
+        slug: "custom-policy",
+        content: "# Duplicate\n",
+        policyEffectiveDate: "",
+        policyLastReviewedDate: "",
+        policyVersion: "",
+        policyOwnerUserId: "",
+        policyApproverUserId: "",
+        policyReviewCadence: "",
+      },
+    });
+
+    expect(duplicateResponse.statusCode).toBe(409);
+    expect(duplicateResponse.json().error.code).toBe("TEMPLATE_SLUG_EXISTS");
+
+    const documentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    });
+
+    expect(documentsResponse.statusCode).toBe(200);
+    expect(documentsResponse.json()).toMatchObject([
+      {
+        template: {
+          id: createResponse.json().id,
+          slug: "custom-policy",
+          sourceSystemTemplateSlug: null,
+        },
+        document: null,
+        status: "not_generated",
+      },
+    ]);
+  });
+
   it("rejects missing system templates", async () => {
     const app = await createTestApp();
     const response = await app.inject({

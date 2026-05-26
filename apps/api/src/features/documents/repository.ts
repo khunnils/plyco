@@ -4,38 +4,42 @@ import {
   type SystemTemplate,
   type Template,
   type TemplateInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
 export interface DocumentRepository {
-  listTemplates(organizationId: string): Promise<Template[]>
+  listTemplates(organizationId: string): Promise<Template[]>;
   createTemplateFromSystem(
     organizationId: string,
     systemTemplate: SystemTemplate,
-  ): Promise<Template>
+  ): Promise<Template>;
+  createTemplate(
+    organizationId: string,
+    input: TemplateInput,
+  ): Promise<Template>;
   updateTemplate(
     organizationId: string,
     id: string,
     input: TemplateInput,
-  ): Promise<Template | null>
-  deleteTemplate(organizationId: string, id: string): Promise<boolean>
+  ): Promise<Template | null>;
+  deleteTemplate(organizationId: string, id: string): Promise<boolean>;
   listDocumentSummaries(
     organizationId: string,
     sourceHashForTemplate: (template: Template) => string,
-  ): Promise<DocumentSummary[]>
+  ): Promise<DocumentSummary[]>;
   createDocument(input: {
-    template: Template
-    title: string
-    renderedContent: string
-    pdfObjectPath: string | null
-    sourceHash: string
-  }): Promise<Document>
+    template: Template;
+    title: string;
+    renderedContent: string;
+    pdfObjectPath: string | null;
+    sourceHash: string;
+  }): Promise<Document>;
   getDocumentPdfObjectPath(
     organizationId: string,
     id: string,
-  ): Promise<string | null>
+  ): Promise<string | null>;
   getDocumentForTemplate(
     organizationId: string,
     templateId: string,
-  ): Promise<Document | null>
-  getDocument(organizationId: string, id: string): Promise<Document | null>
+  ): Promise<Document | null>;
+  getDocument(organizationId: string, id: string): Promise<Document | null>;
 }

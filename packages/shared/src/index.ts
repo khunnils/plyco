@@ -372,7 +372,7 @@ export const templateSchema = z.object({
   organizationId: z.string().min(1),
   name: z.string().trim().min(1),
   slug: templateSlugSchema,
-  sourceSystemTemplateSlug: templateSlugSchema,
+  sourceSystemTemplateSlug: templateSlugSchema.nullable(),
   content: z.string(),
   policyEffectiveDate: z.string().default(""),
   policyLastReviewedDate: z.string().default(""),

@@ -23,7 +23,6 @@ import { DataHandlingProfileRoutePage } from "@/features/company/data-handling/p
 import { AccessProfileRoutePage } from "@/features/company/access/pages/access-profile-route-page"
 import { VendorsRoutePage } from "@/features/vendors/pages/vendors-route-page"
 import { VocabularyRoutePage } from "@/features/vocabulary/pages/vocabulary-route-page"
-import { TemplatesRoutePage } from "@/features/templates/pages/templates-route-page"
 import { DocumentsRoutePage } from "@/features/documents/pages/documents-route-page"
 
 export const App = () => {
@@ -63,10 +62,7 @@ export const App = () => {
 
   if (!selectedOrganization) {
     return (
-      <CreateOrganizationScreen
-        user={user}
-        onLogout={() => logout.mutate()}
-      />
+      <CreateOrganizationScreen user={user} onLogout={() => logout.mutate()} />
     )
   }
 
@@ -86,16 +82,30 @@ export const App = () => {
         <Route path="/" element={<DashboardRoutePage />} />
         <Route path="/company/profile" element={<CompanyProfileRoutePage />} />
         <Route path="/company/services" element={<ServicesRoutePage />} />
-        <Route path="/company/services/:serviceId" element={<ServicesRoutePage />} />
+        <Route
+          path="/company/services/:serviceId"
+          element={<ServicesRoutePage />}
+        />
         <Route path="/company/activities" element={<ActivitiesRoutePage />} />
         <Route path="/company/privacy" element={<PrivacyProfileRoutePage />} />
-        <Route path="/company/infrastructure" element={<InfrastructureProfileRoutePage />} />
-        <Route path="/company/data" element={<DataHandlingProfileRoutePage />} />
+        <Route
+          path="/company/infrastructure"
+          element={<InfrastructureProfileRoutePage />}
+        />
+        <Route
+          path="/company/data"
+          element={<DataHandlingProfileRoutePage />}
+        />
         <Route path="/company/access" element={<AccessProfileRoutePage />} />
         <Route path="/vendors" element={<VendorsRoutePage />} />
         <Route path="/vocabulary" element={<VocabularyRoutePage />} />
-        <Route path="/templates" element={<TemplatesRoutePage />} />
         <Route path="/documents" element={<DocumentsRoutePage />} />
+        <Route path="/documents/:mode" element={<DocumentsRoutePage />} />
+        <Route path="/documents/:mode/:id" element={<DocumentsRoutePage />} />
+        <Route
+          path="/templates/*"
+          element={<Navigate to="/documents" replace />}
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

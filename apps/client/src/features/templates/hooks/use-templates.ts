@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useAuthState } from "@/features/auth/hooks/use-auth"
 import {
+  createTemplate,
   createTemplateFromSystem,
   deleteTemplate,
   getOrganizationMembers,
@@ -29,8 +30,7 @@ export const useTemplates = (enabled = true) => {
   return useQuery({
     enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
     queryKey: templatesQueryKey(selectedOrganizationId ?? ""),
-    queryFn: () =>
-      getOrganizationTemplates(selectedOrganizationId ?? ""),
+    queryFn: () => getOrganizationTemplates(selectedOrganizationId ?? ""),
   })
 }
 
@@ -65,6 +65,28 @@ export const useCreateTemplateFromSystem = () => {
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Could not add template")
+    },
+  })
+}
+
+export const useCreateTemplate = () => {
+  const queryClient = useQueryClient()
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+
+  return useMutation({
+    mutationFn: (input: TemplateInput) => createTemplate(organizationId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: templatesQueryKey(organizationId),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: documentsQueryKey(organizationId),
+      })
+      toast.success("Template created")
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Could not create template")
     },
   })
 }

@@ -1,6 +1,5 @@
 import {
   Box,
-  FileText,
   LayoutDashboard,
   LogOut,
   ScrollText,
@@ -155,21 +154,14 @@ export const AppSidebar = ({
             Providers
           </SidebarMenuButton>
           <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            Policies and documents
+            Documents
           </div>
-          <SidebarMenuButton
-            active={pathname.startsWith("/templates")}
-            onClick={() => navigate("/templates")}
-          >
-            <FileText className="size-4" />
-            Templates
-          </SidebarMenuButton>
           <SidebarMenuButton
             active={pathname.startsWith("/documents")}
             onClick={() => navigate("/documents")}
           >
             <ScrollText className="size-4" />
-            Documents
+            Policies & Documents
           </SidebarMenuButton>
         </SidebarMenu>
         <div className="pt-4">
