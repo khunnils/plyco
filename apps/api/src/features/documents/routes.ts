@@ -113,14 +113,6 @@ export async function registerDocumentRoutes(
       const customTemplate = templateInputSchema.safeParse(request.body);
 
       if (customTemplate.success) {
-        await validatePolicyMemberIds(
-          accountRepository,
-          request.params.organizationId,
-          [
-            customTemplate.data.policyOwnerUserId,
-            customTemplate.data.policyApproverUserId,
-          ],
-        );
         const template = await documentRepository.createTemplate(
           request.params.organizationId,
           customTemplate.data,
@@ -161,11 +153,6 @@ export async function registerDocumentRoutes(
         request.params.organizationId,
       );
       const body = templateInputSchema.parse(request.body);
-      await validatePolicyMemberIds(
-        accountRepository,
-        request.params.organizationId,
-        [body.policyOwnerUserId, body.policyApproverUserId],
-      );
       const template = await documentRepository.updateTemplate(
         request.params.organizationId,
         request.params.id,
@@ -364,34 +351,6 @@ export async function registerDocumentRoutes(
         .send(pdf);
     },
   );
-}
-
-async function validatePolicyMemberIds(
-  accountRepository: AccountRepository,
-  organizationId: string,
-  userIds: string[],
-) {
-  const selectedUserIds = userIds.filter(Boolean);
-
-  if (selectedUserIds.length === 0) {
-    return;
-  }
-
-  const members =
-    await accountRepository.listOrganizationMembers(organizationId);
-  const memberUserIds = new Set(members.map((member) => member.userId));
-  const invalidUserIds = selectedUserIds.filter(
-    (userId) => !memberUserIds.has(userId),
-  );
-
-  if (invalidUserIds.length > 0) {
-    throw new ApiError(
-      "POLICY_MEMBER_NOT_FOUND",
-      "Policy owner and approver must be organization members.",
-      400,
-      { userIds: invalidUserIds },
-    );
-  }
 }
 
 function safePdfFilename(title: string) {

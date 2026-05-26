@@ -1005,7 +1005,6 @@ describe("security profile API", () => {
       expect.arrayContaining([
         expect.objectContaining({ key: "organization.name" }),
         expect.objectContaining({ key: "policy.version" }),
-        expect.objectContaining({ key: "policy.effectiveDate" }),
         expect.objectContaining({ key: "service.name" }),
         expect.objectContaining({ key: "service.description" }),
         expect.objectContaining({ key: "service.url" }),
@@ -1276,12 +1275,7 @@ describe("security profile API", () => {
         id: "template-subprocessors",
         organizationId: "org-test",
         sourceSystemTemplateSlug: systemTemplate.slug,
-        policyEffectiveDate: "",
-        policyLastReviewedDate: "",
         policyVersion: "",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "",
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
         ...systemTemplate,
@@ -1590,12 +1584,7 @@ describe("security profile API", () => {
       slug: "security-policy",
       sourceSystemTemplateSlug: "security-policy",
       content: "# {{ company.name }} Security Policy\n",
-      policyEffectiveDate: "",
-      policyLastReviewedDate: "",
       policyVersion: "",
-      policyOwnerUserId: "",
-      policyApproverUserId: "",
-      policyReviewCadence: "",
     });
 
     const updateResponse = await app.inject({
@@ -1603,29 +1592,18 @@ describe("security profile API", () => {
       url: `/organizations/org-test/templates/${createdTemplate.id}`,
       payload: {
         name: "Customer Security Policy",
-        slug: "customer-security-policy",
         content: "# Updated policy\n",
-        policyEffectiveDate: "2026-05-18",
-        policyLastReviewedDate: "2026-05-18",
         policyVersion: "1.0",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "Annual",
       },
     });
 
     expect(updateResponse.statusCode).toBe(200);
     expect(updateResponse.json()).toMatchObject({
       name: "Customer Security Policy",
-      slug: "customer-security-policy",
+      slug: "security-policy",
       sourceSystemTemplateSlug: "security-policy",
       content: "# Updated policy\n",
-      policyEffectiveDate: "2026-05-18",
-      policyLastReviewedDate: "2026-05-18",
       policyVersion: "1.0",
-      policyOwnerUserId: "",
-      policyApproverUserId: "",
-      policyReviewCadence: "Annual",
     });
 
     const listResponse = await app.inject({
@@ -1648,14 +1626,8 @@ describe("security profile API", () => {
       url: "/organizations/org-test/templates",
       payload: {
         name: "Custom Policy",
-        slug: "custom-policy",
         content: "# Custom policy\n",
-        policyEffectiveDate: "",
-        policyLastReviewedDate: "",
         policyVersion: "",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "",
       },
     });
 
@@ -1671,15 +1643,9 @@ describe("security profile API", () => {
       method: "POST",
       url: "/organizations/org-test/templates",
       payload: {
-        name: "Duplicate Custom Policy",
-        slug: "custom-policy",
+        name: "Custom Policy",
         content: "# Duplicate\n",
-        policyEffectiveDate: "",
-        policyLastReviewedDate: "",
         policyVersion: "",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "",
       },
     });
 
@@ -1736,15 +1702,9 @@ describe("security profile API", () => {
       url: `/organizations/org-test/templates/${template.id}`,
       payload: {
         name: "Security Policy",
-        slug: "security-policy",
         content:
-          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n',
-        policyEffectiveDate: "2026-05-18",
-        policyLastReviewedDate: "2026-05-18",
+          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
         policyVersion: "1.0",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "Annual",
       },
     });
 
@@ -1772,7 +1732,7 @@ describe("security profile API", () => {
       templateId: template.id,
       title: "Security Policy",
       renderedContent:
-        "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
+        "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
       hasPdf: false,
     });
     expect(generateResponse.json().sourceHash).toHaveLength(64);
@@ -1938,7 +1898,7 @@ describe("security profile API", () => {
     });
     expect(documentResponse.statusCode).toBe(200);
     expect(documentResponse.json().renderedContent).toBe(
-      "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0 effective 2026-05-18\n",
+      "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
     );
 
     await app.inject({
@@ -1946,15 +1906,9 @@ describe("security profile API", () => {
       url: `/organizations/org-test/templates/${template.id}`,
       payload: {
         name: "Security Policy",
-        slug: "security-policy",
         content:
-          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }} effective {{ policy.effectiveDate }}\n',
-        policyEffectiveDate: "2026-05-18",
-        policyLastReviewedDate: "2026-05-18",
+          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
         policyVersion: "1.1",
-        policyOwnerUserId: "",
-        policyApproverUserId: "",
-        policyReviewCadence: "Annual",
       },
     });
 

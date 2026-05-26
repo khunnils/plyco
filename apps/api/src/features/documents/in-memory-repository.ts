@@ -18,6 +18,16 @@ function newId(prefix: string) {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export class InMemoryDocumentRepository implements DocumentRepository {
   private templates = new Map<string, Template>();
   private documents = new Map<string, Document>();
@@ -60,12 +70,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       slug: systemTemplate.slug,
       sourceSystemTemplateSlug: systemTemplate.slug,
       content: systemTemplate.content,
-      policyEffectiveDate: "",
-      policyLastReviewedDate: "",
       policyVersion: "",
-      policyOwnerUserId: "",
-      policyApproverUserId: "",
-      policyReviewCadence: "",
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -79,10 +84,11 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     input: TemplateInput,
   ): Promise<Template> {
     const timestamp = now();
+    const slug = slugify(input.name) || "template";
     const existing = Array.from(this.templates.values()).find(
       (template) =>
         template.organizationId === organizationId &&
-        template.slug === input.slug,
+        template.slug === slug,
     );
 
     if (existing) {
@@ -90,7 +96,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
         "TEMPLATE_SLUG_EXISTS",
         "A template with this slug already exists.",
         409,
-        { slug: input.slug },
+        { slug },
       );
     }
 
@@ -98,7 +104,10 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       id: newId("template"),
       organizationId,
       sourceSystemTemplateSlug: null,
-      ...input,
+      name: input.name,
+      slug,
+      content: input.content,
+      policyVersion: input.policyVersion,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -118,25 +127,11 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       return null;
     }
 
-    const duplicate = Array.from(this.templates.values()).find(
-      (template) =>
-        template.id !== id &&
-        template.organizationId === currentTemplate.organizationId &&
-        template.slug === input.slug,
-    );
-
-    if (duplicate) {
-      throw new ApiError(
-        "TEMPLATE_SLUG_EXISTS",
-        "A template with this slug already exists.",
-        409,
-        { slug: input.slug },
-      );
-    }
-
     const template: Template = {
       ...currentTemplate,
-      ...input,
+      name: input.name,
+      content: input.content,
+      policyVersion: input.policyVersion,
       updatedAt: now(),
     };
 

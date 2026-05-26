@@ -1125,68 +1125,12 @@
       "example": "annually"
     },
     {
-      "key": "policy.effectiveDate",
-      "label": "Policy effective date",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Effective date for the generated policy or document.",
-      "example": "2026-05-18"
-    },
-    {
-      "key": "policy.lastReviewedDate",
-      "label": "Policy last reviewed date",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Date when the policy or document was last reviewed.",
-      "example": "2026-05-18"
-    },
-    {
       "key": "policy.version",
       "label": "Policy version",
       "type": "string",
       "category": "Policy Metadata",
       "description": "Version identifier for the generated policy or document.",
       "example": "1.0"
-    },
-    {
-      "key": "policy.ownerName",
-      "label": "Policy owner name",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Name of the internal organization member responsible for maintaining the policy or document.",
-      "example": "Jane Security"
-    },
-    {
-      "key": "policy.ownerEmail",
-      "label": "Policy owner email",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Email address of the internal organization member responsible for maintaining the policy or document.",
-      "example": "jane@example.com"
-    },
-    {
-      "key": "policy.approverName",
-      "label": "Policy approver name",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Name of the internal organization member that approved the policy or document.",
-      "example": "Lee Legal"
-    },
-    {
-      "key": "policy.approverEmail",
-      "label": "Policy approver email",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Email address of the internal organization member that approved the policy or document.",
-      "example": "lee@example.com"
-    },
-    {
-      "key": "policy.reviewCadence",
-      "label": "Policy review cadence",
-      "type": "string",
-      "category": "Policy Metadata",
-      "description": "Expected review cadence for the policy or document.",
-      "example": "Annual"
     },
     {
       "key": "infrastructure.organizationProviders",

@@ -16,6 +16,16 @@ import { ApiError } from "../../errors.js";
 import { type OrganizationRepository } from "../organizations/repository.js";
 import { type DocumentRepository } from "./repository.js";
 
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export class PrismaDocumentRepository implements DocumentRepository {
   constructor(
     private readonly organizationRepository: OrganizationRepository,
@@ -43,12 +53,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
           slug: systemTemplate.slug,
           sourceSystemTemplateSlug: systemTemplate.slug,
           content: systemTemplate.content,
-          policyEffectiveDate: "",
-          policyLastReviewedDate: "",
           policyVersion: "",
-          policyOwnerUserId: null,
-          policyApproverUserId: null,
-          policyReviewCadence: "",
         },
       });
 
@@ -62,26 +67,22 @@ export class PrismaDocumentRepository implements DocumentRepository {
     organizationId: string,
     input: TemplateInput,
   ): Promise<Template> {
+    const slug = slugify(input.name) || "template";
     try {
       const template = await this.client.template.create({
         data: {
           organizationId,
           name: input.name,
-          slug: input.slug,
+          slug,
           sourceSystemTemplateSlug: null,
           content: input.content,
-          policyEffectiveDate: input.policyEffectiveDate,
-          policyLastReviewedDate: input.policyLastReviewedDate,
           policyVersion: input.policyVersion,
-          policyOwnerUserId: input.policyOwnerUserId || null,
-          policyApproverUserId: input.policyApproverUserId || null,
-          policyReviewCadence: input.policyReviewCadence,
         },
       });
 
       return mapTemplateRecord(template);
     } catch (error) {
-      this.throwTemplateConflict(error, input.slug);
+      this.throwTemplateConflict(error, slug);
     }
   }
 
@@ -103,20 +104,14 @@ export class PrismaDocumentRepository implements DocumentRepository {
         where: { id },
         data: {
           name: input.name,
-          slug: input.slug,
           content: input.content,
-          policyEffectiveDate: input.policyEffectiveDate,
-          policyLastReviewedDate: input.policyLastReviewedDate,
           policyVersion: input.policyVersion,
-          policyOwnerUserId: input.policyOwnerUserId || null,
-          policyApproverUserId: input.policyApproverUserId || null,
-          policyReviewCadence: input.policyReviewCadence,
         },
       });
 
       return mapTemplateRecord(template);
     } catch (error) {
-      this.throwTemplateConflict(error, input.slug);
+      this.throwTemplateConflict(error, existing.slug);
     }
   }
 

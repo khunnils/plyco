@@ -48,14 +48,8 @@ import { documentStatusLabel } from "@/features/documents/lib/document-status"
 
 const blankTemplate: TemplateInput = {
   name: "",
-  slug: "",
   content: "",
-  policyEffectiveDate: "",
-  policyLastReviewedDate: "",
   policyVersion: "",
-  policyOwnerUserId: "",
-  policyApproverUserId: "",
-  policyReviewCadence: "",
 }
 
 const generatedText = (summary: DocumentSummary) =>
@@ -144,7 +138,6 @@ export const DocumentsRoutePage = () => {
                     <h2 className="font-semibold text-slate-950">
                       {template.name}
                     </h2>
-                    <Badge variant="code">{template.slug}</Badge>
                     {isAdded ? <Badge variant="secondary">Added</Badge> : null}
                   </div>
                   <p className="mt-2 text-sm text-slate-500">
@@ -340,7 +333,6 @@ export const DocumentsRoutePage = () => {
                     <h2 className="font-semibold text-slate-950">
                       {summary.template.name}
                     </h2>
-                    <Badge variant="code">{summary.template.slug}</Badge>
                     <Badge
                       variant={
                         summary.status === "stale"

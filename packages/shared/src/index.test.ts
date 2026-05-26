@@ -553,14 +553,8 @@ describe("shared security profile schemas", () => {
   it("accepts template input policy metadata fields", () => {
     const result = templateInputSchema.safeParse({
       name: "Privacy Policy",
-      slug: "privacy-policy",
       content: "# Privacy Policy\n",
-      policyEffectiveDate: "2026-05-18",
-      policyLastReviewedDate: "2026-05-18",
       policyVersion: "1.0",
-      policyOwnerUserId: "user_security",
-      policyApproverUserId: "user_legal",
-      policyReviewCadence: "Annual",
     });
 
     expect(result.success).toBe(true);

@@ -374,26 +374,15 @@ export const templateSchema = z.object({
   slug: templateSlugSchema,
   sourceSystemTemplateSlug: templateSlugSchema.nullable(),
   content: z.string(),
-  policyEffectiveDate: z.string().default(""),
-  policyLastReviewedDate: z.string().default(""),
   policyVersion: z.string().default(""),
-  policyOwnerUserId: z.string().default(""),
-  policyApproverUserId: z.string().default(""),
-  policyReviewCadence: z.string().default(""),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
 
 export const templateInputSchema = z.object({
   name: z.string().trim().min(1, "Template name is required"),
-  slug: templateSlugSchema,
   content: z.string(),
-  policyEffectiveDate: z.string().default(""),
-  policyLastReviewedDate: z.string().default(""),
   policyVersion: z.string().default(""),
-  policyOwnerUserId: z.string().default(""),
-  policyApproverUserId: z.string().default(""),
-  policyReviewCadence: z.string().default(""),
 });
 
 export const createTemplateFromSystemSchema = z.object({

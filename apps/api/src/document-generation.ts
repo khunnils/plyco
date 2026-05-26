@@ -147,24 +147,8 @@ export class ReportContextBuilder {
   }
 
   private policyContext(template: Template, members: OrganizationMember[]) {
-    const owner = members.find(
-      (member) => member.userId === template.policyOwnerUserId,
-    );
-    const approver = members.find(
-      (member) => member.userId === template.policyApproverUserId,
-    );
-
     return {
-      effectiveDate: template.policyEffectiveDate,
-      lastReviewedDate: template.policyLastReviewedDate,
       version: template.policyVersion,
-      ownerUserId: template.policyOwnerUserId,
-      ownerName: owner?.name ?? "",
-      ownerEmail: owner?.email ?? "",
-      approverUserId: template.policyApproverUserId,
-      approverName: approver?.name ?? "",
-      approverEmail: approver?.email ?? "",
-      reviewCadence: template.policyReviewCadence,
     };
   }
 

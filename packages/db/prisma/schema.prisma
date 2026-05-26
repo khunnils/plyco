@@ -127,8 +127,6 @@ model User {
   name                    String
   picture                 String?
   memberships             OrganizationMembership[]
-  policyOwnedTemplates    Template[]               @relation("TemplatePolicyOwner")
-  policyApprovedTemplates Template[]               @relation("TemplatePolicyApprover")
   createdAt               DateTime                 @default(now()) @map("created_at")
   updatedAt               DateTime                 @updatedAt @map("updated_at")
 
@@ -390,22 +388,13 @@ model Template {
   slug                     String
   sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
-  policyEffectiveDate      String       @default("") @map("policy_effective_date")
-  policyLastReviewedDate   String       @default("") @map("policy_last_reviewed_date")
   policyVersion            String       @default("") @map("policy_version")
-  policyOwnerUserId        String?      @map("policy_owner_user_id")
-  policyOwner              User?        @relation("TemplatePolicyOwner", fields: [policyOwnerUserId], references: [id], onDelete: SetNull, map: "templates_policy_owner_user_id_fkey")
-  policyApproverUserId     String?      @map("policy_approver_user_id")
-  policyApprover           User?        @relation("TemplatePolicyApprover", fields: [policyApproverUserId], references: [id], onDelete: SetNull, map: "templates_policy_approver_user_id_fkey")
-  policyReviewCadence      String       @default("") @map("policy_review_cadence")
   documents                Document[]
   createdAt                DateTime     @default(now()) @map("created_at")
   updatedAt                DateTime     @updatedAt @map("updated_at")
 
   @@unique([organizationId, slug], map: "templates_organization_id_slug_key")
   @@index([organizationId], map: "idx_templates_organization_id")
-  @@index([policyOwnerUserId], map: "idx_templates_policy_owner_user_id")
-  @@index([policyApproverUserId], map: "idx_templates_policy_approver_user_id")
   @@index([sourceSystemTemplateSlug], map: "idx_templates_source_system_template_slug")
   @@map("templates")
 }
