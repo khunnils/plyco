@@ -311,6 +311,17 @@ const ServiceAudiencePanel = ({
     ) as Resolver<ServiceAudienceDraft>,
     values: draft,
   })
+  const childrenDirected = useWatch({
+    control: form.control,
+    name: audiencePath("childrenDirected"),
+  })
+
+  useEffect(() => {
+    if (childrenDirected !== true) {
+      form.setValue(audiencePath("minimumUserAge"), null)
+    }
+  }, [childrenDirected, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -352,14 +363,18 @@ const ServiceAudiencePanel = ({
               codeValueList(vocabulary, "regions", service.availabilityRegions),
             ],
             ["Directed to children", boolText(service.childrenDirected)],
-            [
-              "Minimum user age",
-              service.minimumUserAge === null
-                ? "Not answered"
-                : service.minimumUserAge === 0
-                  ? "Not set"
-                  : service.minimumUserAge,
-            ],
+            ...(service.childrenDirected
+              ? [
+                  [
+                    "Minimum user age",
+                    service.minimumUserAge === null
+                      ? "Not answered"
+                      : service.minimumUserAge === 0
+                        ? "Not set"
+                        : service.minimumUserAge,
+                  ] as ProfilePanelDetailRow,
+                ]
+              : []),
           ]}
         />
       }
@@ -410,12 +425,14 @@ const ServiceAudiencePanel = ({
           label="Directed to children"
           name={audiencePath("childrenDirected")}
         />
-        <FieldNumberInput
-          error={form.formState.errors.minimumUserAge}
-          label="Minimum user age"
-          name={audiencePath("minimumUserAge")}
-          register={form.register}
-        />
+        {childrenDirected === true && (
+          <FieldNumberInput
+            error={form.formState.errors.minimumUserAge}
+            label="Minimum user age"
+            name={audiencePath("minimumUserAge")}
+            register={form.register}
+          />
+        )}
       </div>
     </ProfilePanelShell>
   )

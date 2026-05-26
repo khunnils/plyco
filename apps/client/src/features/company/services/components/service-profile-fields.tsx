@@ -1,9 +1,11 @@
+import { useEffect } from "react"
 import { Plus, Trash2 } from "lucide-react"
 import { emptyServiceProfile } from "@plyco/shared"
 import {
   type FieldPath,
   type UseFormReturn,
   useFieldArray,
+  useWatch,
 } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -28,6 +30,20 @@ const MinimumAgeField = ({
   index: number
 }) => {
   const error = form.formState.errors.services?.[index]?.minimumUserAge
+  const childrenDirected = useWatch({
+    control: form.control,
+    name: servicePath(index, "childrenDirected"),
+  })
+
+  useEffect(() => {
+    if (childrenDirected !== true) {
+      form.setValue(servicePath(index, "minimumUserAge"), null)
+    }
+  }, [childrenDirected, form, index])
+
+  if (childrenDirected !== true) {
+    return null
+  }
 
   return (
     <label className="grid gap-2 text-sm font-medium text-slate-800">
