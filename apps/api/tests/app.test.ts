@@ -2306,6 +2306,7 @@ describe("security profile API", () => {
 
   it("passes Airtable lookup codes into the provider lookup prompt", async () => {
     let promptVariables: Record<string, string> | null = null;
+    let responseSchema: unknown = null;
     const service = new LlmProviderLookupService(
       new StaticProviderLookupCodeSource({
         categories: [{ code: "source_control", name: "Source control" }],
@@ -2325,7 +2326,8 @@ describe("security profile API", () => {
         },
       },
       {
-        async generateJson() {
+        async generateJson(input) {
+          responseSchema = input.responseSchema;
           return providerLookupResult;
         },
       },
@@ -2343,6 +2345,16 @@ describe("security profile API", () => {
     expect(JSON.parse(promptVariables?.systemTypes ?? "[]")).toEqual([
       { code: "source_control", name: "Source control" },
     ]);
+    expect(responseSchema).toMatchObject({
+      properties: {
+        provider: {
+          properties: {
+            category: { enum: ["source_control"] },
+            systemType: { enum: ["source_control"] },
+          },
+        },
+      },
+    });
   });
 
   it("rejects invalid provider lookup JSON shapes", async () => {
@@ -2507,20 +2519,29 @@ describe("security profile API", () => {
     ]);
   });
 
-  it("rejects provider import when the Airtable category is missing", async () => {
+  it("creates the Airtable provider category when import lookup returns a new valid category", async () => {
+    const client = new InMemoryAirtableImportClient();
     const service = new AirtableProviderImportService(
       {
         async lookup() {
           return providerLookupResult;
         },
       },
-      new InMemoryAirtableImportClient(),
+      client,
     );
+    const result = await service.importProvider("https://github.com");
 
-    await expect(service.importProvider("https://github.com")).rejects.toMatchObject({
-      code: "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
-      statusCode: 400,
+    expect(result).toMatchObject({
+      organizationAction: "created",
+      providerAction: "created",
     });
+    expect(client.records["Provider Categories"][0]?.fields).toEqual({
+      Code: "source_control",
+      Name: "Source control",
+    });
+    expect(client.records.Providers[0]?.fields["Provider Categories"]).toEqual([
+      "rec-Provider-Categories-0",
+    ]);
   });
 
   it("returns provider catalog upstream failures as structured gateway errors", async () => {

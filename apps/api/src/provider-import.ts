@@ -171,19 +171,14 @@ export class AirtableProviderImportService implements ProviderImportService {
     )
     const category = categories.find((record) => categoryMatches(record, lookup))
 
-    if (!category) {
-      throw new ApiError(
-        "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
-        "Provider category was not found in Airtable.",
-        400,
-        {
-          category: lookup.provider.category,
-          categoryName: lookup.provider.categoryName,
-        },
-      )
+    if (category) {
+      return category
     }
 
-    return category
+    return this.airtableClient.createRecord(PROVIDER_CATEGORIES_TABLE, {
+      Code: lookup.provider.category,
+      Name: lookup.provider.categoryName || lookup.provider.category,
+    })
   }
 
   private async upsertOrganization(lookup: ProviderLookupResult): Promise<{

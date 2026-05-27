@@ -60,7 +60,10 @@ export class LlmProviderLookupService implements ProviderLookupService {
     const generated = await this.llmClient.generateJson({
       model: this.model,
       prompt,
-      responseSchema: providerLookupResponseSchema,
+      responseSchema: providerLookupResponseSchema({
+        categories: codes.categories.map((code) => code.code),
+        systemTypes: codes.systemTypes.map((code) => code.code),
+      }),
     })
     const parsed = providerLookupResultSchema.safeParse(generated)
 

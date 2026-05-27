@@ -21,6 +21,11 @@ export interface LlmJsonClient {
   }): Promise<unknown>
 }
 
+export type ProviderLookupResponseSchemaOptions = {
+  categories: string[]
+  systemTypes: string[]
+}
+
 const usageDetails = (
   usageMetadata: GenerateContentResponseUsageMetadata | undefined,
 ) => {
@@ -116,7 +121,10 @@ export class GeminiJsonClient implements LlmJsonClient {
   }
 }
 
-export const providerLookupResponseSchema = {
+export const providerLookupResponseSchema = ({
+  categories,
+  systemTypes,
+}: ProviderLookupResponseSchemaOptions) => ({
   type: Type.OBJECT,
   properties: {
     organization: {
@@ -142,11 +150,11 @@ export const providerLookupResponseSchema = {
         id: { type: Type.STRING },
         name: { type: Type.STRING },
         organization: { type: Type.STRING },
-        category: { type: Type.STRING },
+        category: { type: Type.STRING, enum: categories },
         purpose: { type: Type.STRING },
         categoryName: { type: Type.STRING },
         url: { type: Type.STRING },
-        systemType: { type: Type.STRING },
+        systemType: { type: Type.STRING, enum: systemTypes },
         securityCriticality: { type: Type.STRING },
         handlesCustomerData: { type: Type.BOOLEAN },
       },
@@ -165,4 +173,4 @@ export const providerLookupResponseSchema = {
     },
   },
   required: ["organization", "provider"],
-} satisfies SchemaUnion
+}) satisfies SchemaUnion
