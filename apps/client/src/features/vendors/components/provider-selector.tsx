@@ -1,4 +1,4 @@
-import { ExternalLink, Plus, Search, X } from "lucide-react"
+import { Check, ExternalLink, Plus, Search, X } from "lucide-react"
 import { type Provider } from "@plyco/shared"
 import { useMemo, useState } from "react"
 
@@ -34,9 +34,11 @@ export const ProviderSelector = ({
   const existingProviderNameSet = useMemo(
     () =>
       new Set(
-        existingProviderNames.map((name) => name.trim().toLowerCase()).filter(Boolean),
+        existingProviderNames
+          .map((name) => name.trim().toLowerCase())
+          .filter(Boolean)
       ),
-    [existingProviderNames],
+    [existingProviderNames]
   )
   const categories = useMemo(
     () => [
@@ -51,7 +53,7 @@ export const ProviderSelector = ({
     let result = providers
     if (selectedCategory !== allCategories) {
       result = result.filter(
-        (provider) => (provider.category ?? "Provider") === selectedCategory,
+        (provider) => (provider.category ?? "Provider") === selectedCategory
       )
     }
     if (searchTerm.trim() !== "") {
@@ -61,35 +63,45 @@ export const ProviderSelector = ({
           provider.name.toLowerCase().includes(lowerSearch) ||
           (provider.category &&
             provider.category.toLowerCase().includes(lowerSearch)) ||
-          (provider.url && provider.url.toLowerCase().includes(lowerSearch)),
+          (provider.url && provider.url.toLowerCase().includes(lowerSearch))
       )
     }
     return result
   }, [providers, selectedCategory, searchTerm])
 
   const selectedProviders = providers.filter((provider) =>
-    selectedProviderIds.includes(provider.id),
+    selectedProviderIds.includes(provider.id)
   )
-  const toggleProvider = (providerId: string, checked: boolean) => {
+  const toggleProvider = (providerId: string) => {
     setSelectedProviderIds((current) =>
-      checked
-        ? [...current, providerId]
-        : current.filter((currentId) => currentId !== providerId),
+      current.includes(providerId)
+        ? current.filter((currentId) => currentId !== providerId)
+        : [...current, providerId]
     )
   }
 
   return (
-    <div className="grid gap-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="grid gap-4">
+      <div className="grid gap-3">
+        <div className="relative w-full max-w-xl">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            className="h-11 rounded-md border-slate-200 bg-white pr-4 pl-9"
+            placeholder="Search catalog..."
+            value={searchTerm}
+            type="text"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         {categories.length > 1 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {categories.map((category) => (
               <button
                 aria-pressed={selectedCategory === category}
                 className={cn(
-                  "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:text-slate-950",
+                  "shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950",
                   selectedCategory === category &&
-                    "border-blue-200 bg-blue-50 text-blue-700"
+                    "border-slate-900 bg-slate-900 text-white hover:border-slate-900 hover:text-white"
                 )}
                 key={category}
                 type="button"
@@ -102,60 +114,56 @@ export const ProviderSelector = ({
         ) : (
           <div />
         )}
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-          <Input
-            className="pl-9 pr-4"
-            placeholder="Search catalog..."
-            value={searchTerm}
-            type="text"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {filteredProviders.map((provider) => {
           const alreadyAdded = existingProviderNameSet.has(
-            provider.name.trim().toLowerCase(),
+            provider.name.trim().toLowerCase()
           )
+          const selected = selectedProviderIds.includes(provider.id)
 
           return (
-              <label
-                className={[
-                  "border border-slate-200 p-4 text-left transition",
-                  alreadyAdded
-                    ? "bg-slate-50 text-slate-400"
-                    : "cursor-pointer bg-white hover:border-blue-300 hover:bg-blue-50/40",
-                ].join(" ")}
-                key={provider.id}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 gap-3">
-                    <input
-                      checked={
-                        alreadyAdded || selectedProviderIds.includes(provider.id)
-                      }
-                      className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-                      disabled={alreadyAdded}
-                      type="checkbox"
-                      onChange={(event) =>
-                        toggleProvider(provider.id, event.target.checked)
-                      }
-                    />
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="truncate font-semibold text-slate-950">
-                          {provider.name}
-                        </h3>
-                        {alreadyAdded ? (
-                          <Badge variant="secondary">Added</Badge>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {provider.category ?? "Provider"}
-                      </p>
-                    </div>
+            <button
+              aria-pressed={alreadyAdded || selected}
+              className={cn(
+                "border p-4 text-left transition focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:outline-none",
+                alreadyAdded
+                  ? "border-slate-200 bg-slate-50 text-slate-400"
+                  : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50",
+                selected &&
+                  !alreadyAdded &&
+                  "border-slate-900 bg-slate-50"
+              )}
+              disabled={alreadyAdded}
+              key={provider.id}
+              type="button"
+              onClick={() => toggleProvider(provider.id)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3
+                      className={cn(
+                        "truncate font-semibold",
+                        alreadyAdded ? "text-slate-500" : "text-slate-950"
+                      )}
+                    >
+                      {provider.name}
+                    </h3>
+                    {alreadyAdded ? (
+                      <Badge variant="secondary">Added</Badge>
+                    ) : null}
                   </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {provider.category ?? "Provider"}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {selected && !alreadyAdded ? (
+                    <span className="inline-flex size-6 items-center justify-center rounded-full bg-slate-900 text-white">
+                      <Check className="size-4" />
+                    </span>
+                  ) : null}
                   {provider.logoUrl ? (
                     <img
                       alt=""
@@ -164,23 +172,21 @@ export const ProviderSelector = ({
                     />
                   ) : null}
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2 pl-7">
-                  {provider.securityCriticality ? (
-                    <Badge variant="warning">
-                      {provider.securityCriticality}
-                    </Badge>
-                  ) : null}
-                  {provider.handlesCustomerData ? (
-                    <Badge variant="info">Customer data</Badge>
-                  ) : null}
-                </div>
-                {provider.url ? (
-                  <p className="mt-3 inline-flex items-center gap-1 pl-7 text-xs text-slate-500">
-                    <ExternalLink className="size-3" />
-                    {provider.url}
-                  </p>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {provider.securityCriticality ? (
+                  <Badge variant="warning">
+                    {provider.securityCriticality}
+                  </Badge>
                 ) : null}
-              </label>
+              </div>
+              {provider.url ? (
+                <p className="mt-3 inline-flex max-w-full items-center gap-1 truncate text-xs text-slate-500">
+                  <ExternalLink className="size-3" />
+                  <span className="truncate">{provider.url}</span>
+                </p>
+              ) : null}
+            </button>
           )
         })}
       </div>
