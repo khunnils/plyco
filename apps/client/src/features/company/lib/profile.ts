@@ -35,6 +35,7 @@ export const emptyOrganizationProviderDraft: OrganizationProviderInput = {
   countryOfRegistration: "",
   criticality: "medium",
   notes: "",
+  purpose: "",
 }
 
 export const emptyServiceProviderUsageDraft: ServiceProviderUsageInput = {
@@ -95,6 +96,7 @@ export const toOrganizationProviderInput = (
   countryOfRegistration: provider.countryOfRegistration,
   criticality: provider.criticality,
   notes: provider.notes,
+  purpose: provider.purpose,
 })
 
 export const toServiceProviderUsageInput = (
@@ -204,4 +206,5 @@ export const organizationProviderInputFromProvider = (
   countryOfRegistration: provider.countryOfRegistration || "",
   criticality: providerCriticality(provider),
   notes: "",
+  purpose: "",
 })

@@ -72,14 +72,16 @@ export const AddProviderDialog = ({
         category: provider.category || "",
         countryOfRegistration: organization.countryOfRegistration || "",
         criticality,
-        notes: provider.purpose ? `Purpose: ${provider.purpose}` : "",
+        notes: "",
+        purpose: provider.purpose || "",
       }
 
       toast.success("Details resolved successfully!")
       onSuccess(providerInput)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to resolve provider:", err)
-      setErrorMsg(err.message ?? "Could not retrieve details from the website.")
+      const message = err instanceof Error ? err.message : "Could not retrieve details from the website."
+      setErrorMsg(message)
       setStatus("error")
     }
   }

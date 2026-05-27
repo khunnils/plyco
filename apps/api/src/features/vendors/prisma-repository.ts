@@ -330,6 +330,7 @@ export class PrismaVendorRepository implements ProviderRepository {
       countryOfRegistration: input.countryOfRegistration,
       criticality: input.criticality,
       notes: input.notes || null,
+      purpose: input.purpose || null,
     }
   }
 

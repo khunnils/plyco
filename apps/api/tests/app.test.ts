@@ -1348,13 +1348,17 @@ describe("security profile API", () => {
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/organization-providers",
-      payload: vendorBody,
+      payload: {
+        ...vendorBody,
+        purpose: "Git hosting and collaboration",
+      },
     });
 
     expect(createResponse.statusCode).toBe(201);
     const createdVendor = createResponse.json();
     expect(createdVendor.name).toBe("GitHub");
     expect(createdVendor.countryOfRegistration).toBe("US");
+    expect(createdVendor.purpose).toBe("Git hosting and collaboration");
 
     const createUseResponse = await app.inject({
       method: "POST",

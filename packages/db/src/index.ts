@@ -420,6 +420,7 @@ export function mapOrganizationProviderRecord(record: {
   countryOfRegistration: string;
   criticality: string;
   notes: string | null;
+  purpose: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): OrganizationProvider {
@@ -433,6 +434,7 @@ export function mapOrganizationProviderRecord(record: {
     countryOfRegistration: record.countryOfRegistration,
     criticality: record.criticality,
     notes: record.notes ?? "",
+    purpose: record.purpose ?? "",
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   });

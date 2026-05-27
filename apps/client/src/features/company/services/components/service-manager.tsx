@@ -789,11 +789,14 @@ const ServiceProviderUsagePanel = ({
               type="button"
               onClick={() => {
                 checkedProviderIds.forEach((organizationProviderId) => {
+                  const mappedProvider = organizationProviders.find(
+                    (p) => p.id === organizationProviderId,
+                  )
                   onCreate({
                     ...emptyServiceProviderUsageDraft,
                     serviceId: service.id ?? "",
                     organizationProviderId,
-                    purpose: serviceProviderPurpose(service),
+                    purpose: mappedProvider?.purpose || serviceProviderPurpose(service),
                   })
                 })
                 setShowAddProviders(false)
@@ -952,9 +955,9 @@ const ServiceProviderUsagePanel = ({
                               serviceProviderUsageHelperText.dataRegions,
                             ],
                             [
-                              "Notes",
-                              providerUsage.notes || "Not set",
-                              serviceProviderUsageHelperText.notes,
+                              "Purpose",
+                              providerUsage.purpose || "Not set",
+                              serviceProviderUsageHelperText.purpose,
                             ],
                           ]}
                         />

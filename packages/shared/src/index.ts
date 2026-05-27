@@ -286,6 +286,7 @@ export const organizationProviderInputSchema = z.object({
   countryOfRegistration: countryCodeSchema.or(z.literal("")).default(""),
   criticality: providerCriticalitySchema,
   notes: z.string().trim().optional().or(z.literal("")),
+  purpose: z.string().trim().optional().or(z.literal("")),
 });
 
 export const organizationProviderInventorySchema =

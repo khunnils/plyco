@@ -511,6 +511,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       countryOfRegistration: provider.countryOfRegistration || "",
       criticality: this.providerCriticality(provider),
       notes: null,
+      purpose: null,
     };
   }
 
