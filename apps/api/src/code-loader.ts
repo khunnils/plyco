@@ -1,133 +1,18 @@
 import { randomUUID } from "node:crypto"
 
 import { prisma, type PrismaClient } from "@plyco/db"
-import { z } from "zod"
 
+import {
+  linkedRecordIds,
+  listAirtableRecords,
+  numberField,
+  stringField,
+} from "./airtable.js"
 import { ApiError } from "./errors.js"
 import { countries, requiredCodeSetIds } from "./features/vocabulary/reference-data.js"
 
-const AIRTABLE_API_URL = "https://api.airtable.com/v0"
 const CODE_SETS_TABLE_NAME = "Code Sets"
 const CODES_TABLE_NAME = "Codes"
-
-const airtableRecordSchema = z.object({
-  id: z.string().min(1),
-  fields: z.record(z.string(), z.unknown()),
-})
-
-const airtableResponseSchema = z.object({
-  records: z.array(airtableRecordSchema),
-  offset: z.string().optional(),
-})
-
-type AirtableRecord = z.infer<typeof airtableRecordSchema>
-
-const stringField = (
-  fields: Record<string, unknown>,
-  ...names: string[]
-): string => {
-  for (const name of names) {
-    const value = fields[name]
-
-    if (typeof value === "string" && value.trim()) {
-      return value.trim()
-    }
-  }
-
-  return ""
-}
-
-const numberField = (
-  fields: Record<string, unknown>,
-  ...names: string[]
-): number | undefined => {
-  for (const name of names) {
-    const value = fields[name]
-
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return Math.trunc(value)
-    }
-
-    if (typeof value === "string" && value.trim()) {
-      const parsed = Number(value.trim())
-
-      if (Number.isFinite(parsed)) {
-        return Math.trunc(parsed)
-      }
-    }
-  }
-
-  return undefined
-}
-
-const linkedRecordIds = (
-  fields: Record<string, unknown>,
-  ...names: string[]
-): string[] => {
-  for (const name of names) {
-    const value = fields[name]
-
-    if (Array.isArray(value)) {
-      return value.filter(
-        (item): item is string => typeof item === "string" && item.length > 0,
-      )
-    }
-
-    // Airtable single-record links are returned as a string id, not a one-item array.
-    if (typeof value === "string" && value.length > 0) {
-      return [value]
-    }
-  }
-
-  return []
-}
-
-async function listAirtableRecords({
-  apiKey,
-  baseId,
-  tableName,
-}: {
-  apiKey: string
-  baseId: string
-  tableName: string
-}): Promise<AirtableRecord[]> {
-  const records: AirtableRecord[] = []
-  let offset: string | undefined
-
-  do {
-    const url = new URL(
-      `${AIRTABLE_API_URL}/${baseId}/${encodeURIComponent(tableName)}`,
-    )
-    url.searchParams.set("pageSize", "100")
-
-    if (offset) {
-      url.searchParams.set("offset", offset)
-    }
-
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    })
-
-    if (!response.ok) {
-      throw new ApiError(
-        "AIRTABLE_CODE_LOAD_FAILED",
-        `Unable to load Airtable table ${tableName}.`,
-        502,
-        {
-          status: response.status,
-          statusText: response.statusText,
-          body: (await response.text()).slice(0, 1000),
-        },
-      )
-    }
-
-    const body = airtableResponseSchema.parse(await response.json())
-    records.push(...body.records)
-    offset = body.offset
-  } while (offset)
-
-  return records
-}
 
 export async function loadCodesFromAirtable({
   apiKey,
@@ -142,11 +27,13 @@ export async function loadCodesFromAirtable({
     listAirtableRecords({
       apiKey,
       baseId,
+      errorCode: "AIRTABLE_CODE_LOAD_FAILED",
       tableName: CODE_SETS_TABLE_NAME,
     }),
     listAirtableRecords({
       apiKey,
       baseId,
+      errorCode: "AIRTABLE_CODE_LOAD_FAILED",
       tableName: CODES_TABLE_NAME,
     }),
   ])

@@ -122,3 +122,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Toaster customizations */
+[data-sonner-toast] {
+  transition: none !important;
+  animation: none !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  --success-bg: #ffffff !important;
+  --success-border: #e2e8f0 !important;
+  --success-text: #0f172a !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #10b981 !important; /* Emerald 500 */
+}

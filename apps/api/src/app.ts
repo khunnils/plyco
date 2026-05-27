@@ -5,14 +5,18 @@ import Fastify, {
   type FastifyServerOptions,
 } from "fastify"
 
+import {
+  AirtableProviderLookupCodeSource,
+  type ProviderLookupCodeSource,
+} from "./airtable-code-source.js"
 import { registerAuth } from "./auth.js"
-import { sendError } from "./errors.js"
 import { apiConfig, type AuthConfig } from "./config.js"
 import {
   GcsDocumentPdfStorage,
   NullDocumentPdfStorage,
   type DocumentPdfStorage,
 } from "./document-pdfs.js"
+import { ApiError, sendError } from "./errors.js"
 import { InMemoryAccountRepository } from "./features/accounts/in-memory-repository.js"
 import { PrismaAccountRepository } from "./features/accounts/prisma-repository.js"
 import { type AccountRepository } from "./features/accounts/repository.js"
@@ -33,6 +37,17 @@ import { InMemoryVocabularyRepository } from "./features/vocabulary/in-memory-re
 import { PrismaVocabularyRepository } from "./features/vocabulary/prisma-repository.js"
 import { type VocabularyRepository } from "./features/vocabulary/repository.js"
 import { registerVocabularyRoutes } from "./features/vocabulary/routes.js"
+import { GeminiJsonClient, type LlmJsonClient } from "./llm-client.js"
+import { LangfusePromptClient, type PromptClient } from "./prompt-client.js"
+import {
+  AirtableProviderImportClient,
+  AirtableProviderImportService,
+  type ProviderImportService,
+} from "./provider-import.js"
+import {
+  LlmProviderLookupService,
+  type ProviderLookupService,
+} from "./provider-lookup.js"
 import {
   AirtableProviderSource,
   type ProviderSource,
@@ -53,6 +68,12 @@ export type CreateAppOptions = {
   documentRepository?: DocumentRepository
   documentPdfStorage?: DocumentPdfStorage
   providerSource?: ProviderSource
+  providerLookupApiKey?: string
+  providerLookupCodeSource?: ProviderLookupCodeSource
+  providerLookupService?: ProviderLookupService
+  providerImportService?: ProviderImportService
+  promptClient?: PromptClient
+  llmClient?: LlmJsonClient
   systemTemplateSource?: SystemTemplateSource
   logger?: FastifyServerOptions["logger"]
 }
@@ -71,6 +92,12 @@ export async function createApp({
         apiConfig.airtableApiKey,
       )
     : new StaticProviderSource(),
+  providerLookupApiKey = apiConfig.apiKey,
+  providerLookupCodeSource,
+  providerLookupService,
+  providerImportService,
+  promptClient,
+  llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
@@ -115,9 +142,22 @@ export async function createApp({
     accountRepository: repositories.accountRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
+  const resolvedProviderLookupService =
+    providerLookupService ??
+    createDefaultProviderLookupService({
+      codeSource: providerLookupCodeSource,
+      llmClient,
+      promptClient,
+    })
+
   await registerVendorRoutes(app, {
     accountRepository: repositories.accountRepository,
     providerSource,
+    providerLookupApiKey,
+    providerLookupService: resolvedProviderLookupService,
+    providerImportService:
+      providerImportService ??
+      createDefaultProviderImportService(resolvedProviderLookupService),
     providerRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
@@ -150,6 +190,121 @@ export async function createApp({
   })
 
   return app
+}
+
+function createDefaultProviderImportService(
+  lookupService: ProviderLookupService,
+): ProviderImportService {
+  let service: ProviderImportService | null = null
+
+  return {
+    async importProvider(inputUrl: string) {
+      if (service) {
+        return service.importProvider(inputUrl)
+      }
+
+      const airtableBase = apiConfig.airtableBase
+      const airtableApiKey = apiConfig.airtableApiKey
+      const missing = [
+        airtableBase ? null : "AIRTABLE_BASE",
+        airtableApiKey ? null : "AIRTABLE_API_KEY",
+      ].filter((name): name is string => Boolean(name))
+
+      if (missing.length > 0) {
+        throw new ApiError(
+          "PROVIDER_IMPORT_NOT_CONFIGURED",
+          "Provider import is not configured.",
+          500,
+          { missing },
+        )
+      }
+
+      if (!airtableBase || !airtableApiKey) {
+        throw new ApiError(
+          "PROVIDER_IMPORT_NOT_CONFIGURED",
+          "Provider import is not configured.",
+          500,
+        )
+      }
+
+      service = new AirtableProviderImportService(
+        lookupService,
+        new AirtableProviderImportClient(airtableBase, airtableApiKey),
+      )
+
+      return service.importProvider(inputUrl)
+    },
+  }
+}
+
+function createDefaultProviderLookupService({
+  codeSource,
+  promptClient,
+  llmClient,
+}: {
+  codeSource?: ProviderLookupCodeSource
+  promptClient?: PromptClient
+  llmClient?: LlmJsonClient
+}): ProviderLookupService {
+  let service: ProviderLookupService | null = null
+
+  return {
+    async lookup(inputUrl: string) {
+      if (service) {
+        return service.lookup(inputUrl)
+      }
+
+      const airtableBase = apiConfig.airtableBase
+      const airtableApiKey = apiConfig.airtableApiKey
+      const geminiApiKey = apiConfig.geminiApiKey
+      const missing = [
+        codeSource || airtableBase ? null : "AIRTABLE_BASE",
+        codeSource || airtableApiKey ? null : "AIRTABLE_API_KEY",
+        geminiApiKey || llmClient ? null : "GEMINI_API_KEY",
+        promptClient || apiConfig.langfusePublicKey ? null : "LANGFUSE_PUBLIC_KEY",
+        promptClient || apiConfig.langfuseSecretKey ? null : "LANGFUSE_SECRET_KEY",
+      ].filter((name): name is string => Boolean(name))
+
+      if (missing.length > 0) {
+        throw new ApiError(
+          "PROVIDER_LOOKUP_NOT_CONFIGURED",
+          "Provider lookup is not configured.",
+          500,
+          { missing },
+        )
+      }
+
+      const resolvedCodeSource =
+        codeSource ??
+        (airtableBase && airtableApiKey
+          ? new AirtableProviderLookupCodeSource(airtableBase, airtableApiKey)
+          : null)
+      const resolvedLlmClient =
+        llmClient ?? (geminiApiKey ? new GeminiJsonClient(geminiApiKey) : null)
+
+      if (!resolvedCodeSource || !resolvedLlmClient) {
+        throw new ApiError(
+          "PROVIDER_LOOKUP_NOT_CONFIGURED",
+          "Provider lookup is not configured.",
+          500,
+        )
+      }
+
+      service = new LlmProviderLookupService(
+        resolvedCodeSource,
+        promptClient ??
+          LangfusePromptClient.fromConfig({
+            publicKey: apiConfig.langfusePublicKey,
+            secretKey: apiConfig.langfuseSecretKey,
+            baseUrl: apiConfig.langfuseBaseUrl,
+          }),
+        resolvedLlmClient,
+        apiConfig.geminiProviderLookupModel,
+      )
+
+      return service.lookup(inputUrl)
+    },
+  }
 }
 
 export function createTestApp() {
@@ -218,6 +373,13 @@ export function createTestApp() {
     ]),
     systemTemplateSource: new StaticSystemTemplateSource([
       {
+        slug: "data-security-policy",
+        name: "Data Security Policy",
+        description:
+          "A customer-facing data security policy based on access control, encryption, monitoring, incident response, backup, and vendor risk data.",
+        content: "# {{ company.name }} Data Security Policy\n",
+      },
+      {
         slug: "security-policy",
         name: "Security Policy",
         description: "A practical starter security policy.",
@@ -235,6 +397,13 @@ export function createTestApp() {
         description:
           "A customer-facing subprocessor summary based on the organization's vendor data processors.",
         content: "# {{ organization.name }} Data Processors and Subprocessors\n",
+      },
+      {
+        slug: "privacy-policy",
+        name: "Privacy Policy",
+        description:
+          "A customer-facing privacy policy based on the organization's privacy, service, and vendor data.",
+        content: "# {{ company.name }} Privacy Policy\n",
       },
     ]),
   })

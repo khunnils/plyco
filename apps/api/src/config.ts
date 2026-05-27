@@ -6,8 +6,8 @@ import { config as loadDotenv } from "dotenv"
 const apiDir = path.resolve(fileURLToPath(import.meta.url), "../../")
 const repoRoot = path.resolve(apiDir, "../..")
 
-loadDotenv({ path: path.join(repoRoot, ".env"), override: false })
-loadDotenv({ path: path.join(apiDir, ".env"), override: true })
+loadDotenv({ path: path.join(repoRoot, ".env"), override: false, quiet: true })
+loadDotenv({ path: path.join(apiDir, ".env"), override: true, quiet: true })
 
 function readPort(value: string | undefined) {
   const port = Number(value ?? 4000)
@@ -68,6 +68,17 @@ export const apiConfig = {
   port: readPort(process.env.PORT),
   airtableBase: process.env.AIRTABLE_BASE,
   airtableApiKey: process.env.AIRTABLE_API_KEY,
+  apiKey: process.env.PLYCO_API_KEY,
+  cliApiUrl:
+    process.env.PLYCO_API_URL ??
+    process.env.API_PUBLIC_URL ??
+    "http://localhost:4000",
+  geminiApiKey: process.env.GEMINI_API_KEY,
+  geminiProviderLookupModel:
+    process.env.GEMINI_PROVIDER_LOOKUP_MODEL ?? "gemini-2.5-flash",
+  langfusePublicKey: process.env.LANGFUSE_PUBLIC_KEY,
+  langfuseSecretKey: process.env.LANGFUSE_SECRET_KEY,
+  langfuseBaseUrl: process.env.LANGFUSE_BASE_URL,
   documentPdfBucket: process.env.DOCUMENT_PDF_BUCKET ?? "plyco-public",
   gcpProjectId: process.env.GCP_PROJECT_ID ?? "plyco-prod",
   auth: () => readAuthConfig(),

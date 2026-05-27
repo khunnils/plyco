@@ -170,7 +170,11 @@ export async function registerAuth(
   })
 
   app.addHook("preHandler", async (request) => {
-    if (request.url.startsWith("/auth/")) {
+    if (
+      request.url.startsWith("/auth/") ||
+      request.url.startsWith("/providers/lookup") ||
+      request.url.startsWith("/providers/import")
+    ) {
       return
     }
 

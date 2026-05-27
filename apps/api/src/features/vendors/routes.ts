@@ -2,12 +2,16 @@ import {
   businessActivityInputSchema,
   serviceProviderUsageInputSchema,
   organizationProviderInputSchema,
+  providerLookupInputSchema,
 } from "@plyco/shared"
 import { type FastifyInstance } from "fastify"
 
+import { requireApiKey } from "../../api-key-auth.js"
 import { ApiError } from "../../errors.js"
 import { requireOrganizationMembership } from "../../organization-context.js"
+import { type ProviderImportService } from "../../provider-import.js"
 import { type ProviderSource } from "../../providers.js"
+import { type ProviderLookupService } from "../../provider-lookup.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
 import {
@@ -21,17 +25,39 @@ export async function registerVendorRoutes(
   app: FastifyInstance,
   {
     providerSource,
+    providerLookupService,
+    providerImportService,
+    providerLookupApiKey,
     providerRepository,
     accountRepository,
     vocabularyRepository,
   }: {
     accountRepository: AccountRepository
     providerSource: ProviderSource
+    providerLookupService: ProviderLookupService
+    providerImportService: ProviderImportService
+    providerLookupApiKey?: string
     providerRepository: ProviderRepository
     vocabularyRepository: VocabularyRepository
   },
 ) {
   app.get("/providers", async () => providerSource.listProviders())
+
+  app.post("/providers/lookup", async (request, reply) => {
+    requireApiKey(request, providerLookupApiKey)
+    const body = providerLookupInputSchema.parse(request.body)
+    const result = await providerLookupService.lookup(body.inputUrl)
+
+    return reply.send(result)
+  })
+
+  app.post("/providers/import", async (request, reply) => {
+    requireApiKey(request, providerLookupApiKey)
+    const body = providerLookupInputSchema.parse(request.body)
+    const result = await providerImportService.importProvider(body.inputUrl)
+
+    return reply.send(result)
+  })
 
   app.get<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/business-activities",

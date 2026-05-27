@@ -1,9 +1,10 @@
-import { ExternalLink, Plus, X } from "lucide-react"
+import { ExternalLink, Plus, Search, X } from "lucide-react"
 import { type Provider } from "@plyco/shared"
 import { useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 const allCategories = "All"
@@ -29,6 +30,7 @@ export const ProviderSelector = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState(allCategories)
   const [selectedProviderIds, setSelectedProviderIds] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
   const existingProviderNameSet = useMemo(
     () =>
       new Set(
@@ -45,12 +47,26 @@ export const ProviderSelector = ({
     ],
     [providers]
   )
-  const filteredProviders =
-    selectedCategory === allCategories
-      ? providers
-      : providers.filter(
-          (provider) => (provider.category ?? "Provider") === selectedCategory
-        )
+  const filteredProviders = useMemo(() => {
+    let result = providers
+    if (selectedCategory !== allCategories) {
+      result = result.filter(
+        (provider) => (provider.category ?? "Provider") === selectedCategory,
+      )
+    }
+    if (searchTerm.trim() !== "") {
+      const lowerSearch = searchTerm.toLowerCase()
+      result = result.filter(
+        (provider) =>
+          provider.name.toLowerCase().includes(lowerSearch) ||
+          (provider.category &&
+            provider.category.toLowerCase().includes(lowerSearch)) ||
+          (provider.url && provider.url.toLowerCase().includes(lowerSearch)),
+      )
+    }
+    return result
+  }, [providers, selectedCategory, searchTerm])
+
   const selectedProviders = providers.filter((provider) =>
     selectedProviderIds.includes(provider.id),
   )
@@ -64,25 +80,39 @@ export const ProviderSelector = ({
 
   return (
     <div className="grid gap-3">
-      {categories.length > 1 ? (
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              aria-pressed={selectedCategory === category}
-              className={cn(
-                "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:text-slate-950",
-                selectedCategory === category &&
-                  "border-blue-200 bg-blue-50 text-blue-700"
-              )}
-              key={category}
-              type="button"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {categories.length > 1 ? (
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                aria-pressed={selectedCategory === category}
+                className={cn(
+                  "rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:text-slate-950",
+                  selectedCategory === category &&
+                    "border-blue-200 bg-blue-50 text-blue-700"
+                )}
+                key={category}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div />
+        )}
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            className="pl-9 pr-4"
+            placeholder="Search catalog..."
+            value={searchTerm}
+            type="text"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-      ) : null}
+      </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {filteredProviders.map((provider) => {
           const alreadyAdded = existingProviderNameSet.has(
@@ -173,7 +203,9 @@ export const ProviderSelector = ({
       </div>
       {!isLoading && filteredProviders.length === 0 ? (
         <p className="text-sm text-slate-500">
-          No providers match this category.
+          {searchTerm.trim() !== ""
+            ? "No providers match your search."
+            : "No providers match this category."}
         </p>
       ) : null}
       {isLoading ? (

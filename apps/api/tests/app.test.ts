@@ -15,7 +15,13 @@ import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-
 import { InMemoryOrganizationRepository } from "../src/features/organizations/in-memory-repository.js";
 import { InMemoryVendorRepository } from "../src/features/vendors/in-memory-repository.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
+import { LlmProviderLookupService } from "../src/provider-lookup.js";
 import { AirtableProviderSource } from "../src/providers.js";
+import { StaticProviderLookupCodeSource } from "../src/airtable-code-source.js";
+import {
+  AirtableProviderImportClient,
+  AirtableProviderImportService,
+} from "../src/provider-import.js";
 import { parseSystemTemplate } from "../src/system-templates.js";
 
 const serviceBody = {
@@ -229,6 +235,28 @@ const authConfig = {
   sessionKey: "test-session-key-with-at-least-32-chars",
   cookieSecure: false,
   cookieSameSite: "lax" as const,
+};
+
+const providerLookupResult = {
+  organization: {
+    id: "",
+    name: "GitHub",
+    legalName: "GitHub, Inc.",
+    countryOfRegistration: "US",
+    website: "https://github.com",
+  },
+  provider: {
+    id: "",
+    name: "GitHub",
+    organization: "",
+    category: "source_control",
+    purpose: "Source code hosting",
+    categoryName: "Source control",
+    url: "https://github.com",
+    systemType: "source_control",
+    securityCriticality: "critical",
+    handlesCustomerData: false,
+  },
 };
 
 describe("security profile API", () => {
@@ -1286,7 +1314,9 @@ describe("security profile API", () => {
     expect(renderedContent).toContain("# Acme AI Data Processors");
     expect(renderedContent).toContain("| GitHub | limited |");
     expect(renderedContent).toContain("| Stripe | subprocessor |");
-    expect(renderedContent).toContain("| Stripe | Payment processing |");
+    expect(renderedContent).toContain(
+      "| Stripe |  | Acme AI Platform | Payment processing |",
+    );
   });
 
   it("returns structured validation errors", async () => {
@@ -1549,9 +1579,21 @@ describe("security profile API", () => {
     expect(response.json()).toMatchObject({
       systemTemplates: [
         {
+          slug: "data-security-policy",
+          name: "Data Security Policy",
+          description:
+            "A customer-facing data security policy based on access control, encryption, monitoring, incident response, backup, and vendor risk data.",
+        },
+        {
           slug: "incident-response-plan",
           name: "Incident Response Plan",
           description: "A lightweight incident response outline.",
+        },
+        {
+          slug: "privacy-policy",
+          name: "Privacy Policy",
+          description:
+            "A customer-facing privacy policy based on the organization's privacy, service, and vendor data.",
         },
         {
           slug: "security-policy",
@@ -2100,6 +2142,387 @@ describe("security profile API", () => {
     ]);
   });
 
+  it("requires a bearer API key for provider lookup", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      providerLookupApiKey: "test-api-key",
+      providerLookupService: {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+    });
+    const missingResponse = await app.inject({
+      method: "POST",
+      url: "/providers/lookup",
+      payload: { inputUrl: "https://github.com" },
+    });
+    const invalidResponse = await app.inject({
+      method: "POST",
+      url: "/providers/lookup",
+      headers: { authorization: "Bearer wrong-key" },
+      payload: { inputUrl: "https://github.com" },
+    });
+
+    expect(missingResponse.statusCode).toBe(401);
+    expect(invalidResponse.statusCode).toBe(401);
+    expect(missingResponse.json()).toMatchObject({
+      error: { code: "API_KEY_AUTHENTICATION_REQUIRED" },
+    });
+  });
+
+  it("validates provider lookup input URLs", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      providerLookupApiKey: "test-api-key",
+      providerLookupService: {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/providers/lookup",
+      headers: { authorization: "Bearer test-api-key" },
+      payload: { inputUrl: "not-a-url" },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: { code: "VALIDATION_FAILED" },
+    });
+  });
+
+  it("returns provider lookup results from the resolver", async () => {
+    const calls: string[] = [];
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      providerLookupApiKey: "test-api-key",
+      providerLookupService: {
+        async lookup(inputUrl) {
+          calls.push(inputUrl);
+          return providerLookupResult;
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/providers/lookup",
+      headers: { authorization: "Bearer test-api-key" },
+      payload: { inputUrl: "https://github.com" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(providerLookupResult);
+    expect(calls).toEqual(["https://github.com"]);
+  });
+
+  it("returns provider import results from the importer", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      providerLookupApiKey: "test-api-key",
+      providerLookupService: {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+      providerImportService: {
+        async importProvider(inputUrl) {
+          return {
+            organizationRecordId: "rec-org",
+            providerRecordId: "rec-provider",
+            organizationAction: "created",
+            providerAction: "created",
+            lookup: {
+              ...providerLookupResult,
+              provider: {
+                ...providerLookupResult.provider,
+                url: inputUrl,
+              },
+            },
+          };
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/providers/import",
+      headers: { authorization: "Bearer test-api-key" },
+      payload: { inputUrl: "https://github.com" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      organizationRecordId: "rec-org",
+      providerRecordId: "rec-provider",
+      organizationAction: "created",
+      providerAction: "created",
+      lookup: {
+        provider: { url: "https://github.com" },
+      },
+    });
+  });
+
+  it("allows provider import with API key when cookie authentication is enabled", async () => {
+    const app = await createApp({
+      auth: authConfig,
+      ...createInMemoryRepositories(),
+      providerLookupApiKey: "test-api-key",
+      providerLookupService: {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+      providerImportService: {
+        async importProvider() {
+          return {
+            organizationRecordId: "rec-org",
+            providerRecordId: "rec-provider",
+            organizationAction: "created",
+            providerAction: "created",
+            lookup: providerLookupResult,
+          };
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/providers/import",
+      headers: { authorization: "Bearer test-api-key" },
+      payload: { inputUrl: "https://github.com" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      organizationRecordId: "rec-org",
+      providerRecordId: "rec-provider",
+    });
+  });
+
+  it("passes Airtable lookup codes into the provider lookup prompt", async () => {
+    let promptVariables: Record<string, string> | null = null;
+    const service = new LlmProviderLookupService(
+      new StaticProviderLookupCodeSource({
+        categories: [{ code: "source_control", name: "Source control" }],
+        systemTypes: [{ code: "source_control", name: "Source control" }],
+      }),
+      {
+        async compilePrompt(_name, variables) {
+          promptVariables = variables;
+          return {
+            content: "resolved prompt",
+            metadata: {
+              name: "resolve_provider",
+              version: 1,
+              isFallback: false,
+            },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return providerLookupResult;
+        },
+      },
+      "gemini-2.5-flash",
+    );
+
+    await service.lookup("https://github.com");
+
+    expect(promptVariables).toMatchObject({
+      inputUrl: "https://github.com",
+    });
+    expect(JSON.parse(promptVariables?.categories ?? "[]")).toEqual([
+      { code: "source_control", name: "Source control" },
+    ]);
+    expect(JSON.parse(promptVariables?.systemTypes ?? "[]")).toEqual([
+      { code: "source_control", name: "Source control" },
+    ]);
+  });
+
+  it("rejects invalid provider lookup JSON shapes", async () => {
+    const service = new LlmProviderLookupService(
+      new StaticProviderLookupCodeSource({
+        categories: [{ code: "source_control", name: "Source control" }],
+        systemTypes: [{ code: "source_control", name: "Source control" }],
+      }),
+      {
+        async compilePrompt() {
+          return {
+            content: "resolved prompt",
+            metadata: {
+              name: "resolve_provider",
+              version: 1,
+              isFallback: false,
+            },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return { provider: { name: "GitHub" } };
+        },
+      },
+      "gemini-2.5-flash",
+    );
+
+    await expect(service.lookup("https://github.com")).rejects.toMatchObject({
+      code: "PROVIDER_LOOKUP_INVALID_RESPONSE",
+      statusCode: 502,
+    });
+  });
+
+  it("rejects provider lookup codes that are not in Airtable", async () => {
+    const service = new LlmProviderLookupService(
+      new StaticProviderLookupCodeSource({
+        categories: [{ code: "source_control", name: "Source control" }],
+        systemTypes: [{ code: "source_control", name: "Source control" }],
+      }),
+      {
+        async compilePrompt() {
+          return {
+            content: "resolved prompt",
+            metadata: {
+              name: "resolve_provider",
+              version: 1,
+              isFallback: false,
+            },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return {
+            ...providerLookupResult,
+            provider: {
+              ...providerLookupResult.provider,
+              category: "unknown_category",
+            },
+          };
+        },
+      },
+      "gemini-2.5-flash",
+    );
+
+    await expect(service.lookup("https://github.com")).rejects.toMatchObject({
+      code: "PROVIDER_LOOKUP_UNKNOWN_CODE",
+      statusCode: 502,
+      details: {
+        codeSetId: "vendor_category",
+        field: "provider.category",
+        value: "unknown_category",
+      },
+    });
+  });
+
+  it("creates Airtable organization and provider records during provider import", async () => {
+    const client = new InMemoryAirtableImportClient({
+      "Provider Categories": [
+        {
+          id: "rec-category",
+          fields: { Code: "source-control", Name: "Source Control" },
+        },
+      ],
+    });
+    const service = new AirtableProviderImportService(
+      {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+      client,
+    );
+    const result = await service.importProvider("https://github.com");
+
+    expect(result).toMatchObject({
+      organizationAction: "created",
+      providerAction: "created",
+    });
+    expect(client.records["Provider Organizations"][0]?.fields).toMatchObject({
+      Id: "",
+      Name: "GitHub",
+      "Legal Name": "GitHub, Inc.",
+      Website: "https://github.com",
+    });
+    expect(client.records.Providers[0]?.fields).toMatchObject({
+      Id: "",
+      Name: "GitHub",
+      Url: "https://github.com",
+      Purpose: "Source code hosting",
+      "System Type": "source_control",
+      "Security Relevance": "Critical",
+      "Handles Customer Data": false,
+      Organizatzion: [result.organizationRecordId],
+      "Provider Categories": ["rec-category"],
+    });
+  });
+
+  it("updates existing Airtable organization and provider records during provider import", async () => {
+    const client = new InMemoryAirtableImportClient({
+      "Provider Categories": [
+        {
+          id: "rec-category",
+          fields: { Code: "source-control", Name: "Source Control" },
+        },
+      ],
+      "Provider Organizations": [
+        {
+          id: "rec-org-existing",
+          fields: { Website: "https://github.com", Name: "Old GitHub" },
+        },
+      ],
+      Providers: [
+        {
+          id: "rec-provider-existing",
+          fields: { Url: "https://github.com", Name: "Old Provider" },
+        },
+      ],
+    });
+    const service = new AirtableProviderImportService(
+      {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+      client,
+    );
+    const result = await service.importProvider("https://github.com");
+
+    expect(result).toMatchObject({
+      organizationRecordId: "rec-org-existing",
+      providerRecordId: "rec-provider-existing",
+      organizationAction: "updated",
+      providerAction: "updated",
+    });
+    expect(client.records["Provider Organizations"][0]?.fields.Name).toBe(
+      "GitHub",
+    );
+    expect(client.records.Providers[0]?.fields.Organizatzion).toEqual([
+      "rec-org-existing",
+    ]);
+  });
+
+  it("rejects provider import when the Airtable category is missing", async () => {
+    const service = new AirtableProviderImportService(
+      {
+        async lookup() {
+          return providerLookupResult;
+        },
+      },
+      new InMemoryAirtableImportClient(),
+    );
+
+    await expect(service.importProvider("https://github.com")).rejects.toMatchObject({
+      code: "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
+      statusCode: 400,
+    });
+  });
+
   it("returns provider catalog upstream failures as structured gateway errors", async () => {
     vi.stubGlobal(
       "fetch",
@@ -2161,6 +2584,63 @@ describe("security profile API", () => {
     expect(logOutput).toContain("/providers");
   });
 });
+
+class InMemoryAirtableImportClient extends AirtableProviderImportClient {
+  records: Record<string, Array<{ id: string; fields: Record<string, unknown> }>>;
+
+  constructor(
+    records: Record<string, Array<{ id: string; fields: Record<string, unknown> }>> = {},
+  ) {
+    super("app-test", "pat-test");
+    this.records = {
+      "Provider Categories": [],
+      "Provider Organizations": [],
+      Providers: [],
+      ...records,
+    };
+  }
+
+  override async listRecords(tableName: string, filterByFormula?: string) {
+    const records = this.records[tableName] ?? [];
+    const match = filterByFormula?.match(/^\{(.+)\} = '(.+)'$/);
+
+    if (!match) {
+      return records;
+    }
+
+    const [, fieldName, value] = match;
+    return records.filter((record) => record.fields[fieldName] === value);
+  }
+
+  override async createRecord(
+    tableName: string,
+    fields: Record<string, unknown>,
+  ) {
+    const record = {
+      id: `rec-${tableName.replace(/\s+/g, "-")}-${this.records[tableName]?.length ?? 0}`,
+      fields,
+    };
+
+    this.records[tableName] = [...(this.records[tableName] ?? []), record];
+    return record;
+  }
+
+  override async updateRecord(
+    tableName: string,
+    recordId: string,
+    fields: Record<string, unknown>,
+  ) {
+    const tableRecords = this.records[tableName] ?? [];
+    const record = tableRecords.find((current) => current.id === recordId);
+
+    if (!record) {
+      throw new Error(`Record ${recordId} was not found.`);
+    }
+
+    record.fields = { ...record.fields, ...fields };
+    return record;
+  }
+}
 
 function createInMemoryRepositories() {
   const accountRepository = new InMemoryAccountRepository();

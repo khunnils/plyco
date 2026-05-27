@@ -6,9 +6,9 @@ import {
 } from "@plyco/shared"
 import { z } from "zod"
 
+import { listAirtableRecords, stringField } from "./airtable.js"
 import { ApiError } from "./errors.js"
 
-const AIRTABLE_API_URL = "https://api.airtable.com/v0"
 const PROVIDERS_TABLE_NAME = "Providers"
 const PROVIDER_LOAD_FAILED = "PROVIDER_CATALOG_LOAD_FAILED"
 const PROVIDER_INVALID_RECORD = "PROVIDER_CATALOG_INVALID_RECORD"
@@ -17,33 +17,8 @@ const airtableAttachmentSchema = z.object({
   url: z.string().url(),
 })
 
-const airtableProviderRecordSchema = z.object({
-  id: z.string().min(1),
-  fields: z.record(z.string(), z.unknown()),
-})
-
-const airtableProviderResponseSchema = z.object({
-  records: z.array(airtableProviderRecordSchema),
-  offset: z.string().optional(),
-})
-
 export interface ProviderSource {
   listProviders(): Promise<Provider[]>
-}
-
-const stringField = (
-  fields: Record<string, unknown>,
-  ...names: string[]
-): string | undefined => {
-  for (const name of names) {
-    const value = fields[name]
-
-    if (typeof value === "string" && value.trim()) {
-      return value.trim()
-    }
-  }
-
-  return undefined
 }
 
 const booleanField = (
@@ -126,17 +101,18 @@ const logoUrlField = (fields: Record<string, unknown>): string | undefined => {
   return parsedLogo.success ? parsedLogo.data[0]?.url : undefined
 }
 
-const mapAirtableProvider = (
-  record: z.infer<typeof airtableProviderRecordSchema>
-): Provider => {
+const mapAirtableProvider = (record: {
+  id: string
+  fields: Record<string, unknown>
+}): Provider => {
   const fields = record.fields
   const provider = {
-    id: stringField(fields, "Id") ?? record.id,
-    name: stringField(fields, "Name") ?? "Unnamed provider",
+    id: stringField(fields, "Id") || record.id,
+    name: stringField(fields, "Name") || "Unnamed provider",
     logoUrl: logoUrlField(fields),
-    url: stringField(fields, "Url", "URL"),
+    url: stringField(fields, "Url", "URL") || undefined,
     category:
-      stringField(fields, "Category Name", "Category") ??
+      stringField(fields, "Category Name", "Category") ||
       rawStringValues(fields, "Category Name", "Category")[0],
     systemTypes: systemTypesField(fields),
     securityCriticality: stringField(
@@ -144,7 +120,7 @@ const mapAirtableProvider = (
       "Security Criticality",
       "Security criticality",
       "Security..."
-    ),
+    ) || undefined,
     handlesCustomerData: booleanField(fields, "Handles Customer Data"),
   }
 
@@ -173,43 +149,26 @@ export class AirtableProviderSource implements ProviderSource {
   ) {}
 
   async listProviders(): Promise<Provider[]> {
-    const records: Array<z.infer<typeof airtableProviderRecordSchema>> = []
-    let offset: string | undefined
+    let records
 
-    do {
-      const url = new URL(
-        `${AIRTABLE_API_URL}/${this.baseId}/${encodeURIComponent(PROVIDERS_TABLE_NAME)}`
-      )
-
-      if (offset) {
-        url.searchParams.set("offset", offset)
-      }
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+    try {
+      records = await listAirtableRecords({
+        apiKey: this.apiKey,
+        baseId: this.baseId,
+        tableName: PROVIDERS_TABLE_NAME,
       })
-
-      if (!response.ok) {
-        const body = await response.text()
-
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "AIRTABLE_LOAD_FAILED") {
         throw new ApiError(
           PROVIDER_LOAD_FAILED,
           "Unable to load provider catalog from Airtable.",
           502,
-          {
-            status: response.status,
-            statusText: response.statusText,
-            body: body.slice(0, 1000),
-          }
+          error.details,
         )
       }
 
-      const body = airtableProviderResponseSchema.parse(await response.json())
-      records.push(...body.records)
-      offset = body.offset
-    } while (offset)
+      throw error
+    }
 
     return records.map(mapAirtableProvider)
   }

@@ -351,6 +351,48 @@ export const providerSchema = z.object({
   handlesCustomerData: z.boolean(),
 });
 
+export const providerLookupInputSchema = z.object({
+  inputUrl: z.string().trim().url(),
+});
+
+export const providerLookupResultSchema = z
+  .object({
+    organization: z
+      .object({
+        id: z.string().trim(),
+        name: z.string().trim(),
+        legalName: z.string().trim(),
+        countryOfRegistration: z.string().trim(),
+        website: z.string().trim(),
+      })
+      .strict(),
+    provider: z
+      .object({
+        id: z.string().trim(),
+        name: z.string().trim(),
+        organization: z.string().trim(),
+        category: z.string().trim(),
+        purpose: z.string().trim(),
+        categoryName: z.string().trim(),
+        url: z.string().trim(),
+        systemType: z.string().trim(),
+        securityCriticality: z.string().trim(),
+        handlesCustomerData: z.boolean(),
+      })
+      .strict(),
+  })
+  .strict();
+
+export const providerImportResultSchema = z
+  .object({
+    organizationRecordId: z.string().min(1),
+    providerRecordId: z.string().min(1),
+    organizationAction: z.enum(["created", "updated"]),
+    providerAction: z.enum(["created", "updated"]),
+    lookup: providerLookupResultSchema,
+  })
+  .strict();
+
 export const templateSlugSchema = z
   .string()
   .trim()
@@ -557,6 +599,9 @@ export type ServiceProviderUsageInput = z.infer<
 >;
 export type ServiceProviderUsage = z.infer<typeof serviceProviderUsageSchema>;
 export type Provider = z.infer<typeof providerSchema>;
+export type ProviderLookupInput = z.infer<typeof providerLookupInputSchema>;
+export type ProviderLookupResult = z.infer<typeof providerLookupResultSchema>;
+export type ProviderImportResult = z.infer<typeof providerImportResultSchema>;
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>;
 export type Template = z.infer<typeof templateSchema>;
 export type TemplateInput = z.infer<typeof templateInputSchema>;
