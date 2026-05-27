@@ -83,15 +83,7 @@ export const VendorInventoryPage = ({
     <div className="grid gap-4">
       {showVendorCatalog ? (
         <div className="grid gap-4">
-          <div>
-            <h3 className="font-semibold text-slate-950">
-              Add providers from catalog
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Filter by category, then choose providers to add to the organization
-              inventory.
-            </p>
-          </div>
+          
           <ProviderSelector
             error={providerError ?? null}
             existingProviderNames={organizationProviders.map(

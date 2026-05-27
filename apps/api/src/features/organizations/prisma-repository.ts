@@ -506,13 +506,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   private organizationProviderData(provider: Provider) {
     return {
       name: provider.name,
-      legalName: "",
-      category: this.providerCategory(provider),
-      countryOfRegistration: "",
+      legalName: provider.legalName || "",
+      category: provider.categoryCode || this.providerCategory(provider),
+      countryOfRegistration: provider.countryOfRegistration || "",
       criticality: this.providerCriticality(provider),
-      notes: provider.securityCriticality
-        ? `Provider catalog criticality: ${provider.securityCriticality}`
-        : null,
+      notes: null,
     };
   }
 

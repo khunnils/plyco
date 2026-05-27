@@ -199,11 +199,9 @@ export const organizationProviderInputFromProvider = (
   providerId: provider.id,
   systemTypes: [],
   name: provider.name,
-  legalName: "",
-  category: providerCategory(provider),
-  countryOfRegistration: "",
+  legalName: provider.legalName || "",
+  category: provider.categoryCode || providerCategory(provider) || "",
+  countryOfRegistration: provider.countryOfRegistration || "",
   criticality: providerCriticality(provider),
-  notes: provider.securityCriticality
-    ? `Provider catalog criticality: ${provider.securityCriticality}`
-    : "",
+  notes: "",
 })

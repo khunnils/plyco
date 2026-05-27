@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Plus, Search, X } from "lucide-react"
+import { ExternalLink, Search } from "lucide-react"
 import { type Provider } from "@plyco/shared"
 import { useMemo, useState } from "react"
 
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { Separator } from "@base-ui/react"
 
 const allCategories = "All"
 
@@ -82,8 +83,34 @@ export const ProviderSelector = ({
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-3">
-        <div className="relative w-full max-w-xl">
+      {/* Header section with search input and action buttons */}
+      <div className="flex gap-2 justify-between">
+        <div>
+          <h3 className="font-semibold text-slate-950">
+            Add providers from catalog
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Filter by category, then choose providers to add to the organization
+            inventory.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 a">
+          <Button
+            disabled={submitDisabled || selectedProviders.length === 0}
+            type="button"
+            onClick={() => onChooseProviders(selectedProviders)}
+          >
+            Add selected
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel} >
+            Cancel
+          </Button>
+        </div>
+
+      </div>
+      <Separator /> 
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full max-w-xl flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
           <Input
             className="h-11 rounded-md border-slate-200 bg-white pr-4 pl-9"
@@ -93,28 +120,31 @@ export const ProviderSelector = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        {categories.length > 1 ? (
-          <div className="flex flex-wrap  gap-2 pb-1">
-            {categories.map((category) => (
-              <button
-                aria-pressed={selectedCategory === category}
-                className={cn(
-                  "shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950",
-                  selectedCategory === category &&
-                    "border-slate-900 bg-slate-900 text-white hover:border-slate-900 hover:text-white"
-                )}
-                key={category}
-                type="button"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div />
-        )}
       </div>
+
+      {categories.length > 1 ? (
+        <div className="flex flex-wrap gap-2 pb-1">
+          {categories.map((category) => (
+            <button
+              aria-pressed={selectedCategory === category}
+              className={cn(
+                "shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950",
+                selectedCategory === category &&
+                "border-slate-900 bg-slate-900 text-white hover:border-slate-900 hover:text-white"
+              )}
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div />
+      )}
+
+      {/* Grid of vendor cards scrolling naturally with the page */}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {filteredProviders.map((provider) => {
           const alreadyAdded = existingProviderNameSet.has(
@@ -126,13 +156,13 @@ export const ProviderSelector = ({
             <button
               aria-pressed={alreadyAdded || selected}
               className={cn(
-                "border p-4 text-left transition focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "border p-4 text-left transition focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:outline-none ",
                 alreadyAdded
                   ? "border-slate-200 bg-slate-50 text-slate-400"
                   : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50",
                 selected &&
-                  !alreadyAdded &&
-                  "border-slate-900 bg-slate-50"
+                !alreadyAdded &&
+                "border-slate-900 bg-slate-50"
               )}
               disabled={alreadyAdded}
               key={provider.id}
@@ -166,44 +196,41 @@ export const ProviderSelector = ({
                     ) : null}
                   </div>
                 </div>
-              
               </div>
             </button>
           )
         })}
       </div>
-      <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          <X />
-          Cancel
-        </Button>
-        <Button
-          disabled={submitDisabled || selectedProviders.length === 0}
-          type="button"
-          onClick={() => onChooseProviders(selectedProviders)}
-        >
-          <Plus />
-          Add selected
-        </Button>
-        <Button type="button" variant="outline" onClick={onChooseOther}>
-          Other
-        </Button>
-      </div>
+
       {!isLoading && filteredProviders.length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 my-4">
           {searchTerm.trim() !== ""
             ? "No providers match your search."
             : "No providers match this category."}
         </p>
       ) : null}
       {isLoading ? (
-        <p className="text-sm text-slate-500">Loading provider catalog...</p>
+        <p className="text-sm text-slate-500 my-4">Loading provider catalog...</p>
       ) : null}
       {error ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Provider catalog unavailable. Use Other to add a custom provider.
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 my-4">
+          Provider catalog unavailable. Use "Provider not listed? click to import..." below to add a custom provider.
         </p>
       ) : null}
+
+      {/* Placeholder under the cards instead of the bottom Other button */}
+      <button
+        type="button"
+        onClick={onChooseOther}
+        className="mt-4 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+      >
+        <p className="text-sm text-slate-500 font-medium">
+          Provider not listed?{" "}
+          <span className="font-semibold text-slate-900 underline underline-offset-2">
+            click to import...
+          </span>
+        </p>
+      </button>
     </div>
   )
 }
