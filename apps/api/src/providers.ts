@@ -6,29 +6,6 @@ import {
 } from "@plyco/shared"
 import { z } from "zod"
 
-import { countries } from "./features/vocabulary/reference-data.js"
-
-// Simple country name to ISO 2-letter code mapping
-const countryNameToCode = (name: string | undefined): string | undefined => {
-  if (!name) return undefined
-  const cleanedName = name.trim().toLowerCase()
-  if (cleanedName === "united states" || cleanedName === "usa" || cleanedName === "united states of america") {
-    return "US"
-  }
-  if (cleanedName === "united kingdom" || cleanedName === "uk" || cleanedName === "great britain") {
-    return "GB"
-  }
-  
-  // Find in standard countries list
-  const found = countries.find(
-    (c) =>
-      c.name.toLowerCase() === cleanedName ||
-      c.name.toLowerCase().includes(cleanedName) ||
-      cleanedName.includes(c.name.toLowerCase())
-  )
-  return found?.code
-}
-
 // Maps arbitrary category codes/names to valid vendor_category vocabulary codes
 const mapCategoryCode = (code: string | undefined, name: string | undefined): string | undefined => {
   const cleanedCode = code?.trim().toLowerCase()
@@ -189,7 +166,7 @@ const mapAirtableProvider = (
     category: categoryName || undefined,
     categoryCode: mapCategoryCode(categoryCode, categoryName) || categoryCode || undefined,
     legalName: orgRecord ? getSingleStringOrArrayFirst(orgRecord.fields, "Legal Name") || undefined : undefined,
-    countryOfRegistration: orgRecord ? countryNameToCode(getSingleStringOrArrayFirst(orgRecord.fields, "Country of Registration")) || undefined : undefined,
+    countryOfRegistration: orgRecord ? getSingleStringOrArrayFirst(orgRecord.fields, "Country of Registration") || undefined : undefined,
     systemTypes: systemTypesField(fields),
     securityCriticality: getSingleStringOrArrayFirst(fields, "Security Relevance") || undefined,
     handlesCustomerData: booleanField(fields, "Handles Customer Data"),

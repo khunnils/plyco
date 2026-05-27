@@ -51,17 +51,27 @@ export class LlmProviderLookupService implements ProviderLookupService {
     const prompt = await this.promptClient.compilePrompt(PROMPT_NAME, {
       inputUrl,
       categories: promptCodePayload(codes.categories),
-      systemTypes: promptCodePayload(codes.systemTypes),
     })
     const generated = await this.llmClient.generateJson({
       model: this.model,
       prompt,
       responseSchema: providerLookupResponseSchema({
         categories: codes.categories.map((code) => code.code),
-        systemTypes: codes.systemTypes.map((code) => code.code),
       }),
     })
-    const parsed = providerLookupResultSchema.safeParse(generated)
+
+    const generatedWithSystemType =
+      typeof generated === "object" && generated && "provider" in generated
+        ? {
+            ...generated,
+            provider:
+              typeof generated.provider === "object" && generated.provider
+                ? { ...generated.provider, systemType: null }
+                : generated.provider,
+          }
+        : generated
+
+    const parsed = providerLookupResultSchema.safeParse(generatedWithSystemType)
 
     if (!parsed.success) {
       throw new ApiError(
@@ -77,12 +87,6 @@ export class LlmProviderLookupService implements ProviderLookupService {
       parsed.data.provider.category,
       new Set(codes.categories.map((code) => code.code)),
       "vendor_category",
-    )
-    assertKnownCode(
-      "provider.systemType",
-      parsed.data.provider.systemType,
-      new Set(codes.systemTypes.map((code) => code.code)),
-      "provider_system_type",
     )
 
     return parsed.data

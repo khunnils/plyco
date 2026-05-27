@@ -23,7 +23,6 @@ export interface LlmJsonClient {
 
 export type ProviderLookupResponseSchemaOptions = {
   categories: string[]
-  systemTypes: string[]
 }
 
 const usageDetails = (
@@ -124,7 +123,6 @@ export class GeminiJsonClient implements LlmJsonClient {
 
 export const providerLookupResponseSchema = ({
   categories,
-  systemTypes,
 }: ProviderLookupResponseSchemaOptions) => ({
   type: Type.OBJECT,
   properties: {
@@ -154,7 +152,6 @@ export const providerLookupResponseSchema = ({
         category: { type: Type.STRING, enum: categories },
         purpose: { type: Type.STRING },
         url: { type: Type.STRING },
-        systemType: { type: Type.STRING, enum: systemTypes },
         securityCriticality: { type: Type.STRING },
         handlesCustomerData: { type: Type.BOOLEAN },
       },
@@ -165,7 +162,6 @@ export const providerLookupResponseSchema = ({
         "category",
         "purpose",
         "url",
-        "systemType",
         "securityCriticality",
         "handlesCustomerData",
       ],

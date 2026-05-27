@@ -255,7 +255,7 @@ const providerLookupResult = {
     category: "source-control",
     purpose: "Source code hosting",
     url: "https://github.com",
-    systemType: "source_control",
+    systemType: null,
     securityCriticality: "critical",
     handlesCustomerData: false,
   },
@@ -2418,16 +2418,12 @@ describe("security profile API", () => {
     expect(JSON.parse(promptVariables?.categories ?? "[]")).toEqual([
       "source-control",
     ]);
-    expect(JSON.parse(promptVariables?.systemTypes ?? "[]")).toEqual([
-      "source_control",
-    ]);
     expect(generationInputVariables).toEqual(promptVariables);
     expect(responseSchema).toMatchObject({
       properties: {
         provider: {
           properties: {
             category: { enum: ["source-control"] },
-            systemType: { enum: ["source_control"] },
           },
         },
       },
@@ -2463,7 +2459,6 @@ describe("security profile API", () => {
             provider: {
               ...providerLookupResult.provider,
               category: "AI provider",
-              systemType: "Source control",
             },
           };
         },
@@ -2590,7 +2585,7 @@ describe("security profile API", () => {
       Name: "GitHub",
       Url: "https://github.com",
       Purpose: "Source code hosting",
-      "System Type": "source_control",
+      "System Type": null,
       "Security Relevance": "Critical",
       "Handles Customer Data": false,
       Organizatzion: [result.organizationRecordId],

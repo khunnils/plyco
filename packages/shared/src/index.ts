@@ -377,7 +377,7 @@ export const providerLookupResultSchema = z
         category: z.string().trim(),
         purpose: z.string().trim(),
         url: z.string().trim(),
-        systemType: z.string().trim(),
+        systemType: z.string().trim().nullable(),
         securityCriticality: z.string().trim(),
         handlesCustomerData: z.boolean(),
       })
