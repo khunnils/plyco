@@ -1,4 +1,4 @@
-import { ExternalLink, Search } from "lucide-react"
+import { ExternalLink, Plus, Search } from "lucide-react"
 import { type Provider } from "@plyco/shared"
 import { useMemo, useState } from "react"
 
@@ -222,13 +222,14 @@ export const ProviderSelector = ({
       <button
         type="button"
         onClick={onChooseOther}
-        className="mt-4 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+        className="mt-4 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition hover:border-slate-300 hover:bg-slate-100/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 cursor-pointer"
       >
-        <p className="text-sm text-slate-500 font-medium">
-          Provider not listed?{" "}
-          <span className="font-semibold text-slate-900 underline underline-offset-2">
-            click to import...
-          </span>
+        <div className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 mb-3">
+          <Plus className="size-5" />
+        </div>
+        <h4 className="text-sm font-semibold text-slate-950">Add custom provider</h4>
+        <p className="mt-1 text-xs text-slate-500 max-w-sm">
+          Can't find the provider you are looking for? Import company details automatically from any website URL.
         </p>
       </button>
     </div>

@@ -15,6 +15,7 @@ import {
   serviceProviderUsageSchema,
   serviceProviderUsageInputSchema,
   organizationProviderInventorySchema,
+  providerLookupResultSchema,
   createDocumentSchema,
   documentSchema,
   documentSummarySchema,
@@ -45,6 +46,7 @@ import {
   type ServiceProviderUsageInput,
   type OrganizationProvider,
   type OrganizationProviderInput,
+  type ProviderLookupResult,
   type OrganizationSummary,
   type OrganizationMember,
 } from "@plyco/shared"
@@ -244,6 +246,19 @@ export const saveSecurityProfile = (
     {
       method: "PUT",
       body: JSON.stringify(profile),
+    }
+  )
+
+export const resolveProviderByUrl = (
+  organizationId: string,
+  inputUrl: string
+): Promise<ProviderLookupResult> =>
+  apiRequest(
+    `/organizations/${organizationId}/organization-providers/resolve`,
+    providerLookupResultSchema,
+    {
+      method: "POST",
+      body: JSON.stringify({ inputUrl }),
     }
   )
 

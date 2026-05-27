@@ -166,6 +166,21 @@ export async function registerVendorRoutes(
   )
 
   app.post<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/organization-providers/resolve",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      )
+      const body = providerLookupInputSchema.parse(request.body)
+      const result = await providerLookupService.lookup(body.inputUrl)
+
+      return reply.send(result)
+    },
+  )
+
+  app.post<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/organization-providers",
     async (request, reply) => {
       await requireOrganizationMembership(
