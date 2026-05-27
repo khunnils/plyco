@@ -56,7 +56,7 @@ import { ApiError } from "./errors.js"
 
 const PROVIDERS_TABLE_NAME = "Providers"
 const PROVIDER_ORGANIZATIONS_TABLE_NAME = "Provider Organizations"
-const PROVIDER_CATEGORIES_TABLE_NAME = "Provider Categories"
+const CODES_TABLE_NAME = "Codes"
 
 const PROVIDER_LOAD_FAILED = "PROVIDER_CATALOG_LOAD_FAILED"
 const PROVIDER_INVALID_RECORD = "PROVIDER_CATALOG_INVALID_RECORD"
@@ -170,7 +170,7 @@ const mapAirtableProvider = (
   const orgRecord = orgIds[0] ? orgsMap.get(orgIds[0]) : undefined
 
   // 2. Linked Category lookup
-  const categoryIds = linkedRecordIds(fields, "Provider Categories")
+  const categoryIds = linkedRecordIds(fields, "Category")
   const categoryRecord = categoryIds[0] ? categoriesMap.get(categoryIds[0]) : undefined
 
   const categoryName = categoryRecord
@@ -178,7 +178,7 @@ const mapAirtableProvider = (
     : getSingleStringOrArrayFirst(fields, "Category Name")
 
   const categoryCode = categoryRecord
-    ? getSingleStringOrArrayFirst(categoryRecord.fields, "Code")
+    ? (getSingleStringOrArrayFirst(categoryRecord.fields, "Id") || getSingleStringOrArrayFirst(categoryRecord.fields, "Key"))
     : getSingleStringOrArrayFirst(fields, "Category Code")
 
   const provider = {
@@ -187,7 +187,7 @@ const mapAirtableProvider = (
     logoUrl: logoUrlField(fields),
     url: getSingleStringOrArrayFirst(fields, "Url") || undefined,
     category: categoryName || undefined,
-    categoryCode: mapCategoryCode(categoryCode, categoryName),
+    categoryCode: mapCategoryCode(categoryCode, categoryName) || categoryCode || undefined,
     legalName: orgRecord ? getSingleStringOrArrayFirst(orgRecord.fields, "Legal Name") || undefined : undefined,
     countryOfRegistration: orgRecord ? countryNameToCode(getSingleStringOrArrayFirst(orgRecord.fields, "Country of Registration")) || undefined : undefined,
     systemTypes: systemTypesField(fields),
@@ -239,7 +239,7 @@ export class AirtableProviderSource implements ProviderSource {
         listAirtableRecords({
           apiKey: this.apiKey,
           baseId: this.baseId,
-          tableName: PROVIDER_CATEGORIES_TABLE_NAME,
+          tableName: CODES_TABLE_NAME,
         }),
       ])
       providerRecords = results[0]

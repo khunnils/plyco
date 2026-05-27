@@ -15,7 +15,7 @@ import { type ProviderLookupService } from "./provider-lookup.js"
 
 const PROVIDER_ORGANIZATIONS_TABLE = "Provider Organizations"
 const PROVIDERS_TABLE = "Providers"
-const PROVIDER_CATEGORIES_TABLE = "Provider Categories"
+const CODES_TABLE = "Codes"
 
 type ImportAction = "created" | "updated"
 
@@ -71,7 +71,10 @@ const categoryMatches = (
   record: AirtableRecord,
   lookup: ProviderLookupResult,
 ) => {
-  const code = String(record.fields.Code ?? "")
+  const code = String(record.fields.Id || record.fields.Key || record.fields.Code || "")
+  if (!code) {
+    return false
+  }
   const candidates = categoryCodeCandidates(lookup)
 
   return candidates.some(
@@ -158,7 +161,7 @@ export class AirtableProviderImportService implements ProviderImportService {
 
   private async findCategory(lookup: ProviderLookupResult) {
     const categories = await this.airtableClient.listRecords(
-      PROVIDER_CATEGORIES_TABLE,
+      CODES_TABLE,
     )
     const category = categories.find((record) => categoryMatches(record, lookup))
 
@@ -230,7 +233,7 @@ export class AirtableProviderImportService implements ProviderImportService {
       ),
       "Handles Customer Data": lookup.provider.handlesCustomerData,
       Organizatzion: [organizationRecordId],
-      "Provider Categories": [categoryRecordId],
+      Category: [categoryRecordId],
     }
     const existing = await firstMatch(this.airtableClient, PROVIDERS_TABLE, [
       { fieldName: "Id", value: lookup.provider.id },

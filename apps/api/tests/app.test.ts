@@ -2306,7 +2306,7 @@ describe("security profile API", () => {
     });
   });
 
-  it("loads provider lookup categories from Provider Categories and system types from Codes", async () => {
+  it("loads provider lookup categories from standard Codes using vendor_category and system types from Codes", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: string | URL) => {
@@ -2338,15 +2338,24 @@ describe("security profile API", () => {
               fields: {
                 Id: "ai_provider",
                 Name: "AI provider",
+                "Code Set": ["rec-other-categories"],
+              },
+            },
+            {
+              id: "rec-ai",
+              fields: {
+                Id: "ai",
+                Name: "AI",
                 "Code Set": ["rec-vendor-categories"],
               },
             },
-          ],
-          "Provider Categories": [
-            { id: "rec-ai", fields: { Code: "ai", Name: "AI" } },
             {
               id: "rec-source",
-              fields: { Code: "source-control", Name: "Source Control" },
+              fields: {
+                Id: "source-control",
+                Name: "Source Control",
+                "Code Set": ["rec-vendor-categories"],
+              },
             },
           ],
         };
@@ -2549,10 +2558,10 @@ describe("security profile API", () => {
 
   it("creates Airtable organization and provider records during provider import", async () => {
     const client = new InMemoryAirtableImportClient({
-      "Provider Categories": [
+      Codes: [
         {
           id: "rec-category",
-          fields: { Code: "source-control", Name: "Source Control" },
+          fields: { Id: "source-control", Name: "Source Control" },
         },
       ],
     });
@@ -2585,16 +2594,16 @@ describe("security profile API", () => {
       "Security Relevance": "Critical",
       "Handles Customer Data": false,
       Organizatzion: [result.organizationRecordId],
-      "Provider Categories": ["rec-category"],
+      Category: ["rec-category"],
     });
   });
 
   it("updates existing Airtable organization and provider records during provider import", async () => {
     const client = new InMemoryAirtableImportClient({
-      "Provider Categories": [
+      Codes: [
         {
           id: "rec-category",
-          fields: { Code: "source-control", Name: "Source Control" },
+          fields: { Id: "source-control", Name: "Source Control" },
         },
       ],
       "Provider Organizations": [
@@ -2722,7 +2731,7 @@ class InMemoryAirtableImportClient extends AirtableProviderImportClient {
   ) {
     super("app-test", "pat-test");
     this.records = {
-      "Provider Categories": [],
+      Codes: [],
       "Provider Organizations": [],
       Providers: [],
       ...records,
