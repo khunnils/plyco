@@ -94,7 +94,7 @@ export const ProviderSelector = ({
           />
         </div>
         {categories.length > 1 ? (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex flex-wrap  gap-2 pb-1">
             {categories.map((category) => (
               <button
                 aria-pressed={selectedCategory === category}
@@ -140,7 +140,7 @@ export const ProviderSelector = ({
               onClick={() => toggleProvider(provider.id)}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3
                       className={cn(
@@ -154,38 +154,20 @@ export const ProviderSelector = ({
                       <Badge variant="secondary">Added</Badge>
                     ) : null}
                   </div>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {provider.category ?? "Provider"}
-                  </p>
+                  <div className="mt-1 flex items-center justify-between gap-2 text-sm text-slate-500">
+                    <p className="truncate">
+                      {provider.category ?? "Provider"}
+                    </p>
+                    {provider.url ? (
+                      <p className="inline-flex max-w-[60%] items-center gap-1 truncate text-xs">
+                        <ExternalLink className="size-3" />
+                        <span className="truncate">{provider.url}</span>
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {selected && !alreadyAdded ? (
-                    <span className="inline-flex size-6 items-center justify-center rounded-full bg-slate-900 text-white">
-                      <Check className="size-4" />
-                    </span>
-                  ) : null}
-                  {provider.logoUrl ? (
-                    <img
-                      alt=""
-                      className="size-8 shrink-0 rounded-md object-contain"
-                      src={provider.logoUrl}
-                    />
-                  ) : null}
-                </div>
+              
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {provider.securityCriticality ? (
-                  <Badge variant="warning">
-                    {provider.securityCriticality}
-                  </Badge>
-                ) : null}
-              </div>
-              {provider.url ? (
-                <p className="mt-3 inline-flex max-w-full items-center gap-1 truncate text-xs text-slate-500">
-                  <ExternalLink className="size-3" />
-                  <span className="truncate">{provider.url}</span>
-                </p>
-              ) : null}
             </button>
           )
         })}

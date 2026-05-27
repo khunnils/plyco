@@ -17,7 +17,10 @@ import { InMemoryVendorRepository } from "../src/features/vendors/in-memory-repo
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
 import { LlmProviderLookupService } from "../src/provider-lookup.js";
 import { AirtableProviderSource } from "../src/providers.js";
-import { StaticProviderLookupCodeSource } from "../src/airtable-code-source.js";
+import {
+  AirtableProviderLookupCodeSource,
+  StaticProviderLookupCodeSource,
+} from "../src/airtable-code-source.js";
 import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
@@ -249,9 +252,8 @@ const providerLookupResult = {
     id: "",
     name: "GitHub",
     organization: "",
-    category: "source_control",
+    category: "source-control",
     purpose: "Source code hosting",
-    categoryName: "Source control",
     url: "https://github.com",
     systemType: "source_control",
     securityCriticality: "critical",
@@ -2304,12 +2306,75 @@ describe("security profile API", () => {
     });
   });
 
+  it("loads provider lookup categories from Provider Categories and system types from Codes", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL) => {
+        const tableName = decodeURIComponent(
+          new URL(String(input)).pathname.split("/").at(-1) ?? "",
+        );
+        const recordsByTable: Record<string, unknown[]> = {
+          "Code Sets": [
+            {
+              id: "rec-system-types",
+              fields: { Id: "provider_system_type" },
+            },
+            {
+              id: "rec-vendor-categories",
+              fields: { Id: "vendor_category" },
+            },
+          ],
+          Codes: [
+            {
+              id: "rec-system-auth",
+              fields: {
+                Id: "auth",
+                Name: "Auth",
+                "Code Set": ["rec-system-types"],
+              },
+            },
+            {
+              id: "rec-stale-category",
+              fields: {
+                Id: "ai_provider",
+                Name: "AI provider",
+                "Code Set": ["rec-vendor-categories"],
+              },
+            },
+          ],
+          "Provider Categories": [
+            { id: "rec-ai", fields: { Code: "ai", Name: "AI" } },
+            {
+              id: "rec-source",
+              fields: { Code: "source-control", Name: "Source Control" },
+            },
+          ],
+        };
+
+        return new Response(
+          JSON.stringify({ records: recordsByTable[tableName] ?? [] }),
+          { status: 200 },
+        );
+      }),
+    );
+    const source = new AirtableProviderLookupCodeSource("app-test", "pat-test");
+
+    await expect(source.listLookupCodes()).resolves.toEqual({
+      categories: [
+        { code: "ai", name: "AI" },
+        { code: "source-control", name: "Source Control" },
+      ],
+      systemTypes: [{ code: "auth", name: "Auth" }],
+    });
+  });
+
   it("passes Airtable lookup codes into the provider lookup prompt", async () => {
     let promptVariables: Record<string, string> | null = null;
+    let generationInputVariables: Record<string, string> | undefined;
     let responseSchema: unknown = null;
     const service = new LlmProviderLookupService(
       new StaticProviderLookupCodeSource({
-        categories: [{ code: "source_control", name: "Source control" }],
+        categories: [{ code: "source-control", name: "Source control" }],
         systemTypes: [{ code: "source_control", name: "Source control" }],
       }),
       {
@@ -2317,6 +2382,7 @@ describe("security profile API", () => {
           promptVariables = variables;
           return {
             content: "resolved prompt",
+            inputVariables: variables,
             metadata: {
               name: "resolve_provider",
               version: 1,
@@ -2327,6 +2393,7 @@ describe("security profile API", () => {
       },
       {
         async generateJson(input) {
+          generationInputVariables = input.prompt.inputVariables;
           responseSchema = input.responseSchema;
           return providerLookupResult;
         },
@@ -2340,16 +2407,17 @@ describe("security profile API", () => {
       inputUrl: "https://github.com",
     });
     expect(JSON.parse(promptVariables?.categories ?? "[]")).toEqual([
-      { code: "source_control", name: "Source control" },
+      "source-control",
     ]);
     expect(JSON.parse(promptVariables?.systemTypes ?? "[]")).toEqual([
-      { code: "source_control", name: "Source control" },
+      "source_control",
     ]);
+    expect(generationInputVariables).toEqual(promptVariables);
     expect(responseSchema).toMatchObject({
       properties: {
         provider: {
           properties: {
-            category: { enum: ["source_control"] },
+            category: { enum: ["source-control"] },
             systemType: { enum: ["source_control"] },
           },
         },
@@ -2357,10 +2425,57 @@ describe("security profile API", () => {
     });
   });
 
+  it("rejects provider lookup labels that are not Airtable code IDs", async () => {
+    const service = new LlmProviderLookupService(
+      new StaticProviderLookupCodeSource({
+        categories: [
+          { code: "ai", name: "AI" },
+          { code: "source-control", name: "Source control" },
+        ],
+        systemTypes: [{ code: "source_control", name: "Source control" }],
+      }),
+      {
+        async compilePrompt(_name, variables) {
+          return {
+            content: "resolved prompt",
+            inputVariables: variables,
+            metadata: {
+              name: "resolve_provider",
+              version: 1,
+              isFallback: false,
+            },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return {
+            ...providerLookupResult,
+            provider: {
+              ...providerLookupResult.provider,
+              category: "AI provider",
+              systemType: "Source control",
+            },
+          };
+        },
+      },
+      "gemini-2.5-flash",
+    );
+
+    await expect(service.lookup("https://github.com")).rejects.toMatchObject({
+      code: "PROVIDER_LOOKUP_UNKNOWN_CODE",
+      details: {
+        codeSetId: "vendor_category",
+        field: "provider.category",
+        value: "AI provider",
+      },
+    });
+  });
+
   it("rejects invalid provider lookup JSON shapes", async () => {
     const service = new LlmProviderLookupService(
       new StaticProviderLookupCodeSource({
-        categories: [{ code: "source_control", name: "Source control" }],
+        categories: [{ code: "source-control", name: "Source control" }],
         systemTypes: [{ code: "source_control", name: "Source control" }],
       }),
       {
@@ -2392,7 +2507,7 @@ describe("security profile API", () => {
   it("rejects provider lookup codes that are not in Airtable", async () => {
     const service = new LlmProviderLookupService(
       new StaticProviderLookupCodeSource({
-        categories: [{ code: "source_control", name: "Source control" }],
+        categories: [{ code: "source-control", name: "Source control" }],
         systemTypes: [{ code: "source_control", name: "Source control" }],
       }),
       {
@@ -2519,7 +2634,7 @@ describe("security profile API", () => {
     ]);
   });
 
-  it("creates the Airtable provider category when import lookup returns a new valid category", async () => {
+  it("rejects provider import when the Airtable category is missing", async () => {
     const client = new InMemoryAirtableImportClient();
     const service = new AirtableProviderImportService(
       {
@@ -2529,19 +2644,12 @@ describe("security profile API", () => {
       },
       client,
     );
-    const result = await service.importProvider("https://github.com");
 
-    expect(result).toMatchObject({
-      organizationAction: "created",
-      providerAction: "created",
+    await expect(service.importProvider("https://github.com")).rejects.toMatchObject({
+      code: "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
+      statusCode: 400,
+      details: { category: "source-control" },
     });
-    expect(client.records["Provider Categories"][0]?.fields).toEqual({
-      Code: "source_control",
-      Name: "Source control",
-    });
-    expect(client.records.Providers[0]?.fields["Provider Categories"]).toEqual([
-      "rec-Provider-Categories-0",
-    ]);
   });
 
   it("returns provider catalog upstream failures as structured gateway errors", async () => {

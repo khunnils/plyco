@@ -59,6 +59,7 @@ export class GeminiJsonClient implements LlmJsonClient {
     const generation = startObservation(
       "provider-lookup",
       {
+        input: prompt.inputVariables,
         model,
         prompt: prompt.metadata,
       },
@@ -152,7 +153,6 @@ export const providerLookupResponseSchema = ({
         organization: { type: Type.STRING },
         category: { type: Type.STRING, enum: categories },
         purpose: { type: Type.STRING },
-        categoryName: { type: Type.STRING },
         url: { type: Type.STRING },
         systemType: { type: Type.STRING, enum: systemTypes },
         securityCriticality: { type: Type.STRING },
@@ -164,7 +164,6 @@ export const providerLookupResponseSchema = ({
         "organization",
         "category",
         "purpose",
-        "categoryName",
         "url",
         "systemType",
         "securityCriticality",

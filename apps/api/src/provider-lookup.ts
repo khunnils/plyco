@@ -17,12 +17,8 @@ export interface ProviderLookupService {
   lookup(inputUrl: string): Promise<ProviderLookupResult>
 }
 
-const promptCodePayload = (
-  codes: Array<{
-    code: string
-    name: string
-  }>,
-) => JSON.stringify(codes.map(({ code, name }) => ({ code, name })))
+const promptCodePayload = (codes: Array<{ code: string }>) =>
+  JSON.stringify(codes.map(({ code }) => code))
 
 const assertKnownCode = (
   field: string,

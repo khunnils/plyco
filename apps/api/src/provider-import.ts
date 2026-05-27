@@ -65,27 +65,18 @@ const normalizeSecurityRelevance = (value: string) => {
 }
 
 const categoryCodeCandidates = (lookup: ProviderLookupResult) =>
-  Array.from(
-    new Set([
-      lookup.provider.category,
-      lookup.provider.category.replace(/_/g, "-"),
-      lookup.provider.categoryName,
-    ].filter(Boolean)),
-  )
+  Array.from(new Set([lookup.provider.category].filter(Boolean)))
 
 const categoryMatches = (
   record: AirtableRecord,
   lookup: ProviderLookupResult,
 ) => {
   const code = String(record.fields.Code ?? "")
-  const name = String(record.fields.Name ?? "")
   const candidates = categoryCodeCandidates(lookup)
 
   return candidates.some(
     (candidate) =>
-      code === candidate ||
-      code.toLowerCase() === candidate.toLowerCase() ||
-      name.toLowerCase() === candidate.toLowerCase(),
+      code === candidate || code.toLowerCase() === candidate.toLowerCase(),
   )
 }
 
@@ -171,14 +162,16 @@ export class AirtableProviderImportService implements ProviderImportService {
     )
     const category = categories.find((record) => categoryMatches(record, lookup))
 
-    if (category) {
-      return category
+    if (!category) {
+      throw new ApiError(
+        "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
+        "Provider category was not found in Airtable.",
+        400,
+        { category: lookup.provider.category },
+      )
     }
 
-    return this.airtableClient.createRecord(PROVIDER_CATEGORIES_TABLE, {
-      Code: lookup.provider.category,
-      Name: lookup.provider.categoryName || lookup.provider.category,
-    })
+    return category
   }
 
   private async upsertOrganization(lookup: ProviderLookupResult): Promise<{

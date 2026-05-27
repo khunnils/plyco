@@ -4,6 +4,7 @@ import { ApiError } from "./errors.js"
 
 export type ResolvedPrompt = {
   content: string
+  inputVariables?: Record<string, string>
   metadata: {
     name: string
     version: number
@@ -78,6 +79,7 @@ export class LangfusePromptClient implements PromptClient {
 
       return {
         content,
+        inputVariables: variables,
         metadata: {
           name: prompt.name,
           version: prompt.version,
