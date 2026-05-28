@@ -96,7 +96,7 @@ export const TemplateForm = ({
   )
   const previewContent = preview.data?.renderedContent ?? ""
 
-  const [isSchemaOpen, setIsSchemaOpen] = useState(true)
+  const [isSchemaOpen, setIsSchemaOpen] = useState(false)
   const [editorMode, setEditorMode] = useState<"content" | "preview" | "compare">("compare")
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({})
 
@@ -185,7 +185,7 @@ export const TemplateForm = ({
   }
 
   return (
-    <form className="grid gap-4" onSubmit={handleSubmit}>
+    <form className="grid gap-4" id="template-form" onSubmit={handleSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-1">
           <span className="text-sm font-medium text-slate-700">Name</span>
@@ -449,16 +449,6 @@ export const TemplateForm = ({
             )}
           </div>
         </section>
-      </div>
-
-      <div className="flex gap-2">
-        <Button disabled={isSaving} type="submit">
-          {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
-          Save template
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
       </div>
     </form>
   )

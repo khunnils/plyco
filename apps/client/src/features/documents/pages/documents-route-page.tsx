@@ -96,332 +96,370 @@ export const DocumentsRoutePage = () => {
   )
   const isLoading = templates.isLoading || documents.isLoading
 
+  // Setup header, breadcrumbs and action buttons based on mode
+  let breadcrumbs = [{ label: "Policies & Documents", href: "/documents" }]
+  let eyebrow = "Policies & Documents"
+  let pageTitle = "Policies & Documents"
+
+  let bannerTitle = "Documents & Policies"
+  let bannerSubtitle = "Manage security policy templates and generate customized compliance documents."
+  let bannerButtons: React.ReactNode = null
+  let content: React.ReactNode = null
+
   if (mode === "add") {
-    return (
-      <>
-        <PageHeader
-          breadcrumbs={[
-            { label: "Policies & Documents", href: "/documents" },
-            { label: "Add" },
-          ]}
-          eyebrow="Policies & Documents"
-          title="Add"
-        />
-        <div className="grid gap-4">
-          <article className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <div className="flex items-center gap-2">
-                <FilePlus2 className="size-5 text-slate-500" />
-                <h2 className="font-semibold text-slate-950">
-                  Create from scratch
-                </h2>
-              </div>
-              <p className="mt-2 text-sm text-slate-500">
-                Start with a blank policy template and write your own content.
-              </p>
+    breadcrumbs = [
+      { label: "Policies & Documents", href: "/documents" },
+      { label: "Add" },
+    ]
+    pageTitle = "Add"
+    bannerTitle = "Add template"
+    bannerSubtitle = "Choose a pre-defined system template or start from scratch."
+    bannerButtons = (
+      <Button asChild type="button" variant="outline">
+        <Link to="/documents">Cancel</Link>
+      </Button>
+    )
+
+    content = (
+      <div className="grid gap-4">
+        <article className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <div className="flex items-center gap-2">
+              <FilePlus2 className="size-5 text-slate-500" />
+              <h2 className="font-semibold text-slate-950">
+                Create from scratch
+              </h2>
             </div>
-            <Button asChild className="w-fit" type="button">
-              <Link to="/documents/new">Create</Link>
-            </Button>
-          </article>
+            <p className="mt-2 text-sm text-slate-500">
+              Start with a blank policy template and write your own content.
+            </p>
+          </div>
+          <Button asChild className="w-fit" type="button">
+            <Link to="/documents/new">Create</Link>
+          </Button>
+        </article>
 
-          {templatesData.systemTemplates.map((template) => {
-            const isAdded = addedSystemTemplateSlugs.has(template.slug)
+        {templatesData.systemTemplates.map((template) => {
+          const isAdded = addedSystemTemplateSlugs.has(template.slug)
 
-            return (
-              <article
-                className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-start"
-                key={template.slug}
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-semibold text-slate-950">
-                      {template.name}
-                    </h2>
-                    {isAdded ? <Badge variant="secondary">Added</Badge> : null}
-                  </div>
-                  <p className="mt-2 text-sm text-slate-500">
-                    {template.description}
-                  </p>
-                </div>
-                <Button
-                  className="w-fit"
-                  disabled={isAdded || createTemplateFromSystem.isPending}
-                  type="button"
-                  variant={isAdded ? "outline" : "default"}
-                  onClick={() =>
-                    createTemplateFromSystem.mutate(
-                      { sourceSystemTemplateSlug: template.slug },
-                      { onSuccess: () => navigate("/documents") }
-                    )
-                  }
-                >
-                  <Plus />
-                  {isAdded ? "Added" : "Add"}
-                </Button>
-              </article>
-            )
-          })}
-        </div>
-      </>
-    )
-  }
-
-  if (mode === "new") {
-    return (
-      <>
-        <PageHeader
-          breadcrumbs={[
-            { label: "Policies & Documents", href: "/documents" },
-            { label: "New template" },
-          ]}
-          eyebrow="Policies & Documents"
-          title="New template"
-        />
-        <TemplateForm
-          defaultValues={blankTemplate}
-          isSaving={createTemplate.isPending}
-          members={organizationMembersData}
-          onCancel={() => navigate("/documents")}
-          onSubmit={(template) =>
-            createTemplate.mutate(template, {
-              onSuccess: () => navigate("/documents"),
-            })
-          }
-        />
-      </>
-    )
-  }
-
-  if (mode === "edit") {
-    return (
-      <>
-        <PageHeader
-          breadcrumbs={[
-            { label: "Policies & Documents", href: "/documents" },
-            { label: editingTemplate?.name ?? "Edit template" },
-          ]}
-          eyebrow="Policies & Documents"
-          title={editingTemplate?.name ?? "Edit template"}
-        />
-        {editingTemplate ? (
-          <TemplateForm
-            defaultValues={editingTemplate}
-            isSaving={updateTemplate.isPending}
-            members={organizationMembersData}
-            onCancel={() => navigate("/documents")}
-            onSubmit={(template) =>
-              updateTemplate.mutate(
-                { id: editingTemplate.id, template },
-                { onSuccess: () => navigate("/documents") }
-              )
-            }
-          />
-        ) : (
-          <p className="text-sm text-slate-500">Template was not found.</p>
-        )}
-      </>
-    )
-  }
-
-  if (mode === "view" && id) {
-    return (
-      <>
-        <PageHeader
-          breadcrumbs={[
-            { label: "Policies & Documents", href: "/documents" },
-            { label: documentRecord?.title ?? "Document" },
-          ]}
-          eyebrow="Policies & Documents"
-          title={documentRecord?.title ?? "Document"}
-        />
-        <div className="grid gap-4">
-          <div className="flex flex-wrap gap-2">
-            <Button
-              className="w-fit"
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/documents")}
+          return (
+            <article
+              className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-start"
+              key={template.slug}
             >
-              <X />
-              Close
-            </Button>
-            {documentRecord?.hasPdf ? (
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-semibold text-slate-950">
+                    {template.name}
+                  </h2>
+                  {isAdded ? <Badge variant="secondary">Added</Badge> : null}
+                </div>
+                <p className="mt-2 text-sm text-slate-500">
+                  {template.description}
+                </p>
+              </div>
               <Button
                 className="w-fit"
-                disabled={downloadDocumentPdf.isPending}
+                disabled={isAdded || createTemplateFromSystem.isPending}
+                type="button"
+                variant={isAdded ? "outline" : "default"}
+                onClick={() =>
+                  createTemplateFromSystem.mutate(
+                    { sourceSystemTemplateSlug: template.slug },
+                    { onSuccess: () => navigate("/documents") }
+                  )
+                }
+              >
+                <Plus />
+                {isAdded ? "Added" : "Add"}
+              </Button>
+            </article>
+          )
+        })}
+      </div>
+    )
+  } else if (mode === "new") {
+    breadcrumbs = [
+      { label: "Policies & Documents", href: "/documents" },
+      { label: "New template" },
+    ]
+    pageTitle = "New template"
+    bannerTitle = "New template"
+    bannerSubtitle = "Draft a new policy template using markdown and schema variables."
+    bannerButtons = (
+      <>
+        <Button
+          disabled={createTemplate.isPending}
+          type="submit"
+          form="template-form"
+        >
+          {createTemplate.isPending ? "Saving..." : "Save template"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate("/documents")}
+        >
+          Cancel
+        </Button>
+      </>
+    )
+
+    content = (
+      <TemplateForm
+        defaultValues={blankTemplate}
+        isSaving={createTemplate.isPending}
+        members={organizationMembersData}
+        onCancel={() => navigate("/documents")}
+        onSubmit={(template) =>
+          createTemplate.mutate(template, {
+            onSuccess: () => navigate("/documents"),
+          })
+        }
+      />
+    )
+  } else if (mode === "edit") {
+    breadcrumbs = [
+      { label: "Policies & Documents", href: "/documents" },
+      { label: editingTemplate?.name ?? "Edit template" },
+    ]
+    pageTitle = editingTemplate?.name ?? "Edit template"
+    bannerTitle = editingTemplate?.name ?? "Edit template"
+    bannerSubtitle = `Edit template version ${editingTemplate?.policyVersion || "1.0"}.`
+    bannerButtons = (
+      <>
+        <Button
+          disabled={updateTemplate.isPending}
+          type="submit"
+          form="template-form"
+        >
+          {updateTemplate.isPending ? "Saving..." : "Save template"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate("/documents")}
+        >
+          Cancel
+        </Button>
+      </>
+    )
+
+    content = editingTemplate ? (
+      <TemplateForm
+        defaultValues={editingTemplate}
+        isSaving={updateTemplate.isPending}
+        members={organizationMembersData}
+        onCancel={() => navigate("/documents")}
+        onSubmit={(template) =>
+          updateTemplate.mutate(
+            { id: editingTemplate.id, template },
+            { onSuccess: () => navigate("/documents") }
+          )
+        }
+      />
+    ) : (
+      <p className="text-sm text-slate-500">Template was not found.</p>
+    )
+  } else if (mode === "view" && id) {
+    breadcrumbs = [
+      { label: "Policies & Documents", href: "/documents" },
+      { label: documentRecord?.title ?? "Document" },
+    ]
+    pageTitle = documentRecord?.title ?? "Document"
+    bannerTitle = documentRecord?.title ?? "Document"
+    bannerSubtitle = viewedDocumentSummary
+      ? `Generated from ${viewedDocumentSummary.template.name}.`
+      : "View customized document content."
+    bannerButtons = (
+      <>
+        {documentRecord?.hasPdf ? (
+          <Button
+            disabled={downloadDocumentPdf.isPending}
+            type="button"
+            variant="outline"
+            onClick={() =>
+              downloadDocumentPdf.mutate({
+                id: documentRecord.id,
+                title: documentRecord.title,
+              })
+            }
+          >
+            Download PDF
+          </Button>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => navigate("/documents")}
+        >
+          Close
+        </Button>
+      </>
+    )
+
+    content = document.isLoading ? (
+      <p className="text-sm text-slate-500">Loading document...</p>
+    ) : documentRecord ? (
+      <DocumentContent document={documentRecord} />
+    ) : (
+      <p className="text-sm text-slate-500">Document was not found.</p>
+    )
+  } else {
+    // List view
+    breadcrumbs = [{ label: "Policies & Documents" }]
+    pageTitle = "Policies & Documents"
+    bannerTitle = "Documents & Policies"
+    bannerSubtitle = "Manage security policy templates and generate customized compliance documents."
+    bannerButtons = (
+      <Button asChild className="w-fit" type="button">
+        <Link to="/documents/add">Add</Link>
+      </Button>
+    )
+
+    content = isLoading ? (
+      <p className="text-sm text-slate-500">
+        Loading policies and documents...
+      </p>
+    ) : templatesData.organizationTemplates.length === 0 ? (
+      <Empty className="min-h-[420px] border-slate-200 bg-white">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <FileText />
+          </EmptyMedia>
+          <EmptyTitle>No policy templates yet</EmptyTitle>
+          <EmptyDescription>
+            Add a system template or create a policy template from scratch
+            before generating documents.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild type="button">
+            <Link to="/documents/add">Add</Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
+    ) : (
+      <div className="grid gap-4">
+        {documentsList.map((summary) => (
+          <article
+            className="grid gap-4 border border-slate-200 bg-white p-4 md:grid-cols-[1fr_auto] md:items-start"
+            key={summary.template.id}
+          >
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-semibold text-slate-950">
+                  {summary.template.name}
+                </h2>
+                <Badge
+                  variant={
+                    summary.status === "stale"
+                      ? "warning"
+                      : summary.status === "current"
+                        ? "secondary"
+                        : "outline"
+                  }
+                >
+                  {documentStatusLabel(summary.status)}
+                </Badge>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                {sourceLabel(summary.template)}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                {generatedText(summary)}
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-start gap-2 md:justify-end">
+              <Button
                 type="button"
                 variant="outline"
                 onClick={() =>
-                  downloadDocumentPdf.mutate({
-                    id: documentRecord.id,
-                    title: documentRecord.title,
-                  })
+                  navigate(`/documents/edit/${summary.template.id}`)
                 }
               >
-                <Download />
-                Download PDF
+                <Pencil />
+                Edit
               </Button>
-            ) : null}
-          </div>
-          {document.isLoading ? (
-            <p className="text-sm text-slate-500">Loading document...</p>
-          ) : documentRecord ? (
-            <>
-              {viewedDocumentSummary ? (
-                <p className="text-sm text-slate-500">
-                  Generated from {viewedDocumentSummary.template.name}.
-                </p>
-              ) : null}
-              <DocumentContent document={documentRecord} />
-            </>
-          ) : (
-            <p className="text-sm text-slate-500">Document was not found.</p>
-          )}
-        </div>
-      </>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => deleteTemplate.mutate(summary.template.id)}
+              >
+                <Trash2 />
+                Delete
+              </Button>
+              {summary.document ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(`/documents/view/${summary.document?.id}`)
+                    }
+                  >
+                    <Eye />
+                    View
+                  </Button>
+                  {summary.document.hasPdf ? (
+                    <Button
+                      disabled={downloadDocumentPdf.isPending}
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        summary.document
+                          ? downloadDocumentPdf.mutate({
+                              id: summary.document.id,
+                              title: summary.document.title,
+                            })
+                          : undefined
+                      }
+                    >
+                      <Download />
+                      Download
+                    </Button>
+                  ) : null}
+                </>
+              ) : (
+                <Button
+                  disabled={createDocument.isPending}
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    createDocument.mutate({
+                      templateId: summary.template.id,
+                    })
+                  }
+                >
+                  <ScrollText />
+                  Generate
+                </Button>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
     )
   }
 
   return (
     <>
-      <PageHeader eyebrow="Policies & Documents" title="Policies & Documents" />
+      <PageHeader
+        breadcrumbs={breadcrumbs}
+        eyebrow={eyebrow}
+        title={pageTitle}
+      />
       <div className="grid gap-5">
-        <div className="flex justify-end">
-          <Button asChild className="w-fit" type="button">
-            <Link to="/documents/add">
-              <Plus />
-              Add
-            </Link>
-          </Button>
-        </div>
-
-        {isLoading ? (
-          <p className="text-sm text-slate-500">
-            Loading policies and documents...
-          </p>
-        ) : templatesData.organizationTemplates.length === 0 ? (
-          <Empty className="min-h-[420px] border-slate-200 bg-white">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <FileText />
-              </EmptyMedia>
-              <EmptyTitle>No policy templates yet</EmptyTitle>
-              <EmptyDescription>
-                Add a system template or create a policy template from scratch
-                before generating documents.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              <Button asChild type="button">
-                <Link to="/documents/add">
-                  <Plus />
-                  Add
-                </Link>
-              </Button>
-            </EmptyContent>
-          </Empty>
-        ) : (
-          <div className="grid gap-4">
-            {documentsList.map((summary) => (
-              <article
-                className="grid gap-4 border border-slate-200 bg-white p-4 md:grid-cols-[1fr_auto] md:items-start"
-                key={summary.template.id}
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-semibold text-slate-950">
-                      {summary.template.name}
-                    </h2>
-                    <Badge
-                      variant={
-                        summary.status === "stale"
-                          ? "warning"
-                          : summary.status === "current"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {documentStatusLabel(summary.status)}
-                    </Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-500">
-                    {sourceLabel(summary.template)}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {generatedText(summary)}
-                  </p>
-                </div>
-                <div className="flex flex-wrap justify-start gap-2 md:justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(`/documents/edit/${summary.template.id}`)
-                    }
-                  >
-                    <Pencil />
-                    Edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => deleteTemplate.mutate(summary.template.id)}
-                  >
-                    <Trash2 />
-                    Delete
-                  </Button>
-                  {summary.document ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() =>
-                          navigate(`/documents/view/${summary.document?.id}`)
-                        }
-                      >
-                        <Eye />
-                        View
-                      </Button>
-                      {summary.document.hasPdf ? (
-                        <Button
-                          disabled={downloadDocumentPdf.isPending}
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            summary.document
-                              ? downloadDocumentPdf.mutate({
-                                  id: summary.document.id,
-                                  title: summary.document.title,
-                                })
-                              : undefined
-                          }
-                        >
-                          <Download />
-                          Download
-                        </Button>
-                      ) : null}
-                    </>
-                  ) : (
-                    <Button
-                      disabled={createDocument.isPending}
-                      type="button"
-                      variant="outline"
-                      onClick={() =>
-                        createDocument.mutate({
-                          templateId: summary.template.id,
-                        })
-                      }
-                    >
-                      <ScrollText />
-                      Generate
-                    </Button>
-                  )}
-                </div>
-              </article>
-            ))}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-950">{bannerTitle}</h2>
+            <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
           </div>
-        )}
+          {bannerButtons ? (
+            <div className="flex flex-wrap gap-2 shrink-0">{bannerButtons}</div>
+          ) : null}
+        </div>
+        {content}
       </div>
     </>
   )
