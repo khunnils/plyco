@@ -112,40 +112,6 @@ const servicePrivacyDraft = (
 const serviceProviderPurpose = (service: ServiceProfileInput) =>
   `Used by ${service.serviceName?.trim() || "this service"}`
 
-const FieldNumberInput = <T extends Record<string, unknown>>({
-  error,
-  helperText,
-  label,
-  name,
-  register,
-}: {
-  error?: { message?: string }
-  helperText?: string
-  label: string
-  name: FieldPath<T>
-  register: UseFormReturn<T>["register"]
-}) => (
-  <label className="grid gap-2 text-sm font-medium text-slate-800">
-    <span>{label}</span>
-    {helperText ? (
-      <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
-        {helperText}
-      </span>
-    ) : null}
-    <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-      inputMode="numeric"
-      min={0}
-      type="number"
-      {...register(name, {
-        setValueAs: (value) => (value === "" ? null : Number(value)),
-      })}
-    />
-    {error?.message ? (
-      <span className="text-xs text-red-700">{error.message}</span>
-    ) : null}
-  </label>
-)
 
 const ServiceBasicsFormFields = ({
   descriptionName,
@@ -466,12 +432,14 @@ const ServiceAudiencePanel = ({
           name={audiencePath("childrenDirected")}
         />
         {childrenDirected === true && (
-          <FieldNumberInput
+          <TextField
             error={form.formState.errors.minimumUserAge}
             helperText={serviceHelperText.minimumUserAge}
             label="Minimum user age"
             name={audiencePath("minimumUserAge")}
             register={form.register}
+            type="number"
+            min={0}
           />
         )}
       </div>

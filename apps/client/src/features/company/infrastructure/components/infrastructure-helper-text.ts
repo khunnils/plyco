@@ -32,6 +32,8 @@ export const infrastructureHelperText = {
     "Whether you have a defined fix timeline for high-severity vulnerabilities.",
   patchingSlaHighDays:
     "How quickly high-severity vulnerabilities should be fixed.",
+  penetrationTestingStrategy:
+    "The approach your organization takes for penetration testing (internal, external, etc).",
   penetrationTestingCadence:
     "How often an independent third party performs penetration testing.",
   penetrationTestLastDate:

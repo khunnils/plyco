@@ -13,29 +13,6 @@ import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
-const ResponseTimelineField = ({
-  form,
-}: {
-  form: UseFormReturn<ProfileDraft>
-}) => (
-  <label className="grid gap-2 text-sm font-medium text-slate-800">
-    Response timeline days
-    <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-      inputMode="numeric"
-      min={0}
-      type="number"
-      {...form.register("privacy.responseTimelineDays", {
-        setValueAs: (value) => (value === "" ? null : Number(value)),
-      })}
-    />
-    {form.formState.errors.privacy?.responseTimelineDays && (
-      <span className="text-xs text-red-700">
-        {form.formState.errors.privacy.responseTimelineDays.message}
-      </span>
-    )}
-  </label>
-)
 
 const selectedProviderIds = (
   organizationProviders: ProviderSelection[],
@@ -162,7 +139,14 @@ export const PrivacyProfileFields = ({
             options={requestMethodOptions}
             placeholder="Select request methods"
           />
-          <ResponseTimelineField form={form} />
+          <TextField
+            error={form.formState.errors.privacy?.responseTimelineDays}
+            label="Response timeline days"
+            name="privacy.responseTimelineDays"
+            register={form.register}
+            type="number"
+            min={0}
+          />
           <ToggleField
             control={form.control}
             label="Identity verification required"

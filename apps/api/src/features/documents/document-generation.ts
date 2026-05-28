@@ -210,6 +210,11 @@ export class ReportContextBuilder {
         "security_cadences",
         infrastructure.penetrationTestingCadence,
       ),
+      penetrationTestingStrategyLabel: this.codeLabel(
+        vocabulary,
+        "security_penetration_testing_strategies",
+        infrastructure.penetrationTestingStrategy,
+      ),
     };
   }
 

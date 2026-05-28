@@ -148,19 +148,14 @@ export const CompanyDetailsPanel = ({
           placeholder="123 Market Street"
           register={form.register}
         />
-        <label className="grid gap-2 text-sm font-medium text-slate-800">
-          <span>Policy effective date</span>
-          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
-            {companyHelperText.policyEffectiveDate}
-          </span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-            type="date"
-            {...form.register("policyEffectiveDate", {
-              setValueAs: (value) => (value === "" ? null : value),
-            })}
-          />
-        </label>
+        <TextField
+          error={form.formState.errors.policyEffectiveDate}
+          helperText={companyHelperText.policyEffectiveDate}
+          label="Policy effective date"
+          name="policyEffectiveDate"
+          register={form.register}
+          type="date"
+        />
       </div>
     </ProfilePanelShell>
   )

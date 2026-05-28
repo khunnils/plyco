@@ -6,7 +6,8 @@ import { IncidentResponsePanel } from "@/features/company/infrastructure/compone
 import { InfrastructureProvidersPanel } from "@/features/company/infrastructure/components/panels/infrastructure-providers-panel"
 import { LoggingMonitoringPanel } from "@/features/company/infrastructure/components/panels/logging-monitoring-panel"
 import { VendorRiskPanel } from "@/features/company/infrastructure/components/panels/vendor-risk-panel"
-import { VulnerabilityManagementPanel } from "@/features/company/infrastructure/components/panels/vulnerability-management-panel"
+import { VulnerabilityDetectionPanel } from "@/features/company/infrastructure/components/panels/vulnerability-detection-panel"
+import { VulnerabilityRemediationPanel } from "@/features/company/infrastructure/components/panels/vulnerability-remediation-panel"
 import {
   type ProfileDraft,
   type SaveProfile,
@@ -25,6 +26,7 @@ export const InfrastructureManager = ({
   securityMonitoringOwnerOptions,
   securityNotificationTimelineOptions,
   securityTlsVersionOptions,
+  penetrationTestingStrategyOptions,
   vocabulary,
   onSaveProfile,
 }: {
@@ -38,6 +40,7 @@ export const InfrastructureManager = ({
   securityMonitoringOwnerOptions: Option[]
   securityNotificationTimelineOptions: Option[]
   securityTlsVersionOptions: Option[]
+  penetrationTestingStrategyOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
 }) => {
@@ -94,11 +97,19 @@ export const InfrastructureManager = ({
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
       />
-      <VulnerabilityManagementPanel
+      <VulnerabilityDetectionPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Vulnerability Management")}
+        needsAttention={getNeedsAttention("Vulnerability Detection")}
         securityCadenceOptions={securityCadenceOptions}
+        penetrationTestingStrategyOptions={penetrationTestingStrategyOptions}
+        vocabulary={vocabulary}
+        onSave={saveInfrastructure}
+      />
+      <VulnerabilityRemediationPanel
+        infrastructure={profile.infrastructure}
+        isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Vulnerability Remediation")}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
       />

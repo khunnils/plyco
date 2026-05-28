@@ -142,6 +142,7 @@ export function mapOrganizationRecord(record: {
     vendorReviewRequired: boolean | null;
     vendorReviewCadence: string | null;
     dpaRequiredForProcessors: boolean | null;
+    penetrationTestingStrategy: string | null;
     penetrationTestingCadence: string | null;
     penetrationTestLastDate: string | null;
     vulnerabilityDisclosureProgramExists: boolean | null;
@@ -266,6 +267,8 @@ export function mapOrganizationRecord(record: {
       record.infrastructureProfile?.vendorReviewCadence ?? null,
     dpaRequiredForProcessors:
       record.infrastructureProfile?.dpaRequiredForProcessors ?? null,
+    penetrationTestingStrategy:
+      record.infrastructureProfile?.penetrationTestingStrategy ?? null,
     penetrationTestingCadence:
       record.infrastructureProfile?.penetrationTestingCadence ?? null,
     penetrationTestLastDate:

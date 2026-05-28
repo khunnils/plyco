@@ -322,6 +322,15 @@ export const validateInfrastructureProfileCodes = async (
           "infrastructure.penetrationTestingCadence",
         )
       : Promise.resolve(),
+    infrastructure.penetrationTestingStrategy
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_penetration_testing_strategies",
+          infrastructure.penetrationTestingStrategy,
+          "infrastructure.penetrationTestingStrategy",
+        )
+      : Promise.resolve(),
   ]);
 };
 

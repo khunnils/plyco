@@ -16,6 +16,7 @@ export const requiredCodeSetIds = [
   "privacy_dpo_statuses",
   "privacy_eu_representative_statuses",
   "security_cadences",
+  "security_penetration_testing_strategies",
   "security_encryption_algorithms",
   "security_tls_versions",
   "security_key_management_providers",
@@ -417,6 +418,12 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["annually", "Annually"],
     ["ad_hoc", "Ad hoc"],
     ["none", "None"],
+  ]),
+  codeSet("security_penetration_testing_strategies", "Security penetration testing strategies", false, [
+    ["none", "None"],
+    ["internal", "Internal"],
+    ["external", "External"],
+    ["hybrid", "Hybrid (Internal & External)"],
   ]),
   codeSet("security_encryption_algorithms", "Security encryption algorithms", false, [
     ["aes_256", "AES-256"],

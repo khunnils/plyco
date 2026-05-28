@@ -202,6 +202,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vendorReviewRequired: input.vendorReviewRequired,
       vendorReviewCadence: input.vendorReviewCadence,
       dpaRequiredForProcessors: input.dpaRequiredForProcessors,
+      penetrationTestingStrategy: input.penetrationTestingStrategy,
       penetrationTestingCadence: input.penetrationTestingCadence,
       penetrationTestLastDate: input.penetrationTestLastDate,
       vulnerabilityDisclosureProgramExists:

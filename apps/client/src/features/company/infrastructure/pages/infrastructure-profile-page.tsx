@@ -46,6 +46,10 @@ export const InfrastructureProfilePage = ({
       "security_notification_timelines"
     )}
     securityTlsVersionOptions={codeOptions(vocabulary, "security_tls_versions")}
+    penetrationTestingStrategyOptions={codeOptions(
+      vocabulary,
+      "security_penetration_testing_strategies"
+    )}
     vocabulary={vocabulary}
     onSaveProfile={onSaveProfile}
   />

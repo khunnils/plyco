@@ -1218,6 +1218,22 @@
       "example": false
     },
     {
+      "key": "infrastructure.penetrationTestingStrategy",
+      "label": "Penetration testing strategy",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "Strategy code for penetration testing (internal, external, etc).",
+      "example": "external"
+    },
+    {
+      "key": "infrastructure.penetrationTestingStrategyLabel",
+      "label": "Penetration testing strategy label",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "Human-readable label for the penetration testing strategy code.",
+      "example": "External"
+    },
+    {
       "key": "infrastructure.penetrationTestingCadence",
       "label": "Penetration testing cadence",
       "type": "string",

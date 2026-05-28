@@ -9,6 +9,7 @@ import { type UseFormReturn } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
+import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
   Combobox,
@@ -168,53 +169,6 @@ const ProviderPicker = ({
   )
 }
 
-const NumberField = ({
-  form,
-  label,
-  name,
-}: {
-  form: UseFormReturn<ProfileDraft>
-  label: string
-  name:
-    | "infrastructure.logRetentionDays"
-    | "infrastructure.patchingSlaCriticalDays"
-    | "infrastructure.patchingSlaHighDays"
-    | "infrastructure.backupRetentionDays"
-}) => (
-  <label className="grid gap-2 text-sm font-medium text-slate-800">
-    {label}
-    <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-      inputMode="numeric"
-      min={0}
-      type="number"
-      {...form.register(name, {
-        setValueAs: (value) => (value === "" ? null : Number(value)),
-      })}
-    />
-  </label>
-)
-
-const DateField = ({
-  form,
-  label,
-  name,
-}: {
-  form: UseFormReturn<ProfileDraft>
-  label: string
-  name: "infrastructure.incidentResponseLastTestedDate"
-}) => (
-  <label className="grid gap-2 text-sm font-medium text-slate-800">
-    {label}
-    <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-      type="date"
-      {...form.register(name, {
-        setValueAs: (value) => (value === "" ? null : value),
-      })}
-    />
-  </label>
-)
 
 export const InfrastructureProfileFields = ({
   form,
@@ -347,10 +301,13 @@ export const InfrastructureProfileFields = ({
             name="infrastructure.centralizedLoggingEnabled"
           />
           {centralizedLoggingEnabled && (
-            <NumberField
-              form={form}
+            <TextField
+              error={form.formState.errors.infrastructure?.logRetentionDays}
               label="Log retention days"
               name="infrastructure.logRetentionDays"
+              register={form.register}
+              type="number"
+              min={0}
             />
           )}
           <SelectField
@@ -374,15 +331,21 @@ export const InfrastructureProfileFields = ({
             options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
             placeholder="Not set"
           />
-          <NumberField
-            form={form}
+          <TextField
+            error={form.formState.errors.infrastructure?.patchingSlaCriticalDays}
             label="Critical patching SLA days"
             name="infrastructure.patchingSlaCriticalDays"
+            register={form.register}
+            type="number"
+            min={0}
           />
-          <NumberField
-            form={form}
+          <TextField
+            error={form.formState.errors.infrastructure?.patchingSlaHighDays}
             label="High patching SLA days"
             name="infrastructure.patchingSlaHighDays"
+            register={form.register}
+            type="number"
+            min={0}
           />
         </div>
       </section>
@@ -411,10 +374,12 @@ export const InfrastructureProfileFields = ({
             placeholder="Not set"
           />
           {incidentResponsePlanExists && (
-            <DateField
-              form={form}
+            <TextField
+              error={form.formState.errors.infrastructure?.incidentResponseLastTestedDate}
               label="Last tested date"
               name="infrastructure.incidentResponseLastTestedDate"
+              register={form.register}
+              type="date"
             />
           )}
         </div>
@@ -436,10 +401,13 @@ export const InfrastructureProfileFields = ({
                 options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
                 placeholder="Not set"
               />
-              <NumberField
-                form={form}
+              <TextField
+                error={form.formState.errors.infrastructure?.backupRetentionDays}
                 label="Backup retention days"
                 name="infrastructure.backupRetentionDays"
+                register={form.register}
+                type="number"
+                min={0}
               />
               <SelectField
                 control={form.control}

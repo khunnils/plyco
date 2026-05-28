@@ -24,6 +24,7 @@ const CODE_SETS_WITH_NONE = new Set([
   "security_customer_notification_processes",
   "security_notification_timelines",
   "security_monitoring_owners",
+  "security_penetration_testing_strategies",
 ])
 
 const codeSetsFor = (vocabulary: Vocabulary | undefined, codeSetId: string) =>

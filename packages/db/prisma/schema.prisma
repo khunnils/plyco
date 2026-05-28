@@ -238,6 +238,7 @@ model InfrastructureProfile {
   vendorReviewRequired           Boolean?     @map("vendor_review_required")
   vendorReviewCadence            String?      @map("vendor_review_cadence")
   dpaRequiredForProcessors       Boolean?     @map("dpa_required_for_processors")
+  penetrationTestingStrategy     String?      @map("penetration_testing_strategy")
   penetrationTestingCadence      String?      @map("penetration_testing_cadence")
   penetrationTestLastDate        String?      @map("penetration_test_last_date")
   vulnerabilityDisclosureProgramExists Boolean? @map("vulnerability_disclosure_program_exists")

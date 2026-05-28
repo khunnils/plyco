@@ -47,22 +47,15 @@ const MinimumAgeField = ({
   }
 
   return (
-    <label className="grid gap-2 text-sm font-medium text-slate-800">
-      <span>Minimum user age</span>
-      <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
-        {serviceHelperText.minimumUserAge}
-      </span>
-      <input
-        className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-        inputMode="numeric"
-        min={0}
-        type="number"
-        {...form.register(servicePath(index, "minimumUserAge"), {
-          setValueAs: (value) => (value === "" ? null : Number(value)),
-        })}
-      />
-      {error && <span className="text-xs text-red-700">{error.message}</span>}
-    </label>
+    <TextField
+      error={error}
+      helperText={serviceHelperText.minimumUserAge}
+      label="Minimum user age"
+      name={servicePath(index, "minimumUserAge")}
+      register={form.register}
+      type="number"
+      min={0}
+    />
   )
 }
 

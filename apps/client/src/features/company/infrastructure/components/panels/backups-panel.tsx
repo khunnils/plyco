@@ -9,6 +9,7 @@ import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { SelectField } from "@/components/form/select-field"
+import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
@@ -182,22 +183,16 @@ export const BackupsPanel = ({
               ]}
               placeholder="Not set"
             />
-            <label className="grid gap-2 text-sm font-medium text-slate-800">
-              <span>Backup retention days</span>
-              <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
-                {infrastructureHelperText.backupRetentionDays}
-              </span>
-              <input
-                className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
-                disabled={isBackupRetentionDaysDisabled}
-                inputMode="numeric"
-                min={0}
-                type="number"
-                {...form.register("backupRetentionDays", {
-                  setValueAs: (value) => (value === "" ? null : Number(value)),
-                })}
-              />
-            </label>
+            <TextField
+              disabled={isBackupRetentionDaysDisabled}
+              error={form.formState.errors.backupRetentionDays}
+              helperText={infrastructureHelperText.backupRetentionDays}
+              label="Backup retention days"
+              name="backupRetentionDays"
+              register={form.register}
+              type="number"
+              min={0}
+            />
             <SelectField
               control={form.control}
               helperText={infrastructureHelperText.restoreTestingCadence}

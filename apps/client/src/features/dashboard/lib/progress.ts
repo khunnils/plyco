@@ -276,8 +276,23 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         : []),
       field("Monitoring owner", infrastructure.securityMonitoringOwner),
     ]),
-    sectionProgress("Vulnerability Management", [
+    sectionProgress("Vulnerability Detection", [
       field("Vulnerability scan frequency", infrastructure.scanningCadence),
+      field(
+        "Penetration testing strategy",
+        infrastructure.penetrationTestingStrategy
+      ),
+      ...(infrastructure.penetrationTestingStrategy &&
+      infrastructure.penetrationTestingStrategy !== "none"
+        ? [
+            field(
+              "Penetration testing frequency",
+              infrastructure.penetrationTestingCadence
+            ),
+          ]
+        : []),
+    ]),
+    sectionProgress("Vulnerability Remediation", [
       field(
         "Critical patch timeline status",
         infrastructure.patchingSlaCriticalDaysStatus
@@ -285,10 +300,6 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       field(
         "High patch timeline status",
         infrastructure.patchingSlaHighDaysStatus
-      ),
-      field(
-        "Penetration testing frequency",
-        infrastructure.penetrationTestingCadence
       ),
       field(
         "Responsible disclosure program exists",

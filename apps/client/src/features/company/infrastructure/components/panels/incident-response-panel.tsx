@@ -9,6 +9,7 @@ import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { SelectField } from "@/components/form/select-field"
+import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
@@ -169,19 +170,14 @@ export const IncidentResponsePanel = ({
           placeholder="Not set"
         />
         {incidentResponsePlanExists && (
-          <label className="grid gap-2 text-sm font-medium text-slate-800">
-            <span>Last tested date</span>
-            <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
-              {infrastructureHelperText.incidentResponseLastTestedDate}
-            </span>
-            <input
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-              type="date"
-              {...form.register("incidentResponseLastTestedDate", {
-                setValueAs: (value) => (value === "" ? null : value),
-              })}
-            />
-          </label>
+          <TextField
+            error={form.formState.errors.incidentResponseLastTestedDate}
+            helperText={infrastructureHelperText.incidentResponseLastTestedDate}
+            label="Last tested date"
+            name="incidentResponseLastTestedDate"
+            register={form.register}
+            type="date"
+          />
         )}
       </div>
     </ProfilePanelShell>

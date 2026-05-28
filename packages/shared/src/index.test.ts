@@ -363,6 +363,9 @@ describe("shared security profile schemas", () => {
       logRetentionDaysStatus: null,
       securityMonitoringOwner: null,
       scanningCadence: null,
+      penetrationTestingStrategy: null,
+      penetrationTestingCadence: null,
+      penetrationTestLastDate: null,
       patchingSlaCriticalDays: null,
       patchingSlaCriticalDaysStatus: null,
       patchingSlaHighDays: null,
@@ -378,6 +381,8 @@ describe("shared security profile schemas", () => {
       vendorReviewRequired: null,
       vendorReviewCadence: null,
       dpaRequiredForProcessors: null,
+      vulnerabilityDisclosureProgramExists: null,
+      vulnerabilityDisclosureUrl: null,
     });
   });
 
@@ -417,6 +422,7 @@ describe("shared security profile schemas", () => {
         logRetentionDays: 365,
         securityMonitoringOwner: "security",
         scanningCadence: "weekly",
+        penetrationTestingStrategy: "external",
         patchingSlaCriticalDays: 7,
         patchingSlaHighDays: 30,
         incidentResponsePlanExists: true,
