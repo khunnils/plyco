@@ -9,6 +9,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
 } from "lucide-react"
 import {
   type DocumentSummary,
@@ -117,7 +118,7 @@ export const DocumentsRoutePage = () => {
 
   // Setup header, breadcrumbs and action buttons based on mode
   let breadcrumbs = [{ label: "Policies & Documents", href: "/documents" }]
-  const eyebrow = "Policies & Documents"
+  let eyebrow = "Policies & Documents"
   let pageTitle = "Policies & Documents"
 
   let bannerTitle = "Documents & Policies"
