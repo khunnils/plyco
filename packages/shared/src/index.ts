@@ -420,7 +420,6 @@ export const templateSchema = z.object({
   slug: templateSlugSchema,
   sourceSystemTemplateSlug: templateSlugSchema.nullable(),
   content: z.string(),
-  policyVersion: z.string().default(""),
   versionMajor: z.number().int().default(1),
   versionMinor: z.number().int().default(0),
   createdAt: z.string().datetime(),
@@ -430,7 +429,6 @@ export const templateSchema = z.object({
 export const templateInputSchema = z.object({
   name: z.string().trim().min(1, "Template name is required"),
   content: z.string(),
-  policyVersion: z.string().default(""),
 });
 
 export const templatePreviewInputSchema = templateInputSchema;

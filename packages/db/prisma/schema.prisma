@@ -389,7 +389,6 @@ model Template {
   slug                     String
   sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
-  policyVersion            String       @default("") @map("policy_version")
   versionMajor            Int          @default(1) @map("version_major")
   versionMinor            Int          @default(0) @map("version_minor")
   documents                Document[]

@@ -22,9 +22,8 @@ export const templateSchemaQueryKey = (organizationId: string) =>
 export const templatePreviewQueryKey = (
   organizationId: string,
   name: string,
-  content: string,
-  policyVersion: string
-) => ["template-preview", organizationId, name, content, policyVersion] as const
+  content: string
+) => ["template-preview", organizationId, name, content] as const
 
 export const documentsQueryKey = (organizationId: string) =>
   ["documents", organizationId] as const

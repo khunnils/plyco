@@ -1305,7 +1305,8 @@ describe("security profile API", () => {
         id: "template-subprocessors",
         organizationId: "org-test",
         sourceSystemTemplateSlug: systemTemplate.slug,
-        policyVersion: "",
+        versionMajor: 1,
+        versionMinor: 0,
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
         ...systemTemplate,
@@ -1662,7 +1663,6 @@ describe("security profile API", () => {
         name: "Security Policy",
         content:
           "# {{ company.name }} Security Policy\nVersion {{ policy.version }}\n",
-        policyVersion: "1.0",
       },
     });
 
@@ -1686,7 +1686,6 @@ describe("security profile API", () => {
       payload: {
         name: "Broken Policy",
         content: "{% if company.name %}",
-        policyVersion: "",
       },
     });
 
@@ -1709,7 +1708,6 @@ describe("security profile API", () => {
       slug: "security-policy",
       sourceSystemTemplateSlug: "security-policy",
       content: "# {{ company.name }} Security Policy\n",
-      policyVersion: "",
     });
 
     const updateResponse = await app.inject({
@@ -1718,7 +1716,6 @@ describe("security profile API", () => {
       payload: {
         name: "Customer Security Policy",
         content: "# Updated policy\n",
-        policyVersion: "1.0",
       },
     });
 
@@ -1728,7 +1725,6 @@ describe("security profile API", () => {
       slug: "security-policy",
       sourceSystemTemplateSlug: "security-policy",
       content: "# Updated policy\n",
-      policyVersion: "1.0",
     });
 
     const listResponse = await app.inject({
@@ -1752,7 +1748,6 @@ describe("security profile API", () => {
       payload: {
         name: "Custom Policy",
         content: "# Custom policy\n",
-        policyVersion: "",
       },
     });
 
@@ -1770,7 +1765,6 @@ describe("security profile API", () => {
       payload: {
         name: "Custom Policy",
         content: "# Duplicate\n",
-        policyVersion: "",
       },
     });
 
@@ -1823,7 +1817,6 @@ describe("security profile API", () => {
       payload: {
         name: "Versioning Test Policy",
         content: "# Versioning test policy\n",
-        policyVersion: "",
       },
     });
     expect(createResponse.statusCode).toBe(201);
@@ -1838,7 +1831,6 @@ describe("security profile API", () => {
       payload: {
         name: "Versioning Test Policy",
         content: "# Versioning test policy (updated once)\n",
-        policyVersion: "",
       },
     });
     expect(update1Response.statusCode).toBe(200);
@@ -1866,7 +1858,6 @@ describe("security profile API", () => {
       payload: {
         name: "Versioning Test Policy",
         content: "# Versioning test policy (updated twice)\n",
-        policyVersion: "",
       },
     });
     expect(update2Response.statusCode).toBe(200);
@@ -1881,7 +1872,6 @@ describe("security profile API", () => {
       payload: {
         name: "Versioning Test Policy",
         content: "# Versioning test policy (updated thrice)\n",
-        policyVersion: "",
       },
     });
     expect(update3Response.statusCode).toBe(200);
@@ -1909,7 +1899,6 @@ describe("security profile API", () => {
       payload: {
         name: "Versioning Test Policy",
         content: "# Versioning test policy (updated four times)\n",
-        policyVersion: "",
       },
     });
     expect(update4Response.statusCode).toBe(200);
@@ -1952,7 +1941,6 @@ describe("security profile API", () => {
         name: "Security Policy",
         content:
           '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
-        policyVersion: "1.0",
       },
     });
 
@@ -2155,7 +2143,6 @@ describe("security profile API", () => {
         name: "Security Policy",
         content:
           '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
-        policyVersion: "1.1",
       },
     });
 

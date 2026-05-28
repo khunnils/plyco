@@ -557,7 +557,6 @@ describe("shared security profile schemas", () => {
     const result = templateInputSchema.safeParse({
       name: "Privacy Policy",
       content: "# Privacy Policy\n",
-      policyVersion: "1.0",
     });
 
     expect(result.success).toBe(true);
@@ -568,7 +567,6 @@ describe("shared security profile schemas", () => {
       templatePreviewInputSchema.safeParse({
         name: "Security Policy",
         content: "# {{ company.name }}",
-        policyVersion: "1.0",
       }).success,
     ).toBe(true);
     expect(

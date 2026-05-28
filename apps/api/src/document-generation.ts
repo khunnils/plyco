@@ -148,7 +148,7 @@ export class ReportContextBuilder {
 
   private policyContext(template: Template, members: OrganizationMember[]) {
     return {
-      version: template.policyVersion,
+      version: `${template.versionMajor}.${template.versionMinor}`,
     };
   }
 

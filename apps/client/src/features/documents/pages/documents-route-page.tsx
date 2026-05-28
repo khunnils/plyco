@@ -50,9 +50,8 @@ import { TemplateForm } from "@/features/templates/components/template-form"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
 
 const blankTemplate: TemplateInput = {
-  name: "",
+  name: "Untitled Template",
   content: "",
-  policyVersion: "",
 }
 
 const generatedText = (summary: DocumentSummary) =>
@@ -84,6 +83,10 @@ export const DocumentsRoutePage = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([])
   const [documentFilters, setDocumentFilters] = useState<Record<string, "current" | "all">>({})
+  const [prevMode, setPrevMode] = useState(mode)
+  const [prevId, setPrevId] = useState(id)
+  const [templateName, setTemplateName] = useState("Untitled Template")
+  const [isRenameOpen, setIsRenameOpen] = useState(false)
   const templates = useTemplates()
   const documents = useDocuments()
   const createTemplate = useCreateTemplate()
@@ -104,6 +107,27 @@ export const DocumentsRoutePage = () => {
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === id
   )
+  const [prevEditingTemplateName, setPrevEditingTemplateName] = useState<string | undefined>(editingTemplate?.name)
+
+  // Sync state during render when route params change
+  if (mode !== prevMode || id !== prevId) {
+    setPrevMode(mode)
+    setPrevId(id)
+    if (mode === "edit" && editingTemplate) {
+      setTemplateName(editingTemplate.name)
+      setPrevEditingTemplateName(editingTemplate.name)
+    } else if (mode === "new") {
+      setTemplateName("Untitled Template")
+      setPrevEditingTemplateName(undefined)
+    }
+  }
+
+  // Sync state during render when editingTemplate loads asynchronously
+  if (mode === "edit" && editingTemplate && editingTemplate.name !== prevEditingTemplateName) {
+    setPrevEditingTemplateName(editingTemplate.name)
+    setTemplateName(editingTemplate.name)
+  }
+
   const viewedDocumentSummary = documentsList.find(
     (summary) => summary.document?.id === id
   )
@@ -200,10 +224,10 @@ export const DocumentsRoutePage = () => {
   } else if (mode === "new") {
     breadcrumbs = [
       { label: "Policies & Documents", href: "/documents" },
-      { label: "New template" },
+      { label: templateName },
     ]
-    pageTitle = "New template"
-    bannerTitle = "New template"
+    pageTitle = templateName
+    bannerTitle = templateName
     bannerSubtitle = "Draft a new policy template using markdown and schema variables."
     bannerButtons = (
       <>
@@ -226,6 +250,7 @@ export const DocumentsRoutePage = () => {
 
     content = (
       <TemplateForm
+        name={templateName}
         defaultValues={blankTemplate}
         members={organizationMembersData}
         onSubmit={(template) =>
@@ -238,11 +263,11 @@ export const DocumentsRoutePage = () => {
   } else if (mode === "edit") {
     breadcrumbs = [
       { label: "Policies & Documents", href: "/documents" },
-      { label: editingTemplate?.name ?? "Edit template" },
+      { label: templateName },
     ]
-    pageTitle = editingTemplate?.name ?? "Edit template"
-    bannerTitle = editingTemplate?.name ?? "Edit template"
-    bannerSubtitle = `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}${editingTemplate?.policyVersion ? ` (${editingTemplate.policyVersion})` : ""}.`
+    pageTitle = templateName
+    bannerTitle = templateName
+    bannerSubtitle = `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}.`
     bannerButtons = (
       <>
         <Button
@@ -264,6 +289,7 @@ export const DocumentsRoutePage = () => {
 
     content = editingTemplate ? (
       <TemplateForm
+        name={templateName}
         defaultValues={editingTemplate}
         members={organizationMembersData}
         onSubmit={(template) =>
@@ -576,7 +602,19 @@ export const DocumentsRoutePage = () => {
       <div className="grid gap-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
           <div>
-            <h2 className="text-base font-semibold text-slate-950">{bannerTitle}</h2>
+            <h2 className="text-base font-semibold text-slate-950 flex items-center gap-2">
+              <span>{bannerTitle}</span>
+              {(mode === "new" || mode === "edit") && (
+                <button
+                  type="button"
+                  onClick={() => setIsRenameOpen(true)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded hover:bg-slate-100"
+                  title="Rename template"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+              )}
+            </h2>
             <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
           </div>
           {bannerButtons ? (
@@ -585,6 +623,49 @@ export const DocumentsRoutePage = () => {
         </div>
         {content}
       </div>
+
+      {isRenameOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <h3 className="text-lg font-semibold text-slate-950">Rename template</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Enter a new name for this policy template.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                const newName = (formData.get("name") as string)?.trim()
+                if (newName) {
+                  setTemplateName(newName)
+                }
+                setIsRenameOpen(false)
+              }}
+              className="mt-4 grid gap-4"
+            >
+              <input
+                name="name"
+                type="text"
+                defaultValue={templateName}
+                required
+                autoFocus
+                className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                placeholder="Template name"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsRenameOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Rename</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   )
 }

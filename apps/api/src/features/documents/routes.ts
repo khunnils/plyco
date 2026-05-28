@@ -103,7 +103,6 @@ export async function registerDocumentRoutes(
         slug: "preview",
         sourceSystemTemplateSlug: null,
         content: draft.content,
-        policyVersion: draft.policyVersion,
         versionMajor: 1,
         versionMinor: 0,
         createdAt: now,

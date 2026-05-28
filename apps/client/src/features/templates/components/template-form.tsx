@@ -49,20 +49,27 @@ const groupedVariables = (variables: TemplateVariable[]) =>
   }, {})
 
 export const TemplateForm = ({
+  name,
   defaultValues,
   onSubmit,
 }: {
+  name: string
   defaultValues: Template | TemplateInput
   members?: OrganizationMember[]
   onSubmit: (template: TemplateInput) => void
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [schemaSearch, setSchemaSearch] = useState("")
+  const [prevName, setPrevName] = useState(name)
   const [draft, setDraft] = useState<TemplateInput>({
-    name: defaultValues.name,
+    name,
     content: defaultValues.content,
-    policyVersion: defaultValues.policyVersion,
   })
+
+  if (name !== prevName) {
+    setPrevName(name)
+    setDraft((current) => ({ ...current, name }))
+  }
   const debouncedDraft = useDebouncedTemplate(draft)
   const schema = useTemplateVariableCatalog()
   const preview = useTemplatePreview(debouncedDraft)
@@ -182,36 +189,6 @@ export const TemplateForm = ({
 
   return (
     <form className="grid gap-4" id="template-form" onSubmit={handleSubmit}>
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-1">
-          <span className="text-sm font-medium text-slate-700">Name</span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            required
-            value={draft.name}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                name: event.target.value,
-              }))
-            }
-          />
-        </label>
-        <label className="grid gap-1">
-          <span className="text-sm font-medium text-slate-700">Version</span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            value={draft.policyVersion}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                policyVersion: event.target.value,
-              }))
-            }
-          />
-        </label>
-      </div>
-
       <div className="flex flex-wrap items-center justify-between gap-2 border border-slate-200 bg-slate-50 p-2 rounded-md">
         <div className="flex items-center gap-2">
           <Button

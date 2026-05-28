@@ -77,8 +77,7 @@ export const useTemplatePreview = (template: TemplateInput, enabled = true) => {
     queryKey: templatePreviewQueryKey(
       organizationId,
       template.name,
-      template.content,
-      template.policyVersion
+      template.content
     ),
     queryFn: () => previewTemplate(organizationId, template),
     retry: false,

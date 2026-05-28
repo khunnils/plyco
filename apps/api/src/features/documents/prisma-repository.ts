@@ -53,7 +53,6 @@ export class PrismaDocumentRepository implements DocumentRepository {
           slug: systemTemplate.slug,
           sourceSystemTemplateSlug: systemTemplate.slug,
           content: systemTemplate.content,
-          policyVersion: "",
         },
       });
 
@@ -76,7 +75,6 @@ export class PrismaDocumentRepository implements DocumentRepository {
           slug,
           sourceSystemTemplateSlug: null,
           content: input.content,
-          policyVersion: input.policyVersion,
         },
       });
 
@@ -117,7 +115,6 @@ export class PrismaDocumentRepository implements DocumentRepository {
         data: {
           name: input.name,
           content: input.content,
-          policyVersion: input.policyVersion,
           versionMinor: nextVersionMinor,
         },
       });
