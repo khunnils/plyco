@@ -5,7 +5,7 @@ import {
   type TemplateVariable,
   type TemplateVariableField,
 } from "@plyco/shared"
-import { Braces, ChevronDown, ChevronRight, Columns, Eye, FileCode, ListTree, Loader2, Save, Search } from "lucide-react"
+import { Braces, ChevronDown, ChevronRight, Columns, Eye, FileCode, ListTree, Loader2, Search } from "lucide-react"
 import {
   useMemo,
   useEffect,
@@ -50,14 +50,10 @@ const groupedVariables = (variables: TemplateVariable[]) =>
 
 export const TemplateForm = ({
   defaultValues,
-  isSaving,
-  onCancel,
   onSubmit,
 }: {
   defaultValues: Template | TemplateInput
-  isSaving: boolean
   members?: OrganizationMember[]
-  onCancel: () => void
   onSubmit: (template: TemplateInput) => void
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)

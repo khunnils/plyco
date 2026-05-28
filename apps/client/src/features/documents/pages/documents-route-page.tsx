@@ -9,11 +9,9 @@ import {
   Pencil,
   Plus,
   Trash2,
-  X,
 } from "lucide-react"
 import {
   type DocumentSummary,
-  type Template,
   type TemplateCatalog,
   type TemplateInput,
 } from "@plyco/shared"
@@ -117,8 +115,8 @@ export const DocumentsRoutePage = () => {
   const isLoading = templates.isLoading || documents.isLoading
 
   // Setup header, breadcrumbs and action buttons based on mode
-  let breadcrumbs = [{ label: "Policies & Documents", href: "/documents" }]
-  let eyebrow = "Policies & Documents"
+  let breadcrumbs: Array<{ label: string; href?: string }> = [{ label: "Policies & Documents", href: "/documents" }]
+  const eyebrow = "Policies & Documents"
   let pageTitle = "Policies & Documents"
 
   let bannerTitle = "Documents & Policies"
@@ -228,9 +226,7 @@ export const DocumentsRoutePage = () => {
     content = (
       <TemplateForm
         defaultValues={blankTemplate}
-        isSaving={createTemplate.isPending}
         members={organizationMembersData}
-        onCancel={() => navigate("/documents")}
         onSubmit={(template) =>
           createTemplate.mutate(template, {
             onSuccess: () => navigate("/documents"),
@@ -268,9 +264,7 @@ export const DocumentsRoutePage = () => {
     content = editingTemplate ? (
       <TemplateForm
         defaultValues={editingTemplate}
-        isSaving={updateTemplate.isPending}
         members={organizationMembersData}
-        onCancel={() => navigate("/documents")}
         onSubmit={(template) =>
           updateTemplate.mutate(
             { id: editingTemplate.id, template },
@@ -444,20 +438,18 @@ export const DocumentsRoutePage = () => {
                   >
                     <Trash2 />
                   </Button>
-                  {!summary.document && (
-                    <Button
-                      disabled={createDocument.isPending}
-                      type="button"
-                      variant="outline"
-                      onClick={() =>
-                        createDocument.mutate({
-                          templateId: summary.template.id,
-                        })
-                      }
-                    >
-                      Publish
-                    </Button>
-                  )}
+                  <Button
+                    disabled={createDocument.isPending}
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      createDocument.mutate({
+                        templateId: summary.template.id,
+                      })
+                    }
+                  >
+                    Publish
+                  </Button>
                 </div>
               </div>
 

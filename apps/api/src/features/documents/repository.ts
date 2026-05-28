@@ -33,6 +33,15 @@ export interface DocumentRepository {
     pdfObjectPath: string | null;
     sourceHash: string;
   }): Promise<Document>;
+  updateDocument(
+    id: string,
+    input: {
+      title: string;
+      renderedContent: string;
+      pdfObjectPath: string | null;
+      sourceHash: string;
+    },
+  ): Promise<Document>;
   getDocumentPdfObjectPath(
     organizationId: string,
     id: string,

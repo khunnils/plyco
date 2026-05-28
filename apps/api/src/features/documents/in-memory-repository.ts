@@ -224,6 +224,40 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     return document;
   }
 
+  async updateDocument(
+    id: string,
+    input: {
+      title: string;
+      renderedContent: string;
+      pdfObjectPath: string | null;
+      sourceHash: string;
+    },
+  ): Promise<Document> {
+    const document = this.documents.get(id);
+    if (!document) {
+      throw new Error("Document not found");
+    }
+
+    const updated: Document = {
+      ...document,
+      title: input.title,
+      renderedContent: input.renderedContent,
+      hasPdf: Boolean(input.pdfObjectPath),
+      sourceHash: input.sourceHash,
+      generatedAt: now(),
+    };
+
+    this.documents.set(id, updated);
+
+    if (input.pdfObjectPath) {
+      this.documentPdfObjectPaths.set(id, input.pdfObjectPath);
+    } else {
+      this.documentPdfObjectPaths.delete(id);
+    }
+
+    return updated;
+  }
+
   async getDocument(
     organizationId: string,
     id: string,

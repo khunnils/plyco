@@ -182,6 +182,29 @@ export class PrismaDocumentRepository implements DocumentRepository {
     }
   }
 
+  async updateDocument(
+    id: string,
+    input: {
+      title: string;
+      renderedContent: string;
+      pdfObjectPath: string | null;
+      sourceHash: string;
+    },
+  ): Promise<Document> {
+    const document = await this.client.document.update({
+      where: { id },
+      data: {
+        title: input.title,
+        renderedContent: input.renderedContent,
+        pdfObjectPath: input.pdfObjectPath,
+        sourceHash: input.sourceHash,
+        generatedAt: new Date(),
+      },
+    });
+
+    return mapDocumentRecord(document);
+  }
+
   async getDocument(
     organizationId: string,
     id: string,

@@ -1313,11 +1313,13 @@ describe("security profile API", () => {
       context,
     );
 
-    expect(renderedContent).toContain("# Acme AI Data Processors");
-    expect(renderedContent).toContain("| GitHub | limited |");
-    expect(renderedContent).toContain("| Stripe | subprocessor |");
+    expect(renderedContent).toContain("# Acme AI Data Processors and Subprocessors");
+    expect(renderedContent).toContain("## Acme AI Platform");
     expect(renderedContent).toContain(
-      "| Stripe |  | Acme AI Platform | Payment processing |",
+      "| GitHub |  | Acme AI Platform | limited | Code hosting and pull requests | Customer account data | us | signed |",
+    );
+    expect(renderedContent).toContain(
+      "| Stripe |  | Acme AI Platform | subprocessor | Payment processing | Customer account data | us, eu | signed |",
     );
   });
 
@@ -2012,8 +2014,7 @@ describe("security profile API", () => {
       url: "/organizations/org-test/documents",
       payload: { templateId: template.id },
     });
-    expect(duplicateResponse.statusCode).toBe(409);
-    expect(duplicateResponse.json().error.code).toBe("DOCUMENT_ALREADY_EXISTS");
+    expect(duplicateResponse.statusCode).toBe(201);
 
     const documentResponse = await app.inject({
       method: "GET",

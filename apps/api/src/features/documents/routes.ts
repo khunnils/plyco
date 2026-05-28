@@ -6,6 +6,7 @@ import {
   templateInputSchema,
   templatePreviewInputSchema,
   templateVariableCatalogSchema,
+  type Document,
   type Template,
 } from "@plyco/shared";
 import { type FastifyInstance } from "fastify";
@@ -309,15 +310,6 @@ export async function registerDocumentRoutes(
         template.id,
       );
 
-      if (existingDocument) {
-        throw new ApiError(
-          "DOCUMENT_ALREADY_EXISTS",
-          "A document has already been generated for this template.",
-          409,
-          { templateId: template.id },
-        );
-      }
-
       const snapshot = {
         organization: await organizationRepository.getOrganization(
           request.params.organizationId,
@@ -349,13 +341,24 @@ export async function registerDocumentRoutes(
         title: template.name,
         renderedContent,
       });
-      const document = await documentRepository.createDocument({
-        template,
-        title: template.name,
-        renderedContent,
-        pdfObjectPath: pdf?.objectPath ?? null,
-        sourceHash: templateSourceHash(template, context),
-      });
+
+      let document: Document;
+      if (existingDocument) {
+        document = await documentRepository.updateDocument(existingDocument.id, {
+          title: template.name,
+          renderedContent,
+          pdfObjectPath: pdf?.objectPath ?? null,
+          sourceHash: templateSourceHash(template, context),
+        });
+      } else {
+        document = await documentRepository.createDocument({
+          template,
+          title: template.name,
+          renderedContent,
+          pdfObjectPath: pdf?.objectPath ?? null,
+          sourceHash: templateSourceHash(template, context),
+        });
+      }
 
       return reply.status(201).send(document);
     },
