@@ -55,7 +55,14 @@ const codesForSet = (
         activeField(fields)
       )
     })
-    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) {
+        return a.sortOrder - b.sortOrder;
+      }
+      const aName = stringField(a.fields, "Name") || stringField(a.fields, "Id", "Key") || "";
+      const bName = stringField(b.fields, "Name") || stringField(b.fields, "Id", "Key") || "";
+      return aName.localeCompare(bName, undefined, { sensitivity: "base" });
+    })
     .map(({ fields }) => {
       const code = stringField(fields, "Id", "Key")
 
@@ -118,7 +125,7 @@ export class AirtableProviderLookupCodeSource implements ProviderLookupCodeSourc
       fields: record.fields,
       sortOrder:
         numberField(record.fields, "Sequence", "Sort Order", "Sort", "Order") ??
-        index,
+        0,
     }))
 
     return {
@@ -130,7 +137,7 @@ export class AirtableProviderLookupCodeSource implements ProviderLookupCodeSourc
       systemTypes: codesForSet(
         sortedCodeRecords,
         codeSetRecordsByAirtableId,
-        "provider_system_type",
+        "provider_system_types",
       ),
     }
   }

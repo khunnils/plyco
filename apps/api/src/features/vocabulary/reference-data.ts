@@ -32,7 +32,7 @@ export const requiredCodeSetIds = [
   "vendor_criticality",
   "vendor_category",
   "data_processing_level",
-  "provider_system_type",
+  "provider_system_types",
   "activity_retention_policies",
   "defined_statuses",
 ] as const
@@ -534,7 +534,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["limited", "Limited"],
     ["subprocessor", "Subprocessor"],
   ]),
-  codeSet("provider_system_type", "Provider system type", true, [
+  codeSet("provider_system_types", "Provider system types", true, [
     ["auth", "Auth"],
     ["source_control", "Source control"],
     ["cloud", "Cloud"],

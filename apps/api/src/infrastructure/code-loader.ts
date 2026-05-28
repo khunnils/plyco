@@ -118,7 +118,7 @@ export async function loadCodesFromAirtable({
     const codeId = stringField(record.fields, "Id", "Key")
     const sortOrder =
       numberField(record.fields, "Sequence", "Sort Order", "Sort", "Order") ??
-      recordIndex
+      0
 
     if (!codeSetId || !codeId) {
       throw new ApiError(

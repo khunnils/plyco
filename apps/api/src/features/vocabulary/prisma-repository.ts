@@ -162,6 +162,22 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             })),
           });
         }
+
+        const existingCodesToUpdate = codeSet.codes.filter(
+          (code) => existingCodeIds.has(code.codeId),
+        );
+        for (const code of existingCodesToUpdate) {
+          await tx.organizationCode.updateMany({
+            where: {
+              organizationCodeSetId,
+              codeId: code.codeId,
+              systemCodeId: code.id,
+            },
+            data: {
+              sortOrder: code.sortOrder,
+            },
+          });
+        }
       }
     });
   }

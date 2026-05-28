@@ -172,7 +172,7 @@ export const validateInfrastructureProfileCodes = async (
         )
       ) {
         throw new ApiError(
-          "INFRASTRUCTURE_PROVIDER_SYSTEM_TYPE_INVALID",
+          "INFRASTRUCTURE_PROVIDER_SYSTEM_TYPES_INVALID",
           "Infrastructure providers must use cloud, source control, auth, or password manager system types.",
           400,
           { systemType: provider.systemType },
@@ -182,7 +182,7 @@ export const validateInfrastructureProfileCodes = async (
       return assertCode(
         vocabularyRepository,
         organizationId,
-        "provider_system_type",
+        "provider_system_types",
         provider.systemType,
         "infrastructure.organizationProviders.systemType",
       );
@@ -447,7 +447,7 @@ export const validatePrivacyProfileCodes = async (
     ...privacy.organizationProviders.map((provider) => {
       if (provider.systemType !== "newsletter") {
         throw new ApiError(
-          "PRIVACY_PROVIDER_SYSTEM_TYPE_INVALID",
+          "PRIVACY_PROVIDER_SYSTEM_TYPES_INVALID",
           "Privacy providers must use newsletter system type.",
           400,
           { systemType: provider.systemType },
@@ -457,7 +457,7 @@ export const validatePrivacyProfileCodes = async (
       return assertCode(
         vocabularyRepository,
         organizationId,
-        "provider_system_type",
+        "provider_system_types",
         provider.systemType,
         "privacy.organizationProviders.systemType",
       );
@@ -528,7 +528,7 @@ export const validateServiceProviderUsageCodes = async (
       ? assertCode(
           vocabularyRepository,
           organizationId,
-          "provider_system_type",
+          "provider_system_types",
           providerUsage.systemType,
           "serviceProviderUsage.systemType",
         )

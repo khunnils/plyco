@@ -384,7 +384,7 @@ describe("vendors / providers API", () => {
           "Code Sets": [
             {
               id: "rec-system-types",
-              fields: { Id: "provider_system_type" },
+              fields: { Id: "provider_system_types" },
             },
             {
               id: "rec-vendor-categories",
