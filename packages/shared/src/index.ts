@@ -303,7 +303,7 @@ const serviceProviderUsageInputBaseSchema = z.object({
   purpose: z.string().trim().min(1, "Purpose is required"),
   dataProcessingLevel: providerDataProcessingLevelSchema.default("limited"),
   dataProcessed: z.array(z.string().trim().min(1)).default([]),
-  dpaStatus: dpaStatusSchema,
+  dpaStatus: dpaStatusSchema.nullable().default(null),
   dataRegions: z.array(codeIdSchema).default([]),
   notes: z.string().trim().optional().or(z.literal("")),
 });
@@ -318,7 +318,7 @@ const normalizeProviderDataProcessingNone = <
         ...value,
         dataProcessed: [],
         dataRegions: [],
-        dpaStatus: "not_required",
+        dpaStatus: null,
       } as T)
     : value;
 

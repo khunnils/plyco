@@ -929,31 +929,37 @@ const ServiceProviderUsagePanel = ({
                               ),
                               serviceProviderUsageHelperText.dataProcessingLevel,
                             ],
-                            [
-                              "DPA status",
-                              codeLabel(
-                                vocabulary,
-                                "dpa_status",
-                                providerUsage.dpaStatus
-                              ),
-                              serviceProviderUsageHelperText.dpaStatus,
-                            ],
-                            [
-                              "Data processed",
-                              providerUsage.dataProcessed.length > 0
-                                ? providerUsage.dataProcessed.join(", ")
-                                : "No data types selected",
-                              serviceProviderUsageHelperText.dataProcessed,
-                            ],
-                            [
-                              "Data regions",
-                              codeValueList(
-                                vocabulary,
-                                "regions",
-                                providerUsage.dataRegions
-                              ),
-                              serviceProviderUsageHelperText.dataRegions,
-                            ],
+                            ...(providerUsage.dataProcessingLevel !== "none"
+                              ? ([
+                                  [
+                                    "DPA status",
+                                    providerUsage.dpaStatus
+                                      ? codeLabel(
+                                          vocabulary,
+                                          "dpa_status",
+                                          providerUsage.dpaStatus
+                                        )
+                                      : "Not set",
+                                    serviceProviderUsageHelperText.dpaStatus,
+                                  ],
+                                  [
+                                    "Data processed",
+                                    providerUsage.dataProcessed.length > 0
+                                      ? providerUsage.dataProcessed.join(", ")
+                                      : "No data types selected",
+                                    serviceProviderUsageHelperText.dataProcessed,
+                                  ],
+                                  [
+                                    "Data regions",
+                                    codeValueList(
+                                      vocabulary,
+                                      "regions",
+                                      providerUsage.dataRegions
+                                    ),
+                                    serviceProviderUsageHelperText.dataRegions,
+                                  ],
+                                ] as const satisfies readonly ProfilePanelDetailRow[])
+                              : []),
                             [
                               "Purpose",
                               providerUsage.purpose || "Not set",

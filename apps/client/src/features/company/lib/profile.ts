@@ -45,7 +45,7 @@ export const emptyServiceProviderUsageDraft: ServiceProviderUsageInput = {
   purpose: "",
   dataProcessingLevel: "none",
   dataProcessed: [],
-  dpaStatus: "not_started",
+  dpaStatus: null,
   dataRegions: [],
   notes: "",
 }

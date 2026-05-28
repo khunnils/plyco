@@ -99,7 +99,7 @@ describe("shared security profile schemas", () => {
     if (result.success) {
       expect(result.data).toMatchObject({
         dataProcessed: [],
-        dpaStatus: "not_required",
+        dpaStatus: null,
         dataRegions: [],
       });
     }

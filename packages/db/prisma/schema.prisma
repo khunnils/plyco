@@ -366,7 +366,7 @@ model ServiceProviderUsage {
   systemType             String?                 @map("system_type")
   purpose                String
   dataProcessingLevel    String                  @default("limited") @map("data_processing_level")
-  dpaStatus              String                  @map("dpa_status")
+  dpaStatus              String?                 @map("dpa_status")
   dataRegions            String[]                @default([]) @map("data_regions")
   notes                  String?
   dataTypes              ProviderUsageDataType[]

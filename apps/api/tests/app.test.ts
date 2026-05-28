@@ -225,7 +225,7 @@ const noProcessingVendorUseBody = {
   purpose: "Issue tracking",
   dataProcessingLevel: "none",
   dataProcessed: [],
-  dpaStatus: "not_required",
+  dpaStatus: null,
   dataRegions: [],
   notes: "",
 };

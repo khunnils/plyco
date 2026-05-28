@@ -68,7 +68,7 @@ export const ServiceProviderUsageForm = ({
     if (dataProcessingLevel === "none") {
       form.setValue("dataProcessed", [])
       form.setValue("dataRegions", [])
-      form.setValue("dpaStatus", "not_required")
+      form.setValue("dpaStatus", null)
     }
   }, [dataProcessingLevel, form])
 

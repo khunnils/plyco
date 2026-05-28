@@ -453,7 +453,7 @@ export function mapServiceProviderUsageRecord(record: {
   systemType: string | null;
   purpose: string;
   dataProcessingLevel: string;
-  dpaStatus: string;
+  dpaStatus: string | null;
   dataRegions: string[];
   dataTypes: Array<{
     organizationDataType: {

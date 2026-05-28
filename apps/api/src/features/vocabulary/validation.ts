@@ -499,13 +499,15 @@ export const validateServiceProviderUsageCodes = async (
       providerUsage.dataProcessingLevel,
       "serviceProviderUsage.dataProcessingLevel",
     ),
-    assertCode(
-      vocabularyRepository,
-      organizationId,
-      "dpa_status",
-      providerUsage.dpaStatus,
-      "serviceProviderUsage.dpaStatus",
-    ),
+    providerUsage.dpaStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "dpa_status",
+          providerUsage.dpaStatus,
+          "serviceProviderUsage.dpaStatus",
+        )
+      : Promise.resolve(),
     assertCodes(
       vocabularyRepository,
       organizationId,
