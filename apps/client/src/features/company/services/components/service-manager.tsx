@@ -44,6 +44,7 @@ import {
   type SaveProfile,
 } from "@/features/company/types/company"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { serviceHelperText } from "./service-helper-text"
 
 const serviceBasicsSchema = serviceProfileInputSchema.pick({
   serviceName: true,
@@ -113,17 +114,24 @@ const serviceProviderPurpose = (service: ServiceProfileInput) =>
 
 const FieldNumberInput = <T extends Record<string, unknown>>({
   error,
+  helperText,
   label,
   name,
   register,
 }: {
   error?: { message?: string }
+  helperText?: string
   label: string
   name: FieldPath<T>
   register: UseFormReturn<T>["register"]
 }) => (
   <label className="grid gap-2 text-sm font-medium text-slate-800">
-    {label}
+    <span>{label}</span>
+    {helperText ? (
+      <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+        {helperText}
+      </span>
+    ) : null}
     <input
       className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
       inputMode="numeric"
@@ -155,6 +163,7 @@ const ServiceBasicsFormFields = ({
   <div className="grid gap-4 md:grid-cols-2">
     <TextField
       error={errors.serviceName}
+      helperText={serviceHelperText.serviceName}
       label="Service name"
       name={nameName}
       placeholder="Acme Platform"
@@ -162,6 +171,7 @@ const ServiceBasicsFormFields = ({
     />
     <TextField
       error={errors.serviceUrl}
+      helperText={serviceHelperText.serviceUrl}
       label="Service URL"
       name={urlName}
       placeholder="https://app.acme.example"
@@ -170,6 +180,7 @@ const ServiceBasicsFormFields = ({
     <div className="md:col-span-2">
       <TextAreaField
         error={errors.serviceDescription}
+        helperText={serviceHelperText.serviceDescription}
         label="Description"
         name={descriptionName}
         placeholder="Briefly describe the product or service"
@@ -256,9 +267,21 @@ const ServiceBasicsPanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[
-            ["Service name", service.serviceName || "Not set"],
-            ["Service URL", service.serviceUrl || "Not set"],
-            ["Description", service.serviceDescription || "Not set"],
+            [
+              "Service name",
+              service.serviceName || "Not set",
+              serviceHelperText.serviceName,
+            ],
+            [
+              "Service URL",
+              service.serviceUrl || "Not set",
+              serviceHelperText.serviceUrl,
+            ],
+            [
+              "Description",
+              service.serviceDescription || "Not set",
+              serviceHelperText.serviceDescription,
+            ],
           ]}
         />
       }
@@ -341,7 +364,11 @@ const ServiceAudiencePanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[
-            ["Business activities", activityLabels || "Not set"],
+            [
+              "Business activities",
+              activityLabels || "Not set",
+              serviceHelperText.businessActivityIds,
+            ],
             [
               "User types",
               codeValueList(
@@ -349,6 +376,7 @@ const ServiceAudiencePanel = ({
                 "service_user_types",
                 service.userTypes
               ),
+              serviceHelperText.userTypes,
             ],
             [
               "Customer types",
@@ -357,12 +385,18 @@ const ServiceAudiencePanel = ({
                 "service_customer_types",
                 service.customerTypes
               ),
+              serviceHelperText.customerTypes,
             ],
             [
               "Available regions",
               codeValueList(vocabulary, "regions", service.availabilityRegions),
+              serviceHelperText.availabilityRegions,
             ],
-            ["Directed to children", boolText(service.childrenDirected)],
+            [
+              "Directed to children",
+              boolText(service.childrenDirected),
+              serviceHelperText.childrenDirected,
+            ],
             ...(service.childrenDirected
               ? [
                   [
@@ -372,6 +406,7 @@ const ServiceAudiencePanel = ({
                       : service.minimumUserAge === 0
                         ? "Not set"
                         : service.minimumUserAge,
+                    serviceHelperText.minimumUserAge,
                   ] as ProfilePanelDetailRow,
                 ]
               : []),
@@ -391,6 +426,7 @@ const ServiceAudiencePanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.businessActivityIds?.root}
+          helperText={serviceHelperText.businessActivityIds}
           label="Business activities"
           name={audiencePath("businessActivityIds")}
           options={businessActivityOptions}
@@ -399,6 +435,7 @@ const ServiceAudiencePanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.userTypes?.root}
+          helperText={serviceHelperText.userTypes}
           label="User types"
           name={audiencePath("userTypes")}
           options={userTypeOptions}
@@ -407,6 +444,7 @@ const ServiceAudiencePanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.customerTypes?.root}
+          helperText={serviceHelperText.customerTypes}
           label="Customer types"
           name={audiencePath("customerTypes")}
           options={customerTypeOptions}
@@ -415,6 +453,7 @@ const ServiceAudiencePanel = ({
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.availabilityRegions?.root}
+          helperText={serviceHelperText.availabilityRegions}
           label="Availability regions"
           name={audiencePath("availabilityRegions")}
           options={regionOptions}
@@ -422,12 +461,14 @@ const ServiceAudiencePanel = ({
         />
         <ToggleField
           control={form.control}
+          helperText={serviceHelperText.childrenDirected}
           label="Directed to children"
           name={audiencePath("childrenDirected")}
         />
         {childrenDirected === true && (
           <FieldNumberInput
             error={form.formState.errors.minimumUserAge}
+            helperText={serviceHelperText.minimumUserAge}
             label="Minimum user age"
             name={audiencePath("minimumUserAge")}
             register={form.register}
@@ -485,6 +526,7 @@ const ServicePrivacyPanel = ({
     [
       "Uses cookies or tracking technologies",
       boolText(service.privacy.usesCookiesOrTrackingTechnologies),
+      serviceHelperText.usesCookiesOrTrackingTechnologies,
     ],
   ]
 
@@ -497,6 +539,7 @@ const ServicePrivacyPanel = ({
           "cookie_tracking_categories",
           service.privacy.cookieTrackingCategories
         ),
+        serviceHelperText.cookieTrackingCategories,
       ],
       [
         "Cookie consent mechanism",
@@ -507,11 +550,17 @@ const ServicePrivacyPanel = ({
               service.privacy.cookieConsentMechanism
             )
           : "Not set",
+        serviceHelperText.cookieConsentMechanism,
       ],
-      ["Do Not Track response", boolText(service.privacy.doNotTrackResponse)],
+      [
+        "Do Not Track response",
+        boolText(service.privacy.doNotTrackResponse),
+        serviceHelperText.doNotTrackResponse,
+      ],
       [
         "Global Privacy Control",
         boolText(service.privacy.globalPrivacyControlSupported),
+        serviceHelperText.globalPrivacyControlSupported,
       ]
     )
   }
@@ -534,6 +583,7 @@ const ServicePrivacyPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <ToggleField
           control={form.control}
+          helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
           label="Uses cookies or tracking technologies"
           name={privacyPath("usesCookiesOrTrackingTechnologies")}
         />
@@ -544,6 +594,7 @@ const ServicePrivacyPanel = ({
               error={
                 form.formState.errors.privacy?.cookieTrackingCategories?.root
               }
+              helperText={serviceHelperText.cookieTrackingCategories}
               label="Cookie / tracking categories"
               name={privacyPath("cookieTrackingCategories")}
               options={cookieTrackingCategoryOptions}
@@ -551,6 +602,7 @@ const ServicePrivacyPanel = ({
             />
             <SelectField
               control={form.control}
+              helperText={serviceHelperText.cookieConsentMechanism}
               label="Cookie consent mechanism"
               name={privacyPath("cookieConsentMechanism")}
               options={[
@@ -561,11 +613,13 @@ const ServicePrivacyPanel = ({
             />
             <ToggleField
               control={form.control}
+              helperText={serviceHelperText.doNotTrackResponse}
               label="Responds to Do Not Track"
               name={privacyPath("doNotTrackResponse")}
             />
             <ToggleField
               control={form.control}
+              helperText={serviceHelperText.globalPrivacyControlSupported}
               label="Global Privacy Control supported"
               name={privacyPath("globalPrivacyControlSupported")}
             />
@@ -620,6 +674,7 @@ const ServiceHostingPanel = ({
                     service.privacy.primaryHostingRegion
                   )
                 : "Not set",
+              serviceHelperText.primaryHostingRegion,
             ],
           ]}
         />
@@ -636,6 +691,7 @@ const ServiceHostingPanel = ({
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField
           control={form.control}
+          helperText={serviceHelperText.primaryHostingRegion}
           label="Primary hosting region"
           name={privacyPath("primaryHostingRegion")}
           options={[{ value: "", label: "Not set" }, ...regionOptions]}

@@ -15,6 +15,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { serviceHelperText } from "./service-helper-text"
 
 const servicePath = (index: number, field: string) =>
   `services.${index}.${field}` as FieldPath<ProfileDraft>
@@ -47,7 +48,10 @@ const MinimumAgeField = ({
 
   return (
     <label className="grid gap-2 text-sm font-medium text-slate-800">
-      Minimum user age
+      <span>Minimum user age</span>
+      <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+        {serviceHelperText.minimumUserAge}
+      </span>
       <input
         className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
         inputMode="numeric"
@@ -108,6 +112,7 @@ export const ServiceProfileFields = ({
           </div>
           <TextField
             error={form.formState.errors.services?.[index]?.serviceName}
+            helperText={serviceHelperText.serviceName}
             label="Service name"
             name={servicePath(index, "serviceName")}
             placeholder="Acme Platform"
@@ -115,6 +120,7 @@ export const ServiceProfileFields = ({
           />
           <TextField
             error={form.formState.errors.services?.[index]?.serviceUrl}
+            helperText={serviceHelperText.serviceUrl}
             label="Service URL"
             name={servicePath(index, "serviceUrl")}
             placeholder="https://app.acme.example"
@@ -125,6 +131,7 @@ export const ServiceProfileFields = ({
               error={
                 form.formState.errors.services?.[index]?.serviceDescription
               }
+              helperText={serviceHelperText.serviceDescription}
               label="Description"
               name={servicePath(index, "serviceDescription")}
               placeholder="Briefly describe the product or service"
@@ -136,6 +143,7 @@ export const ServiceProfileFields = ({
             error={
               form.formState.errors.services?.[index]?.businessActivityIds?.root
             }
+            helperText={serviceHelperText.businessActivityIds}
             label="Business activities"
             name={servicePath(index, "businessActivityIds")}
             options={businessActivityOptions}
@@ -144,6 +152,7 @@ export const ServiceProfileFields = ({
           <MultiSelectField
             control={form.control}
             error={form.formState.errors.services?.[index]?.userTypes?.root}
+            helperText={serviceHelperText.userTypes}
             label="User types"
             name={servicePath(index, "userTypes")}
             options={userTypeOptions}
@@ -152,6 +161,7 @@ export const ServiceProfileFields = ({
           <MultiSelectField
             control={form.control}
             error={form.formState.errors.services?.[index]?.customerTypes?.root}
+            helperText={serviceHelperText.customerTypes}
             label="Customer types"
             name={servicePath(index, "customerTypes")}
             options={customerTypeOptions}
@@ -162,6 +172,7 @@ export const ServiceProfileFields = ({
             error={
               form.formState.errors.services?.[index]?.availabilityRegions?.root
             }
+            helperText={serviceHelperText.availabilityRegions}
             label="Availability regions"
             name={servicePath(index, "availabilityRegions")}
             options={regionOptions}
@@ -169,6 +180,7 @@ export const ServiceProfileFields = ({
           />
           <ToggleField
             control={form.control}
+            helperText={serviceHelperText.childrenDirected}
             label="Directed to children"
             name={servicePath(index, "childrenDirected")}
           />
@@ -179,6 +191,7 @@ export const ServiceProfileFields = ({
             </h4>
             <ToggleField
               control={form.control}
+              helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
               label="Uses cookies or tracking technologies"
               name={servicePrivacyPath(
                 index,
@@ -191,6 +204,7 @@ export const ServiceProfileFields = ({
                 form.formState.errors.services?.[index]?.privacy
                   ?.cookieTrackingCategories?.root
               }
+              helperText={serviceHelperText.cookieTrackingCategories}
               label="Cookie / tracking categories"
               name={servicePrivacyPath(index, "cookieTrackingCategories")}
               options={cookieTrackingCategoryOptions}
@@ -198,6 +212,7 @@ export const ServiceProfileFields = ({
             />
             <SelectField
               control={form.control}
+              helperText={serviceHelperText.cookieConsentMechanism}
               label="Cookie consent mechanism"
               name={servicePrivacyPath(index, "cookieConsentMechanism")}
               options={[
@@ -208,16 +223,19 @@ export const ServiceProfileFields = ({
             />
             <ToggleField
               control={form.control}
+              helperText={serviceHelperText.doNotTrackResponse}
               label="Responds to Do Not Track"
               name={servicePrivacyPath(index, "doNotTrackResponse")}
             />
             <ToggleField
               control={form.control}
+              helperText={serviceHelperText.globalPrivacyControlSupported}
               label="Global Privacy Control supported"
               name={servicePrivacyPath(index, "globalPrivacyControlSupported")}
             />
             <SelectField
               control={form.control}
+              helperText={serviceHelperText.primaryHostingRegion}
               label="Primary hosting region"
               name={servicePrivacyPath(index, "primaryHostingRegion")}
               options={[{ value: "", label: "Not set" }, ...regionOptions]}
