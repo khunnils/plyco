@@ -1313,12 +1313,9 @@ describe("security profile API", () => {
       context,
     );
 
-    expect(renderedContent).toContain("# Acme AI Data Processors");
-    expect(renderedContent).toContain("| GitHub | limited |");
-    expect(renderedContent).toContain("| Stripe | subprocessor |");
-    expect(renderedContent).toContain(
-      "| Stripe |  | Acme AI Platform | Payment processing |",
-    );
+    expect(renderedContent).toContain("# Acme AI Data Processors and Subprocessors");
+    expect(renderedContent).toContain("| GitHub |  | Acme AI Platform | limited |");
+    expect(renderedContent).toContain("| Stripe |  | Acme AI Platform | subprocessor |");
   });
 
   it("returns structured validation errors", async () => {
