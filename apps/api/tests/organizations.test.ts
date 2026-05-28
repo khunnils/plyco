@@ -1,0 +1,574 @@
+import { describe, expect, it } from "vitest";
+
+import { createTestApp } from "../src/app.js";
+import {
+  profileBody,
+  serviceBody,
+  vendorBody,
+  vendorUseBody,
+} from "./helpers.js";
+
+describe("organizations API", () => {
+  it("creates and returns organization security profile services", async () => {
+    const app = await createTestApp();
+    const saveResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+
+    expect(saveResponse.statusCode).toBe(200);
+    expect(saveResponse.json().organization.company.companyName).toBe(
+      "Acme AI",
+    );
+    expect(saveResponse.json().organization.company.legalEntityName).toBe(
+      "Acme AI, Inc.",
+    );
+    expect(
+      saveResponse.json().organization.dataHandling.dataTypesStored,
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
+    expect(saveResponse.json().organization.services).toEqual([
+      expect.objectContaining(profileBody.services[0]),
+    ]);
+    expect(saveResponse.json().organization.privacy).toEqual(
+      profileBody.privacy,
+    );
+
+    const getResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/security-profile",
+    });
+
+    expect(getResponse.statusCode).toBe(200);
+    expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
+    expect(
+      getResponse.json().organization.dataHandling.dataTypesStored,
+    ).toEqual(profileBody.dataHandling.dataTypesStored);
+    expect(getResponse.json().organization.services).toEqual([
+      expect.objectContaining(profileBody.services[0]),
+    ]);
+    expect(getResponse.json().organization.privacy).toEqual(
+      profileBody.privacy,
+    );
+  });
+
+  it("persists explicit empty, false, and zero profile answers", async () => {
+    const explicitEmptyProfile = {
+      ...profileBody,
+      company: {
+        ...profileBody.company,
+        industries: [],
+        handlesPii: false,
+        employeeCount: 1,
+        complianceGoals: [],
+      },
+      services: [
+        {
+          ...profileBody.services[0],
+          userTypes: [],
+          childrenDirected: false,
+          minimumUserAge: 0,
+          privacy: {
+            ...profileBody.services[0].privacy,
+            usesCookiesOrTrackingTechnologies: false,
+            cookieTrackingCategories: [],
+            cookieConsentMechanism: "",
+          },
+        },
+      ],
+      privacy: {
+        ...profileBody.privacy,
+        supportedRights: [],
+        responseTimelineDaysStatus: "defined",
+        responseTimelineDays: 0,
+        identityVerificationRequired: false,
+        transferMechanisms: [],
+      },
+    };
+    const app = await createTestApp();
+    const saveResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: explicitEmptyProfile,
+    });
+
+    expect(saveResponse.statusCode).toBe(200);
+    expect(saveResponse.json().organization.company.industries).toEqual([]);
+    expect(saveResponse.json().organization.company.handlesPii).toBe(false);
+    expect(saveResponse.json().organization.services[0].userTypes).toEqual([]);
+    expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0);
+    expect(saveResponse.json().organization.privacy.supportedRights).toEqual(
+      [],
+    );
+    expect(saveResponse.json().organization.privacy.responseTimelineDays).toBe(
+      0,
+    );
+    expect(
+      saveResponse.json().organization.privacy.identityVerificationRequired,
+    ).toBe(false);
+  });
+
+  it("rejects service profile codes that are not in organization vocabulary", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...profileBody.services[0],
+            userTypes: ["not_a_real_user_type"],
+          },
+        ],
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "service_user_types",
+          field: "services.0.userTypes",
+          value: "not_a_real_user_type",
+        },
+      },
+    });
+  });
+
+  it("supports multiple services and service-scoped vendor inventory", async () => {
+    const app = await createTestApp();
+    const saveResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          profileBody.services[0],
+          {
+            ...profileBody.services[0],
+            serviceName: "Acme EU",
+            serviceUrl: "https://eu.acme.example",
+            availabilityRegions: ["eu"],
+          },
+        ],
+      },
+    });
+
+    expect(saveResponse.statusCode).toBe(200);
+    const services = saveResponse.json().organization.services;
+    expect(services).toHaveLength(2);
+
+    const vendorResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/organization-providers",
+      payload: {
+        ...vendorBody,
+        name: "Stripe EU",
+      },
+    });
+
+    expect(vendorResponse.statusCode).toBe(201);
+    const vendorUseResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/service-provider-usage",
+      payload: {
+        ...vendorUseBody,
+        serviceId: services[1].id,
+        organizationProviderId: vendorResponse.json().id,
+      },
+    });
+
+    expect(vendorUseResponse.statusCode).toBe(201);
+    expect(vendorUseResponse.json()).toMatchObject({
+      serviceId: services[1].id,
+      serviceName: "Acme EU",
+      providerName: "Stripe EU",
+    });
+    expect(vendorResponse.json()).toMatchObject({
+      name: "Stripe EU",
+    });
+
+    const invalidVendorResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/service-provider-usage",
+      payload: {
+        ...vendorUseBody,
+        organizationProviderId: vendorResponse.json().id,
+        serviceId: "service_missing",
+      },
+    });
+
+    expect(invalidVendorResponse.statusCode).toBe(400);
+    expect(invalidVendorResponse.json().error.code).toBe(
+      "PROVIDER_SERVICE_NOT_FOUND",
+    );
+  });
+
+  it("rejects privacy profile codes that are not in organization vocabulary", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          supportedRights: ["not_a_real_right"],
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_supported_rights",
+          field: "privacy.supportedRights",
+          value: "not_a_real_right",
+        },
+      },
+    });
+  });
+
+  it("rejects service cookie tracking codes that are not in organization vocabulary", async () => {
+    const app = await createTestApp();
+    const invalidCookieTypeResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieTrackingCategories: ["not_a_real_cookie_type"],
+            },
+          },
+        ],
+      },
+    });
+
+    expect(invalidCookieTypeResponse.statusCode).toBe(400);
+    expect(invalidCookieTypeResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "cookie_tracking_categories",
+          field: "services.0.privacy.cookieTrackingCategories",
+          value: "not_a_real_cookie_type",
+        },
+      },
+    });
+
+    const invalidConsentResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieConsentMechanism: "not_a_real_mechanism",
+            },
+          },
+        ],
+      },
+    });
+
+    expect(invalidConsentResponse.statusCode).toBe(400);
+    expect(invalidConsentResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_cookie_consent_mechanisms",
+          field: "services.0.privacy.cookieConsentMechanism",
+          value: "not_a_real_mechanism",
+        },
+      },
+    });
+  });
+
+  it("rejects infrastructure providers that are not available for the selected system type", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            {
+              systemType: "source_control",
+              providerId: "prov-google-ads",
+            },
+          ],
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "PROVIDER_NOT_AVAILABLE_FOR_SYSTEM",
+        details: {
+          providerId: "prov-google-ads",
+          systemType: "source_control",
+        },
+      },
+    });
+  });
+
+  it("supports saving multiple 'none' infrastructure providers", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            {
+              systemType: "cloud",
+              providerId: "none",
+            },
+            {
+              systemType: "source_control",
+              providerId: "none",
+            },
+            {
+              systemType: "password_manager",
+              providerId: "none",
+            },
+          ],
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(
+      response.json().organization.infrastructure.organizationProviders,
+    ).toEqual(
+      expect.arrayContaining([
+        {
+          systemType: "cloud",
+          providerId: "none",
+          name: "None",
+        },
+        {
+          systemType: "source_control",
+          providerId: "none",
+          name: "None",
+        },
+        {
+          systemType: "password_manager",
+          providerId: "none",
+          name: "None",
+        },
+      ]),
+    );
+  });
+
+  it("rejects invalid marketing opt-out method codes", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          marketingOptOutMethod: "phone_call",
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_marketing_opt_out_methods",
+          field: "privacy.marketingOptOutMethod",
+          value: "phone_call",
+        },
+      },
+    });
+  });
+
+  it("rejects invalid international transfer codes", async () => {
+    const app = await createTestApp();
+    const invalidTransferResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          transferMechanisms: ["not_a_real_mechanism"],
+        },
+      },
+    });
+
+    expect(invalidTransferResponse.statusCode).toBe(400);
+    expect(invalidTransferResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_transfer_mechanisms",
+          field: "privacy.transferMechanisms",
+          value: "not_a_real_mechanism",
+        },
+      },
+    });
+
+    const invalidRegionResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              primaryHostingRegion: "antarctica",
+            },
+          },
+        ],
+      },
+    });
+
+    expect(invalidRegionResponse.statusCode).toBe(400);
+    expect(invalidRegionResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "regions",
+          field: "services.0.privacy.primaryHostingRegion",
+          value: "antarctica",
+        },
+      },
+    });
+
+    const invalidHostingRegionResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              primaryHostingRegion: "antarctica",
+            },
+          },
+        ],
+      },
+    });
+
+    expect(invalidHostingRegionResponse.statusCode).toBe(400);
+    expect(invalidHostingRegionResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "regions",
+          field: "services.0.privacy.primaryHostingRegion",
+          value: "antarctica",
+        },
+      },
+    });
+  });
+
+  it("rejects invalid security control codes", async () => {
+    const app = await createTestApp();
+    const invalidAccessResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        access: {
+          ...profileBody.access,
+          accessReviewCadence: "every_quarter",
+        },
+      },
+    });
+
+    expect(invalidAccessResponse.statusCode).toBe(400);
+    expect(invalidAccessResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_cadences",
+          field: "access.accessReviewCadence",
+          value: "every_quarter",
+        },
+      },
+    });
+
+    const invalidInfrastructureResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          atRestAlgorithm: "aes_512",
+        },
+      },
+    });
+
+    expect(invalidInfrastructureResponse.statusCode).toBe(400);
+    expect(invalidInfrastructureResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_encryption_algorithms",
+          field: "infrastructure.atRestAlgorithm",
+          value: "aes_512",
+        },
+      },
+    });
+  });
+
+  it("returns structured validation errors", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        company: { ...profileBody.company, companyName: "" },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("VALIDATION_FAILED");
+  });
+
+  it("rejects unknown controlled codes and countries", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        company: {
+          ...profileBody.company,
+          country: "ZZ",
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("COUNTRY_NOT_FOUND");
+  });
+});
