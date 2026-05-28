@@ -9,7 +9,7 @@ import {
   stringField,
 } from "./airtable.js"
 import { ApiError } from "./errors.js"
-import { countries, requiredCodeSetIds } from "./features/vocabulary/reference-data.js"
+import { countries, requiredCodeSetIds } from "../features/vocabulary/reference-data.js"
 
 const CODE_SETS_TABLE_NAME = "Code Sets"
 const CODES_TABLE_NAME = "Codes"

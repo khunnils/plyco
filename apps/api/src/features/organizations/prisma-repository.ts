@@ -21,7 +21,7 @@ import {
   type OrganizationRepository,
   type SecurityProfileInput,
 } from "./repository.js";
-import { ApiError } from "../../errors.js";
+import { ApiError } from "../../infrastructure/errors.js";
 
 const jsonValue = (value: string[] | null) =>
   value === null ? Prisma.DbNull : value;

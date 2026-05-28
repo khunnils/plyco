@@ -14,7 +14,7 @@ import {
   type OrganizationProviderInput,
 } from "@plyco/shared"
 
-import { ApiError } from "../../errors.js"
+import { ApiError } from "../../infrastructure/errors.js"
 import { type OrganizationRepository } from "../organizations/repository.js"
 import { type ProviderRepository } from "./repository.js"
 

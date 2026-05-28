@@ -1,8 +1,8 @@
 import { vocabularyCodeInputSchema } from "@plyco/shared"
 import { type FastifyInstance } from "fastify"
 
-import { ApiError } from "../../errors.js"
-import { requireOrganizationMembership } from "../../organization-context.js"
+import { ApiError } from "../../infrastructure/errors.js"
+import { requireOrganizationMembership } from "../../infrastructure/organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
 import { type VocabularyRepository } from "./repository.js"
 

@@ -8,15 +8,15 @@ import Fastify, {
 import {
   AirtableProviderLookupCodeSource,
   type ProviderLookupCodeSource,
-} from "./airtable-code-source.js"
-import { registerAuth } from "./auth.js"
-import { apiConfig, type AuthConfig } from "./config.js"
+} from "./infrastructure/airtable-code-source.js"
+import { registerAuth } from "./infrastructure/auth.js"
+import { apiConfig, type AuthConfig } from "./infrastructure/config.js"
 import {
   GcsDocumentPdfStorage,
   NullDocumentPdfStorage,
   type DocumentPdfStorage,
-} from "./document-pdfs.js"
-import { ApiError, sendError } from "./errors.js"
+} from "./infrastructure/document-pdfs.js"
+import { ApiError, sendError } from "./infrastructure/errors.js"
 import { InMemoryAccountRepository } from "./features/accounts/in-memory-repository.js"
 import { PrismaAccountRepository } from "./features/accounts/prisma-repository.js"
 import { type AccountRepository } from "./features/accounts/repository.js"
@@ -37,8 +37,8 @@ import { InMemoryVocabularyRepository } from "./features/vocabulary/in-memory-re
 import { PrismaVocabularyRepository } from "./features/vocabulary/prisma-repository.js"
 import { type VocabularyRepository } from "./features/vocabulary/repository.js"
 import { registerVocabularyRoutes } from "./features/vocabulary/routes.js"
-import { GeminiJsonClient, type LlmJsonClient } from "./llm-client.js"
-import { LangfusePromptClient, type PromptClient } from "./prompt-client.js"
+import { GeminiJsonClient, type LlmJsonClient } from "./infrastructure/llm-client.js"
+import { LangfusePromptClient, type PromptClient } from "./infrastructure/prompt-client.js"
 import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
@@ -52,12 +52,12 @@ import {
   AirtableProviderSource,
   type ProviderSource,
   StaticProviderSource,
-} from "./providers.js"
+} from "./infrastructure/providers.js"
 import {
   FileSystemTemplateSource,
   StaticSystemTemplateSource,
   type SystemTemplateSource,
-} from "./system-templates.js"
+} from "./infrastructure/system-templates.js"
 
 export type CreateAppOptions = {
   auth?: false | AuthConfig

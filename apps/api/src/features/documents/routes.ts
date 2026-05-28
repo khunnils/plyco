@@ -16,10 +16,10 @@ import {
   ReportContextBuilder,
   templateSourceHash,
 } from "../../document-generation.js";
-import { ApiError } from "../../errors.js";
-import { requireOrganizationMembership } from "../../organization-context.js";
-import { type SystemTemplateSource } from "../../system-templates.js";
-import { type DocumentPdfStorage } from "../../document-pdfs.js";
+import { ApiError } from "../../infrastructure/errors.js";
+import { requireOrganizationMembership } from "../../infrastructure/organization-context.js";
+import { type SystemTemplateSource } from "../../infrastructure/system-templates.js";
+import { type DocumentPdfStorage } from "../../infrastructure/document-pdfs.js";
 import { type AccountRepository } from "../accounts/repository.js";
 import { type OrganizationRepository } from "../organizations/repository.js";
 import { type ProviderRepository } from "../vendors/repository.js";

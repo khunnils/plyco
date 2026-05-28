@@ -2,7 +2,7 @@ import { type FastifyRequest } from "fastify"
 
 import { getSessionUser } from "./auth.js"
 import { ApiError } from "./errors.js"
-import { type AccountRepository } from "./features/accounts/repository.js"
+import { type AccountRepository } from "../features/accounts/repository.js"
 
 export async function requireOrganizationMembership(
   request: FastifyRequest,

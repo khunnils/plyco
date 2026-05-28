@@ -9,9 +9,9 @@ import {
 import { type FastifyInstance } from "fastify"
 import { z } from "zod"
 
-import { requireOrganizationMembership } from "../../organization-context.js"
+import { requireOrganizationMembership } from "../../infrastructure/organization-context.js"
 import { type AccountRepository } from "../accounts/repository.js"
-import { type ProviderSource } from "../../providers.js"
+import { type ProviderSource } from "../../infrastructure/providers.js"
 import {
   validateAccessProfileCodes,
   validateCompanyProfileCodes,

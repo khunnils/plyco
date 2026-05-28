@@ -10,7 +10,7 @@ import {
   ReportContextBuilder,
 } from "../src/document-generation.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
-import { parseSystemTemplate } from "../src/system-templates.js";
+import { parseSystemTemplate } from "../src/infrastructure/system-templates.js";
 
 import {
   noProcessingVendorBody,

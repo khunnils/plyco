@@ -6,7 +6,7 @@ import { z } from "zod"
 
 import { type AuthConfig } from "./config.js"
 import { ApiError } from "./errors.js"
-import { type AccountRepository } from "./features/accounts/repository.js"
+import { type AccountRepository } from "../features/accounts/repository.js"
 
 type OAuthPluginWithProviders = typeof oauthPlugin & {
   GOOGLE_CONFIGURATION: {

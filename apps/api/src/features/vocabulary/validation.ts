@@ -10,7 +10,7 @@ import {
   type OrganizationProviderInput,
 } from "@plyco/shared";
 
-import { ApiError } from "../../errors.js";
+import { ApiError } from "../../infrastructure/errors.js";
 import { type VocabularyRepository } from "./repository.js";
 
 const assertCountry = async (

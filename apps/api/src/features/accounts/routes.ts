@@ -1,9 +1,9 @@
 import { createOrganizationSchema } from "@plyco/shared"
 import { type FastifyInstance } from "fastify"
 
-import { getPersistedSessionUser } from "../../auth.js"
-import { ApiError } from "../../errors.js"
-import { requireOrganizationMembership } from "../../organization-context.js"
+import { getPersistedSessionUser } from "../../infrastructure/auth.js"
+import { ApiError } from "../../infrastructure/errors.js"
+import { requireOrganizationMembership } from "../../infrastructure/organization-context.js"
 import { type AccountRepository } from "./repository.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
 

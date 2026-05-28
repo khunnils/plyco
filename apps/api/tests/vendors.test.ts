@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createApp, createTestApp } from "../src/app.js";
 import { LlmProviderLookupService } from "../src/provider-lookup.js";
-import { AirtableProviderSource } from "../src/providers.js";
+import { AirtableProviderSource } from "../src/infrastructure/providers.js";
 import {
   AirtableProviderLookupCodeSource,
   StaticProviderLookupCodeSource,
-} from "../src/airtable-code-source.js";
+} from "../src/infrastructure/airtable-code-source.js";
 import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
