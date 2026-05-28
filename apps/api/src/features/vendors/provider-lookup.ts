@@ -3,13 +3,13 @@ import {
   type ProviderLookupResult,
 } from "@plyco/shared"
 
-import { type ProviderLookupCodeSource } from "./infrastructure/airtable-code-source.js"
-import { ApiError } from "./infrastructure/errors.js"
+import { type ProviderLookupCodeSource } from "../../infrastructure/airtable-code-source.js"
+import { ApiError } from "../../infrastructure/errors.js"
 import {
   providerLookupResponseSchema,
   type LlmJsonClient,
-} from "./infrastructure/llm-client.js"
-import { type PromptClient } from "./infrastructure/prompt-client.js"
+} from "../../infrastructure/llm-client.js"
+import { type PromptClient } from "../../infrastructure/prompt-client.js"
 
 const PROMPT_NAME = "resolve_provider"
 

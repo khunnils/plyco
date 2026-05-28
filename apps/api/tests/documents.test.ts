@@ -8,7 +8,7 @@ import { createTestApp } from "../src/app.js";
 import {
   Jinja2Renderer,
   ReportContextBuilder,
-} from "../src/document-generation.js";
+} from "../src/features/documents/document-generation.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
 import { parseSystemTemplate } from "../src/infrastructure/system-templates.js";
 

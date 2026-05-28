@@ -15,7 +15,7 @@ import {
   Jinja2Renderer,
   ReportContextBuilder,
   templateSourceHash,
-} from "../../document-generation.js";
+} from "./document-generation.js";
 import { ApiError } from "../../infrastructure/errors.js";
 import { requireOrganizationMembership } from "../../infrastructure/organization-context.js";
 import { type SystemTemplateSource } from "../../infrastructure/system-templates.js";

@@ -1,6 +1,6 @@
 import { config as loadDotenv } from "dotenv"
 
-import { apiConfig } from "../infrastructure/config.js"
+import { apiConfig } from "../config.js"
 import { ApiError } from "../infrastructure/errors.js"
 import { loadCodesFromAirtable } from "../infrastructure/code-loader.js"
 

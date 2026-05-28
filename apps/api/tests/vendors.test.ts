@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 
 import { createApp, createTestApp } from "../src/app.js";
-import { LlmProviderLookupService } from "../src/provider-lookup.js";
+import { LlmProviderLookupService } from "../src/features/vendors/provider-lookup.js";
 import { AirtableProviderSource } from "../src/infrastructure/providers.js";
 import {
   AirtableProviderLookupCodeSource,
@@ -11,7 +11,7 @@ import {
 import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
-} from "../src/provider-import.js";
+} from "../src/features/vendors/provider-import.js";
 
 import {
   authConfig,

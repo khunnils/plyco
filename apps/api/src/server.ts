@@ -1,6 +1,6 @@
 import { shutdownInstrumentation } from "./infrastructure/instrumentation.js"
 import { createApp } from "./app.js"
-import { apiConfig } from "./infrastructure/config.js"
+import { apiConfig } from "./config.js"
 
 const app = await createApp({ logger: true })
 

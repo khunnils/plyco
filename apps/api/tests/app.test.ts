@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createApp, createTestApp } from "../src/app.js";
-import { readAuthConfig } from "../src/infrastructure/config.js";
+import { readAuthConfig } from "../src/config.js";
 import { authConfig, createInMemoryRepositories } from "./helpers.js";
 
 describe("security profile API", () => {

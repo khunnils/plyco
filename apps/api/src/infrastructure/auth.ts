@@ -4,7 +4,7 @@ import { type AuthUser } from "@plyco/shared"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 import { z } from "zod"
 
-import { type AuthConfig } from "./config.js"
+import { type AuthConfig } from "../config.js"
 import { ApiError } from "./errors.js"
 import { type AccountRepository } from "../features/accounts/repository.js"
 

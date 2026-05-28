@@ -9,8 +9,8 @@ import {
   listAirtableRecords,
   updateAirtableRecord,
   type AirtableRecord,
-} from "./infrastructure/airtable.js"
-import { ApiError } from "./infrastructure/errors.js"
+} from "../../infrastructure/airtable.js"
+import { ApiError } from "../../infrastructure/errors.js"
 import { type ProviderLookupService } from "./provider-lookup.js"
 
 const PROVIDER_ORGANIZATIONS_TABLE = "Provider Organizations"

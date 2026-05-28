@@ -10,7 +10,7 @@ import {
   type ProviderLookupCodeSource,
 } from "./infrastructure/airtable-code-source.js"
 import { registerAuth } from "./infrastructure/auth.js"
-import { apiConfig, type AuthConfig } from "./infrastructure/config.js"
+import { apiConfig, type AuthConfig } from "./config.js"
 import {
   GcsDocumentPdfStorage,
   NullDocumentPdfStorage,
@@ -43,11 +43,11 @@ import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
   type ProviderImportService,
-} from "./provider-import.js"
+} from "./features/vendors/provider-import.js"
 import {
   LlmProviderLookupService,
   type ProviderLookupService,
-} from "./provider-lookup.js"
+} from "./features/vendors/provider-lookup.js"
 import {
   AirtableProviderSource,
   type ProviderSource,
