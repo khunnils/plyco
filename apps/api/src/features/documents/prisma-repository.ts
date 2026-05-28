@@ -100,12 +100,25 @@ export class PrismaDocumentRepository implements DocumentRepository {
     }
 
     try {
+      const documentGeneratedForCurrentVersion = await this.client.document.findFirst({
+        where: {
+          templateId: id,
+          templateVersionMajor: existing.versionMajor,
+          templateVersionMinor: existing.versionMinor,
+        },
+      });
+
+      const nextVersionMinor = documentGeneratedForCurrentVersion
+        ? existing.versionMinor + 1
+        : existing.versionMinor;
+
       const template = await this.client.template.update({
         where: { id },
         data: {
           name: input.name,
           content: input.content,
           policyVersion: input.policyVersion,
+          versionMinor: nextVersionMinor,
         },
       });
 
@@ -134,16 +147,18 @@ export class PrismaDocumentRepository implements DocumentRepository {
   ): Promise<DocumentSummary[]> {
     const templates = await this.client.template.findMany({
       where: { organizationId },
-      include: { documents: true },
+      include: {
+        documents: {
+          orderBy: { generatedAt: "desc" },
+        },
+      },
       orderBy: { createdAt: "asc" },
     });
 
     return templates.map((templateRecord) => {
       const template = mapTemplateRecord(templateRecord);
-      const documentRecord = templateRecord.documents[0] ?? null;
-      const document = documentRecord
-        ? mapDocumentRecord(documentRecord)
-        : null;
+      const documents = templateRecord.documents.map(mapDocumentRecord);
+      const document = documents[0] ?? null;
 
       return {
         template,
@@ -153,6 +168,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
           : document.sourceHash === sourceHashForTemplate(template)
             ? "current"
             : "stale",
+        documents,
       };
     });
   }
@@ -173,6 +189,8 @@ export class PrismaDocumentRepository implements DocumentRepository {
           renderedContent: input.renderedContent,
           pdfObjectPath: input.pdfObjectPath,
           sourceHash: input.sourceHash,
+          templateVersionMajor: input.template.versionMajor,
+          templateVersionMinor: input.template.versionMinor,
         },
       });
 
@@ -189,6 +207,8 @@ export class PrismaDocumentRepository implements DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      templateVersionMajor: number;
+      templateVersionMinor: number;
     },
   ): Promise<Document> {
     const document = await this.client.document.update({
@@ -198,6 +218,8 @@ export class PrismaDocumentRepository implements DocumentRepository {
         renderedContent: input.renderedContent,
         pdfObjectPath: input.pdfObjectPath,
         sourceHash: input.sourceHash,
+        templateVersionMajor: input.templateVersionMajor,
+        templateVersionMinor: input.templateVersionMinor,
         generatedAt: new Date(),
       },
     });
@@ -231,9 +253,19 @@ export class PrismaDocumentRepository implements DocumentRepository {
   async getDocumentForTemplate(
     organizationId: string,
     templateId: string,
+    versionMajor?: number,
+    versionMinor?: number,
   ): Promise<Document | null> {
+    const where: any = { organizationId, templateId };
+    if (versionMajor !== undefined) {
+      where.templateVersionMajor = versionMajor;
+    }
+    if (versionMinor !== undefined) {
+      where.templateVersionMinor = versionMinor;
+    }
     const document = await this.client.document.findFirst({
-      where: { organizationId, templateId },
+      where,
+      orderBy: { generatedAt: "desc" },
     });
 
     return document ? mapDocumentRecord(document) : null;

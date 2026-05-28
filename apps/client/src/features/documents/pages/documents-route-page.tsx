@@ -83,6 +83,7 @@ export const DocumentsRoutePage = () => {
   const navigate = useNavigate()
   const { selectedOrganization } = useSelectedOrganization()
   const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([])
+  const [documentFilters, setDocumentFilters] = useState<Record<string, "current" | "all">>({})
   const templates = useTemplates()
   const documents = useDocuments()
   const createTemplate = useCreateTemplate()
@@ -241,7 +242,7 @@ export const DocumentsRoutePage = () => {
     ]
     pageTitle = editingTemplate?.name ?? "Edit template"
     bannerTitle = editingTemplate?.name ?? "Edit template"
-    bannerSubtitle = `Edit template version ${editingTemplate?.policyVersion || "1.0"}.`
+    bannerSubtitle = `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}${editingTemplate?.policyVersion ? ` (${editingTemplate.policyVersion})` : ""}.`
     bannerButtons = (
       <>
         <Button
@@ -399,6 +400,9 @@ export const DocumentsRoutePage = () => {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-slate-950">
                         {summary.template.name}
+                        <span className="text-xs font-normal text-slate-500 ml-2">
+                          v{summary.template.versionMajor}.{summary.template.versionMinor}
+                        </span>
                       </h2>
                       <Badge
                         variant={
@@ -454,55 +458,104 @@ export const DocumentsRoutePage = () => {
               </div>
 
               {isExpanded && summary.document && (
-                <div className="border-t border-slate-100 bg-slate-50/50 p-4 pl-12">
-                  <div className="flex items-center justify-between gap-4 py-2 bg-white border border-slate-100 rounded-md px-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <FileText className="size-5 text-slate-500 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-900 truncate">
-                          {getFileName(
-                            selectedOrganization?.name ?? "organization",
-                            summary.template.slug,
-                            summary.template.policyVersion
-                          )}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Published on {new Date(summary.document.generatedAt).toLocaleString()}
-                        </p>
+                <div className="border-t border-slate-100 bg-slate-50/50 p-4 pl-12 flex flex-col gap-3">
+                  {summary.documents && summary.documents.length > 1 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-slate-500">Document Versions</span>
+                      <div className="flex items-center rounded-md border border-slate-200 bg-white p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setDocumentFilters(prev => ({ ...prev, [summary.template.id]: "current" }))}
+                          className={`px-2 py-1 rounded-sm text-xs font-medium cursor-pointer ${
+                            (documentFilters[summary.template.id] ?? "current") === "current"
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          }`}
+                        >
+                          Current
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDocumentFilters(prev => ({ ...prev, [summary.template.id]: "all" }))}
+                          className={`px-2 py-1 rounded-sm text-xs font-medium cursor-pointer ${
+                            documentFilters[summary.template.id] === "all"
+                              ? "bg-slate-900 text-white"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                          }`}
+                        >
+                          All ({summary.documents.length})
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Button
-                        size="icon"
-                        type="button"
-                        variant="outline"
-                        onClick={() =>
-                          navigate(`/documents/view/${summary.document?.id}`)
-                        }
-                        title="Preview document"
-                      >
-                        <Eye />
-                      </Button>
-                      {summary.document.hasPdf && (
-                        <Button
-                          disabled={downloadDocumentPdf.isPending}
-                          size="icon"
-                          type="button"
-                          variant="outline"
-                          onClick={() =>
-                            summary.document
-                              ? downloadDocumentPdf.mutate({
-                                  id: summary.document.id,
-                                  title: summary.document.title,
-                                })
-                              : undefined
-                          }
-                          title="Download PDF"
-                        >
-                          <Download />
-                        </Button>
-                      )}
-                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    {((documentFilters[summary.template.id] ?? "current") === "current"
+                      ? [summary.document]
+                      : (summary.documents || [])
+                    ).map((doc) => {
+                      if (!doc) return null;
+                      const isCurrentVersion =
+                        doc.templateVersionMajor === summary.template.versionMajor &&
+                        doc.templateVersionMinor === summary.template.versionMinor;
+
+                      return (
+                        <div key={doc.id} className="flex items-center justify-between gap-4 py-2 bg-white border border-slate-100 rounded-md px-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <FileText className="size-5 text-slate-500 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-slate-900 truncate flex items-center gap-2">
+                                <span>
+                                  {getFileName(
+                                    selectedOrganization?.name ?? "organization",
+                                    summary.template.slug,
+                                    `${doc.templateVersionMajor}.${doc.templateVersionMinor}`
+                                  )}
+                                </span>
+                                {isCurrentVersion && (
+                                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                    Current
+                                  </span>
+                                )}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                Published on {new Date(doc.generatedAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Button
+                              size="icon"
+                              type="button"
+                              variant="outline"
+                              onClick={() =>
+                                navigate(`/documents/view/${doc.id}`)
+                              }
+                              title="Preview document"
+                            >
+                              <Eye />
+                            </Button>
+                            {doc.hasPdf && (
+                              <Button
+                                disabled={downloadDocumentPdf.isPending}
+                                size="icon"
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  downloadDocumentPdf.mutate({
+                                    id: doc.id,
+                                    title: doc.title,
+                                  })
+                                }
+                                title="Download PDF"
+                              >
+                                <Download />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

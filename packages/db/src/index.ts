@@ -492,6 +492,8 @@ export function mapTemplateRecord(record: {
   sourceSystemTemplateSlug: string | null;
   content: string;
   policyVersion: string;
+  versionMajor: number;
+  versionMinor: number;
   createdAt: Date;
   updatedAt: Date;
 }): Template {
@@ -503,6 +505,8 @@ export function mapTemplateRecord(record: {
     sourceSystemTemplateSlug: record.sourceSystemTemplateSlug,
     content: record.content,
     policyVersion: record.policyVersion,
+    versionMajor: record.versionMajor,
+    versionMinor: record.versionMinor,
     createdAt: toIsoString(record.createdAt),
     updatedAt: toIsoString(record.updatedAt),
   });
@@ -516,6 +520,8 @@ export function mapDocumentRecord(record: {
   renderedContent: string;
   pdfObjectPath: string | null;
   sourceHash: string;
+  templateVersionMajor: number;
+  templateVersionMinor: number;
   generatedAt: Date;
 }): Document {
   return documentSchema.parse({
@@ -526,6 +532,8 @@ export function mapDocumentRecord(record: {
     renderedContent: record.renderedContent,
     hasPdf: Boolean(record.pdfObjectPath),
     sourceHash: record.sourceHash,
+    templateVersionMajor: record.templateVersionMajor,
+    templateVersionMinor: record.templateVersionMinor,
     generatedAt: toIsoString(record.generatedAt),
   });
 }

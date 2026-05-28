@@ -390,6 +390,8 @@ model Template {
   sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
   policyVersion            String       @default("") @map("policy_version")
+  versionMajor            Int          @default(1) @map("version_major")
+  versionMinor            Int          @default(0) @map("version_minor")
   documents                Document[]
   createdAt                DateTime     @default(now()) @map("created_at")
   updatedAt                DateTime     @updatedAt @map("updated_at")
@@ -401,18 +403,20 @@ model Template {
 }
 
 model Document {
-  id              String       @id(map: "documents_pkey") @default(cuid())
-  organizationId  String       @map("organization_id")
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "documents_organization_id_fkey")
-  templateId      String       @map("template_id")
-  template        Template     @relation(fields: [templateId], references: [id], onDelete: Cascade, map: "documents_template_id_fkey")
-  title           String
-  renderedContent String       @map("rendered_content")
-  pdfObjectPath   String?      @map("pdf_object_path")
-  sourceHash      String       @map("source_hash")
-  generatedAt     DateTime     @default(now()) @map("generated_at")
+  id                   String       @id(map: "documents_pkey") @default(cuid())
+  organizationId       String       @map("organization_id")
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "documents_organization_id_fkey")
+  templateId           String       @map("template_id")
+  template             Template     @relation(fields: [templateId], references: [id], onDelete: Cascade, map: "documents_template_id_fkey")
+  title                String
+  renderedContent      String       @map("rendered_content")
+  pdfObjectPath        String?      @map("pdf_object_path")
+  sourceHash           String       @map("source_hash")
+  templateVersionMajor Int          @default(1) @map("template_version_major")
+  templateVersionMinor Int          @default(0) @map("template_version_minor")
+  generatedAt          DateTime     @default(now()) @map("generated_at")
 
-  @@unique([organizationId, templateId], map: "documents_organization_id_template_id_key")
+  @@unique([organizationId, templateId, templateVersionMajor, templateVersionMinor], map: "documents_organization_id_template_id_version_key")
   @@index([organizationId], map: "idx_documents_organization_id")
   @@index([templateId], map: "idx_documents_template_id")
   @@map("documents")

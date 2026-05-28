@@ -1808,6 +1808,129 @@ describe("security profile API", () => {
     expect(response.json().error.code).toBe("SYSTEM_TEMPLATE_NOT_FOUND");
   });
 
+  it("implements automatic template versioning that increments versionMinor on save if a document exists for the current template version", async () => {
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+
+    // 1. Create a template from scratch. New templates start at v1.0.
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Versioning Test Policy",
+        content: "# Versioning test policy\n",
+        policyVersion: "",
+      },
+    });
+    expect(createResponse.statusCode).toBe(201);
+    let template = createResponse.json();
+    expect(template.versionMajor).toBe(1);
+    expect(template.versionMinor).toBe(0);
+
+    // 2. Update the template *before* generating a document. It should stay at v1.0.
+    const update1Response = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}`,
+      payload: {
+        name: "Versioning Test Policy",
+        content: "# Versioning test policy (updated once)\n",
+        policyVersion: "",
+      },
+    });
+    expect(update1Response.statusCode).toBe(200);
+    template = update1Response.json();
+    expect(template.versionMajor).toBe(1);
+    expect(template.versionMinor).toBe(0);
+
+    // 3. Generate a document for the current version (v1.0).
+    const docResponse1 = await app.inject({
+      method: "POST",
+      url: `/organizations/org-test/documents`,
+      payload: {
+        templateId: template.id,
+      },
+    });
+    expect(docResponse1.statusCode).toBe(201);
+    const document1 = docResponse1.json();
+    expect(document1.templateVersionMajor).toBe(1);
+    expect(document1.templateVersionMinor).toBe(0);
+
+    // 4. Update the template now that a document exists for v1.0. It should auto-increment versionMinor to 1 (v1.1).
+    const update2Response = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}`,
+      payload: {
+        name: "Versioning Test Policy",
+        content: "# Versioning test policy (updated twice)\n",
+        policyVersion: "",
+      },
+    });
+    expect(update2Response.statusCode).toBe(200);
+    template = update2Response.json();
+    expect(template.versionMajor).toBe(1);
+    expect(template.versionMinor).toBe(1);
+
+    // 5. Update the template again *without* generating a document for v1.1. It should stay at v1.1.
+    const update3Response = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}`,
+      payload: {
+        name: "Versioning Test Policy",
+        content: "# Versioning test policy (updated thrice)\n",
+        policyVersion: "",
+      },
+    });
+    expect(update3Response.statusCode).toBe(200);
+    template = update3Response.json();
+    expect(template.versionMajor).toBe(1);
+    expect(template.versionMinor).toBe(1);
+
+    // 6. Generate/update document for the current version (v1.1).
+    const docResponse2 = await app.inject({
+      method: "POST",
+      url: `/organizations/org-test/documents`,
+      payload: {
+        templateId: template.id,
+      },
+    });
+    expect(docResponse2.statusCode).toBe(201);
+    const document2 = docResponse2.json();
+    expect(document2.templateVersionMajor).toBe(1);
+    expect(document2.templateVersionMinor).toBe(1);
+
+    // 7. Update the template again. Since a document exists for v1.1, it should auto-increment to v1.2.
+    const update4Response = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}`,
+      payload: {
+        name: "Versioning Test Policy",
+        content: "# Versioning test policy (updated four times)\n",
+        policyVersion: "",
+      },
+    });
+    expect(update4Response.statusCode).toBe(200);
+    template = update4Response.json();
+    expect(template.versionMajor).toBe(1);
+    expect(template.versionMinor).toBe(2);
+
+    // 8. List summaries and verify multiple document versions are preserved and returned in the documents list
+    const listResponse = await app.inject({
+      method: "GET",
+      url: `/organizations/org-test/documents`,
+    });
+    expect(listResponse.statusCode).toBe(200);
+    const summaries = listResponse.json();
+    const testSummary = summaries.find((s: any) => s.template.id === template.id);
+    expect(testSummary).toBeDefined();
+    expect(testSummary.documents).toHaveLength(2);
+    expect(testSummary.documents[0].id).toBe(document2.id); // Sorted descending, so newest first (v1.1)
+    expect(testSummary.documents[1].id).toBe(document1.id); // Then older (v1.0)
+  });
+
   it("generates documents from templates and reports stale documents", async () => {
     const app = await createTestApp();
     await app.inject({

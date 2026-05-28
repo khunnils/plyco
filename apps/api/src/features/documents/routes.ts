@@ -104,6 +104,8 @@ export async function registerDocumentRoutes(
         sourceSystemTemplateSlug: null,
         content: draft.content,
         policyVersion: draft.policyVersion,
+        versionMajor: 1,
+        versionMinor: 0,
         createdAt: now,
         updatedAt: now,
       };
@@ -308,6 +310,8 @@ export async function registerDocumentRoutes(
       const existingDocument = await documentRepository.getDocumentForTemplate(
         request.params.organizationId,
         template.id,
+        template.versionMajor,
+        template.versionMinor,
       );
 
       const snapshot = {
@@ -349,6 +353,8 @@ export async function registerDocumentRoutes(
           renderedContent,
           pdfObjectPath: pdf?.objectPath ?? null,
           sourceHash: templateSourceHash(template, context),
+          templateVersionMajor: template.versionMajor,
+          templateVersionMinor: template.versionMinor,
         });
       } else {
         document = await documentRepository.createDocument({

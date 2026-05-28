@@ -40,6 +40,8 @@ export interface DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      templateVersionMajor: number;
+      templateVersionMinor: number;
     },
   ): Promise<Document>;
   getDocumentPdfObjectPath(
@@ -49,6 +51,8 @@ export interface DocumentRepository {
   getDocumentForTemplate(
     organizationId: string,
     templateId: string,
+    versionMajor?: number,
+    versionMinor?: number,
   ): Promise<Document | null>;
   getDocument(organizationId: string, id: string): Promise<Document | null>;
 }

@@ -421,6 +421,8 @@ export const templateSchema = z.object({
   sourceSystemTemplateSlug: templateSlugSchema.nullable(),
   content: z.string(),
   policyVersion: z.string().default(""),
+  versionMajor: z.number().int().default(1),
+  versionMinor: z.number().int().default(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -483,6 +485,8 @@ export const documentSchema = z.object({
   renderedContent: z.string(),
   hasPdf: z.boolean(),
   sourceHash: z.string().min(1),
+  templateVersionMajor: z.number().int().default(1),
+  templateVersionMinor: z.number().int().default(0),
   generatedAt: z.string().datetime(),
 });
 
@@ -496,6 +500,7 @@ export const documentSummarySchema = z.object({
   template: templateSchema,
   document: documentSchema.nullable(),
   status: documentStatusSchema,
+  documents: z.array(documentSchema).default([]),
 });
 
 export const createDocumentSchema = z.object({

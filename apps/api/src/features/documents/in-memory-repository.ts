@@ -71,6 +71,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       sourceSystemTemplateSlug: systemTemplate.slug,
       content: systemTemplate.content,
       policyVersion: "",
+      versionMajor: 1,
+      versionMinor: 0,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -108,6 +110,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       slug,
       content: input.content,
       policyVersion: input.policyVersion,
+      versionMajor: 1,
+      versionMinor: 0,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -127,11 +131,23 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       return null;
     }
 
+    const hasDocumentForCurrentVersion = Array.from(this.documents.values()).some(
+      (doc) =>
+        doc.templateId === id &&
+        doc.templateVersionMajor === currentTemplate.versionMajor &&
+        doc.templateVersionMinor === currentTemplate.versionMinor,
+    );
+
+    const nextVersionMinor = hasDocumentForCurrentVersion
+      ? currentTemplate.versionMinor + 1
+      : currentTemplate.versionMinor;
+
     const template: Template = {
       ...currentTemplate,
       name: input.name,
       content: input.content,
       policyVersion: input.policyVersion,
+      versionMinor: nextVersionMinor,
       updatedAt: now(),
     };
 
@@ -167,10 +183,15 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     return Array.from(this.templates.values())
       .filter((template) => template.organizationId === organizationId)
       .map((template) => {
-        const document =
-          Array.from(this.documents.values()).find(
-            (currentDocument) => currentDocument.templateId === template.id,
-          ) ?? null;
+        const documents = Array.from(this.documents.values())
+          .filter(
+            (currentDocument) =>
+              currentDocument.organizationId === organizationId &&
+              currentDocument.templateId === template.id,
+          )
+          .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+
+        const document = documents[0] ?? null;
 
         return {
           template,
@@ -180,6 +201,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
             : document.sourceHash === sourceHashForTemplate(template)
               ? "current"
               : "stale",
+          documents,
         };
       });
   }
@@ -192,13 +214,16 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     sourceHash: string;
   }): Promise<Document> {
     const existingDocument = Array.from(this.documents.values()).find(
-      (document) => document.templateId === input.template.id,
+      (document) =>
+        document.templateId === input.template.id &&
+        document.templateVersionMajor === input.template.versionMajor &&
+        document.templateVersionMinor === input.template.versionMinor,
     );
 
     if (existingDocument) {
       throw new ApiError(
         "DOCUMENT_ALREADY_EXISTS",
-        "A document has already been generated for this template.",
+        "A document has already been generated for this template version.",
         409,
         { templateId: input.template.id },
       );
@@ -212,6 +237,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: input.renderedContent,
       hasPdf: Boolean(input.pdfObjectPath),
       sourceHash: input.sourceHash,
+      templateVersionMajor: input.template.versionMajor,
+      templateVersionMinor: input.template.versionMinor,
       generatedAt: now(),
     };
 
@@ -231,6 +258,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      templateVersionMajor: number;
+      templateVersionMinor: number;
     },
   ): Promise<Document> {
     const document = this.documents.get(id);
@@ -244,6 +273,8 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: input.renderedContent,
       hasPdf: Boolean(input.pdfObjectPath),
       sourceHash: input.sourceHash,
+      templateVersionMajor: input.templateVersionMajor,
+      templateVersionMinor: input.templateVersionMinor,
       generatedAt: now(),
     };
 
@@ -279,14 +310,19 @@ export class InMemoryDocumentRepository implements DocumentRepository {
   async getDocumentForTemplate(
     organizationId: string,
     templateId: string,
+    versionMajor?: number,
+    versionMinor?: number,
   ): Promise<Document | null> {
-    const document =
-      Array.from(this.documents.values()).find(
+    const matched = Array.from(this.documents.values())
+      .filter(
         (currentDocument) =>
           currentDocument.organizationId === organizationId &&
-          currentDocument.templateId === templateId,
-      ) ?? null;
+          currentDocument.templateId === templateId &&
+          (versionMajor === undefined || currentDocument.templateVersionMajor === versionMajor) &&
+          (versionMinor === undefined || currentDocument.templateVersionMinor === versionMinor),
+      )
+      .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
 
-    return document;
+    return matched[0] ?? null;
   }
 }
