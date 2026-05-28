@@ -23,6 +23,7 @@ model Organization {
   handlesPii            Boolean?                 @map("handles_pii")
   handlesSensitiveData  Boolean?                 @map("handles_sensitive_data")
   complianceGoals       Json?                    @map("compliance_goals")
+  policyEffectiveDate   String?                  @map("policy_effective_date")
   services              ServiceProfile[]
   privacyProfile        PrivacyProfile?
   infrastructureProfile InfrastructureProfile?
@@ -237,6 +238,10 @@ model InfrastructureProfile {
   vendorReviewRequired           Boolean?     @map("vendor_review_required")
   vendorReviewCadence            String?      @map("vendor_review_cadence")
   dpaRequiredForProcessors       Boolean?     @map("dpa_required_for_processors")
+  penetrationTestingCadence      String?      @map("penetration_testing_cadence")
+  penetrationTestLastDate        String?      @map("penetration_test_last_date")
+  vulnerabilityDisclosureProgramExists Boolean? @map("vulnerability_disclosure_program_exists")
+  vulnerabilityDisclosureUrl     String?      @map("vulnerability_disclosure_url")
   createdAt                      DateTime     @default(now()) @map("created_at")
   updatedAt                      DateTime     @updatedAt @map("updated_at")
 
@@ -326,6 +331,8 @@ model AccessProfile {
   accessReviewCadence      String?      @map("access_review_cadence")
   adminApprovalRequired    Boolean?     @map("admin_approval_required")
   passwordManagerRequired  Boolean?     @map("password_manager_required")
+  securityTrainingRequired Boolean?     @map("security_training_required")
+  confidentialityAgreementsRequired Boolean? @map("confidentiality_agreements_required")
   createdAt                DateTime     @default(now()) @map("created_at")
   updatedAt                DateTime     @updatedAt @map("updated_at")
 

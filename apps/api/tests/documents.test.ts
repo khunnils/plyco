@@ -520,32 +520,32 @@ describe("documents / templates API", () => {
     const createResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
-      payload: { sourceSystemTemplateSlug: "security-policy" },
+      payload: { sourceSystemTemplateSlug: "incident-response-plan" },
     });
 
     expect(createResponse.statusCode).toBe(201);
     const createdTemplate = createResponse.json();
     expect(createdTemplate).toMatchObject({
-      name: "Security Policy",
-      slug: "security-policy",
-      sourceSystemTemplateSlug: "security-policy",
-      content: "# {{ company.name }} Security Policy\n",
+      name: "Incident Response Plan",
+      slug: "incident-response-plan",
+      sourceSystemTemplateSlug: "incident-response-plan",
+      content: "# {{ company.name }} Incident Response Plan\n",
     });
 
     const updateResponse = await app.inject({
       method: "PUT",
       url: `/organizations/org-test/templates/${createdTemplate.id}`,
       payload: {
-        name: "Customer Security Policy",
+        name: "Customer Incident Response Plan",
         content: "# Updated policy\n",
       },
     });
 
     expect(updateResponse.statusCode).toBe(200);
     expect(updateResponse.json()).toMatchObject({
-      name: "Customer Security Policy",
-      slug: "security-policy",
-      sourceSystemTemplateSlug: "security-policy",
+      name: "Customer Incident Response Plan",
+      slug: "incident-response-plan",
+      sourceSystemTemplateSlug: "incident-response-plan",
       content: "# Updated policy\n",
     });
 
@@ -752,7 +752,7 @@ describe("documents / templates API", () => {
     const createTemplateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
-      payload: { sourceSystemTemplateSlug: "security-policy" },
+      payload: { sourceSystemTemplateSlug: "incident-response-plan" },
     });
     const template = createTemplateResponse.json();
 
@@ -760,9 +760,9 @@ describe("documents / templates API", () => {
       method: "PUT",
       url: `/organizations/org-test/templates/${template.id}`,
       payload: {
-        name: "Security Policy",
+        name: "Incident Response Plan",
         content:
-          '# {{ company.name }} Security Policy\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
+          '# {{ company.name }} Incident Response Plan\n\nService {{ service.name }} for {{ service.userTypeLabels | join(", ") }}\nPrivacy rights: {{ privacy.supportedRightLabels | join(", ") }}\nVersion {{ policy.version }}\n',
       },
     });
 
@@ -773,7 +773,7 @@ describe("documents / templates API", () => {
     expect(emptyDocumentsResponse.statusCode).toBe(200);
     expect(emptyDocumentsResponse.json()).toMatchObject([
       {
-        template: { id: template.id, slug: "security-policy" },
+        template: { id: template.id, slug: "incident-response-plan" },
         document: null,
         status: "not_generated",
       },
@@ -788,9 +788,9 @@ describe("documents / templates API", () => {
     expect(generateResponse.statusCode).toBe(201);
     expect(generateResponse.json()).toMatchObject({
       templateId: template.id,
-      title: "Security Policy",
+      title: "Incident Response Plan",
       renderedContent:
-        "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
+        "# Acme AI Incident Response Plan\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
       hasPdf: false,
     });
     expect(generateResponse.json().sourceHash).toHaveLength(64);
@@ -955,7 +955,7 @@ describe("documents / templates API", () => {
     });
     expect(documentResponse.statusCode).toBe(200);
     expect(documentResponse.json().renderedContent).toBe(
-      "# Acme AI Security Policy\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
+      "# Acme AI Incident Response Plan\n\nService Acme AI Platform for Workspace admins, End users\nPrivacy rights: Access, Deletion, Correction, Opt-out\nVersion 1.0\n",
     );
 
     await app.inject({

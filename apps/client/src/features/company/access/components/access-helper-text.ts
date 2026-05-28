@@ -17,4 +17,8 @@ export const accessHelperText = {
     "Whether multiple people use the same login for any work system.",
   offboardingProcessExists:
     "You have a repeatable checklist for removing access when someone leaves.",
+  securityTrainingRequired:
+    "Team members complete security awareness training when they join and periodically after.",
+  confidentialityAgreementsRequired:
+    "Team members sign a confidentiality or non-disclosure agreement covering customer data.",
 } as const

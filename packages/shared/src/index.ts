@@ -112,6 +112,7 @@ export const complianceFieldVisibility = {
   "privacy.euRepresentativeStatus": ["gdpr"],
   "privacy.euRepresentativeName": ["gdpr"],
   "privacy.euRepresentativeAddress": ["gdpr"],
+  "infrastructure.dpaRequiredForProcessors": ["gdpr"],
 } as const;
 
 export type ComplianceFieldKey = keyof typeof complianceFieldVisibility;
@@ -168,6 +169,7 @@ export const companyProfileSchema = z.object({
   handlesPii: nullableBooleanSchema,
   handlesSensitiveData: nullableBooleanSchema,
   complianceGoals: nullableCodeIdArraySchema,
+  policyEffectiveDate: nullableStringSchema,
 });
 
 export const servicePrivacyProfileSchema = z.object({
@@ -252,6 +254,10 @@ export const infrastructureProfileSchema = z.object({
   vendorReviewRequired: nullableBooleanSchema,
   vendorReviewCadence: nullableCodeIdSchema,
   dpaRequiredForProcessors: nullableBooleanSchema,
+  penetrationTestingCadence: nullableCodeIdSchema,
+  penetrationTestLastDate: nullableStringSchema,
+  vulnerabilityDisclosureProgramExists: nullableBooleanSchema,
+  vulnerabilityDisclosureUrl: nullableStringSchema,
 });
 
 export const dataHandlingProfileSchema = z.object({
@@ -275,6 +281,8 @@ export const accessProfileSchema = z.object({
   accessReviewCadence: nullableCodeIdSchema,
   adminApprovalRequired: nullableBooleanSchema,
   passwordManagerRequired: nullableBooleanSchema,
+  securityTrainingRequired: nullableBooleanSchema,
+  confidentialityAgreementsRequired: nullableBooleanSchema,
 });
 
 export const organizationProviderInputSchema = z.object({
@@ -658,6 +666,7 @@ export const emptyCompanyProfile: CompanyProfile = {
   handlesPii: null,
   handlesSensitiveData: null,
   complianceGoals: null,
+  policyEffectiveDate: null,
 };
 
 export const emptyServiceProfile: ServiceProfileInput = {
@@ -733,6 +742,10 @@ export const emptyInfrastructureProfile: InfrastructureProfile = {
   vendorReviewRequired: null,
   vendorReviewCadence: null,
   dpaRequiredForProcessors: null,
+  penetrationTestingCadence: null,
+  penetrationTestLastDate: null,
+  vulnerabilityDisclosureProgramExists: null,
+  vulnerabilityDisclosureUrl: null,
 };
 
 export const emptyDataHandlingProfile: DataHandlingProfile = {
@@ -756,4 +769,6 @@ export const emptyAccessProfile: AccessProfile = {
   accessReviewCadence: null,
   adminApprovalRequired: null,
   passwordManagerRequired: null,
+  securityTrainingRequired: null,
+  confidentialityAgreementsRequired: null,
 };

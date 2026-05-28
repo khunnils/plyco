@@ -124,6 +124,7 @@ export const InfrastructureManager = ({
         onSave={saveInfrastructure}
       />
       <VendorRiskPanel
+        complianceGoals={profile.company.complianceGoals}
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
         needsAttention={getNeedsAttention("Vendor Risk")}

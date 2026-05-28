@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
+  isComplianceFieldVisible,
   type InfrastructureProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -13,6 +14,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
@@ -36,33 +38,44 @@ const toVendorRiskDraft = (
 
 const vendorRiskRows = (
   draft: VendorRiskDraft,
-  vocabulary: Vocabulary | undefined
-) =>
-  [
+  vocabulary: Vocabulary | undefined,
+  complianceGoals: string[] | null | undefined
+) => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Vendor review required",
       boolText(draft.vendorReviewRequired),
       infrastructureHelperText.vendorReviewRequired,
     ],
-    [
+  ]
+
+  if (draft.vendorReviewRequired) {
+    rows.push([
       "Vendor review frequency",
       draft.vendorReviewCadence
         ? codeLabel(vocabulary, "security_cadences", draft.vendorReviewCadence)
         : "Not set",
       infrastructureHelperText.vendorReviewCadence,
-    ],
-    [
+    ])
+  }
+
+  if (isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", complianceGoals)) {
+    rows.push([
       "DPA required for processors",
       boolText(draft.dpaRequiredForProcessors),
       infrastructureHelperText.dpaRequiredForProcessors,
-    ],
-  ] as const
+    ])
+  }
+
+  return rows
+}
 
 export const VendorRiskPanel = ({
   isMutationPending,
   needsAttention,
   infrastructure,
   securityCadenceOptions,
+  complianceGoals,
   vocabulary,
   onSave,
 }: {
@@ -70,6 +83,7 @@ export const VendorRiskPanel = ({
   needsAttention?: boolean
   infrastructure: InfrastructureProfile
   securityCadenceOptions: Option[]
+  complianceGoals: string[] | null | undefined
   vocabulary: Vocabulary | undefined
   onSave: (patch: VendorRiskDraft, onSuccess?: () => void) => void
 }) => {
@@ -83,6 +97,24 @@ export const VendorRiskPanel = ({
     values: draft,
   })
 
+  const vendorReviewRequired = form.watch("vendorReviewRequired")
+  const showDpaRequired = isComplianceFieldVisible(
+    "infrastructure.dpaRequiredForProcessors",
+    complianceGoals
+  )
+
+  useEffect(() => {
+    if (!vendorReviewRequired) {
+      form.setValue("vendorReviewCadence", null)
+    }
+  }, [vendorReviewRequired, form])
+
+  useEffect(() => {
+    if (!showDpaRequired) {
+      form.setValue("dpaRequiredForProcessors", null)
+    }
+  }, [showDpaRequired, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -94,7 +126,7 @@ export const VendorRiskPanel = ({
       isMutationPending={isMutationPending}
       needsAttention={needsAttention}
       readOnlyContent={
-        <ProfilePanelDetailGrid rows={vendorRiskRows(draft, vocabulary)} />
+        <ProfilePanelDetailGrid rows={vendorRiskRows(draft, vocabulary, complianceGoals)} />
       }
       saveLabel="Save"
       title="Vendor Risk"
@@ -112,20 +144,24 @@ export const VendorRiskPanel = ({
           label="Vendor review required"
           name="vendorReviewRequired"
         />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.vendorReviewCadence}
-          label="Vendor review frequency"
-          name="vendorReviewCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.dpaRequiredForProcessors}
-          label="DPA required for processors"
-          name="dpaRequiredForProcessors"
-        />
+        {vendorReviewRequired && (
+          <SelectField
+            control={form.control}
+            helperText={infrastructureHelperText.vendorReviewCadence}
+            label="Vendor review frequency"
+            name="vendorReviewCadence"
+            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+            placeholder="Not set"
+          />
+        )}
+        {showDpaRequired && (
+          <ToggleField
+            control={form.control}
+            helperText={infrastructureHelperText.dpaRequiredForProcessors}
+            label="DPA required for processors"
+            name="dpaRequiredForProcessors"
+          />
+        )}
       </div>
     </ProfilePanelShell>
   )

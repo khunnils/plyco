@@ -313,6 +313,15 @@ export const validateInfrastructureProfileCodes = async (
           "infrastructure.vendorReviewCadence",
         )
       : Promise.resolve(),
+    infrastructure.penetrationTestingCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          infrastructure.penetrationTestingCadence,
+          "infrastructure.penetrationTestingCadence",
+        )
+      : Promise.resolve(),
   ]);
 };
 

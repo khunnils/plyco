@@ -204,6 +204,12 @@ describe("shared security profile schemas", () => {
     expect(isComplianceFieldVisible("privacy.dpoStatus", ["soc_2"])).toBe(
       false,
     );
+    expect(
+      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", ["gdpr"]),
+    ).toBe(true);
+    expect(
+      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", ["soc_2"]),
+    ).toBe(false);
   });
 
   it("shows untargeted fields by default", () => {

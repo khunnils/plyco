@@ -13,6 +13,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import {
@@ -42,42 +43,50 @@ const toBackupsDraft = (
   restoreTestingCadence: infrastructure.restoreTestingCadence,
 })
 
-const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) =>
-  [
+const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Backups enabled",
       boolText(draft.backupsEnabled),
       infrastructureHelperText.backupsEnabled,
     ],
-    [
-      "Backup frequency",
-      draft.backupCadence
-        ? codeLabel(vocabulary, "security_cadences", draft.backupCadence)
-        : "Not set",
-      infrastructureHelperText.backupCadence,
-    ],
-    [
-      "Backup retention days",
-      draft.backupRetentionDaysStatus === "not_defined"
-        ? "Not defined"
-        : draft.backupRetentionDaysStatus === "defined" &&
-            draft.backupRetentionDays !== null
-          ? `${draft.backupRetentionDays} days`
+  ]
+
+  if (draft.backupsEnabled) {
+    rows.push(
+      [
+        "Backup frequency",
+        draft.backupCadence
+          ? codeLabel(vocabulary, "security_cadences", draft.backupCadence)
           : "Not set",
-      infrastructureHelperText.backupRetentionDays,
-    ],
-    [
-      "Restore test frequency",
-      draft.restoreTestingCadence
-        ? codeLabel(
-            vocabulary,
-            "security_cadences",
-            draft.restoreTestingCadence
-          )
-        : "Not set",
-      infrastructureHelperText.restoreTestingCadence,
-    ],
-  ] as const
+        infrastructureHelperText.backupCadence,
+      ],
+      [
+        "Backup retention days",
+        draft.backupRetentionDaysStatus === "not_defined"
+          ? "Not defined"
+          : draft.backupRetentionDaysStatus === "defined" &&
+              draft.backupRetentionDays !== null
+            ? `${draft.backupRetentionDays} days`
+            : "Not set",
+        infrastructureHelperText.backupRetentionDays,
+      ],
+      [
+        "Restore test frequency",
+        draft.restoreTestingCadence
+          ? codeLabel(
+              vocabulary,
+              "security_cadences",
+              draft.restoreTestingCadence
+            )
+          : "Not set",
+        infrastructureHelperText.restoreTestingCadence,
+      ]
+    )
+  }
+
+  return rows
+}
 
 export const BackupsPanel = ({
   isMutationPending,
@@ -104,8 +113,18 @@ export const BackupsPanel = ({
     values: draft,
   })
 
+  const backupsEnabled = form.watch("backupsEnabled")
   const backupRetentionDaysStatus = form.watch("backupRetentionDaysStatus")
   const isBackupRetentionDaysDisabled = backupRetentionDaysStatus !== "defined"
+
+  useEffect(() => {
+    if (!backupsEnabled) {
+      form.setValue("backupCadence", null)
+      form.setValue("backupRetentionDaysStatus", null)
+      form.setValue("backupRetentionDays", null)
+      form.setValue("restoreTestingCadence", null)
+    }
+  }, [backupsEnabled, form])
 
   useEffect(() => {
     if (backupRetentionDaysStatus === "not_defined") {
@@ -142,49 +161,53 @@ export const BackupsPanel = ({
           label="Backups enabled"
           name="backupsEnabled"
         />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.backupCadence}
-          label="Backup frequency"
-          name="backupCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.backupRetentionDaysStatus}
-          label="Backup retention status"
-          name="backupRetentionDaysStatus"
-          options={[
-            { value: "", label: "Not set" },
-            ...codeOptions(vocabulary, "defined_statuses"),
-          ]}
-          placeholder="Not set"
-        />
-        <label className="grid gap-2 text-sm font-medium text-slate-800">
-          <span>Backup retention days</span>
-          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
-            {infrastructureHelperText.backupRetentionDays}
-          </span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
-            disabled={isBackupRetentionDaysDisabled}
-            inputMode="numeric"
-            min={0}
-            type="number"
-            {...form.register("backupRetentionDays", {
-              setValueAs: (value) => (value === "" ? null : Number(value)),
-            })}
-          />
-        </label>
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.restoreTestingCadence}
-          label="Restore test frequency"
-          name="restoreTestingCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
+        {backupsEnabled && (
+          <>
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.backupCadence}
+              label="Backup frequency"
+              name="backupCadence"
+              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              placeholder="Not set"
+            />
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.backupRetentionDaysStatus}
+              label="Backup retention status"
+              name="backupRetentionDaysStatus"
+              options={[
+                { value: "", label: "Not set" },
+                ...codeOptions(vocabulary, "defined_statuses"),
+              ]}
+              placeholder="Not set"
+            />
+            <label className="grid gap-2 text-sm font-medium text-slate-800">
+              <span>Backup retention days</span>
+              <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+                {infrastructureHelperText.backupRetentionDays}
+              </span>
+              <input
+                className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                disabled={isBackupRetentionDaysDisabled}
+                inputMode="numeric"
+                min={0}
+                type="number"
+                {...form.register("backupRetentionDays", {
+                  setValueAs: (value) => (value === "" ? null : Number(value)),
+                })}
+              />
+            </label>
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.restoreTestingCadence}
+              label="Restore test frequency"
+              name="restoreTestingCadence"
+              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              placeholder="Not set"
+            />
+          </>
+        )}
       </div>
     </ProfilePanelShell>
   )

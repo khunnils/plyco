@@ -10,7 +10,7 @@ import {
 import { ApiError } from "./errors.js";
 
 const DEFAULT_TEMPLATE_DIRECTORY = fileURLToPath(
-  new URL("../data/templates/", import.meta.url),
+  new URL("../../data/templates/", import.meta.url),
 );
 
 export interface SystemTemplateSource {

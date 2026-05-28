@@ -170,6 +170,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
       complianceGoals: jsonValue(input.complianceGoals),
+      policyEffectiveDate: input.policyEffectiveDate,
     };
   }
 
@@ -201,6 +202,11 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vendorReviewRequired: input.vendorReviewRequired,
       vendorReviewCadence: input.vendorReviewCadence,
       dpaRequiredForProcessors: input.dpaRequiredForProcessors,
+      penetrationTestingCadence: input.penetrationTestingCadence,
+      penetrationTestLastDate: input.penetrationTestLastDate,
+      vulnerabilityDisclosureProgramExists:
+        input.vulnerabilityDisclosureProgramExists,
+      vulnerabilityDisclosureUrl: input.vulnerabilityDisclosureUrl,
     };
   }
 
@@ -623,6 +629,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       accessReviewCadence: input.accessReviewCadence,
       adminApprovalRequired: input.adminApprovalRequired,
       passwordManagerRequired: input.passwordManagerRequired,
+      securityTrainingRequired: input.securityTrainingRequired,
+      confidentialityAgreementsRequired:
+        input.confidentialityAgreementsRequired,
     };
   }
 }

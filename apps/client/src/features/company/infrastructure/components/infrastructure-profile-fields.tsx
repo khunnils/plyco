@@ -1,8 +1,10 @@
 import {
+  isComplianceFieldVisible,
   type ProviderSelection,
   type Provider,
   type ProviderSystemType,
 } from "@plyco/shared"
+import { useEffect } from "react"
 import { type UseFormReturn } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -234,191 +236,248 @@ export const InfrastructureProfileFields = ({
   securityMonitoringOwnerOptions?: Option[]
   securityNotificationTimelineOptions?: Option[]
   securityTlsVersionOptions?: Option[]
-}) => (
-  <div className="grid gap-6">
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Infrastructure Providers
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <CloudProviderPicker form={form} providers={providers} />
-        {infrastructureSystemTypes
-          .filter((systemType) => systemType !== "cloud")
-          .map((systemType) => (
-            <ProviderPicker
+}) => {
+  const backupsEnabled = form.watch("infrastructure.backupsEnabled")
+  const centralizedLoggingEnabled = form.watch("infrastructure.centralizedLoggingEnabled")
+  const vendorReviewRequired = form.watch("infrastructure.vendorReviewRequired")
+  const complianceGoals = form.watch("company.complianceGoals")
+  const incidentResponsePlanExists = form.watch("infrastructure.incidentResponsePlanExists")
+
+  useEffect(() => {
+    if (!backupsEnabled) {
+      form.setValue("infrastructure.backupCadence", null)
+      form.setValue("infrastructure.backupRetentionDays", null)
+      form.setValue("infrastructure.restoreTestingCadence", null)
+    }
+  }, [backupsEnabled, form])
+
+  useEffect(() => {
+    if (!centralizedLoggingEnabled) {
+      form.setValue("infrastructure.logRetentionDays", null)
+    }
+  }, [centralizedLoggingEnabled, form])
+
+  useEffect(() => {
+    if (!vendorReviewRequired) {
+      form.setValue("infrastructure.vendorReviewCadence", null)
+    }
+  }, [vendorReviewRequired, form])
+
+  const showDpaRequired = isComplianceFieldVisible(
+    "infrastructure.dpaRequiredForProcessors",
+    complianceGoals
+  )
+
+  useEffect(() => {
+    if (!showDpaRequired) {
+      form.setValue("infrastructure.dpaRequiredForProcessors", null)
+    }
+  }, [showDpaRequired, form])
+
+  useEffect(() => {
+    if (!incidentResponsePlanExists) {
+      form.setValue("infrastructure.incidentResponseLastTestedDate", null)
+    }
+  }, [incidentResponsePlanExists, form])
+
+  return (
+    <div className="grid gap-6">
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Infrastructure Providers
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <CloudProviderPicker form={form} providers={providers} />
+          {infrastructureSystemTypes
+            .filter((systemType) => systemType !== "cloud")
+            .map((systemType) => (
+              <ProviderPicker
+                form={form}
+                key={systemType}
+                providers={providers}
+                systemType={systemType}
+              />
+            ))}
+          <ToggleField
+            control={form.control}
+            label="MFA enabled"
+            name="infrastructure.mfaEnabled"
+          />
+          <ToggleField
+            control={form.control}
+            label="Encrypted devices required"
+            name="infrastructure.encryptedDevicesRequired"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">Encryption</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <SelectField
+            control={form.control}
+            label="At-rest algorithm"
+            name="infrastructure.atRestAlgorithm"
+            options={[{ value: "", label: "Not set" }, ...securityEncryptionAlgorithmOptions]}
+            placeholder="Not set"
+          />
+          <SelectField
+            control={form.control}
+            label="Minimum TLS version"
+            name="infrastructure.inTransitMinimumTlsVersion"
+            options={[{ value: "", label: "Not set" }, ...securityTlsVersionOptions]}
+            placeholder="Not set"
+          />
+          <SelectField
+            control={form.control}
+            label="Key management provider"
+            name="infrastructure.keyManagementProvider"
+            options={[{ value: "", label: "Not set" }, ...securityKeyManagementProviderOptions]}
+            placeholder="Not set"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Logging & Monitoring
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Centralized logging enabled"
+            name="infrastructure.centralizedLoggingEnabled"
+          />
+          {centralizedLoggingEnabled && (
+            <NumberField
               form={form}
-              key={systemType}
-              providers={providers}
-              systemType={systemType}
+              label="Log retention days"
+              name="infrastructure.logRetentionDays"
             />
-          ))}
-        <ToggleField
-          control={form.control}
-          label="MFA enabled"
-          name="infrastructure.mfaEnabled"
-        />
-        <ToggleField
-          control={form.control}
-          label="Encrypted devices required"
-          name="infrastructure.encryptedDevicesRequired"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">Encryption</h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <SelectField
-          control={form.control}
-          label="At-rest algorithm"
-          name="infrastructure.atRestAlgorithm"
-          options={[{ value: "", label: "Not set" }, ...securityEncryptionAlgorithmOptions]}
-          placeholder="Not set"
-        />
-        <SelectField
-          control={form.control}
-          label="Minimum TLS version"
-          name="infrastructure.inTransitMinimumTlsVersion"
-          options={[{ value: "", label: "Not set" }, ...securityTlsVersionOptions]}
-          placeholder="Not set"
-        />
-        <SelectField
-          control={form.control}
-          label="Key management provider"
-          name="infrastructure.keyManagementProvider"
-          options={[{ value: "", label: "Not set" }, ...securityKeyManagementProviderOptions]}
-          placeholder="Not set"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Logging & Monitoring
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Centralized logging enabled"
-          name="infrastructure.centralizedLoggingEnabled"
-        />
-        <NumberField
-          form={form}
-          label="Log retention days"
-          name="infrastructure.logRetentionDays"
-        />
-        <SelectField
-          control={form.control}
-          label="Security monitoring owner"
-          name="infrastructure.securityMonitoringOwner"
-          options={[{ value: "", label: "Not set" }, ...securityMonitoringOwnerOptions]}
-          placeholder="Not set"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Vulnerability Management
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <SelectField
-          control={form.control}
-          label="Scanning cadence"
-          name="infrastructure.scanningCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-        <NumberField
-          form={form}
-          label="Critical patching SLA days"
-          name="infrastructure.patchingSlaCriticalDays"
-        />
-        <NumberField
-          form={form}
-          label="High patching SLA days"
-          name="infrastructure.patchingSlaHighDays"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">
-        Incident Response
-      </h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Plan exists"
-          name="infrastructure.incidentResponsePlanExists"
-        />
-        <SelectField
-          control={form.control}
-          label="Notification timeline"
-          name="infrastructure.incidentNotificationTimeline"
-          options={[{ value: "", label: "Not set" }, ...securityNotificationTimelineOptions]}
-          placeholder="Not set"
-        />
-        <SelectField
-          control={form.control}
-          label="Customer notification process"
-          name="infrastructure.customerNotificationProcess"
-          options={[{ value: "", label: "Not set" }, ...securityCustomerNotificationProcessOptions]}
-          placeholder="Not set"
-        />
-        <DateField
-          form={form}
-          label="Last tested date"
-          name="infrastructure.incidentResponseLastTestedDate"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">Backups</h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Backups enabled"
-          name="infrastructure.backupsEnabled"
-        />
-        <SelectField
-          control={form.control}
-          label="Backup cadence"
-          name="infrastructure.backupCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-        <NumberField
-          form={form}
-          label="Backup retention days"
-          name="infrastructure.backupRetentionDays"
-        />
-        <SelectField
-          control={form.control}
-          label="Restore testing cadence"
-          name="infrastructure.restoreTestingCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-      </div>
-    </section>
-    <section className="grid gap-4">
-      <h3 className="text-sm font-semibold text-slate-900">Vendor Risk</h3>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ToggleField
-          control={form.control}
-          label="Vendor review required"
-          name="infrastructure.vendorReviewRequired"
-        />
-        <SelectField
-          control={form.control}
-          label="Vendor review cadence"
-          name="infrastructure.vendorReviewCadence"
-          options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          label="DPA required for processors"
-          name="infrastructure.dpaRequiredForProcessors"
-        />
-      </div>
-    </section>
-  </div>
-)
+          )}
+          <SelectField
+            control={form.control}
+            label="Security monitoring owner"
+            name="infrastructure.securityMonitoringOwner"
+            options={[{ value: "", label: "Not set" }, ...securityMonitoringOwnerOptions]}
+            placeholder="Not set"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Vulnerability Management
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <SelectField
+            control={form.control}
+            label="Scanning cadence"
+            name="infrastructure.scanningCadence"
+            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+            placeholder="Not set"
+          />
+          <NumberField
+            form={form}
+            label="Critical patching SLA days"
+            name="infrastructure.patchingSlaCriticalDays"
+          />
+          <NumberField
+            form={form}
+            label="High patching SLA days"
+            name="infrastructure.patchingSlaHighDays"
+          />
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Incident Response
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Plan exists"
+            name="infrastructure.incidentResponsePlanExists"
+          />
+          <SelectField
+            control={form.control}
+            label="Notification timeline"
+            name="infrastructure.incidentNotificationTimeline"
+            options={[{ value: "", label: "Not set" }, ...securityNotificationTimelineOptions]}
+            placeholder="Not set"
+          />
+          <SelectField
+            control={form.control}
+            label="Customer notification process"
+            name="infrastructure.customerNotificationProcess"
+            options={[{ value: "", label: "Not set" }, ...securityCustomerNotificationProcessOptions]}
+            placeholder="Not set"
+          />
+          {incidentResponsePlanExists && (
+            <DateField
+              form={form}
+              label="Last tested date"
+              name="infrastructure.incidentResponseLastTestedDate"
+            />
+          )}
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">Backups</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Backups enabled"
+            name="infrastructure.backupsEnabled"
+          />
+          {backupsEnabled && (
+            <>
+              <SelectField
+                control={form.control}
+                label="Backup cadence"
+                name="infrastructure.backupCadence"
+                options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+                placeholder="Not set"
+              />
+              <NumberField
+                form={form}
+                label="Backup retention days"
+                name="infrastructure.backupRetentionDays"
+              />
+              <SelectField
+                control={form.control}
+                label="Restore testing cadence"
+                name="infrastructure.restoreTestingCadence"
+                options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+                placeholder="Not set"
+              />
+            </>
+          )}
+        </div>
+      </section>
+      <section className="grid gap-4">
+        <h3 className="text-sm font-semibold text-slate-900">Vendor Risk</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <ToggleField
+            control={form.control}
+            label="Vendor review required"
+            name="infrastructure.vendorReviewRequired"
+          />
+          {vendorReviewRequired && (
+            <SelectField
+              control={form.control}
+              label="Vendor review cadence"
+              name="infrastructure.vendorReviewCadence"
+              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              placeholder="Not set"
+            />
+          )}
+          {showDpaRequired && (
+            <ToggleField
+              control={form.control}
+              label="DPA required for processors"
+              name="infrastructure.dpaRequiredForProcessors"
+            />
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}

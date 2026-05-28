@@ -208,6 +208,122 @@ describe("dashboard progress", () => {
     })
   })
 
+  it("adjusts backups fields count based on backupsEnabled", () => {
+    const progressNoBackups = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        backupsEnabled: false,
+      },
+    })
+    const backupsNo = progressNoBackups.sections.find(
+      (section) => section.title === "Backups"
+    )
+    expect(backupsNo).toMatchObject({
+      totalFields: 1,
+    })
+
+    const progressWithBackups = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        backupsEnabled: true,
+      },
+    })
+    const backupsYes = progressWithBackups.sections.find(
+      (section) => section.title === "Backups"
+    )
+    expect(backupsYes).toMatchObject({
+      totalFields: 4,
+    })
+  })
+
+  it("adjusts centralized logging fields count based on centralizedLoggingEnabled", () => {
+    const progressNoLogs = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        centralizedLoggingEnabled: false,
+      },
+    })
+    const logsNo = progressNoLogs.sections.find(
+      (section) => section.title === "Logging & Monitoring"
+    )
+    expect(logsNo).toMatchObject({
+      totalFields: 2,
+    })
+
+    const progressWithLogs = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        centralizedLoggingEnabled: true,
+      },
+    })
+    const logsYes = progressWithLogs.sections.find(
+      (section) => section.title === "Logging & Monitoring"
+    )
+    expect(logsYes).toMatchObject({
+      totalFields: 3,
+    })
+  })
+
+  it("adjusts vendor risk fields count based on vendorReviewRequired and compliance goals", () => {
+    const progressNoVendorGDPR = infrastructureProgress({
+      ...emptyProfileDraft,
+      company: {
+        ...emptyProfileDraft.company,
+        complianceGoals: ["gdpr"],
+      },
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        vendorReviewRequired: false,
+      },
+    })
+    const vendorNoGDPR = progressNoVendorGDPR.sections.find(
+      (section) => section.title === "Vendor Risk"
+    )
+    expect(vendorNoGDPR).toMatchObject({
+      totalFields: 2, // Vendor review required + DPA required for processors (since GDPR)
+    })
+
+    const progressWithVendorGDPR = infrastructureProgress({
+      ...emptyProfileDraft,
+      company: {
+        ...emptyProfileDraft.company,
+        complianceGoals: ["gdpr"],
+      },
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        vendorReviewRequired: true,
+      },
+    })
+    const vendorYesGDPR = progressWithVendorGDPR.sections.find(
+      (section) => section.title === "Vendor Risk"
+    )
+    expect(vendorYesGDPR).toMatchObject({
+      totalFields: 3, // Vendor review required + frequency + DPA required for processors
+    })
+
+    const progressWithVendorNoGDPR = infrastructureProgress({
+      ...emptyProfileDraft,
+      company: {
+        ...emptyProfileDraft.company,
+        complianceGoals: ["soc_2"],
+      },
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        vendorReviewRequired: true,
+      },
+    })
+    const vendorYesNoGDPR = progressWithVendorNoGDPR.sections.find(
+      (section) => section.title === "Vendor Risk"
+    )
+    expect(vendorYesNoGDPR).toMatchObject({
+      totalFields: 2, // Vendor review required + frequency (DPA is excluded since no GDPR)
+    })
+  })
+
   it("handles empty service, data type, and vendor lists", () => {
     const progress = dashboardProgress({
       organizationProviders: [],

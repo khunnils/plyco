@@ -1,147 +1,185 @@
 ' slug: privacy-policy
 ' name: Privacy Policy
-' description: A customer-facing privacy policy based on the organization's privacy, service, and vendor data.
+' description: A customer-facing privacy policy based on the organization's privacy, service, data handling, and vendor data.
 
 # {{ organization.name }} Privacy Policy
 
-{{ organization.name }} provides {{ service.name }} at {{ service.url }}. This policy describes how {{ organization.name }} handles personal data in connection with its products and services.
+{% if policy.version %}_Version {{ policy.version }}_{% endif %}
+{% if policy.effectiveDate %}_Effective date: {{ policy.effectiveDate }}_{% endif %}
+{% if policy.lastUpdatedDate %}_Last updated: {{ policy.lastUpdatedDate }}_{% endif %}
 
-## Contact
+This Privacy Policy explains how {{ organization.legalEntityName or organization.name }} ("{{ organization.name }}", "we", "us", or "our") collects, uses, shares, and protects personal data in connection with {{ service.name }}{% if service.url %} ({{ service.url }}){% endif %} and our related products and services.
 
-For privacy questions, contact {{ organization.privacyContactEmail }}. General inquiries may be sent to {{ organization.contactEmail }}.
+## Who we are
 
-## Services Covered
+{{ organization.name }} provides {{ service.name }}{% if service.description %} — {{ service.description }}{% endif %}.
+{% if organization.legalEntityName %}The entity responsible for your personal data is {{ organization.legalEntityName }}.{% endif %}
+{% if organization.address %}Our business address is {{ organization.address }}.{% endif %}
+
+{% if services.all.length > 1 %}
+This policy covers the following services:
 
 {% for service in services.all -%}
-- {{ service.name }}: {{ service.description }}
+- **{{ service.name }}**{% if service.description %}: {{ service.description }}{% endif %}
 {% endfor %}
-
-## Personal Data We Process
-
-{% for service in services.all -%}
-### {{ service.name }}
-
-{% if service.dataTypes.length %}
-{{ service.name }} may process the following data categories:
-
-{% for dataType in service.dataTypes -%}
-- {{ dataType.name }}{% if dataType.description %}: {{ dataType.description }}{% endif %}
-{% endfor %}
-{% else %}
-No service-specific data categories are currently listed for {{ service.name }}.
 {% endif %}
 
+## Personal data we collect
+
+{% if dataHandling.dataTypesStoredHasValue %}
+We collect and process the following categories of personal data:
+
+{% for dataType in dataHandling.dataTypesStored %}
+### {{ dataType.name }}
+
+{% if dataType.description %}{{ dataType.description }}
+{% endif %}
+{% if dataType.subjectTypeLabels.length %}- Relates to: {{ dataType.subjectTypeLabels | join(", ") }}
+{% endif %}
+{% if dataType.collectionMethodLabels.length %}- Collected through: {{ dataType.collectionMethodLabels | join(", ") }}
+{% endif %}
+- {% if dataType.isRequired %}Required to provide the service{% else %}Provided optionally{% endif %}{% if dataType.isSensitive %}; handled as sensitive personal data{% endif %}
+
+{% endfor %}
+{% else %}
+We collect the personal data needed to provide, secure, and improve {{ service.name }}, such as account, contact, and usage information.
+{% endif %}
+
+{% if services.hasActivities %}
+## How and why we use your data
+
+{% for service in services.all %}
+{% if service.activities.length %}
+{% if services.all.length > 1 %}### {{ service.name }}
+{% endif %}
+We process personal data for the following purposes:
+
+| Purpose | Our role | Legal basis | Retention |
+| --- | --- | --- | --- |
+{% for activity in service.activities -%}
+| {{ activity.purpose or activity.name }} | {{ activity.roleLabel or "—" }} | {{ activity.legalBasisLabels | join(", ") or "—" }} | {{ activity.retentionLabel or "—" }} |
 {% endfor %}
 
-## Privacy Rights
+{% endif %}
+{% endfor %}
+{% endif %}
 
-{{ organization.name }} supports the following privacy rights: {{ privacy.supportedRightLabels | join(", ") }}.
+{% if service.childrenDirected %}
+## Children's privacy
 
-Requests may be submitted through: {{ privacy.requestMethodLabels | join(", ") }}.
+{{ service.name }} is directed to children, and we collect and handle children's personal data in accordance with applicable children's privacy laws.
+{% elif service.minimumUserAgeHasValue %}
+## Children's privacy
 
+{{ service.name }} is intended for users aged {{ service.minimumUserAge }} and older and is not directed to children. We do not knowingly collect personal data from anyone under that age.
+{% endif %}
+
+{% if privacy.supportedRightLabels.length or privacy.requestMethodLabels.length or organization.privacyContactEmail or privacy.responseTimelineDaysHasValue or privacy.identityVerificationRequired or privacy.authorizedAgentSupported or privacy.appealProcessExists %}
+## Your privacy rights
+
+{% if privacy.supportedRightLabels.length %}
+Depending on where you live, you may have the right to: {{ privacy.supportedRightLabels | join(", ") }}.
+{% endif %}
+{% if privacy.requestMethodLabels.length %}
+To exercise your rights, you can reach us via: {{ privacy.requestMethodLabels | join(", ") }}{% if organization.privacyContactEmail %}, or by email at {{ organization.privacyContactEmail }}{% endif %}.
+{% elif organization.privacyContactEmail %}
+To exercise your rights, email us at {{ organization.privacyContactEmail }}.
+{% endif %}
 {% if privacy.responseTimelineDaysHasValue %}
-{{ organization.name }} targets a response within {{ privacy.responseTimelineDays }} days.
+We aim to respond to verified requests within {{ privacy.responseTimelineDays }} days.
 {% endif %}
-
 {% if privacy.identityVerificationRequired %}
-{{ organization.name }} may verify the requester's identity before fulfilling a privacy request.
+We may need to verify your identity before acting on a request.
 {% endif %}
-
 {% if privacy.authorizedAgentSupported %}
-Authorized agents may submit requests where permitted by applicable law.
+You may use an authorized agent to submit a request on your behalf where permitted by applicable law.
 {% endif %}
-
 {% if privacy.appealProcessExists %}
-If a request is denied, {{ organization.name }} provides an appeal process.
+If we decline your request, you may appeal that decision.
+{% endif %}
 {% endif %}
 
-## Cookies and Tracking
+{% if services.cookiesAnswered %}
+## Cookies and similar technologies
 
-{% for service in services.all -%}
-### {{ service.name }}
-
+{% for service in services.all %}
 {% if service.privacy.usesCookiesOrTrackingTechnologies %}
-{{ service.name }} uses cookies or similar technologies for: {{ service.privacy.cookieTrackingCategoryLabels | join(", ") }}.
-{% if service.privacy.cookieConsentMechanismLabel %}
-Cookie choices are managed through: {{ service.privacy.cookieConsentMechanismLabel }}.
+{% if services.all.length > 1 %}**{{ service.name }}.** {% endif %}We use cookies and similar technologies{% if service.privacy.cookieTrackingCategoryLabels.length %} for the following purposes: {{ service.privacy.cookieTrackingCategoryLabels | join(", ") }}{% endif %}.{% if service.privacy.cookieConsentMechanismLabel %} You can manage your preferences through {{ service.privacy.cookieConsentMechanismLabel }}.{% endif %}{% if service.privacy.globalPrivacyControlSupported %} We honor Global Privacy Control signals.{% endif %}
+{% if service.privacy.analyticsProviders.length %}Analytics providers we use include: {{ service.privacy.analyticsProviders | join(", ") }}.{% endif %}
+{% if service.privacy.advertisingProviders.length %}Advertising providers we use include: {{ service.privacy.advertisingProviders | join(", ") }}.{% endif %}
+{% elif service.privacy.usesCookiesOrTrackingTechnologiesAnswered and services.all.length == 1 %}
+{{ service.name }} does not use non-essential cookies or similar tracking technologies.
 {% endif %}
-{% else %}
-{{ service.name }} is not currently marked as using cookies or similar tracking technologies.
-{% endif %}
-
-{% if service.privacy.analyticsProviders.length %}
-Analytics providers: {{ service.privacy.analyticsProviders | join(", ") }}.
-{% endif %}
-{% if service.privacy.advertisingProviders.length %}
-Advertising providers: {{ service.privacy.advertisingProviders | join(", ") }}.
-{% endif %}
-{% if service.privacy.globalPrivacyControlSupported %}
-{{ service.name }} supports Global Privacy Control signals.
-{% endif %}
-
 {% endfor %}
+{% endif %}
 
-## Communications
+{% if privacy.sendsMarketingEmails or privacy.transactionalEmailsSent or privacy.newsletterProvider %}
+## Marketing and communications
 
 {% if privacy.sendsMarketingEmails %}
-{{ organization.name }} may send marketing emails. Opt-out method: {{ privacy.marketingOptOutMethodLabel }}.
+We may send you marketing emails.{% if privacy.marketingOptOutMethodLabel %} You can opt out at any time via {{ privacy.marketingOptOutMethodLabel }}.{% endif %}
 {% endif %}
-
 {% if privacy.transactionalEmailsSent %}
-{{ organization.name }} sends transactional or service-related emails.
+We send transactional and service-related messages necessary to operate {{ service.name }}.
 {% endif %}
-
 {% if privacy.newsletterProvider %}
-Newsletter provider: {{ privacy.newsletterProvider }}.
+We use {{ privacy.newsletterProvider }} to manage email communications.
+{% endif %}
 {% endif %}
 
-## Sharing and Transfers
+## How we share personal data
 
 {% if vendors.subprocessorsHasValue %}
-{{ organization.name }} uses subprocessors to provide its services. See the Subprocessors section for details.
+We share personal data with the subprocessors listed below, who process it on our behalf under appropriate contractual safeguards.
 {% endif %}
-
 {% if privacy.crossBorderTransfers %}
-{{ organization.name }} may transfer personal data across borders using: {{ privacy.transferMechanismLabels | join(", ") }}.
+We may transfer personal data internationally. Where we do, we rely on appropriate safeguards such as: {{ privacy.transferMechanismLabels | join(", ") }}.
 {% endif %}
-
 {% if privacy.sellsOrSharesData %}
-{{ organization.name }} may sell or share personal data for cross-context behavioral advertising. Opt-out link: {{ privacy.doNotSellLink }}.
+We may "sell" or "share" personal data for cross-context behavioral advertising as those terms are defined under applicable law.{% if privacy.doNotSellLink %} You can opt out here: {{ privacy.doNotSellLink }}.{% endif %}
 {% else %}
-{{ organization.name }} does not currently indicate that it sells or shares personal data for cross-context behavioral advertising.
+We do not sell your personal data, and we do not share it for cross-context behavioral advertising.
 {% endif %}
-
-## Subprocessors
 
 {% if vendors.subprocessorsHasValue %}
+### Subprocessors
+
 | Subprocessor | Service | Purpose | Data processed | Data regions |
 | --- | --- | --- | --- | --- |
 {% for vendor in vendors.subprocessors -%}
-| {{ vendor.name }} | {{ vendor.serviceName }} | {{ vendor.purpose }} | {{ vendor.dataProcessed | join(", ") }} | {{ vendor.dataRegions | join(", ") }} |
+| {{ vendor.name }} | {{ vendor.serviceName or "—" }} | {{ vendor.purpose or "—" }} | {{ vendor.dataProcessed | join(", ") or "—" }} | {{ vendor.dataRegions | join(", ") or "—" }} |
 {% endfor %}
-{% else %}
-{{ organization.name }} does not currently list any subprocessors.
 {% endif %}
-
-## International Privacy Contacts
-
-{% if privacy.dpoStatus %}
-Data Protection Officer status: {{ privacy.dpoStatusLabel }}.
-{% endif %}
-{% if privacy.dpoName %}
-DPO: {{ privacy.dpoName }} ({{ privacy.dpoEmail }}).
-{% endif %}
-{% if privacy.euRepresentativeStatus %}
-EU representative status: {{ privacy.euRepresentativeStatusLabel }}.
-{% endif %}
-{% if privacy.euRepresentativeName %}
-EU representative: {{ privacy.euRepresentativeName }}, {{ privacy.euRepresentativeAddress }}.
-{% endif %}
-
-## Automated Decision-Making
 
 {% if privacy.usesAutomatedDecisionMaking %}
-{{ organization.name }} uses automated decision-making or profiling with legal or similarly significant effects.
-{% else %}
-{{ organization.name }} does not currently indicate that it uses automated decision-making or profiling with legal or similarly significant effects.
+## Automated decision-making
+
+We use automated decision-making or profiling that may produce legal or similarly significant effects. You may have the right to request human review of such decisions.
+{% endif %}
+
+{% if privacy.dpoName or privacy.euRepresentativeName or privacy.dpoStatusLabel or privacy.euRepresentativeStatusLabel %}
+## Data protection contacts
+
+{% if privacy.dpoName %}Our Data Protection Officer is {{ privacy.dpoName }}{% if privacy.dpoEmail %} ({{ privacy.dpoEmail }}){% endif %}.
+{% elif privacy.dpoStatusLabel %}Data Protection Officer status: {{ privacy.dpoStatusLabel }}.
+{% endif %}
+{% if privacy.euRepresentativeName %}Our EU representative is {{ privacy.euRepresentativeName }}{% if privacy.euRepresentativeAddress %}, {{ privacy.euRepresentativeAddress }}{% endif %}.
+{% elif privacy.euRepresentativeStatusLabel %}EU representative status: {{ privacy.euRepresentativeStatusLabel }}.
+{% endif %}
+{% endif %}
+
+## Changes to this policy
+
+We may update this Privacy Policy from time to time. When we make material changes, we will update the version and revision details above and, where appropriate, provide additional notice.
+
+## How to contact us
+
+{% if organization.privacyContactEmail %}For privacy questions or requests, contact us at {{ organization.privacyContactEmail }}.{% endif %}
+{% if organization.contactEmail %}For general inquiries, contact {{ organization.contactEmail }}.{% endif %}
+{% if organization.address %}You can also write to us at {{ organization.address }}.{% endif %}
+
+{% if organization.country %}
+## Governing law
+
+This policy is governed by the laws applicable to {{ organization.legalEntityName or organization.name }} in its jurisdiction of establishment ({{ organization.country }}), without regard to conflict-of-laws principles.
 {% endif %}

@@ -66,6 +66,14 @@
       "example": "123 Market Street, San Francisco, CA"
     },
     {
+      "key": "organization.policyEffectiveDate",
+      "label": "Policy effective date",
+      "type": "string",
+      "category": "Organization",
+      "description": "Editable date the organization's published policy takes effect.",
+      "example": "2026-01-01"
+    },
+    {
       "key": "organization.employeeCount",
       "label": "Employee count",
       "type": "number",
@@ -1133,6 +1141,22 @@
       "example": "1.0"
     },
     {
+      "key": "policy.effectiveDate",
+      "label": "Policy effective date",
+      "type": "string",
+      "category": "Policy Metadata",
+      "description": "Editable date the published policy takes effect, sourced from the organization profile.",
+      "example": "2026-01-01"
+    },
+    {
+      "key": "policy.lastUpdatedDate",
+      "label": "Policy last updated date",
+      "type": "string",
+      "category": "Policy Metadata",
+      "description": "Date the organization's profile data last changed, derived from organization.updatedAt (date only).",
+      "example": "2026-05-29"
+    },
+    {
       "key": "infrastructure.organizationProviders",
       "label": "Organization providers",
       "type": "collection",
@@ -1194,6 +1218,46 @@
       "example": false
     },
     {
+      "key": "infrastructure.penetrationTestingCadence",
+      "label": "Penetration testing cadence",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "Cadence code for independent third-party penetration testing.",
+      "example": "annually"
+    },
+    {
+      "key": "infrastructure.penetrationTestingCadenceLabel",
+      "label": "Penetration testing cadence label",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "Human-readable label for the penetration testing cadence code.",
+      "example": "Annually"
+    },
+    {
+      "key": "infrastructure.penetrationTestLastDate",
+      "label": "Last penetration test date",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "Date of the most recent third-party penetration test.",
+      "example": "2026-03-15"
+    },
+    {
+      "key": "infrastructure.vulnerabilityDisclosureProgramExists",
+      "label": "Responsible disclosure program exists",
+      "type": "boolean",
+      "category": "Infrastructure",
+      "description": "Whether the organization operates a responsible vulnerability disclosure program.",
+      "example": true
+    },
+    {
+      "key": "infrastructure.vulnerabilityDisclosureUrl",
+      "label": "Responsible disclosure URL",
+      "type": "string",
+      "category": "Infrastructure",
+      "description": "URL where researchers can find the responsible disclosure policy.",
+      "example": "https://acme.example/security"
+    },
+    {
       "key": "dataHandling.dataTypesStored",
       "label": "Data types stored",
       "type": "collection",
@@ -1232,11 +1296,25 @@
           "example": ["customers", "admins"]
         },
         {
+          "key": "subjectTypeLabels",
+          "label": "Subject type labels",
+          "type": "string[]",
+          "description": "Human-readable labels for the data category's subject type codes.",
+          "example": ["Customers", "Admins"]
+        },
+        {
           "key": "collectionMethods",
           "label": "Collection methods",
           "type": "string[]",
           "description": "Ways this data category is collected.",
           "example": ["signup form"]
+        },
+        {
+          "key": "collectionMethodLabels",
+          "label": "Collection method labels",
+          "type": "string[]",
+          "description": "Human-readable labels for the data category's collection method codes.",
+          "example": ["Account signup"]
         },
         {
           "key": "isSensitive",
@@ -1292,11 +1370,25 @@
           "example": "controller"
         },
         {
+          "key": "roleLabel",
+          "label": "Role label",
+          "type": "string",
+          "description": "Human-readable controller or processor role label for this activity.",
+          "example": "Controller"
+        },
+        {
           "key": "legalBasis",
           "label": "Legal basis",
           "type": "string[]",
           "description": "Legal bases for this processing activity.",
           "example": ["contract"]
+        },
+        {
+          "key": "legalBasisLabels",
+          "label": "Legal basis labels",
+          "type": "string[]",
+          "description": "Human-readable labels for this activity's legal basis codes.",
+          "example": ["Contract"]
         },
         {
           "key": "retentionDays",
@@ -1318,6 +1410,13 @@
           "type": "string",
           "description": "Retention policy label.",
           "example": "Fixed"
+        },
+        {
+          "key": "retentionLabel",
+          "label": "Retention label",
+          "type": "string",
+          "description": "Human-readable retention description, derived from the retention policy and retention days.",
+          "example": "365 days"
         }
       ]
     },
@@ -1407,6 +1506,22 @@
       "type": "boolean",
       "category": "Access",
       "description": "Whether access reviews are performed for critical systems.",
+      "example": true
+    },
+    {
+      "key": "access.securityTrainingRequired",
+      "label": "Security awareness training required",
+      "type": "boolean",
+      "category": "Access",
+      "description": "Whether team members are required to complete security awareness training.",
+      "example": true
+    },
+    {
+      "key": "access.confidentialityAgreementsRequired",
+      "label": "Confidentiality / NDA agreements required",
+      "type": "boolean",
+      "category": "Access",
+      "description": "Whether team members are required to sign confidentiality or non-disclosure agreements.",
       "example": true
     },
     {

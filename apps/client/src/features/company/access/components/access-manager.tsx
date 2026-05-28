@@ -2,6 +2,7 @@ import { type AccessProfile, type Vocabulary } from "@plyco/shared"
 
 import { AccessAuthenticationPanel } from "@/features/company/access/components/panels/access-authentication-panel"
 import { AccessControlPanel } from "@/features/company/access/components/panels/access-control-panel"
+import { PersonnelSecurityPanel } from "@/features/company/access/components/panels/personnel-security-panel"
 import {
   type ProfileDraft,
   type SaveProfile,
@@ -58,6 +59,12 @@ export const AccessManager = ({
         access={profile.access}
         isMutationPending={isMutationPending}
         needsAttention={getNeedsAttention("Authentication")}
+        onSave={saveAccess}
+      />
+      <PersonnelSecurityPanel
+        access={profile.access}
+        isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Personnel security")}
         onSave={saveAccess}
       />
     </div>

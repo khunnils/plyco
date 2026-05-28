@@ -47,6 +47,7 @@ export function mapOrganizationRecord(record: {
   handlesPii: boolean | null;
   handlesSensitiveData: boolean | null;
   complianceGoals: unknown;
+  policyEffectiveDate: string | null;
   serviceProfile?: {
     id: string;
     serviceName: string | null;
@@ -141,6 +142,10 @@ export function mapOrganizationRecord(record: {
     vendorReviewRequired: boolean | null;
     vendorReviewCadence: string | null;
     dpaRequiredForProcessors: boolean | null;
+    penetrationTestingCadence: string | null;
+    penetrationTestLastDate: string | null;
+    vulnerabilityDisclosureProgramExists: boolean | null;
+    vulnerabilityDisclosureUrl: string | null;
   } | null;
   organizationProviders: Array<{
     providerId: string | null;
@@ -174,6 +179,8 @@ export function mapOrganizationRecord(record: {
     accessReviewCadence: string | null;
     adminApprovalRequired: boolean | null;
     passwordManagerRequired: boolean | null;
+    securityTrainingRequired: boolean | null;
+    confidentialityAgreementsRequired: boolean | null;
   } | null;
   createdAt: Date;
   updatedAt: Date;
@@ -193,6 +200,7 @@ export function mapOrganizationRecord(record: {
     handlesPii: record.handlesPii,
     handlesSensitiveData: record.handlesSensitiveData,
     complianceGoals: stringArray(record.complianceGoals),
+    policyEffectiveDate: record.policyEffectiveDate,
   });
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.organizationProviders.flatMap((provider) =>
@@ -258,6 +266,15 @@ export function mapOrganizationRecord(record: {
       record.infrastructureProfile?.vendorReviewCadence ?? null,
     dpaRequiredForProcessors:
       record.infrastructureProfile?.dpaRequiredForProcessors ?? null,
+    penetrationTestingCadence:
+      record.infrastructureProfile?.penetrationTestingCadence ?? null,
+    penetrationTestLastDate:
+      record.infrastructureProfile?.penetrationTestLastDate ?? null,
+    vulnerabilityDisclosureProgramExists:
+      record.infrastructureProfile?.vulnerabilityDisclosureProgramExists ??
+      null,
+    vulnerabilityDisclosureUrl:
+      record.infrastructureProfile?.vulnerabilityDisclosureUrl ?? null,
   });
   const serviceRecords =
     record.services ?? (record.serviceProfile ? [record.serviceProfile] : []);
@@ -371,6 +388,10 @@ export function mapOrganizationRecord(record: {
     adminApprovalRequired: record.accessProfile?.adminApprovalRequired ?? null,
     passwordManagerRequired:
       record.accessProfile?.passwordManagerRequired ?? null,
+    securityTrainingRequired:
+      record.accessProfile?.securityTrainingRequired ?? null,
+    confidentialityAgreementsRequired:
+      record.accessProfile?.confidentialityAgreementsRequired ?? null,
   });
 
   return {

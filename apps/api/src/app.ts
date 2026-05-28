@@ -380,12 +380,6 @@ export function createTestApp() {
         content: "# {{ company.name }} Data Security Policy\n",
       },
       {
-        slug: "security-policy",
-        name: "Security Policy",
-        description: "A practical starter security policy.",
-        content: "# {{ company.name }} Security Policy\n",
-      },
-      {
         slug: "incident-response-plan",
         name: "Incident Response Plan",
         description: "A lightweight incident response outline.",

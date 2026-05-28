@@ -4,7 +4,7 @@ import {
   type InfrastructureProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -13,6 +13,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
@@ -39,8 +40,8 @@ const toIncidentDraft = (
 const incidentRows = (
   draft: IncidentDraft,
   vocabulary: Vocabulary | undefined
-) =>
-  [
+) => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Incident response plan exists",
       boolText(draft.incidentResponsePlanExists),
@@ -68,12 +69,18 @@ const incidentRows = (
         : "Not set",
       infrastructureHelperText.customerNotificationProcess,
     ],
-    [
+  ]
+
+  if (draft.incidentResponsePlanExists) {
+    rows.push([
       "Last tested date",
       draft.incidentResponseLastTestedDate || "Not set",
       infrastructureHelperText.incidentResponseLastTestedDate,
-    ],
-  ] as const
+    ])
+  }
+
+  return rows
+}
 
 export const IncidentResponsePanel = ({
   isMutationPending,
@@ -101,6 +108,14 @@ export const IncidentResponsePanel = ({
     resolver: zodResolver(incidentSchema) as Resolver<IncidentDraft>,
     values: draft,
   })
+
+  const incidentResponsePlanExists = form.watch("incidentResponsePlanExists")
+
+  useEffect(() => {
+    if (!incidentResponsePlanExists) {
+      form.setValue("incidentResponseLastTestedDate", null)
+    }
+  }, [incidentResponsePlanExists, form])
 
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
@@ -153,19 +168,21 @@ export const IncidentResponsePanel = ({
           ]}
           placeholder="Not set"
         />
-        <label className="grid gap-2 text-sm font-medium text-slate-800">
-          <span>Last tested date</span>
-          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
-            {infrastructureHelperText.incidentResponseLastTestedDate}
-          </span>
-          <input
-            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
-            type="date"
-            {...form.register("incidentResponseLastTestedDate", {
-              setValueAs: (value) => (value === "" ? null : value),
-            })}
-          />
-        </label>
+        {incidentResponsePlanExists && (
+          <label className="grid gap-2 text-sm font-medium text-slate-800">
+            <span>Last tested date</span>
+            <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+              {infrastructureHelperText.incidentResponseLastTestedDate}
+            </span>
+            <input
+              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+              type="date"
+              {...form.register("incidentResponseLastTestedDate", {
+                setValueAs: (value) => (value === "" ? null : value),
+              })}
+            />
+          </label>
+        )}
       </div>
     </ProfilePanelShell>
   )

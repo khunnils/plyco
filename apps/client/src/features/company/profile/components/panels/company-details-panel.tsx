@@ -23,6 +23,7 @@ const detailsSchema = companyProfileSchema.pick({
   website: true,
   country: true,
   address: true,
+  policyEffectiveDate: true,
 })
 
 type DetailsDraft = z.infer<typeof detailsSchema>
@@ -33,6 +34,7 @@ const toDetailsDraft = (company: CompanyProfile): DetailsDraft => ({
   website: company.website,
   country: company.country,
   address: company.address,
+  policyEffectiveDate: company.policyEffectiveDate,
 })
 
 const detailsRows = (draft: DetailsDraft, countries: Country[] | undefined) =>
@@ -54,6 +56,11 @@ const detailsRows = (draft: DetailsDraft, countries: Country[] | undefined) =>
       companyHelperText.country,
     ],
     ["Address", draft.address || "Not set", companyHelperText.address],
+    [
+      "Policy effective date",
+      draft.policyEffectiveDate || "Not set",
+      companyHelperText.policyEffectiveDate,
+    ],
   ] as const
 
 export const CompanyDetailsPanel = ({
@@ -141,6 +148,19 @@ export const CompanyDetailsPanel = ({
           placeholder="123 Market Street"
           register={form.register}
         />
+        <label className="grid gap-2 text-sm font-medium text-slate-800">
+          <span>Policy effective date</span>
+          <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
+            {companyHelperText.policyEffectiveDate}
+          </span>
+          <input
+            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+            type="date"
+            {...form.register("policyEffectiveDate", {
+              setValueAs: (value) => (value === "" ? null : value),
+            })}
+          />
+        </label>
       </div>
     </ProfilePanelShell>
   )

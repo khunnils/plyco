@@ -271,7 +271,9 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         "Centralized logging enabled",
         infrastructure.centralizedLoggingEnabled
       ),
-      field("Log retention status", infrastructure.logRetentionDaysStatus),
+      ...(infrastructure.centralizedLoggingEnabled === true
+        ? [field("Log retention status", infrastructure.logRetentionDaysStatus)]
+        : []),
       field("Monitoring owner", infrastructure.securityMonitoringOwner),
     ]),
     sectionProgress("Vulnerability Management", [
@@ -284,6 +286,22 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         "High patch timeline status",
         infrastructure.patchingSlaHighDaysStatus
       ),
+      field(
+        "Penetration testing frequency",
+        infrastructure.penetrationTestingCadence
+      ),
+      field(
+        "Responsible disclosure program exists",
+        infrastructure.vulnerabilityDisclosureProgramExists
+      ),
+      ...(infrastructure.vulnerabilityDisclosureProgramExists === true
+        ? [
+            field(
+              "Responsible disclosure URL",
+              infrastructure.vulnerabilityDisclosureUrl
+            ),
+          ]
+        : []),
     ]),
     sectionProgress("Incident Response", [
       field(
@@ -298,7 +316,7 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         "Customer notification process",
         infrastructure.customerNotificationProcess
       ),
-      ...(infrastructure.incidentResponsePlanExists
+      ...(infrastructure.incidentResponsePlanExists === true
         ? [
             field(
               "Last tested date",
@@ -309,20 +327,33 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Backups", [
       field("Backups enabled", infrastructure.backupsEnabled),
-      field("Backup frequency", infrastructure.backupCadence),
-      field(
-        "Backup retention status",
-        infrastructure.backupRetentionDaysStatus
-      ),
-      field("Restore test frequency", infrastructure.restoreTestingCadence),
+      ...(infrastructure.backupsEnabled === true
+        ? [
+            field("Backup frequency", infrastructure.backupCadence),
+            field(
+              "Backup retention status",
+              infrastructure.backupRetentionDaysStatus
+            ),
+            field("Restore test frequency", infrastructure.restoreTestingCadence),
+          ]
+        : []),
     ]),
     sectionProgress("Vendor Risk", [
       field("Vendor review required", infrastructure.vendorReviewRequired),
-      field("Vendor review frequency", infrastructure.vendorReviewCadence),
-      field(
-        "DPA required for processors",
-        infrastructure.dpaRequiredForProcessors
-      ),
+      ...(infrastructure.vendorReviewRequired === true
+        ? [field("Vendor review frequency", infrastructure.vendorReviewCadence)]
+        : []),
+      ...(isComplianceFieldVisible(
+        "infrastructure.dpaRequiredForProcessors",
+        profile.company.complianceGoals
+      )
+        ? [
+            field(
+              "DPA required for processors",
+              infrastructure.dpaRequiredForProcessors
+            ),
+          ]
+        : []),
     ]),
   ])
 }
@@ -358,6 +389,16 @@ export const accessProgress = (profile: ProfileDraft) =>
       field(
         "Employee offboarding process exists",
         profile.access.offboardingProcessExists
+      ),
+    ]),
+    sectionProgress("Personnel security", [
+      field(
+        "Security awareness training required",
+        profile.access.securityTrainingRequired
+      ),
+      field(
+        "Confidentiality / NDA agreements required",
+        profile.access.confidentialityAgreementsRequired
       ),
     ]),
   ])

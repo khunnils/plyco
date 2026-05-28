@@ -4,7 +4,9 @@ import nunjucks from "nunjucks";
 import {
   type AccessProfile,
   type BusinessActivity,
+  type DataHandlingProfile,
   type InfrastructureProfile,
+  type OrganizationSecurityProfile,
   type PrivacyProfile,
   type ServiceProfile,
   type SecurityProgramSnapshot,
@@ -36,6 +38,9 @@ export type NormalizedTemplateContext = {
   services: {
     all: Array<Record<string, unknown>>;
     primary: Record<string, unknown>;
+    hasActivities: boolean;
+    cookiesAnswered: boolean;
+    hasHostingRegion: boolean;
   };
   privacy: Record<string, unknown>;
   security: Record<string, unknown>;
@@ -90,11 +95,30 @@ export class ReportContextBuilder {
     return {
       organization: organizationContext,
       company: organizationContext,
-      policy: template ? this.policyContext(template, members) : {},
+      policy: template
+        ? this.policyContext(template, members, organization)
+        : {},
       service: primaryService,
       services: {
         all: services,
         primary: primaryService,
+        hasActivities: services.some(
+          (service) =>
+            Array.isArray(service.activities) && service.activities.length > 0,
+        ),
+        cookiesAnswered: services.some((service) => {
+          const servicePrivacy = service.privacy as
+            | Record<string, unknown>
+            | undefined;
+          return servicePrivacy?.usesCookiesOrTrackingTechnologiesAnswered ===
+            true;
+        }),
+        hasHostingRegion: services.some((service) => {
+          const servicePrivacy = service.privacy as
+            | Record<string, unknown>
+            | undefined;
+          return Boolean(servicePrivacy?.primaryHostingRegionLabel);
+        }),
       },
       privacy: organization
         ? this.privacyContext(organization.privacy, vocabulary)
@@ -107,10 +131,10 @@ export class ReportContextBuilder {
           )
         : {},
       infrastructure: organization
-        ? this.withAnswerFlags(organization.infrastructure)
+        ? this.infrastructureContext(organization.infrastructure, vocabulary)
         : {},
       dataHandling: organization
-        ? this.withAnswerFlags(organization.dataHandling)
+        ? this.dataHandlingContext(organization.dataHandling, vocabulary)
         : {},
       access: organization ? this.withAnswerFlags(organization.access) : {},
       providers: this.providerGroups(services, providers, providerUsage),
@@ -146,9 +170,68 @@ export class ReportContextBuilder {
     };
   }
 
-  private policyContext(template: Template, members: OrganizationMember[]) {
+  private policyContext(
+    template: Template,
+    members: OrganizationMember[],
+    organization: OrganizationSecurityProfile | null,
+  ) {
+    // lastUpdatedDate is derived from when the organization's underlying data
+    // last changed (not render time) so the document hash stays deterministic.
+    const lastUpdatedDate = organization
+      ? this.isoDateOnly(organization.updatedAt)
+      : "";
+    const effectiveDate = organization?.company.policyEffectiveDate ?? "";
+
     return {
       version: `${template.versionMajor}.${template.versionMinor}`,
+      lastUpdatedDate,
+      effectiveDate,
+      ...this.answerFlags({ lastUpdatedDate, effectiveDate }),
+    };
+  }
+
+  private isoDateOnly(value: string | null) {
+    if (!value) {
+      return "";
+    }
+
+    const separatorIndex = value.indexOf("T");
+    return separatorIndex === -1 ? value : value.slice(0, separatorIndex);
+  }
+
+  private infrastructureContext(
+    infrastructure: InfrastructureProfile,
+    vocabulary?: Vocabulary,
+  ) {
+    return {
+      ...this.withAnswerFlags(infrastructure),
+      penetrationTestingCadenceLabel: this.codeLabel(
+        vocabulary,
+        "security_cadences",
+        infrastructure.penetrationTestingCadence,
+      ),
+    };
+  }
+
+  private dataHandlingContext(
+    dataHandling: DataHandlingProfile,
+    vocabulary?: Vocabulary,
+  ) {
+    return {
+      ...this.withAnswerFlags(dataHandling),
+      dataTypesStored: dataHandling.dataTypesStored.map((dataType) => ({
+        ...dataType,
+        subjectTypeLabels: this.codeLabels(
+          vocabulary,
+          "subject_types",
+          dataType.subjectTypes,
+        ),
+        collectionMethodLabels: this.codeLabels(
+          vocabulary,
+          "collection_methods",
+          dataType.collectionMethods,
+        ),
+      })),
     };
   }
 
