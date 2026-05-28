@@ -13,6 +13,9 @@ export type ProgressMetric = {
   percent: number
 }
 
+export const isProgressComplete = (metric: ProgressMetric) =>
+  metric.totalFields > 0 && metric.completedFields === metric.totalFields
+
 export type ProgressSection = ProgressMetric & {
   title: string
 }

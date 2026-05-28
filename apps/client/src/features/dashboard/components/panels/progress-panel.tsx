@@ -4,7 +4,9 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ProgressBar } from "@/features/dashboard/components/progress-bar"
+import { ProgressStatusBadge } from "@/features/dashboard/components/progress-status-badge"
 import {
+  isProgressComplete,
   type ProgressGroup,
   type ProgressItem,
 } from "@/features/dashboard/lib/progress"
@@ -46,9 +48,12 @@ export const ProgressPanel = ({
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            <div className="w-24 sm:w-32">
-              <ProgressBar percent={group.percent} />
-            </div>
+            <ProgressStatusBadge metric={group} />
+            {!isProgressComplete(group) ? (
+              <div className="w-24 sm:w-32">
+                <ProgressBar percent={group.percent} />
+              </div>
+            ) : null}
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -114,9 +119,12 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="w-24 sm:w-32">
-            <ProgressBar percent={item.percent} />
-          </div>
+          <ProgressStatusBadge metric={item} />
+          {!isProgressComplete(item) ? (
+            <div className="w-24 sm:w-32">
+              <ProgressBar percent={item.percent} />
+            </div>
+          ) : null}
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}

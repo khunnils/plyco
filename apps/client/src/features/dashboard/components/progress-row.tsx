@@ -1,15 +1,9 @@
-import { type ProgressSection } from "@/features/dashboard/lib/progress"
 import { ProgressBar } from "@/features/dashboard/components/progress-bar"
-
-const statusText = (section: ProgressSection) => {
-  const missing = section.totalFields - section.completedFields
-
-  if (section.totalFields === 0) {
-    return "No fields"
-  }
-
-  return missing === 0 ? "Complete" : `${missing} missing`
-}
+import { ProgressStatusBadge } from "@/features/dashboard/components/progress-status-badge"
+import {
+  isProgressComplete,
+  type ProgressSection,
+} from "@/features/dashboard/lib/progress"
 
 export const ProgressRow = ({ section }: { section: ProgressSection }) => (
   <div className="grid gap-2 border border-slate-200 bg-slate-50 p-3">
@@ -22,18 +16,10 @@ export const ProgressRow = ({ section }: { section: ProgressSection }) => (
           {section.completedFields}/{section.totalFields} fields
         </p>
       </div>
-      <span
-        className={[
-          "shrink-0 text-xs font-medium",
-          section.completedFields === section.totalFields &&
-          section.totalFields > 0
-            ? "text-green-700"
-            : "text-amber-700",
-        ].join(" ")}
-      >
-        {statusText(section)}
-      </span>
+      <ProgressStatusBadge metric={section} />
     </div>
-    <ProgressBar percent={section.percent} />
+    {!isProgressComplete(section) ? (
+      <ProgressBar percent={section.percent} />
+    ) : null}
   </div>
 )

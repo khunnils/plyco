@@ -13,10 +13,12 @@ import {
   ProgressPanel,
 } from "@/features/dashboard/components/panels/progress-panel"
 import { ProgressRow } from "@/features/dashboard/components/progress-row"
+import { ProgressStatusBadge } from "@/features/dashboard/components/progress-status-badge"
 import { MetricItem } from "@/features/dashboard/components/metric-item"
 import {
   dashboardProgress,
   groupProgress,
+  isProgressComplete,
 } from "@/features/dashboard/lib/progress"
 import { useTemplates } from "@/features/templates/hooks/use-templates"
 
@@ -142,8 +144,8 @@ export const DashboardPage = ({
             <Link to="/company/data">Open data</Link>
           </Button>
         </div>
-        <div className="mb-4 grid gap-2">
-          <div className="flex items-end justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-baseline gap-3">
             <p className="text-2xl font-semibold text-slate-950">
               {dataGroup.percent}%
             </p>
@@ -151,8 +153,13 @@ export const DashboardPage = ({
               {dataGroup.completedSections}/{dataGroup.totalSections} sections
             </p>
           </div>
-          <ProgressBar percent={dataGroup.percent} />
+          <ProgressStatusBadge metric={dataGroup} />
         </div>
+        {!isProgressComplete(dataGroup) ? (
+          <div className="mb-4">
+            <ProgressBar percent={dataGroup.percent} />
+          </div>
+        ) : null}
         <div className="grid gap-3">
           <ProgressRow section={progress.data.general} />
           {progress.data.dataTypes.length === 0 ? (
