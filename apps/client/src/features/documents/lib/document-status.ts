@@ -6,8 +6,8 @@ export const documentStatusLabel = (status: DocumentSummary["status"]) => {
   }
 
   if (status === "current") {
-    return "Generated"
+    return "Published"
   }
 
-  return "Not generated"
+  return "Draft"
 }

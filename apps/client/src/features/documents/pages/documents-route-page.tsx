@@ -1,11 +1,13 @@
+import { useState } from "react"
 import {
+  ChevronDown,
+  ChevronUp,
   Download,
   Eye,
   FilePlus2,
   FileText,
   Pencil,
   Plus,
-  ScrollText,
   Trash2,
 } from "lucide-react"
 import {
@@ -15,6 +17,9 @@ import {
   type TemplateInput,
 } from "@plyco/shared"
 import { Link, useNavigate, useParams } from "react-router-dom"
+
+import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
+import { cn } from "@/lib/utils"
 
 import {
   useCreateDocument,
@@ -56,14 +61,29 @@ const generatedText = (summary: DocumentSummary) =>
     ? `Last generated on ${new Date(summary.document.generatedAt).toLocaleString()}`
     : "Never generated"
 
-const sourceLabel = (template: Template) =>
-  template.sourceSystemTemplateSlug
-    ? `Copied from ${template.sourceSystemTemplateSlug}`
-    : "Created from scratch"
+const getFileName = (orgName: string, slug: string, version: string) => {
+  const o = orgName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+  const s = slug
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+  let v = version.trim().toLowerCase()
+  if (!v) {
+    v = "v1.0"
+  } else if (!v.startsWith("v")) {
+    v = `v${v}`
+  }
+  return `${o}_${s}_${v}.pdf`
+}
 
 export const DocumentsRoutePage = () => {
   const { mode, id } = useParams()
   const navigate = useNavigate()
+  const { selectedOrganization } = useSelectedOrganization()
+  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([])
   const templates = useTemplates()
   const documents = useDocuments()
   const createTemplate = useCreateTemplate()
@@ -340,103 +360,162 @@ export const DocumentsRoutePage = () => {
       </Empty>
     ) : (
       <div className="grid gap-4">
-        {documentsList.map((summary) => (
-          <article
-            className="grid gap-4 border border-slate-200 bg-white p-4 md:grid-cols-[1fr_auto] md:items-start"
-            key={summary.template.id}
-          >
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-semibold text-slate-950">
-                  {summary.template.name}
-                </h2>
-                <Badge
-                  variant={
-                    summary.status === "stale"
-                      ? "warning"
-                      : summary.status === "current"
-                        ? "secondary"
-                        : "outline"
-                  }
-                >
-                  {documentStatusLabel(summary.status)}
-                </Badge>
-              </div>
-              <p className="mt-2 text-sm text-slate-500">
-                {sourceLabel(summary.template)}
-              </p>
-              <p className="mt-1 text-sm text-slate-500">
-                {generatedText(summary)}
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-start gap-2 md:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  navigate(`/documents/edit/${summary.template.id}`)
-                }
-              >
-                <Pencil />
-                Edit
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={() => deleteTemplate.mutate(summary.template.id)}
-              >
-                <Trash2 />
-                Delete
-              </Button>
-              {summary.document ? (
-                <>
+        {documentsList.map((summary) => {
+          const isExpanded = expandedTemplateIds.includes(summary.template.id)
+          const toggleExpand = () => {
+            setExpandedTemplateIds((prev) =>
+              prev.includes(summary.template.id)
+                ? prev.filter((id) => id !== summary.template.id)
+                : [...prev, summary.template.id]
+            )
+          }
+
+          return (
+            <article
+              className="border border-slate-200 bg-white rounded-md overflow-hidden"
+              key={summary.template.id}
+            >
+              <div className="grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-start">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  {summary.document ? (
+                    <Button
+                      size="icon-xs"
+                      type="button"
+                      variant="ghost"
+                      onClick={toggleExpand}
+                      className="mt-0.5 text-slate-500 hover:text-slate-900 shrink-0"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="size-4" />
+                      ) : (
+                        <ChevronDown className="size-4" />
+                      )}
+                    </Button>
+                  ) : (
+                    <div className="size-6 shrink-0" />
+                  )}
+                  <div
+                    className={cn(
+                      "min-w-0 flex-1",
+                      summary.document ? "cursor-pointer select-none" : ""
+                    )}
+                    onClick={summary.document ? toggleExpand : undefined}
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-semibold text-slate-950">
+                        {summary.template.name}
+                      </h2>
+                      <Badge
+                        variant={
+                          summary.status === "stale"
+                            ? "warning"
+                            : summary.status === "current"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {documentStatusLabel(summary.status)}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {generatedText(summary)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap justify-start gap-2 md:justify-end shrink-0">
                   <Button
+                    size="icon"
                     type="button"
                     variant="outline"
                     onClick={() =>
-                      navigate(`/documents/view/${summary.document?.id}`)
+                      navigate(`/documents/edit/${summary.template.id}`)
                     }
+                    title="Edit template"
                   >
-                    <Eye />
-                    View
+                    <Pencil />
                   </Button>
-                  {summary.document.hasPdf ? (
+                  <Button
+                    size="icon"
+                    type="button"
+                    variant="destructive"
+                    onClick={() => deleteTemplate.mutate(summary.template.id)}
+                    title="Delete template"
+                  >
+                    <Trash2 />
+                  </Button>
+                  {!summary.document && (
                     <Button
-                      disabled={downloadDocumentPdf.isPending}
+                      disabled={createDocument.isPending}
                       type="button"
                       variant="outline"
                       onClick={() =>
-                        summary.document
-                          ? downloadDocumentPdf.mutate({
-                              id: summary.document.id,
-                              title: summary.document.title,
-                            })
-                          : undefined
+                        createDocument.mutate({
+                          templateId: summary.template.id,
+                        })
                       }
                     >
-                      <Download />
-                      Download
+                      Publish
                     </Button>
-                  ) : null}
-                </>
-              ) : (
-                <Button
-                  disabled={createDocument.isPending}
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    createDocument.mutate({
-                      templateId: summary.template.id,
-                    })
-                  }
-                >
-                  <ScrollText />
-                  Generate
-                </Button>
+                  )}
+                </div>
+              </div>
+
+              {isExpanded && summary.document && (
+                <div className="border-t border-slate-100 bg-slate-50/50 p-4 pl-12">
+                  <div className="flex items-center justify-between gap-4 py-2 bg-white border border-slate-100 rounded-md px-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FileText className="size-5 text-slate-500 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {getFileName(
+                            selectedOrganization?.name ?? "organization",
+                            summary.template.slug,
+                            summary.template.policyVersion
+                          )}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Published on {new Date(summary.document.generatedAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        size="icon"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          navigate(`/documents/view/${summary.document?.id}`)
+                        }
+                        title="Preview document"
+                      >
+                        <Eye />
+                      </Button>
+                      {summary.document.hasPdf && (
+                        <Button
+                          disabled={downloadDocumentPdf.isPending}
+                          size="icon"
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            summary.document
+                              ? downloadDocumentPdf.mutate({
+                                  id: summary.document.id,
+                                  title: summary.document.title,
+                                })
+                              : undefined
+                          }
+                          title="Download PDF"
+                        >
+                          <Download />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
-            </div>
-          </article>
-        ))}
+            </article>
+          )
+        })}
       </div>
     )
   }
