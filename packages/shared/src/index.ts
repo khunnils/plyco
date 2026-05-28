@@ -353,6 +353,7 @@ export const providerSchema = z.object({
   systemTypes: z.array(providerSystemTypeSchema).default([]),
   securityCriticality: z.string().trim().min(1).optional(),
   handlesCustomerData: z.boolean(),
+  purpose: z.string().trim().optional(),
 });
 
 export const providerLookupInputSchema = z.object({

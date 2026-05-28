@@ -206,5 +206,5 @@ export const organizationProviderInputFromProvider = (
   countryOfRegistration: provider.countryOfRegistration || "",
   criticality: providerCriticality(provider),
   notes: "",
-  purpose: "",
+  purpose: provider.purpose || "",
 })

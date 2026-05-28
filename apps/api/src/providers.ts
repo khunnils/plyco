@@ -170,6 +170,7 @@ const mapAirtableProvider = (
     systemTypes: systemTypesField(fields),
     securityCriticality: getSingleStringOrArrayFirst(fields, "Security Relevance") || undefined,
     handlesCustomerData: booleanField(fields, "Handles Customer Data"),
+    purpose: getSingleStringOrArrayFirst(fields, "Purpose") || undefined,
   }
 
   const parsedProvider = providerSchema.safeParse(provider)
