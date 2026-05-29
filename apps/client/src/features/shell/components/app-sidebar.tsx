@@ -24,6 +24,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarSectionLabel,
 } from "@/components/ui/sidebar"
 import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
 
@@ -125,7 +126,7 @@ export const AppSidebar = ({
             <LayoutDashboard className="size-4" />
             Dashboard
           </SidebarMenuButton>
-          <div className="px-3 pt-3 pb-1 text-xs text-slate-600">Company</div>
+          <SidebarSectionLabel>Company</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             {companySections.map((section) => {
               const Icon = section.icon
@@ -142,7 +143,7 @@ export const AppSidebar = ({
               )
             })}
           </div>
-          <div className="px-3 pt-3 pb-1 text-xs text-slate-600">Product and Data</div>
+          <SidebarSectionLabel>Product and Data</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             {productAndDataSections.map((section) => {
               const Icon = section.icon
@@ -163,39 +164,39 @@ export const AppSidebar = ({
               )
             })}
           </div>
-          <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            Vendors
+          <SidebarSectionLabel>Vendors</SidebarSectionLabel>
+          <div className="ml-2 grid gap-1">
+            <SidebarMenuButton
+              active={pathname.startsWith("/vendors")}
+              onClick={() => navigate("/vendors")}
+            >
+              <Users className="size-4" />
+              Providers
+            </SidebarMenuButton>
           </div>
-          <SidebarMenuButton
-            active={pathname.startsWith("/vendors")}
-            onClick={() => navigate("/vendors")}
-          >
-            <Users className="size-4" />
-            Providers
-          </SidebarMenuButton>
-          <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            Documents
+          <SidebarSectionLabel>Documents</SidebarSectionLabel>
+          <div className="ml-2 grid gap-1">
+            <SidebarMenuButton
+              active={pathname.startsWith("/documents")}
+              onClick={() => navigate("/documents")}
+            >
+              <ScrollText className="size-4" />
+              Policies & Documents
+            </SidebarMenuButton>
           </div>
-          <SidebarMenuButton
-            active={pathname.startsWith("/documents")}
-            onClick={() => navigate("/documents")}
-          >
-            <ScrollText className="size-4" />
-            Policies & Documents
-          </SidebarMenuButton>
         </SidebarMenu>
         <div className="pt-4">
           <SidebarMenu>
-            <div className="px-3 pt-3 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-              Settings
+            <SidebarSectionLabel>Settings</SidebarSectionLabel>
+            <div className="ml-2 grid gap-1">
+              <SidebarMenuButton
+                active={pathname.startsWith("/vocabulary")}
+                onClick={() => navigate("/vocabulary")}
+              >
+                <Tags className="size-4" />
+                Vocabulary
+              </SidebarMenuButton>
             </div>
-            <SidebarMenuButton
-              active={pathname.startsWith("/vocabulary")}
-              onClick={() => navigate("/vocabulary")}
-            >
-              <Tags className="size-4" />
-              Vocabulary
-            </SidebarMenuButton>
           </SidebarMenu>
         </div>
       </SidebarContent>

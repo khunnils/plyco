@@ -28,6 +28,10 @@ export const SidebarMenu = ({ children }: { children: ReactNode }) => (
   <nav className="grid gap-1">{children}</nav>
 )
 
+export const SidebarSectionLabel = ({ children }: { children: ReactNode }) => (
+  <div className="px-3 pt-3 pb-1 text-xs text-slate-600">{children}</div>
+)
+
 export const SidebarMenuButton = ({
   active = false,
   className,
