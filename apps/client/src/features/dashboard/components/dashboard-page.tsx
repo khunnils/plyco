@@ -122,17 +122,14 @@ export const DashboardPage = ({
   return (
     <div className="grid gap-8">
       {/* Centered Total Progress Card */}
-      <div className="overflow-hidden border border-slate-200 bg-white max-w-xl mx-auto w-full">
+      <div className="overflow-hidden border border-slate-200 bg-white mx-auto w-full">
         <div className="h-2 bg-primary"></div>
         <div className="flex flex-col items-center justify-center text-center p-8">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-            Total Progress
+            Completed
           </span>
-          <span className="text-6xl font-extrabold text-slate-600 mb-2">
+          <span className="text-5xl font-extrabold text-slate-600 mb-2">
             {progress.overall.percent}%
-          </span>
-          <span className="text-sm font-medium text-slate-500 mb-4">
-            Readiness completion
           </span>
           <div className="inline-flex items-center rounded-full bg-slate-50 px-4 py-1.5 text-xs font-semibold text-slate-700">
             {progress.overall.completedSections} of {progress.overall.totalSections} areas complete
