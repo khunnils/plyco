@@ -17,7 +17,7 @@ export const OrganizationProviderForm = ({
   countryOptions,
   criticalityOptions,
   defaultValues,
-  vendorCategoryOptions,
+  providerCategoryOptions,
   submitLabel,
   submitDisabled = false,
   title,
@@ -29,7 +29,7 @@ export const OrganizationProviderForm = ({
   defaultValues: OrganizationProviderInput
   submitLabel: string
   submitDisabled?: boolean
-  vendorCategoryOptions: Option[]
+  providerCategoryOptions: Option[]
   title?: string
   onSubmit: (provider: OrganizationProviderInput) => void
   onCancel?: () => void
@@ -67,7 +67,7 @@ export const OrganizationProviderForm = ({
           control={form.control}
           label="Category"
           name="category"
-          options={[{ value: "", label: "Not set" }, ...vendorCategoryOptions]}
+          options={[{ value: "", label: "Not set" }, ...providerCategoryOptions]}
         />
         <TextField
           error={form.formState.errors.legalName}

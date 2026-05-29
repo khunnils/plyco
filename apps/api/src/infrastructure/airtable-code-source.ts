@@ -132,7 +132,7 @@ export class AirtableProviderLookupCodeSource implements ProviderLookupCodeSourc
       categories: codesForSet(
         sortedCodeRecords,
         codeSetRecordsByAirtableId,
-        "vendor_category",
+        "provider_categories",
       ),
       systemTypes: codesForSet(
         sortedCodeRecords,

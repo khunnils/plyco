@@ -373,7 +373,7 @@ describe("vendors / providers API", () => {
     });
   });
 
-  it("loads provider lookup categories from standard Codes using vendor_category and system types from Codes", async () => {
+  it("loads provider lookup categories from standard Codes using provider_categories and system types from Codes", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: string | URL) => {
@@ -388,7 +388,7 @@ describe("vendors / providers API", () => {
             },
             {
               id: "rec-vendor-categories",
-              fields: { Id: "vendor_category" },
+              fields: { Id: "provider_categories" },
             },
           ],
           Codes: [
@@ -536,7 +536,7 @@ describe("vendors / providers API", () => {
     await expect(service.lookup("https://github.com")).rejects.toMatchObject({
       code: "PROVIDER_LOOKUP_UNKNOWN_CODE",
       details: {
-        codeSetId: "vendor_category",
+        codeSetId: "provider_categories",
         field: "provider.category",
         value: "AI provider",
       },
@@ -611,7 +611,7 @@ describe("vendors / providers API", () => {
       code: "PROVIDER_LOOKUP_UNKNOWN_CODE",
       statusCode: 502,
       details: {
-        codeSetId: "vendor_category",
+        codeSetId: "provider_categories",
         field: "provider.category",
         value: "unknown_category",
       },

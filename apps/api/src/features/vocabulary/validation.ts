@@ -489,7 +489,7 @@ export const validateOrganizationProviderCodes = async (
       ? assertCode(
           vocabularyRepository,
           organizationId,
-          "vendor_category",
+          "provider_categories",
           provider.category,
           "provider.category",
         )

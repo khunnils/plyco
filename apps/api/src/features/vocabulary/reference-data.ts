@@ -31,7 +31,7 @@ export const requiredCodeSetIds = [
   "legal_basis",
   "dpa_status",
   "vendor_criticality",
-  "vendor_category",
+  "provider_categories",
   "data_processing_level",
   "provider_system_types",
   "activity_retention_policies",
@@ -530,7 +530,7 @@ export const defaultVocabularyCodeSets: VocabularyCodeSet[] = [
     ["high", "High"],
     ["critical", "Critical"],
   ]),
-  codeSet("vendor_category", "Vendor category", false, [
+  codeSet("provider_categories", "Provider categories", false, [
     ["source_control", "Source control"],
     ["payments", "Payments"],
     ["project_management", "Project management"],

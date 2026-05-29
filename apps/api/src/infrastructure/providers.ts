@@ -6,7 +6,7 @@ import {
 } from "@plyco/shared"
 import { z } from "zod"
 
-// Maps arbitrary category codes/names to valid vendor_category vocabulary codes
+// Maps arbitrary category codes/names to valid provider_categories vocabulary codes
 const mapCategoryCode = (code: string | undefined, name: string | undefined): string | undefined => {
   const cleanedCode = code?.trim().toLowerCase()
   const cleanedName = name?.trim().toLowerCase()

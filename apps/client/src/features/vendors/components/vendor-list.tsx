@@ -86,7 +86,7 @@ export const VendorList = ({
                     </Badge>
                   </div>
                   <p className="mt-2 text-xs text-slate-500">
-                    {codeLabel(vocabulary, "vendor_category", provider.category)}
+                    {codeLabel(vocabulary, "provider_categories", provider.category)}
                     {provider.countryOfRegistration
                       ? ` - ${countryLabel(countries, provider.countryOfRegistration)}`
                       : ""}

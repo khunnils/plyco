@@ -124,7 +124,7 @@ export const VendorInventoryPage = ({
             submitDisabled={isMutationPending}
             submitLabel={editingProvider ? "Save" : "Add provider"}
             title={editingProvider ? "Edit provider" : "Add provider"}
-            vendorCategoryOptions={codeOptions(vocabulary, "vendor_category")}
+            providerCategoryOptions={codeOptions(vocabulary, "provider_categories")}
             onCancel={
               editingProvider
                 ? () => {

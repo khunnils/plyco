@@ -86,7 +86,7 @@ export class LlmProviderLookupService implements ProviderLookupService {
       "provider.category",
       parsed.data.provider.category,
       new Set(codes.categories.map((code) => code.code)),
-      "vendor_category",
+      "provider_categories",
     )
 
     return parsed.data
