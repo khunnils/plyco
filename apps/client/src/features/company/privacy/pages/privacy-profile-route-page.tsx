@@ -7,6 +7,10 @@ import {
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { PrivacyProfilePage } from "./privacy-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const PrivacyProfileRoutePage = () => {
   const providers = useProviders()
@@ -21,7 +25,13 @@ export const PrivacyProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Privacy" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.company, [
+          { label: "Privacy" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.company}
+        title="Privacy"
+      />
       <PrivacyProfilePage
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}

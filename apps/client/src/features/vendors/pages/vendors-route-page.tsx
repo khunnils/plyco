@@ -12,6 +12,10 @@ import {
 import { useSecurityUiStore } from "@/features/shell/stores/security-ui-store"
 import { VendorInventoryPage } from "@/features/vendors/components/vendor-inventory-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const VendorsRoutePage = () => {
   const providers = useProviders()
@@ -48,7 +52,13 @@ export const VendorsRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Providers" title="Provider inventory" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.vendors, [
+          { label: "Providers" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.vendors}
+        title="Providers"
+      />
       <VendorInventoryPage
         countries={countriesList}
         editingProvider={editingProvider}

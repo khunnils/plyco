@@ -2,7 +2,7 @@ import { type ReactNode } from "react"
 import { Link } from "react-router-dom"
 import { ChevronRight } from "lucide-react"
 
-type PageHeaderCrumb = {
+export type PageHeaderCrumb = {
   label: string
   href?: string
 }

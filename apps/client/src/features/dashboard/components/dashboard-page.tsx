@@ -17,6 +17,7 @@ import {
 
 import { type ProfileDraft } from "@/features/company/types/company"
 import { DashboardServiceCard } from "@/features/dashboard/components/dashboard-service-card"
+import { SIDEBAR_SECTION } from "@/features/shell/lib/navigation"
 import {
   dashboardProgress,
   groupProgress,
@@ -72,6 +73,12 @@ const CategoryCard = ({
   )
 }
 
+const SectionHeading = ({ children }: { children: string }) => (
+  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+    {children}
+  </span>
+)
+
 export const DashboardPage = ({
   organizationProviders,
   profile,
@@ -124,7 +131,7 @@ export const DashboardPage = ({
       {/* Centered Total Progress Card */}
       <div className="overflow-hidden border border-slate-200 bg-white mx-auto w-full">
         <div className="h-2 bg-primary"></div>
-        <div className="flex flex-col items-center justify-center text-center p-8">
+        <div className="flex flex-col items-center justify-center text-center p-8 gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
             Completed
           </span>
@@ -137,7 +144,6 @@ export const DashboardPage = ({
         </div>
       </div>
 
-      {/* Grid of Category Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <CategoryCard
           title="Profile"
@@ -167,36 +173,32 @@ export const DashboardPage = ({
           isComplete={isProgressComplete(progress.access)}
           icon={KeyRound}
         />
-        <CategoryCard
-          title="Activities"
-          description="Processing activities mapping."
-          href="/company/activities"
-          isComplete={isActivitiesComplete}
-          statusText={activitiesStatusText}
-          icon={ClipboardList}
-          className="lg:col-span-2"
-        />
-        <CategoryCard
-          title="Data Types"
-          description="Data categories and protection rules."
-          href="/company/data"
-          isComplete={isDataComplete}
-          statusText={dataTypesStatusText}
-          icon={Database}
-          className="lg:col-span-2"
-        />
       </div>
 
-      {/* Services Section */}
-      <section className=" border-slate-200 bg-white">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-950">Services</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Per-service progress across general details, activities, and providers usage.
-            </p>
-          </div>
+      <section className="grid gap-4">
+        <SectionHeading>{SIDEBAR_SECTION.productAndData}</SectionHeading>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+          <CategoryCard
+            title="Activities"
+            description="Processing activities mapping."
+            href="/company/activities"
+            isComplete={isActivitiesComplete}
+            statusText={activitiesStatusText}
+            icon={ClipboardList}
+          />
+          <CategoryCard
+            title="Data Types"
+            description="Data categories and protection rules."
+            href="/company/data"
+            isComplete={isDataComplete}
+            statusText={dataTypesStatusText}
+            icon={Database}
+          />
         </div>
+      </section>
+
+      <section className="grid gap-4">
+        <SectionHeading>Services</SectionHeading>
 
         {progress.services.length === 0 ? (
           <div className="border border-dashed border-slate-300 bg-slate-50 p-8 text-center rounded-lg">

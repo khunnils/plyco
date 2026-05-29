@@ -46,6 +46,10 @@ import {
 } from "@/components/ui/empty"
 import { DocumentContent } from "@/features/documents/components/document-content"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 import { TemplateForm } from "@/features/templates/components/template-form"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
 
@@ -139,9 +143,16 @@ export const DocumentsRoutePage = () => {
   )
   const isLoading = templates.isLoading || documents.isLoading
 
+  const documentsNavItem = {
+    label: "Policies & Documents",
+    href: "/documents",
+  } as const
+
   // Setup header, breadcrumbs and action buttons based on mode
-  let breadcrumbs: Array<{ label: string; href?: string }> = [{ label: "Policies & Documents", href: "/documents" }]
-  const eyebrow = "Policies & Documents"
+  let breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+    documentsNavItem,
+  ])
+  const eyebrow = SIDEBAR_SECTION.documents
   let pageTitle = "Policies & Documents"
 
   let bannerTitle = "Documents & Policies"
@@ -150,10 +161,10 @@ export const DocumentsRoutePage = () => {
   let content: React.ReactNode = null
 
   if (mode === "add") {
-    breadcrumbs = [
-      { label: "Policies & Documents", href: "/documents" },
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      documentsNavItem,
       { label: "Add" },
-    ]
+    ])
     pageTitle = "Add"
     bannerTitle = "Add template"
     bannerSubtitle = "Choose a pre-defined system template or start from scratch."
@@ -222,10 +233,10 @@ export const DocumentsRoutePage = () => {
       </div>
     )
   } else if (mode === "new") {
-    breadcrumbs = [
-      { label: "Policies & Documents", href: "/documents" },
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      documentsNavItem,
       { label: templateName },
-    ]
+    ])
     pageTitle = templateName
     bannerTitle = templateName
     bannerSubtitle = "Draft a new policy template using markdown and schema variables."
@@ -261,10 +272,10 @@ export const DocumentsRoutePage = () => {
       />
     )
   } else if (mode === "edit") {
-    breadcrumbs = [
-      { label: "Policies & Documents", href: "/documents" },
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      documentsNavItem,
       { label: templateName },
-    ]
+    ])
     pageTitle = templateName
     bannerTitle = templateName
     bannerSubtitle = `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}.`
@@ -303,10 +314,10 @@ export const DocumentsRoutePage = () => {
       <p className="text-sm text-slate-500">Template was not found.</p>
     )
   } else if (mode === "view" && id) {
-    breadcrumbs = [
-      { label: "Policies & Documents", href: "/documents" },
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      documentsNavItem,
       { label: documentRecord?.title ?? "Document" },
-    ]
+    ])
     pageTitle = documentRecord?.title ?? "Document"
     bannerTitle = documentRecord?.title ?? "Document"
     bannerSubtitle = viewedDocumentSummary
@@ -348,7 +359,9 @@ export const DocumentsRoutePage = () => {
     )
   } else {
     // List view
-    breadcrumbs = [{ label: "Policies & Documents" }]
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      { label: "Policies & Documents" },
+    ])
     pageTitle = "Policies & Documents"
     bannerTitle = "Documents & Policies"
     bannerSubtitle = "Manage security policy templates and generate customized compliance documents."

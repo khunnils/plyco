@@ -6,6 +6,10 @@ import {
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { DataHandlingProfilePage } from "./data-handling-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const DataHandlingProfileRoutePage = () => {
   const vocabulary = useVocabulary()
@@ -18,7 +22,13 @@ export const DataHandlingProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Product & Data" title="Data Types" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.productAndData, [
+          { label: "Data Types" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.productAndData}
+        title="Data Types"
+      />
       <DataHandlingProfilePage
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}

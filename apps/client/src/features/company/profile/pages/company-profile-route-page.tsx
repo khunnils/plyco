@@ -9,6 +9,10 @@ import {
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { CompanyProfilePage } from "./company-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const CompanyProfileRoutePage = () => {
   const countries = useCountries()
@@ -24,7 +28,13 @@ export const CompanyProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Profile" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.company, [
+          { label: "Profile" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.company}
+        title="Profile"
+      />
       <CompanyProfilePage
         countries={countriesList}
         isMutationPending={saveProfile.isPending}

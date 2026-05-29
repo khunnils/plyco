@@ -32,6 +32,10 @@ import {
 import { ServiceProfilePage } from "./service-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
 import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -263,12 +267,13 @@ export const ServicesRoutePage = () => {
       ? "Services"
       : headerService?.serviceName?.trim() || "Service"
   const breadcrumbs = serviceId
-    ? [
-        { label: "Company" },
+    ? sectionPageBreadcrumbs(SIDEBAR_SECTION.productAndData, [
         { label: "Services", href: "/company/services" },
         { label: activeCompanyTitle },
-      ]
-    : undefined
+      ])
+    : sectionPageBreadcrumbs(SIDEBAR_SECTION.productAndData, [
+        { label: "Services" },
+      ])
 
   const isVendorMutationPending =
     createServiceProviderUsage.isPending ||
@@ -288,7 +293,7 @@ export const ServicesRoutePage = () => {
     <>
       <PageHeader
         breadcrumbs={breadcrumbs}
-        eyebrow="Company"
+        eyebrow={SIDEBAR_SECTION.productAndData}
         title={activeCompanyTitle}
       />
 

@@ -7,6 +7,10 @@ import {
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { InfrastructureProfilePage } from "./infrastructure-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const InfrastructureProfileRoutePage = () => {
   const providers = useProviders()
@@ -21,7 +25,13 @@ export const InfrastructureProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Infrastructure" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.company, [
+          { label: "Infrastructure" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.company}
+        title="Infrastructure"
+      />
       <InfrastructureProfilePage
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}

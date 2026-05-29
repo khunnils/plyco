@@ -13,7 +13,11 @@ export const DashboardRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Dashboard" title="Readiness Overview" />
+      <PageHeader
+        breadcrumbs={[{ label: "Dashboard" }]}
+        eyebrow="Dashboard"
+        title="Dashboard"
+      />
       <DashboardPage
         businessActivities={businessActivities}
         organizationProviders={organizationProviders}

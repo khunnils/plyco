@@ -13,6 +13,10 @@ import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import { Button } from "@/components/ui/button"
 import { ActivitiesManager } from "@/features/company/activities/components/activities-manager"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const ActivitiesRoutePage = () => {
   const securityProfile = useSecurityProfile()
@@ -41,7 +45,13 @@ export const ActivitiesRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Activities" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.productAndData, [
+          { label: "Activities" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.productAndData}
+        title="Activities"
+      />
       <div className="grid gap-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-4">
           <div>

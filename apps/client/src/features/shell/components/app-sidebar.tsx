@@ -1,18 +1,4 @@
-import {
-  Box,
-  LayoutDashboard,
-  LogOut,
-  ScrollText,
-  Tags,
-  Users,
-  Building2,
-  ClipboardList,
-  ShieldCheck,
-  Server,
-  Database,
-  KeyRound,
-  type LucideIcon,
-} from "lucide-react"
+import { LayoutDashboard, LogOut, ScrollText, Tags, Users } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { type AuthUser } from "@plyco/shared"
 
@@ -27,78 +13,13 @@ import {
   SidebarSectionLabel,
 } from "@/components/ui/sidebar"
 import { OrganizationSwitcher } from "@/features/organizations/components/organization-switcher"
+import {
+  SIDEBAR_SECTION,
+  companySections,
+  productAndDataSections,
+} from "@/features/shell/lib/navigation"
 
-export type CompanySectionId =
-  | "profile"
-  | "service"
-  | "activities"
-  | "privacy"
-  | "infrastructure"
-  | "dataHandling"
-  | "access"
-
-export type CompanySection = {
-  id: CompanySectionId
-  path: string
-  title: string
-  description: string
-  icon: LucideIcon
-}
-
-const companySections: CompanySection[] = [
-  {
-    id: "profile",
-    path: "/company/profile",
-    title: "Profile",
-    description: "Operational context customers ask for early.",
-    icon: Building2,
-  },
-  {
-    id: "privacy",
-    path: "/company/privacy",
-    title: "Privacy",
-    description: "Rights and request handling for privacy documents.",
-    icon: ShieldCheck,
-  },
-  {
-    id: "infrastructure",
-    path: "/company/infrastructure",
-    title: "Infrastructure",
-    description: "The baseline systems behind the product.",
-    icon: Server,
-  },
-  {
-    id: "access",
-    path: "/company/access",
-    title: "Access",
-    description: "Access hygiene and account risk.",
-    icon: KeyRound,
-  },
-]
-
-const productAndDataSections: CompanySection[] = [
-  {
-    id: "activities",
-    path: "/company/activities",
-    title: "Activities",
-    description: "Processing activities services and documents reference.",
-    icon: ClipboardList,
-  },
-  {
-    id: "dataHandling",
-    path: "/company/data",
-    title: "Data Types",
-    description: "Data categories and protection practices.",
-    icon: Database,
-  },
-  {
-    id: "service",
-    path: "/company/services",
-    title: "Services",
-    description: "Products or services the organization offers.",
-    icon: Box,
-  },
-]
+export type { CompanySection, CompanySectionId } from "@/features/shell/lib/navigation"
 
 export const AppSidebar = ({
   onLogout,
@@ -126,7 +47,7 @@ export const AppSidebar = ({
             <LayoutDashboard className="size-4" />
             Dashboard
           </SidebarMenuButton>
-          <SidebarSectionLabel>Company</SidebarSectionLabel>
+          <SidebarSectionLabel>{SIDEBAR_SECTION.company}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             {companySections.map((section) => {
               const Icon = section.icon
@@ -143,7 +64,7 @@ export const AppSidebar = ({
               )
             })}
           </div>
-          <SidebarSectionLabel>Product and Data</SidebarSectionLabel>
+          <SidebarSectionLabel>{SIDEBAR_SECTION.productAndData}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             {productAndDataSections.map((section) => {
               const Icon = section.icon
@@ -164,7 +85,7 @@ export const AppSidebar = ({
               )
             })}
           </div>
-          <SidebarSectionLabel>Vendors</SidebarSectionLabel>
+          <SidebarSectionLabel>{SIDEBAR_SECTION.vendors}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             <SidebarMenuButton
               active={pathname.startsWith("/vendors")}
@@ -174,7 +95,7 @@ export const AppSidebar = ({
               Providers
             </SidebarMenuButton>
           </div>
-          <SidebarSectionLabel>Documents</SidebarSectionLabel>
+          <SidebarSectionLabel>{SIDEBAR_SECTION.documents}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             <SidebarMenuButton
               active={pathname.startsWith("/documents")}
@@ -187,7 +108,7 @@ export const AppSidebar = ({
         </SidebarMenu>
         <div className="pt-4">
           <SidebarMenu>
-            <SidebarSectionLabel>Settings</SidebarSectionLabel>
+            <SidebarSectionLabel>{SIDEBAR_SECTION.settings}</SidebarSectionLabel>
             <div className="ml-2 grid gap-1">
               <SidebarMenuButton
                 active={pathname.startsWith("/vocabulary")}

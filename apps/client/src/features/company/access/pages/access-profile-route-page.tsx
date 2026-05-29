@@ -6,6 +6,10 @@ import {
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { AccessProfilePage } from "./access-profile-page"
 import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  SIDEBAR_SECTION,
+  sectionPageBreadcrumbs,
+} from "@/features/shell/lib/navigation"
 
 export const AccessProfileRoutePage = () => {
   const vocabulary = useVocabulary()
@@ -18,7 +22,13 @@ export const AccessProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Access" />
+      <PageHeader
+        breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.company, [
+          { label: "Access" },
+        ])}
+        eyebrow={SIDEBAR_SECTION.company}
+        title="Access"
+      />
       <AccessProfilePage
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}
