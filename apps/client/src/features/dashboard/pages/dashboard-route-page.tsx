@@ -9,11 +9,13 @@ export const DashboardRoutePage = () => {
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const organizationProviders = snapshot?.organizationProviders ?? []
   const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []
+  const businessActivities = snapshot?.businessActivities ?? []
 
   return (
     <>
       <PageHeader eyebrow="Dashboard" title="Readiness Overview" />
       <DashboardPage
+        businessActivities={businessActivities}
         organizationProviders={organizationProviders}
         profile={defaultValues}
         serviceProviderUsage={serviceProviderUsage}

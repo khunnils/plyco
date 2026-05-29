@@ -3,6 +3,7 @@ import {
   type OrganizationProvider,
   type ServiceProviderUsage,
   type StoredDataType,
+  type BusinessActivity,
 } from "@plyco/shared"
 
 import { type ProfileDraft } from "@/features/company/types/company"
@@ -75,6 +76,23 @@ export const isAnswered = (
   }
 
   return true
+}
+
+export const isActivityComplete = (
+  activity: BusinessActivity,
+  showLegalBasis: boolean
+) => {
+  const isNameSet = isAnswered(activity.name)
+  const isPurposeSet = isAnswered(activity.purpose)
+  const isRoleSet = isAnswered(activity.role)
+  const isRetentionSet = isAnswered(activity.retentionPolicy)
+  const isLegalBasisSet =
+    !showLegalBasis ||
+    (Array.isArray(activity.legalBasis) && activity.legalBasis.length > 0)
+
+  return (
+    isNameSet && isPurposeSet && isRoleSet && isRetentionSet && isLegalBasisSet
+  )
 }
 
 const percent = (completedFields: number, totalFields: number) =>
@@ -433,7 +451,7 @@ export const isRealService = (service: ProfileDraft["services"][number]) =>
     service.serviceUrl?.trim()
   )
 
-const providerUsageProgress = (usage: ServiceProviderUsage) =>
+export const providerUsageProgress = (usage: ServiceProviderUsage) =>
   sectionProgress(usage.providerName || "Selected provider", [
     field("Purpose", usage.purpose),
     field("Data processing level", usage.dataProcessingLevel),
@@ -445,6 +463,60 @@ const providerUsageProgress = (usage: ServiceProviderUsage) =>
         ]
       : []),
   ])
+
+export const serviceDetailsProgress = (
+  service: ProfileDraft["services"][number]
+) => {
+  const fields = [
+    field("Service name", service.serviceName),
+    field("Service URL", service.serviceUrl),
+    field("Description", service.serviceDescription),
+    field("User types", service.userTypes),
+    field("Customer types", service.customerTypes),
+    field("Availability regions", service.availabilityRegions),
+    field("Directed to children", service.childrenDirected),
+    ...(service.childrenDirected
+      ? [field("Minimum user age", service.minimumUserAge, true)]
+      : []),
+    field(
+      "Uses cookies or tracking technologies",
+      service.privacy.usesCookiesOrTrackingTechnologies
+    ),
+    ...(service.privacy.usesCookiesOrTrackingTechnologies
+      ? [
+          field(
+            "Cookie / tracking categories",
+            service.privacy.cookieTrackingCategories
+          ),
+          field(
+            "Cookie consent mechanism",
+            service.privacy.cookieConsentMechanism
+          ),
+          field(
+            "Do Not Track response",
+            service.privacy.doNotTrackResponse
+          ),
+          field(
+            "Global Privacy Control supported",
+            service.privacy.globalPrivacyControlSupported
+          ),
+        ]
+      : []),
+    field("Primary hosting region", service.privacy.primaryHostingRegion),
+  ]
+
+  const completedFields = fields.filter((f) =>
+    isAnswered(f.value, { zeroMeansUnset: f.zeroMeansUnset })
+  ).length
+  const totalFields = fields.length
+
+  return {
+    completedFields,
+    totalFields,
+    percent: percent(completedFields, totalFields),
+    isComplete: totalFields > 0 && completedFields === totalFields,
+  }
+}
 
 export const serviceProgress = (
   service: ProfileDraft["services"][number],
