@@ -64,46 +64,52 @@ const ServiceSelectorPage = ({
 }) => {
   const availableServices = services.filter((service) => service.id)
 
-  if (availableServices.length === 0) {
-    return (
-      <Empty className="min-h-[420px] border-slate-200 bg-white">
-        <EmptyHeader>
-          <EmptyMedia
-            className="size-12 rounded-full border-slate-200 bg-slate-50"
-            variant="icon"
-          >
-            <Box />
-          </EmptyMedia>
-          <EmptyTitle>No services available</EmptyTitle>
-          <EmptyDescription>
-            Services will appear here once they have been added to this
-            workspace.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button asChild type="button">
+  return (
+    <div className="grid gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h2 className="text-base font-semibold text-slate-950">Services</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Customer-facing products and apps, including audience, privacy
+            settings, and provider usage.
+          </p>
+        </div>
+        {availableServices.length > 0 ? (
+          <Button asChild className="w-fit shrink-0" type="button">
             <Link to="/company/services/new">
               <Plus />
               Add service
             </Link>
           </Button>
-        </EmptyContent>
-      </Empty>
-    )
-  }
-
-  return (
-    <div className="grid gap-5">
-      <div className="flex justify-end">
-        <Button asChild className="w-fit" type="button">
-          <Link to="/company/services/new">
-            <Plus />
-            Add service
-          </Link>
-        </Button>
+        ) : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {availableServices.length === 0 ? (
+        <Empty className="min-h-[420px] border-slate-200 bg-white">
+          <EmptyHeader>
+            <EmptyMedia
+              className="size-12 rounded-full border-slate-200 bg-slate-50"
+              variant="icon"
+            >
+              <Box />
+            </EmptyMedia>
+            <EmptyTitle>No services available</EmptyTitle>
+            <EmptyDescription>
+              Services will appear here once they have been added to this
+              workspace.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild type="button">
+              <Link to="/company/services/new">
+                <Plus />
+                Add service
+              </Link>
+            </Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
         {availableServices.map((service, index) => {
           const serviceUses = service.id
             ? serviceProviderUsage.filter(
@@ -219,7 +225,8 @@ const ServiceSelectorPage = ({
             </Link>
           )
         })}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

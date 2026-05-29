@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { DataTypeEmptyState } from "@/features/company/data-handling/components/data-type-empty-state"
 import { DataTypeForm } from "@/features/company/data-handling/components/data-type-form"
 import {
   emptyDataTypeDraft,
@@ -150,12 +151,12 @@ export const DataTypesPanel = ({
               Cancel
             </Button>
           </div>
-        ) : (
-          <Button className="w-fit" type="button" onClick={startCreate}>
+        ) : dataTypes.length > 0 ? (
+          <Button className="w-fit shrink-0" type="button" onClick={startCreate}>
             <Plus />
             Add datatype
           </Button>
-        )}
+        ) : null}
       </div>
 
       <div className="grid gap-4">
@@ -184,9 +185,7 @@ export const DataTypesPanel = ({
             showButtons={false}
           />
         ) : dataTypes.length === 0 ? (
-          <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-            No data types yet.
-          </div>
+          <DataTypeEmptyState onAdd={startCreate} />
         ) : (
           <div className="grid gap-3">
             {dataTypes.map((dataType, index) => {
