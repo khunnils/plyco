@@ -28,7 +28,6 @@ const jsonValue = (value: string[] | null) =>
 
 export const ORGANIZATION_INCLUDE = {
   accessProfile: true,
-  dataHandlingProfile: true,
   dataTypes: { orderBy: { createdAt: "asc" } },
   infrastructureProfile: true,
   privacyProfile: true,
@@ -66,7 +65,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   ): Promise<OrganizationSecurityProfile> {
     const organizationData = this.organizationData(input.company);
     const infrastructureData = this.infrastructureData(input.infrastructure);
-    const dataHandlingData = this.dataHandlingData(input.dataHandling);
     const privacyData = this.privacyData(input.privacy);
     const accessData = this.accessData(input.access);
 
@@ -78,12 +76,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           upsert: {
             create: accessData,
             update: accessData,
-          },
-        },
-        dataHandlingProfile: {
-          upsert: {
-            create: dataHandlingData,
-            update: dataHandlingData,
           },
         },
         privacyProfile: {
@@ -169,8 +161,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       regions: jsonValue(input.regions),
       handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
+      storesPii: input.storesPii,
+      storesHealthcareData: input.storesHealthcareData,
       complianceGoals: jsonValue(input.complianceGoals),
-      policyEffectiveDate: input.policyEffectiveDate,
     };
   }
 
@@ -208,6 +201,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vulnerabilityDisclosureProgramExists:
         input.vulnerabilityDisclosureProgramExists,
       vulnerabilityDisclosureUrl: input.vulnerabilityDisclosureUrl,
+      encryptionAtRest: input.encryptionAtRest,
+      encryptionInTransit: input.encryptionInTransit,
     };
   }
 
@@ -370,6 +365,8 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       euRepresentativeName: input.euRepresentativeName,
       euRepresentativeAddress: input.euRepresentativeAddress,
       usesAutomatedDecisionMaking: input.usesAutomatedDecisionMaking,
+      productionDataInDevelopment: input.productionDataInDevelopment,
+      retentionPolicyExists: input.retentionPolicyExists,
     };
   }
 
@@ -555,17 +552,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     }
 
     return "medium";
-  }
-
-  private dataHandlingData(input: DataHandlingProfile) {
-    return {
-      storesPii: input.storesPii,
-      storesHealthcareData: input.storesHealthcareData,
-      encryptionAtRest: input.encryptionAtRest,
-      encryptionInTransit: input.encryptionInTransit,
-      productionDataInDevelopment: input.productionDataInDevelopment,
-      retentionPolicyExists: input.retentionPolicyExists,
-    };
   }
 
   private organizationDataTypes(input: DataHandlingProfile) {

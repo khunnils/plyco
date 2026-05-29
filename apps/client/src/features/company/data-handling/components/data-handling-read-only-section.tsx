@@ -7,9 +7,6 @@ import { Button } from "@/components/ui/button"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 
-const boolText = (value: boolean | null) =>
-  value === null ? "Not answered" : value ? "Yes" : "No"
-
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
@@ -18,18 +15,6 @@ const codeValueList = (
   values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
-
-const detailRows = (profile: ProfileDraft) => [
-  ["Stores PII", boolText(profile.dataHandling.storesPii)],
-  ["Healthcare data", boolText(profile.dataHandling.storesHealthcareData)],
-  ["Encryption at rest", boolText(profile.dataHandling.encryptionAtRest)],
-  ["Encryption in transit", boolText(profile.dataHandling.encryptionInTransit)],
-  [
-    "Production data in development",
-    boolText(profile.dataHandling.productionDataInDevelopment),
-  ],
-  ["Retention policy", boolText(profile.dataHandling.retentionPolicyExists)],
-]
 
 export const DataHandlingReadOnlySection = ({
   profile,
@@ -43,8 +28,8 @@ export const DataHandlingReadOnlySection = ({
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+    <div className="grid gap-4 max-w-3xl">
+      <div className="grid gap-4">
         <section className="grid content-start gap-3">
           <h3 className="text-sm font-semibold text-slate-950">Data types</h3>
           {profile.dataHandling.dataTypesStored.length === 0 ? (
@@ -138,25 +123,6 @@ export const DataHandlingReadOnlySection = ({
               })}
             </div>
           )}
-        </section>
-
-        <section className="grid content-start gap-3">
-          <h3 className="text-sm font-semibold text-slate-950">
-            General attributes
-          </h3>
-          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {detailRows(profile).map(([label, value]) => (
-              <div
-                className="rounded-md border border-slate-200 bg-slate-50 p-3"
-                key={label}
-              >
-                <dt className="text-xs font-medium text-slate-500">{label}</dt>
-                <dd className="mt-1 text-sm font-medium text-slate-900">
-                  {value}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </section>
       </div>
       <Button

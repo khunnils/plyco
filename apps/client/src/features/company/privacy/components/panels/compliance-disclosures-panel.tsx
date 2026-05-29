@@ -13,11 +13,14 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { privacyHelperText } from "../privacy-helper-text"
+import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const complianceSchema = privacyProfileSchema.pick({
   sellsOrSharesData: true,
   doNotSellLink: true,
   usesAutomatedDecisionMaking: true,
+  productionDataInDevelopment: true,
+  retentionPolicyExists: true,
 })
 
 type ComplianceDraft = z.infer<typeof complianceSchema>
@@ -26,6 +29,8 @@ const toComplianceDraft = (privacy: PrivacyProfile): ComplianceDraft => ({
   sellsOrSharesData: privacy.sellsOrSharesData,
   doNotSellLink: privacy.doNotSellLink,
   usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
+  productionDataInDevelopment: privacy.productionDataInDevelopment,
+  retentionPolicyExists: privacy.retentionPolicyExists,
 })
 
 const complianceRows = (draft: ComplianceDraft): ProfilePanelDetailRow[] => {
@@ -49,6 +54,18 @@ const complianceRows = (draft: ComplianceDraft): ProfilePanelDetailRow[] => {
     "Automated decision making",
     boolText(draft.usesAutomatedDecisionMaking),
     privacyHelperText.usesAutomatedDecisionMaking,
+  ])
+
+  rows.push([
+    "Customer data in development",
+    boolText(draft.productionDataInDevelopment),
+    dataHelperText.productionDataInDevelopment,
+  ])
+
+  rows.push([
+    "Retention policy exists",
+    boolText(draft.retentionPolicyExists),
+    dataHelperText.retentionPolicyExists,
   ])
 
   return rows
@@ -114,6 +131,18 @@ export const ComplianceDisclosuresPanel = ({
           helperText={privacyHelperText.usesAutomatedDecisionMaking}
           label="Uses automated decision making"
           name="usesAutomatedDecisionMaking"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.productionDataInDevelopment}
+          label="Customer data in development"
+          name="productionDataInDevelopment"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.retentionPolicyExists}
+          label="Retention policy exists"
+          name="retentionPolicyExists"
         />
       </div>
     </ProfilePanelShell>

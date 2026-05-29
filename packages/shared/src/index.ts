@@ -168,8 +168,9 @@ export const companyProfileSchema = z.object({
   regions: nullableCodeIdArraySchema,
   handlesPii: nullableBooleanSchema,
   handlesSensitiveData: nullableBooleanSchema,
+  storesPii: nullableBooleanSchema,
+  storesHealthcareData: nullableBooleanSchema,
   complianceGoals: nullableCodeIdArraySchema,
-  policyEffectiveDate: nullableStringSchema,
 });
 
 export const servicePrivacyProfileSchema = z.object({
@@ -224,6 +225,8 @@ export const privacyProfileSchema = z.object({
   euRepresentativeName: nullableStringSchema,
   euRepresentativeAddress: nullableStringSchema,
   usesAutomatedDecisionMaking: nullableBooleanSchema,
+  productionDataInDevelopment: nullableBooleanSchema,
+  retentionPolicyExists: nullableBooleanSchema,
 });
 
 export const infrastructureProfileSchema = z.object({
@@ -259,16 +262,12 @@ export const infrastructureProfileSchema = z.object({
   penetrationTestLastDate: nullableStringSchema,
   vulnerabilityDisclosureProgramExists: nullableBooleanSchema,
   vulnerabilityDisclosureUrl: nullableStringSchema,
+  encryptionAtRest: nullableBooleanSchema,
+  encryptionInTransit: nullableBooleanSchema,
 });
 
 export const dataHandlingProfileSchema = z.object({
   dataTypesStored: z.array(storedDataTypeSchema).default([]),
-  storesPii: nullableBooleanSchema,
-  storesHealthcareData: nullableBooleanSchema,
-  encryptionAtRest: nullableBooleanSchema,
-  encryptionInTransit: nullableBooleanSchema,
-  productionDataInDevelopment: nullableBooleanSchema,
-  retentionPolicyExists: nullableBooleanSchema,
 });
 
 export const accessProfileSchema = z.object({
@@ -666,8 +665,9 @@ export const emptyCompanyProfile: CompanyProfile = {
   regions: null,
   handlesPii: null,
   handlesSensitiveData: null,
+  storesPii: null,
+  storesHealthcareData: null,
   complianceGoals: null,
-  policyEffectiveDate: null,
 };
 
 export const emptyServiceProfile: ServiceProfileInput = {
@@ -713,6 +713,8 @@ export const emptyPrivacyProfile: PrivacyProfile = {
   euRepresentativeName: null,
   euRepresentativeAddress: null,
   usesAutomatedDecisionMaking: null,
+  productionDataInDevelopment: null,
+  retentionPolicyExists: null,
 };
 
 export const emptyInfrastructureProfile: InfrastructureProfile = {
@@ -748,16 +750,12 @@ export const emptyInfrastructureProfile: InfrastructureProfile = {
   penetrationTestLastDate: null,
   vulnerabilityDisclosureProgramExists: null,
   vulnerabilityDisclosureUrl: null,
+  encryptionAtRest: null,
+  encryptionInTransit: null,
 };
 
 export const emptyDataHandlingProfile: DataHandlingProfile = {
   dataTypesStored: [],
-  storesPii: null,
-  storesHealthcareData: null,
-  encryptionAtRest: null,
-  encryptionInTransit: null,
-  productionDataInDevelopment: null,
-  retentionPolicyExists: null,
 };
 
 export const emptyAccessProfile: AccessProfile = {

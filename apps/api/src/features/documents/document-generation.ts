@@ -180,7 +180,7 @@ export class ReportContextBuilder {
     const lastUpdatedDate = organization
       ? this.isoDateOnly(organization.updatedAt)
       : "";
-    const effectiveDate = organization?.company.policyEffectiveDate ?? "";
+    const effectiveDate = lastUpdatedDate;
 
     return {
       version: `${template.versionMajor}.${template.versionMinor}`,

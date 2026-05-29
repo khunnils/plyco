@@ -9,14 +9,19 @@ import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { SelectField } from "@/components/form/select-field"
+import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
+import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
+import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const encryptionSchema = infrastructureProfileSchema.pick({
+  encryptionAtRest: true,
+  encryptionInTransit: true,
   atRestAlgorithm: true,
   inTransitMinimumTlsVersion: true,
   keyManagementProvider: true,
@@ -27,6 +32,8 @@ type EncryptionDraft = z.infer<typeof encryptionSchema>
 const toEncryptionDraft = (
   infrastructure: InfrastructureProfile
 ): EncryptionDraft => ({
+  encryptionAtRest: infrastructure.encryptionAtRest,
+  encryptionInTransit: infrastructure.encryptionInTransit,
   atRestAlgorithm: infrastructure.atRestAlgorithm,
   inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
   keyManagementProvider: infrastructure.keyManagementProvider,
@@ -38,6 +45,11 @@ const encryptionRows = (
 ) =>
   [
     [
+      "Encrypted at rest",
+      boolText(draft.encryptionAtRest),
+      dataHelperText.encryptionAtRest,
+    ],
+    [
       "Stored data encryption",
       draft.atRestAlgorithm
         ? codeLabel(
@@ -47,6 +59,11 @@ const encryptionRows = (
           )
         : "Not set",
       infrastructureHelperText.atRestAlgorithm,
+    ],
+    [
+      "Encrypted in transit",
+      boolText(draft.encryptionInTransit),
+      dataHelperText.encryptionInTransit,
     ],
     [
       "Minimum TLS version",
@@ -124,6 +141,12 @@ export const EncryptionPanel = ({
       onSave={submit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.encryptionAtRest}
+          label="Encrypted at rest"
+          name="encryptionAtRest"
+        />
         <SelectField
           control={form.control}
           helperText={infrastructureHelperText.atRestAlgorithm}
@@ -134,6 +157,12 @@ export const EncryptionPanel = ({
             ...securityEncryptionAlgorithmOptions,
           ]}
           placeholder="Not set"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.encryptionInTransit}
+          label="Encrypted in transit"
+          name="encryptionInTransit"
         />
         <SelectField
           control={form.control}

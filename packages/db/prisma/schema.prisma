@@ -22,12 +22,12 @@ model Organization {
   regions               Json?
   handlesPii            Boolean?                 @map("handles_pii")
   handlesSensitiveData  Boolean?                 @map("handles_sensitive_data")
+  storesPii             Boolean?                 @map("stores_pii")
+  storesHealthcareData  Boolean?                 @map("stores_healthcare_data")
   complianceGoals       Json?                    @map("compliance_goals")
-  policyEffectiveDate   String?                  @map("policy_effective_date")
   services              ServiceProfile[]
   privacyProfile        PrivacyProfile?
   infrastructureProfile InfrastructureProfile?
-  dataHandlingProfile   DataHandlingProfile?
   accessProfile         AccessProfile?
   dataTypes             OrganizationDataType[]
   businessActivities    BusinessActivity[]
@@ -202,6 +202,8 @@ model PrivacyProfile {
   euRepresentativeName         String?      @map("eu_representative_name")
   euRepresentativeAddress      String?      @map("eu_representative_address")
   usesAutomatedDecisionMaking  Boolean?     @map("uses_automated_decision_making")
+  productionDataInDevelopment Boolean?     @map("production_data_in_development")
+  retentionPolicyExists       Boolean?     @map("retention_policy_exists")
   createdAt                    DateTime     @default(now()) @map("created_at")
   updatedAt                    DateTime     @updatedAt @map("updated_at")
 
@@ -243,26 +245,12 @@ model InfrastructureProfile {
   penetrationTestLastDate        String?      @map("penetration_test_last_date")
   vulnerabilityDisclosureProgramExists Boolean? @map("vulnerability_disclosure_program_exists")
   vulnerabilityDisclosureUrl     String?      @map("vulnerability_disclosure_url")
+  encryptionAtRest            Boolean?     @map("encryption_at_rest")
+  encryptionInTransit         Boolean?     @map("encryption_in_transit")
   createdAt                      DateTime     @default(now()) @map("created_at")
   updatedAt                      DateTime     @updatedAt @map("updated_at")
 
   @@map("infrastructure_profiles")
-}
-
-model DataHandlingProfile {
-  id                          String       @id(map: "data_handling_profiles_pkey") @default(cuid())
-  organizationId              String       @unique(map: "data_handling_profiles_organization_id_key") @map("organization_id")
-  organization                Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "data_handling_profiles_organization_id_fkey")
-  storesPii                   Boolean?     @map("stores_pii")
-  storesHealthcareData        Boolean?     @map("stores_healthcare_data")
-  encryptionAtRest            Boolean?     @map("encryption_at_rest")
-  encryptionInTransit         Boolean?     @map("encryption_in_transit")
-  productionDataInDevelopment Boolean?     @map("production_data_in_development")
-  retentionPolicyExists       Boolean?     @map("retention_policy_exists")
-  createdAt                   DateTime     @default(now()) @map("created_at")
-  updatedAt                   DateTime     @updatedAt @map("updated_at")
-
-  @@map("data_handling_profiles")
 }
 
 model OrganizationDataType {

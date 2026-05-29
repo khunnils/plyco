@@ -46,8 +46,9 @@ export function mapOrganizationRecord(record: {
   regions: unknown;
   handlesPii: boolean | null;
   handlesSensitiveData: boolean | null;
+  storesPii: boolean | null;
+  storesHealthcareData: boolean | null;
   complianceGoals: unknown;
-  policyEffectiveDate: string | null;
   serviceProfile?: {
     id: string;
     serviceName: string | null;
@@ -114,6 +115,8 @@ export function mapOrganizationRecord(record: {
     euRepresentativeName: string | null;
     euRepresentativeAddress: string | null;
     usesAutomatedDecisionMaking: boolean | null;
+    productionDataInDevelopment: boolean | null;
+    retentionPolicyExists: boolean | null;
   } | null;
   infrastructureProfile: {
     mfaEnabled: boolean | null;
@@ -147,20 +150,14 @@ export function mapOrganizationRecord(record: {
     penetrationTestLastDate: string | null;
     vulnerabilityDisclosureProgramExists: boolean | null;
     vulnerabilityDisclosureUrl: string | null;
+    encryptionAtRest: boolean | null;
+    encryptionInTransit: boolean | null;
   } | null;
   organizationProviders: Array<{
     providerId: string | null;
     systemTypes: string[];
     name: string;
   }>;
-  dataHandlingProfile: {
-    storesPii: boolean | null;
-    storesHealthcareData: boolean | null;
-    encryptionAtRest: boolean | null;
-    encryptionInTransit: boolean | null;
-    productionDataInDevelopment: boolean | null;
-    retentionPolicyExists: boolean | null;
-  } | null;
   dataTypes: Array<{
     name: string;
     description: string | null;
@@ -200,8 +197,9 @@ export function mapOrganizationRecord(record: {
     regions: stringArray(record.regions),
     handlesPii: record.handlesPii,
     handlesSensitiveData: record.handlesSensitiveData,
+    storesPii: record.storesPii,
+    storesHealthcareData: record.storesHealthcareData,
     complianceGoals: stringArray(record.complianceGoals),
-    policyEffectiveDate: record.policyEffectiveDate,
   });
   const infrastructure = infrastructureProfileSchema.parse({
     organizationProviders: record.organizationProviders.flatMap((provider) =>
@@ -278,6 +276,10 @@ export function mapOrganizationRecord(record: {
       null,
     vulnerabilityDisclosureUrl:
       record.infrastructureProfile?.vulnerabilityDisclosureUrl ?? null,
+    encryptionAtRest:
+      record.infrastructureProfile?.encryptionAtRest ?? null,
+    encryptionInTransit:
+      record.infrastructureProfile?.encryptionInTransit ?? null,
   });
   const serviceRecords =
     record.services ?? (record.serviceProfile ? [record.serviceProfile] : []);
@@ -356,6 +358,10 @@ export function mapOrganizationRecord(record: {
       record.privacyProfile?.euRepresentativeAddress ?? null,
     usesAutomatedDecisionMaking:
       record.privacyProfile?.usesAutomatedDecisionMaking ?? null,
+    productionDataInDevelopment:
+      record.privacyProfile?.productionDataInDevelopment ?? null,
+    retentionPolicyExists:
+      record.privacyProfile?.retentionPolicyExists ?? null,
   });
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
@@ -366,16 +372,6 @@ export function mapOrganizationRecord(record: {
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
     })),
-    storesPii: record.dataHandlingProfile?.storesPii ?? null,
-    storesHealthcareData:
-      record.dataHandlingProfile?.storesHealthcareData ?? null,
-    encryptionAtRest: record.dataHandlingProfile?.encryptionAtRest ?? null,
-    encryptionInTransit:
-      record.dataHandlingProfile?.encryptionInTransit ?? null,
-    productionDataInDevelopment:
-      record.dataHandlingProfile?.productionDataInDevelopment ?? null,
-    retentionPolicyExists:
-      record.dataHandlingProfile?.retentionPolicyExists ?? null,
   });
   const access = accessProfileSchema.parse({
     mfaRequired: record.accessProfile?.mfaRequired ?? null,

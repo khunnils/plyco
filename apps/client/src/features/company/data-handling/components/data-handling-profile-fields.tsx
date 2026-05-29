@@ -45,32 +45,32 @@ export const ProfileDataHandlingFields = ({
     <ToggleField
       control={form.control}
       label="Stores PII"
-      name="dataHandling.storesPii"
+      name="company.storesPii"
     />
     <ToggleField
       control={form.control}
       label="Stores healthcare data"
-      name="dataHandling.storesHealthcareData"
+      name="company.storesHealthcareData"
     />
     <ToggleField
       control={form.control}
       label="Encryption at rest"
-      name="dataHandling.encryptionAtRest"
+      name="infrastructure.encryptionAtRest"
     />
     <ToggleField
       control={form.control}
       label="Encryption in transit"
-      name="dataHandling.encryptionInTransit"
+      name="infrastructure.encryptionInTransit"
     />
     <ToggleField
       control={form.control}
       label="Production data used in development"
-      name="dataHandling.productionDataInDevelopment"
+      name="privacy.productionDataInDevelopment"
     />
     <ToggleField
       control={form.control}
       label="Retention policy exists"
-      name="dataHandling.retentionPolicyExists"
+      name="privacy.retentionPolicyExists"
     />
   </div>
 )

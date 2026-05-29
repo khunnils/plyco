@@ -53,20 +53,6 @@ const companySections: CompanySection[] = [
     icon: Building2,
   },
   {
-    id: "service",
-    path: "/company/services",
-    title: "Services",
-    description: "Products or services the organization offers.",
-    icon: Box,
-  },
-  {
-    id: "activities",
-    path: "/company/activities",
-    title: "Activities",
-    description: "Processing activities services and documents reference.",
-    icon: ClipboardList,
-  },
-  {
     id: "privacy",
     path: "/company/privacy",
     title: "Privacy",
@@ -81,18 +67,35 @@ const companySections: CompanySection[] = [
     icon: Server,
   },
   {
-    id: "dataHandling",
-    path: "/company/data",
-    title: "Data",
-    description: "Data categories and protection practices.",
-    icon: Database,
-  },
-  {
     id: "access",
     path: "/company/access",
     title: "Access",
     description: "Access hygiene and account risk.",
     icon: KeyRound,
+  },
+]
+
+const productAndDataSections: CompanySection[] = [
+  {
+    id: "activities",
+    path: "/company/activities",
+    title: "Activities",
+    description: "Processing activities services and documents reference.",
+    icon: ClipboardList,
+  },
+  {
+    id: "dataHandling",
+    path: "/company/data",
+    title: "Data Types",
+    description: "Data categories and protection practices.",
+    icon: Database,
+  },
+  {
+    id: "service",
+    path: "/company/services",
+    title: "Services",
+    description: "Products or services the organization offers.",
+    icon: Box,
   },
 ]
 
@@ -123,8 +126,25 @@ export const AppSidebar = ({
             Dashboard
           </SidebarMenuButton>
           <div className="px-3 pt-3 pb-1 text-xs text-slate-600">Company</div>
-          <div className="ml-1 grid gap-1">
+          <div className="ml-2 grid gap-1">
             {companySections.map((section) => {
+              const Icon = section.icon
+
+              return (
+                <SidebarMenuButton
+                  active={pathname === section.path}
+                  key={section.id}
+                  onClick={() => navigate(section.path)}
+                >
+                  <Icon className="size-4" />
+                  {section.title}
+                </SidebarMenuButton>
+              )
+            })}
+          </div>
+          <div className="px-3 pt-3 pb-1 text-xs text-slate-600">Product and Data</div>
+          <div className="ml-2 grid gap-1">
+            {productAndDataSections.map((section) => {
               const Icon = section.icon
 
               return (

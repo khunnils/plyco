@@ -18,7 +18,7 @@ export const DataHandlingProfileRoutePage = () => {
 
   return (
     <>
-      <PageHeader eyebrow="Company" title="Data" />
+      <PageHeader eyebrow="Product & Data" title="Data Types" />
       <DataHandlingProfilePage
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}

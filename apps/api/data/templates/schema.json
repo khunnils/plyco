@@ -66,14 +66,6 @@
       "example": "123 Market Street, San Francisco, CA"
     },
     {
-      "key": "organization.policyEffectiveDate",
-      "label": "Policy effective date",
-      "type": "string",
-      "category": "Organization",
-      "description": "Editable date the organization's published policy takes effect.",
-      "example": "2026-01-01"
-    },
-    {
       "key": "organization.employeeCount",
       "label": "Employee count",
       "type": "number",

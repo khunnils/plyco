@@ -24,6 +24,4 @@ export const companyHelperText = {
     "Whether you handle personal data such as names, emails, identifiers, or account details.",
   handlesSensitiveData:
     "Whether you handle higher-risk data such as health, financial, biometric, or government ID data.",
-  policyEffectiveDate:
-    "The date your published privacy policy takes effect, shown on generated policy documents.",
 } as const

@@ -11,10 +11,13 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { companyHelperText } from "../company-helper-text"
+import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const dataProfileSchema = companyProfileSchema.pick({
   handlesPii: true,
   handlesSensitiveData: true,
+  storesPii: true,
+  storesHealthcareData: true,
 })
 
 type DataProfileDraft = z.infer<typeof dataProfileSchema>
@@ -22,6 +25,8 @@ type DataProfileDraft = z.infer<typeof dataProfileSchema>
 const toDataProfileDraft = (company: CompanyProfile): DataProfileDraft => ({
   handlesPii: company.handlesPii,
   handlesSensitiveData: company.handlesSensitiveData,
+  storesPii: company.storesPii,
+  storesHealthcareData: company.storesHealthcareData,
 })
 
 const dataProfileRows = (draft: DataProfileDraft) =>
@@ -31,6 +36,16 @@ const dataProfileRows = (draft: DataProfileDraft) =>
       "Sensitive data",
       boolText(draft.handlesSensitiveData),
       companyHelperText.handlesSensitiveData,
+    ],
+    [
+      "Stores personal data",
+      boolText(draft.storesPii),
+      dataHelperText.storesPii,
+    ],
+    [
+      "Stores health data",
+      boolText(draft.storesHealthcareData),
+      dataHelperText.storesHealthcareData,
     ],
   ] as const
 
@@ -84,6 +99,18 @@ export const CompanyDataProfilePanel = ({
           helperText={companyHelperText.handlesSensitiveData}
           label="Handles sensitive data"
           name="handlesSensitiveData"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.storesPii}
+          label="Stores personal data"
+          name="storesPii"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={dataHelperText.storesHealthcareData}
+          label="Stores health data"
+          name="storesHealthcareData"
         />
       </div>
     </ProfilePanelShell>

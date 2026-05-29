@@ -43,7 +43,6 @@ export type DashboardProgress = {
   access: ProgressGroup
   services: ProgressItem[]
   data: {
-    general: ProgressSection
     dataTypes: ProgressSection[]
   }
   vendors: ProgressItem[]
@@ -160,6 +159,8 @@ export const profileProgress = (profile: ProfileDraft) =>
     sectionProgress("Data profile", [
       field("Handles PII", profile.company.handlesPii),
       field("Sensitive data", profile.company.handlesSensitiveData),
+      field("Stores personal data", profile.company.storesPii),
+      field("Stores health data", profile.company.storesHealthcareData),
     ]),
   ])
 
@@ -210,6 +211,11 @@ export const privacyProgress = (profile: ProfileDraft) => {
         ? [field("Do Not Sell link", privacy.doNotSellLink)]
         : []),
       field("Automated decision making", privacy.usesAutomatedDecisionMaking),
+      field(
+        "Production data used in development",
+        privacy.productionDataInDevelopment
+      ),
+      field("Retention policy exists", privacy.retentionPolicyExists),
     ]),
     ...(showPrivacyRepresentation
       ? [
@@ -265,7 +271,9 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       field("Work devices encrypted", infrastructure.encryptedDevicesRequired),
     ]),
     sectionProgress("Encryption", [
+      field("Encrypted at rest", infrastructure.encryptionAtRest),
       field("Stored data encryption", infrastructure.atRestAlgorithm),
+      field("Encrypted in transit", infrastructure.encryptionInTransit),
       field("Minimum TLS version", infrastructure.inTransitMinimumTlsVersion),
       field("Key management", infrastructure.keyManagementProvider),
     ]),
@@ -527,23 +535,6 @@ export const dataTypeProgress = (
   ])
 
 export const dataProgress = (profile: ProfileDraft) => ({
-  general: sectionProgress("General attributes", [
-    field("Personal data stored", profile.dataHandling.storesPii),
-    field("Health data stored", profile.dataHandling.storesHealthcareData),
-    field("Data encrypted at rest", profile.dataHandling.encryptionAtRest),
-    field(
-      "Data encrypted in transit",
-      profile.dataHandling.encryptionInTransit
-    ),
-    field(
-      "Real customer data used in development",
-      profile.dataHandling.productionDataInDevelopment
-    ),
-    field(
-      "Retention policy exists",
-      profile.dataHandling.retentionPolicyExists
-    ),
-  ]),
   dataTypes: profile.dataHandling.dataTypesStored.map(dataTypeProgress),
 })
 
@@ -599,7 +590,6 @@ export const dashboardProgress = ({
     infrastructureGroup,
     accessGroup,
     ...services,
-    data.general,
     ...data.dataTypes,
     ...vendors,
   ]

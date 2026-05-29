@@ -164,12 +164,6 @@ describe("shared security profile schemas", () => {
           isRequired: true,
         },
       ],
-      storesPii: true,
-      storesHealthcareData: false,
-      encryptionAtRest: true,
-      encryptionInTransit: true,
-      productionDataInDevelopment: false,
-      retentionPolicyExists: true,
     });
 
     expect(result.success).toBe(true);
@@ -341,6 +335,8 @@ describe("shared security profile schemas", () => {
         euRepresentativeName: null,
         euRepresentativeAddress: null,
         usesAutomatedDecisionMaking: null,
+        productionDataInDevelopment: null,
+        retentionPolicyExists: null,
       });
     }
   });

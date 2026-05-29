@@ -44,6 +44,8 @@ export const profileBody = {
     regions: ["us", "eu"],
     handlesPii: true,
     handlesSensitiveData: true,
+    storesPii: true,
+    storesHealthcareData: false,
     complianceGoals: ["soc_2", "gdpr"],
   },
   services: [serviceBody],
@@ -76,6 +78,8 @@ export const profileBody = {
     euRepresentativeName: "",
     euRepresentativeAddress: "",
     usesAutomatedDecisionMaking: false,
+    productionDataInDevelopment: false,
+    retentionPolicyExists: false,
   },
   infrastructure: {
     organizationProviders: [
@@ -106,6 +110,8 @@ export const profileBody = {
     vendorReviewRequired: true,
     vendorReviewCadence: "annually",
     dpaRequiredForProcessors: true,
+    encryptionAtRest: true,
+    encryptionInTransit: true,
   },
   dataHandling: {
     dataTypesStored: [
@@ -126,12 +132,6 @@ export const profileBody = {
         isRequired: false,
       },
     ],
-    storesPii: true,
-    storesHealthcareData: false,
-    encryptionAtRest: true,
-    encryptionInTransit: true,
-    productionDataInDevelopment: false,
-    retentionPolicyExists: false,
   },
   access: {
     mfaRequired: true,

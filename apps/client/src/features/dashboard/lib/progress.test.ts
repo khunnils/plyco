@@ -93,6 +93,8 @@ describe("dashboard progress", () => {
         doNotSellLink: null,
         transactionalEmailsSent: false,
         usesAutomatedDecisionMaking: false,
+        productionDataInDevelopment: false,
+        retentionPolicyExists: false,
         dpoStatus: "not_appointed",
         euRepresentativeStatus: "not_appointed",
       },
@@ -112,7 +114,7 @@ describe("dashboard progress", () => {
 
     expect(marketing).toMatchObject({ completedFields: 2, totalFields: 2 })
     expect(transfers).toMatchObject({ completedFields: 1, totalFields: 1 })
-    expect(disclosures).toMatchObject({ completedFields: 2, totalFields: 2 })
+    expect(disclosures).toMatchObject({ completedFields: 4, totalFields: 4 })
     expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
   })
 

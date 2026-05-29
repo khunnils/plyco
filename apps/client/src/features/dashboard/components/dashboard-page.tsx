@@ -36,10 +36,7 @@ export const DashboardPage = ({
     profile,
     serviceProviderUsage,
   })
-  const dataGroup = groupProgress([
-    progress.data.general,
-    ...progress.data.dataTypes,
-  ])
+  const dataGroup = groupProgress(progress.data.dataTypes)
   const templates = useTemplates()
   const templatesData = templates.data ?? {
     systemTemplates: [],
@@ -161,7 +158,6 @@ export const DashboardPage = ({
           </div>
         ) : null}
         <div className="grid gap-3">
-          <ProgressRow section={progress.data.general} />
           {progress.data.dataTypes.length === 0 ? (
             <PlaceholderPanel
               actionLabel="Add data type"
