@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type CreateOrganization } from "@plyco/shared"
+import { type CreateOrganization, type OrganizationLookupInput } from "@plyco/shared"
 import { toast } from "sonner"
 
-import { createOrganization } from "@/lib/api"
+import { createOrganization, lookupOrganization } from "@/lib/api"
 import { authStateQueryKey } from "@/lib/query-keys"
 
 export const useCreateOrganization = () => {
@@ -19,3 +19,14 @@ export const useCreateOrganization = () => {
     },
   })
 }
+
+export const useLookupOrganization = () =>
+  useMutation({
+    mutationFn: (input: OrganizationLookupInput) => lookupOrganization(input),
+    onError: (err: Error) => {
+      toast.warning(
+        err.message ??
+          "Could not pull details from the website. You can continue manually."
+      )
+    },
+  })

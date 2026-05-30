@@ -544,6 +544,45 @@ export const authStateSchema = z.object({
 
 export const createOrganizationSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
+  website: z.string().trim().url().optional(),
+});
+
+export const organizationLookupInputSchema = z.object({
+  name: z.string().trim().min(1, "Organization name is required"),
+  website: z.string().trim().url("Website must be a valid URL"),
+});
+
+export const organizationLookupPolicyLinkSchema = z.object({
+  type: z
+    .enum([
+      "privacy_policy",
+      "data_security",
+      "subprocessors",
+      "terms",
+      "other",
+    ])
+    .default("other"),
+  title: z.string().trim().min(1),
+  url: z.string().trim().url(),
+});
+
+export const organizationLookupSuggestedProviderSchema = z.object({
+  name: z.string().trim().min(1),
+  url: z.string().trim().url().optional(),
+  purpose: z.string().trim().optional(),
+});
+
+export const organizationLookupResultSchema = z.object({
+  company: companyProfileSchema,
+  primaryService: serviceProfileInputSchema,
+  primaryDataType: storedDataTypeSchema,
+  primaryActivity: businessActivityInputSchema,
+  suggestedProviders: z
+    .array(organizationLookupSuggestedProviderSchema)
+    .max(12)
+    .default([]),
+  policyLinks: z.array(organizationLookupPolicyLinkSchema).max(12).default([]),
+  warnings: z.array(z.string().trim().min(1)).max(8).default([]),
 });
 
 export const templateCatalogSchema = z.object({
@@ -643,6 +682,18 @@ export type OrganizationMember = z.infer<typeof organizationMemberSchema>;
 export type OrganizationSummary = z.infer<typeof organizationSummarySchema>;
 export type AuthState = z.infer<typeof authStateSchema>;
 export type CreateOrganization = z.infer<typeof createOrganizationSchema>;
+export type OrganizationLookupInput = z.infer<
+  typeof organizationLookupInputSchema
+>;
+export type OrganizationLookupPolicyLink = z.infer<
+  typeof organizationLookupPolicyLinkSchema
+>;
+export type OrganizationLookupSuggestedProvider = z.infer<
+  typeof organizationLookupSuggestedProviderSchema
+>;
+export type OrganizationLookupResult = z.infer<
+  typeof organizationLookupResultSchema
+>;
 export type OrganizationSecurityProfile = z.infer<
   typeof organizationSecurityProfileSchema
 >;

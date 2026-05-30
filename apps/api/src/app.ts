@@ -29,6 +29,11 @@ import { InMemoryOrganizationRepository } from "./features/organizations/in-memo
 import { PrismaOrganizationRepository } from "./features/organizations/prisma-repository.js"
 import { type OrganizationRepository } from "./features/organizations/repository.js"
 import { registerOrganizationRoutes } from "./features/organizations/routes.js"
+import {
+  createDefaultOrganizationLookupService,
+  type OrganizationLookupService,
+} from "./features/organization-lookup/service.js"
+import { registerOrganizationLookupRoutes } from "./features/organization-lookup/routes.js"
 import { InMemoryVendorRepository } from "./features/vendors/in-memory-repository.js"
 import { PrismaVendorRepository } from "./features/vendors/prisma-repository.js"
 import { type ProviderRepository } from "./features/vendors/repository.js"
@@ -72,6 +77,7 @@ export type CreateAppOptions = {
   providerLookupCodeSource?: ProviderLookupCodeSource
   providerLookupService?: ProviderLookupService
   providerImportService?: ProviderImportService
+  organizationLookupService?: OrganizationLookupService
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
   systemTemplateSource?: SystemTemplateSource
@@ -96,6 +102,7 @@ export async function createApp({
   providerLookupCodeSource,
   providerLookupService,
   providerImportService,
+  organizationLookupService = createDefaultOrganizationLookupService(),
   promptClient,
   llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
@@ -141,6 +148,10 @@ export async function createApp({
   await registerAccountRoutes(app, {
     accountRepository: repositories.accountRepository,
     vocabularyRepository: repositories.vocabularyRepository,
+  })
+  await registerOrganizationLookupRoutes(app, {
+    accountRepository: repositories.accountRepository,
+    organizationLookupService,
   })
   const resolvedProviderLookupService =
     providerLookupService ??

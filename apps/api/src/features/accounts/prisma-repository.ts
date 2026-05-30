@@ -104,6 +104,7 @@ export class PrismaAccountRepository implements AccountRepository {
     const organization = await this.client.organization.create({
       data: {
         companyName: input.name,
+        website: input.website,
         memberships: {
           create: {
             userId,

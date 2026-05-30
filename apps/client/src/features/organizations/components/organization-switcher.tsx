@@ -1,10 +1,10 @@
-import { Check, ChevronDown, Plus, X } from "lucide-react"
+import { Check, ChevronDown, Plus } from "lucide-react"
 import { type AuthUser } from "@plyco/shared"
 import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 
 import { Button } from "@/components/ui/button"
-import { CreateOrganizationPanel } from "@/features/organizations/components/create-organization-screen"
-import { useCreateOrganization } from "@/features/organizations/hooks/use-organizations"
+import { CreateOrganizationScreen } from "@/features/organizations/components/create-organization-screen"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 
@@ -13,11 +13,6 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
   const selectOrganization = useCurrentOrganizationStore(
     (state) => state.selectOrganization
   )
-  const markOnboarding = useCurrentOrganizationStore(
-    (state) => state.markOnboarding
-  )
-  const createOrganization = useCreateOrganization()
-  const createError = createOrganization.error?.message ?? null
   const selectedOrganizationId = selectedOrganization?.id ?? ""
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -51,19 +46,6 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
   const handleSelectOrganization = (organizationId: string) => {
     selectOrganization(organizationId)
     setOpen(false)
-  }
-
-  const handleCreateOrganization = (name: string) => {
-    createOrganization.mutate(
-      { name },
-      {
-        onSuccess: (organization) => {
-          selectOrganization(organization.id)
-          markOnboarding(organization.id)
-          setCreating(false)
-        },
-      }
-    )
   }
 
   if (!selectedOrganization) {
@@ -142,35 +124,24 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
         </div>
       )}
 
-      {creating && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 px-4 py-6"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Create organization"
-        >
-          <div className="w-full max-w-xl">
-            <CreateOrganizationPanel
-              className="rounded-lg border border-slate-200 bg-white p-6 shadow-xl"
-              error={createError}
-              isSubmitting={createOrganization.isPending}
-              user={user}
-              onCreate={handleCreateOrganization}
-              actions={
-                <Button
-                  type="button"
-                  size="icon-sm"
-                  variant="outline"
-                  aria-label="Close create organization"
-                  onClick={() => setCreating(false)}
-                >
-                  <X />
-                </Button>
-              }
-            />
-          </div>
-        </div>
-      )}
+      {creating
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[1000] bg-slate-50"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Create organization"
+            >
+              <CreateOrganizationScreen
+                user={user}
+                onCancel={() => setCreating(false)}
+                onComplete={() => setCreating(false)}
+                onLogout={() => setCreating(false)}
+              />
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   )
 }

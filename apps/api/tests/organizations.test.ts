@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestApp } from "../src/app.js";
+import { createApp, createTestApp } from "../src/app.js";
+import { ApiError } from "../src/infrastructure/errors.js";
 import {
+  authConfig,
+  createInMemoryRepositories,
   profileBody,
   serviceBody,
   vendorBody,
@@ -9,6 +12,130 @@ import {
 } from "./helpers.js";
 
 describe("organizations API", () => {
+  it("requires authentication for organization lookup when auth is enabled", async () => {
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+      organizationLookupService: {
+        async lookup() {
+          throw new Error("should not be called");
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/organization-lookup",
+      payload: { name: "Acme AI", website: "https://acme.example" },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      error: { code: "AUTHENTICATION_REQUIRED" },
+    });
+  });
+
+  it("validates organization lookup input", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      organizationLookupService: {
+        async lookup() {
+          throw new Error("should not be called");
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/organization-lookup",
+      payload: { name: "Acme AI", website: "not-a-url" },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: { code: "VALIDATION_FAILED" },
+    });
+  });
+
+  it("returns organization lookup results from the lookup service", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      organizationLookupService: {
+        async lookup(input) {
+          return {
+            company: {
+              ...profileBody.company,
+              companyName: input.name,
+              website: input.website,
+            },
+            primaryService: serviceBody,
+            primaryDataType: profileBody.dataHandling.dataTypesStored[0],
+            primaryActivity: {
+              name: "Account management",
+              purpose: "Create and manage customer accounts.",
+              role: "",
+              legalBasis: [],
+              retentionPolicy: null,
+              retentionDays: 0,
+            },
+            suggestedProviders: [
+              { name: "GitHub", url: "https://github.com" },
+            ],
+            policyLinks: [
+              {
+                type: "privacy_policy",
+                title: "Privacy Policy",
+                url: "https://acme.example/privacy",
+              },
+            ],
+            warnings: [],
+          };
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/organization-lookup",
+      payload: { name: "Acme Lookup", website: "https://acme.example" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      company: {
+        companyName: "Acme Lookup",
+        website: "https://acme.example",
+      },
+      primaryService: serviceBody,
+      suggestedProviders: [{ name: "GitHub", url: "https://github.com" }],
+    });
+  });
+
+  it("returns structured errors when organization lookup fails upstream", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      organizationLookupService: {
+        async lookup() {
+          throw new ApiError(
+            "ORGANIZATION_LOOKUP_AGENT_FAILED",
+            "Organization lookup agent failed.",
+            502,
+          );
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/organization-lookup",
+      payload: { name: "Acme AI", website: "https://acme.example" },
+    });
+
+    expect(response.statusCode).toBe(502);
+    expect(response.json()).toMatchObject({
+      error: { code: "ORGANIZATION_LOOKUP_AGENT_FAILED" },
+    });
+  });
+
   it("creates and returns organization security profile services", async () => {
     const app = await createTestApp();
     const saveResponse = await app.inject({

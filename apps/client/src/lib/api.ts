@@ -16,6 +16,8 @@ import {
   serviceProviderUsageInputSchema,
   organizationProviderInventorySchema,
   providerLookupResultSchema,
+  organizationLookupInputSchema,
+  organizationLookupResultSchema,
   createDocumentSchema,
   documentSchema,
   documentSummarySchema,
@@ -47,6 +49,8 @@ import {
   type OrganizationProvider,
   type OrganizationProviderInput,
   type ProviderLookupResult,
+  type OrganizationLookupInput,
+  type OrganizationLookupResult,
   type OrganizationSummary,
   type OrganizationMember,
 } from "@plyco/shared"
@@ -134,6 +138,14 @@ export const getOrganizationMembers = (
     `/organizations/${organizationId}/members`,
     z.array(organizationMemberSchema)
   )
+
+export const lookupOrganization = (
+  input: OrganizationLookupInput
+): Promise<OrganizationLookupResult> =>
+  apiRequest("/organization-lookup", organizationLookupResultSchema, {
+    method: "POST",
+    body: JSON.stringify(organizationLookupInputSchema.parse(input)),
+  })
 
 export const createVocabularyCode = ({
   organizationId,
