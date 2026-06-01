@@ -102,7 +102,7 @@ export async function createApp({
   providerLookupCodeSource,
   providerLookupService,
   providerImportService,
-  organizationLookupService = createDefaultOrganizationLookupService(),
+  organizationLookupService,
   promptClient,
   llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
@@ -149,9 +149,16 @@ export async function createApp({
     accountRepository: repositories.accountRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
+  const resolvedOrganizationLookupService =
+    organizationLookupService ??
+    createDefaultOrganizationLookupService({
+      llmClient,
+      promptClient,
+    })
+
   await registerOrganizationLookupRoutes(app, {
     accountRepository: repositories.accountRepository,
-    organizationLookupService,
+    organizationLookupService: resolvedOrganizationLookupService,
   })
   const resolvedProviderLookupService =
     providerLookupService ??

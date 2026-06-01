@@ -4,7 +4,7 @@ import { ApiError } from "./errors.js"
 
 export type ResolvedPrompt = {
   content: string
-  inputVariables?: Record<string, string>
+  inputVariables?: Record<string, unknown>
   metadata: {
     name: string
     version: number
@@ -15,7 +15,7 @@ export type ResolvedPrompt = {
 export interface PromptClient {
   compilePrompt(
     name: string,
-    variables: Record<string, string>,
+    variables: Record<string, unknown>,
   ): Promise<ResolvedPrompt>
 }
 
@@ -63,11 +63,13 @@ export class LangfusePromptClient implements PromptClient {
 
   async compilePrompt(
     name: string,
-    variables: Record<string, string>,
+    variables: Record<string, unknown>,
   ): Promise<ResolvedPrompt> {
     try {
       const prompt = await this.client.prompt.get(name)
-      const content = compiledPromptToText(prompt.compile(variables))
+      const content = compiledPromptToText(
+        prompt.compile(variables as Record<string, string>),
+      )
 
       if (!content) {
         throw new ApiError(
@@ -93,7 +95,7 @@ export class LangfusePromptClient implements PromptClient {
 
       throw new ApiError(
         "PROMPT_LOAD_FAILED",
-        "Unable to load provider lookup prompt.",
+        "Unable to load prompt.",
         502,
         promptLoadDetails(error),
       )

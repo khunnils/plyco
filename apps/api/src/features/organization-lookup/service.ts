@@ -16,6 +16,18 @@ import {
 
 import { apiConfig } from "../../config.js"
 import { ApiError } from "../../infrastructure/errors.js"
+import {
+  GeminiJsonClient,
+  type OrganizationLookupCodeSetId,
+  type OrganizationLookupResponseSchemaOptions,
+  organizationLookupResponseSchema,
+  type LlmJsonClient,
+} from "../../infrastructure/llm-client.js"
+import {
+  LangfusePromptClient,
+  type PromptClient,
+} from "../../infrastructure/prompt-client.js"
+import { defaultVocabularyCodeSets } from "../vocabulary/reference-data.js"
 
 export interface OrganizationLookupService {
   lookup(input: OrganizationLookupInput): Promise<OrganizationLookupResult>
@@ -31,6 +43,52 @@ type CrawledWebsite = {
   pages: CrawledPage[]
   policyLinks: OrganizationLookupPolicyLink[]
 }
+
+type WebsiteCrawler = {
+  crawl(input: OrganizationLookupInput): Promise<CrawledWebsite>
+}
+
+const PROMPT_NAME = "website_parser"
+const organizationLookupCodeSetIds = [
+  "industries",
+  "regions",
+  "compliance_goals",
+  "service_user_types",
+  "service_customer_types",
+  "cookie_tracking_categories",
+  "privacy_cookie_consent_mechanisms",
+  "subject_types",
+  "collection_methods",
+  "activity_role",
+  "legal_basis",
+  "activity_retention_policies",
+] as const satisfies readonly OrganizationLookupCodeSetId[]
+
+const organizationLookupCodeSets = Object.fromEntries(
+  organizationLookupCodeSetIds.map((codeSetId) => {
+    const codeSet = defaultVocabularyCodeSets.find(
+      (candidate) => candidate.codeSetId === codeSetId,
+    )
+
+    return [
+      codeSetId,
+      codeSet?.codes
+        .filter((code) => code.active)
+        .map((code) => ({ codeId: code.codeId, label: code.name })) ?? [],
+    ]
+  }),
+) as Record<
+  OrganizationLookupCodeSetId,
+  Array<{ codeId: string; label: string }>
+>
+
+const organizationLookupResponseCodeSets =
+  Object.fromEntries(
+    organizationLookupCodeSetIds.map((codeSetId) => [
+      codeSetId,
+      organizationLookupCodeSets[codeSetId].map((code) => code.codeId),
+    ]),
+  ) as OrganizationLookupResponseSchemaOptions
 
 const lookupWarning = (message: string) => message.slice(0, 300)
 
@@ -243,9 +301,11 @@ export class FirecrawlWebsiteCrawler {
   }
 }
 
-export class AdkOrganizationLookupService implements OrganizationLookupService {
+export class LlmOrganizationLookupService implements OrganizationLookupService {
   constructor(
-    private readonly crawler: FirecrawlWebsiteCrawler,
+    private readonly crawler: WebsiteCrawler,
+    private readonly promptClient: PromptClient,
+    private readonly llmClient: LlmJsonClient,
     private readonly model = apiConfig.organizationLookupModel,
   ) {}
 
@@ -298,91 +358,45 @@ export class AdkOrganizationLookupService implements OrganizationLookupService {
     input: OrganizationLookupInput,
     crawled: CrawledWebsite,
   ): Promise<OrganizationLookupResult> {
-    if (apiConfig.geminiApiKey && !process.env.GOOGLE_API_KEY) {
-      process.env.GOOGLE_API_KEY = apiConfig.geminiApiKey
-    }
+    const prompt = await this.promptClient.compilePrompt(PROMPT_NAME, {
+      input: organizationLookupPromptInput(input, crawled),
+    })
+    const generated = await this.llmClient.generateJson({
+      model: this.model,
+      prompt,
+      responseSchema: organizationLookupResponseSchema(
+        organizationLookupResponseCodeSets,
+      ),
+    })
+    const parsed = organizationLookupResultSchema.safeParse(
+      normalizeLookupGeneratedOutput(generated),
+    )
 
-    try {
-      const { InMemoryRunner, LlmAgent, isFinalResponse, stringifyContent } =
-        await import("@google/adk")
-      const privacyPolicyAgent = new LlmAgent({
-        name: "policy_profile_extractor",
-        model: this.model,
-        description:
-          "Extracts privacy, security, and subprocessor facts from policy pages.",
-        instruction:
-          "Review policy-page text and return concise facts relevant to company profile, data types, activities, providers, and policy links.",
-        outputSchema: organizationLookupResultSchema,
-      })
-      const websiteProfileAgent = new LlmAgent({
-        name: "website_profile_mapper",
-        model: this.model,
-        description:
-          "Maps website and product pages into the Plyco organization schema.",
-        instruction:
-          "Map public website content to the supplied JSON schema. Prefer null or empty values over guessing.",
-        outputSchema: organizationLookupResultSchema,
-      })
-      const rootAgent = new LlmAgent({
-        name: "organization_lookup_coordinator",
-        model: this.model,
-        description:
-          "Coordinates website and policy extraction for Plyco organization onboarding.",
-        instruction: organizationLookupInstruction(input, crawled),
-        outputSchema: organizationLookupResultSchema,
-        subAgents: [websiteProfileAgent, privacyPolicyAgent],
-      })
-      const runner = new InMemoryRunner({
-        agent: rootAgent,
-        appName: "plyco-organization-lookup",
-      })
-      let finalText = ""
-
-      for await (const event of runner.runEphemeral({
-        userId: "organization-lookup",
-        newMessage: {
-          role: "user",
-          parts: [{ text: organizationLookupPrompt(input, crawled) }],
-        },
-      })) {
-        if (isFinalResponse(event)) {
-          finalText = stringifyContent(event)
-        }
-      }
-
-      const parsed = organizationLookupResultSchema.safeParse(
-        JSON.parse(extractJson(finalText)),
-      )
-
-      if (!parsed.success) {
-        throw new ApiError(
-          "ORGANIZATION_LOOKUP_INVALID_RESPONSE",
-          "Organization lookup returned an invalid profile.",
-          502,
-          parsed.error.flatten(),
-        )
-      }
-
-      return parsed.data
-    } catch (error) {
-      if (error instanceof ApiError) {
-        throw error
-      }
-
+    if (!parsed.success) {
       throw new ApiError(
-        "ORGANIZATION_LOOKUP_AGENT_FAILED",
-        "Organization lookup agent failed.",
+        "ORGANIZATION_LOOKUP_INVALID_RESPONSE",
+        "Organization lookup returned an invalid profile.",
         502,
-        upstreamDetails(error),
+        parsed.error.flatten(),
       )
     }
+
+    return parsed.data
   }
 }
 
-export const createDefaultOrganizationLookupService = () => {
+export const createDefaultOrganizationLookupService = ({
+  promptClient,
+  llmClient,
+}: {
+  promptClient?: PromptClient
+  llmClient?: LlmJsonClient
+} = {}) => {
   const missing = [
     apiConfig.firecrawlApiKey ? null : "FIRECRAWL_API_KEY",
-    apiConfig.geminiApiKey ? null : "GEMINI_API_KEY",
+    apiConfig.geminiApiKey || llmClient ? null : "GEMINI_API_KEY",
+    promptClient || apiConfig.langfusePublicKey ? null : "LANGFUSE_PUBLIC_KEY",
+    promptClient || apiConfig.langfuseSecretKey ? null : "LANGFUSE_SECRET_KEY",
   ].filter((name): name is string => Boolean(name))
 
   if (missing.length > 0) {
@@ -397,10 +411,17 @@ export const createDefaultOrganizationLookupService = () => {
     } satisfies OrganizationLookupService
   }
 
-  return new AdkOrganizationLookupService(
+  return new LlmOrganizationLookupService(
     new FirecrawlWebsiteCrawler(
       new Firecrawl({ apiKey: apiConfig.firecrawlApiKey }),
     ),
+    promptClient ??
+      LangfusePromptClient.fromConfig({
+        publicKey: apiConfig.langfusePublicKey,
+        secretKey: apiConfig.langfuseSecretKey,
+        baseUrl: apiConfig.langfuseBaseUrl,
+      }),
+    llmClient ?? new GeminiJsonClient(apiConfig.geminiApiKey ?? ""),
   )
 }
 
@@ -422,22 +443,26 @@ const upstreamDetails = (error: unknown) =>
     ? { cause: error.name, message: error.message.slice(0, 500) }
     : undefined
 
-const extractJson = (text: string) => {
-  const trimmed = text.trim()
-  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-
-  if (fenced?.[1]) {
-    return fenced[1]
+const normalizeLookupGeneratedOutput = (generated: unknown) => {
+  if (
+    typeof generated !== "object" ||
+    !generated ||
+    !("primaryActivity" in generated) ||
+    typeof generated.primaryActivity !== "object" ||
+    !generated.primaryActivity
+  ) {
+    return generated
   }
 
-  const firstBrace = trimmed.indexOf("{")
-  const lastBrace = trimmed.lastIndexOf("}")
+  const primaryActivity = generated.primaryActivity as Record<string, unknown>
 
-  if (firstBrace >= 0 && lastBrace > firstBrace) {
-    return trimmed.slice(firstBrace, lastBrace + 1)
+  return {
+    ...generated,
+    primaryActivity: {
+      ...primaryActivity,
+      role: primaryActivity.role ?? "",
+    },
   }
-
-  return trimmed
 }
 
 const organizationLookupInstruction = (
@@ -450,6 +475,7 @@ Use these rules:
 - Default legalEntityName to "${input.name}" unless a legal entity is explicit.
 - Use ISO alpha-2 country codes only. Use null if uncertain.
 - Use region code IDs such as "us", "eu", "uk", "apac", or null for primaryHostingRegion.
+- Use only code IDs from input.codeSets for all code-backed fields. Never return code labels such as "GDPR" or "Controller".
 - Do not invent policy links, providers, addresses, emails, or sensitive data.
 - Keep one primary service, one primary data type, and one primary activity.
 - suggestedProviders should only include named third-party providers evident in the crawl or policy pages.
@@ -457,22 +483,23 @@ Use these rules:
 Discovered policy links:
 ${JSON.stringify(crawled.policyLinks)}`;
 
-const organizationLookupPrompt = (
+const organizationLookupPromptInput = (
   input: OrganizationLookupInput,
   crawled: CrawledWebsite,
-) =>
-  JSON.stringify({
-    organizationName: input.name,
-    website: input.website,
-    pages: crawled.pages.map((page) => ({
-      url: page.url,
-      title: page.title,
-      markdown: truncate(page.markdown, 7000),
-    })),
-    emptyProfiles: {
-      access: emptyAccessProfile,
-      dataHandling: emptyDataHandlingProfile,
-      infrastructure: emptyInfrastructureProfile,
-      privacy: emptyPrivacyProfile,
-    },
-  })
+) => ({
+  organizationName: input.name,
+  website: input.website,
+  pages: crawled.pages.map((page) => ({
+    url: page.url,
+    title: page.title,
+    markdown: truncate(page.markdown, 7000),
+  })),
+  emptyProfiles: {
+    access: emptyAccessProfile,
+    dataHandling: emptyDataHandlingProfile,
+    infrastructure: emptyInfrastructureProfile,
+    privacy: emptyPrivacyProfile,
+  },
+  codeSets: organizationLookupCodeSets,
+  instructions: organizationLookupInstruction(input, crawled),
+})
