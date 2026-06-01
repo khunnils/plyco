@@ -36,13 +36,13 @@ import {
   type WizardStep,
   type WizardDraft,
   stepOrder,
-  fallbackIndustryOptions,
   fallbackComplianceGoalOptions,
   fallbackRegionOptions,
   draftFromLookup,
   toProfileDraft,
   normalizeUrl,
   optionLabels,
+  complianceGoalsForRegions,
 } from "./types"
 
 export const CreateOrganizationScreen = ({
@@ -65,9 +65,6 @@ export const CreateOrganizationScreen = ({
   const lookupOrganization = useLookupOrganization()
   const vocabulary = useVocabulary(Boolean(draft))
   const queryClient = useQueryClient()
-  const industryOptions = codeOptions(vocabulary.data, "industries")
-  const marketOptions =
-    industryOptions.length > 0 ? industryOptions : fallbackIndustryOptions
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
   const goalOptions =
     complianceGoalOptions.length > 0
@@ -99,9 +96,9 @@ export const CreateOrganizationScreen = ({
 
     if (
       step === "markets" &&
-      (!draft?.company.industries || draft.company.industries.length === 0)
+      (!draft?.company.regions || draft.company.regions.length === 0)
     ) {
-      setSubmitError("Select at least one primary market.")
+      setSubmitError("Select at least one primary region.")
       return
     }
 
@@ -244,7 +241,7 @@ export const CreateOrganizationScreen = ({
             onChange={setWebsite}
           />
           <div className="flex gap-4 rounded-lg border border-primary-100 bg-primary-50 p-4 text-left">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-blue-100 text-priamry-700">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-blue-100 text-primary-700">
               <Info className="size-5" />
             </div>
             <div>
@@ -332,7 +329,7 @@ export const CreateOrganizationScreen = ({
       step={step}
       title={
         step === "markets"
-          ? "Select your primary markets"
+          ? "Select your primary regions"
           : step === "compliance"
             ? "Choose compliance goals"
             : "Review lookup details"
@@ -347,14 +344,18 @@ export const CreateOrganizationScreen = ({
 
         {step === "markets" ? (
           <OptionPicker
-            helperText="Use the shared industries codeset so your profile and generated policies use the same market vocabulary."
-            label="Primary markets"
-            options={marketOptions}
-            value={draft.company.industries}
+            helperText="Use the shared regions codeset so the next step can start with relevant compliance defaults."
+            label="Primary regions"
+            options={regionOptions}
+            value={draft.company.regions}
             onChange={(value) =>
               updateDraft((current) => ({
                 ...current,
-                company: { ...current.company, industries: value },
+                company: {
+                  ...current.company,
+                  regions: value,
+                  complianceGoals: complianceGoalsForRegions(value),
+                },
               }))
             }
           />
@@ -423,8 +424,8 @@ export const CreateOrganizationScreen = ({
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <ReviewRow
-                label="Primary markets"
-                value={optionLabels(draft.company.industries, marketOptions)}
+                label="Primary regions"
+                value={optionLabels(draft.company.regions, regionOptions)}
               />
               <ReviewRow
                 label="Compliance goals"

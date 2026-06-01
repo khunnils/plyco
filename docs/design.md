@@ -17,6 +17,6 @@ Plyco is reading public website and policy pages, and avoid implying automatic
 compliance or legal certainty.
 
 Each step should collect the minimum viable setup data and make lookup-prefilled
-values obviously editable. Primary markets and compliance goals should use the
+values obviously editable. Primary regions and compliance goals should use the
 shared vocabulary code IDs so onboarding choices align with the rest of the
 profile.

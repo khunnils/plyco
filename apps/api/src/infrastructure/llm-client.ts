@@ -7,7 +7,10 @@ import {
 import { startObservation } from "@langfuse/tracing"
 
 import { ApiError } from "./errors.js"
-import { flushInstrumentation } from "./instrumentation.js"
+import {
+  flushInstrumentation,
+  isInstrumentationEnabled,
+} from "./instrumentation.js"
 import { type ResolvedPrompt } from "./prompt-client.js"
 
 export interface LlmJsonClient {
@@ -117,6 +120,8 @@ const llmErrorDetails = (error: unknown) => {
   }
 }
 
+const isValidTraceId = (traceId: string) => !/^0+$/.test(traceId)
+
 export class GeminiJsonClient implements LlmJsonClient {
   private readonly client: GoogleGenAI
 
@@ -143,6 +148,7 @@ export class GeminiJsonClient implements LlmJsonClient {
       },
       { asType: "generation" },
     )
+    const traceId = generation.traceId
 
     try {
       const response = await this.client.models.generateContent({
@@ -168,6 +174,15 @@ export class GeminiJsonClient implements LlmJsonClient {
         output: parsed,
         usageDetails: usageDetails(response.usageMetadata),
       })
+      console.info(
+        JSON.stringify({
+          msg: "llm generation completed",
+          generationName: operationName,
+          model,
+          traceId,
+          tracingEnabled: isInstrumentationEnabled(),
+        }),
+      )
 
       return parsed
     } catch (error) {
@@ -200,6 +215,15 @@ export class GeminiJsonClient implements LlmJsonClient {
     } finally {
       generation.end()
       await flushInstrumentation()
+      if (!isValidTraceId(traceId)) {
+        console.warn(
+          JSON.stringify({
+            msg: "langfuse generation trace id is invalid",
+            generationName: operationName,
+            tracingEnabled: isInstrumentationEnabled(),
+          }),
+        )
+      }
     }
   }
 }

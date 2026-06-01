@@ -46,6 +46,31 @@ export const fallbackComplianceGoalOptions = [
   { value: "gdpr", label: "GDPR" },
 ]
 
+export const complianceGoalsForRegions = (
+  regions: string[] | null | undefined
+) => {
+  const selectedRegions = regions ?? []
+  const goals = new Set<string>()
+
+  if (
+    selectedRegions.some((region) =>
+      ["us", "global", "apac", "latam", "mea"].includes(region)
+    )
+  ) {
+    goals.add("soc_2")
+  }
+
+  if (
+    selectedRegions.some((region) => ["eu", "uk", "global"].includes(region))
+  ) {
+    goals.add("gdpr")
+  }
+
+  return Array.from(goals)
+}
+
+export const defaultComplianceGoals = complianceGoalsForRegions([])
+
 export const fallbackRegionOptions = [
   { value: "us", label: "United States" },
   { value: "eu", label: "European Union" },
@@ -89,7 +114,8 @@ export const fallbackDraft = ({
     legalEntityName: name,
     website,
     industries: [],
-    complianceGoals: [],
+    regions: [],
+    complianceGoals: defaultComplianceGoals,
   },
   primaryService: {
     ...emptyServiceProfile,
@@ -114,7 +140,11 @@ export const draftFromLookup = (
     legalEntityName: result.company.legalEntityName || input.name,
     website: result.company.website || input.website,
     industries: result.company.industries ?? [],
-    complianceGoals: result.company.complianceGoals ?? [],
+    regions: result.company.regions ?? [],
+    complianceGoals:
+      result.company.complianceGoals && result.company.complianceGoals.length > 0
+        ? result.company.complianceGoals
+        : complianceGoalsForRegions(result.company.regions),
   },
   primaryService: {
     ...emptyServiceProfile,

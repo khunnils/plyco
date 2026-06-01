@@ -331,7 +331,7 @@ export class LlmOrganizationLookupService implements OrganizationLookupService {
         ...emptyCompanyProfile,
         ...generated.company,
         companyName: generated.company.companyName || input.name,
-        legalEntityName: generated.company.legalEntityName || input.name,
+        legalEntityName: generated.company.legalEntityName,
         website: generated.company.website || input.website,
       },
       primaryService: {
@@ -472,11 +472,12 @@ const organizationLookupInstruction = (
 
 Return only valid JSON matching the output schema. Do not wrap it in Markdown.
 Use these rules:
-- Default legalEntityName to "${input.name}" unless a legal entity is explicit.
+- Set legalEntityName, address, employeeCount, country, contactEmail, securityContactEmail, and privacyContactEmail to null unless the exact value is present in the crawled website content.
 - Use ISO alpha-2 country codes only. Use null if uncertain.
 - Use region code IDs such as "us", "eu", "uk", "apac", or null for primaryHostingRegion.
 - Use only code IDs from input.codeSets for all code-backed fields. Never return code labels such as "GDPR" or "Controller".
-- Do not invent policy links, providers, addresses, emails, or sensitive data.
+- Do not infer operating regions or compliance goals from generic SaaS/security language. Return them only when the pages explicitly mention the geography or framework.
+- Do not invent policy links, providers, addresses, emails, counts, legal names, or sensitive data.
 - Keep one primary service, one primary data type, and one primary activity.
 - suggestedProviders should only include named third-party providers evident in the crawl or policy pages.
 
