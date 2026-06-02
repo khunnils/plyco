@@ -176,15 +176,17 @@ describe("organizations API", () => {
               website: input.website,
             },
             primaryService: serviceBody,
-            primaryDataType: profileBody.dataHandling.dataTypesStored[0],
-            primaryActivity: {
-              name: "Account management",
-              purpose: "Create and manage customer accounts.",
-              role: "",
-              legalBasis: [],
-              retentionPolicy: null,
-              retentionDays: 0,
-            },
+            dataTypes: profileBody.dataHandling.dataTypesStored,
+            activities: [
+              {
+                name: "Account management",
+                purpose: "Create and manage customer accounts.",
+                role: "",
+                legalBasis: [],
+                retentionPolicy: null,
+                retentionDays: 0,
+              },
+            ],
             suggestedProviders: [
               { name: "GitHub", url: "https://github.com" },
             ],
@@ -217,6 +219,13 @@ describe("organizations API", () => {
         website: "https://acme.example",
       },
       primaryService: serviceBody,
+      dataTypes: profileBody.dataHandling.dataTypesStored,
+      activities: [
+        expect.objectContaining({
+          name: "Account management",
+          purpose: "Create and manage customer accounts.",
+        }),
+      ],
       suggestedProviders: [{ name: "GitHub", url: "https://github.com" }],
     });
   });
@@ -339,6 +348,38 @@ describe("organizations API", () => {
     expect(llmClient.request?.tools).toEqual([
       { googleSearch: {} },
       { urlContext: {} },
+    ]);
+  });
+
+  it("maps multiple website lookup activities and data types", async () => {
+    const service = new LlmOrganizationLookupService(
+      lookupCodeSource,
+      new CapturingPromptClient(),
+      new StubLlmClient({
+        ...validWebsiteLookupGenerated,
+        primaryService: {
+          ...validWebsiteLookupGenerated.primaryService,
+          activities: ["Account management", "Billing", "Account management"],
+          dataCaptured: ["Customer account data", "Payment data", ""],
+        },
+      }),
+      "test-model",
+    );
+
+    const result = await service.lookupWebsite({
+      website: "https://acme.example",
+    });
+
+    expect(result.activities).toEqual([
+      expect.objectContaining({ name: "Account management", purpose: "" }),
+      expect.objectContaining({ name: "Billing", purpose: "" }),
+    ]);
+    expect(result.dataTypes).toEqual([
+      expect.objectContaining({
+        name: "Customer account data",
+        description: null,
+      }),
+      expect.objectContaining({ name: "Payment data", description: null }),
     ]);
   });
 

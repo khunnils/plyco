@@ -11,17 +11,19 @@ import {
 export const CreateShell = ({
   actions,
   children,
-  eyebrow,
   onBack,
   step,
   title,
+  titleAbove,
+  description,
 }: {
   actions: ReactNode
   children: ReactNode
-  eyebrow: string
   onBack?: () => void
   step: WizardStep
   title: string
+  titleAbove?: boolean
+  description?: string
 }) => (
   <main className="min-h-svh bg-slate-50 text-slate-900">
     <section className="flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
@@ -38,12 +40,7 @@ export const CreateShell = ({
               <ArrowLeft />
             </Button>
           ) : null}
-          <div className="min-w-0">
-            <p className="truncate text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Organization Setup
-            </p>
-            <p className="text-sm font-medium text-slate-700">{eyebrow}</p>
-          </div>
+          <img src="/logo.png" alt="Plyco" className="h-8 w-auto rounded-md object-contain" />
         </div>
         <div className="flex items-center gap-4">
           {stepNumber(step) > 0 ? (
@@ -65,13 +62,30 @@ export const CreateShell = ({
           {actions}
         </div>
       </header>
-      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
-        <section className="w-full max-w-3xl rounded-lg bg-white px-5 py-8 shadow-sm ring-1 ring-slate-200 sm:px-10 sm:py-10">
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-8">
+        {titleAbove ? (
           <div className="mx-auto mb-8 max-w-2xl text-center">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
+              STEP {stepNumber(step)} OF {stepOrder.length}
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
               {title}
             </h1>
+            {description ? (
+              <p className="mt-3 text-sm leading-6 text-slate-500 max-w-xl mx-auto">
+                {description}
+              </p>
+            ) : null}
           </div>
+        ) : null}
+        <section className="w-full max-w-3xl rounded-lg bg-white px-5 py-8 shadow-sm ring-1 ring-slate-200 sm:px-10 sm:py-10">
+          {!titleAbove ? (
+            <div className="mx-auto mb-8 max-w-2xl text-center">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                {title}
+              </h1>
+            </div>
+          ) : null}
           {children}
         </section>
       </div>

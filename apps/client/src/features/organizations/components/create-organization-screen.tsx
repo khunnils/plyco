@@ -2,21 +2,32 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  Edit2,
   Info,
   Loader2,
   LogOut,
+  Plus,
   Sparkles,
+  Trash2,
   X,
 } from "lucide-react"
 import {
   organizationLookupInputSchema,
   type AuthUser,
+  type BusinessActivityInput,
+  type StoredDataType,
 } from "@plyco/shared"
 import { useState, type FormEvent } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import {
   useLookupOrganizationWebsite,
   useLookupPrivacyPolicy,
@@ -41,12 +52,110 @@ import {
   stepOrder,
   fallbackComplianceGoalOptions,
   fallbackRegionOptions,
-  draftFromLookup,
+  fallbackDraft,
+  mergeLookupDraft,
   toProfileDraft,
   normalizeUrl,
   optionLabels,
   complianceGoalsForRegions,
 } from "./types"
+
+const privacyLookupWarning =
+  "Privacy policy details could not be enriched. You can continue manually."
+
+const websiteLookupWarning =
+  "Website details could not be enriched. You can continue manually."
+
+const SetupTextArea = ({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string
+  value: string
+  placeholder?: string
+  onChange: (value: string) => void
+}) => (
+  <label className="grid gap-2 text-sm font-medium text-slate-800 md:col-span-2">
+    <span>{label}</span>
+    <textarea
+      className="min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-normal leading-6 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      placeholder={placeholder}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  </label>
+)
+
+const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> = {
+  global: {
+    description: "Cross-border operations spanning multiple continents.",
+    icon: "globe",
+  },
+  us: {
+    description: "North American domestic market and regulatory compliance.",
+    icon: "us",
+  },
+  eu: {
+    description: "EMEA focus with GDPR and regional policy adherence.",
+    icon: "eu",
+  },
+  uk: {
+    description: "UK market presence and UK GDPR alignment.",
+    icon: "uk",
+  },
+  apac: {
+    description: "APAC fast-growing markets and local compliance needs.",
+    icon: "apac",
+  },
+  latam: {
+    description: "LATAM presence and emerging data protection frameworks.",
+    icon: "latam",
+  },
+  mea: {
+    description: "MEA operations and localized compliance standards.",
+    icon: "mea",
+  },
+}
+
+const ENRICHED_COMPLIANCE: Record<string, { description: string; icon: string }> = {
+  soc_2: {
+    description: "Security, availability, and confidentiality trust standard.",
+    icon: "soc_2",
+  },
+  gdpr: {
+    description: "European standard for data protection and privacy rights.",
+    icon: "gdpr",
+  },
+}
+
+const emptyDataType = (index: number): StoredDataType => ({
+  name: `Data type ${index + 1}`,
+  description: "",
+  subjectTypes: null,
+  collectionMethods: null,
+  isSensitive: null,
+  isRequired: true,
+})
+
+const emptyActivity = (index: number): BusinessActivityInput => ({
+  name: `Activity ${index + 1}`,
+  purpose: "",
+  role: "",
+  legalBasis: [],
+  retentionPolicy: null,
+  retentionDays: 0,
+})
+
+type SetupTab = "company" | "service" | "data-types" | "activities"
+
+const setupTabs: Array<{ value: SetupTab; label: string }> = [
+  { value: "company", label: "Company" },
+  { value: "service", label: "Primary Service" },
+  { value: "data-types", label: "Data Types" },
+  { value: "activities", label: "Activities" },
+]
 
 export const CreateOrganizationScreen = ({
   user,
@@ -63,6 +172,9 @@ export const CreateOrganizationScreen = ({
   const [name, setName] = useState("")
   const [website, setWebsite] = useState("")
   const [draft, setDraft] = useState<WizardDraft | null>(null)
+  const [setupTab, setSetupTab] = useState<SetupTab>("company")
+  const [editingDataType, setEditingDataType] = useState<number | null>(null)
+  const [editingActivity, setEditingActivity] = useState<number | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const lookupOrganizationWebsite = useLookupOrganizationWebsite()
@@ -70,15 +182,32 @@ export const CreateOrganizationScreen = ({
   const vocabulary = useVocabulary(Boolean(draft))
   const queryClient = useQueryClient()
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
-  const goalOptions =
+  const goalOptions = (
     complianceGoalOptions.length > 0
       ? complianceGoalOptions
       : fallbackComplianceGoalOptions
+  ).map((option) => {
+    const enriched = ENRICHED_COMPLIANCE[option.value] || {
+      description: "Compliance and security reporting framework standard.",
+      icon: "shield",
+    }
+    return {
+      ...option,
+      ...enriched,
+    }
+  })
+  const allowedRegionValues = ["global", "us", "eu"]
   const vocabularyRegionOptions = codeOptions(vocabulary.data, "regions")
-  const regionOptions =
+  const regionOptions = (
     vocabularyRegionOptions.length > 0
       ? vocabularyRegionOptions
       : fallbackRegionOptions
+  )
+    .filter((option) => allowedRegionValues.includes(option.value))
+    .map((option) => ({
+      ...option,
+      ...ENRICHED_REGIONS[option.value],
+    }))
   const actions = onCancel ? (
     <Button type="button" variant="outline" onClick={onCancel}>
       <X />
@@ -95,6 +224,55 @@ export const CreateOrganizationScreen = ({
     setDraft((current) => (current ? updater(current) : current))
   }
 
+  const runLookups = async () => {
+    if (!draft) {
+      return
+    }
+
+    const lookupInput = {
+      name: draft.company.companyName,
+      website: draft.company.website ?? "",
+    }
+    let nextDraft = draft
+
+    setSubmitError(null)
+    setStep("lookup-organization")
+
+    try {
+      const result = await lookupOrganizationWebsite.mutateAsync({
+        website: lookupInput.website,
+      })
+      nextDraft = mergeLookupDraft(nextDraft, lookupInput, result)
+      setDraft(nextDraft)
+
+      if (result.privacyPolicyUrl) {
+        setStep("lookup-privacy")
+
+        try {
+          const privacy = await lookupPrivacyPolicy.mutateAsync({
+            privacyPolicyUrl: result.privacyPolicyUrl,
+          })
+          nextDraft = { ...nextDraft, privacy }
+          setDraft(nextDraft)
+        } catch {
+          nextDraft = {
+            ...nextDraft,
+            warnings: [...nextDraft.warnings, privacyLookupWarning],
+          }
+          setDraft(nextDraft)
+        }
+      }
+    } catch {
+      nextDraft = {
+        ...nextDraft,
+        warnings: [...nextDraft.warnings, websiteLookupWarning],
+      }
+      setDraft(nextDraft)
+    } finally {
+      setStep("setup-review")
+    }
+  }
+
   const goNext = () => {
     const index = stepOrder.indexOf(step)
 
@@ -107,6 +285,11 @@ export const CreateOrganizationScreen = ({
     }
 
     setSubmitError(null)
+
+    if (step === "compliance") {
+      void runLookups()
+      return
+    }
 
     if (index >= 0 && index < stepOrder.length - 1) {
       setStep(stepOrder[index + 1])
@@ -121,7 +304,7 @@ export const CreateOrganizationScreen = ({
     }
   }
 
-  const startLookup = (event: FormEvent<HTMLFormElement>) => {
+  const startOnboarding = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const normalizedWebsite = normalizeUrl(website)
     const parsed = organizationLookupInputSchema.safeParse({
@@ -135,50 +318,35 @@ export const CreateOrganizationScreen = ({
     }
 
     setSubmitError(null)
+    setName(parsed.data.name)
     setWebsite(normalizedWebsite)
-    setStep("lookup")
-    lookupOrganizationWebsite.mutate(
-      { website: parsed.data.website },
-      {
-        onSuccess: (result) => {
-          setDraft(draftFromLookup(parsed.data, result))
-          setStep("markets")
-          if (result.privacyPolicyUrl) {
-            lookupPrivacyPolicy.mutate(
-              { privacyPolicyUrl: result.privacyPolicyUrl },
-              {
-                onSuccess: (privacy) => {
-                  setDraft((current) =>
-                    current ? { ...current, privacy } : current
-                  )
-                },
-                onError: () => {
-                  setDraft((current) =>
-                    current
-                      ? {
-                          ...current,
-                          warnings: [
-                            ...current.warnings,
-                            "Privacy policy details could not be enriched. You can continue manually.",
-                          ],
-                        }
-                      : current
-                  )
-                },
-              }
-            )
-          }
-        },
-        onError: (error) => {
-          setSubmitError(error.message || "Could not map organization details.")
-          setStep("identity")
-        },
-      }
-    )
+    setDraft(fallbackDraft(parsed.data))
+    setStep("markets")
   }
 
   const finishSetup = async () => {
     if (!draft) {
+      return
+    }
+
+    if (!draft.primaryService.serviceName?.trim()) {
+      setSubmitError("Service name is required.")
+      return
+    }
+
+    if (
+      draft.dataTypes.length === 0 ||
+      draft.dataTypes.some((dataType) => !dataType.name.trim())
+    ) {
+      setSubmitError("Add at least one data type with a name.")
+      return
+    }
+
+    if (
+      draft.activities.length === 0 ||
+      draft.activities.some((activity) => !activity.name.trim())
+    ) {
+      setSubmitError("Add at least one activity with a name.")
       return
     }
 
@@ -194,11 +362,15 @@ export const CreateOrganizationScreen = ({
       store.selectOrganization(organization.id)
       store.markOnboarding(organization.id)
 
-      const activity = await createBusinessActivity(
-        organization.id,
-        draft.primaryActivity
+      const activities = await Promise.all(
+        draft.activities.map((activity) =>
+          createBusinessActivity(organization.id, activity)
+        )
       )
-      const profile = toProfileDraft(draft, activity.id)
+      const profile = toProfileDraft(
+        draft,
+        activities.map((activity) => activity.id)
+      )
       const snapshot = await saveSecurityProfile(organization.id, profile)
 
       queryClient.setQueryData(securityProfileQueryKey(organization.id), snapshot)
@@ -219,25 +391,32 @@ export const CreateOrganizationScreen = ({
     }
   }
 
-  if (step === "lookup") {
+  if (step === "lookup-organization" || step === "lookup-privacy") {
+    const isPrivacyLookup = step === "lookup-privacy"
+
     return (
       <CreateShell
         actions={actions}
-        eyebrow="Website lookup"
         step={step}
-        title="Pulling details from your website"
+        title={
+          isPrivacyLookup
+            ? "Evaluating existing policies"
+            : "Building an understanding"
+        }
       >
         <div className="mx-auto flex max-w-xl flex-col items-center text-center">
-          <div className="flex size-12 items-center justify-center rounded-md bg-blue-50 text-blue-700">
+          <div className="flex size-12 items-center justify-center rounded-md bg-slate-100 text-slate-700">
             <Loader2 className="size-5 animate-spin" />
           </div>
           <p className="mt-5 font-medium text-slate-950">
-            Reading public website details.
+            {isPrivacyLookup
+              ? "Reading public privacy policy details."
+              : "Reading public website details."}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            We are looking for organization details, a primary service, common
-            data categories, and a privacy policy link. You can review the
-            lookup details before anything is saved.
+            {isPrivacyLookup
+              ? "We are checking existing policy language for privacy defaults. You can review every value before anything is saved."
+              : "We are looking for organization details, a primary service, common data categories, and a privacy policy link. You can review the lookup details before anything is saved."}
           </p>
         </div>
       </CreateShell>
@@ -248,13 +427,12 @@ export const CreateOrganizationScreen = ({
     return (
       <CreateShell
         actions={actions}
-        eyebrow="Step 1 of 4"
         step={step}
         title="Let's build your workspace"
       >
         <form
           className="mx-auto grid max-w-2xl gap-6"
-          onSubmit={startLookup}
+          onSubmit={startOnboarding}
         >
           <TextInput
             label="Organization name"
@@ -273,7 +451,7 @@ export const CreateOrganizationScreen = ({
             onChange={setWebsite}
           />
           <div className="flex gap-4 rounded-lg border border-primary-100 bg-primary-50 p-4 text-left">
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-blue-100 text-primary-700">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-slate-200 text-slate-700">
               <Info className="size-5" />
             </div>
             <div>
@@ -281,8 +459,8 @@ export const CreateOrganizationScreen = ({
                 Workspace identity
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Providing your website helps us fetch public details for review
-                while keeping the setup editable.
+                Add the basics first. We will ask for regions and goals before
+                reading public pages for editable defaults.
               </p>
             </div>
           </div>
@@ -294,14 +472,9 @@ export const CreateOrganizationScreen = ({
           <div className="grid gap-4 pt-2">
             <Button
               className="h-12"
-              disabled={lookupOrganizationWebsite.isPending}
               type="submit"
             >
-              {lookupOrganizationWebsite.isPending ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Sparkles />
-              )}
+              <Sparkles />
               Continue
             </Button>
             <p className="text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -324,9 +497,9 @@ export const CreateOrganizationScreen = ({
         <ArrowLeft />
         Back
       </Button>
-      {step === "review" ? (
+      {step === "setup-review" ? (
         <Button
-          className="bg-blue-600 hover:bg-blue-700 focus-visible:border-blue-700 focus-visible:ring-blue-100"
+          className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
           disabled={isSubmitting}
           type="button"
           onClick={finishSetup}
@@ -336,7 +509,7 @@ export const CreateOrganizationScreen = ({
         </Button>
       ) : (
         <Button
-          className="bg-blue-600 hover:bg-blue-700 focus-visible:border-blue-700 focus-visible:ring-blue-100"
+          className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
           type="button"
           onClick={goNext}
         >
@@ -350,21 +523,22 @@ export const CreateOrganizationScreen = ({
   return (
     <CreateShell
       actions={actions}
-      eyebrow={
-        step === "markets"
-          ? "Step 2 of 4"
-          : step === "compliance"
-            ? "Step 3 of 4"
-            : "Step 4 of 4"
-      }
       onBack={goBack}
       step={step}
+      titleAbove={step === "markets" || step === "compliance"}
+      description={
+        step === "markets"
+          ? "Select the core regions where your organization operates to tailor your compliance and data reporting experience."
+          : step === "compliance"
+            ? "Pick the frameworks you are actively preparing for or already need to answer customer security reviews."
+            : undefined
+      }
       title={
         step === "markets"
-          ? "Select your primary regions"
+          ? "Primary Markets"
           : step === "compliance"
-            ? "Choose compliance goals"
-            : "Review lookup details"
+            ? "Compliance Goals"
+            : "Review workspace setup"
       }
     >
       <section className="grid gap-6">
@@ -373,15 +547,10 @@ export const CreateOrganizationScreen = ({
             {draft.warnings[0]}
           </div>
         ) : null}
-        {lookupPrivacyPolicy.isPending ? (
-          <div className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
-            Enriching privacy policy details in the background.
-          </div>
-        ) : null}
 
         {step === "markets" ? (
           <OptionPicker
-            helperText="Use the shared regions codeset so the next step can start with relevant compliance defaults."
+            hideHeader
             label="Primary regions"
             options={regionOptions}
             value={draft.company.regions}
@@ -400,7 +569,9 @@ export const CreateOrganizationScreen = ({
 
         {step === "compliance" ? (
           <OptionPicker
-            helperText="Pick the frameworks you are actively preparing for or already need to answer customer security reviews."
+            hideHeader
+            cols={2}
+            isCompliance
             label="Compliance goals"
             options={goalOptions}
             value={draft.company.complianceGoals}
@@ -413,94 +584,435 @@ export const CreateOrganizationScreen = ({
           />
         ) : null}
 
-        {step === "review" ? (
-          <div className="grid gap-5">
-            <div className="grid gap-3 md:grid-cols-2">
-              <TextInput
-                label="Organization name"
-                required
-                value={draft.company.companyName}
-                onChange={(value) =>
-                  updateDraft((current) => ({
-                    ...current,
-                    company: { ...current.company, companyName: value },
-                  }))
-                }
-              />
-              <TextInput
-                label="Website"
-                value={draft.company.website ?? ""}
-                onChange={(value) =>
-                  updateDraft((current) => ({
-                    ...current,
-                    company: { ...current.company, website: value },
-                  }))
-                }
-              />
-              <TextInput
-                label="Legal entity name"
-                value={draft.company.legalEntityName ?? ""}
-                onChange={(value) =>
-                  updateDraft((current) => ({
-                    ...current,
-                    company: { ...current.company, legalEntityName: value },
-                  }))
-                }
-              />
-              <TextInput
-                label="Contact email"
-                type="email"
-                value={draft.company.contactEmail ?? ""}
-                onChange={(value) =>
-                  updateDraft((current) => ({
-                    ...current,
-                    company: { ...current.company, contactEmail: value },
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <ReviewRow
-                label="Primary regions"
-                value={optionLabels(draft.company.regions, regionOptions)}
-              />
-              <ReviewRow
-                label="Compliance goals"
-                value={optionLabels(draft.company.complianceGoals, goalOptions)}
-              />
-              <ReviewRow
-                label="Primary service"
-                value={draft.primaryService.serviceName || "Not detected"}
-              />
-              <ReviewRow
-                label="Primary data type"
-                value={draft.primaryDataType.name || "Not detected"}
-              />
-              <ReviewRow
-                label="Hosting region"
-                value={
-                  draft.primaryService.privacy.primaryHostingRegion
-                    ? optionLabels(
-                        [draft.primaryService.privacy.primaryHostingRegion],
-                        regionOptions
-                      )
-                    : "Not detected"
-                }
-              />
-              <ReviewRow
-                label="Privacy policy"
-                value={draft.privacyPolicyUrl ?? "Not detected"}
-              />
-              <ReviewRow
-                label="Suggested providers"
-                value={
-                  draft.suggestedProviderNames.length > 0
-                    ? draft.suggestedProviderNames.join(", ")
-                    : "None detected"
-                }
-              />
-            </div>
-          </div>
+        {step === "setup-review" ? (
+          <Tabs
+            className="grid gap-4"
+            value={setupTab}
+            onValueChange={(value) => setSetupTab(value as SetupTab)}
+          >
+            <TabsList className="grid w-full grid-cols-4">
+              {setupTabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <section className="rounded-md border border-slate-200 bg-white p-4">
+              <TabsContent className="mt-0 border-0 p-0 shadow-none" value="company">
+                <div className="grid gap-5">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <TextInput
+                      label="Organization name"
+                      required
+                      value={draft.company.companyName}
+                      onChange={(value) =>
+                        updateDraft((current) => ({
+                          ...current,
+                          company: { ...current.company, companyName: value },
+                        }))
+                      }
+                    />
+                    <TextInput
+                      label="Website"
+                      value={draft.company.website ?? ""}
+                      onChange={(value) =>
+                        updateDraft((current) => ({
+                          ...current,
+                          company: { ...current.company, website: value },
+                        }))
+                      }
+                    />
+                    <TextInput
+                      label="Legal entity name"
+                      value={draft.company.legalEntityName ?? ""}
+                      onChange={(value) =>
+                        updateDraft((current) => ({
+                          ...current,
+                          company: { ...current.company, legalEntityName: value },
+                        }))
+                      }
+                    />
+                    <TextInput
+                      label="Contact email"
+                      type="email"
+                      value={draft.company.contactEmail ?? ""}
+                      onChange={(value) =>
+                        updateDraft((current) => ({
+                          ...current,
+                          company: { ...current.company, contactEmail: value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="grid gap-3 border-t border-slate-100 pt-5 md:grid-cols-2">
+                    <ReviewRow
+                      label="Primary regions"
+                      value={optionLabels(draft.company.regions, regionOptions)}
+                    />
+                    <ReviewRow
+                      label="Compliance goals"
+                      value={optionLabels(draft.company.complianceGoals, goalOptions)}
+                    />
+                    <ReviewRow
+                      label="Privacy policy"
+                      value={draft.privacyPolicyUrl ?? "Not detected"}
+                    />
+                    <ReviewRow
+                      label="Suggested providers"
+                      value={
+                        draft.suggestedProviderNames.length > 0
+                          ? draft.suggestedProviderNames.join(", ")
+                          : "None detected"
+                      }
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent className="mt-0 border-0 p-0 shadow-none" value="service">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-semibold text-slate-950">
+                      Primary Service
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Edit the primary product or service saved during setup.
+                    </p>
+                  </div>
+                  <TextInput
+                    label="Service name"
+                    required
+                    value={draft.primaryService.serviceName ?? ""}
+                    onChange={(value) =>
+                      updateDraft((current) => ({
+                        ...current,
+                        primaryService: {
+                          ...current.primaryService,
+                          serviceName: value,
+                        },
+                      }))
+                    }
+                  />
+                  <TextInput
+                    label="Service URL"
+                    value={draft.primaryService.serviceUrl ?? ""}
+                    onChange={(value) =>
+                      updateDraft((current) => ({
+                        ...current,
+                        primaryService: {
+                          ...current.primaryService,
+                          serviceUrl: value,
+                        },
+                      }))
+                    }
+                  />
+                  <SetupTextArea
+                    label="Description"
+                    value={draft.primaryService.serviceDescription ?? ""}
+                    onChange={(value) =>
+                      updateDraft((current) => ({
+                        ...current,
+                        primaryService: {
+                          ...current.primaryService,
+                          serviceDescription: value,
+                        },
+                      }))
+                    }
+                  />
+                  <label className="grid gap-2 text-sm font-medium text-slate-800 md:col-span-2">
+                    <span>Hosting region</span>
+                    <select
+                      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+                      value={
+                        draft.primaryService.privacy.primaryHostingRegion ?? ""
+                      }
+                      onChange={(event) =>
+                        updateDraft((current) => ({
+                          ...current,
+                          primaryService: {
+                            ...current.primaryService,
+                            privacy: {
+                              ...current.primaryService.privacy,
+                              primaryHostingRegion:
+                                event.target.value || null,
+                            },
+                          },
+                        }))
+                      }
+                    >
+                      <option value="">Not set</option>
+                      {regionOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </TabsContent>
+
+              <TabsContent className="mt-0 border-0 p-0 shadow-none" value="data-types">
+                <div className="grid gap-3">
+                  <div className="mb-2">
+                    <p className="text-sm font-semibold text-slate-950">
+                      Data Types
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Review and edit the data categories that will be saved.
+                    </p>
+                  </div>
+                  <div className="grid gap-3">
+                    {draft.dataTypes.map((dataType, index) => (
+                      <div
+                        className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
+                        key={`${dataType.name}-${index}`}
+                      >
+                        {editingDataType === index ? (
+                          <div className="grid gap-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold text-slate-950">
+                                Edit Data Type
+                              </p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingDataType(null)}
+                              >
+                                <Check className="size-4" />
+                                Done
+                              </Button>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <TextInput
+                                label="Name"
+                                required
+                                value={dataType.name}
+                                onChange={(value) =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    dataTypes: current.dataTypes.map(
+                                      (item, currentIndex) =>
+                                        currentIndex === index
+                                          ? { ...item, name: value }
+                                          : item
+                                    ),
+                                  }))
+                                }
+                              />
+                              <SetupTextArea
+                                label="Description"
+                                value={dataType.description ?? ""}
+                                onChange={(value) =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    dataTypes: current.dataTypes.map(
+                                      (item, currentIndex) =>
+                                        currentIndex === index
+                                          ? { ...item, description: value || null }
+                                          : item
+                                    ),
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-950">
+                                {dataType.name}
+                              </p>
+                              {dataType.description ? (
+                                <p className="mt-1 text-xs leading-5 text-slate-500">
+                                  {dataType.description}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingDataType(index)}
+                              >
+                                <Edit2 className="size-4 text-slate-500" />
+                              </Button>
+                              <Button
+                                disabled={draft.dataTypes.length === 1}
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    dataTypes: current.dataTypes.filter(
+                                      (_, currentIndex) => currentIndex !== index
+                                    ),
+                                  }))
+                                }
+                              >
+                                <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      className="mt-2 justify-self-start"
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        updateDraft((current) => {
+                          const next = [
+                            ...current.dataTypes,
+                            emptyDataType(current.dataTypes.length),
+                          ]
+                          setEditingDataType(next.length - 1)
+                          return {
+                            ...current,
+                            dataTypes: next,
+                          }
+                        })
+                      }}
+                    >
+                      <Plus className="size-4" />
+                      Add data type
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent className="mt-0 border-0 p-0 shadow-none" value="activities">
+                <div className="grid gap-3">
+                  <div className="mb-2">
+                    <p className="text-sm font-semibold text-slate-950">
+                      Activities
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Review and edit the business activities.
+                    </p>
+                  </div>
+                  <div className="grid gap-3">
+                    {draft.activities.map((activity, index) => (
+                      <div
+                        className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
+                        key={`${activity.name}-${index}`}
+                      >
+                        {editingActivity === index ? (
+                          <div className="grid gap-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold text-slate-950">
+                                Edit Activity
+                              </p>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingActivity(null)}
+                              >
+                                <Check className="size-4" />
+                                Done
+                              </Button>
+                            </div>
+                            <div className="grid gap-3 md:grid-cols-2">
+                              <TextInput
+                                label="Name"
+                                required
+                                value={activity.name}
+                                onChange={(value) =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    activities: current.activities.map(
+                                      (item, currentIndex) =>
+                                        currentIndex === index
+                                          ? { ...item, name: value }
+                                          : item
+                                    ),
+                                  }))
+                                }
+                              />
+                              <SetupTextArea
+                                label="Purpose"
+                                value={activity.purpose}
+                                onChange={(value) =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    activities: current.activities.map(
+                                      (item, currentIndex) =>
+                                        currentIndex === index
+                                          ? { ...item, purpose: value }
+                                          : item
+                                    ),
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-950">
+                                {activity.name}
+                              </p>
+                              {activity.purpose ? (
+                                <p className="mt-1 text-xs leading-5 text-slate-500">
+                                  {activity.purpose}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingActivity(index)}
+                              >
+                                <Edit2 className="size-4 text-slate-500" />
+                              </Button>
+                              <Button
+                                disabled={draft.activities.length === 1}
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  updateDraft((current) => ({
+                                    ...current,
+                                    activities: current.activities.filter(
+                                      (_, currentIndex) => currentIndex !== index
+                                    ),
+                                  }))
+                                }
+                              >
+                                <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      className="mt-2 justify-self-start"
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        updateDraft((current) => {
+                          const next = [
+                            ...current.activities,
+                            emptyActivity(current.activities.length),
+                          ]
+                          setEditingActivity(next.length - 1)
+                          return {
+                            ...current,
+                            activities: next,
+                          }
+                        })
+                      }}
+                    >
+                      <Plus className="size-4" />
+                      Add activity
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+            </section>
+          </Tabs>
         ) : null}
 
         {submitError ? (

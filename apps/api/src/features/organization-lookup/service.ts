@@ -255,8 +255,24 @@ const websiteLookupGeneratedSchema = z.object({
     .object({
       name: z.string().trim().nullable().default(null),
       description: z.string().trim().nullable().default(null),
-      activities: z.array(z.string().trim()).max(5).default([]),
-      dataCaptured: z.array(z.string().trim()).max(5).default([]),
+      activities: z
+        .array(
+          z.object({
+            name: z.string().trim(),
+            purpose: z.string().trim().default(""),
+          }),
+        )
+        .max(5)
+        .default([]),
+      dataCaptured: z
+        .array(
+          z.object({
+            name: z.string().trim(),
+            description: z.string().trim().nullable().default(null),
+          }),
+        )
+        .max(5)
+        .default([]),
     })
     .default({
       name: null,
@@ -291,8 +307,28 @@ const websiteLookupResponseSchema = (codeSets: CodeSetMap) =>
         properties: {
           name: nullableStringSchema,
           description: nullableStringSchema,
-          activities: stringArraySchema(5),
-          dataCaptured: stringArraySchema(5),
+          activities: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Name of the business activity." },
+                purpose: { type: Type.STRING, description: "Detailed purpose for this activity." },
+              },
+              required: ["name", "purpose"],
+            },
+          },
+          dataCaptured: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, description: "Name of the data category or type." },
+                description: { type: Type.STRING, nullable: true, description: "Contextual description of this data type." },
+              },
+              required: ["name", "description"],
+            },
+          },
         },
         required: ["name", "description", "activities", "dataCaptured"],
       },
@@ -431,8 +467,14 @@ const privacyPolicyLink = (
 const nonEmpty = (value: string | null | undefined) =>
   value && value.trim() ? value.trim() : null
 
-const firstNonEmpty = (values: string[]) =>
-  values.find((value) => value.trim())?.trim() ?? null
+const uniqueBy = <T>(values: T[], key: (item: T) => string) =>
+  Array.from(
+    new Map(
+      values
+        .filter((value) => key(value).trim())
+        .map((value) => [key(value).trim().toLocaleLowerCase(), value]),
+    ).values(),
+  )
 
 const defaultLookupResult = (
   input: OrganizationWebsiteLookupInput,
@@ -453,8 +495,8 @@ const defaultLookupResult = (
       serviceDescription: "",
       serviceUrl: input.website,
     },
-    primaryDataType: defaultDataType(fallbackName),
-    primaryActivity: defaultActivity(),
+    dataTypes: [defaultDataType(fallbackName)],
+    activities: [defaultActivity()],
     suggestedProviders: [],
     policyLinks: [],
     privacyPolicyUrl: null,
@@ -471,13 +513,10 @@ const mapWebsiteLookupResult = (
     nonEmpty(generated.primaryService.name) ??
     nonEmpty(generated.legalEntityName) ??
     fallbackName
-  const dataName =
-    firstNonEmpty(generated.primaryService.dataCaptured) ??
-    "Customer account data"
-  const activityName =
-    firstNonEmpty(generated.primaryService.activities) ??
-    "Provide the primary service"
+  const dataCaptured = uniqueBy(generated.primaryService.dataCaptured, (d) => d.name)
+  const activities = uniqueBy(generated.primaryService.activities, (a) => a.name)
   const policyLinks = privacyPolicyLink(generated.privacyPolicyUrl)
+  const serviceDescription = generated.primaryService.description ?? ""
 
   return organizationLookupResultSchema.parse({
     company: {
@@ -500,31 +539,32 @@ const mapWebsiteLookupResult = (
     primaryService: {
       ...emptyServiceProfile,
       serviceName,
-      serviceDescription: generated.primaryService.description ?? "",
+      serviceDescription,
       serviceUrl: input.website,
       availabilityRegions: generated.regions,
     },
-    primaryDataType: {
-      name: dataName,
-      description: generated.primaryService.dataCaptured
-        .filter((value) => value.trim())
-        .slice(0, 5)
-        .join(", "),
-      subjectTypes: null,
-      collectionMethods: null,
-      isSensitive: generated.handlesSensitiveData,
-      isRequired: true,
-    },
-    primaryActivity: {
-      name: activityName,
-      purpose:
-        generated.primaryService.description ??
-        "Operate the product, support users, and manage customer accounts.",
-      role: "",
-      legalBasis: [],
-      retentionPolicy: null,
-      retentionDays: 0,
-    },
+    dataTypes:
+      dataCaptured.length > 0
+        ? dataCaptured.map((d) => ({
+            name: d.name,
+            description: d.description,
+            subjectTypes: null,
+            collectionMethods: null,
+            isSensitive: generated.handlesSensitiveData,
+            isRequired: true,
+          }))
+        : [defaultDataType(serviceName)],
+    activities:
+      activities.length > 0
+        ? activities.map((a) => ({
+            name: a.name,
+            purpose: a.purpose,
+            role: "",
+            legalBasis: [],
+            retentionPolicy: null,
+            retentionDays: 0,
+          }))
+        : [defaultActivity()],
     suggestedProviders: [],
     policyLinks,
     privacyPolicyUrl: policyLinks[0]?.url ?? null,

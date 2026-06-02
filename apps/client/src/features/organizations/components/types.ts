@@ -14,24 +14,30 @@ import {
 import { type ProfileDraft } from "@/features/company/types/company"
 
 export type WizardStep =
-  | "lookup"
+  | "lookup-organization"
+  | "lookup-privacy"
   | "identity"
   | "markets"
   | "compliance"
-  | "review"
+  | "setup-review"
 
 export type WizardDraft = {
   company: CompanyProfile
   primaryService: ServiceProfileInput
-  primaryDataType: StoredDataType
-  primaryActivity: BusinessActivityInput
+  dataTypes: StoredDataType[]
+  activities: BusinessActivityInput[]
   privacy: PrivacyProfile
   privacyPolicyUrl: string | null
   suggestedProviderNames: string[]
   warnings: string[]
 }
 
-export const stepOrder: WizardStep[] = ["identity", "markets", "compliance", "review"]
+export const stepOrder: WizardStep[] = [
+  "identity",
+  "markets",
+  "compliance",
+  "setup-review",
+]
 
 export const fallbackIndustryOptions = [
   { value: "artificial_intelligence", label: "Artificial Intelligence" },
@@ -126,8 +132,8 @@ export const fallbackDraft = ({
     serviceDescription: "",
     serviceUrl: website,
   },
-  primaryDataType: defaultDataType(name),
-  primaryActivity: defaultActivity,
+  dataTypes: [defaultDataType(name)],
+  activities: [defaultActivity],
   privacy: emptyPrivacyProfile,
   privacyPolicyUrl: null,
   suggestedProviderNames: [],
@@ -157,12 +163,10 @@ export const draftFromLookup = (
     serviceName: result.primaryService.serviceName || input.name,
     serviceUrl: result.primaryService.serviceUrl || input.website,
   },
-  primaryDataType: result.primaryDataType.name
-    ? result.primaryDataType
-    : defaultDataType(input.name),
-  primaryActivity: result.primaryActivity.name
-    ? result.primaryActivity
-    : defaultActivity,
+  dataTypes:
+    result.dataTypes.length > 0 ? result.dataTypes : [defaultDataType(input.name)],
+  activities:
+    result.activities.length > 0 ? result.activities : [defaultActivity],
   privacy: emptyPrivacyProfile,
   privacyPolicyUrl: result.privacyPolicyUrl,
   suggestedProviderNames: result.suggestedProviders.map(
@@ -171,21 +175,40 @@ export const draftFromLookup = (
   warnings: result.warnings,
 })
 
+export const mergeLookupDraft = (
+  current: WizardDraft,
+  input: { name: string; website: string },
+  result: OrganizationLookupResult
+): WizardDraft => {
+  const lookupDraft = draftFromLookup(input, result)
+
+  return {
+    ...lookupDraft,
+    company: {
+      ...lookupDraft.company,
+      regions: current.company.regions,
+      complianceGoals: current.company.complianceGoals,
+    },
+    privacy: current.privacy,
+    warnings: [...current.warnings, ...lookupDraft.warnings],
+  }
+}
+
 export const toProfileDraft = (
   draft: WizardDraft,
-  businessActivityId: string
+  businessActivityIds: string[]
 ): ProfileDraft => ({
   company: draft.company,
   services: [
     {
       ...draft.primaryService,
-      businessActivityIds: [businessActivityId],
+      businessActivityIds,
     },
   ],
   privacy: draft.privacy,
   infrastructure: emptyInfrastructureProfile,
   dataHandling: {
-    dataTypesStored: [draft.primaryDataType],
+    dataTypesStored: draft.dataTypes,
   },
   access: emptyAccessProfile,
 })

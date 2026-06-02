@@ -16,6 +16,7 @@ import {
   infrastructureProfileSchema,
   isComplianceFieldVisible,
   organizationProviderInputSchema,
+  organizationLookupResultSchema,
   providerCriticalitySchema,
   providerSystemTypeSchema,
   serviceProfileInputSchema,
@@ -125,6 +126,76 @@ describe("shared security profile schemas", () => {
         ],
       }).success,
     ).toBe(true);
+  });
+
+  it("accepts plural onboarding lookup data types and activities", () => {
+    const result = organizationLookupResultSchema.safeParse({
+      company: {
+        companyName: "Acme AI",
+        legalEntityName: "Acme AI, Inc.",
+        website: "https://acme.example",
+        contactEmail: "hello@acme.example",
+        securityContactEmail: "",
+        privacyContactEmail: "",
+        country: "US",
+        address: "",
+        employeeCount: null,
+        industries: [],
+        regions: ["us"],
+        handlesPii: true,
+        handlesSensitiveData: false,
+        storesPii: true,
+        storesHealthcareData: false,
+        complianceGoals: ["soc_2"],
+      },
+      primaryService: {
+        ...emptyServiceProfile,
+        serviceName: "Acme AI",
+        serviceUrl: "https://acme.example",
+      },
+      dataTypes: [
+        {
+          name: "Customer account data",
+          description: "Customer account data",
+          subjectTypes: null,
+          collectionMethods: null,
+          isSensitive: false,
+          isRequired: true,
+        },
+        {
+          name: "Payment data",
+          description: "Payment data",
+          subjectTypes: null,
+          collectionMethods: null,
+          isSensitive: false,
+          isRequired: true,
+        },
+      ],
+      activities: [
+        {
+          name: "Account management",
+          purpose: "Operate user accounts",
+          role: "",
+          legalBasis: [],
+          retentionPolicy: null,
+          retentionDays: 0,
+        },
+        {
+          name: "Billing",
+          purpose: "Process customer payments",
+          role: "",
+          legalBasis: [],
+          retentionPolicy: null,
+          retentionDays: 0,
+        },
+      ],
+      suggestedProviders: [],
+      policyLinks: [],
+      privacyPolicyUrl: null,
+      warnings: [],
+    });
+
+    expect(result.success).toBe(true);
   });
 
   it("requires organization creation to include a name", () => {

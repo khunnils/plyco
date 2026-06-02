@@ -586,8 +586,8 @@ export const organizationLookupSuggestedProviderSchema = z.object({
 export const organizationLookupResultSchema = z.object({
   company: companyProfileSchema,
   primaryService: serviceProfileInputSchema,
-  primaryDataType: storedDataTypeSchema,
-  primaryActivity: businessActivityInputSchema,
+  dataTypes: z.array(storedDataTypeSchema).default([]),
+  activities: z.array(businessActivityInputSchema).default([]),
   suggestedProviders: z
     .array(organizationLookupSuggestedProviderSchema)
     .max(12)

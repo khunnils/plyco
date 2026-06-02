@@ -6,23 +6,26 @@ New users create an organization from a split-panel setup flow. The left panel
 contains the active form step and the right panel provides a calm branded
 background effect.
 
-The first step asks for organization name and website URL. The client calls the
-authenticated `POST /organization-lookup/website` endpoint, which attempts to
-prefill setup from the public website. If that response includes a privacy
-policy URL, the client calls `POST /organization-lookup/privacy-policy` in the
-background to enrich privacy defaults. Website lookup shows an interim state;
-privacy policy enrichment is non-blocking. Lookup failure is not blocking; the
-user continues with the entered name and URL.
+The first step asks for organization name and website URL. The next steps ask
+for primary regions and compliance goals before any public-page lookup runs.
+After those choices, the client calls the authenticated
+`POST /organization-lookup/website` endpoint and shows a blocking “Building an
+understanding” loading screen while it attempts to prefill setup from the public
+website. If that response includes a privacy policy URL, the client calls
+`POST /organization-lookup/privacy-policy` and shows a separate blocking
+“Evaluating existing policies” loading screen to enrich privacy defaults. Lookup
+failure is not blocking; the user continues with the entered name, URL, selected
+regions, selected goals, and editable manual defaults.
 
-After lookup, the user reviews five editable steps:
+After lookup, the user reviews setup in two screens:
 
-- organization profile: legal entity name, country, contact email, and address
-- primary service: name, description, and primary hosting region
-- primary data: one starting data type, with additional data types added later
-- primary activity: one starting business activity
-- provider selector: optional provider catalog selections
+- company review: organization identity, selected regions, compliance goals,
+  privacy policy, and suggested providers
+- setup review: editable tabs for the primary service, data types, and
+  activities
 
-Final submit creates the organization, creates the primary activity, saves the
-seeded security profile, adds selected providers to organization inventory, and
-then opens the workspace. Provider selections do not create service-specific
-provider usage during setup.
+Final submit creates the organization, creates all onboarding activities, links
+them to the primary service, saves all onboarding data types in the seeded
+security profile, adds selected providers to organization inventory, and then
+opens the workspace. Provider selections do not create service-specific provider
+usage during setup.

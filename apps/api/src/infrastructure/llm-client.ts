@@ -357,48 +357,54 @@ export const organizationLookupResponseSchema = (
           "privacy",
         ],
       },
-      primaryDataType: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING },
-          description: nullableStringSchema,
-          subjectTypes: codeIdArraySchema(codeSets.subject_types),
-          collectionMethods: codeIdArraySchema(codeSets.collection_methods),
-          isSensitive: nullableBooleanSchema,
-          isRequired: nullableBooleanSchema,
-        },
-        required: [
-          "name",
-          "description",
-          "subjectTypes",
-          "collectionMethods",
-          "isSensitive",
-          "isRequired",
-        ],
-      },
-      primaryActivity: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING },
-          purpose: { type: Type.STRING },
-          role: nullableCodeIdSchema(codeSets.activity_role),
-          legalBasis: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING, enum: codeSets.legal_basis },
+      dataTypes: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            description: nullableStringSchema,
+            subjectTypes: codeIdArraySchema(codeSets.subject_types),
+            collectionMethods: codeIdArraySchema(codeSets.collection_methods),
+            isSensitive: nullableBooleanSchema,
+            isRequired: nullableBooleanSchema,
           },
-          retentionPolicy: nullableCodeIdSchema(
-            codeSets.activity_retention_policies,
-          ),
-          retentionDays: { type: Type.INTEGER },
+          required: [
+            "name",
+            "description",
+            "subjectTypes",
+            "collectionMethods",
+            "isSensitive",
+            "isRequired",
+          ],
         },
-        required: [
-          "name",
-          "purpose",
-          "role",
-          "legalBasis",
-          "retentionPolicy",
-          "retentionDays",
-        ],
+      },
+      activities: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            name: { type: Type.STRING },
+            purpose: { type: Type.STRING },
+            role: nullableCodeIdSchema(codeSets.activity_role),
+            legalBasis: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING, enum: codeSets.legal_basis },
+            },
+            retentionPolicy: nullableCodeIdSchema(
+              codeSets.activity_retention_policies,
+            ),
+            retentionDays: { type: Type.INTEGER },
+          },
+          required: [
+            "name",
+            "purpose",
+            "role",
+            "legalBasis",
+            "retentionPolicy",
+            "retentionDays",
+          ],
+        },
       },
       suggestedProviders: {
         type: Type.ARRAY,
@@ -441,8 +447,8 @@ export const organizationLookupResponseSchema = (
     required: [
       "company",
       "primaryService",
-      "primaryDataType",
-      "primaryActivity",
+      "dataTypes",
+      "activities",
       "suggestedProviders",
       "policyLinks",
       "warnings",
