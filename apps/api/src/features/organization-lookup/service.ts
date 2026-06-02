@@ -1,96 +1,391 @@
-import Firecrawl, { type Document } from "@mendable/firecrawl-js"
+import { Type, type SchemaUnion, type Tool } from "@google/genai"
 import {
-  emptyAccessProfile,
   emptyCompanyProfile,
-  emptyDataHandlingProfile,
-  emptyInfrastructureProfile,
   emptyPrivacyProfile,
   emptyServiceProfile,
+  codeIdSchema,
+  countryCodeSchema,
   organizationLookupResultSchema,
+  privacyProfileSchema,
   type BusinessActivityInput,
-  type OrganizationLookupInput,
   type OrganizationLookupPolicyLink,
   type OrganizationLookupResult,
+  type OrganizationPrivacyPolicyLookupInput,
+  type OrganizationWebsiteLookupInput,
+  type PrivacyProfile,
   type StoredDataType,
 } from "@plyco/shared"
+import { z } from "zod"
 
 import { apiConfig } from "../../config.js"
+import {
+  linkedRecordIds,
+  listAirtableRecords,
+  numberField,
+  stringField,
+} from "../../infrastructure/airtable.js"
 import { ApiError } from "../../infrastructure/errors.js"
 import {
   GeminiJsonClient,
-  type OrganizationLookupCodeSetId,
-  type OrganizationLookupResponseSchemaOptions,
-  organizationLookupResponseSchema,
   type LlmJsonClient,
 } from "../../infrastructure/llm-client.js"
 import {
   LangfusePromptClient,
   type PromptClient,
 } from "../../infrastructure/prompt-client.js"
-import { defaultVocabularyCodeSets } from "../vocabulary/reference-data.js"
 
 export interface OrganizationLookupService {
-  lookup(input: OrganizationLookupInput): Promise<OrganizationLookupResult>
+  lookupWebsite(
+    input: OrganizationWebsiteLookupInput,
+  ): Promise<OrganizationLookupResult>
+  lookupPrivacyPolicy(
+    input: OrganizationPrivacyPolicyLookupInput,
+  ): Promise<PrivacyProfile>
 }
 
-type CrawledPage = {
-  url: string
-  title: string
-  markdown: string
+export interface OrganizationLookupCodeSource {
+  listCodeSets(codeSetIds: readonly CodeSetId[]): Promise<CodeSetMap>
 }
 
-type CrawledWebsite = {
-  pages: CrawledPage[]
-  policyLinks: OrganizationLookupPolicyLink[]
-}
+type CodeSetId =
+  | "industries"
+  | "regions"
+  | "subject_types"
+  | "collection_methods"
+  | "activity_role"
+  | "legal_basis"
+  | "activity_retention_policies"
+  | "privacy_supported_rights"
+  | "privacy_request_methods"
+  | "defined_statuses"
+  | "privacy_transfer_mechanisms"
+  | "privacy_dpo_statuses"
+  | "privacy_eu_representative_statuses"
 
-type WebsiteCrawler = {
-  crawl(input: OrganizationLookupInput): Promise<CrawledWebsite>
-}
+const WEBSITE_PROMPT_NAME = "website_parser"
+const PRIVACY_PROMPT_NAME = "privacy_policy_parser"
+const CODE_SETS_TABLE_NAME = "Code Sets"
+const CODES_TABLE_NAME = "Codes"
+const GEMINI_URL_TOOLS: Tool[] = [{ googleSearch: {} }, { urlContext: {} }]
 
-const PROMPT_NAME = "website_parser"
-const organizationLookupCodeSetIds = [
+const websiteCodeSetIds = [
   "industries",
   "regions",
-  "compliance_goals",
-  "service_user_types",
-  "service_customer_types",
-  "cookie_tracking_categories",
-  "privacy_cookie_consent_mechanisms",
   "subject_types",
   "collection_methods",
   "activity_role",
   "legal_basis",
   "activity_retention_policies",
-] as const satisfies readonly OrganizationLookupCodeSetId[]
+] as const satisfies readonly CodeSetId[]
 
-const organizationLookupCodeSets = Object.fromEntries(
-  organizationLookupCodeSetIds.map((codeSetId) => {
-    const codeSet = defaultVocabularyCodeSets.find(
-      (candidate) => candidate.codeSetId === codeSetId,
+const privacyCodeSetIds = [
+  "privacy_supported_rights",
+  "privacy_request_methods",
+  "defined_statuses",
+  "privacy_transfer_mechanisms",
+  "privacy_dpo_statuses",
+  "privacy_eu_representative_statuses",
+] as const satisfies readonly CodeSetId[]
+
+const nullableStringSchema = { type: Type.STRING, nullable: true } as const
+const nullableBooleanSchema = { type: Type.BOOLEAN, nullable: true } as const
+const nullableIntegerSchema = { type: Type.INTEGER, nullable: true } as const
+
+type CodeSetMap = Partial<Record<CodeSetId, string[]>>
+
+const activeField = (fields: Record<string, unknown>) =>
+  fields.Active !== false && fields["Is Active"] !== false
+
+const emptyCodeSetMap = (codeSetIds: readonly CodeSetId[]) =>
+  Object.fromEntries(codeSetIds.map((codeSetId) => [codeSetId, []])) as CodeSetMap
+
+export class AirtableOrganizationLookupCodeSource
+  implements OrganizationLookupCodeSource
+{
+  constructor(
+    private readonly baseId: string,
+    private readonly apiKey: string,
+  ) {}
+
+  async listCodeSets(codeSetIds: readonly CodeSetId[]): Promise<CodeSetMap> {
+    const requested = new Set<string>(codeSetIds)
+    let codeSetRecords
+    let codeRecords
+
+    try {
+      const records = await Promise.all([
+        listAirtableRecords({
+          apiKey: this.apiKey,
+          baseId: this.baseId,
+          tableName: CODE_SETS_TABLE_NAME,
+        }),
+        listAirtableRecords({
+          apiKey: this.apiKey,
+          baseId: this.baseId,
+          tableName: CODES_TABLE_NAME,
+        }),
+      ])
+      codeSetRecords = records[0]
+      codeRecords = records[1]
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "AIRTABLE_LOAD_FAILED") {
+        throw new ApiError(
+          "ORGANIZATION_LOOKUP_CODES_LOAD_FAILED",
+          "Unable to load organization lookup codes from Airtable.",
+          502,
+          error.details,
+        )
+      }
+
+      throw error
+    }
+
+    const codeSetRecordsByAirtableId = new Map(
+      codeSetRecords.map((record) => [record.id, record]),
     )
+    const result = emptyCodeSetMap(codeSetIds)
+    const sortedCodeRecords = codeRecords
+      .map((record, index) => ({
+        fields: record.fields,
+        sortOrder:
+          numberField(record.fields, "Sequence", "Sort Order", "Sort", "Order") ??
+          index,
+      }))
+      .sort((first, second) => first.sortOrder - second.sortOrder)
 
-    return [
-      codeSetId,
-      codeSet?.codes
-        .filter((code) => code.active)
-        .map((code) => ({ codeId: code.codeId, label: code.name })) ?? [],
-    ]
-  }),
-) as Record<
-  OrganizationLookupCodeSetId,
-  Array<{ codeId: string; label: string }>
->
+    for (const record of sortedCodeRecords) {
+      const linkedCodeSetId = linkedRecordIds(
+        record.fields,
+        "Code Set",
+        "Code Sets",
+        "Code set",
+        "code_set",
+      )[0]
+      const linkedCodeSet = linkedCodeSetId
+        ? codeSetRecordsByAirtableId.get(linkedCodeSetId)
+        : undefined
+      const codeSetId = linkedCodeSet
+        ? stringField(linkedCodeSet.fields, "Id", "Key")
+        : ""
+      const codeId = stringField(record.fields, "Id", "Key")
 
-const organizationLookupResponseCodeSets =
-  Object.fromEntries(
-    organizationLookupCodeSetIds.map((codeSetId) => [
-      codeSetId,
-      organizationLookupCodeSets[codeSetId].map((code) => code.codeId),
-    ]),
-  ) as OrganizationLookupResponseSchemaOptions
+      if (
+        !codeSetId ||
+        !codeId ||
+        !requested.has(codeSetId) ||
+        !activeField(record.fields)
+      ) {
+        continue
+      }
+
+      result[codeSetId as CodeSetId]?.push(codeId)
+    }
+
+    return result
+  }
+}
+
+export class StaticOrganizationLookupCodeSource
+  implements OrganizationLookupCodeSource
+{
+  constructor(private readonly codeSets: CodeSetMap) {}
+
+  async listCodeSets(codeSetIds: readonly CodeSetId[]): Promise<CodeSetMap> {
+    return Object.fromEntries(
+      codeSetIds.map((codeSetId) => [codeSetId, this.codeSets[codeSetId] ?? []]),
+    ) as CodeSetMap
+  }
+}
+
+const codesFor = (codeSets: CodeSetMap, codeSetId: CodeSetId) =>
+  codeSets[codeSetId] ?? []
+
+const activeCodeSets = (codeSetIds: readonly CodeSetId[], codeSets: CodeSetMap) =>
+  codeSetIds.map((codeSetId) => {
+    const codes =
+      codeSetId === "regions"
+        ? codesFor(codeSets, codeSetId).filter((codeId) =>
+            ["us", "eu", "global"].includes(codeId),
+          )
+        : codesFor(codeSets, codeSetId)
+
+    return { codeSetId, codes }
+  })
+
+const codeSetsText = (codeSetIds: readonly CodeSetId[], codeSets: CodeSetMap) =>
+  activeCodeSets(codeSetIds, codeSets)
+    .map(
+      ({ codeSetId, codes }) =>
+        `${codeSetId}\n${codes.map((code) => ` - ${code}`).join("\n")}`,
+    )
+    .join("\n\n")
+
+const codeArraySchema = (codes: string[]) =>
+  ({
+    type: Type.ARRAY,
+    items: { type: Type.STRING, enum: codes },
+    nullable: true,
+  }) as const
+
+const nullableCodeSchema = (codes: string[]) =>
+  ({
+    type: Type.STRING,
+    enum: codes,
+    nullable: true,
+  }) as const
+
+const stringArraySchema = (maxItems: number) =>
+  ({
+    type: Type.ARRAY,
+    items: { type: Type.STRING },
+    maxItems,
+  }) as const
+
+const websiteLookupGeneratedSchema = z.object({
+  legalEntityName: z.string().trim().nullable().default(null),
+  registeredCountry: countryCodeSchema.nullable().default(null),
+  address: z.string().trim().nullable().default(null),
+  industries: z.array(codeIdSchema).nullable().default(null),
+  regions: z.array(codeIdSchema).nullable().default(null),
+  handlesPii: z.boolean().nullable().default(null),
+  handlesSensitiveData: z.boolean().nullable().default(null),
+  handlesHealthData: z.boolean().nullable().default(null),
+  handlesPersonalData: z.boolean().nullable().default(null),
+  primaryService: z
+    .object({
+      name: z.string().trim().nullable().default(null),
+      description: z.string().trim().nullable().default(null),
+      activities: z.array(z.string().trim()).max(5).default([]),
+      dataCaptured: z.array(z.string().trim()).max(5).default([]),
+    })
+    .default({
+      name: null,
+      description: null,
+      activities: [],
+      dataCaptured: [],
+    }),
+  contactEmail: z.string().trim().nullable().default(null),
+  securityEmail: z.string().trim().nullable().default(null),
+  privacyEmail: z.string().trim().nullable().default(null),
+  privacyPolicyUrl: z.string().trim().nullable().default(null),
+  warnings: z.array(z.string().trim()).max(8).default([]),
+})
+
+type WebsiteLookupGenerated = z.infer<typeof websiteLookupGeneratedSchema>
+
+const websiteLookupResponseSchema = (codeSets: CodeSetMap) =>
+  ({
+    type: Type.OBJECT,
+    properties: {
+      legalEntityName: nullableStringSchema,
+      registeredCountry: nullableStringSchema,
+      address: nullableStringSchema,
+      industries: codeArraySchema(codesFor(codeSets, "industries")),
+      regions: codeArraySchema(["us", "eu", "global"]),
+      handlesPii: nullableBooleanSchema,
+      handlesSensitiveData: nullableBooleanSchema,
+      handlesHealthData: nullableBooleanSchema,
+      handlesPersonalData: nullableBooleanSchema,
+      primaryService: {
+        type: Type.OBJECT,
+        properties: {
+          name: nullableStringSchema,
+          description: nullableStringSchema,
+          activities: stringArraySchema(5),
+          dataCaptured: stringArraySchema(5),
+        },
+        required: ["name", "description", "activities", "dataCaptured"],
+      },
+      contactEmail: nullableStringSchema,
+      securityEmail: nullableStringSchema,
+      privacyEmail: nullableStringSchema,
+      privacyPolicyUrl: nullableStringSchema,
+      warnings: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+      },
+    },
+    required: [
+      "legalEntityName",
+      "registeredCountry",
+      "address",
+      "industries",
+      "regions",
+      "handlesPii",
+      "handlesSensitiveData",
+      "handlesHealthData",
+      "handlesPersonalData",
+      "primaryService",
+      "contactEmail",
+      "securityEmail",
+      "privacyEmail",
+      "privacyPolicyUrl",
+      "warnings",
+    ],
+  }) satisfies SchemaUnion
+
+const privacyPolicyResponseSchema = (codeSets: CodeSetMap) =>
+  ({
+    type: Type.OBJECT,
+    properties: {
+      supportedRights: codeArraySchema(
+        codesFor(codeSets, "privacy_supported_rights"),
+      ),
+      requestMethods: codeArraySchema(codesFor(codeSets, "privacy_request_methods")),
+      responseTimelineDaysStatus: nullableCodeSchema(
+        codesFor(codeSets, "defined_statuses"),
+      ),
+      responseTimelineDays: nullableIntegerSchema,
+      identityVerificationRequired: nullableBooleanSchema,
+      authorizedAgentSupported: nullableBooleanSchema,
+      appealProcessExists: nullableBooleanSchema,
+      sendsMarketingEmails: nullableBooleanSchema,
+      transactionalEmailsSent: nullableBooleanSchema,
+      crossBorderTransfers: nullableBooleanSchema,
+      transferMechanisms: codeArraySchema(
+        codesFor(codeSets, "privacy_transfer_mechanisms"),
+      ),
+      sellsOrSharesData: nullableBooleanSchema,
+      usesAutomatedDecisionMaking: nullableBooleanSchema,
+      productionDataInDevelopment: nullableBooleanSchema,
+      retentionPolicyExists: nullableBooleanSchema,
+      dpoStatus: nullableCodeSchema(codesFor(codeSets, "privacy_dpo_statuses")),
+      dpoName: nullableStringSchema,
+      dpoEmail: nullableStringSchema,
+      euRepresentativeStatus: nullableCodeSchema(
+        codesFor(codeSets, "privacy_eu_representative_statuses"),
+      ),
+      euRepresentativeName: nullableStringSchema,
+      euRepresentativeAddress: nullableStringSchema,
+    },
+    required: [
+      "supportedRights",
+      "requestMethods",
+      "responseTimelineDaysStatus",
+      "responseTimelineDays",
+      "identityVerificationRequired",
+      "authorizedAgentSupported",
+      "appealProcessExists",
+      "sendsMarketingEmails",
+      "transactionalEmailsSent",
+      "crossBorderTransfers",
+      "transferMechanisms",
+      "sellsOrSharesData",
+      "usesAutomatedDecisionMaking",
+      "productionDataInDevelopment",
+      "retentionPolicyExists",
+      "dpoStatus",
+      "dpoName",
+      "dpoEmail",
+      "euRepresentativeStatus",
+      "euRepresentativeName",
+      "euRepresentativeAddress",
+    ],
+  }) satisfies SchemaUnion
 
 const lookupWarning = (message: string) => message.slice(0, 300)
+
+const hostnameFromUrl = (url: string) => new URL(url).hostname.replace(/^www\./, "")
 
 const defaultDataType = (name: string): StoredDataType => ({
   name: "Customer account data",
@@ -110,272 +405,192 @@ const defaultActivity = (): BusinessActivityInput => ({
   retentionDays: 0,
 })
 
-const defaultLookupResult = (
-  input: OrganizationLookupInput,
-  warnings: string[] = [],
-): OrganizationLookupResult =>
-  organizationLookupResultSchema.parse({
-    company: {
-      ...emptyCompanyProfile,
-      companyName: input.name,
-      legalEntityName: input.name,
-      website: input.website,
-    },
-    primaryService: {
-      ...emptyServiceProfile,
-      serviceName: input.name,
-      serviceDescription: "",
-      serviceUrl: input.website,
-    },
-    primaryDataType: defaultDataType(input.name),
-    primaryActivity: defaultActivity(),
-    suggestedProviders: [],
-    policyLinks: [],
-    warnings,
-  })
-
-const truncate = (value: string, maxLength: number) =>
-  value.length > maxLength ? `${value.slice(0, maxLength)}\n[truncated]` : value
-
-const pageTitle = (document: Document, fallbackUrl: string) => {
-  const title = document.metadata?.title
-
-  return typeof title === "string" && title.trim() ? title.trim() : fallbackUrl
-}
-
-const pageUrl = (document: Document, fallbackUrl: string) => {
-  const sourceUrl = document.metadata?.sourceURL
-  const url = document.metadata?.url
-
-  return typeof sourceUrl === "string" && sourceUrl.trim()
-    ? sourceUrl
-    : typeof url === "string" && url.trim()
-      ? url
-      : fallbackUrl
-}
-
-const policyType = (
-  url: string,
-  title = "",
-): OrganizationLookupPolicyLink["type"] => {
-  const haystack = `${url} ${title}`.toLowerCase()
-
-  if (haystack.includes("subprocessor") || haystack.includes("sub-processor")) {
-    return "subprocessors"
-  }
-
-  if (
-    haystack.includes("security") ||
-    haystack.includes("trust") ||
-    haystack.includes("soc")
-  ) {
-    return "data_security"
-  }
-
-  if (haystack.includes("terms")) {
-    return "terms"
-  }
-
-  if (haystack.includes("privacy")) {
-    return "privacy_policy"
-  }
-
-  return "other"
-}
-
-const isRelevantPolicyUrl = (url: string) => {
-  const lower = url.toLowerCase()
-
-  return [
-    "privacy",
-    "security",
-    "trust",
-    "subprocessor",
-    "sub-processor",
-    "dpa",
-    "terms",
-  ].some((token) => lower.includes(token))
-}
-
 const policyTitle = (url: string) => {
   const path = new URL(url).pathname
-  const lastSegment = path.split("/").filter(Boolean).at(-1) ?? "Policy"
+  const lastSegment = path.split("/").filter(Boolean).at(-1) ?? "Privacy Policy"
+
   return lastSegment
     .replace(/[-_]+/g, " ")
     .replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
-const asUniquePolicyLinks = (urls: string[]): OrganizationLookupPolicyLink[] => {
-  const seen = new Set<string>()
+const privacyPolicyLink = (
+  url: string | null,
+): OrganizationLookupPolicyLink[] => {
+  if (!url) {
+    return []
+  }
 
-  return urls
-    .filter((url) => {
-      if (!isRelevantPolicyUrl(url) || seen.has(url)) {
-        return false
-      }
+  const parsedUrl = z.string().url().safeParse(url)
 
-      seen.add(url)
-      return true
-    })
-    .slice(0, 8)
-    .map((url) => ({
-      type: policyType(url),
-      title: policyTitle(url),
-      url,
-    }))
+  return parsedUrl.success
+    ? [{ type: "privacy_policy", title: policyTitle(parsedUrl.data), url }]
+    : []
 }
 
-const stringLinks = (links: unknown[]) =>
-  links.flatMap((link) =>
-    typeof link === "string"
-      ? [link]
-      : typeof link === "object" &&
-          link &&
-          "url" in link &&
-          typeof link.url === "string"
-        ? [link.url]
-        : [],
-  )
+const nonEmpty = (value: string | null | undefined) =>
+  value && value.trim() ? value.trim() : null
 
-export class FirecrawlWebsiteCrawler {
-  constructor(private readonly client: Firecrawl) {}
+const firstNonEmpty = (values: string[]) =>
+  values.find((value) => value.trim())?.trim() ?? null
 
-  async crawl(input: OrganizationLookupInput): Promise<CrawledWebsite> {
-    const root = await this.client.scrape(input.website, {
-      formats: ["markdown", "links"],
-      onlyMainContent: true,
-      timeout: 30000,
-    })
-    const mapped = await this.client.map(input.website, {
-      limit: 20,
-      timeout: 30000,
-    })
-    const mappedLinks = stringLinks(Array.isArray(mapped.links) ? mapped.links : [])
-    const rootLinks = stringLinks(Array.isArray(root.links) ? root.links : [])
-    const policyLinks = asUniquePolicyLinks([...rootLinks, ...mappedLinks])
-    const crawl = await this.client.crawl(input.website, {
-      limit: 6,
-      maxDiscoveryDepth: 1,
-      scrapeOptions: {
-        formats: ["markdown"],
-        onlyMainContent: true,
-        timeout: 30000,
-      },
-      timeout: 60,
-    })
+const defaultLookupResult = (
+  input: OrganizationWebsiteLookupInput,
+  warnings: string[] = [],
+): OrganizationLookupResult => {
+  const fallbackName = hostnameFromUrl(input.website)
 
-    if (crawl.status === "failed" || crawl.status === "cancelled") {
-      throw new ApiError(
-        "ORGANIZATION_LOOKUP_CRAWL_FAILED",
-        "Website lookup crawl failed.",
-        502,
-        { status: crawl.status },
-      )
-    }
+  return organizationLookupResultSchema.parse({
+    company: {
+      ...emptyCompanyProfile,
+      companyName: fallbackName,
+      legalEntityName: fallbackName,
+      website: input.website,
+    },
+    primaryService: {
+      ...emptyServiceProfile,
+      serviceName: fallbackName,
+      serviceDescription: "",
+      serviceUrl: input.website,
+    },
+    primaryDataType: defaultDataType(fallbackName),
+    primaryActivity: defaultActivity(),
+    suggestedProviders: [],
+    policyLinks: [],
+    privacyPolicyUrl: null,
+    warnings,
+  })
+}
 
-    const crawlPages = (crawl.data ?? []).flatMap((document) =>
-      document.markdown
-        ? [
-            {
-              url: pageUrl(document, input.website),
-              title: pageTitle(document, input.website),
-              markdown: document.markdown,
-            },
-          ]
-        : [],
-    )
-    const rootPage = root.markdown
-      ? [
-          {
-            url: pageUrl(root, input.website),
-            title: pageTitle(root, input.website),
-            markdown: root.markdown,
-          },
-        ]
-      : []
+const mapWebsiteLookupResult = (
+  input: OrganizationWebsiteLookupInput,
+  generated: WebsiteLookupGenerated,
+) => {
+  const fallbackName = hostnameFromUrl(input.website)
+  const serviceName =
+    nonEmpty(generated.primaryService.name) ??
+    nonEmpty(generated.legalEntityName) ??
+    fallbackName
+  const dataName =
+    firstNonEmpty(generated.primaryService.dataCaptured) ??
+    "Customer account data"
+  const activityName =
+    firstNonEmpty(generated.primaryService.activities) ??
+    "Provide the primary service"
+  const policyLinks = privacyPolicyLink(generated.privacyPolicyUrl)
 
-    return {
-      pages: [...rootPage, ...crawlPages].slice(0, 8),
-      policyLinks,
-    }
-  }
+  return organizationLookupResultSchema.parse({
+    company: {
+      ...emptyCompanyProfile,
+      companyName: nonEmpty(generated.legalEntityName) ?? fallbackName,
+      legalEntityName: generated.legalEntityName,
+      website: input.website,
+      contactEmail: generated.contactEmail,
+      securityContactEmail: generated.securityEmail,
+      privacyContactEmail: generated.privacyEmail,
+      country: generated.registeredCountry,
+      address: generated.address,
+      industries: generated.industries,
+      regions: generated.regions,
+      handlesPii: generated.handlesPii,
+      handlesSensitiveData: generated.handlesSensitiveData,
+      storesPii: generated.handlesPersonalData,
+      storesHealthcareData: generated.handlesHealthData,
+    },
+    primaryService: {
+      ...emptyServiceProfile,
+      serviceName,
+      serviceDescription: generated.primaryService.description ?? "",
+      serviceUrl: input.website,
+      availabilityRegions: generated.regions,
+    },
+    primaryDataType: {
+      name: dataName,
+      description: generated.primaryService.dataCaptured
+        .filter((value) => value.trim())
+        .slice(0, 5)
+        .join(", "),
+      subjectTypes: null,
+      collectionMethods: null,
+      isSensitive: generated.handlesSensitiveData,
+      isRequired: true,
+    },
+    primaryActivity: {
+      name: activityName,
+      purpose:
+        generated.primaryService.description ??
+        "Operate the product, support users, and manage customer accounts.",
+      role: "",
+      legalBasis: [],
+      retentionPolicy: null,
+      retentionDays: 0,
+    },
+    suggestedProviders: [],
+    policyLinks,
+    privacyPolicyUrl: policyLinks[0]?.url ?? null,
+    warnings: generated.warnings,
+  })
 }
 
 export class LlmOrganizationLookupService implements OrganizationLookupService {
   constructor(
-    private readonly crawler: WebsiteCrawler,
+    private readonly codeSource: OrganizationLookupCodeSource,
     private readonly promptClient: PromptClient,
     private readonly llmClient: LlmJsonClient,
     private readonly model = apiConfig.organizationLookupModel,
   ) {}
 
-  async lookup(input: OrganizationLookupInput): Promise<OrganizationLookupResult> {
-    let crawled: CrawledWebsite
-
-    try {
-      crawled = await this.crawler.crawl(input)
-    } catch (error) {
-      throw new ApiError(
-        "ORGANIZATION_LOOKUP_CRAWL_FAILED",
-        "Could not read the organization website.",
-        502,
-        upstreamDetails(error),
-      )
-    }
-
-    const generated = await this.runAgent(input, crawled)
-
-    return organizationLookupResultSchema.parse({
-      ...generated,
-      company: {
-        ...emptyCompanyProfile,
-        ...generated.company,
-        companyName: generated.company.companyName || input.name,
-        legalEntityName: generated.company.legalEntityName,
-        website: generated.company.website || input.website,
-      },
-      primaryService: {
-        ...emptyServiceProfile,
-        ...generated.primaryService,
-        serviceName: generated.primaryService.serviceName || input.name,
-        serviceUrl: generated.primaryService.serviceUrl || input.website,
-      },
-      primaryDataType: generated.primaryDataType.name
-        ? generated.primaryDataType
-        : defaultDataType(input.name),
-      primaryActivity: generated.primaryActivity.name
-        ? generated.primaryActivity
-        : defaultActivity(),
-      policyLinks: mergePolicyLinks(
-        crawled.policyLinks,
-        generated.policyLinks ?? [],
-      ),
-      warnings: generated.warnings ?? [],
-    })
-  }
-
-  private async runAgent(
-    input: OrganizationLookupInput,
-    crawled: CrawledWebsite,
+  async lookupWebsite(
+    input: OrganizationWebsiteLookupInput,
   ): Promise<OrganizationLookupResult> {
-    const prompt = await this.promptClient.compilePrompt(PROMPT_NAME, {
-      input: organizationLookupPromptInput(input, crawled),
+    const codeSets = await this.codeSource.listCodeSets(websiteCodeSetIds)
+    const prompt = await this.promptClient.compilePrompt(WEBSITE_PROMPT_NAME, {
+      websiteUrl: input.website,
+      codeSets: codeSetsText(websiteCodeSetIds, codeSets),
     })
     const generated = await this.llmClient.generateJson({
       model: this.model,
       prompt,
-      responseSchema: organizationLookupResponseSchema(
-        organizationLookupResponseCodeSets,
-      ),
+      responseSchema: websiteLookupResponseSchema(codeSets),
+      tools: GEMINI_URL_TOOLS,
     })
-    const parsed = organizationLookupResultSchema.safeParse(
-      normalizeLookupGeneratedOutput(generated),
-    )
+    const parsed = websiteLookupGeneratedSchema.safeParse(generated)
 
     if (!parsed.success) {
       throw new ApiError(
-        "ORGANIZATION_LOOKUP_INVALID_RESPONSE",
-        "Organization lookup returned an invalid profile.",
+        "ORGANIZATION_WEBSITE_LOOKUP_INVALID_RESPONSE",
+        "Website lookup returned an invalid profile.",
+        502,
+        parsed.error.flatten(),
+      )
+    }
+
+    return mapWebsiteLookupResult(input, parsed.data)
+  }
+
+  async lookupPrivacyPolicy(
+    input: OrganizationPrivacyPolicyLookupInput,
+  ): Promise<PrivacyProfile> {
+    const codeSets = await this.codeSource.listCodeSets(privacyCodeSetIds)
+    const prompt = await this.promptClient.compilePrompt(PRIVACY_PROMPT_NAME, {
+      privacyPolicyUrl: input.privacyPolicyUrl,
+      codeSets: codeSetsText(privacyCodeSetIds, codeSets),
+    })
+    const generated = await this.llmClient.generateJson({
+      model: this.model,
+      prompt,
+      responseSchema: privacyPolicyResponseSchema(codeSets),
+      tools: GEMINI_URL_TOOLS,
+    })
+    const parsed = privacyProfileSchema.safeParse({
+      ...emptyPrivacyProfile,
+      ...(typeof generated === "object" && generated ? generated : {}),
+    })
+
+    if (!parsed.success) {
+      throw new ApiError(
+        "ORGANIZATION_PRIVACY_POLICY_LOOKUP_INVALID_RESPONSE",
+        "Privacy policy lookup returned an invalid profile.",
         502,
         parsed.error.flatten(),
       )
@@ -388,12 +603,15 @@ export class LlmOrganizationLookupService implements OrganizationLookupService {
 export const createDefaultOrganizationLookupService = ({
   promptClient,
   llmClient,
+  codeSource,
 }: {
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
+  codeSource?: OrganizationLookupCodeSource
 } = {}) => {
   const missing = [
-    apiConfig.firecrawlApiKey ? null : "FIRECRAWL_API_KEY",
+    codeSource || apiConfig.airtableBase ? null : "AIRTABLE_BASE",
+    codeSource || apiConfig.airtableApiKey ? null : "AIRTABLE_API_KEY",
     apiConfig.geminiApiKey || llmClient ? null : "GEMINI_API_KEY",
     promptClient || apiConfig.langfusePublicKey ? null : "LANGFUSE_PUBLIC_KEY",
     promptClient || apiConfig.langfuseSecretKey ? null : "LANGFUSE_SECRET_KEY",
@@ -401,20 +619,25 @@ export const createDefaultOrganizationLookupService = ({
 
   if (missing.length > 0) {
     return {
-      async lookup(input: OrganizationLookupInput) {
+      async lookupWebsite(input: OrganizationWebsiteLookupInput) {
         return defaultLookupResult(input, [
           lookupWarning(
             `Website lookup is not configured. Missing ${missing.join(", ")}.`,
           ),
         ])
       },
+      async lookupPrivacyPolicy() {
+        return privacyProfileSchema.parse(emptyPrivacyProfile)
+      },
     } satisfies OrganizationLookupService
   }
 
   return new LlmOrganizationLookupService(
-    new FirecrawlWebsiteCrawler(
-      new Firecrawl({ apiKey: apiConfig.firecrawlApiKey }),
-    ),
+    codeSource ??
+      new AirtableOrganizationLookupCodeSource(
+        apiConfig.airtableBase ?? "",
+        apiConfig.airtableApiKey ?? "",
+      ),
     promptClient ??
       LangfusePromptClient.fromConfig({
         publicKey: apiConfig.langfusePublicKey,
@@ -424,83 +647,3 @@ export const createDefaultOrganizationLookupService = ({
     llmClient ?? new GeminiJsonClient(apiConfig.geminiApiKey ?? ""),
   )
 }
-
-const mergePolicyLinks = (
-  first: OrganizationLookupPolicyLink[],
-  second: OrganizationLookupPolicyLink[],
-) => {
-  const byUrl = new Map<string, OrganizationLookupPolicyLink>()
-
-  for (const link of [...first, ...second]) {
-    byUrl.set(link.url, link)
-  }
-
-  return Array.from(byUrl.values()).slice(0, 12)
-}
-
-const upstreamDetails = (error: unknown) =>
-  error instanceof Error
-    ? { cause: error.name, message: error.message.slice(0, 500) }
-    : undefined
-
-const normalizeLookupGeneratedOutput = (generated: unknown) => {
-  if (
-    typeof generated !== "object" ||
-    !generated ||
-    !("primaryActivity" in generated) ||
-    typeof generated.primaryActivity !== "object" ||
-    !generated.primaryActivity
-  ) {
-    return generated
-  }
-
-  const primaryActivity = generated.primaryActivity as Record<string, unknown>
-
-  return {
-    ...generated,
-    primaryActivity: {
-      ...primaryActivity,
-      role: primaryActivity.role ?? "",
-    },
-  }
-}
-
-const organizationLookupInstruction = (
-  input: OrganizationLookupInput,
-  crawled: CrawledWebsite,
-) => `You map public website content into Plyco's onboarding schema.
-
-Return only valid JSON matching the output schema. Do not wrap it in Markdown.
-Use these rules:
-- Set legalEntityName, address, employeeCount, country, contactEmail, securityContactEmail, and privacyContactEmail to null unless the exact value is present in the crawled website content.
-- Use ISO alpha-2 country codes only. Use null if uncertain.
-- Use region code IDs such as "us", "eu", "uk", "apac", or null for primaryHostingRegion.
-- Use only code IDs from input.codeSets for all code-backed fields. Never return code labels such as "GDPR" or "Controller".
-- Do not infer operating regions or compliance goals from generic SaaS/security language. Return them only when the pages explicitly mention the geography or framework.
-- Do not invent policy links, providers, addresses, emails, counts, legal names, or sensitive data.
-- Keep one primary service, one primary data type, and one primary activity.
-- suggestedProviders should only include named third-party providers evident in the crawl or policy pages.
-
-Discovered policy links:
-${JSON.stringify(crawled.policyLinks)}`;
-
-const organizationLookupPromptInput = (
-  input: OrganizationLookupInput,
-  crawled: CrawledWebsite,
-) => ({
-  organizationName: input.name,
-  website: input.website,
-  pages: crawled.pages.map((page) => ({
-    url: page.url,
-    title: page.title,
-    markdown: truncate(page.markdown, 7000),
-  })),
-  emptyProfiles: {
-    access: emptyAccessProfile,
-    dataHandling: emptyDataHandlingProfile,
-    infrastructure: emptyInfrastructureProfile,
-    privacy: emptyPrivacyProfile,
-  },
-  codeSets: organizationLookupCodeSets,
-  instructions: organizationLookupInstruction(input, crawled),
-})

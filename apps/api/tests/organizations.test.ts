@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { createApp, createTestApp } from "../src/app.js";
-import { LlmOrganizationLookupService } from "../src/features/organization-lookup/service.js";
+import { createApp } from "../src/app.js";
+import { createTestApp } from "./helpers.js";
+import {
+  LlmOrganizationLookupService,
+  StaticOrganizationLookupCodeSource,
+} from "../src/features/organization-lookup/service.js";
 import { ApiError } from "../src/infrastructure/errors.js";
 import { type LlmJsonClient } from "../src/infrastructure/llm-client.js";
 import { type PromptClient } from "../src/infrastructure/prompt-client.js";
@@ -14,14 +18,32 @@ import {
   vendorUseBody,
 } from "./helpers.js";
 
+const lookupCodeSource = new StaticOrganizationLookupCodeSource({
+  industries: ["technology_saas"],
+  regions: ["us", "eu", "global"],
+  subject_types: ["customer"],
+  collection_methods: ["account_signup"],
+  activity_role: ["controller"],
+  legal_basis: ["contract"],
+  activity_retention_policies: ["fixed", "not_defined"],
+  privacy_supported_rights: ["access", "deletion"],
+  privacy_request_methods: ["email"],
+  defined_statuses: ["defined", "not_defined"],
+  privacy_transfer_mechanisms: ["sccs"],
+  privacy_dpo_statuses: ["not_required"],
+  privacy_eu_representative_statuses: ["not_required"],
+});
+
 class CapturingPromptClient implements PromptClient {
   variables: Record<string, unknown> | null = null;
+  calls: Array<{ name: string; variables: Record<string, unknown> }> = [];
 
   async compilePrompt(name: string, variables: Record<string, unknown>) {
     this.variables = variables;
+    this.calls.push({ name, variables });
 
     return {
-      content: "website parser prompt",
+      content: `${name} prompt`,
       inputVariables: variables,
       metadata: {
         name,
@@ -43,43 +65,51 @@ class StubLlmClient implements LlmJsonClient {
   }
 }
 
-const lookupCrawler = {
-  async crawl() {
-    return {
-      pages: [
-        {
-          url: "https://acme.example",
-          title: "Acme AI",
-          markdown:
-            "Acme AI builds secure SaaS products for customers pursuing SOC 2 and GDPR.",
-        },
-      ],
-      policyLinks: [
-        {
-          type: "privacy_policy" as const,
-          title: "Privacy Policy",
-          url: "https://acme.example/privacy",
-        },
-      ],
-    };
+const validWebsiteLookupGenerated = {
+  legalEntityName: "Acme AI, Inc.",
+  registeredCountry: "US",
+  address: "1 Market St, San Francisco, CA",
+  industries: ["technology_saas"],
+  regions: ["us"],
+  handlesPii: true,
+  handlesSensitiveData: false,
+  handlesHealthData: false,
+  handlesPersonalData: true,
+  primaryService: {
+    name: "Acme AI",
+    description: "Secure SaaS products for customers.",
+    activities: ["Account management"],
+    dataCaptured: ["Customer account data"],
   },
+  contactEmail: "hello@acme.example",
+  securityEmail: "security@acme.example",
+  privacyEmail: "privacy@acme.example",
+  privacyPolicyUrl: "https://acme.example/privacy",
+  warnings: [],
 };
 
-const validLookupResult = {
-  company: profileBody.company,
-  primaryService: serviceBody,
-  primaryDataType: profileBody.dataHandling.dataTypesStored[0],
-  primaryActivity: {
-    name: "Account management",
-    purpose: "Create and manage customer accounts.",
-    role: "controller",
-    legalBasis: ["contract"],
-    retentionPolicy: null,
-    retentionDays: 0,
-  },
-  suggestedProviders: [],
-  policyLinks: [],
-  warnings: [],
+const validPrivacyLookupGenerated = {
+  supportedRights: ["access", "deletion"],
+  requestMethods: ["email"],
+  responseTimelineDaysStatus: "defined",
+  responseTimelineDays: 30,
+  identityVerificationRequired: true,
+  authorizedAgentSupported: true,
+  appealProcessExists: false,
+  sendsMarketingEmails: true,
+  transactionalEmailsSent: true,
+  crossBorderTransfers: true,
+  transferMechanisms: ["sccs"],
+  sellsOrSharesData: false,
+  usesAutomatedDecisionMaking: false,
+  productionDataInDevelopment: false,
+  retentionPolicyExists: true,
+  dpoStatus: "not_required",
+  dpoName: null,
+  dpoEmail: null,
+  euRepresentativeStatus: "not_required",
+  euRepresentativeName: null,
+  euRepresentativeAddress: null,
 };
 
 describe("organizations API", () => {
@@ -88,15 +118,18 @@ describe("organizations API", () => {
       ...createInMemoryRepositories(),
       auth: authConfig,
       organizationLookupService: {
-        async lookup() {
+        async lookupWebsite() {
+          throw new Error("should not be called");
+        },
+        async lookupPrivacyPolicy() {
           throw new Error("should not be called");
         },
       },
     });
     const response = await app.inject({
       method: "POST",
-      url: "/organization-lookup",
-      payload: { name: "Acme AI", website: "https://acme.example" },
+      url: "/organization-lookup/website",
+      payload: { website: "https://acme.example" },
     });
 
     expect(response.statusCode).toBe(401);
@@ -110,15 +143,18 @@ describe("organizations API", () => {
       auth: false,
       ...createInMemoryRepositories(),
       organizationLookupService: {
-        async lookup() {
+        async lookupWebsite() {
+          throw new Error("should not be called");
+        },
+        async lookupPrivacyPolicy() {
           throw new Error("should not be called");
         },
       },
     });
     const response = await app.inject({
       method: "POST",
-      url: "/organization-lookup",
-      payload: { name: "Acme AI", website: "not-a-url" },
+      url: "/organization-lookup/website",
+      payload: { website: "not-a-url" },
     });
 
     expect(response.statusCode).toBe(400);
@@ -132,11 +168,11 @@ describe("organizations API", () => {
       auth: false,
       ...createInMemoryRepositories(),
       organizationLookupService: {
-        async lookup(input) {
+        async lookupWebsite(input) {
           return {
             company: {
               ...profileBody.company,
-              companyName: input.name,
+              companyName: "Acme Lookup",
               website: input.website,
             },
             primaryService: serviceBody,
@@ -159,15 +195,19 @@ describe("organizations API", () => {
                 url: "https://acme.example/privacy",
               },
             ],
+            privacyPolicyUrl: "https://acme.example/privacy",
             warnings: [],
           };
+        },
+        async lookupPrivacyPolicy() {
+          return profileBody.privacy;
         },
       },
     });
     const response = await app.inject({
       method: "POST",
-      url: "/organization-lookup",
-      payload: { name: "Acme Lookup", website: "https://acme.example" },
+      url: "/organization-lookup/website",
+      payload: { website: "https://acme.example" },
     });
 
     expect(response.statusCode).toBe(200);
@@ -186,19 +226,22 @@ describe("organizations API", () => {
       auth: false,
       ...createInMemoryRepositories(),
       organizationLookupService: {
-        async lookup() {
+        async lookupWebsite() {
           throw new ApiError(
             "ORGANIZATION_LOOKUP_AGENT_FAILED",
             "Organization lookup agent failed.",
             502,
           );
         },
+        async lookupPrivacyPolicy() {
+          return profileBody.privacy;
+        },
       },
     });
     const response = await app.inject({
       method: "POST",
-      url: "/organization-lookup",
-      payload: { name: "Acme AI", website: "https://acme.example" },
+      url: "/organization-lookup/website",
+      payload: { website: "https://acme.example" },
     });
 
     expect(response.statusCode).toBe(502);
@@ -207,117 +250,140 @@ describe("organizations API", () => {
     });
   });
 
-  it("passes allowed vocabulary code ids to the organization lookup prompt", async () => {
+  it("returns privacy policy lookup results from the lookup service", async () => {
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      organizationLookupService: {
+        async lookupWebsite() {
+          throw new Error("should not be called");
+        },
+        async lookupPrivacyPolicy(input) {
+          expect(input.privacyPolicyUrl).toBe("https://acme.example/privacy");
+          return {
+            ...profileBody.privacy,
+            supportedRights: ["access", "deletion"],
+            requestMethods: ["email"],
+          };
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/organization-lookup/privacy-policy",
+      payload: { privacyPolicyUrl: "https://acme.example/privacy" },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      supportedRights: ["access", "deletion"],
+      requestMethods: ["email"],
+    });
+  });
+
+  it("passes allowed vocabulary code ids to the website lookup prompt", async () => {
     const promptClient = new CapturingPromptClient();
-    const llmClient = new StubLlmClient(validLookupResult);
+    const llmClient = new StubLlmClient(validWebsiteLookupGenerated);
     const service = new LlmOrganizationLookupService(
-      lookupCrawler,
+      lookupCodeSource,
       promptClient,
       llmClient,
       "test-model",
     );
 
-    await service.lookup({
-      name: "Acme AI",
+    await service.lookupWebsite({
       website: "https://acme.example",
     });
 
-    const promptInput = promptClient.variables?.input as
-      | { codeSets?: Record<string, Array<{ codeId: string; label: string }>> }
-      | undefined;
+    expect(promptClient.calls[0]?.name).toBe("website_parser");
+    expect(promptClient.variables).toMatchObject({
+      websiteUrl: "https://acme.example",
+    });
+    expect(promptClient.variables).not.toHaveProperty("organizationName");
+    expect(promptClient.variables).not.toHaveProperty("pages");
 
-    expect(promptInput?.codeSets?.compliance_goals).toContainEqual({
-      codeId: "gdpr",
-      label: "GDPR",
-    });
-    expect(promptInput?.codeSets?.industries).toContainEqual({
-      codeId: "technology_saas",
-      label: "Technology / SaaS",
-    });
-    expect(promptInput?.codeSets?.activity_role).toContainEqual({
-      codeId: "controller",
-      label: "Controller",
-    });
+    const codeSets = promptClient.variables?.codeSets;
+    expect(codeSets).toContain("industries\n");
+    expect(codeSets).toContain(" - technology_saas");
+    expect(codeSets).toContain("activity_role\n");
+    expect(codeSets).toContain(" - controller");
+    expect(codeSets).not.toContain("Technology / SaaS");
+    expect(codeSets).not.toContain("Controller");
   });
 
-  it("constrains organization lookup schema fields to code ids", async () => {
-    const llmClient = new StubLlmClient(validLookupResult);
+  it("constrains website lookup schema fields to code ids and enables URL tools", async () => {
+    const llmClient = new StubLlmClient(validWebsiteLookupGenerated);
     const service = new LlmOrganizationLookupService(
-      lookupCrawler,
+      lookupCodeSource,
       new CapturingPromptClient(),
       llmClient,
       "test-model",
     );
 
-    await service.lookup({
-      name: "Acme AI",
+    await service.lookupWebsite({
       website: "https://acme.example",
     });
 
     const schema = llmClient.request?.responseSchema as {
-      properties: Record<string, { properties: Record<string, unknown> }>;
+      properties: Record<string, any>;
     };
-    const company = schema.properties.company.properties as Record<string, any>;
-    const primaryActivity = schema.properties.primaryActivity
-      .properties as Record<string, any>;
-
-    expect(company.complianceGoals.items.enum).toContain("gdpr");
-    expect(company.complianceGoals.items.enum).not.toContain("GDPR");
-    expect(company.industries.items.enum).toContain("technology_saas");
-    expect(primaryActivity.role.enum).toContain("controller");
-    expect(primaryActivity.role.nullable).toBe(true);
-    expect(primaryActivity.role.enum).not.toContain("Controller");
-    expect(primaryActivity.role.enum).not.toContain("");
-    expect(primaryActivity.legalBasis.items.enum).toContain("contract");
+    expect(schema.properties.industries.items.enum).toContain("technology_saas");
+    expect(schema.properties.industries.items.enum).not.toContain(
+      "Technology / SaaS",
+    );
+    expect(schema.properties.regions.items.enum).toEqual([
+      "us",
+      "eu",
+      "global",
+    ]);
+    expect(llmClient.request?.tools).toEqual([
+      { googleSearch: {} },
+      { urlContext: {} },
+    ]);
   });
 
-  it("accepts null optional activity role from organization lookup", async () => {
+  it("passes privacy code ids to the privacy policy prompt", async () => {
+    const promptClient = new CapturingPromptClient();
     const service = new LlmOrganizationLookupService(
-      lookupCrawler,
-      new CapturingPromptClient(),
-      new StubLlmClient({
-        ...validLookupResult,
-        primaryActivity: {
-          ...validLookupResult.primaryActivity,
-          role: null,
-        },
-      }),
+      lookupCodeSource,
+      promptClient,
+      new StubLlmClient(validPrivacyLookupGenerated),
       "test-model",
     );
 
-    const result = await service.lookup({
-      name: "Acme AI",
-      website: "https://acme.example",
+    const result = await service.lookupPrivacyPolicy({
+      privacyPolicyUrl: "https://acme.example/privacy",
     });
 
-    expect(result.primaryActivity.role).toBe("");
+    expect(promptClient.calls[0]?.name).toBe("privacy_policy_parser");
+    expect(promptClient.variables).toMatchObject({
+      privacyPolicyUrl: "https://acme.example/privacy",
+    });
+    expect(promptClient.variables?.codeSets).toContain(
+      "privacy_supported_rights\n",
+    );
+    expect(promptClient.variables?.codeSets).toContain(" - access");
+    expect(promptClient.variables?.codeSets).not.toContain("Access");
+    expect(result.supportedRights).toEqual(["access", "deletion"]);
   });
 
   it("rejects organization lookup label values instead of normalizing them", async () => {
     const service = new LlmOrganizationLookupService(
-      lookupCrawler,
+      lookupCodeSource,
       new CapturingPromptClient(),
       new StubLlmClient({
-        ...validLookupResult,
-        company: {
-          ...validLookupResult.company,
-          complianceGoals: ["GDPR"],
-        },
-        primaryActivity: {
-          ...validLookupResult.primaryActivity,
-          role: "Controller",
-        },
+        ...validWebsiteLookupGenerated,
+        industries: ["Technology / SaaS"],
       }),
       "test-model",
     );
 
     await expect(
-      service.lookup({
-        name: "Acme AI",
+      service.lookupWebsite({
         website: "https://acme.example",
       }),
     ).rejects.toMatchObject({
-      code: "ORGANIZATION_LOOKUP_INVALID_RESPONSE",
+      code: "ORGANIZATION_WEBSITE_LOOKUP_INVALID_RESPONSE",
     });
   });
 

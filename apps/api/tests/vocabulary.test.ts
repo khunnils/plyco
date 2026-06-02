@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestApp } from "../src/app.js";
+import { createTestApp } from "./helpers.js";
 import { profileBody } from "./helpers.js";
 
 describe("vocabulary API", () => {

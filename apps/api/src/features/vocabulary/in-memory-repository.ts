@@ -7,17 +7,24 @@ import {
   type VocabularyCodeInput,
 } from "@plyco/shared";
 
-import { countries, defaultVocabularyCodeSets } from "./reference-data.js";
+import { countries } from "./reference-data.js";
 import { type VocabularyRepository } from "./repository.js";
 
 export class InMemoryVocabularyRepository implements VocabularyRepository {
+  private readonly systemCodeSets: Map<string, VocabularyCodeSet>;
+
+  constructor(
+    private readonly initialCodeSets: VocabularyCodeSet[] = [],
+  ) {
+    this.systemCodeSets = new Map(
+      initialCodeSets
+        .filter((codeSet) => codeSet.isSystem)
+        .map((codeSet) => [codeSet.codeSetId, codeSet]),
+    );
+  }
+
   private readonly countriesByCode = new Map(
     countries.map((country) => [country.code, country]),
-  );
-  private readonly systemCodeSets = new Map(
-    defaultVocabularyCodeSets
-      .filter((codeSet) => codeSet.isSystem)
-      .map((codeSet) => [codeSet.codeSetId, codeSet]),
   );
   private readonly organizationCodeSets = new Map<
     string,
@@ -61,7 +68,7 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
 
     this.organizationCodeSets.set(
       organizationId,
-      defaultVocabularyCodeSets
+      this.initialCodeSets
         .filter((codeSet) => !codeSet.isSystem)
         .map((codeSet) => ({
           ...codeSet,

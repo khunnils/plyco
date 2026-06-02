@@ -76,7 +76,6 @@ export const apiConfig = {
   geminiApiKey: process.env.GEMINI_API_KEY,
   geminiProviderLookupModel:
     process.env.GEMINI_PROVIDER_LOOKUP_MODEL ?? "gemini-2.5-flash",
-  firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
   organizationLookupModel:
     process.env.ORGANIZATION_LOOKUP_MODEL ?? "gemini-flash-latest",
   langfusePublicKey: process.env.LANGFUSE_PUBLIC_KEY,

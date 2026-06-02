@@ -5,7 +5,7 @@ import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { NodeSDK } from "@opentelemetry/sdk-node"
 import { config as loadDotenv } from "dotenv"
 
-const apiDir = path.resolve(fileURLToPath(import.meta.url), "../../")
+const apiDir = path.resolve(fileURLToPath(import.meta.url), "../../../")
 const repoRoot = path.resolve(apiDir, "../..")
 
 loadDotenv({ path: path.join(repoRoot, ".env"), override: false, quiet: true })

@@ -1,7 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 
-import { createApp, createTestApp } from "../src/app.js";
+import { createApp } from "../src/app.js";
+import { createTestApp } from "./helpers.js";
 import { LlmProviderLookupService } from "../src/features/vendors/provider-lookup.js";
 import { AirtableProviderSource } from "../src/infrastructure/providers.js";
 import {

@@ -552,6 +552,17 @@ export const organizationLookupInputSchema = z.object({
   website: z.string().trim().url("Website must be a valid URL"),
 });
 
+export const organizationWebsiteLookupInputSchema = z.object({
+  website: z.string().trim().url("Website must be a valid URL"),
+});
+
+export const organizationPrivacyPolicyLookupInputSchema = z.object({
+  privacyPolicyUrl: z
+    .string()
+    .trim()
+    .url("Privacy policy URL must be a valid URL"),
+});
+
 export const organizationLookupPolicyLinkSchema = z.object({
   type: z
     .enum([
@@ -582,6 +593,7 @@ export const organizationLookupResultSchema = z.object({
     .max(12)
     .default([]),
   policyLinks: z.array(organizationLookupPolicyLinkSchema).max(12).default([]),
+  privacyPolicyUrl: z.string().trim().url().nullable().default(null),
   warnings: z.array(z.string().trim().min(1)).max(8).default([]),
 });
 
@@ -684,6 +696,12 @@ export type AuthState = z.infer<typeof authStateSchema>;
 export type CreateOrganization = z.infer<typeof createOrganizationSchema>;
 export type OrganizationLookupInput = z.infer<
   typeof organizationLookupInputSchema
+>;
+export type OrganizationWebsiteLookupInput = z.infer<
+  typeof organizationWebsiteLookupInputSchema
+>;
+export type OrganizationPrivacyPolicyLookupInput = z.infer<
+  typeof organizationPrivacyPolicyLookupInputSchema
 >;
 export type OrganizationLookupPolicyLink = z.infer<
   typeof organizationLookupPolicyLinkSchema

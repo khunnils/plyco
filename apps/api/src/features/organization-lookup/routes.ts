@@ -1,8 +1,10 @@
 import {
-  organizationLookupInputSchema,
   organizationLookupResultSchema,
+  organizationPrivacyPolicyLookupInputSchema,
+  organizationWebsiteLookupInputSchema,
+  privacyProfileSchema,
 } from "@plyco/shared"
-import { type FastifyInstance } from "fastify"
+import { type FastifyInstance, type FastifyRequest } from "fastify"
 
 import { getPersistedSessionUser } from "../../infrastructure/auth.js"
 import { ApiError } from "../../infrastructure/errors.js"
@@ -19,7 +21,7 @@ export async function registerOrganizationLookupRoutes(
     organizationLookupService: OrganizationLookupService
   },
 ) {
-  app.post("/organization-lookup", async (request, reply) => {
+  const requireUser = async (request: FastifyRequest) => {
     const user = await getPersistedSessionUser(request, accountRepository)
 
     if (!user && request.session) {
@@ -29,10 +31,25 @@ export async function registerOrganizationLookupRoutes(
         401,
       )
     }
+  }
 
-    const input = organizationLookupInputSchema.parse(request.body)
+  app.post("/organization-lookup/website", async (request, reply) => {
+    await requireUser(request)
+
+    const input = organizationWebsiteLookupInputSchema.parse(request.body)
     const result = organizationLookupResultSchema.parse(
-      await organizationLookupService.lookup(input),
+      await organizationLookupService.lookupWebsite(input),
+    )
+
+    return reply.send(result)
+  })
+
+  app.post("/organization-lookup/privacy-policy", async (request, reply) => {
+    await requireUser(request)
+
+    const input = organizationPrivacyPolicyLookupInputSchema.parse(request.body)
+    const result = privacyProfileSchema.parse(
+      await organizationLookupService.lookupPrivacyPolicy(input),
     )
 
     return reply.send(result)

@@ -5,6 +5,7 @@ import {
   emptyPrivacyProfile,
   emptyServiceProfile,
   type CompanyProfile,
+  type PrivacyProfile,
   type ServiceProfileInput,
   type StoredDataType,
   type BusinessActivityInput,
@@ -24,6 +25,8 @@ export type WizardDraft = {
   primaryService: ServiceProfileInput
   primaryDataType: StoredDataType
   primaryActivity: BusinessActivityInput
+  privacy: PrivacyProfile
+  privacyPolicyUrl: string | null
   suggestedProviderNames: string[]
   warnings: string[]
 }
@@ -125,6 +128,8 @@ export const fallbackDraft = ({
   },
   primaryDataType: defaultDataType(name),
   primaryActivity: defaultActivity,
+  privacy: emptyPrivacyProfile,
+  privacyPolicyUrl: null,
   suggestedProviderNames: [],
   warnings,
 })
@@ -158,6 +163,8 @@ export const draftFromLookup = (
   primaryActivity: result.primaryActivity.name
     ? result.primaryActivity
     : defaultActivity,
+  privacy: emptyPrivacyProfile,
+  privacyPolicyUrl: result.privacyPolicyUrl,
   suggestedProviderNames: result.suggestedProviders.map(
     (provider) => provider.name
   ),
@@ -175,7 +182,7 @@ export const toProfileDraft = (
       businessActivityIds: [businessActivityId],
     },
   ],
-  privacy: emptyPrivacyProfile,
+  privacy: draft.privacy,
   infrastructure: emptyInfrastructureProfile,
   dataHandling: {
     dataTypesStored: [draft.primaryDataType],

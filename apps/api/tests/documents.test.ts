@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { type SecurityProgramSnapshot } from "@plyco/shared";
 import { describe, expect, it } from "vitest";
 
-import { createTestApp } from "../src/app.js";
+import { createTestApp } from "./helpers.js";
 import {
   Jinja2Renderer,
   ReportContextBuilder,
@@ -23,6 +23,7 @@ import {
   vendorBody,
   vendorUseBody,
 } from "./helpers.js";
+import { testVocabularyCodeSets } from "./vocabulary-fixtures.js";
 
 describe("documents / templates API", () => {
   it("builds report context with organization aliases and vendor collections", () => {
@@ -265,7 +266,9 @@ describe("documents / templates API", () => {
   });
 
   it("exposes profile values and resolved labels in the document context", async () => {
-    const vocabularyRepository = new InMemoryVocabularyRepository();
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
     const vocabulary = await vocabularyRepository.listVocabulary("org-test");
     const snapshot: SecurityProgramSnapshot = {
       organization: {

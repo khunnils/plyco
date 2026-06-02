@@ -17,7 +17,10 @@ import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { useLookupOrganization } from "@/features/organizations/hooks/use-organizations"
+import {
+  useLookupOrganizationWebsite,
+  useLookupPrivacyPolicy,
+} from "@/features/organizations/hooks/use-organizations"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
@@ -62,7 +65,8 @@ export const CreateOrganizationScreen = ({
   const [draft, setDraft] = useState<WizardDraft | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const lookupOrganization = useLookupOrganization()
+  const lookupOrganizationWebsite = useLookupOrganizationWebsite()
+  const lookupPrivacyPolicy = useLookupPrivacyPolicy()
   const vocabulary = useVocabulary(Boolean(draft))
   const queryClient = useQueryClient()
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
@@ -133,16 +137,44 @@ export const CreateOrganizationScreen = ({
     setSubmitError(null)
     setWebsite(normalizedWebsite)
     setStep("lookup")
-    lookupOrganization.mutate(parsed.data, {
-      onSuccess: (result) => {
-        setDraft(draftFromLookup(parsed.data, result))
-        setStep("markets")
-      },
-      onError: (error) => {
-        setSubmitError(error.message || "Could not map organization details.")
-        setStep("identity")
-      },
-    })
+    lookupOrganizationWebsite.mutate(
+      { website: parsed.data.website },
+      {
+        onSuccess: (result) => {
+          setDraft(draftFromLookup(parsed.data, result))
+          setStep("markets")
+          if (result.privacyPolicyUrl) {
+            lookupPrivacyPolicy.mutate(
+              { privacyPolicyUrl: result.privacyPolicyUrl },
+              {
+                onSuccess: (privacy) => {
+                  setDraft((current) =>
+                    current ? { ...current, privacy } : current
+                  )
+                },
+                onError: () => {
+                  setDraft((current) =>
+                    current
+                      ? {
+                          ...current,
+                          warnings: [
+                            ...current.warnings,
+                            "Privacy policy details could not be enriched. You can continue manually.",
+                          ],
+                        }
+                      : current
+                  )
+                },
+              }
+            )
+          }
+        },
+        onError: (error) => {
+          setSubmitError(error.message || "Could not map organization details.")
+          setStep("identity")
+        },
+      }
+    )
   }
 
   const finishSetup = async () => {
@@ -200,11 +232,11 @@ export const CreateOrganizationScreen = ({
             <Loader2 className="size-5 animate-spin" />
           </div>
           <p className="mt-5 font-medium text-slate-950">
-            Reading public pages and policy links.
+            Reading public website details.
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             We are looking for organization details, a primary service, common
-            data categories, policy links, and providers. You can review the
+            data categories, and a privacy policy link. You can review the
             lookup details before anything is saved.
           </p>
         </div>
@@ -262,10 +294,10 @@ export const CreateOrganizationScreen = ({
           <div className="grid gap-4 pt-2">
             <Button
               className="h-12"
-              disabled={lookupOrganization.isPending}
+              disabled={lookupOrganizationWebsite.isPending}
               type="submit"
             >
-              {lookupOrganization.isPending ? (
+              {lookupOrganizationWebsite.isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (
                 <Sparkles />
@@ -339,6 +371,11 @@ export const CreateOrganizationScreen = ({
         {draft.warnings.length > 0 ? (
           <div className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
             {draft.warnings[0]}
+          </div>
+        ) : null}
+        {lookupPrivacyPolicy.isPending ? (
+          <div className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
+            Enriching privacy policy details in the background.
           </div>
         ) : null}
 
@@ -449,6 +486,10 @@ export const CreateOrganizationScreen = ({
                       )
                     : "Not detected"
                 }
+              />
+              <ReviewRow
+                label="Privacy policy"
+                value={draft.privacyPolicyUrl ?? "Not detected"}
               />
               <ReviewRow
                 label="Suggested providers"

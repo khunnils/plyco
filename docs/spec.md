@@ -7,10 +7,12 @@ contains the active form step and the right panel provides a calm branded
 background effect.
 
 The first step asks for organization name and website URL. The client calls the
-authenticated `POST /organization-lookup` endpoint, which attempts to prefill
-setup from the public website. While lookup runs, the client shows an interim
-state explaining that Plyco is reading website and policy details. Lookup
-failure is not blocking; the user continues with the entered name and URL.
+authenticated `POST /organization-lookup/website` endpoint, which attempts to
+prefill setup from the public website. If that response includes a privacy
+policy URL, the client calls `POST /organization-lookup/privacy-policy` in the
+background to enrich privacy defaults. Website lookup shows an interim state;
+privacy policy enrichment is non-blocking. Lookup failure is not blocking; the
+user continues with the entered name and URL.
 
 After lookup, the user reviews five editable steps:
 

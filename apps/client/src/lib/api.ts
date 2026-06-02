@@ -16,8 +16,10 @@ import {
   serviceProviderUsageInputSchema,
   organizationProviderInventorySchema,
   providerLookupResultSchema,
-  organizationLookupInputSchema,
   organizationLookupResultSchema,
+  organizationPrivacyPolicyLookupInputSchema,
+  organizationWebsiteLookupInputSchema,
+  privacyProfileSchema,
   createDocumentSchema,
   documentSchema,
   documentSummarySchema,
@@ -49,8 +51,10 @@ import {
   type OrganizationProvider,
   type OrganizationProviderInput,
   type ProviderLookupResult,
-  type OrganizationLookupInput,
   type OrganizationLookupResult,
+  type OrganizationPrivacyPolicyLookupInput,
+  type OrganizationWebsiteLookupInput,
+  type PrivacyProfile,
   type OrganizationSummary,
   type OrganizationMember,
 } from "@plyco/shared"
@@ -139,12 +143,20 @@ export const getOrganizationMembers = (
     z.array(organizationMemberSchema)
   )
 
-export const lookupOrganization = (
-  input: OrganizationLookupInput
+export const lookupOrganizationWebsite = (
+  input: OrganizationWebsiteLookupInput
 ): Promise<OrganizationLookupResult> =>
-  apiRequest("/organization-lookup", organizationLookupResultSchema, {
+  apiRequest("/organization-lookup/website", organizationLookupResultSchema, {
     method: "POST",
-    body: JSON.stringify(organizationLookupInputSchema.parse(input)),
+    body: JSON.stringify(organizationWebsiteLookupInputSchema.parse(input)),
+  })
+
+export const lookupPrivacyPolicy = (
+  input: OrganizationPrivacyPolicyLookupInput
+): Promise<PrivacyProfile> =>
+  apiRequest("/organization-lookup/privacy-policy", privacyProfileSchema, {
+    method: "POST",
+    body: JSON.stringify(organizationPrivacyPolicyLookupInputSchema.parse(input)),
   })
 
 export const createVocabularyCode = ({

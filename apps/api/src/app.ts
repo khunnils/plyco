@@ -60,7 +60,6 @@ import {
 } from "./infrastructure/providers.js"
 import {
   FileSystemTemplateSource,
-  StaticSystemTemplateSource,
   type SystemTemplateSource,
 } from "./infrastructure/system-templates.js"
 
@@ -323,102 +322,6 @@ function createDefaultProviderLookupService({
       return service.lookup(inputUrl)
     },
   }
-}
-
-export function createTestApp() {
-  const accountRepository = new InMemoryAccountRepository()
-  const organizationRepository = new InMemoryOrganizationRepository()
-  const vendorRepository = new InMemoryVendorRepository(organizationRepository)
-  const vocabularyRepository = new InMemoryVocabularyRepository()
-  const documentRepository = new InMemoryDocumentRepository(
-    organizationRepository,
-  )
-
-  return createApp({
-    auth: false,
-    accountRepository,
-    documentRepository,
-    documentPdfStorage: new NullDocumentPdfStorage(),
-    organizationRepository,
-    vendorRepository,
-    vocabularyRepository,
-    providerSource: new StaticProviderSource([
-      {
-        id: "prov-github",
-        name: "GitHub",
-        url: "https://github.com",
-        category: "Source Control",
-        systemTypes: ["source_control"],
-        securityCriticality: "Critical",
-        handlesCustomerData: false,
-      },
-      {
-        id: "prov-google-analytics",
-        name: "Google Analytics",
-        url: "https://analytics.google.com",
-        category: "Analytics",
-        systemTypes: ["analytics"],
-        securityCriticality: "Medium",
-        handlesCustomerData: true,
-      },
-      {
-        id: "prov-posthog",
-        name: "PostHog",
-        url: "https://posthog.com",
-        category: "Analytics",
-        systemTypes: ["analytics"],
-        securityCriticality: "Medium",
-        handlesCustomerData: true,
-      },
-      {
-        id: "prov-google-ads",
-        name: "Google Ads",
-        url: "https://ads.google.com",
-        category: "Advertising",
-        systemTypes: ["advertising"],
-        securityCriticality: "Medium",
-        handlesCustomerData: true,
-      },
-      {
-        id: "prov-mailchimp",
-        name: "Mailchimp",
-        url: "https://mailchimp.com",
-        category: "Newsletter",
-        systemTypes: ["newsletter"],
-        securityCriticality: "Medium",
-        handlesCustomerData: true,
-      },
-    ]),
-    systemTemplateSource: new StaticSystemTemplateSource([
-      {
-        slug: "data-security-policy",
-        name: "Data Security Policy",
-        description:
-          "A customer-facing data security policy based on access control, encryption, monitoring, incident response, backup, and vendor risk data.",
-        content: "# {{ company.name }} Data Security Policy\n",
-      },
-      {
-        slug: "incident-response-plan",
-        name: "Incident Response Plan",
-        description: "A lightweight incident response outline.",
-        content: "# {{ company.name }} Incident Response Plan\n",
-      },
-      {
-        slug: "subprocessors",
-        name: "Subprocessors",
-        description:
-          "A customer-facing subprocessor summary based on the organization's vendor data processors.",
-        content: "# {{ organization.name }} Data Processors and Subprocessors\n",
-      },
-      {
-        slug: "privacy-policy",
-        name: "Privacy Policy",
-        description:
-          "A customer-facing privacy policy based on the organization's privacy, service, and vendor data.",
-        content: "# {{ company.name }} Privacy Policy\n",
-      },
-    ]),
-  })
 }
 
 function createRepositories({

@@ -3,6 +3,7 @@ import {
   Type,
   type GenerateContentResponseUsageMetadata,
   type SchemaUnion,
+  type Tool,
 } from "@google/genai"
 import { startObservation } from "@langfuse/tracing"
 
@@ -18,10 +19,12 @@ export interface LlmJsonClient {
     model,
     prompt,
     responseSchema,
+    tools,
   }: {
     model: string
     prompt: ResolvedPrompt
     responseSchema: SchemaUnion
+    tools?: Tool[]
   }): Promise<unknown>
 }
 
@@ -133,10 +136,12 @@ export class GeminiJsonClient implements LlmJsonClient {
     model,
     prompt,
     responseSchema,
+    tools,
   }: {
     model: string
     prompt: ResolvedPrompt
     responseSchema: SchemaUnion
+    tools?: Tool[]
   }): Promise<unknown> {
     const operationName = prompt.metadata.name
     const generation = startObservation(
@@ -157,6 +162,7 @@ export class GeminiJsonClient implements LlmJsonClient {
         config: {
           responseMimeType: "application/json",
           responseSchema,
+          tools,
         },
       })
       const text = response.text
@@ -179,7 +185,6 @@ export class GeminiJsonClient implements LlmJsonClient {
           msg: "llm generation completed",
           generationName: operationName,
           model,
-          traceId,
           tracingEnabled: isInstrumentationEnabled(),
         }),
       )

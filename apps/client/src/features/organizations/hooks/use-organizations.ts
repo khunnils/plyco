@@ -1,8 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type CreateOrganization, type OrganizationLookupInput } from "@plyco/shared"
+import {
+  type CreateOrganization,
+  type OrganizationPrivacyPolicyLookupInput,
+  type OrganizationWebsiteLookupInput,
+} from "@plyco/shared"
 import { toast } from "sonner"
 
-import { createOrganization, lookupOrganization } from "@/lib/api"
+import {
+  createOrganization,
+  lookupOrganizationWebsite,
+  lookupPrivacyPolicy,
+} from "@/lib/api"
 import { authStateQueryKey } from "@/lib/query-keys"
 
 export const useCreateOrganization = () => {
@@ -20,13 +28,26 @@ export const useCreateOrganization = () => {
   })
 }
 
-export const useLookupOrganization = () =>
+export const useLookupOrganizationWebsite = () =>
   useMutation({
-    mutationFn: (input: OrganizationLookupInput) => lookupOrganization(input),
+    mutationFn: (input: OrganizationWebsiteLookupInput) =>
+      lookupOrganizationWebsite(input),
     onError: (err: Error) => {
       toast.warning(
         err.message ??
           "Could not pull details from the website. You can continue manually."
+      )
+    },
+  })
+
+export const useLookupPrivacyPolicy = () =>
+  useMutation({
+    mutationFn: (input: OrganizationPrivacyPolicyLookupInput) =>
+      lookupPrivacyPolicy(input),
+    onError: (err: Error) => {
+      toast.warning(
+        err.message ??
+          "Could not pull details from the privacy policy. You can continue manually."
       )
     },
   })
