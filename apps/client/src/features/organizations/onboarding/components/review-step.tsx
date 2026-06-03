@@ -5,12 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { CreateShell } from "../../components/create-shell"
 import { ReviewCompanyTab } from "./review-company-tab"
@@ -32,38 +27,42 @@ import {
   toProfileDraft,
 } from "../../components/types"
 
-const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> = {
-  global: {
-    description: "Cross-border operations spanning multiple continents.",
-    icon: "globe",
-  },
-  us: {
-    description: "North American domestic market and regulatory compliance.",
-    icon: "us",
-  },
-  eu: {
-    description: "EMEA focus with GDPR and regional policy adherence.",
-    icon: "eu",
-  },
-  uk: {
-    description: "UK market presence and UK GDPR alignment.",
-    icon: "uk",
-  },
-  apac: {
-    description: "APAC fast-growing markets and local compliance needs.",
-    icon: "apac",
-  },
-  latam: {
-    description: "LATAM presence and emerging data protection frameworks.",
-    icon: "latam",
-  },
-  mea: {
-    description: "MEA operations and localized compliance standards.",
-    icon: "mea",
-  },
-}
+const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> =
+  {
+    global: {
+      description: "Cross-border operations spanning multiple continents.",
+      icon: "globe",
+    },
+    us: {
+      description: "North American domestic market and regulatory compliance.",
+      icon: "us",
+    },
+    eu: {
+      description: "EMEA focus with GDPR and regional policy adherence.",
+      icon: "eu",
+    },
+    uk: {
+      description: "UK market presence and UK GDPR alignment.",
+      icon: "uk",
+    },
+    apac: {
+      description: "APAC fast-growing markets and local compliance needs.",
+      icon: "apac",
+    },
+    latam: {
+      description: "LATAM presence and emerging data protection frameworks.",
+      icon: "latam",
+    },
+    mea: {
+      description: "MEA operations and localized compliance standards.",
+      icon: "mea",
+    },
+  }
 
-const ENRICHED_COMPLIANCE: Record<string, { description: string; icon: string }> = {
+const ENRICHED_COMPLIANCE: Record<
+  string,
+  { description: string; icon: string }
+> = {
   soc_2: {
     description: "Security, availability, and confidentiality trust standard.",
     icon: "shield",
@@ -184,7 +183,10 @@ export const ReviewStep = () => {
       )
       const snapshot = await saveSecurityProfile(organization.id, profile)
 
-      queryClient.setQueryData(securityProfileQueryKey(organization.id), snapshot)
+      queryClient.setQueryData(
+        securityProfileQueryKey(organization.id),
+        snapshot
+      )
       await queryClient.invalidateQueries({ queryKey: authStateQueryKey })
       await queryClient.invalidateQueries({
         queryKey: securityProfileQueryKey(organization.id),
@@ -229,7 +231,7 @@ export const ReviewStep = () => {
         Back
       </Button>
       <Button
-        className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
+        className="bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-950 focus-visible:ring-slate-100"
         disabled={isSubmitting}
         type="button"
         onClick={finishSetup}
@@ -257,7 +259,7 @@ export const ReviewStep = () => {
         ) : null}
 
         <Tabs
-          className="gap-6"
+          className="h-[34rem] min-h-0 gap-6"
           value={setupTab}
           onValueChange={(value) => setSetupTab(value as SetupTab)}
         >
@@ -269,19 +271,34 @@ export const ReviewStep = () => {
             ))}
           </TabsList>
 
-          <TabsContent className="mt-0 border-0 p-0 shadow-none" value="company">
-            <ReviewCompanyTab regionOptions={regionOptions} goalOptions={goalOptions} />
+          <TabsContent
+            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
+            value="company"
+          >
+            <ReviewCompanyTab
+              regionOptions={regionOptions}
+              goalOptions={goalOptions}
+            />
           </TabsContent>
 
-          <TabsContent className="mt-0 border-0 p-0 shadow-none" value="service">
+          <TabsContent
+            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
+            value="service"
+          >
             <ReviewServiceTab regionOptions={regionOptions} />
           </TabsContent>
 
-          <TabsContent className="mt-0 border-0 p-0 shadow-none" value="data-types">
+          <TabsContent
+            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
+            value="data-types"
+          >
             <ReviewDataTypesTab />
           </TabsContent>
 
-          <TabsContent className="mt-0 border-0 p-0 shadow-none" value="activities">
+          <TabsContent
+            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
+            value="activities"
+          >
             <ReviewActivitiesTab />
           </TabsContent>
         </Tabs>

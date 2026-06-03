@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Check, Edit2, Trash2, Plus } from "lucide-react"
+import { Check, Edit2, Trash2, Plus, X } from "lucide-react"
 import { type BusinessActivityInput } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ const SetupTextArea = ({
   <label className="grid gap-2 text-sm font-medium text-slate-800 md:col-span-2">
     <span>{label}</span>
     <textarea
-      className="min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-normal leading-6 text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      className="min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
       placeholder={placeholder}
       value={value}
       onChange={(event) => onChange(event.target.value)}
@@ -37,143 +37,179 @@ const emptyActivity = (index: number): BusinessActivityInput => ({
   retentionDays: 0,
 })
 
+type ActivityEditor = {
+  index: number | null
+  draft: BusinessActivityInput
+}
+
 export const ReviewActivitiesTab = () => {
   const { draft, updateDraft } = useOnboardingStore()
-  const [editingActivity, setEditingActivity] = useState<number | null>(null)
+  const [activityEditor, setActivityEditor] = useState<ActivityEditor | null>(
+    null
+  )
 
   if (!draft) {
     return null
   }
 
+  const startAddingActivity = () => {
+    setActivityEditor({
+      index: null,
+      draft: emptyActivity(draft.activities.length),
+    })
+  }
+
+  const startEditingActivity = (index: number) => {
+    setActivityEditor({
+      index,
+      draft: { ...draft.activities[index] },
+    })
+  }
+
+  const saveActivity = () => {
+    if (!activityEditor) {
+      return
+    }
+
+    updateDraft((current) => ({
+      ...current,
+      activities:
+        activityEditor.index === null
+          ? [...current.activities, activityEditor.draft]
+          : current.activities.map((item, index) =>
+              index === activityEditor.index ? activityEditor.draft : item
+            ),
+    }))
+    setActivityEditor(null)
+  }
+
   return (
-    <div className="grid gap-3">
-      <div className="mb-2 flex items-start justify-between gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="flex shrink-0 items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-slate-950">
-            Activities
-          </p>
+          <p className="text-sm font-semibold text-slate-950">Activities</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             Review and edit the business activities.
           </p>
         </div>
-        <Button
-          size="sm"
-          type="button"
-          variant="outline"
-          onClick={() => {
-            updateDraft((current) => {
-              const next = [
-                ...current.activities,
-                emptyActivity(current.activities.length),
-              ]
-              setEditingActivity(next.length - 1)
-              return {
-                ...current,
-                activities: next,
-              }
-            })
-          }}
-        >
-          <Plus className="size-4" />
-          Add activity
-        </Button>
-      </div>
-      <div className="grid gap-3">
-        {draft.activities.map((activity, index) => (
-          <div
-            className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
-            key={`${activity.name}-${index}`}
+        {!activityEditor ? (
+          <Button
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={startAddingActivity}
           >
-            {editingActivity === index ? (
-              <div className="grid gap-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-950">
-                    Edit Activity
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setEditingActivity(null)}
-                  >
-                    <Check className="size-4" />
-                    Done
-                  </Button>
-                </div>
-                <div className="grid gap-3 md:grid-cols-2">
-                  <TextInput
-                    label="Name"
-                    required
-                    value={activity.name}
-                    onChange={(value) =>
-                      updateDraft((current) => ({
-                        ...current,
-                        activities: current.activities.map(
-                          (item, currentIndex) =>
-                            currentIndex === index
-                              ? { ...item, name: value }
-                              : item
-                        ),
-                      }))
-                    }
-                  />
-                  <SetupTextArea
-                    label="Purpose"
-                    value={activity.purpose}
-                    onChange={(value) =>
-                      updateDraft((current) => ({
-                        ...current,
-                        activities: current.activities.map(
-                          (item, currentIndex) =>
-                            currentIndex === index
-                              ? { ...item, purpose: value }
-                              : item
-                        ),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-slate-950">
-                    {activity.name}
-                  </p>
-                  {activity.purpose ? (
-                    <p className="mt-1 text-xs leading-5 text-slate-500">
-                      {activity.purpose}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setEditingActivity(index)}
-                  >
-                    <Edit2 className="size-4 text-slate-500" />
-                  </Button>
-                  <Button
-                    disabled={draft.activities.length === 1}
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      updateDraft((current) => ({
-                        ...current,
-                        activities: current.activities.filter(
-                          (_, currentIndex) => currentIndex !== index
-                        ),
-                      }))
-                    }
-                  >
-                    <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+            <Plus className="size-4" />
+            Add activity
+          </Button>
+        ) : null}
       </div>
+
+      {activityEditor ? (
+        <div className="grid gap-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-slate-950">
+              {activityEditor.index === null ? "Add activity" : "Edit activity"}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => setActivityEditor(null)}
+              >
+                <X className="size-4" />
+                Cancel
+              </Button>
+              <Button
+                disabled={!activityEditor.draft.name.trim()}
+                size="sm"
+                type="button"
+                onClick={saveActivity}
+              >
+                <Check className="size-4" />
+                Save
+              </Button>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <TextInput
+              label="Name"
+              required
+              value={activityEditor.draft.name}
+              onChange={(value) =>
+                setActivityEditor((current) =>
+                  current
+                    ? { ...current, draft: { ...current.draft, name: value } }
+                    : current
+                )
+              }
+            />
+            <SetupTextArea
+              label="Purpose"
+              value={activityEditor.draft.purpose}
+              onChange={(value) =>
+                setActivityEditor((current) =>
+                  current
+                    ? {
+                        ...current,
+                        draft: { ...current.draft, purpose: value },
+                      }
+                    : current
+                )
+              }
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="min-h-0 overflow-y-auto pr-1">
+          <div className="grid gap-3">
+            {draft.activities.map((activity, index) => (
+              <div
+                className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
+                key={`${activity.name}-${index}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">
+                      {activity.name}
+                    </p>
+                    {activity.purpose ? (
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        {activity.purpose}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => startEditingActivity(index)}
+                    >
+                      <Edit2 className="size-4 text-slate-500" />
+                    </Button>
+                    <Button
+                      disabled={draft.activities.length === 1}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        updateDraft((current) => ({
+                          ...current,
+                          activities: current.activities.filter(
+                            (_, currentIndex) => currentIndex !== index
+                          ),
+                        }))
+                      }
+                    >
+                      <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
