@@ -252,14 +252,9 @@ export const ReviewStep = () => {
       title="Review workspace setup"
     >
       <section className="grid gap-6">
-        {draft.warnings.length > 0 ? (
-          <div className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            {draft.warnings[0]}
-          </div>
-        ) : null}
-
+     
         <Tabs
-          className="h-[34rem] min-h-0 gap-6"
+          className="h-120 min-h-0 gap-6"
           value={setupTab}
           onValueChange={(value) => setSetupTab(value as SetupTab)}
         >
