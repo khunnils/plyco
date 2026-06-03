@@ -232,7 +232,7 @@ export class AirtableProviderImportService implements ProviderImportService {
         lookup.provider.securityCriticality,
       ),
       "Handles Customer Data": lookup.provider.handlesCustomerData,
-      Organizatzion: [organizationRecordId],
+      Organization: [organizationRecordId],
       Category: [categoryRecordId],
     }
     const existing = await firstMatch(this.airtableClient, PROVIDERS_TABLE, [

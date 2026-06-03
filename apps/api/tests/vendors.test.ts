@@ -656,7 +656,7 @@ describe("vendors / providers API", () => {
       "System Type": null,
       "Security Relevance": "Critical",
       "Handles Customer Data": false,
-      Organizatzion: [result.organizationRecordId],
+      Organization: [result.organizationRecordId],
       Category: ["rec-category"],
     });
   });
@@ -701,7 +701,7 @@ describe("vendors / providers API", () => {
     expect(client.records["Provider Organizations"][0]?.fields.Name).toBe(
       "GitHub",
     );
-    expect(client.records.Providers[0]?.fields.Organizatzion).toEqual([
+    expect(client.records.Providers[0]?.fields.Organization).toEqual([
       "rec-org-existing",
     ]);
   });
