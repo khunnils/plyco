@@ -47,13 +47,36 @@ export const ReviewActivitiesTab = () => {
 
   return (
     <div className="grid gap-3">
-      <div className="mb-2">
-        <p className="text-sm font-semibold text-slate-950">
-          Activities
-        </p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Review and edit the business activities.
-        </p>
+      <div className="mb-2 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-950">
+            Activities
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Review and edit the business activities.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={() => {
+            updateDraft((current) => {
+              const next = [
+                ...current.activities,
+                emptyActivity(current.activities.length),
+              ]
+              setEditingActivity(next.length - 1)
+              return {
+                ...current,
+                activities: next,
+              }
+            })
+          }}
+        >
+          <Plus className="size-4" />
+          Add activity
+        </Button>
       </div>
       <div className="grid gap-3">
         {draft.activities.map((activity, index) => (
@@ -150,27 +173,6 @@ export const ReviewActivitiesTab = () => {
             )}
           </div>
         ))}
-        <Button
-          className="mt-2 justify-self-start"
-          type="button"
-          variant="outline"
-          onClick={() => {
-            updateDraft((current) => {
-              const next = [
-                ...current.activities,
-                emptyActivity(current.activities.length),
-              ]
-              setEditingActivity(next.length - 1)
-              return {
-                ...current,
-                activities: next,
-              }
-            })
-          }}
-        >
-          <Plus className="size-4" />
-          Add activity
-        </Button>
       </div>
     </div>
   )

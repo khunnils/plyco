@@ -47,13 +47,36 @@ export const ReviewDataTypesTab = () => {
 
   return (
     <div className="grid gap-3">
-      <div className="mb-2">
-        <p className="text-sm font-semibold text-slate-950">
-          Data Types
-        </p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Review and edit the data categories that will be saved.
-        </p>
+      <div className="mb-2 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-950">
+            Data Types
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Review and edit the data categories that will be saved.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={() => {
+            updateDraft((current) => {
+              const next = [
+                ...current.dataTypes,
+                emptyDataType(current.dataTypes.length),
+              ]
+              setEditingDataType(next.length - 1)
+              return {
+                ...current,
+                dataTypes: next,
+              }
+            })
+          }}
+        >
+          <Plus className="size-4" />
+          Add data type
+        </Button>
       </div>
       <div className="grid gap-3">
         {draft.dataTypes.map((dataType, index) => (
@@ -150,27 +173,6 @@ export const ReviewDataTypesTab = () => {
             )}
           </div>
         ))}
-        <Button
-          className="mt-2 justify-self-start"
-          type="button"
-          variant="outline"
-          onClick={() => {
-            updateDraft((current) => {
-              const next = [
-                ...current.dataTypes,
-                emptyDataType(current.dataTypes.length),
-              ]
-              setEditingDataType(next.length - 1)
-              return {
-                ...current,
-                dataTypes: next,
-              }
-            })
-          }}
-        >
-          <Plus className="size-4" />
-          Add data type
-        </Button>
       </div>
     </div>
   )
