@@ -27,7 +27,12 @@ import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
@@ -1178,35 +1183,30 @@ export const ServiceManager = ({
   }
 
   return (
-    <div className="grid gap-6">
-      <div className="flex gap-6 border-b border-slate-200">
-        <button
-          type="button"
-          onClick={() => setActiveTab("details")}
-          className={cn(
-            "mb-[-2px] cursor-pointer border-b-2 pb-3 text-sm font-medium transition-all outline-none",
-            activeTab === "details"
-              ? "border-slate-900 font-semibold text-slate-900"
-              : "border-transparent text-slate-500 hover:text-slate-800"
-          )}
+    <Tabs
+      value={activeTab}
+      onValueChange={(val) => setActiveTab(val as "details" | "providers")}
+      className="grid gap-6"
+    >
+      <TabsList
+        variant="line"
+        className="gap-6 border-b border-slate-200 w-full justify-start pb-0 h-auto rounded-none p-0"
+      >
+        <TabsTrigger
+          value="details"
+          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
         >
           Service details
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("providers")}
-          className={cn(
-            "mb-[-2px] cursor-pointer border-b-2 pb-3 text-sm font-medium transition-all outline-none",
-            activeTab === "providers"
-              ? "border-slate-900 font-semibold text-slate-900"
-              : "border-transparent text-slate-500 hover:text-slate-800"
-          )}
+        </TabsTrigger>
+        <TabsTrigger
+          value="providers"
+          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
         >
           Service Providers
-        </button>
-      </div>
+        </TabsTrigger>
+      </TabsList>
 
-      {activeTab === "details" ? (
+      <TabsContent value="details" className="mt-0">
         <div className="grid gap-10">
           <ServiceBasicsPanel
             isMutationPending={isProfileMutationPending}
@@ -1239,7 +1239,9 @@ export const ServiceManager = ({
             onSave={saveServicePatch}
           />
         </div>
-      ) : (
+      </TabsContent>
+
+      <TabsContent value="providers" className="mt-0">
         <ServiceProviderUsagePanel
           dataProcessingLevelOptions={dataProcessingLevelOptions}
           dataRegionOptions={dataRegionOptions}
@@ -1254,7 +1256,7 @@ export const ServiceManager = ({
           onDelete={onDeleteProviderUsage}
           onUpdate={onUpdateProviderUsage}
         />
-      )}
-    </div>
+      </TabsContent>
+    </Tabs>
   )
 }

@@ -63,7 +63,7 @@ export const CreateShell = ({
         </div>
       </header>
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-8">
-        {titleAbove ? (
+        {titleAbove && title ? (
           <div className="mx-auto mb-8 max-w-2xl text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
               STEP {stepNumber(step)} OF {stepOrder.length}
@@ -79,7 +79,7 @@ export const CreateShell = ({
           </div>
         ) : null}
         <section className="w-full max-w-3xl rounded-lg bg-white px-5 py-8 shadow-sm ring-1 ring-slate-200 sm:px-10 sm:py-10">
-          {!titleAbove ? (
+          {!titleAbove && title ? (
             <div className="mx-auto mb-8 max-w-2xl text-center">
               <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                 {title}

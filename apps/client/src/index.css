@@ -123,6 +123,55 @@
   }
 }
 
+@keyframes onboarding-lookup-core {
+  0%,
+  100% {
+    background-color: #f8fafc;
+  }
+
+  33% {
+    background-color: #f1f5f9;
+  }
+
+  66% {
+    background-color: #e2e8f0;
+  }
+}
+
+@keyframes onboarding-lookup-dot-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.onboarding-lookup-core {
+  animation: onboarding-lookup-core 6s ease-in-out infinite;
+}
+
+.onboarding-lookup-dot {
+  animation: onboarding-lookup-dot-bounce 4.8s ease-in-out infinite;
+}
+
+.onboarding-lookup-dot-secondary {
+  animation-delay: 0.9s;
+}
+
+.onboarding-lookup-dot-tertiary {
+  animation-delay: 1.8s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-lookup-core,
+  .onboarding-lookup-dot {
+    animation: none;
+  }
+}
+
 /* Toaster customizations */
 [data-sonner-toast] {
   transition: none !important;
