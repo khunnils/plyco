@@ -1,8 +1,8 @@
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
-import { CreateOrganizationScreen } from "@/features/organizations/components/create-organization-screen"
+import { OnboardingWizardPage } from "@/features/organizations/onboarding/pages/onboarding-wizard-page"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import { emptyProfileDraft } from "@/features/company/lib/profile"
@@ -26,6 +26,7 @@ import { VocabularyRoutePage } from "@/features/vocabulary/pages/vocabulary-rout
 import { DocumentsRoutePage } from "@/features/documents/pages/documents-route-page"
 
 export const App = () => {
+  const navigate = useNavigate()
   const authState = useAuthState()
   const user = authState.data?.user ?? null
   const isAuthenticated = Boolean(user)
@@ -62,7 +63,18 @@ export const App = () => {
 
   if (!selectedOrganization) {
     return (
-      <CreateOrganizationScreen user={user} onLogout={() => logout.mutate()} />
+      <Routes>
+        <Route
+          path="/onboarding/organization/*"
+          element={
+            <OnboardingWizardPage
+              user={user}
+              onLogout={() => logout.mutate()}
+            />
+          }
+        />
+        <Route path="*" element={<Navigate to="/onboarding/organization/identity" replace />} />
+      </Routes>
     )
   }
 
@@ -78,6 +90,16 @@ export const App = () => {
 
   return (
     <Routes>
+      <Route
+        path="/onboarding/organization/*"
+        element={
+          <OnboardingWizardPage
+            user={user}
+            onCancel={() => navigate("/")}
+            onComplete={() => navigate("/")}
+          />
+        }
+      />
       <Route element={<WorkspaceLayout user={user} />}>
         <Route path="/" element={<DashboardRoutePage />} />
         <Route path="/company/profile" element={<CompanyProfileRoutePage />} />

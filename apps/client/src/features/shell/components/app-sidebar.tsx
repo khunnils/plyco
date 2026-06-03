@@ -36,7 +36,7 @@ export const AppSidebar = ({
   return (
     <Sidebar>
       <SidebarHeader>
-        <OrganizationSwitcher user={user} />
+        <OrganizationSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>

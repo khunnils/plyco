@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input"
+
 export const TextInput = ({
   label,
   value,
@@ -22,8 +24,8 @@ export const TextInput = ({
         {helperText}
       </span>
     ) : null}
-    <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 outline-none transition focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+    <Input
+      className="bg-white border-slate-200"
       placeholder={placeholder}
       required={required}
       type={type}

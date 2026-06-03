@@ -1,24 +1,22 @@
 import { Check, ChevronDown, Plus } from "lucide-react"
-import { type AuthUser } from "@plyco/shared"
 import { useEffect, useRef, useState } from "react"
-import { createPortal } from "react-dom"
+import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
-import { CreateOrganizationScreen } from "@/features/organizations/components/create-organization-screen"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 
-export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
+export const OrganizationSwitcher = () => {
+  const navigate = useNavigate()
   const { organizations, selectedOrganization } = useSelectedOrganization()
   const selectOrganization = useCurrentOrganizationStore(
     (state) => state.selectOrganization
   )
   const selectedOrganizationId = selectedOrganization?.id ?? ""
   const [open, setOpen] = useState(false)
-  const [creating, setCreating] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!open && !creating) {
+    if (!open) {
       return
     }
 
@@ -30,7 +28,6 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false)
-        setCreating(false)
       }
     }
 
@@ -41,7 +38,7 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
       document.removeEventListener("pointerdown", handlePointerDown)
       document.removeEventListener("keydown", handleKeyDown)
     }
-  }, [creating, open])
+  }, [open])
 
   const handleSelectOrganization = (organizationId: string) => {
     selectOrganization(organizationId)
@@ -113,7 +110,7 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
                 variant="ghost"
                 onClick={() => {
                   setOpen(false)
-                  setCreating(true)
+                  navigate("/onboarding/organization/identity")
                 }}
               >
                 <Plus />
@@ -123,25 +120,6 @@ export const OrganizationSwitcher = ({ user }: { user: AuthUser }) => {
           </>
         </div>
       )}
-
-      {creating
-        ? createPortal(
-            <div
-              className="fixed inset-0 z-[1000] bg-slate-50"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Create organization"
-            >
-              <CreateOrganizationScreen
-                user={user}
-                onCancel={() => setCreating(false)}
-                onComplete={() => setCreating(false)}
-                onLogout={() => setCreating(false)}
-              />
-            </div>,
-            document.body
-          )
-        : null}
     </div>
   )
 }
