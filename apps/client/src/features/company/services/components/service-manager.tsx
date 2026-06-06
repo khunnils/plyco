@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
 import {
+  type BusinessActivity,
   emptyServiceProfile,
   serviceProfileInputSchema,
   servicePrivacyProfileSchema,
@@ -57,7 +58,6 @@ const serviceBasicsSchema = serviceProfileInputSchema.pick({
   serviceUrl: true,
 })
 const serviceAudienceSchema = serviceProfileInputSchema.pick({
-  businessActivityIds: true,
   userTypes: true,
   customerTypes: true,
   availabilityRegions: true,
@@ -100,7 +100,6 @@ const serviceBasicsDraft = (
 const serviceAudienceDraft = (
   service: ServiceProfileInput
 ): ServiceAudienceDraft => ({
-  businessActivityIds: service.businessActivityIds,
   userTypes: service.userTypes,
   customerTypes: service.customerTypes,
   availabilityRegions: service.availabilityRegions,
@@ -116,7 +115,6 @@ const servicePrivacyDraft = (
 
 const serviceProviderPurpose = (service: ServiceProfileInput) =>
   `Used by ${service.serviceName?.trim() || "this service"}`
-
 
 const ServiceBasicsFormFields = ({
   descriptionName,
@@ -276,8 +274,207 @@ const ServiceBasicsPanel = ({
   )
 }
 
-const ServiceAudiencePanel = ({
+const ServiceActivitiesPanel = ({
+  businessActivities,
   businessActivityOptions,
+  isMutationPending,
+  service,
+  vocabulary,
+  onSave,
+}: {
+  businessActivities: BusinessActivity[]
+  businessActivityOptions: Option[]
+  isMutationPending: boolean
+  service: ServiceProfileInput
+  vocabulary: Vocabulary | undefined
+  onSave: (
+    patch: Pick<ServiceProfileInput, "businessActivityIds">,
+    onSuccess?: () => void
+  ) => void
+}) => {
+  const [showAddActivities, setShowAddActivities] = useState(false)
+  const [checkedActivityIds, setCheckedActivityIds] = useState<string[]>([])
+  const selectedActivityIds = service.businessActivityIds
+  const selectedActivityIdSet = new Set(selectedActivityIds)
+  const selectedActivities = selectedActivityIds.map((activityId) => ({
+    activity:
+      businessActivities.find((activity) => activity.id === activityId) ?? null,
+    id: activityId,
+    label:
+      businessActivityOptions.find((option) => option.value === activityId)
+        ?.label ?? activityId,
+  }))
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h3 className="text-base font-semibold text-slate-950">
+            Service Activities
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Processing activities this service supports.
+          </p>
+        </div>
+        {showAddActivities ? (
+          <div className="flex gap-2">
+            <Button
+              disabled={isMutationPending || checkedActivityIds.length === 0}
+              type="button"
+              onClick={() => {
+                onSave(
+                  {
+                    businessActivityIds: [
+                      ...selectedActivityIds,
+                      ...checkedActivityIds.filter(
+                        (activityId) => !selectedActivityIdSet.has(activityId)
+                      ),
+                    ],
+                  },
+                  () => {
+                    setShowAddActivities(false)
+                    setCheckedActivityIds([])
+                  }
+                )
+              }}
+            >
+              Add
+            </Button>
+            <Button
+              disabled={isMutationPending}
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowAddActivities(false)
+                setCheckedActivityIds([])
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-fit"
+            disabled={!service.id || businessActivityOptions.length === 0}
+            type="button"
+            onClick={() => {
+              setShowAddActivities(true)
+              setCheckedActivityIds([])
+            }}
+          >
+            <Plus />
+            Add Activities
+          </Button>
+        )}
+      </div>
+
+      <div className="grid gap-4">
+        {!service.id ? (
+          <div className="border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">
+            Save this service before assigning activities.
+          </div>
+        ) : businessActivityOptions.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">
+            Add activities to the activity inventory before assigning them to a
+            service.
+          </div>
+        ) : showAddActivities ? (
+          <AddActivitiesForm
+            checkedIds={checkedActivityIds}
+            options={businessActivityOptions}
+            selectedActivityIds={selectedActivityIdSet}
+            onChange={setCheckedActivityIds}
+          />
+        ) : selectedActivities.length === 0 ? (
+          <div className="border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">
+            No activities selected for this service.
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {selectedActivities.map((selectedActivity) => {
+              const roleLabel = selectedActivity.activity?.role
+                ? codeLabel(
+                    vocabulary,
+                    "activity_role",
+                    selectedActivity.activity.role
+                  )
+                : null
+              const legalBasisLabel =
+                selectedActivity.activity &&
+                selectedActivity.activity.legalBasis.length > 0
+                  ? codeValueList(
+                      vocabulary,
+                      "legal_basis",
+                      selectedActivity.activity.legalBasis
+                    )
+                  : null
+
+              return (
+                <article
+                  className="border border-slate-200 bg-white p-4"
+                  key={selectedActivity.id}
+                >
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="grid flex-1 gap-3">
+                      <h4 className="text-sm font-semibold text-slate-950">
+                        {selectedActivity.label}
+                      </h4>
+                      <p className="text-sm leading-5 text-slate-600">
+                        {selectedActivity.activity?.purpose.trim() ||
+                          "No description"}
+                      </p>
+                      {roleLabel || legalBasisLabel ? (
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                          {roleLabel ? (
+                            <span>
+                              <span className="font-medium text-slate-700">
+                                Role:
+                              </span>{" "}
+                              {roleLabel}
+                            </span>
+                          ) : null}
+                          {legalBasisLabel ? (
+                            <span>
+                              <span className="font-medium text-slate-700">
+                                Legal basis:
+                              </span>{" "}
+                              {legalBasisLabel}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        aria-label="Delete service activity"
+                        disabled={isMutationPending}
+                        size="icon-sm"
+                        type="button"
+                        variant="outline"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onSave({
+                            businessActivityIds: selectedActivityIds.filter(
+                              (activityId) => activityId !== selectedActivity.id
+                            ),
+                          })
+                        }}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const ServiceAudiencePanel = ({
   customerTypeOptions,
   isMutationPending,
   regionOptions,
@@ -286,7 +483,6 @@ const ServiceAudiencePanel = ({
   vocabulary,
   onSave,
 }: {
-  businessActivityOptions: Option[]
   customerTypeOptions: Option[]
   isMutationPending: boolean
   regionOptions: Option[]
@@ -319,13 +515,6 @@ const ServiceAudiencePanel = ({
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
-  const activityLabels = service.businessActivityIds
-    .map(
-      (activityId) =>
-        businessActivityOptions.find((option) => option.value === activityId)
-          ?.label ?? activityId
-    )
-    .join(", ")
 
   return (
     <ProfilePanelShell
@@ -335,11 +524,6 @@ const ServiceAudiencePanel = ({
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[
-            [
-              "Business activities",
-              activityLabels || "Not set",
-              serviceHelperText.businessActivityIds,
-            ],
             [
               "User types",
               codeValueList(
@@ -394,15 +578,6 @@ const ServiceAudiencePanel = ({
       onSave={submit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.businessActivityIds?.root}
-          helperText={serviceHelperText.businessActivityIds}
-          label="Business activities"
-          name={audiencePath("businessActivityIds")}
-          options={businessActivityOptions}
-          placeholder="Select business activities"
-        />
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.userTypes?.root}
@@ -672,6 +847,60 @@ const ServiceHostingPanel = ({
         />
       </div>
     </ProfilePanelShell>
+  )
+}
+
+const AddActivitiesForm = ({
+  checkedIds,
+  options,
+  selectedActivityIds,
+  onChange,
+}: {
+  checkedIds: string[]
+  options: Option[]
+  selectedActivityIds: Set<string>
+  onChange: (checkedIds: string[]) => void
+}) => {
+  const toggleActivity = (activityId: string, checked: boolean) => {
+    onChange(
+      checked
+        ? [...checkedIds, activityId]
+        : checkedIds.filter((currentId) => currentId !== activityId)
+    )
+  }
+
+  return (
+    <div className="grid gap-4 border border-slate-200 bg-white p-4">
+      <div className="grid gap-2">
+        {options.map((option) => {
+          const disabled = selectedActivityIds.has(option.value)
+
+          return (
+            <label
+              className={[
+                "flex min-h-11 items-center gap-3 border bg-white px-3 py-2 text-sm",
+                disabled
+                  ? "border-slate-200 text-slate-400"
+                  : "border-slate-200 text-slate-800",
+              ].join(" ")}
+              key={option.value}
+            >
+              <input
+                checked={disabled || checkedIds.includes(option.value)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                disabled={disabled}
+                type="checkbox"
+                onChange={(event) =>
+                  toggleActivity(option.value, event.target.checked)
+                }
+              />
+              <span className="min-w-0 flex-1 truncate">{option.label}</span>
+              {disabled ? <Badge variant="secondary">Selected</Badge> : null}
+            </label>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -1049,6 +1278,7 @@ const ServiceProviderUsagePanel = ({
 }
 
 export const ServiceManager = ({
+  businessActivities,
   businessActivityOptions,
   cookieConsentMechanismOptions,
   cookieTrackingCategoryOptions,
@@ -1074,6 +1304,7 @@ export const ServiceManager = ({
   onSelectService,
   onUpdateProviderUsage,
 }: {
+  businessActivities: BusinessActivity[]
   businessActivityOptions: Option[]
   cookieConsentMechanismOptions: Option[]
   cookieTrackingCategoryOptions: Option[]
@@ -1114,7 +1345,9 @@ export const ServiceManager = ({
   )
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
-  const [activeTab, setActiveTab] = useState<"details" | "providers">("details")
+  const [activeTab, setActiveTab] = useState<
+    "details" | "activities" | "providers"
+  >("details")
   const [prevSelectedServiceId, setPrevSelectedServiceId] =
     useState(selectedServiceId)
 
@@ -1185,7 +1418,9 @@ export const ServiceManager = ({
   return (
     <Tabs
       value={activeTab}
-      onValueChange={(val) => setActiveTab(val as "details" | "providers")}
+      onValueChange={(val) =>
+        setActiveTab(val as "details" | "activities" | "providers")
+      }
       className="grid gap-6"
     >
       <TabsList
@@ -1197,6 +1432,12 @@ export const ServiceManager = ({
           className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
         >
           Service details
+        </TabsTrigger>
+        <TabsTrigger
+          value="activities"
+          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
+        >
+          Service Activities
         </TabsTrigger>
         <TabsTrigger
           value="providers"
@@ -1214,7 +1455,6 @@ export const ServiceManager = ({
             onSave={saveServicePatch}
           />
           <ServiceAudiencePanel
-            businessActivityOptions={businessActivityOptions}
             customerTypeOptions={customerTypeOptions}
             isMutationPending={isProfileMutationPending}
             regionOptions={regionOptions}
@@ -1239,6 +1479,17 @@ export const ServiceManager = ({
             onSave={saveServicePatch}
           />
         </div>
+      </TabsContent>
+
+      <TabsContent value="activities" className="mt-0">
+        <ServiceActivitiesPanel
+          businessActivities={businessActivities}
+          businessActivityOptions={businessActivityOptions}
+          isMutationPending={isProfileMutationPending}
+          service={selectedService}
+          vocabulary={vocabulary}
+          onSave={saveServicePatch}
+        />
       </TabsContent>
 
       <TabsContent value="providers" className="mt-0">

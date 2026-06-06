@@ -306,6 +306,7 @@ export const ServicesRoutePage = () => {
         />
       ) : (
         <ServiceProfilePage
+          businessActivities={businessActivities}
           businessActivityOptions={businessActivityOptions}
           dataTypeOptions={dataTypeOptions}
           isCreatingService={isCreatingService}

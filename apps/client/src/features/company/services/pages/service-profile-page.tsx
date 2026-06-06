@@ -1,4 +1,5 @@
 import {
+  type BusinessActivity,
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
   type OrganizationProvider,
@@ -10,6 +11,7 @@ import { type ProfileDraft } from "@/features/company/types/company"
 import { codeOptions, type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ServiceProfilePage = ({
+  businessActivities,
   businessActivityOptions,
   dataTypeOptions,
   isCreatingService,
@@ -27,6 +29,7 @@ export const ServiceProfilePage = ({
   onSelectService,
   onUpdateProviderUsage,
 }: {
+  businessActivities: BusinessActivity[]
   businessActivityOptions: Option[]
   dataTypeOptions: Array<{ value: string; label: string }>
   isCreatingService: boolean
@@ -54,6 +57,7 @@ export const ServiceProfilePage = ({
   ) => void
 }) => (
   <ServiceManager
+    businessActivities={businessActivities}
     businessActivityOptions={businessActivityOptions}
     cookieConsentMechanismOptions={codeOptions(
       vocabulary,

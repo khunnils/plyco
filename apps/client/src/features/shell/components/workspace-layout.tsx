@@ -12,7 +12,7 @@ export const WorkspaceLayout = ({ user }: { user: AuthUser }) => {
     <SidebarProvider>
       <AppSidebar user={user} onLogout={() => logout.mutate()} />
       <SidebarInset>
-        <main className="grid gap-6 px-4 pt-28 pb-6 md:px-12">
+        <main className="grid gap-6 px-4 pt-24 pb-6 md:px-12">
           <Outlet />
         </main>
       </SidebarInset>
