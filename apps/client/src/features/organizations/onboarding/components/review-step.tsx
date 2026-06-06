@@ -12,12 +12,14 @@ import { ReviewCompanyTab } from "./review-company-tab"
 import { ReviewServiceTab } from "./review-service-tab"
 import { ReviewDataTypesTab } from "./review-data-types-tab"
 import { ReviewActivitiesTab } from "./review-activities-tab"
+import { ReviewProvidersTab } from "./review-providers-tab"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import {
   createBusinessActivity,
   createOrganization,
+  createOrganizationProvider,
   saveSecurityProfile,
 } from "@/lib/api"
 import { authStateQueryKey, securityProfileQueryKey } from "@/lib/query-keys"
@@ -73,13 +75,14 @@ const ENRICHED_COMPLIANCE: Record<
   },
 }
 
-type SetupTab = "company" | "service" | "data-types" | "activities"
+type SetupTab = "company" | "service" | "data-types" | "activities" | "providers"
 
 const setupTabs: Array<{ value: SetupTab; label: string }> = [
   { value: "company", label: "Company" },
   { value: "service", label: "Primary Service" },
   { value: "data-types", label: "Data Types" },
   { value: "activities", label: "Activities" },
+  { value: "providers", label: "Providers" },
 ]
 
 export const ReviewStep = () => {
@@ -177,6 +180,15 @@ export const ReviewStep = () => {
           createBusinessActivity(organization.id, activity)
         )
       )
+
+      if (draft.providers && draft.providers.length > 0) {
+        await Promise.all(
+          draft.providers.map((provider) =>
+            createOrganizationProvider(organization.id, provider)
+          )
+        )
+      }
+
       const profile = toProfileDraft(
         draft,
         activities.map((activity) => activity.id)
@@ -205,7 +217,7 @@ export const ReviewStep = () => {
   }
 
   const handleBack = () => {
-    navigate("../compliance")
+    navigate("../providers")
   }
 
   const actions = onCancel ? (
@@ -295,6 +307,13 @@ export const ReviewStep = () => {
             value="activities"
           >
             <ReviewActivitiesTab />
+          </TabsContent>
+
+          <TabsContent
+            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
+            value="providers"
+          >
+            <ReviewProvidersTab />
           </TabsContent>
         </Tabs>
 

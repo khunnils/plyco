@@ -4,6 +4,7 @@ import {
   ClipboardList,
   Database,
   KeyRound,
+  Network,
   Server,
   ShieldCheck,
   type LucideIcon,
@@ -23,6 +24,7 @@ export type CompanySectionId =
   | "profile"
   | "service"
   | "activities"
+  | "graph"
   | "privacy"
   | "infrastructure"
   | "dataHandling"
@@ -68,6 +70,13 @@ export const companySections: CompanySection[] = [
 ]
 
 export const productAndDataSections: CompanySection[] = [
+  {
+    id: "graph",
+    path: "/company/graph",
+    title: "Graph",
+    description: "Read-only map of services, data, activities, and providers.",
+    icon: Network,
+  },
   {
     id: "activities",
     path: "/company/activities",

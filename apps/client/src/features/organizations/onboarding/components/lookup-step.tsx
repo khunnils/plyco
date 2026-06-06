@@ -297,7 +297,7 @@ export const LookupStep = () => {
       } finally {
         await organizationDetailsPromise
         if (isMounted) {
-          navigate("../review", { replace: true })
+          navigate("../providers", { replace: true })
         }
       }
     }

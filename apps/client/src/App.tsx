@@ -17,6 +17,7 @@ import { DashboardRoutePage } from "@/features/dashboard/pages/dashboard-route-p
 import { CompanyProfileRoutePage } from "@/features/company/profile/pages/company-profile-route-page"
 import { ServicesRoutePage } from "@/features/company/services/pages/services-route-page"
 import { ActivitiesRoutePage } from "@/features/company/activities/pages/activities-route-page"
+import { ProductDataGraphRoutePage } from "@/features/company/graph/pages/product-data-graph-route-page"
 import { PrivacyProfileRoutePage } from "@/features/company/privacy/pages/privacy-profile-route-page"
 import { InfrastructureProfileRoutePage } from "@/features/company/infrastructure/pages/infrastructure-profile-route-page"
 import { DataHandlingProfileRoutePage } from "@/features/company/data-handling/pages/data-handling-profile-route-page"
@@ -109,6 +110,7 @@ export const App = () => {
           element={<ServicesRoutePage />}
         />
         <Route path="/company/activities" element={<ActivitiesRoutePage />} />
+        <Route path="/company/graph" element={<ProductDataGraphRoutePage />} />
         <Route path="/company/privacy" element={<PrivacyProfileRoutePage />} />
         <Route
           path="/company/infrastructure"

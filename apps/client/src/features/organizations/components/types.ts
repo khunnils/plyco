@@ -10,6 +10,7 @@ import {
   type StoredDataType,
   type BusinessActivityInput,
   type OrganizationLookupResult,
+  type OrganizationProviderInput,
 } from "@plyco/shared"
 import { type ProfileDraft } from "@/features/company/types/company"
 
@@ -19,6 +20,7 @@ export type WizardStep =
   | "identity"
   | "markets"
   | "compliance"
+  | "providers"
   | "setup-review"
 
 export type WizardDraft = {
@@ -29,6 +31,7 @@ export type WizardDraft = {
   privacy: PrivacyProfile
   privacyPolicyUrl: string | null
   suggestedProviderNames: string[]
+  providers: OrganizationProviderInput[]
   warnings: string[]
 }
 
@@ -36,6 +39,7 @@ export const stepOrder: WizardStep[] = [
   "identity",
   "markets",
   "compliance",
+  "providers",
   "setup-review",
 ]
 
@@ -137,6 +141,7 @@ export const fallbackDraft = ({
   privacy: emptyPrivacyProfile,
   privacyPolicyUrl: null,
   suggestedProviderNames: [],
+  providers: [],
   warnings,
 })
 
@@ -172,6 +177,7 @@ export const draftFromLookup = (
   suggestedProviderNames: result.suggestedProviders.map(
     (provider) => provider.name
   ),
+  providers: [],
   warnings: result.warnings,
 })
 
@@ -190,6 +196,7 @@ export const mergeLookupDraft = (
       complianceGoals: current.company.complianceGoals,
     },
     privacy: current.privacy,
+    providers: current.providers,
     warnings: [...current.warnings, ...lookupDraft.warnings],
   }
 }
