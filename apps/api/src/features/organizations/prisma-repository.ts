@@ -119,6 +119,15 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return dataTypes.map((dataType) => dataType.name);
   }
 
+  async listDataTypeIds(organizationId: string): Promise<string[]> {
+    const dataTypes = await this.client.organizationDataType.findMany({
+      where: { organizationId },
+      select: { id: true },
+    });
+
+    return dataTypes.map((dataType) => dataType.id);
+  }
+
   async listServiceIds(organizationId: string): Promise<string[]> {
     const services = await this.client.serviceProfile.findMany({
       where: { organizationId },

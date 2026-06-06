@@ -17,6 +17,7 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ActivityForm = ({
   defaultValues,
+  dataTypeOptions,
   roleOptions,
   legalBasisOptions,
   retentionPolicyOptions,
@@ -28,6 +29,7 @@ export const ActivityForm = ({
   showButtons = true,
 }: {
   defaultValues: BusinessActivityInput
+  dataTypeOptions: Option[]
   roleOptions: Option[]
   legalBasisOptions: Option[]
   retentionPolicyOptions: Option[]
@@ -103,6 +105,15 @@ export const ActivityForm = ({
           placeholder="Select legal basis"
         />
       ) : null}
+      <MultiSelectField
+        control={form.control}
+        error={form.formState.errors.dataTypeIds?.root}
+        helperText={activityHelperText.dataTypes}
+        label="Data types processed"
+        name="dataTypeIds"
+        options={dataTypeOptions}
+        placeholder="Select data types"
+      />
       <SelectField
         control={form.control}
         helperText={activityHelperText.retentionPolicy}

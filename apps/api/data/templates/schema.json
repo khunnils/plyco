@@ -1273,6 +1273,7 @@
       "description": "Categories of data stored by the organization.",
       "example": [
         {
+          "id": "data_type_customer_account",
           "name": "customer account data",
           "description": "Profile and billing contact details",
           "subjectTypes": ["customers", "admins"],
@@ -1282,6 +1283,13 @@
         }
       ],
       "itemFields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "string",
+          "description": "Stable identifier for the data category.",
+          "example": "data_type_customer_account"
+        },
         {
           "key": "name",
           "label": "Name",
@@ -1352,6 +1360,14 @@
           "purpose": "Operate user accounts",
           "role": "controller",
           "legalBasis": ["contract"],
+          "dataTypeIds": ["data_type_customer_account"],
+          "dataTypeNames": ["customer account data"],
+          "dataTypes": [
+            {
+              "id": "data_type_customer_account",
+              "name": "customer account data"
+            }
+          ],
           "retentionDays": 365
         }
       ],
@@ -1397,6 +1413,32 @@
           "type": "string[]",
           "description": "Human-readable labels for this activity's legal basis codes.",
           "example": ["Contract"]
+        },
+        {
+          "key": "dataTypeIds",
+          "label": "Data type IDs",
+          "type": "string[]",
+          "description": "IDs of data categories processed by this activity.",
+          "example": ["data_type_customer_account"]
+        },
+        {
+          "key": "dataTypeNames",
+          "label": "Data type names",
+          "type": "string[]",
+          "description": "Names of data categories processed by this activity.",
+          "example": ["customer account data"]
+        },
+        {
+          "key": "dataTypes",
+          "label": "Data types",
+          "type": "collection",
+          "description": "Data category records processed by this activity.",
+          "example": [
+            {
+              "id": "data_type_customer_account",
+              "name": "customer account data"
+            }
+          ]
         },
         {
           "key": "retentionDays",

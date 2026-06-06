@@ -24,10 +24,16 @@ import {
 } from "./helpers.js";
 
 class InMemoryAirtableImportClient extends AirtableProviderImportClient {
-  records: Record<string, Array<{ id: string; fields: Record<string, unknown> }>>;
+  records: Record<
+    string,
+    Array<{ id: string; fields: Record<string, unknown> }>
+  >;
 
   constructor(
-    records: Record<string, Array<{ id: string; fields: Record<string, unknown> }>> = {},
+    records: Record<
+      string,
+      Array<{ id: string; fields: Record<string, unknown> }>
+    > = {},
   ) {
     super("app-test", "pat-test");
     this.records = {
@@ -81,6 +87,91 @@ class InMemoryAirtableImportClient extends AirtableProviderImportClient {
 }
 
 describe("vendors / providers API", () => {
+  it("supports business activity data type mappings", async () => {
+    const app = await createTestApp();
+    const profileResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+    const dataTypeIds = profileResponse
+      .json()
+      .organization.dataHandling.dataTypesStored.map(
+        (dataType: { id: string }) => dataType.id,
+      );
+
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/business-activities",
+      payload: {
+        name: "Account management",
+        purpose: "Operate customer accounts",
+        role: "controller",
+        legalBasis: ["contract"],
+        dataTypeIds: [dataTypeIds[0]],
+        retentionPolicy: null,
+        retentionDays: 0,
+      },
+    });
+
+    expect(createResponse.statusCode).toBe(201);
+    expect(createResponse.json().dataTypeIds).toEqual([dataTypeIds[0]]);
+
+    const createdActivity = createResponse.json();
+    const updateResponse = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/business-activities/${createdActivity.id}`,
+      payload: {
+        name: "Account management",
+        purpose: "Operate customer accounts",
+        role: "controller",
+        legalBasis: ["contract"],
+        dataTypeIds,
+        retentionPolicy: null,
+        retentionDays: 0,
+      },
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json().dataTypeIds).toEqual(dataTypeIds);
+
+    const listResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/business-activities",
+    });
+
+    expect(listResponse.statusCode).toBe(200);
+    expect(listResponse.json()[0].dataTypeIds).toEqual(dataTypeIds);
+  });
+
+  it("rejects activity data types outside the organization", async () => {
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/business-activities",
+      payload: {
+        name: "Account management",
+        purpose: "Operate customer accounts",
+        role: "controller",
+        legalBasis: ["contract"],
+        dataTypeIds: ["data_type_other_org"],
+        retentionPolicy: null,
+        retentionDays: 0,
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: { code: "DATA_TYPE_NOT_FOUND" },
+    });
+  });
+
   it("supports vendor CRUD", async () => {
     const app = await createTestApp();
     const profileResponse = await app.inject({
@@ -717,7 +808,9 @@ describe("vendors / providers API", () => {
       client,
     );
 
-    await expect(service.importProvider("https://github.com")).rejects.toMatchObject({
+    await expect(
+      service.importProvider("https://github.com"),
+    ).rejects.toMatchObject({
       code: "PROVIDER_IMPORT_CATEGORY_NOT_FOUND",
       statusCode: 400,
       details: { category: "source-control" },

@@ -108,6 +108,7 @@ export const defaultActivity: BusinessActivityInput = {
   purpose: "Operate the product, support users, and manage customer accounts.",
   role: "",
   legalBasis: [],
+  dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
 }
@@ -158,7 +159,8 @@ export const draftFromLookup = (
     industries: result.company.industries ?? [],
     regions: result.company.regions ?? [],
     complianceGoals:
-      result.company.complianceGoals && result.company.complianceGoals.length > 0
+      result.company.complianceGoals &&
+      result.company.complianceGoals.length > 0
         ? result.company.complianceGoals
         : complianceGoalsForRegions(result.company.regions),
   },
@@ -169,7 +171,9 @@ export const draftFromLookup = (
     serviceUrl: result.primaryService.serviceUrl || input.website,
   },
   dataTypes:
-    result.dataTypes.length > 0 ? result.dataTypes : [defaultDataType(input.name)],
+    result.dataTypes.length > 0
+      ? result.dataTypes
+      : [defaultDataType(input.name)],
   activities:
     result.activities.length > 0 ? result.activities : [defaultActivity],
   privacy: emptyPrivacyProfile,

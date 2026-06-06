@@ -227,6 +227,7 @@ describe("shared security profile schemas", () => {
     const result = dataHandlingProfileSchema.safeParse({
       dataTypesStored: [
         {
+          id: "data_type_customer_account",
           name: "Customer account data",
           description: "Account contact and notification data",
           subjectTypes: ["customer"],
@@ -246,6 +247,7 @@ describe("shared security profile schemas", () => {
       purpose: "Operate user accounts",
       role: "controller",
       legalBasis: ["contract"],
+      dataTypeIds: ["data_type_customer_account"],
       retentionDays: 365,
     });
 
@@ -270,10 +272,14 @@ describe("shared security profile schemas", () => {
       false,
     );
     expect(
-      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", ["gdpr"]),
+      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", [
+        "gdpr",
+      ]),
     ).toBe(true);
     expect(
-      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", ["soc_2"]),
+      isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", [
+        "soc_2",
+      ]),
     ).toBe(false);
   });
 

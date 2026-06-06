@@ -7,28 +7,29 @@ import {
   type PrivacyProfile,
   type Provider,
   type ServiceProfileInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
 export type SecurityProfileInput = {
-  company: CompanyProfile
-  services: ServiceProfileInput[]
-  privacy: PrivacyProfile
-  infrastructure: InfrastructureProfile
-  dataHandling: DataHandlingProfile
-  access: AccessProfile
-}
+  company: CompanyProfile;
+  services: ServiceProfileInput[];
+  privacy: PrivacyProfile;
+  infrastructure: InfrastructureProfile;
+  dataHandling: DataHandlingProfile;
+  access: AccessProfile;
+};
 
 export interface OrganizationRepository {
   getOrganization(
     organizationId: string,
-  ): Promise<OrganizationSecurityProfile | null>
+  ): Promise<OrganizationSecurityProfile | null>;
   upsertProfile(
     organizationId: string,
     input: SecurityProfileInput,
     providerCatalog: Provider[],
-  ): Promise<OrganizationSecurityProfile>
-  listDataTypeNames(organizationId: string): Promise<string[]>
-  listServiceIds(organizationId: string): Promise<string[]>
-  listBusinessActivityIds(organizationId: string): Promise<string[]>
-  listOrganizationProviderIds(organizationId: string): Promise<string[]>
+  ): Promise<OrganizationSecurityProfile>;
+  listDataTypeNames(organizationId: string): Promise<string[]>;
+  listDataTypeIds(organizationId: string): Promise<string[]>;
+  listServiceIds(organizationId: string): Promise<string[]>;
+  listBusinessActivityIds(organizationId: string): Promise<string[]>;
+  listOrganizationProviderIds(organizationId: string): Promise<string[]>;
 }

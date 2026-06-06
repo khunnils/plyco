@@ -4,29 +4,30 @@ import {
   type Provider,
   type ServiceProfile,
   type ServiceProfileInput,
-} from "@plyco/shared"
+  type StoredDataType,
+} from "@plyco/shared";
 
 import {
   type OrganizationRepository,
   type SecurityProfileInput,
-} from "./repository.js"
-import { ApiError } from "../../infrastructure/errors.js"
+} from "./repository.js";
+import { ApiError } from "../../infrastructure/errors.js";
 
 function now() {
-  return new Date().toISOString()
+  return new Date().toISOString();
 }
 
 function newId(prefix: string) {
-  return `${prefix}_${crypto.randomUUID()}`
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
 export class InMemoryOrganizationRepository implements OrganizationRepository {
-  private organizations = new Map<string, OrganizationSecurityProfile>()
+  private organizations = new Map<string, OrganizationSecurityProfile>();
 
   async getOrganization(
     organizationId: string,
   ): Promise<OrganizationSecurityProfile | null> {
-    return this.organizations.get(organizationId) ?? null
+    return this.organizations.get(organizationId) ?? null;
   }
 
   async upsertProfile(
@@ -34,38 +35,61 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     input: SecurityProfileInput,
     providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
-    const timestamp = now()
-    const existing = this.organizations.get(organizationId)
-    const inputWithProviderNames = this.withProviderNames(input, providerCatalog)
+    const timestamp = now();
+    const existing = this.organizations.get(organizationId);
+    const inputWithProviderNames = this.withProviderNames(
+      input,
+      providerCatalog,
+    );
     const services = this.servicesWithIds(
       inputWithProviderNames.services,
       existing?.services ?? [],
       timestamp,
-    )
+    );
+    const dataTypesStored = this.dataTypesWithIds(
+      inputWithProviderNames.dataHandling.dataTypesStored,
+      existing?.dataHandling.dataTypesStored ?? [],
+    );
     const organization: OrganizationSecurityProfile = {
       id: organizationId,
       ...inputWithProviderNames,
+      dataHandling: {
+        ...inputWithProviderNames.dataHandling,
+        dataTypesStored,
+      },
       services,
       createdAt: existing?.createdAt ?? timestamp,
       updatedAt: timestamp,
-    }
+    };
 
-    this.organizations.set(organizationId, organization)
-    return organization
+    this.organizations.set(organizationId, organization);
+    return organization;
   }
 
   async listDataTypeNames(organizationId: string): Promise<string[]> {
     return (
       this.organizations
         .get(organizationId)
-        ?.dataHandling.dataTypesStored.map(
-        (dataType) => dataType.name,
-      ) ?? []
-    )
+        ?.dataHandling.dataTypesStored.map((dataType) => dataType.name) ?? []
+    );
+  }
+
+  async listDataTypeIds(organizationId: string): Promise<string[]> {
+    return (
+      this.organizations
+        .get(organizationId)
+        ?.dataHandling.dataTypesStored.flatMap((dataType) =>
+          dataType.id ? [dataType.id] : [],
+        ) ?? []
+    );
   }
 
   async listServiceIds(organizationId: string): Promise<string[]> {
-    return this.organizations.get(organizationId)?.services.map((service) => service.id) ?? []
+    return (
+      this.organizations
+        .get(organizationId)
+        ?.services.map((service) => service.id) ?? []
+    );
   }
 
   async listBusinessActivityIds(organizationId: string): Promise<string[]> {
@@ -75,11 +99,13 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
           .get(organizationId)
           ?.services.flatMap((service) => service.businessActivityIds) ?? [],
       ),
-    )
+    );
   }
 
-  async listOrganizationProviderIds(_organizationId: string): Promise<string[]> {
-    return []
+  async listOrganizationProviderIds(
+    _organizationId: string,
+  ): Promise<string[]> {
+    return [];
   }
 
   private servicesWithIds(
@@ -88,10 +114,12 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     timestamp: string,
   ): ServiceProfile[] {
     return inputServices.map((service, index) => {
-      const serviceId = service.id ?? existingServices[index]?.id
+      const serviceId = service.id ?? existingServices[index]?.id;
       const existingService = service.id
-        ? existingServices.find((currentService) => currentService.id === service.id)
-        : existingServices[index]
+        ? existingServices.find(
+            (currentService) => currentService.id === service.id,
+          )
+        : existingServices[index];
 
       if (service.id && !existingService) {
         throw new ApiError(
@@ -99,7 +127,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
           "Service was not found for this organization.",
           400,
           { serviceId: service.id },
-        )
+        );
       }
 
       return {
@@ -107,8 +135,22 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
         id: serviceId ?? newId("service"),
         createdAt: existingService?.createdAt ?? timestamp,
         updatedAt: timestamp,
-      }
-    })
+      };
+    });
+  }
+
+  private dataTypesWithIds(
+    inputDataTypes: StoredDataType[],
+    existingDataTypes: StoredDataType[],
+  ): StoredDataType[] {
+    return inputDataTypes.map((dataType) => ({
+      ...dataType,
+      id:
+        dataType.id ??
+        existingDataTypes.find((existing) => existing.name === dataType.name)
+          ?.id ??
+        newId("data_type"),
+    }));
   }
 
   private withProviderNames(
@@ -131,7 +173,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
           providerCatalog,
         ),
       },
-    }
+    };
   }
 
   private providerNames(
@@ -141,7 +183,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     return selectedProviders.map((selectedProvider) => ({
       ...selectedProvider,
       name: this.catalogProvider(providerCatalog, selectedProvider).name,
-    }))
+    }));
   }
 
   private catalogProvider(
@@ -157,14 +199,14 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
         systemTypes: [selectedProvider.systemType],
         securityCriticality: "Low",
         handlesCustomerData: false,
-      }
+      };
     }
 
     const provider = providerCatalog.find(
       (catalogProvider) =>
         catalogProvider.id === selectedProvider.providerId &&
         catalogProvider.systemTypes.includes(selectedProvider.systemType),
-    )
+    );
 
     if (!provider) {
       throw new ApiError(
@@ -175,9 +217,9 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
           providerId: selectedProvider.providerId,
           systemType: selectedProvider.systemType,
         },
-      )
+      );
     }
 
-    return provider
+    return provider;
   }
 }

@@ -15,6 +15,7 @@ import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ActivitiesManager = ({
   activities,
+  dataTypeOptions,
   isMutationPending,
   roleOptions,
   legalBasisOptions,
@@ -30,6 +31,7 @@ export const ActivitiesManager = ({
   setEditingActivityId,
 }: {
   activities: BusinessActivity[]
+  dataTypeOptions: Option[]
   isMutationPending: boolean
   roleOptions: Option[]
   legalBasisOptions: Option[]
@@ -74,6 +76,7 @@ export const ActivitiesManager = ({
             ? toActivityInput(editingActivity)
             : emptyActivityDraft
         }
+        dataTypeOptions={dataTypeOptions}
         legalBasisOptions={legalBasisOptions}
         retentionPolicyOptions={retentionPolicyOptions}
         roleOptions={roleOptions}
@@ -101,6 +104,7 @@ export const ActivitiesManager = ({
     <div className="grid gap-4">
       <ActivityList
         activities={activities}
+        dataTypeOptions={dataTypeOptions}
         showLegalBasis={showLegalBasis}
         vocabulary={vocabulary}
         onDelete={onDelete}

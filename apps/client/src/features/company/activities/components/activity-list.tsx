@@ -10,15 +10,18 @@ import {
   activityRetentionLabel,
   codeValueList,
 } from "@/features/company/activities/lib/activity-display"
+import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const ActivityList = ({
   activities,
+  dataTypeOptions,
   showLegalBasis,
   vocabulary,
   onDelete,
   onEdit,
 }: {
   activities: BusinessActivity[]
+  dataTypeOptions: Option[]
   showLegalBasis: boolean
   vocabulary: Vocabulary | undefined
   onEdit: (activity: BusinessActivity) => void
@@ -26,6 +29,9 @@ export const ActivityList = ({
 }) => {
   const [expandedActivityIds, setExpandedActivityIds] = useState<Set<string>>(
     () => new Set()
+  )
+  const dataTypeLabelById = new Map(
+    dataTypeOptions.map((option) => [option.value, option.label])
   )
 
   if (activities.length === 0) {
@@ -92,6 +98,19 @@ export const ActivityList = ({
                             )
                           : "Not set",
                         activityHelperText.role,
+                      ],
+                      [
+                        "Data types processed",
+                        activity.dataTypeIds.length > 0
+                          ? activity.dataTypeIds
+                              .map(
+                                (dataTypeId) =>
+                                  dataTypeLabelById.get(dataTypeId) ??
+                                  dataTypeId
+                              )
+                              .join(", ")
+                          : "Not set",
+                        activityHelperText.dataTypes,
                       ],
                       [
                         "Retention",

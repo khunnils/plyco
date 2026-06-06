@@ -33,6 +33,7 @@ const emptyActivity = (index: number): BusinessActivityInput => ({
   purpose: "",
   role: "",
   legalBasis: [],
+  dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
 })

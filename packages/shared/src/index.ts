@@ -131,6 +131,7 @@ export const isComplianceFieldVisible = (
 };
 
 export const storedDataTypeSchema = z.object({
+  id: z.string().min(1).optional(),
   name: z.string().trim().min(1, "Name is required"),
   description: nullableStringSchema,
   subjectTypes: nullableCodeIdArraySchema,
@@ -144,6 +145,7 @@ export const businessActivityInputSchema = z.object({
   purpose: z.string().trim().default(""),
   role: codeIdSchema.or(z.literal("")).default(""),
   legalBasis: z.array(codeIdSchema).default([]),
+  dataTypeIds: z.array(z.string().trim().min(1)).default([]),
   retentionPolicy: nullableCodeIdSchema,
   retentionDays: z.number().int().min(0).default(0),
 });

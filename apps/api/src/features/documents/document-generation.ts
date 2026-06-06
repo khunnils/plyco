@@ -110,8 +110,9 @@ export class ReportContextBuilder {
           const servicePrivacy = service.privacy as
             | Record<string, unknown>
             | undefined;
-          return servicePrivacy?.usesCookiesOrTrackingTechnologiesAnswered ===
-            true;
+          return (
+            servicePrivacy?.usesCookiesOrTrackingTechnologiesAnswered === true
+          );
         }),
         hasHostingRegion: services.some((service) => {
           const servicePrivacy = service.privacy as
@@ -258,13 +259,20 @@ export class ReportContextBuilder {
     );
     const serviceActivities = activities
       .filter((activity) => service.businessActivityIds.includes(activity.id))
-      .map((activity) => this.businessActivityContext(activity, vocabulary));
+      .map((activity) =>
+        this.businessActivityContext(activity, dataTypes, vocabulary),
+      );
     const dataTypeNames = new Set(
       serviceProviderUsage.flatMap((usage) =>
         Array.isArray(usage.dataProcessed)
           ? usage.dataProcessed.map(String)
           : [],
       ),
+    );
+    const activityDataTypeIds = new Set(
+      activities
+        .filter((activity) => service.businessActivityIds.includes(activity.id))
+        .flatMap((activity) => activity.dataTypeIds),
     );
 
     return {
@@ -341,8 +349,10 @@ export class ReportContextBuilder {
       subprocessors: serviceProviderUsage.filter(
         (usage) => usage.dataProcessingLevel === "subprocessor",
       ),
-      dataTypes: dataTypes.filter((dataType) =>
-        dataTypeNames.has(String(dataType.name)),
+      dataTypes: dataTypes.filter(
+        (dataType) =>
+          dataTypeNames.has(String(dataType.name)) ||
+          (dataType.id ? activityDataTypeIds.has(dataType.id) : false),
       ),
     };
   }
@@ -723,8 +733,13 @@ export class ReportContextBuilder {
 
   private businessActivityContext(
     activity: BusinessActivity,
+    dataTypes: StoredDataType[],
     vocabulary?: Vocabulary,
   ) {
+    const activityDataTypes = dataTypes.filter((dataType) =>
+      dataType.id ? activity.dataTypeIds.includes(dataType.id) : false,
+    );
+
     return {
       id: activity.id,
       name: activity.name,
@@ -740,6 +755,9 @@ export class ReportContextBuilder {
         "legal_basis",
         activity.legalBasis,
       ),
+      dataTypeIds: activity.dataTypeIds,
+      dataTypes: activityDataTypes,
+      dataTypeNames: activityDataTypes.map((dataType) => dataType.name),
       retentionDays: activity.retentionDays,
       retentionPolicy: activity.retentionPolicy,
       retentionPolicyLabel: this.codeLabel(

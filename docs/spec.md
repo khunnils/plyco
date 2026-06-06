@@ -30,10 +30,17 @@ security profile, adds selected providers to organization inventory, and then
 opens the workspace. Provider selections do not create service-specific provider
 usage during setup.
 
+## Activities and Data Types
+
+In the workspace, each processing activity can reference the organization data
+types it processes. This mapping is maintained from the Activities page after
+organization creation; the onboarding review keeps activities and data types as
+separate simple lists.
+
 ## Product and Data Graph
 
 The workspace includes a read-only Product and Data graph at `/company/graph`.
 It maps the organization to services, linked processing activities, data types
-processed through service provider usage, and the providers used by those
-services. Users can pan and zoom the graph, but cannot edit nodes or
-relationships from this view.
+processed by those activities, data types processed through service provider
+usage, and the providers used by those services. Users can pan and zoom the
+graph, but cannot edit nodes or relationships from this view.

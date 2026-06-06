@@ -16,12 +16,17 @@ import { buildProductDataGraph } from "@/features/company/graph/lib/product-data
 
 const now = "2026-01-01T00:00:00.000Z"
 
-const activity = (id: string, name: string): BusinessActivity => ({
+const activity = (
+  id: string,
+  name: string,
+  dataTypeIds: string[] = []
+): BusinessActivity => ({
   id,
   name,
   purpose: `${name} purpose`,
   role: "controller",
   legalBasis: [],
+  dataTypeIds,
   retentionPolicy: null,
   retentionDays: 0,
   createdAt: now,
@@ -124,6 +129,7 @@ const snapshot = (
       ...emptyDataHandlingProfile,
       dataTypesStored: [
         {
+          id: "data_email",
           name: "Email Address",
           description: "User emails",
           subjectTypes: null,
@@ -140,7 +146,9 @@ const snapshot = (
 
   return {
     organization,
-    businessActivities: [activity("act_1", "Account management")],
+    businessActivities: [
+      activity("act_1", "Account management", ["data_email"]),
+    ],
     organizationProviders: [provider("prov_1", "Stripe")],
     serviceProviderUsage: [
       usage({
@@ -186,6 +194,29 @@ describe("buildProductDataGraph", () => {
         "service-svc_1-to-data-email-address",
         "data-email-address-to-provider-prov_1-use_1",
       ])
+    )
+  })
+
+  it("connects activities to mapped data types", () => {
+    const graph = buildProductDataGraph(snapshot())
+
+    expect(graph.nodes.map((node) => node.id)).toContain("data:email-address")
+    expect(graph.edges.map((edge) => edge.id)).toContain(
+      "activity-act_1-to-data-data_email"
+    )
+  })
+
+  it("ignores stale activity data type mappings", () => {
+    const graph = buildProductDataGraph(
+      snapshot({
+        businessActivities: [
+          activity("act_1", "Account management", ["data_missing"]),
+        ],
+      })
+    )
+
+    expect(graph.edges.map((edge) => edge.id)).not.toContain(
+      "activity-act_1-to-data-data_missing"
     )
   })
 

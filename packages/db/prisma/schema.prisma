@@ -122,14 +122,14 @@ model OrganizationCode {
 }
 
 model User {
-  id                      String                   @id(map: "users_pkey") @default(cuid())
-  googleSubject           String                   @unique(map: "users_google_subject_key") @map("google_subject")
-  email                   String                   @unique(map: "users_email_key")
-  name                    String
-  picture                 String?
-  memberships             OrganizationMembership[]
-  createdAt               DateTime                 @default(now()) @map("created_at")
-  updatedAt               DateTime                 @updatedAt @map("updated_at")
+  id            String                   @id(map: "users_pkey") @default(cuid())
+  googleSubject String                   @unique(map: "users_google_subject_key") @map("google_subject")
+  email         String                   @unique(map: "users_email_key")
+  name          String
+  picture       String?
+  memberships   OrganizationMembership[]
+  createdAt     DateTime                 @default(now()) @map("created_at")
+  updatedAt     DateTime                 @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -202,8 +202,8 @@ model PrivacyProfile {
   euRepresentativeName         String?      @map("eu_representative_name")
   euRepresentativeAddress      String?      @map("eu_representative_address")
   usesAutomatedDecisionMaking  Boolean?     @map("uses_automated_decision_making")
-  productionDataInDevelopment Boolean?     @map("production_data_in_development")
-  retentionPolicyExists       Boolean?     @map("retention_policy_exists")
+  productionDataInDevelopment  Boolean?     @map("production_data_in_development")
+  retentionPolicyExists        Boolean?     @map("retention_policy_exists")
   createdAt                    DateTime     @default(now()) @map("created_at")
   updatedAt                    DateTime     @updatedAt @map("updated_at")
 
@@ -211,61 +211,62 @@ model PrivacyProfile {
 }
 
 model InfrastructureProfile {
-  id                             String       @id(map: "infrastructure_profiles_pkey") @default(cuid())
-  organizationId                 String       @unique(map: "infrastructure_profiles_organization_id_key") @map("organization_id")
-  organization                   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "infrastructure_profiles_organization_id_fkey")
-  mfaEnabled                     Boolean?     @map("mfa_enabled")
-  encryptedDevicesRequired       Boolean?     @map("encrypted_devices_required")
-  backupsEnabled                 Boolean?     @map("backups_enabled")
-  centralizedLoggingEnabled      Boolean?     @map("centralized_logging_enabled")
-  atRestAlgorithm                String?      @map("at_rest_algorithm")
-  inTransitMinimumTlsVersion     String?      @map("in_transit_minimum_tls_version")
-  keyManagementProvider          String?      @map("key_management_provider")
-  logRetentionDays               Int?         @map("log_retention_days")
-  logRetentionDaysStatus         String?      @map("log_retention_days_status")
-  securityMonitoringOwner        String?      @map("security_monitoring_owner")
-  scanningCadence                String?      @map("scanning_cadence")
-  patchingSlaCriticalDays        Int?         @map("patching_sla_critical_days")
-  patchingSlaCriticalDaysStatus  String?      @map("patching_sla_critical_days_status")
-  patchingSlaHighDays            Int?         @map("patching_sla_high_days")
-  patchingSlaHighDaysStatus      String?      @map("patching_sla_high_days_status")
-  incidentResponsePlanExists     Boolean?     @map("incident_response_plan_exists")
-  incidentNotificationTimeline   String?      @map("incident_notification_timeline")
-  customerNotificationProcess    String?      @map("customer_notification_process")
-  incidentResponseLastTestedDate String?      @map("incident_response_last_tested_date")
-  backupCadence                  String?      @map("backup_cadence")
-  backupRetentionDays            Int?         @map("backup_retention_days")
-  backupRetentionDaysStatus      String?      @map("backup_retention_days_status")
-  restoreTestingCadence          String?      @map("restore_testing_cadence")
-  vendorReviewRequired           Boolean?     @map("vendor_review_required")
-  vendorReviewCadence            String?      @map("vendor_review_cadence")
-  dpaRequiredForProcessors       Boolean?     @map("dpa_required_for_processors")
-  penetrationTestingStrategy     String?      @map("penetration_testing_strategy")
-  penetrationTestingCadence      String?      @map("penetration_testing_cadence")
-  penetrationTestLastDate        String?      @map("penetration_test_last_date")
-  vulnerabilityDisclosureProgramExists Boolean? @map("vulnerability_disclosure_program_exists")
-  vulnerabilityDisclosureUrl     String?      @map("vulnerability_disclosure_url")
-  encryptionAtRest            Boolean?     @map("encryption_at_rest")
-  encryptionInTransit         Boolean?     @map("encryption_in_transit")
-  createdAt                      DateTime     @default(now()) @map("created_at")
-  updatedAt                      DateTime     @updatedAt @map("updated_at")
+  id                                   String       @id(map: "infrastructure_profiles_pkey") @default(cuid())
+  organizationId                       String       @unique(map: "infrastructure_profiles_organization_id_key") @map("organization_id")
+  organization                         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "infrastructure_profiles_organization_id_fkey")
+  mfaEnabled                           Boolean?     @map("mfa_enabled")
+  encryptedDevicesRequired             Boolean?     @map("encrypted_devices_required")
+  backupsEnabled                       Boolean?     @map("backups_enabled")
+  centralizedLoggingEnabled            Boolean?     @map("centralized_logging_enabled")
+  atRestAlgorithm                      String?      @map("at_rest_algorithm")
+  inTransitMinimumTlsVersion           String?      @map("in_transit_minimum_tls_version")
+  keyManagementProvider                String?      @map("key_management_provider")
+  logRetentionDays                     Int?         @map("log_retention_days")
+  logRetentionDaysStatus               String?      @map("log_retention_days_status")
+  securityMonitoringOwner              String?      @map("security_monitoring_owner")
+  scanningCadence                      String?      @map("scanning_cadence")
+  patchingSlaCriticalDays              Int?         @map("patching_sla_critical_days")
+  patchingSlaCriticalDaysStatus        String?      @map("patching_sla_critical_days_status")
+  patchingSlaHighDays                  Int?         @map("patching_sla_high_days")
+  patchingSlaHighDaysStatus            String?      @map("patching_sla_high_days_status")
+  incidentResponsePlanExists           Boolean?     @map("incident_response_plan_exists")
+  incidentNotificationTimeline         String?      @map("incident_notification_timeline")
+  customerNotificationProcess          String?      @map("customer_notification_process")
+  incidentResponseLastTestedDate       String?      @map("incident_response_last_tested_date")
+  backupCadence                        String?      @map("backup_cadence")
+  backupRetentionDays                  Int?         @map("backup_retention_days")
+  backupRetentionDaysStatus            String?      @map("backup_retention_days_status")
+  restoreTestingCadence                String?      @map("restore_testing_cadence")
+  vendorReviewRequired                 Boolean?     @map("vendor_review_required")
+  vendorReviewCadence                  String?      @map("vendor_review_cadence")
+  dpaRequiredForProcessors             Boolean?     @map("dpa_required_for_processors")
+  penetrationTestingStrategy           String?      @map("penetration_testing_strategy")
+  penetrationTestingCadence            String?      @map("penetration_testing_cadence")
+  penetrationTestLastDate              String?      @map("penetration_test_last_date")
+  vulnerabilityDisclosureProgramExists Boolean?     @map("vulnerability_disclosure_program_exists")
+  vulnerabilityDisclosureUrl           String?      @map("vulnerability_disclosure_url")
+  encryptionAtRest                     Boolean?     @map("encryption_at_rest")
+  encryptionInTransit                  Boolean?     @map("encryption_in_transit")
+  createdAt                            DateTime     @default(now()) @map("created_at")
+  updatedAt                            DateTime     @updatedAt @map("updated_at")
 
   @@map("infrastructure_profiles")
 }
 
 model OrganizationDataType {
-  id                     String                  @id(map: "organization_data_types_pkey") @default(cuid())
-  organizationId         String                  @map("organization_id")
-  organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
-  name                   String
-  description            String?
-  subjectTypes           Json?                   @map("subject_types")
-  collectionMethods      Json?                   @map("collection_methods")
-  isSensitive            Boolean?                @map("is_sensitive")
-  isRequired             Boolean?                @map("is_required")
-  providerUsageDataTypes ProviderUsageDataType[]
-  createdAt              DateTime                @default(now()) @map("created_at")
-  updatedAt              DateTime                @updatedAt @map("updated_at")
+  id                        String                     @id(map: "organization_data_types_pkey") @default(cuid())
+  organizationId            String                     @map("organization_id")
+  organization              Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
+  name                      String
+  description               String?
+  subjectTypes              Json?                      @map("subject_types")
+  collectionMethods         Json?                      @map("collection_methods")
+  isSensitive               Boolean?                   @map("is_sensitive")
+  isRequired                Boolean?                   @map("is_required")
+  providerUsageDataTypes    ProviderUsageDataType[]
+  businessActivityDataTypes BusinessActivityDataType[]
+  createdAt                 DateTime                   @default(now()) @map("created_at")
+  updatedAt                 DateTime                   @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "organization_data_types_organization_id_name_key")
   @@index([organizationId], map: "idx_organization_data_types_organization_id")
@@ -273,22 +274,38 @@ model OrganizationDataType {
 }
 
 model BusinessActivity {
-  id              String                    @id(map: "business_activities_pkey") @default(cuid())
-  organizationId  String                    @map("organization_id")
-  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
+  id              String                     @id(map: "business_activities_pkey") @default(cuid())
+  organizationId  String                     @map("organization_id")
+  organization    Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
   name            String
-  purpose         String                    @default("")
-  role            String                    @default("")
-  legalBasis      String[]                  @default([]) @map("legal_basis")
-  retentionPolicy String?                   @map("retention_policy")
-  retentionDays   Int                       @default(0) @map("retention_days")
+  purpose         String                     @default("")
+  role            String                     @default("")
+  legalBasis      String[]                   @default([]) @map("legal_basis")
+  retentionPolicy String?                    @map("retention_policy")
+  retentionDays   Int                        @default(0) @map("retention_days")
   services        ServiceBusinessActivity[]
-  createdAt       DateTime                  @default(now()) @map("created_at")
-  updatedAt       DateTime                  @updatedAt @map("updated_at")
+  dataTypes       BusinessActivityDataType[]
+  createdAt       DateTime                   @default(now()) @map("created_at")
+  updatedAt       DateTime                   @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "business_activities_organization_id_name_key")
   @@index([organizationId], map: "idx_business_activities_organization_id")
   @@map("business_activities")
+}
+
+model BusinessActivityDataType {
+  id                     String               @id(map: "business_activity_data_types_pkey") @default(cuid())
+  businessActivityId     String               @map("business_activity_id")
+  businessActivity       BusinessActivity     @relation(fields: [businessActivityId], references: [id], onDelete: Cascade, map: "business_activity_data_types_business_activity_id_fkey")
+  organizationDataTypeId String               @map("organization_data_type_id")
+  organizationDataType   OrganizationDataType @relation(fields: [organizationDataTypeId], references: [id], onDelete: Cascade, map: "business_activity_data_types_organization_data_type_id_fkey")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+
+  @@unique([businessActivityId, organizationDataTypeId], map: "business_activity_data_types_activity_id_data_type_id_key")
+  @@index([businessActivityId], map: "idx_business_activity_data_types_business_activity_id")
+  @@index([organizationDataTypeId], map: "idx_business_activity_data_types_organization_data_type_id")
+  @@map("business_activity_data_types")
 }
 
 model ServiceBusinessActivity {
@@ -307,23 +324,23 @@ model ServiceBusinessActivity {
 }
 
 model AccessProfile {
-  id                       String       @id(map: "access_profiles_pkey") @default(cuid())
-  organizationId           String       @unique(map: "access_profiles_organization_id_key") @map("organization_id")
-  organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "access_profiles_organization_id_fkey")
-  mfaRequired              Boolean?     @map("mfa_required")
-  ssoEnabled               Boolean?     @map("sso_enabled")
-  sharedAccountsExist      Boolean?     @map("shared_accounts_exist")
-  offboardingProcessExists Boolean?     @map("offboarding_process_exists")
-  accessReviewsPerformed   Boolean?     @map("access_reviews_performed")
-  leastPrivilege           Boolean?     @map("least_privilege")
-  roleBasedAccess          Boolean?     @map("role_based_access")
-  accessReviewCadence      String?      @map("access_review_cadence")
-  adminApprovalRequired    Boolean?     @map("admin_approval_required")
-  passwordManagerRequired  Boolean?     @map("password_manager_required")
-  securityTrainingRequired Boolean?     @map("security_training_required")
-  confidentialityAgreementsRequired Boolean? @map("confidentiality_agreements_required")
-  createdAt                DateTime     @default(now()) @map("created_at")
-  updatedAt                DateTime     @updatedAt @map("updated_at")
+  id                                String       @id(map: "access_profiles_pkey") @default(cuid())
+  organizationId                    String       @unique(map: "access_profiles_organization_id_key") @map("organization_id")
+  organization                      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "access_profiles_organization_id_fkey")
+  mfaRequired                       Boolean?     @map("mfa_required")
+  ssoEnabled                        Boolean?     @map("sso_enabled")
+  sharedAccountsExist               Boolean?     @map("shared_accounts_exist")
+  offboardingProcessExists          Boolean?     @map("offboarding_process_exists")
+  accessReviewsPerformed            Boolean?     @map("access_reviews_performed")
+  leastPrivilege                    Boolean?     @map("least_privilege")
+  roleBasedAccess                   Boolean?     @map("role_based_access")
+  accessReviewCadence               String?      @map("access_review_cadence")
+  adminApprovalRequired             Boolean?     @map("admin_approval_required")
+  passwordManagerRequired           Boolean?     @map("password_manager_required")
+  securityTrainingRequired          Boolean?     @map("security_training_required")
+  confidentialityAgreementsRequired Boolean?     @map("confidentiality_agreements_required")
+  createdAt                         DateTime     @default(now()) @map("created_at")
+  updatedAt                         DateTime     @updatedAt @map("updated_at")
 
   @@map("access_profiles")
 }
@@ -385,8 +402,8 @@ model Template {
   slug                     String
   sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
-  versionMajor            Int          @default(1) @map("version_major")
-  versionMinor            Int          @default(0) @map("version_minor")
+  versionMajor             Int          @default(1) @map("version_major")
+  versionMinor             Int          @default(0) @map("version_minor")
   documents                Document[]
   createdAt                DateTime     @default(now()) @map("created_at")
   updatedAt                DateTime     @updatedAt @map("updated_at")

@@ -1,7 +1,4 @@
-import type {
-  Edge,
-  Node,
-} from "@xyflow/react"
+import type { Edge, Node } from "@xyflow/react"
 import type { SecurityProgramSnapshot } from "@plyco/shared"
 
 export type ProductDataGraphNodeKind =
@@ -130,11 +127,55 @@ export const buildProductDataGraph = (
 
   const dataTypeNames = new Map(
     organization.dataHandling.dataTypesStored
-      .map((dataType) => [normalizeDataTypeName(dataType.name), dataType] as const)
+      .map(
+        (dataType) => [normalizeDataTypeName(dataType.name), dataType] as const
+      )
       .filter(([normalizedName]) => normalizedName.length > 0)
   )
   const dataRows = new Map<string, number>()
   const dataColumnOffset = snapshot.businessActivities.length
+  const dataNodeIdByDataTypeId = new Map<string, string>()
+
+  organization.dataHandling.dataTypesStored.forEach((dataType) => {
+    const normalizedName = normalizeDataTypeName(dataType.name)
+
+    if (!normalizedName) {
+      return
+    }
+
+    if (!dataRows.has(normalizedName)) {
+      dataRows.set(normalizedName, dataRows.size)
+    }
+
+    const dataNodeId = `data:${normalizedName}`
+    addNode(dataNodeId, 2, dataColumnOffset + dataRows.get(normalizedName)!, {
+      kind: "data",
+      label: dataType.name,
+      detail: dataType.description ?? undefined,
+    })
+
+    if (dataType.id) {
+      dataNodeIdByDataTypeId.set(dataType.id, dataNodeId)
+    }
+  })
+
+  snapshot.businessActivities.forEach((activity) => {
+    activity.dataTypeIds.forEach((dataTypeId) => {
+      const dataNodeId = dataNodeIdByDataTypeId.get(dataTypeId)
+
+      if (!dataNodeId || !activityRows.has(activity.id)) {
+        return
+      }
+
+      addEdge(
+        edge(
+          `activity-${activity.id}-to-data-${dataTypeId}`,
+          `activity:${activity.id}`,
+          dataNodeId
+        )
+      )
+    })
+  })
 
   const providerRows = new Map<string, number>()
   snapshot.organizationProviders.forEach((provider, index) => {
@@ -150,7 +191,10 @@ export const buildProductDataGraph = (
     const serviceNodeId = `service:${usage.serviceId}`
     const providerNodeId = `provider:${usage.organizationProviderId}`
 
-    if (!nodes.has(serviceNodeId) || !providerRows.has(usage.organizationProviderId)) {
+    if (
+      !nodes.has(serviceNodeId) ||
+      !providerRows.has(usage.organizationProviderId)
+    ) {
       return
     }
 
@@ -177,16 +221,7 @@ export const buildProductDataGraph = (
         return
       }
 
-      if (!dataRows.has(normalizedName)) {
-        dataRows.set(normalizedName, dataRows.size)
-      }
-
       const dataNodeId = `data:${normalizedName}`
-      addNode(dataNodeId, 2, dataColumnOffset + dataRows.get(normalizedName)!, {
-        kind: "data",
-        label: dataType.name,
-        detail: dataType.description ?? undefined,
-      })
       addEdge(
         edge(
           `service-${usage.serviceId}-to-data-${normalizedName}`,

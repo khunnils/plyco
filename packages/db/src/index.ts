@@ -159,6 +159,7 @@ export function mapOrganizationRecord(record: {
     name: string;
   }>;
   dataTypes: Array<{
+    id: string;
     name: string;
     description: string | null;
     subjectTypes: unknown;
@@ -276,8 +277,7 @@ export function mapOrganizationRecord(record: {
       null,
     vulnerabilityDisclosureUrl:
       record.infrastructureProfile?.vulnerabilityDisclosureUrl ?? null,
-    encryptionAtRest:
-      record.infrastructureProfile?.encryptionAtRest ?? null,
+    encryptionAtRest: record.infrastructureProfile?.encryptionAtRest ?? null,
     encryptionInTransit:
       record.infrastructureProfile?.encryptionInTransit ?? null,
   });
@@ -360,11 +360,11 @@ export function mapOrganizationRecord(record: {
       record.privacyProfile?.usesAutomatedDecisionMaking ?? null,
     productionDataInDevelopment:
       record.privacyProfile?.productionDataInDevelopment ?? null,
-    retentionPolicyExists:
-      record.privacyProfile?.retentionPolicyExists ?? null,
+    retentionPolicyExists: record.privacyProfile?.retentionPolicyExists ?? null,
   });
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
+      id: dataType.id,
       name: dataType.name,
       description: dataType.description,
       subjectTypes: stringArray(dataType.subjectTypes),
@@ -412,6 +412,9 @@ export function mapBusinessActivityRecord(record: {
   purpose: string;
   role: string;
   legalBasis: string[];
+  dataTypes?: Array<{
+    organizationDataTypeId: string;
+  }>;
   retentionDays: number;
   retentionPolicy: string | null;
   createdAt: Date;
@@ -423,6 +426,9 @@ export function mapBusinessActivityRecord(record: {
     purpose: record.purpose,
     role: record.role,
     legalBasis: record.legalBasis,
+    dataTypeIds:
+      record.dataTypes?.map((dataType) => dataType.organizationDataTypeId) ??
+      [],
     retentionPolicy: record.retentionPolicy,
     retentionDays: record.retentionDays,
     createdAt: toIsoString(record.createdAt),

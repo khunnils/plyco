@@ -78,8 +78,18 @@ const validWebsiteLookupGenerated = {
   primaryService: {
     name: "Acme AI",
     description: "Secure SaaS products for customers.",
-    activities: ["Account management"],
-    dataCaptured: ["Customer account data"],
+    activities: [
+      {
+        name: "Account management",
+        purpose: "",
+      },
+    ],
+    dataCaptured: [
+      {
+        name: "Customer account data",
+        description: null,
+      },
+    ],
   },
   contactEmail: "hello@acme.example",
   securityEmail: "security@acme.example",
@@ -187,9 +197,7 @@ describe("organizations API", () => {
                 retentionDays: 0,
               },
             ],
-            suggestedProviders: [
-              { name: "GitHub", url: "https://github.com" },
-            ],
+            suggestedProviders: [{ name: "GitHub", url: "https://github.com" }],
             policyLinks: [
               {
                 type: "privacy_policy",
@@ -336,7 +344,9 @@ describe("organizations API", () => {
     const schema = llmClient.request?.responseSchema as {
       properties: Record<string, any>;
     };
-    expect(schema.properties.industries.items.enum).toContain("technology_saas");
+    expect(schema.properties.industries.items.enum).toContain(
+      "technology_saas",
+    );
     expect(schema.properties.industries.items.enum).not.toContain(
       "Technology / SaaS",
     );
@@ -359,8 +369,16 @@ describe("organizations API", () => {
         ...validWebsiteLookupGenerated,
         primaryService: {
           ...validWebsiteLookupGenerated.primaryService,
-          activities: ["Account management", "Billing", "Account management"],
-          dataCaptured: ["Customer account data", "Payment data", ""],
+          activities: [
+            { name: "Account management", purpose: "" },
+            { name: "Billing", purpose: "" },
+            { name: "Account management", purpose: "" },
+          ],
+          dataCaptured: [
+            { name: "Customer account data", description: null },
+            { name: "Payment data", description: null },
+            { name: "", description: null },
+          ],
         },
       }),
       "test-model",
@@ -444,8 +462,19 @@ describe("organizations API", () => {
       "Acme AI, Inc.",
     );
     expect(
-      saveResponse.json().organization.dataHandling.dataTypesStored,
+      saveResponse
+        .json()
+        .organization.dataHandling.dataTypesStored.map(
+          ({ id: _id, ...dataType }: { id: string }) => dataType,
+        ),
     ).toEqual(profileBody.dataHandling.dataTypesStored);
+    expect(
+      saveResponse
+        .json()
+        .organization.dataHandling.dataTypesStored.every(
+          (dataType: { id?: string }) => Boolean(dataType.id),
+        ),
+    ).toBe(true);
     expect(saveResponse.json().organization.services).toEqual([
       expect.objectContaining(profileBody.services[0]),
     ]);
@@ -461,8 +490,19 @@ describe("organizations API", () => {
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
     expect(
-      getResponse.json().organization.dataHandling.dataTypesStored,
+      getResponse
+        .json()
+        .organization.dataHandling.dataTypesStored.map(
+          ({ id: _id, ...dataType }: { id: string }) => dataType,
+        ),
     ).toEqual(profileBody.dataHandling.dataTypesStored);
+    expect(
+      getResponse
+        .json()
+        .organization.dataHandling.dataTypesStored.every(
+          (dataType: { id?: string }) => Boolean(dataType.id),
+        ),
+    ).toBe(true);
     expect(getResponse.json().organization.services).toEqual([
       expect.objectContaining(profileBody.services[0]),
     ]);

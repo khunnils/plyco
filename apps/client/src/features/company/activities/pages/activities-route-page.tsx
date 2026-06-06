@@ -27,9 +27,13 @@ export const ActivitiesRoutePage = () => {
 
   const snapshot = securityProfile.data
   const businessActivities = snapshot?.businessActivities ?? []
+  const dataTypeOptions =
+    snapshot?.organization?.dataHandling.dataTypesStored.flatMap((dataType) =>
+      dataType.id ? [{ value: dataType.id, label: dataType.name }] : []
+    ) ?? []
   const showLegalBasis = isComplianceFieldVisible(
     "businessActivity.legalBasis",
-    snapshot?.organization?.company.complianceGoals,
+    snapshot?.organization?.company.complianceGoals
   )
   const vocabularyData = vocabulary.data
 
@@ -53,9 +57,11 @@ export const ActivitiesRoutePage = () => {
         title="Activities"
       />
       <div className="grid gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-slate-200 pb-4">
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-base font-semibold text-slate-950">Activities</h2>
+            <h2 className="text-base font-semibold text-slate-950">
+              Activities
+            </h2>
             <p className="mt-1 text-sm text-slate-500">
               {showLegalBasis
                 ? "Processing activities with purpose, role, legal basis, and retention."
@@ -98,21 +104,20 @@ export const ActivitiesRoutePage = () => {
         </div>
         <ActivitiesManager
           activities={businessActivities}
+          dataTypeOptions={dataTypeOptions}
           isMutationPending={isActivityMutationPending}
           legalBasisOptions={codeOptions(vocabularyData, "legal_basis")}
           roleOptions={codeOptions(vocabularyData, "activity_role")}
           retentionPolicyOptions={codeOptions(
             vocabularyData,
-            "activity_retention_policies",
+            "activity_retention_policies"
           )}
           showLegalBasis={showLegalBasis}
           vocabulary={vocabularyData}
           onCreate={(activity, onSuccess) =>
             createBusinessActivity.mutate(activity, { onSuccess })
           }
-          onDelete={(activity) =>
-            deleteBusinessActivity.mutate(activity.id)
-          }
+          onDelete={(activity) => deleteBusinessActivity.mutate(activity.id)}
           onUpdate={(input, onSuccess) =>
             updateBusinessActivity.mutate(input, { onSuccess })
           }
