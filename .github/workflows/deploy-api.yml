@@ -41,8 +41,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
-        run: pnpm --filter @plyco/db prisma:generate
+      - name: Build shared workspace packages
+        run: |
+          pnpm --filter @plyco/shared build
+          pnpm --filter @plyco/db build
 
       - name: Typecheck
         run: pnpm -r typecheck
