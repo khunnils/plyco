@@ -16,7 +16,7 @@ env:
   SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
   ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REGISTRY_REPOSITORY || 'plyco' }}
   IMAGE_NAME: api
-  FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'plyco-prod-5693a' }}
+  FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'plyco-prod' }}
   LANGFUSE_BASE_URL: ${{ vars.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com' }}
 
 jobs:
