@@ -1,0 +1,157 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'plyco-prod' }}
+  REGION: ${{ vars.CLOUD_RUN_REGION || 'us-central1' }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
+  ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REGISTRY_REPOSITORY || 'plyco' }}
+  IMAGE_NAME: api
+  LANGFUSE_BASE_URL: ${{ vars.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com' }}
+
+jobs:
+  deploy:
+    name: Build and deploy API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Test
+        run: pnpm -r test
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          set -euo pipefail
+          if ! gcloud artifacts repositories describe "${ARTIFACT_REPOSITORY}" \
+            --project "${PROJECT_ID}" \
+            --location "${REGION}" >/dev/null 2>&1; then
+            gcloud artifacts repositories create "${ARTIFACT_REPOSITORY}" \
+              --project "${PROJECT_ID}" \
+              --location "${REGION}" \
+              --repository-format docker \
+              --description "Plyco Docker images"
+          fi
+
+      - name: Build and push API image
+        env:
+          IMAGE_URI: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --file apps/api/Dockerfile \
+            --tag "${IMAGE_URI}" \
+            .
+          docker push "${IMAGE_URI}"
+          echo "IMAGE_URI=${IMAGE_URI}" >> "${GITHUB_ENV}"
+
+      - name: Run Prisma migrations
+        run: |
+          set -euo pipefail
+          export DATABASE_URL="$(
+            gcloud secrets versions access latest \
+              --project "${PROJECT_ID}" \
+              --secret "database-url"
+          )"
+          pnpm --filter @plyco/db exec prisma migrate deploy
+
+      - name: Deploy API to Cloud Run
+        run: |
+          set -euo pipefail
+
+          if [ -z "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" ]; then
+            echo "CLOUD_RUN_SERVICE_ACCOUNT repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.CLIENT_URL }}" ]; then
+            echo "CLIENT_URL repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.AIRTABLE_BASE }}" ]; then
+            echo "AIRTABLE_BASE repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.DOCUMENT_PDF_BUCKET }}" ]; then
+            echo "DOCUMENT_PDF_BUCKET repository variable is required." >&2
+            exit 1
+          fi
+
+          gcloud run deploy "${SERVICE}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --platform managed \
+            --image "${IMAGE_URI}" \
+            --service-account "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" \
+            --allow-unauthenticated \
+            --set-env-vars "NODE_ENV=production,HOST=0.0.0.0,GCP_PROJECT_ID=${PROJECT_ID},AIRTABLE_BASE=${{ vars.AIRTABLE_BASE }},CLIENT_URL=${{ vars.CLIENT_URL }},DOCUMENT_PDF_BUCKET=${{ vars.DOCUMENT_PDF_BUCKET }},LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL},GEMINI_PROVIDER_LOOKUP_MODEL=gemini-2.5-flash,ORGANIZATION_LOOKUP_MODEL=gemini-flash-latest,API_PUBLIC_URL=https://pending-cloud-run-url.invalid" \
+            --set-secrets "DATABASE_URL=database-url:latest,AIRTABLE_API_KEY=airtable-api-key:latest,PLYCO_API_KEY=plyco-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest,GOOGLE_OAUTH_CLIENT_ID=google-oauth-client-id:latest,GOOGLE_OAUTH_CLIENT_SECRET=google-oauth-client-secret:latest,SESSION_KEY=session-key:latest"
+
+      - name: Set API_PUBLIC_URL to Cloud Run service URL
+        run: |
+          set -euo pipefail
+          SERVICE_URL="$(
+            gcloud run services describe "${SERVICE}" \
+              --project "${PROJECT_ID}" \
+              --region "${REGION}" \
+              --format "value(status.url)"
+          )"
+
+          gcloud run services update "${SERVICE}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --update-env-vars "API_PUBLIC_URL=${SERVICE_URL}"
+
+          echo "Cloud Run URL: ${SERVICE_URL}"
+          echo "Google OAuth callback URL: ${SERVICE_URL}/auth/google/callback"
+
+      - name: Verify health endpoint
+        run: |
+          set -euo pipefail
+          SERVICE_URL="$(
+            gcloud run services describe "${SERVICE}" \
+              --project "${PROJECT_ID}" \
+              --region "${REGION}" \
+              --format "value(status.url)"
+          )"
+          curl --fail --silent --show-error "${SERVICE_URL}/health"

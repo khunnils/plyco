@@ -130,7 +130,7 @@ export const DashboardPage = ({
     <div className="grid gap-8">
       {/* Centered Total Progress Card */}
       <div className="overflow-hidden border border-slate-200 bg-white mx-auto w-full">
-        {/* <div className="h-2 bg-primary"></div> */}
+        <div className="h-2 bg-primary"></div>
         <div className="flex flex-col items-center justify-center text-center p-8 gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
             Completed

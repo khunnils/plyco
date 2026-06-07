@@ -1,0 +1,10 @@
+.git
+.github
+**/.env
+**/.env.*
+**/node_modules
+**/dist
+apps/client/dist
+apps/web/dist
+coverage
+.DS_Store
