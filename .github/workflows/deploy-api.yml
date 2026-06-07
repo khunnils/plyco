@@ -16,6 +16,7 @@ env:
   SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
   ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REGISTRY_REPOSITORY || 'plyco' }}
   IMAGE_NAME: api
+  FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'plyco-prod-5693a' }}
   LANGFUSE_BASE_URL: ${{ vars.LANGFUSE_BASE_URL || 'https://cloud.langfuse.com' }}
 
 jobs:
@@ -162,3 +163,17 @@ jobs:
               --format "value(status.url)"
           )"
           curl --fail --silent --show-error "${SERVICE_URL}/health"
+          echo "SERVICE_URL=${SERVICE_URL}" >> "${GITHUB_ENV}"
+
+      - name: Build client
+        run: |
+          set -euo pipefail
+          VITE_API_URL="${SERVICE_URL}" pnpm --filter cf-app build
+
+      - name: Deploy client to Firebase Hosting
+        run: |
+          set -euo pipefail
+          pnpm exec firebase deploy \
+            --only hosting \
+            --project "${FIREBASE_PROJECT_ID}" \
+            --non-interactive
