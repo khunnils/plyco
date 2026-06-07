@@ -10,6 +10,7 @@ permissions:
   id-token: write
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'plyco-prod' }}
   REGION: ${{ vars.CLOUD_RUN_REGION || 'us-central1' }}
   SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
@@ -39,6 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @plyco/db prisma:generate
 
       - name: Typecheck
         run: pnpm -r typecheck
