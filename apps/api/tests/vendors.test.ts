@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createApp } from "../src/app.js";
 import { createTestApp } from "./helpers.js";
@@ -22,6 +22,10 @@ import {
   vendorBody,
   vendorUseBody,
 } from "./helpers.js";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 class InMemoryAirtableImportClient extends AirtableProviderImportClient {
   records: Record<
@@ -300,6 +304,109 @@ describe("vendors / providers API", () => {
         securityCriticality: "Medium",
         handlesCustomerData: true,
       },
+      {
+        id: "prov-linear",
+        name: "Linear",
+        url: "https://linear.app",
+        category: "Issue Tracking",
+        systemTypes: ["issue_tracking"],
+        securityCriticality: "Medium",
+        handlesCustomerData: false,
+        purpose: "Issue tracking",
+      },
+    ]);
+  });
+
+  it("loads Airtable provider system types and logos", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL) => {
+        const url = String(input);
+
+        if (url.includes("Provider%20Organizations")) {
+          return new Response(
+            JSON.stringify({
+              records: [
+                {
+                  id: "org-linear",
+                  fields: {
+                    "Legal Name": "Linear Orbit, Inc.",
+                    "Country of Registration": "US",
+                  },
+                },
+              ],
+            }),
+          );
+        }
+
+        if (url.includes("Codes")) {
+          return new Response(
+            JSON.stringify({
+              records: [
+                {
+                  id: "cat-project-management",
+                  fields: {
+                    Name: "Project Management",
+                    Id: "project_management",
+                  },
+                },
+              ],
+            }),
+          );
+        }
+
+        return new Response(
+          JSON.stringify({
+            records: [
+              {
+                id: "rec-linear",
+                fields: {
+                  Id: "prov-linear",
+                  Name: "Linear",
+                  Url: "https://linear.app",
+                  Logo: [{ url: "https://airtable.example/linear.png" }],
+                  Organization: ["org-linear"],
+                  Category: ["cat-project-management"],
+                  "System Types": ["Issue tracking", "Analytics"],
+                  "Security Relevance": "Medium",
+                  "Handles Customer Data": false,
+                  Purpose: "Issue tracking",
+                },
+              },
+              {
+                id: "rec-github",
+                fields: {
+                  Id: "prov-github",
+                  Name: "GitHub",
+                  Url: "https://github.com",
+                  "System Type": "Source Control",
+                  "Security Relevance": "Critical",
+                  "Handles Customer Data": false,
+                },
+              },
+            ],
+          }),
+        );
+      }),
+    );
+    const app = await createApp({
+      auth: false,
+      ...createInMemoryRepositories(),
+      providerSource: new AirtableProviderSource("app-test", "pat-test"),
+    });
+    const response = await app.inject({ method: "GET", url: "/providers" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([
+      expect.objectContaining({
+        id: "prov-linear",
+        logoUrl: "https://airtable.example/linear.png",
+        systemTypes: ["issue_tracking", "analytics"],
+      }),
+      expect.objectContaining({
+        id: "prov-github",
+        systemTypes: ["source_control"],
+      }),
     ]);
   });
 

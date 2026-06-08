@@ -30,6 +30,7 @@ export const providerSystemTypeSchema = z.enum([
   "password_manager",
   "analytics",
   "advertising",
+  "issue_tracking",
   "newsletter",
 ]);
 

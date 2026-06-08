@@ -96,6 +96,14 @@ const systemTypeAliases: Record<string, ProviderSystemType> = {
   ads: "advertising",
   "advertising provider": "advertising",
   marketing: "advertising",
+  "issue tracking": "issue_tracking",
+  "issue_tracking": "issue_tracking",
+  "issue tracker": "issue_tracking",
+  "issue management": "issue_tracking",
+  "bug tracking": "issue_tracking",
+  "bug tracker": "issue_tracking",
+  tickets: "issue_tracking",
+  ticketing: "issue_tracking",
   newsletter: "newsletter",
   "newsletter provider": "newsletter",
   "email marketing": "newsletter",
@@ -108,7 +116,10 @@ const systemTypesField = (
 ): ProviderSystemType[] =>
   Array.from(
     new Set(
-      rawStringValues(fields, "System Type")
+      [
+        ...rawStringValues(fields, "System Types"),
+        ...rawStringValues(fields, "System Type"),
+      ]
         .map((value) => systemTypeAliases[value.trim().toLowerCase()])
         .filter((value): value is ProviderSystemType =>
           providerSystemTypeSchema.safeParse(value).success,

@@ -12,7 +12,6 @@ import { ReviewCompanyTab } from "./review-company-tab"
 import { ReviewServiceTab } from "./review-service-tab"
 import { ReviewDataTypesTab } from "./review-data-types-tab"
 import { ReviewActivitiesTab } from "./review-activities-tab"
-import { ReviewProvidersTab } from "./review-providers-tab"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
@@ -24,8 +23,12 @@ import {
 } from "@/lib/api"
 import { authStateQueryKey, securityProfileQueryKey } from "@/lib/query-keys"
 import {
+  MARKETING_WEBSITE_SERVICE_NAME,
+  WEBSITE_DATA_TYPE_NAME,
   fallbackComplianceGoalOptions,
   fallbackRegionOptions,
+  isWebsiteActivity,
+  onboardingComplianceGoalOptions,
   toProfileDraft,
 } from "../../components/types"
 
@@ -75,14 +78,13 @@ const ENRICHED_COMPLIANCE: Record<
   },
 }
 
-type SetupTab = "company" | "service" | "data-types" | "activities" | "providers"
+type SetupTab = "company" | "service" | "data-types" | "activities"
 
 const setupTabs: Array<{ value: SetupTab; label: string }> = [
   { value: "company", label: "Company" },
   { value: "service", label: "Primary Service" },
   { value: "data-types", label: "Data Types" },
   { value: "activities", label: "Activities" },
-  { value: "providers", label: "Providers" },
 ]
 
 export const ReviewStep = () => {
@@ -103,7 +105,7 @@ export const ReviewStep = () => {
 
   const vocabulary = useVocabulary(Boolean(draft))
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
-  const goalOptions = (
+  const goalOptions = onboardingComplianceGoalOptions(
     complianceGoalOptions.length > 0
       ? complianceGoalOptions
       : fallbackComplianceGoalOptions
@@ -175,11 +177,45 @@ export const ReviewStep = () => {
       store.selectOrganization(organization.id)
       store.markOnboarding(organization.id)
 
-      const activities = await Promise.all(
-        draft.activities.map((activity) =>
-          createBusinessActivity(organization.id, activity)
-        )
+      const initialSnapshot = await saveSecurityProfile(
+        organization.id,
+        toProfileDraft(draft, {
+          primaryActivityIds: [],
+          websiteActivityIds: [],
+        })
       )
+      const websiteDataTypeId =
+        initialSnapshot.organization?.dataHandling.dataTypesStored.find(
+          (dataType) => dataType.name === WEBSITE_DATA_TYPE_NAME
+        )?.id
+      const websiteService = initialSnapshot.organization?.services.find(
+        (service) => service.serviceName === MARKETING_WEBSITE_SERVICE_NAME
+      )
+      const primaryService = initialSnapshot.organization?.services.find(
+        (service) => service.id !== websiteService?.id
+      )
+
+      if (!websiteDataTypeId || !websiteService || !primaryService) {
+        throw new Error("Could not create the default website service.")
+      }
+
+      const activities = await Promise.all(
+        draft.activities.map(async (activity) => ({
+          input: activity,
+          activity: await createBusinessActivity(
+            organization.id,
+            isWebsiteActivity(activity)
+              ? { ...activity, dataTypeIds: [websiteDataTypeId] }
+              : activity
+          ),
+        }))
+      )
+      const primaryActivityIds = activities
+        .filter(({ input }) => !isWebsiteActivity(input))
+        .map(({ activity }) => activity.id)
+      const websiteActivityIds = activities
+        .filter(({ input }) => isWebsiteActivity(input))
+        .map(({ activity }) => activity.id)
 
       if (draft.providers && draft.providers.length > 0) {
         await Promise.all(
@@ -190,8 +226,21 @@ export const ReviewStep = () => {
       }
 
       const profile = toProfileDraft(
-        draft,
-        activities.map((activity) => activity.id)
+        {
+          ...draft,
+          primaryService: {
+            ...draft.primaryService,
+            id: primaryService.id,
+          },
+          websiteService: {
+            ...draft.websiteService,
+            id: websiteService.id,
+          },
+        },
+        {
+          primaryActivityIds,
+          websiteActivityIds,
+        }
       )
       const snapshot = await saveSecurityProfile(organization.id, profile)
 
@@ -309,12 +358,6 @@ export const ReviewStep = () => {
             <ReviewActivitiesTab />
           </TabsContent>
 
-          <TabsContent
-            className="mt-0 min-h-0 overflow-hidden border-0 p-0 shadow-none"
-            value="providers"
-          >
-            <ReviewProvidersTab />
-          </TabsContent>
         </Tabs>
 
         {submitError ? (

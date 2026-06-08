@@ -26,6 +26,7 @@ export type WizardStep =
 export type WizardDraft = {
   company: CompanyProfile
   primaryService: ServiceProfileInput
+  websiteService: ServiceProfileInput
   dataTypes: StoredDataType[]
   activities: BusinessActivityInput[]
   privacy: PrivacyProfile
@@ -58,6 +59,10 @@ export const fallbackComplianceGoalOptions = [
   { value: "soc_2", label: "SOC 2" },
   { value: "gdpr", label: "GDPR" },
 ]
+
+export const onboardingComplianceGoalOptions = (
+  options: Array<{ value: string; label: string }>
+) => options
 
 export const complianceGoalsForRegions = (
   regions: string[] | null | undefined
@@ -94,12 +99,26 @@ export const fallbackRegionOptions = [
   { value: "global", label: "Global" },
 ]
 
+export const MARKETING_WEBSITE_SERVICE_NAME = "Marketing website"
+export const WEBSITE_DATA_TYPE_NAME = "Website visitor data"
+export const WEBSITE_ACTIVITY_NAME = "Operate marketing website"
+
 export const defaultDataType = (name: string): StoredDataType => ({
   name: "Customer account data",
   description: `Basic account and usage data handled by ${name}.`,
   subjectTypes: null,
   collectionMethods: null,
   isSensitive: null,
+  isRequired: true,
+})
+
+export const defaultWebsiteDataType = (): StoredDataType => ({
+  name: WEBSITE_DATA_TYPE_NAME,
+  description:
+    "Basic visitor, analytics, and inquiry data collected through the public website.",
+  subjectTypes: null,
+  collectionMethods: null,
+  isSensitive: false,
   isRequired: true,
 })
 
@@ -112,6 +131,42 @@ export const defaultActivity: BusinessActivityInput = {
   retentionPolicy: null,
   retentionDays: 0,
 }
+
+export const defaultWebsiteActivity: BusinessActivityInput = {
+  name: WEBSITE_ACTIVITY_NAME,
+  purpose:
+    "Publish public pages, measure website usage, and handle inbound website inquiries.",
+  role: "",
+  legalBasis: [],
+  dataTypeIds: [],
+  retentionPolicy: null,
+  retentionDays: 0,
+}
+
+export const defaultWebsiteService = (
+  website: string | null
+): ServiceProfileInput => ({
+  ...emptyServiceProfile,
+  serviceName: MARKETING_WEBSITE_SERVICE_NAME,
+  serviceDescription: "Public website for marketing and inbound inquiries.",
+  serviceUrl: website,
+})
+
+export const isWebsiteDataType = (dataType: StoredDataType) =>
+  dataType.name === WEBSITE_DATA_TYPE_NAME
+
+export const isWebsiteActivity = (activity: BusinessActivityInput) =>
+  activity.name === WEBSITE_ACTIVITY_NAME
+
+const withWebsiteDataType = (dataTypes: StoredDataType[]) =>
+  dataTypes.some(isWebsiteDataType)
+    ? dataTypes
+    : [...dataTypes, defaultWebsiteDataType()]
+
+const withWebsiteActivity = (activities: BusinessActivityInput[]) =>
+  activities.some(isWebsiteActivity)
+    ? activities
+    : [...activities, defaultWebsiteActivity]
 
 export const fallbackDraft = ({
   name,
@@ -137,8 +192,9 @@ export const fallbackDraft = ({
     serviceDescription: "",
     serviceUrl: website,
   },
-  dataTypes: [defaultDataType(name)],
-  activities: [defaultActivity],
+  websiteService: defaultWebsiteService(website),
+  dataTypes: withWebsiteDataType([defaultDataType(name)]),
+  activities: withWebsiteActivity([defaultActivity]),
   privacy: emptyPrivacyProfile,
   privacyPolicyUrl: null,
   suggestedProviderNames: [],
@@ -170,12 +226,15 @@ export const draftFromLookup = (
     serviceName: result.primaryService.serviceName || input.name,
     serviceUrl: result.primaryService.serviceUrl || input.website,
   },
-  dataTypes:
+  websiteService: defaultWebsiteService(input.website),
+  dataTypes: withWebsiteDataType(
     result.dataTypes.length > 0
       ? result.dataTypes
-      : [defaultDataType(input.name)],
-  activities:
-    result.activities.length > 0 ? result.activities : [defaultActivity],
+      : [defaultDataType(input.name)]
+  ),
+  activities: withWebsiteActivity(
+    result.activities.length > 0 ? result.activities : [defaultActivity]
+  ),
   privacy: emptyPrivacyProfile,
   privacyPolicyUrl: result.privacyPolicyUrl,
   suggestedProviderNames: result.suggestedProviders.map(
@@ -200,6 +259,7 @@ export const mergeLookupDraft = (
       complianceGoals: current.company.complianceGoals,
     },
     privacy: current.privacy,
+    websiteService: current.websiteService,
     providers: current.providers,
     warnings: [...current.warnings, ...lookupDraft.warnings],
   }
@@ -207,13 +267,23 @@ export const mergeLookupDraft = (
 
 export const toProfileDraft = (
   draft: WizardDraft,
-  businessActivityIds: string[]
+  {
+    primaryActivityIds,
+    websiteActivityIds,
+  }: {
+    primaryActivityIds: string[]
+    websiteActivityIds: string[]
+  }
 ): ProfileDraft => ({
   company: draft.company,
   services: [
     {
       ...draft.primaryService,
-      businessActivityIds,
+      businessActivityIds: primaryActivityIds,
+    },
+    {
+      ...draft.websiteService,
+      businessActivityIds: websiteActivityIds,
     },
   ],
   privacy: draft.privacy,

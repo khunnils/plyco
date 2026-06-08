@@ -27,7 +27,7 @@ const comboboxInputClassName =
 
 type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
-  "analytics" | "advertising" | "newsletter"
+  "analytics" | "advertising" | "issue_tracking" | "newsletter"
 >
 
 const systemLabels: Record<InfrastructureProviderSystemType, string> = {

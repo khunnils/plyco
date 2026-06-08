@@ -95,6 +95,7 @@ export const AppSidebar = ({
               Providers
             </SidebarMenuButton>
           </div>
+
           <SidebarSectionLabel>{SIDEBAR_SECTION.documents}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             <SidebarMenuButton
@@ -106,19 +107,16 @@ export const AppSidebar = ({
             </SidebarMenuButton>
           </div>
         </SidebarMenu>
-        <div className="pt-4">
-          <SidebarMenu>
-            <SidebarSectionLabel>{SIDEBAR_SECTION.settings}</SidebarSectionLabel>
-            <div className="ml-2 grid gap-1">
-              <SidebarMenuButton
-                active={pathname.startsWith("/vocabulary")}
-                onClick={() => navigate("/vocabulary")}
-              >
-                <Tags className="size-4" />
-                Vocabulary
-              </SidebarMenuButton>
-            </div>
-          </SidebarMenu>
+
+        <SidebarSectionLabel>{SIDEBAR_SECTION.settings}</SidebarSectionLabel>
+        <div className="ml-2 grid gap-1">
+          <SidebarMenuButton
+            active={pathname.startsWith("/vocabulary")}
+            onClick={() => navigate("/vocabulary")}
+          >
+            <Tags className="size-4" />
+            Vocabulary
+          </SidebarMenuButton>
         </div>
       </SidebarContent>
       <SidebarFooter>

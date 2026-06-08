@@ -75,6 +75,16 @@ export function createTestApp() {
         securityCriticality: "Medium",
         handlesCustomerData: true,
       },
+      {
+        id: "prov-linear",
+        name: "Linear",
+        url: "https://linear.app",
+        category: "Issue Tracking",
+        systemTypes: ["issue_tracking"],
+        securityCriticality: "Medium",
+        handlesCustomerData: false,
+        purpose: "Issue tracking",
+      },
     ]),
     systemTemplateSource: new StaticSystemTemplateSource([
       {

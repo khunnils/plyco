@@ -2,7 +2,7 @@ import { type ProviderSystemType } from "@plyco/shared"
 
 export type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
-  "analytics" | "advertising" | "newsletter"
+  "analytics" | "advertising" | "issue_tracking" | "newsletter"
 >
 
 export const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [

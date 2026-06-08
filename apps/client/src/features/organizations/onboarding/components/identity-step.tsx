@@ -19,7 +19,6 @@ export const IdentityStep = () => {
     setDraft,
     submitError,
     setSubmitError,
-    user,
     onCancel,
     onLogout,
   } = useOnboardingStore()
@@ -108,9 +107,7 @@ export const IdentityStep = () => {
             <Sparkles />
             Continue
           </Button>
-          <p className="text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Signed in as {user?.email}
-          </p>
+
         </div>
       </form>
     </CreateShell>

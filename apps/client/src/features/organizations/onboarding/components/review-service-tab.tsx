@@ -1,5 +1,6 @@
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { TextInput } from "../../components/text-input"
+import { MARKETING_WEBSITE_SERVICE_NAME } from "../../components/types"
 
 interface ReviewServiceTabProps {
   regionOptions: Array<{ value: string; label: string }>
@@ -113,6 +114,19 @@ export const ReviewServiceTab = ({ regionOptions }: ReviewServiceTabProps) => {
           ))}
         </select>
       </label>
+      <div className="mt-2 rounded-md border border-slate-200 bg-white p-4 md:col-span-2">
+        <p className="text-sm font-semibold text-slate-950">
+          {draft.websiteService.serviceName ?? MARKETING_WEBSITE_SERVICE_NAME}
+        </p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          {draft.websiteService.serviceDescription}
+        </p>
+        {draft.websiteService.serviceUrl ? (
+          <p className="mt-3 text-xs font-medium text-slate-600">
+            {draft.websiteService.serviceUrl}
+          </p>
+        ) : null}
+      </div>
     </div>
   )
 }

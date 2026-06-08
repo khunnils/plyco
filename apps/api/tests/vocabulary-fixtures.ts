@@ -129,6 +129,7 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
     ["password_manager", "Password manager"],
     ["analytics", "Analytics"],
     ["advertising", "Advertising"],
+    ["issue_tracking", "Issue tracking"],
     ["newsletter", "Newsletter"],
   ]),
   codeSet("security_cadences", "Security cadences", false, [

@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Check, Edit2, Trash2, Plus, X } from "lucide-react"
+import { Check, Edit2, Trash2, X } from "lucide-react"
 import { type BusinessActivityInput } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { TextInput } from "../../components/text-input"
+import { isWebsiteActivity } from "../../components/types"
 
 const SetupTextArea = ({
   label,
@@ -28,18 +29,8 @@ const SetupTextArea = ({
   </label>
 )
 
-const emptyActivity = (index: number): BusinessActivityInput => ({
-  name: `Activity ${index + 1}`,
-  purpose: "",
-  role: "",
-  legalBasis: [],
-  dataTypeIds: [],
-  retentionPolicy: null,
-  retentionDays: 0,
-})
-
 type ActivityEditor = {
-  index: number | null
+  index: number
   draft: BusinessActivityInput
 }
 
@@ -51,13 +42,6 @@ export const ReviewActivitiesTab = () => {
 
   if (!draft) {
     return null
-  }
-
-  const startAddingActivity = () => {
-    setActivityEditor({
-      index: null,
-      draft: emptyActivity(draft.activities.length),
-    })
   }
 
   const startEditingActivity = (index: number) => {
@@ -74,12 +58,9 @@ export const ReviewActivitiesTab = () => {
 
     updateDraft((current) => ({
       ...current,
-      activities:
-        activityEditor.index === null
-          ? [...current.activities, activityEditor.draft]
-          : current.activities.map((item, index) =>
-              index === activityEditor.index ? activityEditor.draft : item
-            ),
+      activities: current.activities.map((item, index) =>
+        index === activityEditor.index ? activityEditor.draft : item
+      ),
     }))
     setActivityEditor(null)
   }
@@ -93,24 +74,13 @@ export const ReviewActivitiesTab = () => {
             Review and edit the business activities.
           </p>
         </div>
-        {!activityEditor ? (
-          <Button
-            size="sm"
-            type="button"
-            variant="outline"
-            onClick={startAddingActivity}
-          >
-            <Plus className="size-4" />
-            Add activity
-          </Button>
-        ) : null}
       </div>
 
       {activityEditor ? (
         <div className="grid gap-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-slate-950">
-              {activityEditor.index === null ? "Add activity" : "Edit activity"}
+              Edit activity
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -165,49 +135,55 @@ export const ReviewActivitiesTab = () => {
       ) : (
         <div className="min-h-0 overflow-y-auto pr-1">
           <div className="grid gap-3">
-            {draft.activities.map((activity, index) => (
-              <div
-                className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
-                key={`${activity.name}-${index}`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-950">
-                      {activity.name}
-                    </p>
-                    {activity.purpose ? (
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
-                        {activity.purpose}
+            {draft.activities.map((activity, index) => {
+              const fixedWebsiteActivity = isWebsiteActivity(activity)
+
+              return (
+                <div
+                  className="group relative rounded-md border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm"
+                  key={`${activity.name}-${index}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">
+                        {activity.name}
                       </p>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => startEditingActivity(index)}
-                    >
-                      <Edit2 className="size-4 text-slate-500" />
-                    </Button>
-                    <Button
-                      disabled={draft.activities.length === 1}
-                      size="sm"
-                      variant="ghost"
-                      onClick={() =>
-                        updateDraft((current) => ({
-                          ...current,
-                          activities: current.activities.filter(
-                            (_, currentIndex) => currentIndex !== index
-                          ),
-                        }))
-                      }
-                    >
-                      <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
-                    </Button>
+                      {activity.purpose ? (
+                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                          {activity.purpose}
+                        </p>
+                      ) : null}
+                    </div>
+                    {fixedWebsiteActivity ? null : (
+                      <div className="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => startEditingActivity(index)}
+                        >
+                          <Edit2 className="size-4 text-slate-500" />
+                        </Button>
+                        <Button
+                          disabled={draft.activities.length === 1}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            updateDraft((current) => ({
+                              ...current,
+                              activities: current.activities.filter(
+                                (_, currentIndex) => currentIndex !== index
+                              ),
+                            }))
+                          }
+                        >
+                          <Trash2 className="size-4 text-slate-400 hover:text-red-600" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

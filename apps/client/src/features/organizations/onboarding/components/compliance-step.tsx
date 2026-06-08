@@ -8,7 +8,10 @@ import { CreateShell } from "../../components/create-shell"
 import { OptionPicker } from "../../components/option-picker"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
-import { fallbackComplianceGoalOptions } from "../../components/types"
+import {
+  fallbackComplianceGoalOptions,
+  onboardingComplianceGoalOptions,
+} from "../../components/types"
 
 const ENRICHED_COMPLIANCE: Record<string, { description: string; icon: string }> = {
   soc_2: {
@@ -34,7 +37,7 @@ export const ComplianceStep = () => {
 
   const vocabulary = useVocabulary(Boolean(draft))
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
-  const goalOptions = (
+  const goalOptions = onboardingComplianceGoalOptions(
     complianceGoalOptions.length > 0
       ? complianceGoalOptions
       : fallbackComplianceGoalOptions

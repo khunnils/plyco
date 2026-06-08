@@ -170,8 +170,7 @@ const LookupLoadingView = ({
       Building an understanding
     </h1>
     <p className="mt-4 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-      We are gathering intelligence about your organization's public footprint
-      to streamline your governance setup.
+      We are analyzing your website and existing policies to streamline workspace setup.
     </p>
     <div className="mt-10 grid w-full gap-3">
       <LookupStatusPanel

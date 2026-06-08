@@ -630,9 +630,12 @@ describe("shared security profile schemas", () => {
     ).toBe(false);
   });
 
-  it("accepts analytics and advertising provider system types", () => {
+  it("accepts marketing and issue tracking provider system types", () => {
     expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true);
     expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(
+      true,
+    );
+    expect(providerSystemTypeSchema.safeParse("issue_tracking").success).toBe(
       true,
     );
     expect(providerSystemTypeSchema.safeParse("newsletter").success).toBe(true);

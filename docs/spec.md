@@ -22,20 +22,30 @@ After lookup, the user reviews setup in two screens:
 - company review: organization identity, selected regions, compliance goals,
   privacy policy, and suggested providers
 - setup review: editable tabs for the primary service, data types, and
-  activities
+  activities, plus a visible fixed Marketing website service summary
 
-Final submit creates the organization, creates all onboarding activities, links
-them to the primary service, saves all onboarding data types in the seeded
-security profile, adds selected providers to organization inventory, and then
-opens the workspace. Provider selections do not create service-specific provider
-usage during setup.
+Final submit creates the organization, creates the primary service and a
+Marketing website service, creates all onboarding activities, links primary
+activities to the primary service, links the fixed Operate marketing website
+activity to the Marketing website service, saves all onboarding data types in
+the seeded security profile, adds selected providers to organization inventory,
+and then opens the workspace. The Marketing website service includes a fixed
+Website visitor data type for basic visitor, analytics, and inquiry data.
+Provider selections do not create service-specific provider usage during setup.
+Compliance goal choices shown during onboarding come from the configured
+vocabulary, including CCPA and ISO 27001 when present. Technology provider
+selection happens on the dedicated provider step; those
+manual selections are not repeated in setup review. Onboarding data types and
+activities can be edited or deleted in review, but new rows are added later from
+the workspace.
 
 ## Activities and Data Types
 
 In the workspace, each processing activity can reference the organization data
 types it processes. This mapping is maintained from the Activities page after
-organization creation; the onboarding review keeps activities and data types as
-separate simple lists.
+organization creation, except onboarding automatically links Operate marketing
+website to Website visitor data so the default website service appears in the
+Product and Data graph.
 
 ## Product and Data Graph
 

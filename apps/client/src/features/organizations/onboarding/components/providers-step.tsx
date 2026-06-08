@@ -1,7 +1,12 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, ArrowRight, LogOut, Check, Loader2 } from "lucide-react"
-import { type Provider, type OrganizationProviderInput, type ProviderCriticality } from "@plyco/shared"
+import {
+  type Provider,
+  type OrganizationProviderInput,
+  type ProviderCriticality,
+  type ProviderSystemType,
+} from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
@@ -12,7 +17,7 @@ interface ProviderCategoryDefinition {
   id: string
   title: string
   description: string
-  systemType: "auth" | "source_control" | "cloud" | "analytics"
+  systemType: ProviderSystemType
 }
 
 const CATEGORIES: ProviderCategoryDefinition[] = [
@@ -40,6 +45,12 @@ const CATEGORIES: ProviderCategoryDefinition[] = [
     description: "Tools used to capture, aggregate, and analyze user interactions with your product.",
     systemType: "analytics",
   },
+  {
+    id: "issue_tracking",
+    title: "Issue tracking",
+    description: "Where your team tracks bugs, roadmap work, and customer/product issues.",
+    systemType: "issue_tracking",
+  },
 ]
 
 const getDomain = (url?: string) => {
@@ -51,7 +62,10 @@ const getDomain = (url?: string) => {
   }
 }
 
-const mapToOrganizationProviderInput = (provider: Provider): OrganizationProviderInput => {
+const mapToOrganizationProviderInput = (
+  provider: Provider,
+  systemType: ProviderSystemType
+): OrganizationProviderInput => {
   const rawCriticality = (provider.securityCriticality || "").toLowerCase()
   const validCriticalities: ProviderCriticality[] = ["low", "medium", "high", "critical"]
   const criticality = validCriticalities.includes(rawCriticality as ProviderCriticality)
@@ -60,7 +74,7 @@ const mapToOrganizationProviderInput = (provider: Provider): OrganizationProvide
 
   return {
     providerId: provider.id,
-    systemTypes: provider.systemTypes,
+    systemTypes: [systemType],
     name: provider.name,
     legalName: provider.legalName || "",
     category: provider.categoryCode || "",
@@ -69,6 +83,33 @@ const mapToOrganizationProviderInput = (provider: Provider): OrganizationProvide
     notes: "",
     purpose: provider.purpose || "",
   }
+}
+
+const toggleProviderSystemType = (
+  providers: OrganizationProviderInput[],
+  provider: Provider,
+  systemType: ProviderSystemType
+) => {
+  const existingProvider = providers.find((item) => item.providerId === provider.id)
+
+  if (!existingProvider) {
+    return [...providers, mapToOrganizationProviderInput(provider, systemType)]
+  }
+
+  const selected = existingProvider.systemTypes.includes(systemType)
+  const nextSystemTypes = selected
+    ? existingProvider.systemTypes.filter((item) => item !== systemType)
+    : [...existingProvider.systemTypes, systemType]
+
+  if (nextSystemTypes.length === 0) {
+    return providers.filter((item) => item.providerId !== provider.id)
+  }
+
+  return providers.map((item) =>
+    item.providerId === provider.id
+      ? { ...item, systemTypes: nextSystemTypes }
+      : item
+  )
 }
 
 export const ProvidersStep = () => {
@@ -114,17 +155,18 @@ export const ProvidersStep = () => {
     navigate("../compliance")
   }
 
-  const toggleProvider = (provider: Provider) => {
-    const isSelected = draft.providers.some((p) => p.providerId === provider.id)
-
+  const toggleProvider = (
+    provider: Provider,
+    systemType: ProviderSystemType
+  ) => {
     updateDraft((current) => {
-      const nextProviders = isSelected
-        ? current.providers.filter((p) => p.providerId !== provider.id)
-        : [...current.providers, mapToOrganizationProviderInput(provider)]
-
       return {
         ...current,
-        providers: nextProviders,
+        providers: toggleProviderSystemType(
+          current.providers,
+          provider,
+          systemType
+        ),
       }
     })
   }
@@ -190,7 +232,9 @@ export const ProvidersStep = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {categoryProviders.map((provider) => {
                       const isSelected = draft.providers.some(
-                        (p) => p.providerId === provider.id
+                        (p) =>
+                          p.providerId === provider.id &&
+                          p.systemTypes.includes(category.systemType)
                       )
 
                       const domain = getDomain(provider.url)
@@ -204,7 +248,7 @@ export const ProvidersStep = () => {
                               ? "border-slate-950 bg-slate-50/50 ring-1 ring-slate-950/20"
                               : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/20"
                           }`}
-                          onClick={() => toggleProvider(provider)}
+                          onClick={() => toggleProvider(provider, category.systemType)}
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             {faviconUrl ? (
