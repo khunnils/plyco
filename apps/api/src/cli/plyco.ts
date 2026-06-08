@@ -1,11 +1,9 @@
-import { config as loadDotenv } from "dotenv"
-
+import { getFilteredArgs } from "../infrastructure/env-loader.js"
 import { apiConfig } from "../config.js"
 import { ApiError } from "../infrastructure/errors.js"
 import { loadCodesFromAirtable } from "../infrastructure/code-loader.js"
 
-loadDotenv({ path: ".env", override: false, quiet: true })
-loadDotenv({ path: "apps/api/.env", override: true, quiet: true })
+process.argv = getFilteredArgs(process.argv)
 
 const [, , command, subcommand] = process.argv
 
@@ -13,9 +11,9 @@ const usage = () => {
   console.error(
     [
       "Usage:",
-      "  pnpm plyco codes load",
-      "  pnpm plyco providers lookup --url <url>",
-      "  pnpm plyco providers import --url <url>",
+      "  pnpm plyco codes load [--env <env>]",
+      "  pnpm plyco providers lookup --url <url> [--env <env>]",
+      "  pnpm plyco providers import --url <url> [--env <env>]",
     ].join("\n"),
   )
 }
