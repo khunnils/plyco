@@ -1,4 +1,11 @@
-import { LayoutDashboard, LogOut, ScrollText, Tags, Users } from "lucide-react"
+import {
+  LayoutDashboard,
+  Lightbulb,
+  LogOut,
+  ScrollText,
+  Tags,
+  Users,
+} from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { type AuthUser } from "@plyco/shared"
 
@@ -46,6 +53,13 @@ export const AppSidebar = ({
           >
             <LayoutDashboard className="size-4" />
             Dashboard
+          </SidebarMenuButton>
+          <SidebarMenuButton
+            active={pathname.startsWith("/recommendations")}
+            onClick={() => navigate("/recommendations")}
+          >
+            <Lightbulb className="size-4" />
+            Recommendations
           </SidebarMenuButton>
           <SidebarSectionLabel>{SIDEBAR_SECTION.company}</SidebarSectionLabel>
           <div className="ml-2 grid gap-1">

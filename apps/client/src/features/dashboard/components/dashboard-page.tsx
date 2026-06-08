@@ -1,5 +1,6 @@
 import {
   type OrganizationProvider,
+  type RecommendationsResponse,
   type ServiceProviderUsage,
   type BusinessActivity,
   isComplianceFieldVisible,
@@ -13,6 +14,7 @@ import {
   ClipboardList,
   Database,
   CheckCircle2,
+  Lightbulb,
 } from "lucide-react"
 
 import { type ProfileDraft } from "@/features/company/types/company"
@@ -24,6 +26,10 @@ import {
   isProgressComplete,
   isActivityComplete,
 } from "@/features/dashboard/lib/progress"
+import {
+  severityLabel,
+  severityOrder,
+} from "@/features/recommendations/lib/recommendations"
 
 interface CategoryCardProps {
   title: string
@@ -82,11 +88,15 @@ const SectionHeading = ({ children }: { children: string }) => (
 export const DashboardPage = ({
   organizationProviders,
   profile,
+  recommendations,
+  recommendationsLoading = false,
   serviceProviderUsage,
   businessActivities = [],
 }: {
   organizationProviders: OrganizationProvider[]
   profile: ProfileDraft
+  recommendations?: RecommendationsResponse
+  recommendationsLoading?: boolean
   serviceProviderUsage: ServiceProviderUsage[]
   businessActivities?: BusinessActivity[]
 }) => {
@@ -95,6 +105,16 @@ export const DashboardPage = ({
     profile,
     serviceProviderUsage,
   })
+  const recommendationCounts = recommendations?.countsBySeverity ?? {
+    low: 0,
+    medium: 0,
+    high: 0,
+    critical: 0,
+  }
+  const recommendationTotal = severityOrder.reduce(
+    (total, severity) => total + recommendationCounts[severity],
+    0
+  )
 
   // Calculate completeness for activities
   const showLegalBasis = isComplianceFieldVisible(
@@ -142,6 +162,57 @@ export const DashboardPage = ({
           </div>
         </div>
       </div>
+
+      <section className="grid gap-4">
+        <div className="flex items-center justify-between gap-3">
+          <SectionHeading>Recommendations</SectionHeading>
+          <Link
+            className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline"
+            to="/recommendations"
+          >
+            View all
+          </Link>
+        </div>
+        <Link
+          className="grid gap-4 border border-slate-200 bg-white p-4 hover:border-slate-300 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+          to="/recommendations"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-md bg-amber-50 text-amber-700">
+                <Lightbulb className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-slate-950">
+                  {recommendationsLoading
+                    ? "Checking recommendations"
+                    : recommendationTotal === 0
+                      ? "No recommendations right now"
+                      : `${recommendationTotal} ${recommendationTotal === 1 ? "recommendation" : "recommendations"}`}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Advisor findings from your saved profile.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:flex">
+              {severityOrder.map((severity) => (
+                <div
+                  className="min-w-24 border border-slate-200 bg-slate-50 px-3 py-2 text-center"
+                  key={severity}
+                >
+                  <div className="text-lg font-semibold text-slate-950">
+                    {recommendationCounts[severity]}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500">
+                    {severityLabel(severity)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Link>
+      </section>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <CategoryCard

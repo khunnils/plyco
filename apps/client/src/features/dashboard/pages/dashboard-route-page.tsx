@@ -1,10 +1,12 @@
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { DashboardPage } from "@/features/dashboard/components/dashboard-page"
+import { useRecommendations } from "@/features/recommendations/hooks/use-recommendations"
 import { PageHeader } from "@/features/shell/components/page-header"
 
 export const DashboardRoutePage = () => {
   const securityProfile = useSecurityProfile()
+  const recommendations = useRecommendations()
   const snapshot = securityProfile.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const organizationProviders = snapshot?.organizationProviders ?? []
@@ -22,6 +24,8 @@ export const DashboardRoutePage = () => {
         businessActivities={businessActivities}
         organizationProviders={organizationProviders}
         profile={defaultValues}
+        recommendations={recommendations.data}
+        recommendationsLoading={recommendations.isLoading}
         serviceProviderUsage={serviceProviderUsage}
       />
     </>

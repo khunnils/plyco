@@ -14,6 +14,7 @@ import { WorkspaceLayout } from "@/features/shell/components/workspace-layout"
 
 // Route Pages
 import { DashboardRoutePage } from "@/features/dashboard/pages/dashboard-route-page"
+import { RecommendationsRoutePage } from "@/features/recommendations/pages/recommendations-route-page"
 import { CompanyProfileRoutePage } from "@/features/company/profile/pages/company-profile-route-page"
 import { ServicesRoutePage } from "@/features/company/services/pages/services-route-page"
 import { ActivitiesRoutePage } from "@/features/company/activities/pages/activities-route-page"
@@ -103,6 +104,7 @@ export const App = () => {
       />
       <Route element={<WorkspaceLayout user={user} />}>
         <Route path="/" element={<DashboardRoutePage />} />
+        <Route path="/recommendations" element={<RecommendationsRoutePage />} />
         <Route path="/company/profile" element={<CompanyProfileRoutePage />} />
         <Route path="/company/services" element={<ServicesRoutePage />} />
         <Route

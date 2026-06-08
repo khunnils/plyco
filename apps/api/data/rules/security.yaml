@@ -1,0 +1,14 @@
+- id: security.mfa_required
+  title: MFA is not required
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: security.authentication.mfaRequired
+    equals: false
+  message: Multi-factor authentication is not required.
+  recommendation: Require MFA for workforce and administrative access.
+  relatedFields:
+    - security.authentication.mfaRequired

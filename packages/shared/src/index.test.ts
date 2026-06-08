@@ -19,6 +19,8 @@ import {
   organizationLookupResultSchema,
   providerCriticalitySchema,
   providerSystemTypeSchema,
+  recommendationsResponseSchema,
+  recommendationSeveritySchema,
   serviceProfileInputSchema,
   serviceProfileSchema,
   serviceProviderUsageInputSchema,
@@ -216,6 +218,37 @@ describe("shared security profile schemas", () => {
 
   it("limits provider criticality to the supported readiness levels", () => {
     expect(providerCriticalitySchema.safeParse("severe").success).toBe(false);
+  });
+
+  it("accepts recommendation responses with severity counts", () => {
+    const result = recommendationsResponseSchema.safeParse({
+      recommendations: [
+        {
+          id: "security.mfa_required",
+          title: "MFA is not required",
+          category: "security",
+          severity: "high",
+          frameworks: ["soc_2"],
+          message: "Multi-factor authentication is not required.",
+          recommendation: "Require MFA for workforce and administrative access.",
+          relatedFields: ["security.authentication.mfaRequired"],
+        },
+      ],
+      countsBySeverity: {
+        low: 0,
+        medium: 0,
+        high: 1,
+        critical: 0,
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects unsupported recommendation severities", () => {
+    expect(recommendationSeveritySchema.safeParse("urgent").success).toBe(
+      false,
+    );
   });
 
   it("validates ISO alpha-2 country codes", () => {

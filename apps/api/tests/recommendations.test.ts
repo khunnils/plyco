@@ -1,0 +1,204 @@
+import { describe, expect, it } from "vitest"
+
+import { createApp } from "../src/app.js"
+import {
+  evaluateAdvisorRules,
+  parseAdvisorRuleFile,
+  StaticAdvisorRuleSource,
+  type AdvisorRule,
+} from "../src/features/recommendations/rules.js"
+import { createTestApp, profileBody, serviceBody } from "./helpers.js"
+
+const mfaRule: AdvisorRule = {
+  id: "security.mfa_required",
+  title: "MFA is not required",
+  category: "security",
+  severity: "high",
+  frameworks: ["soc_2", "iso_27001"],
+  appliesWhen: {
+    anyComplianceGoal: ["soc_2", "iso_27001"],
+  },
+  condition: {
+    field: "security.authentication.mfaRequired",
+    equals: false,
+  },
+  message: "Multi-factor authentication is not required.",
+  recommendation: "Require MFA for workforce and administrative access.",
+  relatedFields: ["security.authentication.mfaRequired"],
+}
+
+const organization = ({
+  id: "org-test",
+  ...profileBody,
+  services: [
+    {
+      id: "service-platform",
+      ...serviceBody,
+      businessActivityIds: [],
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+    },
+  ],
+  createdAt: "2026-05-15T00:00:00.000Z",
+  updatedAt: "2026-05-15T00:00:00.000Z",
+} as const)
+
+describe("recommendation rules", () => {
+  it("parses YAML rule files", () => {
+    const rules = parseAdvisorRuleFile(`
+- id: security.mfa_required
+  title: MFA is not required
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: security.authentication.mfaRequired
+    equals: false
+  message: Multi-factor authentication is not required.
+  recommendation: Require MFA for workforce and administrative access.
+  relatedFields:
+    - security.authentication.mfaRequired
+`)
+
+    expect(rules).toEqual([mfaRule])
+  })
+
+  it("returns an MFA recommendation when MFA is false and SOC 2 is a goal", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: false,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["soc_2"],
+      },
+    })
+
+    expect(response.recommendations).toMatchObject([
+      {
+        id: "security.mfa_required",
+        severity: "high",
+      },
+    ])
+    expect(response.countsBySeverity).toEqual({
+      low: 0,
+      medium: 0,
+      high: 1,
+      critical: 0,
+    })
+  })
+
+  it("does not return the MFA recommendation when MFA is true", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: true,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["soc_2"],
+      },
+    })
+
+    expect(response.recommendations).toEqual([])
+  })
+
+  it("does not return the MFA recommendation when compliance goals do not match", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: false,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["gdpr"],
+      },
+    })
+
+    expect(response.recommendations).toEqual([])
+  })
+
+  it("does not treat unanswered MFA as false", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: null,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["soc_2"],
+      },
+    })
+
+    expect(response.recommendations).toEqual([])
+  })
+})
+
+describe("recommendations API", () => {
+  it("returns empty recommendations when the organization has no profile", async () => {
+    const app = await createApp({
+      auth: false,
+      advisorRuleSource: new StaticAdvisorRuleSource([mfaRule]),
+    })
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/recommendations",
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      recommendations: [],
+      countsBySeverity: {
+        low: 0,
+        medium: 0,
+        high: 0,
+        critical: 0,
+      },
+    })
+  })
+
+  it("evaluates recommendations for the current organization profile", async () => {
+    const app = await createTestApp()
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        company: {
+          ...profileBody.company,
+          complianceGoals: ["soc_2"],
+        },
+        access: {
+          ...profileBody.access,
+          mfaRequired: false,
+        },
+      },
+    })
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/recommendations",
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toMatchObject({
+      recommendations: [
+        {
+          id: "security.mfa_required",
+          severity: "high",
+        },
+      ],
+      countsBySeverity: {
+        high: 1,
+      },
+    })
+  })
+})

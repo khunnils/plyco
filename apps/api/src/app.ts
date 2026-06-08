@@ -38,6 +38,11 @@ import {
   type OrganizationLookupService,
 } from "./features/organization-lookup/service.js"
 import { registerOrganizationLookupRoutes } from "./features/organization-lookup/routes.js"
+import { registerRecommendationRoutes } from "./features/recommendations/routes.js"
+import {
+  FileSystemAdvisorRuleSource,
+  type AdvisorRuleSource,
+} from "./features/recommendations/rules.js"
 import { InMemoryVendorRepository } from "./features/vendors/in-memory-repository.js"
 import { PrismaVendorRepository } from "./features/vendors/prisma-repository.js"
 import { type ProviderRepository } from "./features/vendors/repository.js"
@@ -81,6 +86,7 @@ export type CreateAppOptions = {
   providerLookupService?: ProviderLookupService
   providerImportService?: ProviderImportService
   organizationLookupService?: OrganizationLookupService
+  advisorRuleSource?: AdvisorRuleSource
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
   systemTemplateSource?: SystemTemplateSource
@@ -111,6 +117,7 @@ export async function createApp({
   providerLookupService,
   providerImportService,
   organizationLookupService,
+  advisorRuleSource = new FileSystemAdvisorRuleSource(),
   promptClient,
   llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
@@ -201,6 +208,11 @@ export async function createApp({
     providerSource,
     vendorRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
+  })
+  await registerRecommendationRoutes(app, {
+    accountRepository: repositories.accountRepository,
+    advisorRuleSource,
+    organizationRepository: repositories.organizationRepository,
   })
   await registerVocabularyRoutes(app, {
     accountRepository: repositories.accountRepository,

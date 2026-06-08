@@ -54,3 +54,17 @@ It maps the organization to services, linked processing activities, data types
 processed by those activities, data types processed through service provider
 usage, and the providers used by those services. Users can pan and zoom the
 graph, but cannot edit nodes or relationships from this view.
+
+## Smart Advisor Recommendations
+
+The dashboard includes a Recommendations section with counts by severity and a
+link to the full recommendations page. The sidebar shows Recommendations
+directly below Dashboard.
+
+The recommendations page at `/recommendations` lists current advisor findings
+from the saved organization profile. Each item shows severity, category,
+message, recommendation text, framework codes, and related profile fields. When
+no rules match, the page shows “No recommendations right now.”
+
+Recommendations are computed from static advisor rules and are not persisted,
+dismissed, or assigned in this version.

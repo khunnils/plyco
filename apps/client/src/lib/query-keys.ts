@@ -13,6 +13,9 @@ export const organizationMembersQueryKey = (organizationId: string) =>
 export const securityProfileQueryKey = (organizationId: string) =>
   ["security-profile", organizationId] as const
 
+export const recommendationsQueryKey = (organizationId: string) =>
+  ["recommendations", organizationId] as const
+
 export const templatesQueryKey = (organizationId: string) =>
   ["templates", organizationId] as const
 

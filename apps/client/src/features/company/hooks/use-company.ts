@@ -6,7 +6,11 @@ import {
   getOrganizationSecurityProfile,
   saveSecurityProfile,
 } from "@/lib/api"
-import { authStateQueryKey, securityProfileQueryKey } from "@/lib/query-keys"
+import {
+  authStateQueryKey,
+  recommendationsQueryKey,
+  securityProfileQueryKey,
+} from "@/lib/query-keys"
 import { type ProfileDraft } from "@/features/company/types/company"
 
 export const useSecurityProfile = (enabled = true) => {
@@ -34,6 +38,9 @@ export const useSaveSecurityProfile = () => {
       )
       void queryClient.invalidateQueries({
         queryKey: authStateQueryKey,
+      })
+      void queryClient.invalidateQueries({
+        queryKey: recommendationsQueryKey(selectedOrganizationId ?? ""),
       })
       toast.success("Profile saved")
     },

@@ -16,6 +16,7 @@ import {
   serviceProviderUsageInputSchema,
   organizationProviderInventorySchema,
   providerLookupResultSchema,
+  recommendationsResponseSchema,
   organizationLookupResultSchema,
   organizationPrivacyPolicyLookupInputSchema,
   organizationWebsiteLookupInputSchema,
@@ -57,6 +58,7 @@ import {
   type PrivacyProfile,
   type OrganizationSummary,
   type OrganizationMember,
+  type RecommendationsResponse,
 } from "@plyco/shared"
 import { z } from "zod"
 
@@ -124,6 +126,14 @@ export const getOrganizationSecurityProfile = (
   apiRequest(
     `/organizations/${organizationId}/security-profile`,
     securityProgramSnapshotSchema
+  )
+
+export const getRecommendations = (
+  organizationId: string
+): Promise<RecommendationsResponse> =>
+  apiRequest(
+    `/organizations/${organizationId}/recommendations`,
+    recommendationsResponseSchema
   )
 
 export const getProviders = (): Promise<Provider[]> =>
