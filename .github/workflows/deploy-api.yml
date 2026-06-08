@@ -171,3 +171,19 @@ jobs:
               --format "value(status.url)"
           )"
           curl --fail --silent --show-error "${SERVICE_URL}/health"
+
+      - name: Send Telegram Notification
+        uses: appleboy/telegram-action@v1.0.1
+        if: always()
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Deployment Status: ${{ job.status }}
+            App: API App
+            Workflow: ${{ github.workflow }}
+            
+            Commit: ${{ github.event.head_commit.message || github.sha }}
+            Author: ${{ github.actor }}
+            
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
