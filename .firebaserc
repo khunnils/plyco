@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "plyco-prod"
+  },
+  "targets": {
+    "plyco-prod": {
+      "hosting": {
+        "client": [
+          "plyco-prod"
+        ],
+        "web": [
+          "plyco-web"
+        ]
+      }
+    }
   }
 }

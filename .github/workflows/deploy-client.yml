@@ -1,0 +1,99 @@
+name: Deploy Client
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-client.yml"
+      - ".firebaserc"
+      - "firebase.json"
+      - "apps/client/**"
+      - "packages/shared/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'plyco-prod' }}
+  REGION: ${{ vars.CLOUD_RUN_REGION || 'us-central1' }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
+  FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'plyco-prod' }}
+
+jobs:
+  deploy:
+    name: Build and deploy client
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm --filter @plyco/shared build
+
+      - name: Typecheck shared package
+        run: pnpm --filter @plyco/shared typecheck
+
+      - name: Test shared package
+        run: pnpm --filter @plyco/shared test
+
+      - name: Typecheck client
+        run: pnpm --filter cf-app typecheck
+
+      - name: Test client
+        run: pnpm --filter cf-app test
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve API URL
+        run: |
+          set -euo pipefail
+          SERVICE_URL="$(
+            gcloud run services describe "${SERVICE}" \
+              --project "${PROJECT_ID}" \
+              --region "${REGION}" \
+              --format "value(status.url)"
+          )"
+          echo "SERVICE_URL=${SERVICE_URL}" >> "${GITHUB_ENV}"
+
+      - name: Build client
+        run: |
+          set -euo pipefail
+          VITE_API_URL="${SERVICE_URL}" pnpm --filter cf-app build
+
+      - name: Deploy client to Firebase Hosting
+        run: |
+          set -euo pipefail
+          pnpm exec firebase deploy \
+            --only hosting:client \
+            --project "${FIREBASE_PROJECT_ID}" \
+            --non-interactive
