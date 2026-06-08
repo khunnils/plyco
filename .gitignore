@@ -5,6 +5,8 @@ dist
 .env
 .env.*
 !.env.example
+.plyco/*.env
+!.plyco/example.env
 
 apps/*/dist
 packages/*/dist

@@ -173,6 +173,7 @@ export async function registerAuth(
     if (
       request.url === "/health" ||
       request.url.startsWith("/auth/") ||
+      request.url.startsWith("/codes/load") ||
       request.url.startsWith("/providers/lookup") ||
       request.url.startsWith("/providers/import")
     ) {

@@ -9,7 +9,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "plyco": "pnpm --filter @plyco/api exec tsx src/cli/plyco.ts",
+    "plyco": "pnpm --filter @plyco/cli exec tsx src/index.ts",
     "dev:api": "pnpm --filter @plyco/shared build && pnpm --filter @plyco/db build && pnpm --filter @plyco/api dev",
     "dev:client": "pnpm --filter @plyco/shared build && pnpm --filter cf-app dev",
     "dev:web": "pnpm --filter @plyco/shared build && pnpm --filter cf-web dev",

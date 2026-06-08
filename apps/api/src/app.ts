@@ -21,6 +21,10 @@ import { InMemoryAccountRepository } from "./features/accounts/in-memory-reposit
 import { PrismaAccountRepository } from "./features/accounts/prisma-repository.js"
 import { type AccountRepository } from "./features/accounts/repository.js"
 import { registerAccountRoutes } from "./features/accounts/routes.js"
+import {
+  registerCodeRoutes,
+  type CodeLoader,
+} from "./features/codes/routes.js"
 import { InMemoryDocumentRepository } from "./features/documents/in-memory-repository.js"
 import { PrismaDocumentRepository } from "./features/documents/prisma-repository.js"
 import { type DocumentRepository } from "./features/documents/repository.js"
@@ -80,6 +84,11 @@ export type CreateAppOptions = {
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
   systemTemplateSource?: SystemTemplateSource
+  codeLoader?: CodeLoader
+  codeLoaderConfig?: {
+    airtableApiKey?: string
+    airtableBase?: string
+  }
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -105,6 +114,8 @@ export async function createApp({
   promptClient,
   llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
+  codeLoader,
+  codeLoaderConfig,
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -177,6 +188,12 @@ export async function createApp({
       createDefaultProviderImportService(resolvedProviderLookupService),
     providerRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
+  })
+  await registerCodeRoutes(app, {
+    airtableApiKey: codeLoaderConfig?.airtableApiKey,
+    airtableBase: codeLoaderConfig?.airtableBase,
+    codeLoader,
+    toolApiKey: providerLookupApiKey,
   })
   await registerOrganizationRoutes(app, {
     accountRepository: repositories.accountRepository,
