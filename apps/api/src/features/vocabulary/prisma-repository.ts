@@ -104,7 +104,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       select: {
         id: true,
         systemCodeSetId: true,
-        codes: { select: { codeId: true } },
+        codes: { select: { codeId: true, sortOrder: true, systemCodeId: true } },
       },
     });
     const existingBySystemId = new Map(
@@ -138,16 +138,20 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
           existingBySystemId.set(codeSet.id, {
             id: organizationCodeSetId,
             systemCodeSetId: codeSet.id,
-            codes: codeSet.codes.map((code) => ({ codeId: code.codeId })),
+            codes: codeSet.codes.map((code) => ({
+              codeId: code.codeId,
+              sortOrder: code.sortOrder,
+              systemCodeId: code.id,
+            })),
           });
           continue;
         }
 
-        const existingCodeIds = new Set(
-          (existingCodeSet?.codes ?? []).map((code) => code.codeId),
+        const existingCodesByCodeId = new Map(
+          (existingCodeSet?.codes ?? []).map((code) => [code.codeId, code]),
         );
         const missingCodes = codeSet.codes.filter(
-          (code) => !existingCodeIds.has(code.codeId),
+          (code) => !existingCodesByCodeId.has(code.codeId),
         );
 
         if (missingCodes.length > 0) {
@@ -164,7 +168,9 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         }
 
         const existingCodesToUpdate = codeSet.codes.filter(
-          (code) => existingCodeIds.has(code.codeId),
+          (code) =>
+            existingCodesByCodeId.get(code.codeId)?.sortOrder !==
+            code.sortOrder,
         );
         for (const code of existingCodesToUpdate) {
           await tx.organizationCode.updateMany({
@@ -179,7 +185,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
           });
         }
       }
-    });
+    }, { timeout: 30_000 });
   }
 
   async createOrganizationCode(
