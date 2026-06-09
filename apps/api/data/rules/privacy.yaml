@@ -1,0 +1,72 @@
+- id: privacy.gdpr_transfer_mechanism_missing
+  title: Cross-border transfer mechanism is missing
+  category: privacy
+  severity: high
+  frameworks: [gdpr]
+  appliesWhen:
+    all:
+      - anyComplianceGoal: [gdpr]
+      - field: privacy.crossBorderTransfers
+        equals: true
+  condition:
+    field: privacy.transferMechanisms
+    empty: true
+  message: Cross-border transfers are enabled, but no transfer mechanism is recorded.
+  recommendation: Document the transfer mechanism used for international personal data transfers, such as SCCs or an applicable adequacy mechanism.
+  relatedFields:
+    - privacy.crossBorderTransfers
+    - privacy.transferMechanisms
+
+- id: privacy.gdpr_privacy_rights_missing
+  title: Privacy rights are not configured
+  category: privacy
+  severity: medium
+  frameworks: [gdpr]
+  appliesWhen:
+    anyComplianceGoal: [gdpr]
+  condition:
+    field: privacy.supportedRights
+    empty: true
+  message: Privacy rights are not configured.
+  recommendation: Configure the privacy rights your organization supports, such as access, deletion, correction, objection, and portability.
+  relatedFields:
+    - privacy.supportedRights
+
+- id: privacy.gdpr_request_method_missing
+  title: Privacy request method is missing
+  category: privacy
+  severity: high
+  frameworks: [gdpr, ccpa]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, ccpa]
+  condition:
+    field: privacy.requestMethods
+    empty: true
+  message: Privacy request method is missing.
+  recommendation: Add at least one way for individuals to submit privacy or data rights requests.
+  relatedFields:
+    - privacy.requestMethods
+    - company.privacyContactEmail
+
+- id: privacy.cookies_tracking_without_consent
+  title: Tracking cookies are used without a consent mechanism
+  category: privacy
+  severity: medium
+  frameworks: [gdpr, ccpa]
+  condition:
+    any:
+      collection: services.all
+      where:
+        all:
+          - field: privacy.usesCookiesOrTrackingTechnologies
+            equals: true
+          - field: privacy.cookieTrackingCategories
+            includesAny: [analytics, marketing, advertising]
+          - field: privacy.cookieConsentMechanism
+            in: [null, none, not_set]
+  message: A service uses tracking cookies without a consent mechanism.
+  recommendation: Add a cookie consent mechanism or update the service tracking configuration.
+  relatedFields:
+    - services.all.privacy.usesCookiesOrTrackingTechnologies
+    - services.all.privacy.cookieTrackingCategories
+    - services.all.privacy.cookieConsentMechanism

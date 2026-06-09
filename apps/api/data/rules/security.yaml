@@ -12,3 +12,65 @@
   recommendation: Require MFA for workforce and administrative access.
   relatedFields:
     - security.authentication.mfaRequired
+
+- id: security.incident_response_plan_missing
+  title: Incident response plan is missing
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.incidentResponsePlanExists
+    equals: false
+  message: Incident response plan is missing.
+  recommendation: Create a lightweight incident response plan covering triage, ownership, communication, and customer notification.
+  relatedFields:
+    - infrastructure.incidentResponsePlanExists
+
+- id: security.backups_disabled
+  title: Backups are not enabled
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.backupsEnabled
+    equals: false
+  message: Backups are not enabled.
+  recommendation: Enable backups for production systems and document backup cadence, retention, and restore testing.
+  relatedFields:
+    - infrastructure.backupsEnabled
+    - infrastructure.backupCadence
+    - infrastructure.backupRetentionDays
+
+- id: security.vulnerability_scanning_missing
+  title: Vulnerability scanning is not configured
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.scanningCadence
+    in: [null, none, not_defined]
+  message: Vulnerability scanning is not configured.
+  recommendation: Configure recurring vulnerability scanning for dependencies, application code, containers, or infrastructure.
+  relatedFields:
+    - infrastructure.scanningCadence
+
+- id: security.shared_accounts_exist
+  title: Shared accounts are in use
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: access.sharedAccountsExist
+    equals: true
+  message: Shared accounts are in use.
+  recommendation: Replace shared accounts with named user accounts and enforce individual authentication.
+  relatedFields:
+    - access.sharedAccountsExist

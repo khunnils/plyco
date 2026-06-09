@@ -139,6 +139,182 @@ describe("recommendation rules", () => {
 
     expect(response.recommendations).toEqual([])
   })
+
+  it("supports in, empty, nested all, and appliesWhen predicates", () => {
+    const response = evaluateAdvisorRules(
+      [
+        {
+          id: "privacy.gdpr_transfer_mechanism_missing",
+          title: "Cross-border transfer mechanism is missing",
+          category: "privacy",
+          severity: "high",
+          frameworks: ["gdpr"],
+          appliesWhen: {
+            all: [
+              { anyComplianceGoal: ["gdpr"] },
+              { field: "privacy.crossBorderTransfers", equals: true },
+            ],
+          },
+          condition: {
+            field: "privacy.transferMechanisms",
+            empty: true,
+          },
+          message:
+            "Cross-border transfers are enabled, but no transfer mechanism is recorded.",
+          recommendation:
+            "Document the transfer mechanism used for international personal data transfers.",
+          relatedFields: [
+            "privacy.crossBorderTransfers",
+            "privacy.transferMechanisms",
+          ],
+        },
+        {
+          id: "security.vulnerability_scanning_missing",
+          title: "Vulnerability scanning is not configured",
+          category: "security",
+          severity: "high",
+          frameworks: ["soc_2"],
+          appliesWhen: { anyComplianceGoal: ["soc_2"] },
+          condition: {
+            field: "infrastructure.scanningCadence",
+            in: [null, "none", "not_defined"],
+          },
+          message: "Vulnerability scanning is not configured.",
+          recommendation: "Configure recurring vulnerability scanning.",
+          relatedFields: ["infrastructure.scanningCadence"],
+        },
+      ],
+      {
+        ...organization,
+        company: {
+          ...organization.company,
+          complianceGoals: ["gdpr", "soc_2"],
+        },
+        infrastructure: {
+          ...organization.infrastructure,
+          scanningCadence: null,
+        },
+        privacy: {
+          ...organization.privacy,
+          crossBorderTransfers: true,
+          transferMechanisms: [],
+        },
+      },
+    )
+
+    expect(response.recommendations.map((recommendation) => recommendation.id))
+      .toEqual([
+        "privacy.gdpr_transfer_mechanism_missing",
+        "security.vulnerability_scanning_missing",
+      ])
+  })
+
+  it("supports collection predicates and notIn", () => {
+    const response = evaluateAdvisorRules(
+      [
+        {
+          id: "vendors.processor_dpa_missing",
+          title: "Data processor is missing DPA status",
+          category: "vendors",
+          severity: "high",
+          frameworks: ["gdpr", "soc_2"],
+          condition: {
+            any: {
+              collection: "vendors.dataProcessors",
+              where: {
+                all: [
+                  {
+                    field: "dataProcessingLevel",
+                    in: ["limited", "subprocessor"],
+                  },
+                  {
+                    field: "dpaStatus",
+                    notIn: ["signed", "not_required"],
+                  },
+                ],
+              },
+            },
+          },
+          message:
+            "A provider processing customer or user data is missing a signed or not-required DPA status.",
+          recommendation: "Confirm each data processor has processing terms.",
+          relatedFields: ["vendors.dataProcessors"],
+        },
+        {
+          id: "privacy.cookies_tracking_without_consent",
+          title: "Tracking cookies are used without a consent mechanism",
+          category: "privacy",
+          severity: "medium",
+          frameworks: ["gdpr"],
+          condition: {
+            any: {
+              collection: "services.all",
+              where: {
+                all: [
+                  {
+                    field: "privacy.usesCookiesOrTrackingTechnologies",
+                    equals: true,
+                  },
+                  {
+                    field: "privacy.cookieTrackingCategories",
+                    includesAny: ["analytics", "marketing", "advertising"],
+                  },
+                  {
+                    field: "privacy.cookieConsentMechanism",
+                    in: [null, "none", "not_set"],
+                  },
+                ],
+              },
+            },
+          },
+          message:
+            "A service uses tracking cookies without a consent mechanism.",
+          recommendation: "Add a cookie consent mechanism.",
+          relatedFields: ["services.all.privacy.cookieConsentMechanism"],
+        },
+      ],
+      {
+        ...organization,
+        services: [
+          {
+            ...organization.services[0],
+            privacy: {
+              ...organization.services[0].privacy,
+              usesCookiesOrTrackingTechnologies: true,
+              cookieTrackingCategories: ["analytics"],
+              cookieConsentMechanism: null,
+            },
+          },
+        ],
+      },
+      {
+        serviceProviderUsage: [
+          {
+            id: "usage-1",
+            serviceId: "service-platform",
+            serviceName: "Acme AI Platform",
+            organizationProviderId: "provider-1",
+            providerName: "Processor",
+            systemType: null,
+            purpose: "Processing",
+            dataProcessingLevel: "limited",
+            dataProcessed: ["Customer account data"],
+            dpaStatus: "under_review",
+            dataRegions: ["us"],
+            notes: "",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+      },
+    )
+
+    expect(response.recommendations.map((recommendation) => recommendation.id))
+      .toEqual([
+        "vendors.processor_dpa_missing",
+        "privacy.cookies_tracking_without_consent",
+      ])
+  })
 })
 
 describe("recommendations API", () => {

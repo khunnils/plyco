@@ -1,0 +1,19 @@
+- id: data.sensitive_data_without_flag
+  title: Sensitive data flag may be inconsistent
+  category: data
+  severity: medium
+  frameworks: [gdpr, soc_2, iso_27001]
+  condition:
+    all:
+      - field: company.handlesSensitiveData
+        equals: false
+      - any:
+          collection: dataHandling.dataTypesStored
+          where:
+            field: isSensitive
+            equals: true
+  message: A stored data type is marked sensitive while the company profile says sensitive data is not handled.
+  recommendation: Review whether the organization handles sensitive or regulated data and update the organization profile if needed.
+  relatedFields:
+    - company.handlesSensitiveData
+    - dataHandling.dataTypesStored

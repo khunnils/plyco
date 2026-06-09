@@ -5,10 +5,12 @@ import { fileURLToPath } from "node:url"
 import {
   recommendationSeveritySchema,
   recommendationsResponseSchema,
+  type BusinessActivity,
   type OrganizationSecurityProfile,
   type Recommendation,
   type RecommendationCountsBySeverity,
   type RecommendationsResponse,
+  type ServiceProviderUsage,
 } from "@plyco/shared"
 import { parse } from "yaml"
 import { z } from "zod"
@@ -19,10 +21,66 @@ const DEFAULT_RULE_DIRECTORY = fileURLToPath(
   new URL("../../../data/rules/", import.meta.url),
 )
 
-const ruleConditionSchema = z.object({
-  field: z.string().trim().min(1),
-  equals: z.union([z.string(), z.number(), z.boolean(), z.null()]),
-})
+const conditionValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+])
+
+type RuleCondition = {
+  field?: string
+  equals?: z.infer<typeof conditionValueSchema>
+  in?: Array<z.infer<typeof conditionValueSchema>>
+  notIn?: Array<z.infer<typeof conditionValueSchema>>
+  empty?: boolean
+  includesAny?: Array<z.infer<typeof conditionValueSchema>>
+  anyComplianceGoal?: string[]
+  all?: RuleCondition[]
+  any?: RuleCondition[] | { collection: string; where: RuleCondition }
+}
+
+const fieldConditionSchema = z
+  .object({
+    field: z.string().trim().min(1),
+    equals: conditionValueSchema.optional(),
+    in: z.array(conditionValueSchema).optional(),
+    notIn: z.array(conditionValueSchema).optional(),
+    empty: z.boolean().optional(),
+    includesAny: z.array(conditionValueSchema).optional(),
+  })
+  .refine(
+    (condition) =>
+      [
+        condition.equals !== undefined,
+        condition.in !== undefined,
+        condition.notIn !== undefined,
+        condition.empty !== undefined,
+        condition.includesAny !== undefined,
+      ].filter(Boolean).length === 1,
+    "Field conditions must define exactly one operator.",
+  )
+
+const ruleConditionSchema: z.ZodType<RuleCondition> = z.lazy(() =>
+  z.union([
+    fieldConditionSchema,
+    z.object({
+      anyComplianceGoal: z.array(z.string().trim().min(1)).default([]),
+    }),
+    z.object({
+      all: z.array(ruleConditionSchema).min(1),
+    }),
+    z.object({
+      any: z.union([
+        z.array(ruleConditionSchema).min(1),
+        z.object({
+          collection: z.string().trim().min(1),
+          where: ruleConditionSchema,
+        }),
+      ]),
+    }),
+  ]),
+)
 
 const advisorRuleSchema = z.object({
   id: z.string().trim().min(1),
@@ -30,11 +88,7 @@ const advisorRuleSchema = z.object({
   category: z.string().trim().min(1),
   severity: recommendationSeveritySchema,
   frameworks: z.array(z.string().trim().min(1)).default([]),
-  appliesWhen: z
-    .object({
-      anyComplianceGoal: z.array(z.string().trim().min(1)).default([]),
-    })
-    .default({ anyComplianceGoal: [] }),
+  appliesWhen: ruleConditionSchema.optional(),
   condition: ruleConditionSchema,
   message: z.string().trim().min(1),
   recommendation: z.string().trim().min(1),
@@ -113,6 +167,10 @@ export const parseAdvisorRuleFile = (
 export const evaluateAdvisorRules = (
   rules: AdvisorRule[],
   organization: OrganizationSecurityProfile | null,
+  options: {
+    businessActivities?: BusinessActivity[]
+    serviceProviderUsage?: ServiceProviderUsage[]
+  } = {},
 ): RecommendationsResponse => {
   if (!organization) {
     return recommendationsResponseSchema.parse({
@@ -121,7 +179,7 @@ export const evaluateAdvisorRules = (
     })
   }
 
-  const context = recommendationContext(organization)
+  const context = recommendationContext(organization, options)
   const recommendations = rules
     .filter((rule) => ruleApplies(rule, context))
     .map(ruleToRecommendation)
@@ -132,13 +190,45 @@ export const evaluateAdvisorRules = (
   })
 }
 
-const recommendationContext = (organization: OrganizationSecurityProfile) => ({
-  company: {
-    complianceGoals: organization.company.complianceGoals ?? [],
+const recommendationContext = (
+  organization: OrganizationSecurityProfile,
+  {
+    businessActivities = [],
+    serviceProviderUsage = [],
+  }: {
+    businessActivities?: BusinessActivity[]
+    serviceProviderUsage?: ServiceProviderUsage[]
+  },
+) => ({
+  company: organization.company,
+  privacy: organization.privacy,
+  infrastructure: organization.infrastructure,
+  access: organization.access,
+  dataHandling: organization.dataHandling,
+  businessActivities,
+  serviceProviderUsage,
+  services: {
+    all: organization.services,
+  },
+  vendors: {
+    dataProcessors: serviceProviderUsage.filter((usage) =>
+      ["limited", "subprocessor"].includes(usage.dataProcessingLevel),
+    ),
   },
   security: {
     authentication: {
       mfaRequired: organization.access.mfaRequired,
+    },
+    incidentResponse: {
+      planExists: organization.infrastructure.incidentResponsePlanExists,
+    },
+    backups: {
+      backupsEnabled: organization.infrastructure.backupsEnabled,
+      backupCadence: organization.infrastructure.backupCadence,
+      backupRetentionDays: organization.infrastructure.backupRetentionDays,
+    },
+    vulnerabilityManagement: {
+      scanningCadence: organization.infrastructure.scanningCadence,
     },
   },
 })
@@ -147,20 +237,8 @@ const ruleApplies = (
   rule: AdvisorRule,
   context: ReturnType<typeof recommendationContext>,
 ) =>
-  complianceGoalApplies(rule, context.company.complianceGoals) &&
-  getByPath(context, rule.condition.field) === rule.condition.equals
-
-const complianceGoalApplies = (
-  rule: AdvisorRule,
-  complianceGoals: string[],
-) => {
-  const requiredGoals = rule.appliesWhen.anyComplianceGoal
-
-  return (
-    requiredGoals.length === 0 ||
-    requiredGoals.some((goal) => complianceGoals.includes(goal))
-  )
-}
+  (!rule.appliesWhen || conditionMatches(rule.appliesWhen, context)) &&
+  conditionMatches(rule.condition, context)
 
 const ruleToRecommendation = (rule: AdvisorRule): Recommendation => ({
   id: rule.id,
@@ -187,6 +265,78 @@ const countBySeverity = (
     counts[recommendation.severity] += 1
     return counts
   }, emptyCounts())
+
+const conditionMatches = (
+  condition: RuleCondition,
+  context: ReturnType<typeof recommendationContext> | unknown,
+): boolean => {
+  if (condition.all) {
+    return condition.all.every((item) => conditionMatches(item, context))
+  }
+
+  if (condition.any) {
+    const anyCondition = condition.any
+
+    if (Array.isArray(anyCondition)) {
+      return anyCondition.some((item) => conditionMatches(item, context))
+    }
+
+    const collection = getByPath(context, anyCondition.collection)
+
+    return (
+      Array.isArray(collection) &&
+      collection.some((item) => conditionMatches(anyCondition.where, item))
+    )
+  }
+
+  if (condition.anyComplianceGoal) {
+    const complianceGoals = getByPath(context, "company.complianceGoals")
+
+    return (
+      Array.isArray(complianceGoals) &&
+      condition.anyComplianceGoal.some((goal) => complianceGoals.includes(goal))
+    )
+  }
+
+  if (!condition.field) {
+    return false
+  }
+
+  const value = getByPath(context, condition.field)
+
+  if (condition.equals !== undefined) {
+    return value === condition.equals
+  }
+
+  if (condition.in) {
+    return condition.in.includes(value as z.infer<typeof conditionValueSchema>)
+  }
+
+  if (condition.notIn) {
+    return !condition.notIn.includes(
+      value as z.infer<typeof conditionValueSchema>,
+    )
+  }
+
+  if (condition.empty !== undefined) {
+    return isEmpty(value) === condition.empty
+  }
+
+  if (condition.includesAny) {
+    return (
+      Array.isArray(value) &&
+      condition.includesAny.some((item) => value.includes(item))
+    )
+  }
+
+  return false
+}
+
+const isEmpty = (value: unknown) =>
+  value === null ||
+  value === undefined ||
+  value === "" ||
+  (Array.isArray(value) && value.length === 0)
 
 const getByPath = (value: unknown, path: string): unknown =>
   path.split(".").reduce<unknown>((current, key) => {

@@ -213,6 +213,7 @@ export async function createApp({
     accountRepository: repositories.accountRepository,
     advisorRuleSource,
     organizationRepository: repositories.organizationRepository,
+    vendorRepository: repositories.vendorRepository,
   })
   await registerVocabularyRoutes(app, {
     accountRepository: repositories.accountRepository,

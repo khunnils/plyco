@@ -1,0 +1,15 @@
+- id: activities.retention_policy_missing
+  title: Processing activity retention is not defined
+  category: activities
+  severity: medium
+  frameworks: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      collection: businessActivities
+      where:
+        field: retentionPolicy
+        in: [null, not_defined, not_set]
+  message: A processing activity does not have a defined retention policy.
+  recommendation: Define how long data is retained for each processing activity, even if the answer is customer-defined or contract-defined.
+  relatedFields:
+    - businessActivities.retentionPolicy

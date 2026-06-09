@@ -1,0 +1,37 @@
+- id: vendors.processor_dpa_missing
+  title: Data processor is missing DPA status
+  category: vendors
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      collection: vendors.dataProcessors
+      where:
+        all:
+          - field: dataProcessingLevel
+            in: [limited, subprocessor]
+          - field: dpaStatus
+            notIn: [signed, not_required]
+  message: A provider processing customer or user data is missing a signed or not-required DPA status.
+  recommendation: Confirm that each provider processing customer or user data has a DPA or equivalent processing terms in place.
+  relatedFields:
+    - vendors.dataProcessors
+
+- id: vendors.processor_region_missing
+  title: Data processor region is missing
+  category: vendors
+  severity: medium
+  frameworks: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      collection: vendors.dataProcessors
+      where:
+        all:
+          - field: dataProcessingLevel
+            in: [limited, subprocessor]
+          - field: dataRegions
+            empty: true
+  message: A provider processing customer or user data is missing processing region data.
+  recommendation: Record where each provider stores or processes customer or user data.
+  relatedFields:
+    - vendors.dataProcessors
