@@ -21,9 +21,6 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'plyco-prod' }}
-  REGION: ${{ vars.CLOUD_RUN_REGION || 'us-central1' }}
-  SERVICE: ${{ vars.CLOUD_RUN_SERVICE || 'plyco-api' }}
   FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID || 'plyco-prod' }}
 
 jobs:
@@ -71,24 +68,10 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
 
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Resolve API URL
-        run: |
-          set -euo pipefail
-          SERVICE_URL="$(
-            gcloud run services describe "${SERVICE}" \
-              --project "${PROJECT_ID}" \
-              --region "${REGION}" \
-              --format "value(status.url)"
-          )"
-          echo "SERVICE_URL=${SERVICE_URL}" >> "${GITHUB_ENV}"
-
       - name: Build client
         run: |
           set -euo pipefail
-          VITE_API_URL="${SERVICE_URL}" pnpm --filter cf-app build
+          VITE_API_URL="${{ vars.VITE_API_URL }}" NODE_ENV=production pnpm --filter cf-app build
 
       - name: Deploy client to Firebase Hosting
         run: |
