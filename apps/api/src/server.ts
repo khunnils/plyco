@@ -1,8 +1,9 @@
 import { shutdownInstrumentation } from "./infrastructure/instrumentation.js"
 import { createApp } from "./app.js"
 import { apiConfig } from "./config.js"
+import { createApiLogger } from "./infrastructure/logger.js"
 
-const app = await createApp({ logger: true })
+const app = await createApp({ logger: createApiLogger() })
 
 const shutdown = async () => {
   await app.close()

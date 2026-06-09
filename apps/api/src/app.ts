@@ -11,6 +11,7 @@ import {
 } from "./infrastructure/airtable-code-source.js"
 import { registerAuth } from "./infrastructure/auth.js"
 import { apiConfig, type AuthConfig } from "./config.js"
+import { setupFastifyErrorInstrumentation } from "./infrastructure/instrumentation.js"
 import {
   GcsDocumentPdfStorage,
   NullDocumentPdfStorage,
@@ -126,6 +127,7 @@ export async function createApp({
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
+  setupFastifyErrorInstrumentation(app)
   const repositories = createRepositories({
     accountRepository,
     documentRepository,
