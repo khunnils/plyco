@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto"
 import { prisma, type PrismaClient } from "@plyco/db"
 
 import {
+  booleanField,
   linkedRecordIds,
   listAirtableRecords,
   numberField,
@@ -88,15 +89,15 @@ export async function loadCodesFromAirtable({
         airtableRecordId: record.id,
         name: stringField(record.fields, "Name") || id,
         description: stringField(record.fields, "Description"),
-        usesHints: record.fields["Uses Hints"] === true,
-        isSystem: record.fields["Is System"] === true,
+        usesHints: booleanField(record.fields, "Uses Hints"),
+        isSystem: booleanField(record.fields, "Is System"),
       },
       update: {
         airtableRecordId: record.id,
         name: stringField(record.fields, "Name") || id,
         description: stringField(record.fields, "Description"),
-        usesHints: record.fields["Uses Hints"] === true,
-        isSystem: record.fields["Is System"] === true,
+        usesHints: booleanField(record.fields, "Uses Hints"),
+        isSystem: booleanField(record.fields, "Is System"),
       },
     })
   }

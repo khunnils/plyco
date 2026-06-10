@@ -80,6 +80,45 @@ export const linkedRecordIds = (
   return []
 }
 
+export const booleanField = (
+  fields: Record<string, unknown>,
+  ...names: string[]
+): boolean => {
+  for (const name of names) {
+    const value = fields[name]
+
+    if (typeof value === "boolean") {
+      return value
+    }
+
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase()
+      if (
+        normalized === "true" ||
+        normalized === "1" ||
+        normalized === "yes" ||
+        normalized === "checked"
+      ) {
+        return true
+      }
+      if (
+        normalized === "false" ||
+        normalized === "0" ||
+        normalized === "no" ||
+        normalized === "unchecked"
+      ) {
+        return false
+      }
+    }
+
+    if (typeof value === "number") {
+      return value === 1
+    }
+  }
+
+  return false
+}
+
 export async function listAirtableRecords({
   apiKey,
   baseId,
