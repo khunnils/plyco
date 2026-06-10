@@ -211,7 +211,7 @@ export const DataTypesPanel = ({
                 return (
                   <article
                     className="cursor-pointer border border-slate-200 bg-white p-4"
-                    key={`${dataType.name}-${index}`}
+                    key={dataTypeId}
                     onClick={() => toggleExpanded(dataTypeId)}
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

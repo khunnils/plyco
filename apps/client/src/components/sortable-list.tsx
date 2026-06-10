@@ -38,7 +38,11 @@ const SortableItem = ({
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id, disabled })
+  } = useSortable({
+    id,
+    disabled,
+    animateLayoutChanges: () => false,
+  })
 
   return (
     <div
