@@ -1,5 +1,5 @@
 import { type StoredDataType, type Vocabulary } from "@plyco/shared"
-import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
@@ -123,7 +123,7 @@ export const DataTypesPanel = ({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between" >
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
           <p className="mt-1 text-sm text-slate-500">
@@ -139,9 +139,15 @@ export const DataTypesPanel = ({
               form="data-type-form"
               disabled={isMutationPending}
             >
+              {isMutationPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {showCreateForm ? "Add" : "Save"}
             </Button>
-            <Button type="button" variant="outline" onClick={closeForm}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeForm}
+              disabled={isMutationPending}
+            >
               Cancel
             </Button>
           </div>
@@ -150,6 +156,7 @@ export const DataTypesPanel = ({
             className="w-fit shrink-0"
             type="button"
             onClick={startCreate}
+            disabled={isMutationPending}
           >
             <Plus />
             Add datatype
@@ -273,6 +280,7 @@ export const DataTypesPanel = ({
                           size="icon-sm"
                           type="button"
                           variant="outline"
+                          disabled={isMutationPending}
                           onClick={(event) => {
                             event.stopPropagation()
                             startEdit(index)
@@ -285,6 +293,7 @@ export const DataTypesPanel = ({
                           size="icon-sm"
                           type="button"
                           variant="outline"
+                          disabled={isMutationPending}
                           onClick={(event) => {
                             event.stopPropagation()
                             handleDelete(index)

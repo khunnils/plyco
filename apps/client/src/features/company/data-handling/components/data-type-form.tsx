@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Save, X } from "lucide-react"
 import { storedDataTypeSchema, type StoredDataType } from "@plyco/shared"
-import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
@@ -38,10 +37,6 @@ export const DataTypeForm = ({
     mode: "onBlur",
     resolver: zodResolver(storedDataTypeSchema) as Resolver<StoredDataType>,
   })
-
-  useEffect(() => {
-    form.reset(defaultValues)
-  }, [defaultValues, form])
 
   const submitDataType = form.handleSubmit((dataType) => {
     onSubmit(dataType)
