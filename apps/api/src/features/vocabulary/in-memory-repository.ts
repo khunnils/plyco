@@ -102,6 +102,7 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
       id: `${organizationId}:${codeSetId}:${parsed.codeId}`,
       codeId: parsed.codeId,
       name: parsed.name,
+      description: parsed.description,
       sortOrder: codeSet.codes.length,
       active: parsed.active,
       isSystem: false,
@@ -140,6 +141,7 @@ export class InMemoryVocabularyRepository implements VocabularyRepository {
 
     code.codeId = parsed.codeId;
     code.name = parsed.name;
+    code.description = parsed.description;
     code.active = parsed.active;
     return code;
   }

@@ -5,10 +5,9 @@
 1. Don’t assume. Don’t hide confusion. Surface tradeoffs.
 2. Minimum code that solves the problem. Nothing speculative.
 3. Touch only what you must. Clean up only your own mess.
-4. Define success criteria. Loop until verified.
 
 ## Testing
- - Run builds and static type checking and linting to verify changes but do not spin up browsers or run any e2e tests unless prompted
+ - Run builds and static type checking to verify changes but do not spin up browsers or run any e2e tests unless prompted
 
 ## Canonical Docs
 

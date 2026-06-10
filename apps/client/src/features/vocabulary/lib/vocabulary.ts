@@ -4,11 +4,39 @@ import {
   type VocabularyCode,
 } from "@plyco/shared"
 
-export type Option = { value: string; label: string }
+export type CodeSetChange =
+  | { type: "update"; previousCodeId: string; code: VocabularyCode }
+  | { type: "delete"; codeId: string }
+
+export type Option = {
+  value: string
+  label: string
+  description?: string
+  codeSetId?: string
+  usesHints?: boolean
+  editable?: boolean
+}
+
+export const applyCodeSetChange = (
+  values: string[],
+  change: CodeSetChange
+): string[] => {
+  if (change.type === "delete") {
+    return values.filter((value) => value !== change.codeId)
+  }
+
+  return values.flatMap((value) =>
+    value !== change.previousCodeId
+      ? [value]
+      : change.code.active
+        ? [change.code.codeId]
+        : []
+  )
+}
 
 const sortCodesBySequenceThenName = (
   first: VocabularyCode,
-  second: VocabularyCode,
+  second: VocabularyCode
 ) =>
   first.sortOrder - second.sortOrder ||
   first.name.localeCompare(second.name, undefined, { sensitivity: "base" })
@@ -46,15 +74,29 @@ const activeCodesFor = (
 
 export const codeOptions = (
   vocabulary: Vocabulary | undefined,
-  codeSetId: string,
+  codeSetId: string
 ): Option[] => {
-  let options = activeCodesFor(vocabulary, codeSetId)
+  const codeSet = codeSetsFor(vocabulary, codeSetId)[0]
+  let options: Option[] = activeCodesFor(vocabulary, codeSetId)
     .sort(sortCodesBySequenceThenName)
-    .map((code) => ({ value: code.codeId, label: code.name }))
+    .map((code) => ({
+      value: code.codeId,
+      label: code.name,
+      description: code.description,
+      codeSetId,
+      usesHints: codeSet?.usesHints ?? false,
+      editable: codeSet ? !codeSet.isSystem : false,
+    }))
 
   if (CODE_SETS_WITH_NONE.has(codeSetId)) {
     options = options.filter((opt) => opt.value !== "none")
-    options.unshift({ value: "none", label: "None" })
+    options.unshift({
+      value: "none",
+      label: "None",
+      codeSetId,
+      usesHints: codeSet?.usesHints ?? false,
+      editable: codeSet ? !codeSet.isSystem : false,
+    })
   }
 
   return options
@@ -69,7 +111,7 @@ export const countryOptions = (countries: Country[] | undefined): Option[] =>
 export const codeLabel = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  codeId: string,
+  codeId: string
 ) => {
   if (codeId === "none") {
     return "None"
@@ -84,7 +126,7 @@ export const codeLabel = (
 export const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[] | null,
+  values: string[] | null
 ) =>
   values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
@@ -92,5 +134,5 @@ export const codeValueList = (
 
 export const countryLabel = (
   countries: Country[] | undefined,
-  code: string | null,
+  code: string | null
 ) => countries?.find((country) => country.code === code)?.name ?? code

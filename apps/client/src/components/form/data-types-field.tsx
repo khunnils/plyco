@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Plus, Settings, Trash2 } from "lucide-react"
 import { useState } from "react"
 import {
   Controller,
@@ -23,7 +23,12 @@ import {
   ComboboxTrigger,
   useComboboxAnchor,
 } from "@/components/ui/combobox"
-import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { CodeSetEditorDialog } from "@/features/vocabulary/components/code-set-editor-dialog"
+import {
+  applyCodeSetChange,
+  type CodeSetChange,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
 
 type StoredDataType = {
   name: string
@@ -115,13 +120,12 @@ const FieldInput = ({
         onChange(
           type === "number"
             ? event.target.valueAsNumber || 0
-            : event.target.value,
+            : event.target.value
         )
       }
     />
   </label>
 )
-
 
 const MultiSelectDropdown = ({
   label,
@@ -138,22 +142,31 @@ const MultiSelectDropdown = ({
   placeholder?: string
   value: string[]
 }) => {
+  const [isComboboxOpen, setIsComboboxOpen] = useState(false)
+  const [isEditingOptions, setIsEditingOptions] = useState(false)
   const anchorRef = useComboboxAnchor()
   const optionLabelByValue = new Map(options.map((o) => [o.value, o.label]))
+  const codeSetId = options.find((option) => option.codeSetId)?.codeSetId
+  const isEditable = options.some((option) => option.editable)
+  const handleCodeSetChange = (change: CodeSetChange) => {
+    onChange(applyCodeSetChange(value, change))
+  }
 
   return (
     <div className="grid gap-2">
       <span>{label}</span>
       <Combobox<string, true>
         multiple
+        open={isComboboxOpen}
         items={options.map((o) => o.value)}
         value={value}
         itemToStringLabel={(v) => optionLabelByValue.get(v) ?? v}
         onValueChange={(v) => onChange([...v])}
+        onOpenChange={setIsComboboxOpen}
       >
         <ComboboxChips
           ref={anchorRef}
-          className="min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
+          className="group/code-select min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
         >
           {value.map((v) => (
             <ComboboxChip
@@ -164,11 +177,32 @@ const MultiSelectDropdown = ({
             </ComboboxChip>
           ))}
           <ComboboxChipsInput
-            placeholder={value.length === 0 ? (placeholder ?? "Select options") : undefined}
+            placeholder={
+              value.length === 0 ? (placeholder ?? "Select options") : undefined
+            }
             className="text-sm font-normal text-slate-900 placeholder:text-slate-400"
             onBlur={onBlur}
           />
-          <ComboboxTrigger className="ml-auto rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />
+          <span className="ml-auto flex items-center gap-0.5">
+            {isEditable && codeSetId ? (
+              <button
+                aria-label={`Edit ${label} options`}
+                className="rounded-sm p-1 text-slate-400 opacity-0 transition group-hover/code-select:opacity-100 hover:bg-slate-100 hover:text-slate-700 focus-visible:opacity-100"
+                title={`Edit ${label} options`}
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setIsComboboxOpen(false)
+                  setIsEditingOptions(true)
+                }}
+              >
+                <Settings className="size-3.5" />
+              </button>
+            ) : null}
+            <ComboboxTrigger className="rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />
+          </span>
         </ComboboxChips>
         <ComboboxContent
           anchor={anchorRef}
@@ -182,12 +216,27 @@ const MultiSelectDropdown = ({
                 className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
                 value={option.value}
               >
-                {option.label}
+                <span className="grid gap-0.5">
+                  <span>{option.label}</span>
+                  {option.usesHints && option.description ? (
+                    <span className="text-xs font-normal text-slate-500">
+                      {option.description}
+                    </span>
+                  ) : null}
+                </span>
               </ComboboxItem>
             ))}
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
+      {codeSetId ? (
+        <CodeSetEditorDialog
+          codeSetId={codeSetId}
+          isOpen={isEditingOptions}
+          onChange={handleCodeSetChange}
+          onClose={() => setIsEditingOptions(false)}
+        />
+      ) : null}
     </div>
   )
 }
@@ -241,12 +290,12 @@ const DataTypesEditor = <T extends FieldValues>({
   const updateValue = (
     index: number,
     key: keyof StoredDataType,
-    value: string | boolean | number | string[],
+    value: string | boolean | number | string[]
   ) => {
     changeValues(
       values.map((item, currentIndex) =>
-        currentIndex === index ? { ...item, [key]: value } : item,
-      ),
+        currentIndex === index ? { ...item, [key]: value } : item
+      )
     )
   }
   const addValue = () => {
@@ -256,7 +305,9 @@ const DataTypesEditor = <T extends FieldValues>({
     setExpandedIndex(nextValues.length - 1)
   }
   const removeValue = (index: number) => {
-    const nextValues = values.filter((_, currentIndex) => currentIndex !== index)
+    const nextValues = values.filter(
+      (_, currentIndex) => currentIndex !== index
+    )
 
     changeValues(nextValues)
     setExpandedIndex((current) => {
@@ -273,7 +324,12 @@ const DataTypesEditor = <T extends FieldValues>({
     <div className="grid gap-3 text-sm font-medium text-slate-800 md:col-span-2">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <span>{label}</span>
-        <Button className="w-fit" type="button" variant="outline" onClick={addValue}>
+        <Button
+          className="w-fit"
+          type="button"
+          variant="outline"
+          onClick={addValue}
+        >
           <Plus />
           Add data type
         </Button>
@@ -292,7 +348,9 @@ const DataTypesEditor = <T extends FieldValues>({
               <div
                 className={[
                   "rounded-md border bg-white",
-                  expanded ? "border-blue-300 ring-2 ring-blue-100" : "border-slate-200",
+                  expanded
+                    ? "border-blue-300 ring-2 ring-blue-100"
+                    : "border-slate-200",
                 ].join(" ")}
                 key={index}
               >
@@ -313,7 +371,7 @@ const DataTypesEditor = <T extends FieldValues>({
                       ))}
                     </div>
                     {!expanded && item.description ? (
-                      <p className="mt-1 line-clamp-2 text-xs font-normal leading-5 text-slate-500">
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 font-normal text-slate-500">
                         {item.description}
                       </p>
                     ) : null}
@@ -345,9 +403,7 @@ const DataTypesEditor = <T extends FieldValues>({
                         placeholder="e.g. Customer billing details"
                         value={item.name}
                         onBlur={field.onBlur}
-                        onChange={(value) =>
-                          updateValue(index, "name", value)
-                        }
+                        onChange={(value) => updateValue(index, "name", value)}
                       />
                       <div className="md:col-span-2">
                         <FieldInput
@@ -388,13 +444,17 @@ const DataTypesEditor = <T extends FieldValues>({
                         checked={item.isSensitive}
                         label="Sensitive"
                         onBlur={field.onBlur}
-                        onChange={(value) => updateValue(index, "isSensitive", value)}
+                        onChange={(value) =>
+                          updateValue(index, "isSensitive", value)
+                        }
                       />
                       <ToggleInput
                         checked={item.isRequired}
                         label="Product required"
                         onBlur={field.onBlur}
-                        onChange={(value) => updateValue(index, "isRequired", value)}
+                        onChange={(value) =>
+                          updateValue(index, "isRequired", value)
+                        }
                       />
                     </div>
                   </div>

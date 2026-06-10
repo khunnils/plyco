@@ -10,11 +10,16 @@ const codeSet = (
   codeSetId,
   name,
   description: "",
+  usesHints: codeSetId === "industries",
   isSystem,
   codes: codes.map(([codeId, codeName], index) => ({
     id: `${codeSetId}:${codeId}`,
     codeId,
     name: codeName,
+    description:
+      codeId === "artificial_intelligence"
+        ? "Products built around machine learning."
+        : "",
     sortOrder: index,
     active: true,
     isSystem,

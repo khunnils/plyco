@@ -32,6 +32,13 @@ describe("vocabulary API", () => {
         expect.objectContaining({
           codeSetId: "industries",
           isSystem: false,
+          usesHints: true,
+          codes: expect.arrayContaining([
+            expect.objectContaining({
+              codeId: "artificial_intelligence",
+              description: "Products built around machine learning.",
+            }),
+          ]),
         }),
         expect.objectContaining({
           codeSetId: "dpa_status",
@@ -49,6 +56,7 @@ describe("vocabulary API", () => {
       payload: {
         codeId: "robotics",
         name: "Robotics",
+        description: "Robotic systems and automation.",
         active: true,
       },
     });
@@ -57,6 +65,7 @@ describe("vocabulary API", () => {
     expect(createResponse.json()).toMatchObject({
       codeId: "robotics",
       name: "Robotics",
+      description: "Robotic systems and automation.",
       isSystem: false,
     });
 
@@ -66,12 +75,16 @@ describe("vocabulary API", () => {
       payload: {
         codeId: "robotics",
         name: "Robotics and automation",
+        description: "Industrial and software automation.",
         active: true,
       },
     });
 
     expect(updateResponse.statusCode).toBe(200);
-    expect(updateResponse.json().name).toBe("Robotics and automation");
+    expect(updateResponse.json()).toMatchObject({
+      name: "Robotics and automation",
+      description: "Industrial and software automation.",
+    });
 
     const deleteResponse = await app.inject({
       method: "DELETE",

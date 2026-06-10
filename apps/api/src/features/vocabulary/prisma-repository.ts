@@ -38,6 +38,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       this.client.organizationCodeSet.findMany({
         where: { organizationId },
         include: {
+          systemCodeSet: { select: { usesHints: true } },
           codes: {
             where: { deletedAt: null },
             orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -55,12 +56,14 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             codeSetId: codeSet.id,
             name: codeSet.name,
             description: codeSet.description,
+            usesHints: codeSet.usesHints,
             isSystem: true,
             codes: codeSet.codes.map((code) =>
               vocabularyCodeSchema.parse({
                 id: code.id,
                 codeId: code.codeId,
                 name: code.name,
+                description: code.description,
                 sortOrder: code.sortOrder,
                 active: code.active,
                 isSystem: true,
@@ -74,12 +77,14 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             codeSetId: codeSet.systemCodeSetId,
             name: codeSet.name,
             description: codeSet.description,
+            usesHints: codeSet.systemCodeSet.usesHints,
             isSystem: false,
             codes: codeSet.codes.map((code) =>
               vocabularyCodeSchema.parse({
                 id: code.id,
                 codeId: code.codeId,
                 name: code.name,
+                description: code.description,
                 sortOrder: code.sortOrder,
                 active: code.active,
                 isSystem: false,
@@ -104,7 +109,15 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       select: {
         id: true,
         systemCodeSetId: true,
-        codes: { select: { codeId: true, sortOrder: true, systemCodeId: true } },
+        codes: {
+          select: {
+            codeId: true,
+            description: true,
+            descriptionCustomized: true,
+            sortOrder: true,
+            systemCodeId: true,
+          },
+        },
       },
     });
     const existingBySystemId = new Map(
@@ -128,6 +141,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
                   systemCodeId: code.id,
                   codeId: code.codeId,
                   name: code.name,
+                  description: code.description,
                   sortOrder: code.sortOrder,
                   active: code.active,
                 })),
@@ -140,6 +154,8 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             systemCodeSetId: codeSet.id,
             codes: codeSet.codes.map((code) => ({
               codeId: code.codeId,
+              description: code.description,
+              descriptionCustomized: false,
               sortOrder: code.sortOrder,
               systemCodeId: code.id,
             })),
@@ -161,18 +177,23 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
               systemCodeId: code.id,
               codeId: code.codeId,
               name: code.name,
+              description: code.description,
               sortOrder: code.sortOrder,
               active: code.active,
             })),
           });
         }
 
-        const existingCodesToUpdate = codeSet.codes.filter(
-          (code) =>
-            existingCodesByCodeId.get(code.codeId)?.sortOrder !==
-            code.sortOrder,
-        );
+        const existingCodesToUpdate = codeSet.codes.filter((code) => {
+          const existing = existingCodesByCodeId.get(code.codeId);
+          return (
+            existing?.sortOrder !== code.sortOrder ||
+            (!existing?.descriptionCustomized &&
+              existing?.description !== code.description)
+          );
+        });
         for (const code of existingCodesToUpdate) {
+          const existing = existingCodesByCodeId.get(code.codeId);
           await tx.organizationCode.updateMany({
             where: {
               organizationCodeSetId,
@@ -181,6 +202,9 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
             },
             data: {
               sortOrder: code.sortOrder,
+              ...(!existing?.descriptionCustomized
+                ? { description: code.description }
+                : {}),
             },
           });
         }
@@ -216,6 +240,8 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
         organizationCodeSetId: codeSet.id,
         codeId: input.codeId,
         name: input.name,
+        description: input.description,
+        descriptionCustomized: true,
         active: input.active,
         sortOrder: count,
       },
@@ -225,6 +251,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       id: code.id,
       codeId: code.codeId,
       name: code.name,
+      description: code.description,
       sortOrder: code.sortOrder,
       active: code.active,
       isSystem: false,
@@ -267,6 +294,8 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       data: {
         codeId: input.codeId,
         name: input.name,
+        description: input.description,
+        descriptionCustomized: true,
         active: input.active,
       },
     });
@@ -275,6 +304,7 @@ export class PrismaVocabularyRepository implements VocabularyRepository {
       id: code.id,
       codeId: code.codeId,
       name: code.name,
+      description: code.description,
       sortOrder: code.sortOrder,
       active: code.active,
       isSystem: false,

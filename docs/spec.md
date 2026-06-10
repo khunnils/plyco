@@ -47,6 +47,15 @@ organization creation, except onboarding automatically links Operate marketing
 website to Website visitor data so the default website service appears in the
 Product and Data graph.
 
+## Vocabulary Selectors
+
+Workspace editors use searchable selectors for controlled vocabulary fields.
+Code sets marked `Uses Hints` show each code's description beneath its label in
+the dropdown while selected values remain compact. Organization-owned code sets
+offer an in-context editor for adding, renaming, describing, activating,
+deactivating, and removing codes without leaving the current page. System code
+sets remain read-only.
+
 ## Product and Data Graph
 
 The workspace includes a read-only Product and Data graph at `/company/graph`.

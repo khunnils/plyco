@@ -42,10 +42,11 @@ export const useCreateVocabularyCode = () => {
     mutationFn: (input: { codeSetId: string; code: VocabularyCodeInput }) =>
       createVocabularyCode({ organizationId, ...input }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      const invalidation = queryClient.invalidateQueries({
         queryKey: vocabularyQueryKey(organizationId),
       })
       toast.success("Code added")
+      return invalidation
     },
     onError: (err: Error) => toast.error(err.message ?? "Could not add code"),
   })
@@ -63,12 +64,14 @@ export const useUpdateVocabularyCode = () => {
       code: VocabularyCodeInput
     }) => updateVocabularyCode({ organizationId, ...input }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      const invalidation = queryClient.invalidateQueries({
         queryKey: vocabularyQueryKey(organizationId),
       })
       toast.success("Code updated")
+      return invalidation
     },
-    onError: (err: Error) => toast.error(err.message ?? "Could not update code"),
+    onError: (err: Error) =>
+      toast.error(err.message ?? "Could not update code"),
   })
 }
 
@@ -81,11 +84,13 @@ export const useDeleteVocabularyCode = () => {
     mutationFn: (input: { codeSetId: string; codeId: string }) =>
       deleteVocabularyCode({ organizationId, ...input }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({
+      const invalidation = queryClient.invalidateQueries({
         queryKey: vocabularyQueryKey(organizationId),
       })
       toast.success("Code removed")
+      return invalidation
     },
-    onError: (err: Error) => toast.error(err.message ?? "Could not remove code"),
+    onError: (err: Error) =>
+      toast.error(err.message ?? "Could not remove code"),
   })
 }

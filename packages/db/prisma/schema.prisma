@@ -58,6 +58,7 @@ model SystemCodeSet {
   airtableRecordId String                @unique(map: "system_code_sets_airtable_record_id_key") @map("airtable_record_id")
   name             String
   description      String                @default("")
+  usesHints        Boolean               @default(false) @map("uses_hints")
   isSystem         Boolean               @default(false) @map("is_system")
   codes            SystemCode[]
   organizationSets OrganizationCodeSet[]
@@ -74,6 +75,7 @@ model SystemCode {
   airtableRecordId String        @unique(map: "system_codes_airtable_record_id_key") @map("airtable_record_id")
   codeId           String        @map("code_id")
   name             String
+  description      String        @default("")
   sortOrder        Int           @default(0) @map("sort_order")
   active           Boolean       @default(true)
   createdAt        DateTime      @default(now()) @map("created_at")
@@ -109,6 +111,8 @@ model OrganizationCode {
   systemCodeId          String?             @map("system_code_id")
   codeId                String              @map("code_id")
   name                  String
+  description           String              @default("")
+  descriptionCustomized Boolean             @default(false) @map("description_customized")
   sortOrder             Int                 @default(0) @map("sort_order")
   active                Boolean             @default(true)
   deletedAt             DateTime?           @map("deleted_at")
