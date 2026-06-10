@@ -2,8 +2,8 @@ import { type StoredDataType, type Vocabulary } from "@plyco/shared"
 import { ChevronDown, ChevronUp, Loader2, Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SensitiveTooltip } from "@/components/ui/info-tooltip"
 import { SortableList } from "@/components/sortable-list"
 import { DataTypeEmptyState } from "@/features/company/data-handling/components/data-type-empty-state"
 import { DataTypeForm } from "@/features/company/data-handling/components/data-type-form"
@@ -221,10 +221,10 @@ export const DataTypesPanel = ({
                             {title}
                           </h4>
                           {dataType.isSensitive ? (
-                            <Badge variant="warning">Sensitive</Badge>
+                            <SensitiveTooltip />
                           ) : null}
                           {dataType.isRequired ? (
-                            <Badge variant="secondary">Required</Badge>
+                            <span className="text-muted-foreground text-xs">Required</span>
                           ) : null}
                         </div>
                         {dataType.description ? (

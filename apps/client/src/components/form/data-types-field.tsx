@@ -9,8 +9,8 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SensitiveTooltip } from "@/components/ui/info-tooltip"
 import {
   Combobox,
   ComboboxChip,
@@ -69,27 +69,6 @@ const normalizeDataType = (value: Partial<StoredDataType>): StoredDataType => ({
 
 const dataTypeTitle = (item: StoredDataType, index: number) =>
   item.name.trim() || `Data type ${index + 1}`
-
-type DataTypeBadge = {
-  label: string
-  variant: "secondary" | "warning"
-}
-
-const dataTypeBadges = (item: StoredDataType) =>
-  [
-    item.isSensitive
-      ? {
-          label: "Sensitive",
-          variant: "warning",
-        }
-      : null,
-    item.isRequired
-      ? {
-          label: "Required",
-          variant: "secondary",
-        }
-      : null,
-  ].filter((badge): badge is DataTypeBadge => Boolean(badge))
 
 const FieldInput = ({
   label,
@@ -341,7 +320,6 @@ const DataTypesEditor = <T extends FieldValues>({
       ) : (
         <div className="grid gap-2">
           {values.map((item, index) => {
-            const badges = dataTypeBadges(item)
             const expanded = expandedIndex === index
 
             return (
@@ -364,11 +342,13 @@ const DataTypesEditor = <T extends FieldValues>({
                       <p className="truncate text-sm font-semibold text-slate-950">
                         {dataTypeTitle(item, index)}
                       </p>
-                      {badges.map((badge) => (
-                        <Badge key={badge.label} variant={badge.variant}>
-                          {badge.label}
-                        </Badge>
-                      ))}
+                      {item.isSensitive ? (
+                        <SensitiveTooltip />
+                      ) : null}
+                      {item.isRequired ? (
+                        <span className="text-muted-foreground text-xs">Required</span>
+
+                      ) : null}
                     </div>
                     {!expanded && item.description ? (
                       <p className="mt-1 line-clamp-2 text-xs leading-5 font-normal text-slate-500">
