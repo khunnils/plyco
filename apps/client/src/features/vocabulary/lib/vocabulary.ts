@@ -116,6 +116,9 @@ export const codeLabel = (
   if (codeId === "none") {
     return "None"
   }
+  if (codeId === "not_set") {
+    return "Not set"
+  }
   return (
     codeSetsFor(vocabulary, codeSetId)
       .flatMap((codeSet) => codeSet.codes)

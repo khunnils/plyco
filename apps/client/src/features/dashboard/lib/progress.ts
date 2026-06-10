@@ -64,7 +64,8 @@ export const isAnswered = (
   }
 
   if (typeof value === "string") {
-    return value.trim().length > 0
+    const trimmed = value.trim()
+    return trimmed.length > 0 && trimmed !== "not_set"
   }
 
   if (typeof value === "number") {
@@ -455,7 +456,7 @@ export const providerUsageProgress = (usage: ServiceProviderUsage) =>
   sectionProgress(usage.providerName || "Selected provider", [
     field("Purpose", usage.purpose),
     field("Data processing level", usage.dataProcessingLevel),
-    ...(usage.dataProcessingLevel !== "none"
+    ...(usage.dataProcessingLevel !== "none" && usage.dataProcessingLevel !== "not_set"
       ? [
           field("Data processed", usage.dataProcessed),
           field("DPA status", usage.dpaStatus),

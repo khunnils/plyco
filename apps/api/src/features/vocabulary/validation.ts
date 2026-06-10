@@ -39,6 +39,9 @@ const assertCode = async (
   value: string,
   field: string,
 ) => {
+  if (value === "not_set") {
+    return;
+  }
   if (
     !(await vocabularyRepository.codeExists(organizationId, codeSetId, value))
   ) {

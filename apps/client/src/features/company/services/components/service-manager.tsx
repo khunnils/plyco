@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
+import { AlertCircle, ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
 import {
   type BusinessActivity,
   emptyServiceProfile,
@@ -958,6 +958,23 @@ const AddVendorsForm = ({
   )
 }
 
+const needsAttention = (providerUsage: ServiceProviderUsage) => {
+  const level = providerUsage.dataProcessingLevel
+  if (level === "not_set") {
+    return true
+  }
+  if (level !== "none") {
+    return (
+      !providerUsage.dataProcessed ||
+      providerUsage.dataProcessed.length === 0 ||
+      !providerUsage.dataRegions ||
+      providerUsage.dataRegions.length === 0 ||
+      !providerUsage.dpaStatus
+    )
+  }
+  return false
+}
+
 const ServiceProviderUsagePanel = ({
   dataProcessingLevelOptions,
   dataRegionOptions,
@@ -1169,9 +1186,16 @@ const ServiceProviderUsagePanel = ({
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="grid flex-1 gap-3">
-                      <h4 className="text-sm font-semibold text-slate-950">
-                        {providerUsage.providerName || "Selected provider"}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-semibold text-slate-950">
+                          {providerUsage.providerName || "Selected provider"}
+                        </h4>
+                        {needsAttention(providerUsage) && (
+                          <span title="Needs attention">
+                            <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                          </span>
+                        )}
+                      </div>
                       <p className="line-clamp-2 text-sm leading-5 text-slate-600">
                         {providerUsage.purpose}
                       </p>
@@ -1187,7 +1211,7 @@ const ServiceProviderUsagePanel = ({
                               ),
                               serviceProviderUsageHelperText.dataProcessingLevel,
                             ],
-                            ...(providerUsage.dataProcessingLevel !== "none"
+                            ...(providerUsage.dataProcessingLevel !== "none" && providerUsage.dataProcessingLevel !== "not_set"
                               ? ([
                                   [
                                     "DPA status",
@@ -1345,6 +1369,14 @@ export const ServiceManager = ({
   )
   const selectedService = profile.services[selectedIndex] ?? emptyServiceProfile
 
+  const activitiesCount = selectedService.businessActivityIds?.length ?? 0
+  const selectedServiceUses = selectedService.id
+    ? serviceProviderUsage.filter(
+        (providerUsage) => providerUsage.serviceId === selectedService.id
+      )
+    : []
+  const providersCount = selectedServiceUses.length
+
   const [activeTab, setActiveTab] = useState<
     "details" | "activities" | "providers"
   >("details")
@@ -1437,13 +1469,13 @@ export const ServiceManager = ({
           value="activities"
           className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
         >
-          Service Activities
+          Service Activities ({activitiesCount})
         </TabsTrigger>
         <TabsTrigger
           value="providers"
           className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
         >
-          Service Providers
+          Service Providers ({providersCount})
         </TabsTrigger>
       </TabsList>
 

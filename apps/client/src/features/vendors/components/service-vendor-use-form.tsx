@@ -62,10 +62,10 @@ export const ServiceProviderUsageForm = ({
       name: "dataProcessingLevel",
       defaultValue: defaultValues.dataProcessingLevel,
     }) ?? defaultValues.dataProcessingLevel
-  const showDataProcessingDetail = dataProcessingLevel !== "none"
+  const showDataProcessingDetail = dataProcessingLevel !== "none" && dataProcessingLevel !== "not_set"
 
   useEffect(() => {
-    if (dataProcessingLevel === "none") {
+    if (dataProcessingLevel === "none" || dataProcessingLevel === "not_set") {
       form.setValue("dataProcessed", [])
       form.setValue("dataRegions", [])
       form.setValue("dpaStatus", null)
@@ -112,7 +112,10 @@ export const ServiceProviderUsageForm = ({
           helperText={serviceProviderUsageHelperText.dataProcessingLevel}
           label="Data processing level"
           name="dataProcessingLevel"
-          options={dataProcessingLevelOptions}
+          options={[
+            { value: "not_set", label: "Not set" },
+            ...dataProcessingLevelOptions,
+          ]}
         />
         {showDataProcessingDetail ? (
           <>

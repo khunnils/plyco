@@ -43,7 +43,7 @@ export const emptyServiceProviderUsageDraft: ServiceProviderUsageInput = {
   organizationProviderId: "",
   systemType: null,
   purpose: "",
-  dataProcessingLevel: "none",
+  dataProcessingLevel: "not_set",
   dataProcessed: [],
   dpaStatus: null,
   dataRegions: [],

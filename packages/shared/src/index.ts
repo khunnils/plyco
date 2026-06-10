@@ -21,6 +21,7 @@ export const providerDataProcessingLevelSchema = z.enum([
   "none",
   "limited",
   "subprocessor",
+  "not_set",
 ]);
 
 export const providerSystemTypeSchema = z.enum([
