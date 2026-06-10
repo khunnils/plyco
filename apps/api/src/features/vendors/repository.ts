@@ -5,37 +5,54 @@ import {
   type ServiceProviderUsageInput,
   type OrganizationProvider,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/shared";
 
 export interface ProviderRepository {
-  listBusinessActivities(organizationId: string): Promise<BusinessActivity[]>
+  listBusinessActivities(organizationId: string): Promise<BusinessActivity[]>;
   createBusinessActivity(
     organizationId: string,
     input: BusinessActivityInput,
-  ): Promise<BusinessActivity>
+  ): Promise<BusinessActivity>;
   updateBusinessActivity(
     organizationId: string,
     id: string,
     input: BusinessActivityInput,
-  ): Promise<BusinessActivity | null>
-  deleteBusinessActivity(organizationId: string, id: string): Promise<boolean>
-  listOrganizationProviders(organizationId: string): Promise<OrganizationProvider[]>
-  createOrganizationProvider(organizationId: string, input: OrganizationProviderInput): Promise<OrganizationProvider>
+  ): Promise<BusinessActivity | null>;
+  deleteBusinessActivity(organizationId: string, id: string): Promise<boolean>;
+  reorderBusinessActivities(
+    organizationId: string,
+    ids: string[],
+  ): Promise<void>;
+  listOrganizationProviders(
+    organizationId: string,
+  ): Promise<OrganizationProvider[]>;
+  createOrganizationProvider(
+    organizationId: string,
+    input: OrganizationProviderInput,
+  ): Promise<OrganizationProvider>;
   updateOrganizationProvider(
     organizationId: string,
     id: string,
     input: OrganizationProviderInput,
-  ): Promise<OrganizationProvider | null>
-  deleteOrganizationProvider(organizationId: string, id: string): Promise<boolean>
-  listServiceProviderUsage(organizationId: string): Promise<ServiceProviderUsage[]>
+  ): Promise<OrganizationProvider | null>;
+  deleteOrganizationProvider(
+    organizationId: string,
+    id: string,
+  ): Promise<boolean>;
+  listServiceProviderUsage(
+    organizationId: string,
+  ): Promise<ServiceProviderUsage[]>;
   createServiceProviderUsage(
     organizationId: string,
     input: ServiceProviderUsageInput,
-  ): Promise<ServiceProviderUsage>
+  ): Promise<ServiceProviderUsage>;
   updateServiceProviderUsage(
     organizationId: string,
     id: string,
     input: ServiceProviderUsageInput,
-  ): Promise<ServiceProviderUsage | null>
-  deleteServiceProviderUsage(organizationId: string, id: string): Promise<boolean>
+  ): Promise<ServiceProviderUsage | null>;
+  deleteServiceProviderUsage(
+    organizationId: string,
+    id: string,
+  ): Promise<boolean>;
 }

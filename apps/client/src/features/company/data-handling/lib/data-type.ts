@@ -1,6 +1,7 @@
 import { type StoredDataType } from "@plyco/shared"
 
 export const emptyDataTypeDraft = (): StoredDataType => ({
+  sortOrder: 0,
   name: "",
   description: "",
   subjectTypes: [],
@@ -10,7 +11,7 @@ export const emptyDataTypeDraft = (): StoredDataType => ({
 })
 
 export const normalizeDataType = (
-  value: Partial<StoredDataType> | undefined,
+  value: Partial<StoredDataType> | undefined
 ): StoredDataType => ({
   ...emptyDataTypeDraft(),
   ...value,

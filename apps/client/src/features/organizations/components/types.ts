@@ -104,6 +104,7 @@ export const WEBSITE_DATA_TYPE_NAME = "Website visitor data"
 export const WEBSITE_ACTIVITY_NAME = "Operate marketing website"
 
 export const defaultDataType = (name: string): StoredDataType => ({
+  sortOrder: 0,
   name: "Customer account data",
   description: `Basic account and usage data handled by ${name}.`,
   subjectTypes: null,
@@ -113,6 +114,7 @@ export const defaultDataType = (name: string): StoredDataType => ({
 })
 
 export const defaultWebsiteDataType = (): StoredDataType => ({
+  sortOrder: 0,
   name: WEBSITE_DATA_TYPE_NAME,
   description:
     "Basic visitor, analytics, and inquiry data collected through the public website.",

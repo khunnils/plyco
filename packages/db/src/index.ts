@@ -51,6 +51,7 @@ export function mapOrganizationRecord(record: {
   complianceGoals: unknown;
   serviceProfile?: {
     id: string;
+    sortOrder: number;
     serviceName: string | null;
     serviceDescription: string | null;
     serviceUrl: string | null;
@@ -73,6 +74,7 @@ export function mapOrganizationRecord(record: {
   } | null;
   services?: Array<{
     id: string;
+    sortOrder: number;
     serviceName: string | null;
     serviceDescription: string | null;
     serviceUrl: string | null;
@@ -160,6 +162,7 @@ export function mapOrganizationRecord(record: {
   }>;
   dataTypes: Array<{
     id: string;
+    sortOrder: number;
     name: string;
     description: string | null;
     subjectTypes: unknown;
@@ -288,6 +291,7 @@ export function mapOrganizationRecord(record: {
       ? [
           serviceProfileSchema.parse({
             id: service.id,
+            sortOrder: service.sortOrder,
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
@@ -365,6 +369,7 @@ export function mapOrganizationRecord(record: {
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
       id: dataType.id,
+      sortOrder: dataType.sortOrder,
       name: dataType.name,
       description: dataType.description,
       subjectTypes: stringArray(dataType.subjectTypes),
@@ -408,6 +413,7 @@ export function mapOrganizationRecord(record: {
 
 export function mapBusinessActivityRecord(record: {
   id: string;
+  sortOrder: number;
   name: string;
   purpose: string;
   role: string;
@@ -422,6 +428,7 @@ export function mapBusinessActivityRecord(record: {
 }): BusinessActivity {
   return businessActivitySchema.parse({
     id: record.id,
+    sortOrder: record.sortOrder,
     name: record.name,
     purpose: record.purpose,
     role: record.role,

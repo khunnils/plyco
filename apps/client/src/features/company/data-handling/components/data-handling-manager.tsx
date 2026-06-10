@@ -14,6 +14,8 @@ export const DataHandlingManager = ({
   subjectTypeOptions,
   vocabulary,
   onSaveProfile,
+  onReorder,
+  reorderDisabled,
 }: {
   collectionMethodOptions: Option[]
   isMutationPending: boolean
@@ -21,6 +23,8 @@ export const DataHandlingManager = ({
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
+  onReorder: (ids: string[]) => void
+  reorderDisabled: boolean
 }) => {
   const saveDataHandling = (
     dataHandling: ProfileDraft["dataHandling"],
@@ -52,6 +56,8 @@ export const DataHandlingManager = ({
             onSuccess
           )
         }
+        onReorder={onReorder}
+        reorderDisabled={reorderDisabled}
       />
     </div>
   )

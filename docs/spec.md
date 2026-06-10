@@ -64,6 +64,12 @@ processed by those activities, data types processed through service provider
 usage, and the providers used by those services. Users can pan and zoom the
 graph, but cannot edit nodes or relationships from this view.
 
+Workspace service, business-activity, and data-type lists can be reordered from
+dedicated drag handles. A completed drop saves immediately for the organization,
+and the persisted order is reused by selectors, graphs, generated documents, and
+other downstream views. Dragging is disabled while an order update is pending;
+failed updates restore the prior order and show an error.
+
 ## Smart Advisor Recommendations
 
 The dashboard includes a Recommendations section with counts by severity and a

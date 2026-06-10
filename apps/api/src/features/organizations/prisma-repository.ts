@@ -26,23 +26,26 @@ import { ApiError } from "../../infrastructure/errors.js";
 const jsonValue = (value: string[] | null) =>
   value === null ? Prisma.DbNull : value;
 
-export const ORGANIZATION_INCLUDE = {
-  accessProfile: true,
-  dataTypes: { orderBy: { createdAt: "asc" } },
-  infrastructureProfile: true,
-  privacyProfile: true,
-  services: {
-    include: { businessActivities: true },
-    orderBy: { createdAt: "asc" },
-  },
-  organizationProviders: {
-    select: {
-      name: true,
-      providerId: true,
-      systemTypes: true,
+export const ORGANIZATION_INCLUDE =
+  Prisma.validator<Prisma.OrganizationInclude>()({
+    accessProfile: true,
+    dataTypes: {
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
     },
-  },
-} as const;
+    infrastructureProfile: true,
+    privacyProfile: true,
+    services: {
+      include: { businessActivities: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+    },
+    organizationProviders: {
+      select: {
+        name: true,
+        providerId: true,
+        systemTypes: true,
+      },
+    },
+  });
 
 export class PrismaOrganizationRepository implements OrganizationRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
@@ -155,6 +158,28 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     return providers.map((provider) => provider.id);
   }
 
+  async reorderServices(organizationId: string, ids: string[]): Promise<void> {
+    await this.reorderOrganizationEntities(
+      organizationId,
+      ids,
+      "SERVICE_ORDER_INVALID",
+      (tx, id, sortOrder) =>
+        tx.$executeRaw`UPDATE "service_profiles" SET "sort_order" = ${sortOrder} WHERE "id" = ${id} AND "organization_id" = ${organizationId}`,
+      () => this.listServiceIds(organizationId),
+    );
+  }
+
+  async reorderDataTypes(organizationId: string, ids: string[]): Promise<void> {
+    await this.reorderOrganizationEntities(
+      organizationId,
+      ids,
+      "DATA_TYPE_ORDER_INVALID",
+      (tx, id, sortOrder) =>
+        tx.$executeRaw`UPDATE "organization_data_types" SET "sort_order" = ${sortOrder} WHERE "id" = ${id} AND "organization_id" = ${organizationId}`,
+      () => this.listDataTypeIds(organizationId),
+    );
+  }
+
   private organizationData(input: CompanyProfile) {
     return {
       companyName: input.companyName,
@@ -245,6 +270,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const existingServices = await this.client.serviceProfile.findMany({
       where: { organizationId },
       select: { id: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
     });
     const existingBusinessActivityIds = new Set(
       await this.listBusinessActivityIds(organizationId),
@@ -294,16 +320,17 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     });
 
     return Promise.all(
-      resolvedServices.map(async (service) => {
+      resolvedServices.map(async (service, sortOrder) => {
         const record = service.id
           ? await this.client.serviceProfile.update({
               where: { id: service.id },
-              data: this.serviceData(service),
+              data: { ...this.serviceData(service), sortOrder },
             })
           : await this.client.serviceProfile.create({
               data: {
                 organizationId,
                 ...this.serviceData(service),
+                sortOrder,
               },
             });
 
@@ -564,13 +591,14 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   }
 
   private organizationDataTypes(input: DataHandlingProfile) {
-    return input.dataTypesStored.map((dataType) => ({
+    return input.dataTypesStored.map((dataType, sortOrder) => ({
       name: dataType.name,
       description: dataType.description,
       subjectTypes: jsonValue(dataType.subjectTypes),
       collectionMethods: jsonValue(dataType.collectionMethods),
       isSensitive: dataType.isSensitive,
       isRequired: dataType.isRequired,
+      sortOrder,
     }));
   }
 
@@ -607,10 +635,45 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             collectionMethods: dataType.collectionMethods,
             isSensitive: dataType.isSensitive,
             isRequired: dataType.isRequired,
+            sortOrder: dataType.sortOrder,
           },
         }),
       ),
     );
+  }
+
+  private async reorderOrganizationEntities(
+    organizationId: string,
+    ids: string[],
+    errorCode: string,
+    update: (
+      tx: Prisma.TransactionClient,
+      id: string,
+      sortOrder: number,
+    ) => Promise<unknown>,
+    currentIds: () => Promise<string[]>,
+  ) {
+    const existingIds = await currentIds();
+    const uniqueIds = new Set(ids);
+    const hasExactIds =
+      ids.length === existingIds.length &&
+      uniqueIds.size === ids.length &&
+      existingIds.every((id) => uniqueIds.has(id));
+
+    if (!hasExactIds) {
+      throw new ApiError(
+        errorCode,
+        "Order must contain every current item exactly once.",
+        400,
+        { organizationId },
+      );
+    }
+
+    await this.client.$transaction(async (tx) => {
+      for (const [sortOrder, id] of ids.entries()) {
+        await update(tx, id, sortOrder);
+      }
+    });
   }
 
   private accessData(input: AccessProfile) {

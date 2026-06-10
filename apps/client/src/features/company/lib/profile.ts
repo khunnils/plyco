@@ -63,6 +63,7 @@ export const profileFromOrganization = (
       organization.services.length > 0
         ? organization.services.map((service) => ({
             id: service.id,
+            sortOrder: service.sortOrder,
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
@@ -86,7 +87,7 @@ export const profileFromOrganization = (
 }
 
 export const toOrganizationProviderInput = (
-  provider: OrganizationProvider | OrganizationProviderInput,
+  provider: OrganizationProvider | OrganizationProviderInput
 ): OrganizationProviderInput => ({
   providerId: provider.providerId,
   systemTypes: provider.systemTypes,
@@ -153,7 +154,9 @@ const providerCriticality = (
   return "medium"
 }
 
-const providerCategory = (provider: Provider): OrganizationProviderInput["category"] => {
+const providerCategory = (
+  provider: Provider
+): OrganizationProviderInput["category"] => {
   const normalizedCategory = provider.category?.trim().toLowerCase()
 
   if (normalizedCategory === "source control") {
@@ -177,7 +180,7 @@ const valueList = (values: string[] | null) =>
 export const providerNamesForSystem = (
   organizationProviders: ProviderSelection[],
   providers: Provider[],
-  systemType: ProviderSystemType,
+  systemType: ProviderSystemType
 ) => {
   const names = organizationProviders
     .filter((provider) => provider.systemType === systemType)
@@ -186,7 +189,7 @@ export const providerNamesForSystem = (
         return "None"
       }
       const catalogProvider = providers.find(
-        (catalogProvider) => catalogProvider.id === provider.providerId,
+        (catalogProvider) => catalogProvider.id === provider.providerId
       )
 
       return catalogProvider?.name ?? provider.name ?? provider.providerId
@@ -196,7 +199,7 @@ export const providerNamesForSystem = (
 }
 
 export const organizationProviderInputFromProvider = (
-  provider: Provider,
+  provider: Provider
 ): OrganizationProviderInput => ({
   providerId: provider.id,
   systemTypes: [],

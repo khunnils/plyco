@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { SortableList } from "@/components/sortable-list"
 import { DataTypeEmptyState } from "@/features/company/data-handling/components/data-type-empty-state"
 import { DataTypeForm } from "@/features/company/data-handling/components/data-type-form"
 import {
@@ -38,6 +39,8 @@ export const DataTypesPanel = ({
   subjectTypeOptions,
   vocabulary,
   onSave,
+  onReorder,
+  reorderDisabled,
 }: {
   collectionMethodOptions: Option[]
   dataTypes: StoredDataType[]
@@ -45,10 +48,10 @@ export const DataTypesPanel = ({
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (dataTypes: StoredDataType[], onSuccess?: () => void) => void
+  onReorder: (ids: string[]) => void
+  reorderDisabled: boolean
 }) => {
-  const [expandedIndexes, setExpandedIndexes] = useState<Set<number>>(
-    () => new Set()
-  )
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
 
@@ -65,9 +68,11 @@ export const DataTypesPanel = ({
   const startEdit = (index: number) => {
     setShowCreateForm(false)
     setEditingIndex(index)
-    setExpandedIndexes((current) => {
+    const id = dataTypes[index]?.id
+    if (!id) return
+    setExpandedIds((current) => {
       const next = new Set(current)
-      next.delete(index)
+      next.delete(id)
       return next
     })
   }
@@ -91,17 +96,10 @@ export const DataTypesPanel = ({
 
   const handleDelete = (index: number) => {
     onSave(dataTypes.filter((_, currentIndex) => currentIndex !== index))
-    setExpandedIndexes((current) => {
-      const next = new Set<number>()
-
-      current.forEach((currentIndex) => {
-        if (currentIndex < index) {
-          next.add(currentIndex)
-        } else if (currentIndex > index) {
-          next.add(currentIndex - 1)
-        }
-      })
-
+    const deletedId = dataTypes[index]?.id
+    setExpandedIds((current) => {
+      const next = new Set(current)
+      if (deletedId) next.delete(deletedId)
       return next
     })
     if (editingIndex === index) {
@@ -109,22 +107,18 @@ export const DataTypesPanel = ({
     }
   }
 
-  const toggleExpanded = (index: number) => {
-    setExpandedIndexes((current) => {
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((current) => {
       const next = new Set(current)
 
-      if (next.has(index)) {
-        next.delete(index)
+      if (next.has(id)) {
+        next.delete(id)
       } else {
-        next.add(index)
+        next.add(id)
       }
 
       return next
     })
-  }
-
-  if (showCreateForm) {
-    // we handle rendering inside the main return block now
   }
 
   return (
@@ -152,7 +146,11 @@ export const DataTypesPanel = ({
             </Button>
           </div>
         ) : dataTypes.length > 0 ? (
-          <Button className="w-fit shrink-0" type="button" onClick={startCreate}>
+          <Button
+            className="w-fit shrink-0"
+            type="button"
+            onClick={startCreate}
+          >
             <Plus />
             Add datatype
           </Button>
@@ -188,105 +186,118 @@ export const DataTypesPanel = ({
           <DataTypeEmptyState onAdd={startCreate} />
         ) : (
           <div className="grid gap-3">
-            {dataTypes.map((dataType, index) => {
-              const expanded = expandedIndexes.has(index)
-              const title = displayTitle(dataType, index)
+            <SortableList
+              disabled={reorderDisabled}
+              ids={dataTypes.flatMap((dataType) =>
+                dataType.id ? [dataType.id] : []
+              )}
+              onReorder={onReorder}
+            >
+              {(dataTypeId, dragHandle) => {
+                const index = dataTypes.findIndex(
+                  (dataType) => dataType.id === dataTypeId
+                )
+                const dataType = dataTypes[index]
+                const expanded = expandedIds.has(dataTypeId)
+                const title = displayTitle(dataType, index)
 
-              return (
-                <article
-                  className="cursor-pointer border border-slate-200 bg-white p-4"
-                  key={`${dataType.name}-${index}`}
-                  onClick={() => toggleExpanded(index)}
-                >
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div className="grid flex-1 gap-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-sm font-semibold text-slate-950">
-                          {title}
-                        </h4>
-                        {dataType.isSensitive ? (
-                          <Badge variant="warning">Sensitive</Badge>
+                return (
+                  <article
+                    className="cursor-pointer border border-slate-200 bg-white p-4"
+                    key={`${dataType.name}-${index}`}
+                    onClick={() => toggleExpanded(dataTypeId)}
+                  >
+                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                      <div className="grid flex-1 gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h4 className="text-sm font-semibold text-slate-950">
+                            {title}
+                          </h4>
+                          {dataType.isSensitive ? (
+                            <Badge variant="warning">Sensitive</Badge>
+                          ) : null}
+                          {dataType.isRequired ? (
+                            <Badge variant="secondary">Required</Badge>
+                          ) : null}
+                        </div>
+                        {dataType.description ? (
+                          <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
+                            {dataType.description}
+                          </p>
                         ) : null}
-                        {dataType.isRequired ? (
-                          <Badge variant="secondary">Required</Badge>
+                        {expanded ? (
+                          <ProfilePanelDetailGrid
+                            rows={
+                              [
+                                [
+                                  "Subject type",
+                                  codeValueList(
+                                    vocabulary,
+                                    "subject_types",
+                                    dataType.subjectTypes
+                                  ),
+                                  dataHelperText.subjectTypes,
+                                ],
+                                [
+                                  "Collection method",
+                                  codeValueList(
+                                    vocabulary,
+                                    "collection_methods",
+                                    dataType.collectionMethods
+                                  ),
+                                  dataHelperText.collectionMethods,
+                                ],
+                              ] as const satisfies readonly ProfilePanelDetailRow[]
+                            }
+                          />
                         ) : null}
                       </div>
-                      {dataType.description ? (
-                        <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-600">
-                          {dataType.description}
-                        </p>
-                      ) : null}
-                      {expanded ? (
-                        <ProfilePanelDetailGrid
-                          rows={
-                            [
-                              [
-                                "Subject type",
-                                codeValueList(
-                                  vocabulary,
-                                  "subject_types",
-                                  dataType.subjectTypes
-                                ),
-                                dataHelperText.subjectTypes,
-                              ],
-                              [
-                                "Collection method",
-                                codeValueList(
-                                  vocabulary,
-                                  "collection_methods",
-                                  dataType.collectionMethods
-                                ),
-                                dataHelperText.collectionMethods,
-                              ],
-                            ] as const satisfies readonly ProfilePanelDetailRow[]
+                      <div className="flex shrink-0 gap-2">
+                        {dragHandle}
+                        <Button
+                          aria-label={
+                            expanded ? "Collapse data type" : "Expand data type"
                           }
-                        />
-                      ) : null}
+                          size="icon-sm"
+                          type="button"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            toggleExpanded(dataTypeId)
+                          }}
+                        >
+                          {expanded ? <ChevronUp /> : <ChevronDown />}
+                        </Button>
+                        <Button
+                          aria-label="Edit data type"
+                          size="icon-sm"
+                          type="button"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            startEdit(index)
+                          }}
+                        >
+                          <Pencil />
+                        </Button>
+                        <Button
+                          aria-label="Delete data type"
+                          size="icon-sm"
+                          type="button"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            handleDelete(index)
+                          }}
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex shrink-0 gap-2">
-                      <Button
-                        aria-label={
-                          expanded ? "Collapse data type" : "Expand data type"
-                        }
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          toggleExpanded(index)
-                        }}
-                      >
-                        {expanded ? <ChevronUp /> : <ChevronDown />}
-                      </Button>
-                      <Button
-                        aria-label="Edit data type"
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          startEdit(index)
-                        }}
-                      >
-                        <Pencil />
-                      </Button>
-                      <Button
-                        aria-label="Delete data type"
-                        size="icon-sm"
-                        type="button"
-                        variant="outline"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          handleDelete(index)
-                        }}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              )
-            })}
+                  </article>
+                )
+              }}
+            </SortableList>
           </div>
         )}
       </div>

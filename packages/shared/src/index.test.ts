@@ -230,7 +230,8 @@ describe("shared security profile schemas", () => {
           severity: "high",
           frameworks: ["soc_2"],
           message: "Multi-factor authentication is not required.",
-          recommendation: "Require MFA for workforce and administrative access.",
+          recommendation:
+            "Require MFA for workforce and administrative access.",
           relatedFields: ["security.authentication.mfaRequired"],
         },
       ],
@@ -343,6 +344,7 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toEqual({
+        sortOrder: 0,
         serviceName: null,
         serviceDescription: null,
         serviceUrl: null,

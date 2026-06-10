@@ -12,11 +12,15 @@ export const DataHandlingProfilePage = ({
   profile,
   vocabulary,
   onSaveProfile,
+  onReorder,
+  reorderDisabled,
 }: {
   isMutationPending: boolean
   profile: ProfileDraft
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
+  onReorder: (ids: string[]) => void
+  reorderDisabled: boolean
 }) => (
   <DataHandlingManager
     collectionMethodOptions={codeOptions(vocabulary, "collection_methods")}
@@ -25,5 +29,7 @@ export const DataHandlingProfilePage = ({
     subjectTypeOptions={codeOptions(vocabulary, "subject_types")}
     vocabulary={vocabulary}
     onSaveProfile={onSaveProfile}
+    onReorder={onReorder}
+    reorderDisabled={reorderDisabled}
   />
 )

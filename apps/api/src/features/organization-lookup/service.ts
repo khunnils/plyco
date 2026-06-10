@@ -449,6 +449,7 @@ const hostnameFromUrl = (url: string) =>
   new URL(url).hostname.replace(/^www\./, "");
 
 const defaultDataType = (name: string): StoredDataType => ({
+  sortOrder: 0,
   name: "Customer account data",
   description: `Basic account and usage data handled by ${name}.`,
   subjectTypes: null,

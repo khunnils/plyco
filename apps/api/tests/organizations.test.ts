@@ -123,6 +123,175 @@ const validPrivacyLookupGenerated = {
 };
 
 describe("organizations API", () => {
+  it("reorders services, data types, and business activities", async () => {
+    const app = await createTestApp();
+    const profileResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          { ...serviceBody, serviceName: "First service" },
+          { ...serviceBody, serviceName: "Second service" },
+        ],
+        dataHandling: {
+          dataTypesStored: [
+            {
+              name: "First data type",
+              description: null,
+              subjectTypes: [],
+              collectionMethods: [],
+              isSensitive: false,
+              isRequired: false,
+            },
+            {
+              name: "Second data type",
+              description: null,
+              subjectTypes: [],
+              collectionMethods: [],
+              isSensitive: false,
+              isRequired: false,
+            },
+          ],
+        },
+      },
+    });
+    const organization = profileResponse.json().organization;
+    const serviceIds = organization.services.map(
+      (service: { id: string }) => service.id,
+    );
+    const dataTypeIds = organization.dataHandling.dataTypesStored.map(
+      (dataType: { id: string }) => dataType.id,
+    );
+    expect(
+      organization.services.map(
+        (service: { sortOrder: number }) => service.sortOrder,
+      ),
+    ).toEqual([0, 1]);
+    expect(
+      organization.dataHandling.dataTypesStored.map(
+        (dataType: { sortOrder: number }) => dataType.sortOrder,
+      ),
+    ).toEqual([0, 1]);
+
+    const firstActivity = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/business-activities",
+      payload: {
+        name: "First activity",
+        purpose: "",
+        role: "",
+        legalBasis: [],
+        dataTypeIds: [],
+        retentionPolicy: null,
+        retentionDays: 0,
+      },
+    });
+    const secondActivity = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/business-activities",
+      payload: {
+        name: "Second activity",
+        purpose: "",
+        role: "",
+        legalBasis: [],
+        dataTypeIds: [],
+        retentionPolicy: null,
+        retentionDays: 0,
+      },
+    });
+    const activityIds = [firstActivity.json().id, secondActivity.json().id];
+    expect([
+      firstActivity.json().sortOrder,
+      secondActivity.json().sortOrder,
+    ]).toEqual([0, 1]);
+
+    for (const [url, ids] of [
+      ["/organizations/org-test/services/order", serviceIds.toReversed()],
+      ["/organizations/org-test/data-types/order", dataTypeIds.toReversed()],
+      [
+        "/organizations/org-test/business-activities/order",
+        activityIds.toReversed(),
+      ],
+    ] as const) {
+      const response = await app.inject({
+        method: "PUT",
+        url,
+        payload: { ids },
+      });
+      expect(response.statusCode).toBe(204);
+    }
+
+    const snapshot = (
+      await app.inject({
+        method: "GET",
+        url: "/organizations/org-test/security-profile",
+      })
+    ).json();
+    expect(
+      snapshot.organization.services.map(
+        (service: { id: string }) => service.id,
+      ),
+    ).toEqual(serviceIds.toReversed());
+    expect(
+      snapshot.organization.dataHandling.dataTypesStored.map(
+        (dataType: { id: string }) => dataType.id,
+      ),
+    ).toEqual(dataTypeIds.toReversed());
+    expect(
+      snapshot.businessActivities.map(
+        (activity: { id: string }) => activity.id,
+      ),
+    ).toEqual(activityIds.toReversed());
+    expect(
+      snapshot.organization.services.map(
+        (service: { sortOrder: number }) => service.sortOrder,
+      ),
+    ).toEqual([0, 1]);
+    expect(
+      snapshot.organization.dataHandling.dataTypesStored.map(
+        (dataType: { sortOrder: number }) => dataType.sortOrder,
+      ),
+    ).toEqual([0, 1]);
+    expect(
+      snapshot.businessActivities.map(
+        (activity: { sortOrder: number }) => activity.sortOrder,
+      ),
+    ).toEqual([0, 1]);
+
+    for (const [url, ids, errorCode] of [
+      [
+        "/organizations/org-test/services/order",
+        serviceIds,
+        "SERVICE_ORDER_INVALID",
+      ],
+      [
+        "/organizations/org-test/data-types/order",
+        dataTypeIds,
+        "DATA_TYPE_ORDER_INVALID",
+      ],
+      [
+        "/organizations/org-test/business-activities/order",
+        activityIds,
+        "BUSINESS_ACTIVITY_ORDER_INVALID",
+      ],
+    ] as const) {
+      for (const invalidIds of [
+        [ids[0]],
+        [ids[0], ids[0]],
+        [ids[0], "foreign-id"],
+      ]) {
+        const response = await app.inject({
+          method: "PUT",
+          url,
+          payload: { ids: invalidIds },
+        });
+        expect(response.statusCode).toBe(400);
+        expect(response.json().error.code).toBe(errorCode);
+      }
+    }
+  });
+
   it("requires authentication for organization lookup when auth is enabled", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
@@ -465,7 +634,14 @@ describe("organizations API", () => {
       saveResponse
         .json()
         .organization.dataHandling.dataTypesStored.map(
-          ({ id: _id, ...dataType }: { id: string }) => dataType,
+          ({
+            id: _id,
+            sortOrder: _sortOrder,
+            ...dataType
+          }: {
+            id: string;
+            sortOrder: number;
+          }) => dataType,
         ),
     ).toEqual(profileBody.dataHandling.dataTypesStored);
     expect(
@@ -493,7 +669,14 @@ describe("organizations API", () => {
       getResponse
         .json()
         .organization.dataHandling.dataTypesStored.map(
-          ({ id: _id, ...dataType }: { id: string }) => dataType,
+          ({
+            id: _id,
+            sortOrder: _sortOrder,
+            ...dataType
+          }: {
+            id: string;
+            sortOrder: number;
+          }) => dataType,
         ),
     ).toEqual(profileBody.dataHandling.dataTypesStored);
     expect(

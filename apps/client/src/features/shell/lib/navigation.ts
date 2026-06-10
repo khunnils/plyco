@@ -71,11 +71,11 @@ export const companySections: CompanySection[] = [
 
 export const productAndDataSections: CompanySection[] = [
   {
-    id: "graph",
-    path: "/company/graph",
-    title: "Graph",
-    description: "Read-only map of services, data, activities, and providers.",
-    icon: Network,
+    id: "dataHandling",
+    path: "/company/data",
+    title: "Data Types",
+    description: "Data categories and protection practices.",
+    icon: Database,
   },
   {
     id: "activities",
@@ -85,20 +85,20 @@ export const productAndDataSections: CompanySection[] = [
     icon: ClipboardList,
   },
   {
-    id: "dataHandling",
-    path: "/company/data",
-    title: "Data Types",
-    description: "Data categories and protection practices.",
-    icon: Database,
-  },
-  {
     id: "service",
     path: "/company/services",
     title: "Services",
     description: "Products or services the organization offers.",
     icon: Box,
   },
-]
+  {
+    id: "graph",
+    path: "/company/graph",
+    title: "Graph",
+    description: "Read-only map of services, data, activities, and providers.",
+    icon: Network,
+  },
+  ]
 
 export const sectionPageBreadcrumbs = (
   section: string,

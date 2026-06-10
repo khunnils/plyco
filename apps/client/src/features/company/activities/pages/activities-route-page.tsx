@@ -8,6 +8,7 @@ import {
   useCreateBusinessActivity,
   useDeleteBusinessActivity,
   useUpdateBusinessActivity,
+  useReorderBusinessActivities,
 } from "@/features/company/activities/hooks/use-activities"
 import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ export const ActivitiesRoutePage = () => {
   const createBusinessActivity = useCreateBusinessActivity()
   const updateBusinessActivity = useUpdateBusinessActivity()
   const deleteBusinessActivity = useDeleteBusinessActivity()
+  const reorderBusinessActivities = useReorderBusinessActivities()
 
   const snapshot = securityProfile.data
   const businessActivities = snapshot?.businessActivities ?? []
@@ -121,6 +123,8 @@ export const ActivitiesRoutePage = () => {
           onUpdate={(input, onSuccess) =>
             updateBusinessActivity.mutate(input, { onSuccess })
           }
+          onReorder={(ids) => reorderBusinessActivities.mutate(ids)}
+          reorderDisabled={reorderBusinessActivities.isPending}
           showForm={showActivityForm}
           setShowForm={setShowActivityForm}
           editingActivityId={editingActivityId}

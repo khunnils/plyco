@@ -41,9 +41,9 @@ export class InMemoryVendorRepository implements ProviderRepository {
   ) {}
 
   async listBusinessActivities(organizationId: string) {
-    return Array.from(this.activities.values()).filter(
-      (activity) => activity.organizationId === organizationId,
-    );
+    return Array.from(this.activities.values())
+      .filter((activity) => activity.organizationId === organizationId)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   async createBusinessActivity(
@@ -57,6 +57,9 @@ export class InMemoryVendorRepository implements ProviderRepository {
     const timestamp = now();
     const activity = businessActivitySchema.parse({
       id: newId("activity"),
+      sortOrder: Array.from(this.activities.values()).filter(
+        (activity) => activity.organizationId === organizationId,
+      ).length,
       ...input,
       dataTypeIds,
       createdAt: timestamp,
@@ -95,6 +98,26 @@ export class InMemoryVendorRepository implements ProviderRepository {
     }
 
     return this.activities.delete(id);
+  }
+
+  async reorderBusinessActivities(organizationId: string, ids: string[]) {
+    const activities = await this.listBusinessActivities(organizationId);
+    const byId = new Map(activities.map((activity) => [activity.id, activity]));
+    if (
+      ids.length !== activities.length ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !byId.has(id))
+    ) {
+      throw new ApiError(
+        "BUSINESS_ACTIVITY_ORDER_INVALID",
+        "Order must contain every current activity exactly once.",
+        400,
+      );
+    }
+    ids.forEach((id, sortOrder) => {
+      const activity = this.activities.get(id)!;
+      this.activities.set(id, { ...activity, sortOrder });
+    });
   }
 
   async listOrganizationProviders(organizationId: string) {

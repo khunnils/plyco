@@ -108,6 +108,36 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     return [];
   }
 
+  async reorderServices(organizationId: string, ids: string[]): Promise<void> {
+    const organization = this.organizations.get(organizationId);
+    if (!organization)
+      throw new ApiError(
+        "ORGANIZATION_NOT_FOUND",
+        "Organization was not found.",
+        404,
+      );
+    organization.services = this.reorderExact(
+      organization.services,
+      ids,
+      "SERVICE_ORDER_INVALID",
+    );
+  }
+
+  async reorderDataTypes(organizationId: string, ids: string[]): Promise<void> {
+    const organization = this.organizations.get(organizationId);
+    if (!organization)
+      throw new ApiError(
+        "ORGANIZATION_NOT_FOUND",
+        "Organization was not found.",
+        404,
+      );
+    organization.dataHandling.dataTypesStored = this.reorderExact(
+      organization.dataHandling.dataTypesStored,
+      ids,
+      "DATA_TYPE_ORDER_INVALID",
+    );
+  }
+
   private servicesWithIds(
     inputServices: ServiceProfileInput[],
     existingServices: ServiceProfile[],
@@ -133,6 +163,7 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       return {
         ...service,
         id: serviceId ?? newId("service"),
+        sortOrder: index,
         createdAt: existingService?.createdAt ?? timestamp,
         updatedAt: timestamp,
       };
@@ -143,14 +174,37 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     inputDataTypes: StoredDataType[],
     existingDataTypes: StoredDataType[],
   ): StoredDataType[] {
-    return inputDataTypes.map((dataType) => ({
+    return inputDataTypes.map((dataType, sortOrder) => ({
       ...dataType,
+      sortOrder,
       id:
         dataType.id ??
         existingDataTypes.find((existing) => existing.name === dataType.name)
           ?.id ??
         newId("data_type"),
     }));
+  }
+
+  private reorderExact<T extends { id?: string; sortOrder: number }>(
+    items: T[],
+    ids: string[],
+    errorCode: string,
+  ): T[] {
+    const byId = new Map(
+      items.flatMap((item) => (item.id ? [[item.id, item] as const] : [])),
+    );
+    if (
+      ids.length !== items.length ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !byId.has(id))
+    ) {
+      throw new ApiError(
+        errorCode,
+        "Order must contain every current item exactly once.",
+        400,
+      );
+    }
+    return ids.map((id, sortOrder) => ({ ...byId.get(id)!, sortOrder }));
   }
 
   private withProviderNames(

@@ -166,7 +166,9 @@ export const lookupPrivacyPolicy = (
 ): Promise<PrivacyProfile> =>
   apiRequest("/organization-lookup/privacy-policy", privacyProfileSchema, {
     method: "POST",
-    body: JSON.stringify(organizationPrivacyPolicyLookupInputSchema.parse(input)),
+    body: JSON.stringify(
+      organizationPrivacyPolicyLookupInputSchema.parse(input)
+    ),
   })
 
 export const createVocabularyCode = ({
@@ -360,6 +362,37 @@ export const deleteBusinessActivity = async (
     )
   }
 }
+
+const reorderEntities = async (path: string, ids: string[]): Promise<void> => {
+  const response = await fetch(`${API_URL}${path}`, {
+    credentials: "include",
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const parsedError = structuredErrorSchema.safeParse(body)
+    throw new Error(
+      parsedError.success ? parsedError.data.error.message : "Request failed"
+    )
+  }
+}
+
+export const reorderServices = (organizationId: string, ids: string[]) =>
+  reorderEntities(`/organizations/${organizationId}/services/order`, ids)
+
+export const reorderDataTypes = (organizationId: string, ids: string[]) =>
+  reorderEntities(`/organizations/${organizationId}/data-types/order`, ids)
+
+export const reorderBusinessActivities = (
+  organizationId: string,
+  ids: string[]
+) =>
+  reorderEntities(
+    `/organizations/${organizationId}/business-activities/order`,
+    ids
+  )
 
 export const createTemplateFromSystem = (
   organizationId: string,

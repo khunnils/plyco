@@ -64,6 +64,7 @@ describe("onboarding profile helpers", () => {
       },
       dataTypes: [
         {
+          sortOrder: 0,
           name: "Lookup account data",
           description: "Account data from lookup.",
           subjectTypes: null,

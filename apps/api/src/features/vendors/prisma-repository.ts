@@ -49,7 +49,7 @@ export class PrismaVendorRepository implements ProviderRepository {
     const activities = await this.client.businessActivity.findMany({
       where: { organizationId },
       include: BUSINESS_ACTIVITY_INCLUDE,
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
     });
 
     return activities.map(mapBusinessActivityRecord);
@@ -63,9 +63,14 @@ export class PrismaVendorRepository implements ProviderRepository {
       organizationId,
       input,
     );
+    const maximumOrder = await this.client.businessActivity.aggregate({
+      where: { organizationId },
+      _max: { sortOrder: true },
+    });
     const activity = await this.client.businessActivity.create({
       data: {
         organizationId,
+        sortOrder: (maximumOrder._max.sortOrder ?? -1) + 1,
         ...this.businessActivityData(input),
         dataTypes: {
           create: dataTypeIds.map((organizationDataTypeId) => ({
@@ -143,6 +148,36 @@ export class PrismaVendorRepository implements ProviderRepository {
 
     await this.client.businessActivity.delete({ where: { id } });
     return true;
+  }
+
+  async reorderBusinessActivities(
+    organizationId: string,
+    ids: string[],
+  ): Promise<void> {
+    const existing = await this.client.businessActivity.findMany({
+      where: { organizationId },
+      select: { id: true },
+    });
+    const existingIds = existing.map((activity) => activity.id);
+    const uniqueIds = new Set(ids);
+
+    if (
+      ids.length !== existingIds.length ||
+      uniqueIds.size !== ids.length ||
+      !existingIds.every((id) => uniqueIds.has(id))
+    ) {
+      throw new ApiError(
+        "BUSINESS_ACTIVITY_ORDER_INVALID",
+        "Order must contain every current activity exactly once.",
+        400,
+      );
+    }
+
+    await this.client.$transaction(async (tx) => {
+      for (const [sortOrder, id] of ids.entries()) {
+        await tx.$executeRaw`UPDATE "business_activities" SET "sort_order" = ${sortOrder} WHERE "id" = ${id} AND "organization_id" = ${organizationId}`;
+      }
+    });
   }
 
   async listOrganizationProviders(

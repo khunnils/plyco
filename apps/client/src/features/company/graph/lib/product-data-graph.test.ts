@@ -22,6 +22,7 @@ const activity = (
   dataTypeIds: string[] = []
 ): BusinessActivity => ({
   id,
+  sortOrder: 0,
   name,
   purpose: `${name} purpose`,
   role: "controller",
@@ -80,6 +81,7 @@ const snapshot = (
     services: [
       {
         id: "svc_1",
+        sortOrder: 0,
         serviceName: "App",
         serviceDescription: "Customer app",
         serviceUrl: "https://app.example",
@@ -102,6 +104,7 @@ const snapshot = (
       },
       {
         id: "svc_2",
+        sortOrder: 1,
         serviceName: "Admin",
         serviceDescription: null,
         serviceUrl: null,
@@ -130,6 +133,7 @@ const snapshot = (
       dataTypesStored: [
         {
           id: "data_email",
+          sortOrder: 0,
           name: "Email Address",
           description: "User emails",
           subjectTypes: null,

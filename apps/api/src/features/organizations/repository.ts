@@ -32,4 +32,6 @@ export interface OrganizationRepository {
   listServiceIds(organizationId: string): Promise<string[]>;
   listBusinessActivityIds(organizationId: string): Promise<string[]>;
   listOrganizationProviderIds(organizationId: string): Promise<string[]>;
+  reorderServices(organizationId: string, ids: string[]): Promise<void>;
+  reorderDataTypes(organizationId: string, ids: string[]): Promise<void>;
 }

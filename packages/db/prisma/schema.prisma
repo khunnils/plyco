@@ -174,10 +174,12 @@ model ServiceProfile {
   doNotTrackResponse                Boolean?                  @map("do_not_track_response")
   globalPrivacyControlSupported     Boolean?                  @map("global_privacy_control_supported")
   primaryHostingRegion              String?                   @map("primary_hosting_region")
+  sortOrder                         Int                       @default(0) @map("sort_order")
   createdAt                         DateTime                  @default(now()) @map("created_at")
   updatedAt                         DateTime                  @updatedAt @map("updated_at")
 
   @@index([organizationId], map: "idx_service_profiles_organization_id")
+  @@index([organizationId, sortOrder], map: "idx_service_profiles_organization_id_sort_order")
   @@map("service_profiles")
 }
 
@@ -267,6 +269,7 @@ model OrganizationDataType {
   collectionMethods         Json?                      @map("collection_methods")
   isSensitive               Boolean?                   @map("is_sensitive")
   isRequired                Boolean?                   @map("is_required")
+  sortOrder                 Int                        @default(0) @map("sort_order")
   providerUsageDataTypes    ProviderUsageDataType[]
   businessActivityDataTypes BusinessActivityDataType[]
   createdAt                 DateTime                   @default(now()) @map("created_at")
@@ -274,6 +277,7 @@ model OrganizationDataType {
 
   @@unique([organizationId, name], map: "organization_data_types_organization_id_name_key")
   @@index([organizationId], map: "idx_organization_data_types_organization_id")
+  @@index([organizationId, sortOrder], map: "idx_organization_data_types_organization_id_sort_order")
   @@map("organization_data_types")
 }
 
@@ -287,6 +291,7 @@ model BusinessActivity {
   legalBasis      String[]                   @default([]) @map("legal_basis")
   retentionPolicy String?                    @map("retention_policy")
   retentionDays   Int                        @default(0) @map("retention_days")
+  sortOrder       Int                        @default(0) @map("sort_order")
   services        ServiceBusinessActivity[]
   dataTypes       BusinessActivityDataType[]
   createdAt       DateTime                   @default(now()) @map("created_at")
@@ -294,6 +299,7 @@ model BusinessActivity {
 
   @@unique([organizationId, name], map: "business_activities_organization_id_name_key")
   @@index([organizationId], map: "idx_business_activities_organization_id")
+  @@index([organizationId, sortOrder], map: "idx_business_activities_organization_id_sort_order")
   @@map("business_activities")
 }
 

@@ -136,6 +136,7 @@ export const isComplianceFieldVisible = (
 
 export const storedDataTypeSchema = z.object({
   id: z.string().min(1).optional(),
+  sortOrder: z.number().int().min(0).default(0),
   name: z.string().trim().min(1, "Name is required"),
   description: nullableStringSchema,
   subjectTypes: nullableCodeIdArraySchema,
@@ -156,6 +157,7 @@ export const businessActivityInputSchema = z.object({
 
 export const businessActivitySchema = businessActivityInputSchema.extend({
   id: z.string().min(1),
+  sortOrder: z.number().int().min(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -190,6 +192,7 @@ export const servicePrivacyProfileSchema = z.object({
 
 export const serviceProfileInputSchema = z.object({
   id: z.string().min(1).optional(),
+  sortOrder: z.number().int().min(0).default(0),
   serviceName: nullableStringSchema,
   serviceDescription: nullableStringSchema,
   serviceUrl: nullableStringSchema,
@@ -657,6 +660,10 @@ export const securityProgramSnapshotSchema = z.object({
   serviceProviderUsage: z.array(serviceProviderUsageSchema),
 });
 
+export const reorderEntitiesSchema = z.object({
+  ids: z.array(z.string().trim().min(1)).min(1),
+});
+
 export const structuredErrorSchema = z.object({
   error: z.object({
     code: z.string(),
@@ -680,6 +687,7 @@ export type Vocabulary = z.infer<typeof vocabularySchema>;
 export type VocabularyCodeInput = z.infer<typeof vocabularyCodeInputSchema>;
 export type ProviderSelection = z.infer<typeof providerSelectionSchema>;
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>;
+export type ReorderEntitiesInput = z.infer<typeof reorderEntitiesSchema>;
 export type BusinessActivityInput = z.infer<typeof businessActivityInputSchema>;
 export type BusinessActivity = z.infer<typeof businessActivitySchema>;
 export type CompanyProfile = z.infer<typeof companyProfileSchema>;
@@ -786,6 +794,7 @@ export const emptyCompanyProfile: CompanyProfile = {
 };
 
 export const emptyServiceProfile: ServiceProfileInput = {
+  sortOrder: 0,
   serviceName: null,
   serviceDescription: null,
   serviceUrl: null,

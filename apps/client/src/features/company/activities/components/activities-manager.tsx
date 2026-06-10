@@ -25,6 +25,8 @@ export const ActivitiesManager = ({
   onCreate,
   onDelete,
   onUpdate,
+  onReorder,
+  reorderDisabled,
   showForm,
   setShowForm,
   editingActivityId,
@@ -44,6 +46,8 @@ export const ActivitiesManager = ({
     input: { id: string; activity: BusinessActivityInput },
     onSuccess?: () => void
   ) => void
+  onReorder: (ids: string[]) => void
+  reorderDisabled: boolean
   showForm: boolean
   setShowForm: (show: boolean) => void
   editingActivityId: string | null
@@ -109,6 +113,8 @@ export const ActivitiesManager = ({
         vocabulary={vocabulary}
         onDelete={onDelete}
         onEdit={startEdit}
+        onReorder={onReorder}
+        reorderDisabled={reorderDisabled}
       />
     </div>
   )
