@@ -109,7 +109,8 @@ We integrate security checks into software development and production changes.
 {% if security.encryption.inTransitMinimumTlsVersionLabel %}Data in transit is protected using {{ security.encryption.inTransitMinimumTlsVersionLabel }} or higher.
 {% elif infrastructure.encryptionInTransitHasValue %}Data in transit is protected using industry-standard transport encryption.
 {% endif %}
-{% if security.encryption.keyManagementProviderLabel %}Encryption keys are managed using {{ security.encryption.keyManagementProviderLabel }}.
+{% if security.encryption.keyManagementProvider == "none" %}Encryption keys are managed using controls provided by our infrastructure providers.
+{% elif security.encryption.keyManagementProviderLabel %}Encryption keys are managed using {{ security.encryption.keyManagementProviderLabel }}.
 {% endif %}
 {% if infrastructure.encryptedDevicesRequiredHasValue %}Company devices used to access customer data are required to use full-disk encryption.
 {% endif %}
@@ -117,6 +118,17 @@ We integrate security checks into software development and production changes.
 {% endif %}
 {% if privacy.retentionPolicyExistsHasValue %}We maintain data-retention practices intended to delete or anonymize data when it is no longer needed.
 {% endif %}
+{% endif %}
+
+{% if dataHandling.dataTypesStoredHasValue %}
+## Data categories
+
+We process the following categories of data:
+
+{% for dataType in dataHandling.dataTypesStored %}
+- **{{ dataType.name }}**{% if dataType.description %}: {{ dataType.description }}{% endif %}{% if dataType.isSensitive %} _(sensitive)_{% endif %}
+
+{% endfor %}
 {% endif %}
 
 {% if security.logging.centralizedLoggingHasValue or (security.logging.securityMonitoringHasValue and security.logging.securityMonitoring != "none") %}
@@ -166,7 +178,7 @@ We maintain a documented process for identifying, containing, investigating, rem
 Critical production data is backed up{% if security.backups.backupCadenceLabel %} on a {{ security.backups.backupCadenceLabel | lower }} basis{% endif %}.
 {% if security.backups.backupRetentionDaysHasValue %}Backups are retained for {{ security.backups.backupRetentionDays }} days.
 {% endif %}
-{% if security.backups.restoreTestingCadenceLabel %}Backup restoration is tested on a {{ security.backups.restoreTestingCadenceLabel | lower }} basis.
+{% if security.backups.restoreTestingCadence and security.backups.restoreTestingCadence != "none" %}Backup restoration is tested on a {{ security.backups.restoreTestingCadenceLabel | lower }} basis.
 {% endif %}
 {% endif %}
 

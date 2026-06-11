@@ -602,6 +602,14 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain(
       "Production customer data is not used in development or test environments.",
     );
+    expect(renderedContent).toContain("## Data categories");
+    expect(renderedContent).toContain("**Customer account data**");
+    expect(renderedContent).toContain("Profile and billing contact details");
+    expect(renderedContent).toContain("_(sensitive)_");
+    expect(renderedContent).toContain("**Usage data**");
+    expect(renderedContent).not.toContain(
+      "_(sensitive)_\n\n- **Usage data**",
+    );
     expect(renderedContent).toContain("## Shared responsibility");
     expect(renderedContent).not.toContain("| Vendor |");
     expect(renderedContent).not.toContain("DPA status");
@@ -722,6 +730,60 @@ describe("documents / templates API", () => {
     expect(renderedContent).not.toContain("retained for 30 days");
     expect(renderedContent).not.toContain("restoration is tested");
     expect(renderedContent).toContain("## Shared responsibility");
+  });
+
+  it("handles none sentinel values for encryption key management and backup restoration", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/data-security-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "data-security-policy.md",
+    );
+    const template = {
+      id: "template-data-security-policy-none-sentinels",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          infrastructure: {
+            ...profileBody.infrastructure,
+            keyManagementProvider: "none",
+            restoreTestingCadence: "none",
+          },
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [],
+        serviceVendorUses: [],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(renderedContent).toContain(
+      "Encryption keys are managed using controls provided by our infrastructure providers.",
+    );
+    expect(renderedContent).not.toContain("managed using none");
+    expect(renderedContent).not.toContain("managed using None");
+    expect(renderedContent).not.toContain("restoration is tested on a none basis");
   });
 
   it("previews draft templates without generating documents", async () => {
