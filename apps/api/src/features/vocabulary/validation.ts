@@ -168,6 +168,30 @@ export const validateInfrastructureProfileCodes = async (
   organizationId: string,
   infrastructure: InfrastructureProfile,
 ) => {
+  const providersBySystemType = new Map<
+    string,
+    typeof infrastructure.organizationProviders
+  >();
+  for (const provider of infrastructure.organizationProviders) {
+    providersBySystemType.set(provider.systemType, [
+      ...(providersBySystemType.get(provider.systemType) ?? []),
+      provider,
+    ]);
+  }
+  for (const [systemType, providers] of providersBySystemType) {
+    if (
+      providers.some((provider) => provider.providerId === "none") &&
+      providers.length > 1
+    ) {
+      throw new ApiError(
+        "INFRASTRUCTURE_PROVIDER_NONE_CONFLICT",
+        "None cannot be selected with another provider for the same system type.",
+        400,
+        { systemType },
+      );
+    }
+  }
+
   await Promise.all([
     ...infrastructure.organizationProviders.map((provider) => {
       if (

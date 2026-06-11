@@ -976,7 +976,7 @@ describe("organizations API", () => {
     });
   });
 
-  it("supports saving multiple 'none' infrastructure providers", async () => {
+  it("preserves explicit 'none' infrastructure providers outside inventory", async () => {
     const app = await createTestApp();
     const response = await app.inject({
       method: "PUT",
@@ -995,6 +995,10 @@ describe("organizations API", () => {
               providerId: "none",
             },
             {
+              systemType: "auth",
+              providerId: "none",
+            },
+            {
               systemType: "password_manager",
               providerId: "none",
             },
@@ -1006,25 +1010,81 @@ describe("organizations API", () => {
     expect(response.statusCode).toBe(200);
     expect(
       response.json().organization.infrastructure.organizationProviders,
-    ).toEqual(
-      expect.arrayContaining([
-        {
-          systemType: "cloud",
-          providerId: "none",
-          name: "None",
+    ).toEqual([
+      { systemType: "cloud", providerId: "none", name: "None" },
+      { systemType: "source_control", providerId: "none", name: "None" },
+      { systemType: "auth", providerId: "none", name: "None" },
+      { systemType: "password_manager", providerId: "none", name: "None" },
+    ]);
+    expect(response.json().organizationProviders).toEqual([]);
+  });
+
+  it("replaces explicit none with a real infrastructure provider", async () => {
+    const app = await createTestApp();
+    await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            { systemType: "source_control", providerId: "none" },
+          ],
         },
-        {
-          systemType: "source_control",
-          providerId: "none",
-          name: "None",
+      },
+    });
+
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            { systemType: "source_control", providerId: "prov-github" },
+          ],
         },
-        {
-          systemType: "password_manager",
-          providerId: "none",
-          name: "None",
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(
+      response.json().organization.infrastructure.organizationProviders,
+    ).toEqual([
+      {
+        systemType: "source_control",
+        providerId: "prov-github",
+        name: "GitHub",
+      },
+    ]);
+  });
+
+  it("rejects none alongside a real provider for the same system type", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            { systemType: "source_control", providerId: "none" },
+            { systemType: "source_control", providerId: "prov-github" },
+          ],
         },
-      ]),
-    );
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      error: {
+        code: "INFRASTRUCTURE_PROVIDER_NONE_CONFLICT",
+        details: { systemType: "source_control" },
+      },
+    });
   });
 
   it("rejects invalid marketing opt-out method codes", async () => {

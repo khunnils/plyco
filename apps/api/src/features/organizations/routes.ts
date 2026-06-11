@@ -133,7 +133,9 @@ export async function registerOrganizationRoutes(
       const organization = await organizationRepository.upsertProfile(
         request.params.organizationId,
         body,
-        body.infrastructure.organizationProviders.length > 0 ||
+        body.infrastructure.organizationProviders.some(
+          (provider) => provider.providerId !== "none",
+        ) ||
           body.privacy.organizationProviders.length > 0
           ? await providerSource.listProviders()
           : [],

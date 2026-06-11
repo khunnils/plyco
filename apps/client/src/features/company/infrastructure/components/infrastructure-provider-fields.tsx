@@ -17,6 +17,7 @@ import {
 import {
   type InfrastructureProviderSystemType,
   infrastructureProviderLabels,
+  updateInfrastructureProviderSelection,
 } from "@/features/company/infrastructure/lib/infrastructure-provider-utils"
 import { type ProfileDraft } from "@/features/company/types/company"
 
@@ -34,12 +35,10 @@ const selectedProviderIds = (
 const providerOptions = (
   providers: Provider[],
   systemType: ProviderSystemType
-) => [
-  { value: "none", label: "None" },
-  ...providers
+) =>
+  providers
     .filter((provider) => provider.systemTypes.includes(systemType))
-    .map((provider) => ({ value: provider.id, label: provider.name })),
-]
+    .map((provider) => ({ value: provider.id, label: provider.name }))
 
 export const CloudProviderField = ({
   form,
@@ -52,7 +51,10 @@ export const CloudProviderField = ({
 }) => {
   const organizationProviders = form.watch("organizationProviders")
   const selectedIds = selectedProviderIds(organizationProviders, "cloud")
-  const options = providerOptions(providers, "cloud")
+  const options = [
+    { value: "none", label: "None" },
+    ...providerOptions(providers, "cloud"),
+  ]
 
   return (
     <MultiSelectField
@@ -64,28 +66,13 @@ export const CloudProviderField = ({
       placeholder="Select cloud providers"
       value={selectedIds}
       onValueChange={(providerIds) => {
-        const otherProviders = organizationProviders.filter(
-          (provider) => provider.systemType !== "cloud"
-        )
-
-        let nextIds = providerIds
-        const hadNone = selectedIds.includes("none")
-        const hasNone = providerIds.includes("none")
-        if (hasNone && !hadNone) {
-          nextIds = ["none"]
-        } else if (hasNone && providerIds.length > 1) {
-          nextIds = providerIds.filter((id) => id !== "none")
-        }
-
         form.setValue(
           "organizationProviders",
-          [
-            ...otherProviders,
-            ...nextIds.map((providerId) => ({
-              systemType: "cloud" as const,
-              providerId,
-            })),
-          ],
+          updateInfrastructureProviderSelection(
+            organizationProviders,
+            "cloud",
+            providerIds
+          ),
           { shouldDirty: true, shouldValidate: true }
         )
       }}
@@ -108,6 +95,7 @@ export const SingleProviderField = ({
   const selectedIds = selectedProviderIds(organizationProviders, systemType)
   const options = [
     { value: "", label: "Not set" },
+    { value: "none", label: "None" },
     ...providerOptions(providers, systemType),
   ]
   const optionLabelByValue = new Map(
@@ -116,13 +104,13 @@ export const SingleProviderField = ({
   const fieldId = `provider-${systemType}`
 
   const setSystemProvider = (providerId: string) => {
-    const otherProviders = organizationProviders.filter(
-      (provider) => provider.systemType !== systemType
-    )
-
     form.setValue(
       "organizationProviders",
-      [...otherProviders, ...(providerId ? [{ systemType, providerId }] : [])],
+      updateInfrastructureProviderSelection(
+        organizationProviders,
+        systemType,
+        providerId ? [providerId] : []
+      ),
       { shouldDirty: true, shouldValidate: true }
     )
   }

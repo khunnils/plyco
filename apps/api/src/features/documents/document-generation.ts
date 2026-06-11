@@ -202,10 +202,13 @@ export class ReportContextBuilder {
     return separatorIndex === -1 ? value : value.slice(0, separatorIndex);
   }
 
-  private infrastructureContext(
-    infrastructure: InfrastructureProfile,
-  ) {
-    return this.withAnswerFlags(infrastructure);
+  private infrastructureContext(infrastructure: InfrastructureProfile) {
+    return this.withAnswerFlags({
+      ...infrastructure,
+      organizationProviders: infrastructure.organizationProviders.filter(
+        (provider) => provider.providerId !== "none",
+      ),
+    });
   }
 
   private dataHandlingContext(
@@ -408,6 +411,8 @@ export class ReportContextBuilder {
       euRepresentativeName: privacy.euRepresentativeName,
       euRepresentativeAddress: privacy.euRepresentativeAddress,
       usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
+      productionDataInDevelopment: privacy.productionDataInDevelopment,
+      retentionPolicyExists: privacy.retentionPolicyExists,
       ...this.answerFlags(privacy),
     };
   }
@@ -543,8 +548,7 @@ export class ReportContextBuilder {
         ),
         penetrationTestLastDate: security.penetrationTestLastDate,
         patchingSlaCriticalDays: security.patchingSlaCriticalDays,
-        patchingSlaCriticalDaysStatus:
-          security.patchingSlaCriticalDaysStatus,
+        patchingSlaCriticalDaysStatus: security.patchingSlaCriticalDaysStatus,
         patchingSlaCriticalDaysStatusLabel: this.codeLabel(
           vocabulary,
           "defined_statuses",

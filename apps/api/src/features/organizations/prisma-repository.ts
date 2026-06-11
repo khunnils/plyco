@@ -229,6 +229,13 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       dpaRequiredForProcessors: input.dpaRequiredForProcessors,
       encryptionAtRest: input.encryptionAtRest,
       encryptionInTransit: input.encryptionInTransit,
+      explicitNoProviderSystemTypes: Array.from(
+        new Set(
+          input.organizationProviders
+            .filter((provider) => provider.providerId === "none")
+            .map((provider) => provider.systemType),
+        ),
+      ),
     };
   }
 
@@ -433,7 +440,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     const selectedProviders: ProviderSelection[] = [
       ...input.infrastructure.organizationProviders,
       ...input.privacy.organizationProviders,
-    ];
+    ].filter((provider) => provider.providerId !== "none");
     const catalogProviders = selectedProviders.map((selectedProvider) => ({
       selectedProvider,
       provider: this.catalogProvider(
@@ -470,6 +477,12 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
     await Promise.all(
       currentProviders.map((provider) => {
+        if (provider.providerId === "none") {
+          return this.client.organizationProvider.delete({
+            where: { id: provider.id },
+          });
+        }
+
         const selectedSystemTypes =
           (provider.providerId
             ? selectedByProviderId.get(provider.providerId)
@@ -532,18 +545,6 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     systemType: ProviderSystemType,
     providerId: string,
   ) {
-    if (providerId === "none") {
-      return {
-        id: "none",
-        name: "None",
-        url: "",
-        category: "",
-        systemTypes: [systemType],
-        securityCriticality: "Low",
-        handlesCustomerData: false,
-      };
-    }
-
     const provider = providerCatalog.find(
       (catalogProvider) =>
         catalogProvider.id === providerId &&

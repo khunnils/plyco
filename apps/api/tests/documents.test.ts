@@ -31,6 +31,13 @@ describe("documents / templates API", () => {
       organization: {
         id: "org-test",
         ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          organizationProviders: [
+            ...profileBody.infrastructure.organizationProviders,
+            { systemType: "password_manager", providerId: "none" },
+          ],
+        },
         services: [storedService],
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
@@ -324,6 +331,12 @@ describe("documents / templates API", () => {
     });
     expect(context.services.primary).toMatchObject(context.service);
     expect(context.services.all).toHaveLength(1);
+    expect(context.infrastructure.organizationProviders).toEqual([
+      {
+        systemType: "source_control",
+        providerId: "prov-github",
+      },
+    ]);
     expect(context.privacy).toMatchObject({
       supportedRights: ["access", "deletion", "correction", "opt_out"],
       supportedRightLabels: ["Access", "Deletion", "Correction", "Opt-out"],
@@ -344,6 +357,8 @@ describe("documents / templates API", () => {
       transferMechanismLabels: ["SCCs", "Data Privacy Framework"],
       newsletterProvider: "Mailchimp",
       newsletterProviderId: "prov-mailchimp",
+      productionDataInDevelopment: false,
+      retentionPolicyExists: false,
     });
     expect(context.security).toMatchObject({
       accessControl: {
@@ -473,7 +488,9 @@ describe("documents / templates API", () => {
       context,
     );
 
-    expect(renderedContent).toContain("# Acme AI Data Processors and Subprocessors");
+    expect(renderedContent).toContain(
+      "# Acme AI Data Processors and Subprocessors",
+    );
     expect(renderedContent).toContain("## Acme AI Platform");
     expect(renderedContent).toContain(
       "| GitHub |  | Acme AI Platform | limited | Code hosting and pull requests | Customer account data | us | signed |",
@@ -481,6 +498,230 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain(
       "| Stripe |  | Acme AI Platform | subprocessor | Payment processing | Customer account data | us, eu | signed |",
     );
+  });
+
+  it("renders the data security policy from current profile fields", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/data-security-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "data-security-policy.md",
+    );
+    const template = {
+      id: "template-data-security-policy",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [
+            storedService,
+            {
+              id: "service-admin",
+              ...serviceBody,
+              serviceName: "Acme Admin",
+              privacy: {
+                ...serviceBody.privacy,
+                primaryHostingRegion: "eu",
+              },
+              createdAt: "2026-05-16T00:00:00.000Z",
+              updatedAt: "2026-05-16T00:00:00.000Z",
+            },
+          ],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [
+          {
+            id: "vendor-subprocessor",
+            ...subprocessorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        serviceVendorUses: [
+          {
+            id: "vendor-use-subprocessor",
+            ...subprocessorUseBody,
+            vendorName: "Stripe",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(renderedContent).toContain("# Acme AI Data Security Policy");
+    expect(renderedContent).toContain("- Acme AI Platform");
+    expect(renderedContent).toContain("- Acme Admin");
+    expect(renderedContent).toContain(
+      "Acme AI Platform is primarily hosted in United States.",
+    );
+    expect(renderedContent).toContain(
+      "Acme Admin is primarily hosted in European Union.",
+    );
+    expect(renderedContent).toContain(
+      "## Secure development and change management",
+    );
+    expect(renderedContent).toContain("Code changes require review");
+    expect(renderedContent).toContain("dependencies are monitored");
+    expect(renderedContent).toContain(
+      "scanned for exposed credentials and secrets",
+    );
+    expect(renderedContent).toContain("Automated tests must pass");
+    expect(renderedContent).toContain("defined CI/CD process");
+    expect(renderedContent).toContain("require approval before release");
+    expect(renderedContent).toContain("using automated processes");
+    expect(renderedContent).toContain("on a weekly basis");
+    expect(renderedContent).toContain("critical vulnerabilities within 7 days");
+    expect(renderedContent).toContain(
+      "high-severity vulnerabilities within 30 days",
+    );
+    expect(renderedContent).toContain("## Incident response");
+    expect(renderedContent).toContain("## Backup and recovery");
+    expect(renderedContent).toContain("## Responsible disclosure");
+    expect(renderedContent).toContain(
+      "Production customer data is not used in development or test environments.",
+    );
+    expect(renderedContent).toContain("## Shared responsibility");
+    expect(renderedContent).not.toContain("| Vendor |");
+    expect(renderedContent).not.toContain("DPA status");
+    expect(renderedContent).not.toContain("Stripe");
+  });
+
+  it("omits unsupported controls and dependent security details", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/data-security-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "data-security-policy.md",
+    );
+    const template = {
+      id: "template-data-security-policy-empty",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          privacy: {
+            ...profileBody.privacy,
+            productionDataInDevelopment: true,
+            retentionPolicyExists: false,
+          },
+          infrastructure: {
+            ...profileBody.infrastructure,
+            organizationProviders: [],
+            encryptedDevicesRequired: false,
+            backupsEnabled: false,
+            centralizedLoggingEnabled: false,
+            securityMonitoring: "none",
+            atRestAlgorithm: null,
+            inTransitMinimumTlsVersion: null,
+            keyManagementProvider: null,
+            vendorReviewRequired: false,
+            vendorReviewCadence: null,
+            dpaRequiredForProcessors: false,
+            encryptionAtRest: false,
+            encryptionInTransit: false,
+          },
+          security: {
+            ...profileBody.security,
+            codeReviewRequired: false,
+            dependencySecurityMonitoring: false,
+            secretScanning: false,
+            automatedTestingBeforeDeployment: false,
+            cicdDeploymentProcess: false,
+            productionDeploymentApprovalRequired: false,
+            scanningCadence: null,
+            penetrationTestingStrategy: "none",
+            penetrationTestingCadence: null,
+            penetrationTestLastDate: null,
+            patchingSlaCriticalDays: null,
+            patchingSlaCriticalDaysStatus: null,
+            patchingSlaHighDays: null,
+            patchingSlaHighDaysStatus: null,
+            vulnerabilityDisclosureProgramExists: false,
+            vulnerabilityDisclosureUrl: null,
+            incidentResponsePlanExists: false,
+          },
+          access: {
+            ...profileBody.access,
+            mfaRequired: false,
+            ssoEnabled: false,
+            sharedAccountsExist: true,
+            offboardingProcessExists: false,
+            accessReviewsPerformed: false,
+            leastPrivilege: false,
+            roleBasedAccess: false,
+            accessReviewCadence: null,
+            adminApprovalRequired: false,
+            passwordManagerRequired: false,
+          },
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [],
+        serviceVendorUses: [],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(renderedContent).not.toContain(
+      "## Secure development and change management",
+    );
+    expect(renderedContent).not.toContain("## Access control");
+    expect(renderedContent).not.toContain("## Authentication");
+    expect(renderedContent).not.toContain("## Personnel security");
+    expect(renderedContent).not.toContain("## Encryption and data protection");
+    expect(renderedContent).not.toContain("## Monitoring and detection");
+    expect(renderedContent).not.toContain("## Vulnerability management");
+    expect(renderedContent).not.toContain("## Independent security testing");
+    expect(renderedContent).not.toContain("## Incident response");
+    expect(renderedContent).not.toContain("## Backup and recovery");
+    expect(renderedContent).not.toContain("## Vendor risk management");
+    expect(renderedContent).not.toContain("## Responsible disclosure");
+    expect(renderedContent).not.toContain("Within 72 hours");
+    expect(renderedContent).not.toContain("Email notice");
+    expect(renderedContent).not.toContain("retained for 30 days");
+    expect(renderedContent).not.toContain("restoration is tested");
+    expect(renderedContent).toContain("## Shared responsibility");
   });
 
   it("previews draft templates without generating documents", async () => {
@@ -748,7 +989,9 @@ describe("documents / templates API", () => {
     });
     expect(listResponse.statusCode).toBe(200);
     const summaries = listResponse.json();
-    const testSummary = summaries.find((s: any) => s.template.id === template.id);
+    const testSummary = summaries.find(
+      (s: any) => s.template.id === template.id,
+    );
     expect(testSummary).toBeDefined();
     expect(testSummary.documents).toHaveLength(2);
     expect(testSummary.documents[0].id).toBe(document2.id); // Sorted descending, so newest first (v1.1)

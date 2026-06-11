@@ -1,4 +1,4 @@
-import { type ProviderSystemType } from "@plyco/shared"
+import { type ProviderSelection, type ProviderSystemType } from "@plyco/shared"
 
 export type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
@@ -20,4 +20,28 @@ export const infrastructureProviderLabels: Record<
   source_control: "Code repository",
   cloud: "Cloud providers",
   password_manager: "Password manager",
+}
+
+export const updateInfrastructureProviderSelection = (
+  providers: ProviderSelection[],
+  systemType: InfrastructureProviderSystemType,
+  providerIds: string[]
+) => {
+  const otherProviders = providers.filter(
+    (provider) => provider.systemType !== systemType
+  )
+  const hadNone = providers.some(
+    (provider) =>
+      provider.systemType === systemType && provider.providerId === "none"
+  )
+  const hasNone = providerIds.includes("none")
+  const selectedIds =
+    hasNone && !hadNone
+      ? ["none"]
+      : providerIds.filter((providerId) => providerId !== "none")
+
+  return [
+    ...otherProviders,
+    ...selectedIds.map((providerId) => ({ systemType, providerId })),
+  ]
 }

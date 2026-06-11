@@ -91,7 +91,7 @@ export function createTestApp() {
         slug: "data-security-policy",
         name: "Data Security Policy",
         description:
-          "A customer-facing data security policy based on access control, encryption, monitoring, incident response, backup, and vendor risk data.",
+          "A customer-facing security policy covering governance, secure development, access, protection, detection, response, recovery, and vendor risk.",
         content: "# {{ company.name }} Data Security Policy\n",
       },
       {

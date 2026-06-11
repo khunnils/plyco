@@ -667,7 +667,6 @@ export const dashboardProgress = ({
     accessGroup,
     ...services,
     ...data.dataTypes,
-    ...vendors,
   ]
   const completedFields = topLevelSections.reduce(
     (total, section) => total + section.completedFields,

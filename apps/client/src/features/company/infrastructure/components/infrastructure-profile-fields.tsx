@@ -19,6 +19,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox"
+import { updateInfrastructureProviderSelection } from "@/features/company/infrastructure/lib/infrastructure-provider-utils"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
@@ -71,7 +72,10 @@ const CloudProviderPicker = ({
     "infrastructure.organizationProviders"
   )
   const selectedIds = selectedProviderIds(organizationProviders, "cloud")
-  const options = providerOptions(providers, "cloud")
+  const options = [
+    { value: "none", label: "None" },
+    ...providerOptions(providers, "cloud"),
+  ]
 
   return (
     <MultiSelectField
@@ -82,19 +86,13 @@ const CloudProviderPicker = ({
       placeholder="Select cloud providers"
       value={selectedIds}
       onValueChange={(providerIds) => {
-        const otherProviders = organizationProviders.filter(
-          (provider) => provider.systemType !== "cloud"
-        )
-
         form.setValue(
           "infrastructure.organizationProviders",
-          [
-            ...otherProviders,
-            ...providerIds.map((providerId) => ({
-              systemType: "cloud" as const,
-              providerId,
-            })),
-          ],
+          updateInfrastructureProviderSelection(
+            organizationProviders,
+            "cloud",
+            providerIds
+          ),
           { shouldDirty: true, shouldValidate: true }
         )
       }}
@@ -117,6 +115,7 @@ const ProviderPicker = ({
   const selectedIds = selectedProviderIds(organizationProviders, systemType)
   const options = [
     { value: "", label: "Not set" },
+    { value: "none", label: "None" },
     ...providerOptions(providers, systemType),
   ]
   const optionLabelByValue = new Map(
@@ -125,13 +124,13 @@ const ProviderPicker = ({
   const fieldId = `provider-${systemType}`
 
   const setSystemProvider = (providerId: string) => {
-    const otherProviders = organizationProviders.filter(
-      (provider) => provider.systemType !== systemType
-    )
-
     form.setValue(
       "infrastructure.organizationProviders",
-      [...otherProviders, ...(providerId ? [{ systemType, providerId }] : [])],
+      updateInfrastructureProviderSelection(
+        organizationProviders,
+        systemType,
+        providerId ? [providerId] : []
+      ),
       { shouldDirty: true, shouldValidate: true }
     )
   }

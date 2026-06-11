@@ -1237,7 +1237,7 @@
       "key": "security.vulnerabilityManagement.penetrationTestingStrategy",
       "label": "Penetration testing strategy",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Strategy code for penetration testing (internal, external, etc).",
       "example": "external"
     },
@@ -1245,7 +1245,7 @@
       "key": "security.vulnerabilityManagement.penetrationTestingStrategyLabel",
       "label": "Penetration testing strategy label",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Human-readable label for the penetration testing strategy code.",
       "example": "External"
     },
@@ -1253,7 +1253,7 @@
       "key": "security.vulnerabilityManagement.penetrationTestingCadence",
       "label": "Penetration testing cadence",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Cadence code for independent third-party penetration testing.",
       "example": "annually"
     },
@@ -1261,7 +1261,7 @@
       "key": "security.vulnerabilityManagement.penetrationTestingCadenceLabel",
       "label": "Penetration testing cadence label",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Human-readable label for the penetration testing cadence code.",
       "example": "Annually"
     },
@@ -1269,7 +1269,7 @@
       "key": "security.vulnerabilityManagement.penetrationTestLastDate",
       "label": "Last penetration test date",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Date of the most recent third-party penetration test.",
       "example": "2026-03-15"
     },
@@ -1277,7 +1277,7 @@
       "key": "security.vulnerabilityManagement.vulnerabilityDisclosureProgramExists",
       "label": "Responsible disclosure program exists",
       "type": "boolean",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "Whether the organization operates a responsible vulnerability disclosure program.",
       "example": true
     },
@@ -1285,7 +1285,7 @@
       "key": "security.vulnerabilityManagement.vulnerabilityDisclosureUrl",
       "label": "Responsible disclosure URL",
       "type": "string",
-      "category": "Infrastructure",
+      "category": "Security",
       "description": "URL where researchers can find the responsible disclosure policy.",
       "example": "https://acme.example/security"
     },
@@ -1495,7 +1495,7 @@
       ]
     },
     {
-      "key": "dataHandling.storesPii",
+      "key": "organization.storesPii",
       "label": "Stores PII",
       "type": "boolean",
       "category": "Data Handling",
@@ -1503,7 +1503,7 @@
       "example": true
     },
     {
-      "key": "dataHandling.storesHealthcareData",
+      "key": "organization.storesHealthcareData",
       "label": "Stores healthcare data",
       "type": "boolean",
       "category": "Data Handling",
@@ -1511,34 +1511,34 @@
       "example": false
     },
     {
-      "key": "dataHandling.encryptionAtRest",
+      "key": "infrastructure.encryptionAtRest",
       "label": "Encryption at rest",
       "type": "boolean",
-      "category": "Data Handling",
+      "category": "Infrastructure",
       "description": "Whether stored data is encrypted at rest.",
       "example": true
     },
     {
-      "key": "dataHandling.encryptionInTransit",
+      "key": "infrastructure.encryptionInTransit",
       "label": "Encryption in transit",
       "type": "boolean",
-      "category": "Data Handling",
+      "category": "Infrastructure",
       "description": "Whether data is encrypted while transmitted between systems.",
       "example": true
     },
     {
-      "key": "dataHandling.productionDataInDevelopment",
+      "key": "privacy.productionDataInDevelopment",
       "label": "Production data in development",
       "type": "boolean",
-      "category": "Data Handling",
+      "category": "Privacy",
       "description": "Whether production data is used in development or test environments.",
       "example": false
     },
     {
-      "key": "dataHandling.retentionPolicyExists",
+      "key": "privacy.retentionPolicyExists",
       "label": "Retention policy exists",
       "type": "boolean",
-      "category": "Data Handling",
+      "category": "Privacy",
       "description": "Whether the organization has a documented data retention policy.",
       "example": true
     },

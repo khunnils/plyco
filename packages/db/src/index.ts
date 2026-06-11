@@ -139,6 +139,7 @@ export function mapOrganizationRecord(record: {
     dpaRequiredForProcessors: boolean | null;
     encryptionAtRest: boolean | null;
     encryptionInTransit: boolean | null;
+    explicitNoProviderSystemTypes: string[];
   } | null;
   securityProfile: {
     codeReviewRequired: boolean | null;
@@ -213,23 +214,36 @@ export function mapOrganizationRecord(record: {
     complianceGoals: stringArray(record.complianceGoals),
   });
   const infrastructure = infrastructureProfileSchema.parse({
-    organizationProviders: record.organizationProviders.flatMap((provider) =>
-      provider.providerId
-        ? provider.systemTypes.flatMap((systemType) =>
-            ["auth", "source_control", "cloud", "password_manager"].includes(
-              systemType,
+    organizationProviders: [
+      ...record.organizationProviders.flatMap((provider) =>
+        provider.providerId
+          ? provider.systemTypes.flatMap((systemType) =>
+              ["auth", "source_control", "cloud", "password_manager"].includes(
+                systemType,
+              )
+                ? [
+                    {
+                      providerId: provider.providerId,
+                      systemType,
+                      name: provider.name,
+                    },
+                  ]
+                : [],
             )
-              ? [
-                  {
-                    providerId: provider.providerId,
-                    systemType,
-                    name: provider.name,
-                  },
-                ]
-              : [],
-          )
-        : [],
-    ),
+          : [],
+      ),
+      ...(record.infrastructureProfile?.explicitNoProviderSystemTypes ?? [])
+        .filter((systemType) =>
+          ["auth", "source_control", "cloud", "password_manager"].includes(
+            systemType,
+          ),
+        )
+        .map((systemType) => ({
+          providerId: "none",
+          systemType,
+          name: "None",
+        })),
+    ],
     mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? null,
     encryptedDevicesRequired:
       record.infrastructureProfile?.encryptedDevicesRequired ?? null,

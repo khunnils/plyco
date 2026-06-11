@@ -273,6 +273,31 @@ describe("dashboard progress", () => {
     })
   })
 
+  it("counts explicit no-provider answers but not unanswered providers", () => {
+    const unanswered = infrastructureProgress(emptyProfileDraft)
+    const answered = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        organizationProviders: [
+          { systemType: "cloud", providerId: "none" },
+          { systemType: "source_control", providerId: "none" },
+          { systemType: "auth", providerId: "none" },
+          { systemType: "password_manager", providerId: "none" },
+        ],
+      },
+    })
+    const unansweredProviders = unanswered.sections.find(
+      (section) => section.title === "Infrastructure Providers"
+    )
+    const answeredProviders = answered.sections.find(
+      (section) => section.title === "Infrastructure Providers"
+    )
+
+    expect(unansweredProviders?.completedFields).toBe(0)
+    expect(answeredProviders?.completedFields).toBe(4)
+  })
+
   it("adjusts vendor risk fields count based on vendorReviewRequired and compliance goals", () => {
     const progressNoVendorGDPR = infrastructureProgress({
       ...emptyProfileDraft,

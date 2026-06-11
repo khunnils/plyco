@@ -1,28 +1,41 @@
 ' slug: data-security-policy
 ' name: Data Security Policy
-' description: A customer-facing data security policy based on access control, encryption, monitoring, incident response, backup, and vendor risk data.
+' description: A customer-facing security policy for SaaS services, covering governance, secure development, access, protection, detection, response, recovery, and vendor risk.
 
 # {{ organization.name }} Data Security Policy
 
 {% if policy.version %}_Version {{ policy.version }}_{% endif %}
 {% if policy.lastUpdatedDate %}_Last updated: {{ policy.lastUpdatedDate }}_{% endif %}
 
-{{ organization.legalEntityName or organization.name }} maintains administrative, technical, and organizational safeguards designed to protect {{ service.name }} and the customer data we process. This policy summarizes the security controls we have in place.
+{{ organization.legalEntityName or organization.name }} maintains administrative, technical, and organizational safeguards designed to protect the services we provide and the customer data we process. This policy describes our current security practices. It does not represent a certification or guarantee that security incidents cannot occur.
 
-## Scope
+## Governance and scope
 
-This policy applies to {{ service.name }} and the systems, infrastructure, and personnel involved in operating and supporting it.
+This policy applies to the people, processes, systems, and infrastructure used to develop, operate, and support our services.
+
+{% if services.all.length > 1 %}
+The services covered by this policy are:
+
+{% for service in services.all -%}
+{% if service.name %}- {{ service.name }}
+{% endif %}
+{% endfor %}
+{% elif service.name %}
+This policy covers {{ service.name }}.
+{% endif %}
+
+We review and update this policy when our services, security practices, or material risks change.
 
 {% if services.hasHostingRegion or infrastructure.organizationProviders.length %}
-## Hosting and data residency
+## Infrastructure and hosting
 
 {% for service in services.all %}
 {% if service.privacy.primaryHostingRegionLabel %}
-{% if services.all.length > 1 %}{{ service.name }} is{% else %}Our service is{% endif %} primarily hosted in {{ service.privacy.primaryHostingRegionLabel }}.
+{% if services.all.length > 1 %}{{ service.name }} is{% else %}The service is{% endif %} primarily hosted in {{ service.privacy.primaryHostingRegionLabel }}.
 {% endif %}
 {% endfor %}
 {% if infrastructure.organizationProviders.length %}
-We build on established infrastructure and platform providers, including:
+We use established infrastructure and platform providers to operate critical systems, including:
 
 {% for provider in infrastructure.organizationProviders -%}
 - {{ provider.name or provider.providerId }}{% if provider.systemType %} ({{ provider.systemType | replace("_", " ") | replace("-", " ") }}){% endif %}
@@ -30,22 +43,40 @@ We build on established infrastructure and platform providers, including:
 {% endif %}
 {% endif %}
 
+{% if security.developmentSecurity.codeReviewRequiredHasValue or security.developmentSecurity.dependencySecurityMonitoringHasValue or security.developmentSecurity.secretScanningHasValue or security.developmentSecurity.automatedTestingBeforeDeploymentHasValue or security.developmentSecurity.cicdDeploymentProcessHasValue or security.developmentSecurity.productionDeploymentApprovalRequiredHasValue %}
+## Secure development and change management
+
+We integrate security checks into software development and production changes.
+
+{% if security.developmentSecurity.codeReviewRequiredHasValue %}- Code changes require review before they are merged.
+{% endif %}
+{% if security.developmentSecurity.dependencySecurityMonitoringHasValue %}- Software dependencies are monitored for known security vulnerabilities.
+{% endif %}
+{% if security.developmentSecurity.secretScanningHasValue %}- Source code is scanned for exposed credentials and secrets.
+{% endif %}
+{% if security.developmentSecurity.automatedTestingBeforeDeploymentHasValue %}- Automated tests must pass before changes are deployed.
+{% endif %}
+{% if security.developmentSecurity.cicdDeploymentProcessHasValue %}- Production deployments use a defined CI/CD process.
+{% endif %}
+{% if security.developmentSecurity.productionDeploymentApprovalRequiredHasValue %}- Production deployments require approval before release.
+{% endif %}
+{% endif %}
+
 {% if security.accessControl.leastPrivilegeHasValue or security.accessControl.roleBasedAccessHasValue or security.accessControl.adminApprovalRequiredHasValue or security.accessControl.accessReviewCadenceLabel or access.accessReviewsPerformedHasValue or access.offboardingProcessExistsHasValue or (access.sharedAccountsExistAnswered and not access.sharedAccountsExist) %}
 ## Access control
 
-{% if security.accessControl.leastPrivilegeHasValue %}We apply least-privilege principles, granting access only to the systems and data each person needs.
+{% if security.accessControl.leastPrivilegeHasValue %}We apply least-privilege principles so personnel receive only the access needed for their responsibilities.
 {% endif %}
-{% if security.accessControl.roleBasedAccessHasValue %}Access is granted through defined roles.
+{% if security.accessControl.roleBasedAccessHasValue %}Access is assigned through defined roles.
 {% endif %}
 {% if security.accessControl.adminApprovalRequiredHasValue %}Administrative and other privileged access requires explicit approval.
 {% endif %}
-{% if security.accessControl.accessReviewCadenceLabel %}We review access rights on a {{ security.accessControl.accessReviewCadenceLabel | lower }} basis.
+{% if security.accessControl.accessReviewCadenceLabel %}Access rights are reviewed on a {{ security.accessControl.accessReviewCadenceLabel | lower }} basis.
+{% elif access.accessReviewsPerformedHasValue %}Access rights to critical systems are reviewed periodically.
 {% endif %}
-{% if access.accessReviewsPerformedHasValue %}Periodic access reviews are performed for critical systems.
+{% if access.offboardingProcessExistsHasValue %}A defined offboarding process removes access promptly when personnel leave or change roles.
 {% endif %}
-{% if access.offboardingProcessExistsHasValue %}We follow a defined offboarding process to remove access promptly when personnel leave or change roles.
-{% endif %}
-{% if access.sharedAccountsExistAnswered and not access.sharedAccountsExist %}We do not permit shared user accounts on critical systems.
+{% if access.sharedAccountsExistAnswered and not access.sharedAccountsExist %}Shared user accounts are not permitted on critical systems.
 {% endif %}
 {% endif %}
 
@@ -54,49 +85,53 @@ We build on established infrastructure and platform providers, including:
 
 {% if security.authentication.mfaRequiredHasValue %}Multi-factor authentication is required for workforce access to critical systems.
 {% endif %}
-{% if security.authentication.ssoSupportedHasValue %}Single sign-on is supported for workforce access.
+{% if security.authentication.ssoSupportedHasValue %}Single sign-on is used to centralize workforce authentication where supported.
 {% endif %}
-{% if security.authentication.passwordManagerRequiredHasValue %}Team members are required to use a password manager.
+{% if security.authentication.passwordManagerRequiredHasValue %}Personnel are required to use an approved password manager for work credentials.
 {% endif %}
 {% endif %}
 
 {% if access.securityTrainingRequiredHasValue or access.confidentialityAgreementsRequiredHasValue %}
 ## Personnel security
 
-{% if access.securityTrainingRequiredHasValue %}All team members complete security awareness training when they join and on a recurring basis thereafter.
+{% if access.securityTrainingRequiredHasValue %}Personnel complete security awareness training when they join and on a recurring basis thereafter.
 {% endif %}
-{% if access.confidentialityAgreementsRequiredHasValue %}All team members are bound by confidentiality or non-disclosure agreements covering customer data.
+{% if access.confidentialityAgreementsRequiredHasValue %}Personnel are bound by confidentiality obligations covering customer and company data.
 {% endif %}
 {% endif %}
 
-{% if security.encryption.atRestAlgorithmLabel or dataHandling.encryptionAtRestHasValue or security.encryption.inTransitMinimumTlsVersionLabel or dataHandling.encryptionInTransitHasValue or security.encryption.keyManagementProviderLabel or infrastructure.encryptedDevicesRequiredHasValue %}
-## Encryption and key management
+{% if security.encryption.atRestAlgorithmLabel or infrastructure.encryptionAtRestHasValue or security.encryption.inTransitMinimumTlsVersionLabel or infrastructure.encryptionInTransitHasValue or security.encryption.keyManagementProviderLabel or infrastructure.encryptedDevicesRequiredHasValue or (privacy.productionDataInDevelopmentAnswered and not privacy.productionDataInDevelopment) or privacy.retentionPolicyExistsHasValue %}
+## Encryption and data protection
 
 {% if security.encryption.atRestAlgorithmLabel %}Data at rest is encrypted using {{ security.encryption.atRestAlgorithmLabel }}.
-{% elif dataHandling.encryptionAtRestHasValue %}Data at rest is encrypted.
+{% elif infrastructure.encryptionAtRestHasValue %}Data at rest is encrypted.
 {% endif %}
 {% if security.encryption.inTransitMinimumTlsVersionLabel %}Data in transit is protected using {{ security.encryption.inTransitMinimumTlsVersionLabel }} or higher.
-{% elif dataHandling.encryptionInTransitHasValue %}Data in transit is encrypted using industry-standard transport encryption.
+{% elif infrastructure.encryptionInTransitHasValue %}Data in transit is protected using industry-standard transport encryption.
 {% endif %}
 {% if security.encryption.keyManagementProviderLabel %}Encryption keys are managed using {{ security.encryption.keyManagementProviderLabel }}.
 {% endif %}
 {% if infrastructure.encryptedDevicesRequiredHasValue %}Company devices used to access customer data are required to use full-disk encryption.
 {% endif %}
+{% if privacy.productionDataInDevelopmentAnswered and not privacy.productionDataInDevelopment %}Production customer data is not used in development or test environments.
 {% endif %}
-
-{% if security.logging.centralizedLoggingHasValue or security.logging.securityMonitoringHasValue %}
-## Logging and monitoring
-
-{% if security.logging.centralizedLoggingHasValue %}Security-relevant logs are centralized to support monitoring and review.
-{% endif %}
-{% if security.logging.securityMonitoringHasValue %}Security monitoring is {{ security.logging.securityMonitoringLabel | lower }}.
+{% if privacy.retentionPolicyExistsHasValue %}We maintain data-retention practices intended to delete or anonymize data when it is no longer needed.
 {% endif %}
 {% endif %}
 
-{% if security.vulnerabilityManagement.scanningCadenceLabel or security.vulnerabilityManagement.patchingSlaCriticalDaysHasValue or security.vulnerabilityManagement.patchingSlaHighDaysHasValue %}
+{% if security.logging.centralizedLoggingHasValue or (security.logging.securityMonitoringHasValue and security.logging.securityMonitoring != "none") %}
+## Monitoring and detection
+
+{% if security.logging.centralizedLoggingHasValue %}Security-relevant logs are centralized to support investigation and operational review.
+{% endif %}
+{% if security.logging.securityMonitoringHasValue and security.logging.securityMonitoring != "none" %}Security events are monitored using {{ security.logging.securityMonitoringLabel | lower }} processes to identify suspicious activity and operational issues.
+{% endif %}
+{% endif %}
+
+{% if (security.vulnerabilityManagement.scanningCadence and security.vulnerabilityManagement.scanningCadence != "none" and security.vulnerabilityManagement.scanningCadence != "not_defined") or security.vulnerabilityManagement.patchingSlaCriticalDaysHasValue or security.vulnerabilityManagement.patchingSlaHighDaysHasValue %}
 ## Vulnerability management
 
-{% if security.vulnerabilityManagement.scanningCadenceLabel %}We scan for vulnerabilities on a {{ security.vulnerabilityManagement.scanningCadenceLabel | lower }} basis.
+{% if security.vulnerabilityManagement.scanningCadence and security.vulnerabilityManagement.scanningCadence != "none" and security.vulnerabilityManagement.scanningCadence != "not_defined" %}Applications, dependencies, and infrastructure are scanned for known vulnerabilities on a {{ security.vulnerabilityManagement.scanningCadenceLabel | lower }} basis.
 {% endif %}
 {% if security.vulnerabilityManagement.patchingSlaCriticalDaysHasValue %}We target remediation of critical vulnerabilities within {{ security.vulnerabilityManagement.patchingSlaCriticalDays }} days.
 {% endif %}
@@ -104,75 +139,60 @@ We build on established infrastructure and platform providers, including:
 {% endif %}
 {% endif %}
 
-{% if security.vulnerabilityManagement.penetrationTestingCadenceLabel or security.vulnerabilityManagement.penetrationTestLastDate %}
-## Penetration testing
+{% if security.vulnerabilityManagement.penetrationTestingStrategy == "external" and (security.vulnerabilityManagement.penetrationTestingCadenceLabel or security.vulnerabilityManagement.penetrationTestLastDate) %}
+## Independent security testing
 
-{% if security.vulnerabilityManagement.penetrationTestingCadenceLabel %}We engage independent third parties to perform penetration testing on a {{ security.vulnerabilityManagement.penetrationTestingCadenceLabel | lower }} basis.
+{% if security.vulnerabilityManagement.penetrationTestingCadenceLabel %}Independent third parties perform penetration testing on a {{ security.vulnerabilityManagement.penetrationTestingCadenceLabel | lower }} basis.
 {% endif %}
-{% if security.vulnerabilityManagement.penetrationTestLastDate %}Our most recent penetration test was completed on {{ security.vulnerabilityManagement.penetrationTestLastDate }}.
+{% if security.vulnerabilityManagement.penetrationTestLastDate %}The most recent penetration test was completed on {{ security.vulnerabilityManagement.penetrationTestLastDate }}.
 {% endif %}
 {% endif %}
 
-{% if security.incidentResponse.planExistsHasValue or security.incidentResponse.notificationTimelineLabel or security.incidentResponse.customerNotificationProcessLabel or security.incidentResponse.lastTestedDate %}
+{% if security.incidentResponse.planExistsHasValue %}
 ## Incident response
 
-{% if security.incidentResponse.planExistsHasValue %}We maintain a documented incident response plan.
-{% endif %}
-{% if security.incidentResponse.notificationTimelineLabel %}If an incident affects customer data, we notify affected customers {{ security.incidentResponse.notificationTimelineLabel | lower }}.
+We maintain a documented process for identifying, containing, investigating, remediating, and learning from security incidents.
+{% if security.incidentResponse.notificationTimelineLabel %}When an incident requires customer notification, affected customers are notified {{ security.incidentResponse.notificationTimelineLabel | lower }}.
 {% endif %}
 {% if security.incidentResponse.customerNotificationProcessLabel %}Customer notifications are delivered via {{ security.incidentResponse.customerNotificationProcessLabel | lower }}.
 {% endif %}
-{% if security.incidentResponse.lastTestedDate %}Our incident response plan was last tested on {{ security.incidentResponse.lastTestedDate }}.
+{% if security.incidentResponse.lastTestedDate %}Our incident response process was last tested on {{ security.incidentResponse.lastTestedDate }}.
 {% endif %}
 {% endif %}
 
-{% if infrastructure.backupsEnabledHasValue or security.backups.backupCadenceLabel or security.backups.backupRetentionDaysHasValue or security.backups.restoreTestingCadenceLabel %}
-## Backups and recovery
+{% if infrastructure.backupsEnabledHasValue %}
+## Backup and recovery
 
-{% if infrastructure.backupsEnabledHasValue or security.backups.backupCadenceLabel %}We back up critical data{% if security.backups.backupCadenceLabel %} on a {{ security.backups.backupCadenceLabel | lower }} basis{% endif %}.
-{% endif %}
+Critical production data is backed up{% if security.backups.backupCadenceLabel %} on a {{ security.backups.backupCadenceLabel | lower }} basis{% endif %}.
 {% if security.backups.backupRetentionDaysHasValue %}Backups are retained for {{ security.backups.backupRetentionDays }} days.
 {% endif %}
-{% if security.backups.restoreTestingCadenceLabel %}We test our ability to restore from backups on a {{ security.backups.restoreTestingCadenceLabel | lower }} basis.
-{% endif %}
-{% endif %}
-
-{% if (dataHandling.productionDataInDevelopmentAnswered and not dataHandling.productionDataInDevelopment) or dataHandling.retentionPolicyExistsHasValue %}
-## Data protection
-
-{% if dataHandling.productionDataInDevelopmentAnswered and not dataHandling.productionDataInDevelopment %}We do not use production customer data in development or test environments.
-{% endif %}
-{% if dataHandling.retentionPolicyExistsHasValue %}We maintain a data retention policy and delete or anonymize data when it is no longer needed.
+{% if security.backups.restoreTestingCadenceLabel %}Backup restoration is tested on a {{ security.backups.restoreTestingCadenceLabel | lower }} basis.
 {% endif %}
 {% endif %}
 
 {% if security.vendorRisk.vendorReviewRequiredHasValue or security.vendorRisk.dpaRequiredForProcessorsHasValue or vendors.dataProcessorsHasValue %}
 ## Vendor risk management
 
-{% if security.vendorRisk.vendorReviewRequiredHasValue %}We assess the security practices of vendors that process customer data{% if security.vendorRisk.vendorReviewCadenceLabel %} on a {{ security.vendorRisk.vendorReviewCadenceLabel | lower }} basis{% endif %}.
+{% if security.vendorRisk.vendorReviewRequiredHasValue %}Vendors with access to critical systems or customer data are assessed before use{% if security.vendorRisk.vendorReviewCadenceLabel %} and reviewed on a {{ security.vendorRisk.vendorReviewCadenceLabel | lower }} basis{% endif %}.
+{% elif vendors.dataProcessorsHasValue %}We assess vendors that process customer data on our behalf.
 {% endif %}
-{% if security.vendorRisk.dpaRequiredForProcessorsHasValue %}We require data processing agreements with vendors that process personal data on our behalf.
+{% if security.vendorRisk.dpaRequiredForProcessorsHasValue %}Data processing agreements are required for vendors that process personal data on our behalf.
 {% endif %}
-
-{% if vendors.dataProcessorsHasValue %}
-The vendors that process customer data on our behalf are:
-
-| Vendor | Purpose | Processing level | DPA status |
-| --- | --- | --- | --- |
-{% for vendor in vendors.dataProcessors -%}
-| {{ vendor.name }} | {{ vendor.purpose or "—" }} | {{ vendor.dataProcessingLevel or "—" }} | {{ vendor.dpaStatus or "—" }} |
-{% endfor %}
-{% endif %}
+Our current data processors and subprocessors are described in our dedicated subprocessors document.
 {% endif %}
 
 {% if security.vulnerabilityManagement.vulnerabilityDisclosureProgramExistsHasValue %}
 ## Responsible disclosure
 
-We welcome reports from security researchers and operate a responsible disclosure process. We ask that researchers give us a reasonable opportunity to investigate and remediate before any public disclosure.
-{% if security.vulnerabilityManagement.vulnerabilityDisclosureUrl %}Details of our disclosure program are available at {{ security.vulnerabilityManagement.vulnerabilityDisclosureUrl }}.
+We welcome good-faith vulnerability reports and ask researchers to provide a reasonable opportunity to investigate and remediate an issue before public disclosure.
+{% if security.vulnerabilityManagement.vulnerabilityDisclosureUrl %}Instructions for reporting vulnerabilities are available at {{ security.vulnerabilityManagement.vulnerabilityDisclosureUrl }}.
 {% endif %}
 {% endif %}
+
+## Shared responsibility
+
+Customers are responsible for protecting their account credentials, managing authorized users, configuring available security settings appropriately, and notifying us promptly of suspected unauthorized access. Security also depends on the safeguards provided by the infrastructure and service providers used to deliver our services.
 
 ## Reporting a security concern
 
-{% if organization.securityContactEmail %}If you discover a security vulnerability or have a security concern, please contact us at {{ organization.securityContactEmail }}.{% elif organization.contactEmail %}If you discover a security vulnerability or have a security concern, please contact us at {{ organization.contactEmail }}.{% else %}If you discover a security vulnerability or have a security concern, please contact us so we can investigate promptly.{% endif %}
+{% if organization.securityContactEmail %}To report a vulnerability or security concern, contact {{ organization.securityContactEmail }}.{% elif organization.contactEmail %}To report a vulnerability or security concern, contact {{ organization.contactEmail }}.{% else %}Please contact us promptly if you discover a vulnerability or security concern.{% endif %}
