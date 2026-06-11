@@ -9,6 +9,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type SecurityProfile,
   type ProviderSelection,
   type OrganizationSecurityProfile,
   type PrivacyProfile,
@@ -33,6 +34,7 @@ export const ORGANIZATION_INCLUDE =
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
     },
     infrastructureProfile: true,
+    securityProfile: true,
     privacyProfile: true,
     services: {
       include: { businessActivities: true },
@@ -68,6 +70,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
   ): Promise<OrganizationSecurityProfile> {
     const organizationData = this.organizationData(input.company);
     const infrastructureData = this.infrastructureData(input.infrastructure);
+    const securityData = this.securityData(input.security);
     const privacyData = this.privacyData(input.privacy);
     const accessData = this.accessData(input.access);
 
@@ -91,6 +94,12 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
           upsert: {
             create: infrastructureData,
             update: infrastructureData,
+          },
+        },
+        securityProfile: {
+          upsert: {
+            create: securityData,
+            update: securityData,
           },
         },
       },
@@ -207,21 +216,10 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       encryptedDevicesRequired: input.encryptedDevicesRequired,
       backupsEnabled: input.backupsEnabled,
       centralizedLoggingEnabled: input.centralizedLoggingEnabled,
+      securityMonitoring: input.securityMonitoring,
       atRestAlgorithm: input.atRestAlgorithm,
       inTransitMinimumTlsVersion: input.inTransitMinimumTlsVersion,
       keyManagementProvider: input.keyManagementProvider,
-      logRetentionDays: input.logRetentionDays,
-      logRetentionDaysStatus: input.logRetentionDaysStatus,
-      securityMonitoringOwner: input.securityMonitoringOwner,
-      scanningCadence: input.scanningCadence,
-      patchingSlaCriticalDays: input.patchingSlaCriticalDays,
-      patchingSlaCriticalDaysStatus: input.patchingSlaCriticalDaysStatus,
-      patchingSlaHighDays: input.patchingSlaHighDays,
-      patchingSlaHighDaysStatus: input.patchingSlaHighDaysStatus,
-      incidentResponsePlanExists: input.incidentResponsePlanExists,
-      incidentNotificationTimeline: input.incidentNotificationTimeline,
-      customerNotificationProcess: input.customerNotificationProcess,
-      incidentResponseLastTestedDate: input.incidentResponseLastTestedDate,
       backupCadence: input.backupCadence,
       backupRetentionDays: input.backupRetentionDays,
       backupRetentionDaysStatus: input.backupRetentionDaysStatus,
@@ -229,14 +227,35 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vendorReviewRequired: input.vendorReviewRequired,
       vendorReviewCadence: input.vendorReviewCadence,
       dpaRequiredForProcessors: input.dpaRequiredForProcessors,
+      encryptionAtRest: input.encryptionAtRest,
+      encryptionInTransit: input.encryptionInTransit,
+    };
+  }
+
+  private securityData(input: SecurityProfile) {
+    return {
+      codeReviewRequired: input.codeReviewRequired,
+      dependencySecurityMonitoring: input.dependencySecurityMonitoring,
+      secretScanning: input.secretScanning,
+      automatedTestingBeforeDeployment: input.automatedTestingBeforeDeployment,
+      cicdDeploymentProcess: input.cicdDeploymentProcess,
+      productionDeploymentApprovalRequired:
+        input.productionDeploymentApprovalRequired,
+      scanningCadence: input.scanningCadence,
       penetrationTestingStrategy: input.penetrationTestingStrategy,
       penetrationTestingCadence: input.penetrationTestingCadence,
       penetrationTestLastDate: input.penetrationTestLastDate,
+      patchingSlaCriticalDays: input.patchingSlaCriticalDays,
+      patchingSlaCriticalDaysStatus: input.patchingSlaCriticalDaysStatus,
+      patchingSlaHighDays: input.patchingSlaHighDays,
+      patchingSlaHighDaysStatus: input.patchingSlaHighDaysStatus,
       vulnerabilityDisclosureProgramExists:
         input.vulnerabilityDisclosureProgramExists,
       vulnerabilityDisclosureUrl: input.vulnerabilityDisclosureUrl,
-      encryptionAtRest: input.encryptionAtRest,
-      encryptionInTransit: input.encryptionInTransit,
+      incidentResponsePlanExists: input.incidentResponsePlanExists,
+      incidentNotificationTimeline: input.incidentNotificationTimeline,
+      customerNotificationProcess: input.customerNotificationProcess,
+      incidentResponseLastTestedDate: input.incidentResponseLastTestedDate,
     };
   }
 

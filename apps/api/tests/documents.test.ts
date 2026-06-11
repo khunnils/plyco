@@ -246,7 +246,10 @@ describe("documents / templates API", () => {
         expect.objectContaining({
           key: "security.encryption.atRestAlgorithmLabel",
         }),
-        expect.objectContaining({ key: "security.logging.logRetentionDays" }),
+        expect.objectContaining({ key: "security.logging.securityMonitoring" }),
+        expect.objectContaining({
+          key: "security.developmentSecurity.codeReviewRequired",
+        }),
         expect.objectContaining({
           key: "security.vulnerabilityManagement.scanningCadenceLabel",
         }),
@@ -365,9 +368,16 @@ describe("documents / templates API", () => {
       },
       logging: {
         centralizedLogging: false,
-        logRetentionDays: 365,
-        securityMonitoringOwner: "security",
-        securityMonitoringOwnerLabel: "Security",
+        securityMonitoring: "automated",
+        securityMonitoringLabel: "Automated",
+      },
+      developmentSecurity: {
+        codeReviewRequired: true,
+        dependencySecurityMonitoring: true,
+        secretScanning: true,
+        automatedTestingBeforeDeployment: true,
+        cicdDeploymentProcess: true,
+        productionDeploymentApprovalRequired: true,
       },
       vulnerabilityManagement: {
         scanningCadence: "weekly",
@@ -885,9 +895,9 @@ describe("documents / templates API", () => {
       url: "/organizations/org-test/security-profile",
       payload: {
         ...profileBody,
-        infrastructure: {
-          ...profileBody.infrastructure,
-          logRetentionDays: 180,
+        security: {
+          ...profileBody.security,
+          codeReviewRequired: false,
         },
       },
     });

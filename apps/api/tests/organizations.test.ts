@@ -657,6 +657,12 @@ describe("organizations API", () => {
     expect(saveResponse.json().organization.privacy).toEqual(
       profileBody.privacy,
     );
+    expect(saveResponse.json().organization.infrastructure).toMatchObject(
+      profileBody.infrastructure,
+    );
+    expect(saveResponse.json().organization.security).toEqual(
+      profileBody.security,
+    );
 
     const getResponse = await app.inject({
       method: "GET",
@@ -691,6 +697,9 @@ describe("organizations API", () => {
     ]);
     expect(getResponse.json().organization.privacy).toEqual(
       profileBody.privacy,
+    );
+    expect(getResponse.json().organization.security).toEqual(
+      profileBody.security,
     );
   });
 
@@ -1176,6 +1185,30 @@ describe("organizations API", () => {
           codeSetId: "security_encryption_algorithms",
           field: "infrastructure.atRestAlgorithm",
           value: "aes_512",
+        },
+      },
+    });
+
+    const invalidMonitoringResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          securityMonitoring: "outsourced",
+        },
+      },
+    });
+
+    expect(invalidMonitoringResponse.statusCode).toBe(400);
+    expect(invalidMonitoringResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_monitoring_modes",
+          field: "infrastructure.securityMonitoring",
+          value: "outsourced",
         },
       },
     });

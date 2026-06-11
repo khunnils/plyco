@@ -21,6 +21,7 @@ import { ActivitiesRoutePage } from "@/features/company/activities/pages/activit
 import { ProductDataGraphRoutePage } from "@/features/company/graph/pages/product-data-graph-route-page"
 import { PrivacyProfileRoutePage } from "@/features/company/privacy/pages/privacy-profile-route-page"
 import { InfrastructureProfileRoutePage } from "@/features/company/infrastructure/pages/infrastructure-profile-route-page"
+import { SecurityProfileRoutePage } from "@/features/company/security/pages/security-profile-route-page"
 import { DataHandlingProfileRoutePage } from "@/features/company/data-handling/pages/data-handling-profile-route-page"
 import { AccessProfileRoutePage } from "@/features/company/access/pages/access-profile-route-page"
 import { VendorsRoutePage } from "@/features/vendors/pages/vendors-route-page"
@@ -118,6 +119,7 @@ export const App = () => {
           path="/company/infrastructure"
           element={<InfrastructureProfileRoutePage />}
         />
+        <Route path="/company/security" element={<SecurityProfileRoutePage />} />
         <Route
           path="/company/data"
           element={<DataHandlingProfileRoutePage />}

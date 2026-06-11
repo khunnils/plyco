@@ -3,6 +3,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type SecurityProfile,
   type OrganizationSecurityProfile,
   type PrivacyProfile,
   type Provider,
@@ -14,6 +15,7 @@ export type SecurityProfileInput = {
   services: ServiceProfileInput[];
   privacy: PrivacyProfile;
   infrastructure: InfrastructureProfile;
+  security: SecurityProfile;
   dataHandling: DataHandlingProfile;
   access: AccessProfile;
 };

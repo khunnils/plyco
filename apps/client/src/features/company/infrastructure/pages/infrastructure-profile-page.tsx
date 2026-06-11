@@ -25,10 +25,6 @@ export const InfrastructureProfilePage = ({
     profile={profile}
     providers={providers}
     securityCadenceOptions={codeOptions(vocabulary, "security_cadences")}
-    securityCustomerNotificationProcessOptions={codeOptions(
-      vocabulary,
-      "security_customer_notification_processes"
-    )}
     securityEncryptionAlgorithmOptions={codeOptions(
       vocabulary,
       "security_encryption_algorithms"
@@ -37,19 +33,11 @@ export const InfrastructureProfilePage = ({
       vocabulary,
       "security_key_management_providers"
     )}
-    securityMonitoringOwnerOptions={codeOptions(
+    securityMonitoringOptions={codeOptions(
       vocabulary,
-      "security_monitoring_owners"
-    )}
-    securityNotificationTimelineOptions={codeOptions(
-      vocabulary,
-      "security_notification_timelines"
+      "security_monitoring_modes"
     )}
     securityTlsVersionOptions={codeOptions(vocabulary, "security_tls_versions")}
-    penetrationTestingStrategyOptions={codeOptions(
-      vocabulary,
-      "security_penetration_testing_strategies"
-    )}
     vocabulary={vocabulary}
     onSaveProfile={onSaveProfile}
   />

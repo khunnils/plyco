@@ -41,6 +41,7 @@ export type DashboardProgress = {
   profile: ProgressGroup
   privacy: ProgressGroup
   infrastructure: ProgressGroup
+  security: ProgressGroup
   access: ProgressGroup
   services: ProgressItem[]
   data: {
@@ -296,85 +297,19 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       field("Minimum TLS version", infrastructure.inTransitMinimumTlsVersion),
       field("Key management", infrastructure.keyManagementProvider),
     ]),
-    sectionProgress("Logging & Monitoring", [
+    sectionProgress("Monitoring & Detection", [
       field(
         "Centralized logging enabled",
         infrastructure.centralizedLoggingEnabled
       ),
-      ...(infrastructure.centralizedLoggingEnabled === true
-        ? [field("Log retention status", infrastructure.logRetentionDaysStatus)]
-        : []),
-      field("Monitoring owner", infrastructure.securityMonitoringOwner),
-    ]),
-    sectionProgress("Vulnerability Detection", [
-      field("Vulnerability scan frequency", infrastructure.scanningCadence),
-      field(
-        "Penetration testing strategy",
-        infrastructure.penetrationTestingStrategy
-      ),
-      ...(infrastructure.penetrationTestingStrategy &&
-      infrastructure.penetrationTestingStrategy !== "none"
-        ? [
-            field(
-              "Penetration testing frequency",
-              infrastructure.penetrationTestingCadence
-            ),
-          ]
-        : []),
-    ]),
-    sectionProgress("Vulnerability Remediation", [
-      field(
-        "Critical patch timeline status",
-        infrastructure.patchingSlaCriticalDaysStatus
-      ),
-      field(
-        "High patch timeline status",
-        infrastructure.patchingSlaHighDaysStatus
-      ),
-      field(
-        "Responsible disclosure program exists",
-        infrastructure.vulnerabilityDisclosureProgramExists
-      ),
-      ...(infrastructure.vulnerabilityDisclosureProgramExists === true
-        ? [
-            field(
-              "Responsible disclosure URL",
-              infrastructure.vulnerabilityDisclosureUrl
-            ),
-          ]
-        : []),
-    ]),
-    sectionProgress("Incident Response", [
-      field(
-        "Incident response plan exists",
-        infrastructure.incidentResponsePlanExists
-      ),
-      field(
-        "Notification timeline",
-        infrastructure.incidentNotificationTimeline
-      ),
-      field(
-        "Customer notification process",
-        infrastructure.customerNotificationProcess
-      ),
-      ...(infrastructure.incidentResponsePlanExists === true
-        ? [
-            field(
-              "Last tested date",
-              infrastructure.incidentResponseLastTestedDate
-            ),
-          ]
-        : []),
+      field("Security monitoring", infrastructure.securityMonitoring),
     ]),
     sectionProgress("Backups", [
       field("Backups enabled", infrastructure.backupsEnabled),
       ...(infrastructure.backupsEnabled === true
         ? [
             field("Backup frequency", infrastructure.backupCadence),
-            field(
-              "Backup retention status",
-              infrastructure.backupRetentionDaysStatus
-            ),
+            field("Backup retention status", infrastructure.backupRetentionDaysStatus),
             field("Restore test frequency", infrastructure.restoreTestingCadence),
           ]
         : []),
@@ -384,14 +319,80 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       ...(infrastructure.vendorReviewRequired === true
         ? [field("Vendor review frequency", infrastructure.vendorReviewCadence)]
         : []),
-      ...(isComplianceFieldVisible(
-        "infrastructure.dpaRequiredForProcessors",
-        profile.company.complianceGoals
-      )
+      ...(isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", profile.company.complianceGoals)
+        ? [field("DPA required for processors", infrastructure.dpaRequiredForProcessors)]
+        : []),
+    ]),
+  ])
+}
+
+export const securityProgress = (profile: ProfileDraft) => {
+  const security = profile.security
+  return groupProgress([
+    sectionProgress("Development Security", [
+      field("Code review required", security.codeReviewRequired),
+      field("Dependency security monitoring", security.dependencySecurityMonitoring),
+      field("Secret scanning", security.secretScanning),
+      field("Automated testing before deployment", security.automatedTestingBeforeDeployment),
+      field("CI/CD deployment process", security.cicdDeploymentProcess),
+      field("Production deployment approval required", security.productionDeploymentApprovalRequired),
+    ]),
+    sectionProgress("Vulnerability Detection", [
+      field("Vulnerability scan frequency", security.scanningCadence),
+      field(
+        "Penetration testing strategy",
+        security.penetrationTestingStrategy
+      ),
+      ...(security.penetrationTestingStrategy &&
+      security.penetrationTestingStrategy !== "none"
         ? [
             field(
-              "DPA required for processors",
-              infrastructure.dpaRequiredForProcessors
+              "Penetration testing frequency",
+              security.penetrationTestingCadence
+            ),
+          ]
+        : []),
+    ]),
+    sectionProgress("Vulnerability Remediation", [
+      field(
+        "Critical patch timeline status",
+        security.patchingSlaCriticalDaysStatus
+      ),
+      field(
+        "High patch timeline status",
+        security.patchingSlaHighDaysStatus
+      ),
+      field(
+        "Responsible disclosure program exists",
+        security.vulnerabilityDisclosureProgramExists
+      ),
+      ...(security.vulnerabilityDisclosureProgramExists === true
+        ? [
+            field(
+              "Responsible disclosure URL",
+              security.vulnerabilityDisclosureUrl
+            ),
+          ]
+        : []),
+    ]),
+    sectionProgress("Incident Response", [
+      field(
+        "Incident response plan exists",
+        security.incidentResponsePlanExists
+      ),
+      field(
+        "Notification timeline",
+        security.incidentNotificationTimeline
+      ),
+      field(
+        "Customer notification process",
+        security.customerNotificationProcess
+      ),
+      ...(security.incidentResponsePlanExists === true
+        ? [
+            field(
+              "Last tested date",
+              security.incidentResponseLastTestedDate
             ),
           ]
         : []),
@@ -649,6 +650,7 @@ export const dashboardProgress = ({
   const profileGroup = profileProgress(profile)
   const privacyGroup = privacyProgress(profile)
   const infrastructureGroup = infrastructureProgress(profile)
+  const securityGroup = securityProgress(profile)
   const accessGroup = accessProgress(profile)
   const services = profile.services
     .filter(isRealService)
@@ -661,6 +663,7 @@ export const dashboardProgress = ({
     profileGroup,
     privacyGroup,
     infrastructureGroup,
+    securityGroup,
     accessGroup,
     ...services,
     ...data.dataTypes,
@@ -690,6 +693,7 @@ export const dashboardProgress = ({
     profile: profileGroup,
     privacy: privacyGroup,
     infrastructure: infrastructureGroup,
+    security: securityGroup,
     access: accessGroup,
     services,
     data,

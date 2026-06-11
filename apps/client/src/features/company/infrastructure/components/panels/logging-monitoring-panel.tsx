@@ -4,12 +4,11 @@ import {
   type InfrastructureProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { SelectField } from "@/components/form/select-field"
-import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
@@ -19,16 +18,13 @@ import {
 import { boolText } from "@/features/company/lib/display"
 import {
   codeLabel,
-  codeOptions,
   type Option,
 } from "@/features/vocabulary/lib/vocabulary"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const loggingSchema = infrastructureProfileSchema.pick({
   centralizedLoggingEnabled: true,
-  logRetentionDays: true,
-  logRetentionDaysStatus: true,
-  securityMonitoringOwner: true,
+  securityMonitoring: true,
 })
 
 type LoggingDraft = z.infer<typeof loggingSchema>
@@ -37,9 +33,7 @@ const toLoggingDraft = (
   infrastructure: InfrastructureProfile
 ): LoggingDraft => ({
   centralizedLoggingEnabled: infrastructure.centralizedLoggingEnabled,
-  logRetentionDays: infrastructure.logRetentionDays,
-  logRetentionDaysStatus: infrastructure.logRetentionDaysStatus ?? null,
-  securityMonitoringOwner: infrastructure.securityMonitoringOwner,
+  securityMonitoring: infrastructure.securityMonitoring,
 })
 
 const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) => {
@@ -51,29 +45,16 @@ const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) =>
     ],
   ]
 
-  if (draft.centralizedLoggingEnabled) {
-    rows.push([
-      "Log retention days",
-      draft.logRetentionDaysStatus === "not_defined"
-        ? "Not defined"
-        : draft.logRetentionDaysStatus === "defined" &&
-            draft.logRetentionDays !== null
-          ? `${draft.logRetentionDays} days`
-          : "Not set",
-      infrastructureHelperText.logRetentionDays,
-    ])
-  }
-
   rows.push([
-    "Monitoring owner",
-    draft.securityMonitoringOwner
+    "Security monitoring",
+    draft.securityMonitoring
       ? codeLabel(
           vocabulary,
-          "security_monitoring_owners",
-          draft.securityMonitoringOwner
+          "security_monitoring_modes",
+          draft.securityMonitoring
         )
       : "Not set",
-    infrastructureHelperText.securityMonitoringOwner,
+    infrastructureHelperText.securityMonitoring,
   ])
 
   return rows
@@ -83,14 +64,14 @@ export const LoggingMonitoringPanel = ({
   isMutationPending,
   needsAttention,
   infrastructure,
-  securityMonitoringOwnerOptions,
+  securityMonitoringOptions,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
   needsAttention?: boolean
   infrastructure: InfrastructureProfile
-  securityMonitoringOwnerOptions: Option[]
+  securityMonitoringOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (patch: LoggingDraft, onSuccess?: () => void) => void
 }) => {
@@ -104,30 +85,13 @@ export const LoggingMonitoringPanel = ({
     values: draft,
   })
 
-  const centralizedLoggingEnabled = form.watch("centralizedLoggingEnabled")
-  const logRetentionDaysStatus = form.watch("logRetentionDaysStatus")
-  const isLogRetentionDaysDisabled = logRetentionDaysStatus !== "defined"
-
-  useEffect(() => {
-    if (!centralizedLoggingEnabled) {
-      form.setValue("logRetentionDaysStatus", null)
-      form.setValue("logRetentionDays", null)
-    }
-  }, [centralizedLoggingEnabled, form])
-
-  useEffect(() => {
-    if (logRetentionDaysStatus === "not_defined") {
-      form.setValue("logRetentionDays", null)
-    }
-  }, [logRetentionDaysStatus, form])
-
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
 
   return (
     <ProfilePanelShell
-      description="Centralized logs, retention policies, system monitoring ownership, and security alerts."
+      description="Centralized logging and the level of security monitoring in place."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       needsAttention={needsAttention}
@@ -135,7 +99,7 @@ export const LoggingMonitoringPanel = ({
         <ProfilePanelDetailGrid rows={loggingRows(draft, vocabulary)} />
       }
       saveLabel="Save"
-      title="Logging & Monitoring"
+      title="Monitoring & Detection"
       onCancel={() => {
         form.reset(draft)
         setIsEditing(false)
@@ -150,39 +114,14 @@ export const LoggingMonitoringPanel = ({
           label="Centralized logging enabled"
           name="centralizedLoggingEnabled"
         />
-        {centralizedLoggingEnabled && (
-          <>
-            <SelectField
-              control={form.control}
-              helperText={infrastructureHelperText.logRetentionDaysStatus}
-              label="Log retention status"
-              name="logRetentionDaysStatus"
-              options={[
-                { value: "", label: "Not set" },
-                ...codeOptions(vocabulary, "defined_statuses"),
-              ]}
-              placeholder="Not set"
-            />
-            <TextField
-              disabled={isLogRetentionDaysDisabled}
-              error={form.formState.errors.logRetentionDays}
-              helperText={infrastructureHelperText.logRetentionDays}
-              label="Log retention days"
-              name="logRetentionDays"
-              register={form.register}
-              type="number"
-              min={0}
-            />
-          </>
-        )}
         <SelectField
           control={form.control}
-          helperText={infrastructureHelperText.securityMonitoringOwner}
-          label="Monitoring owner"
-          name="securityMonitoringOwner"
+          helperText={infrastructureHelperText.securityMonitoring}
+          label="Security monitoring"
+          name="securityMonitoring"
           options={[
             { value: "", label: "Not set" },
-            ...securityMonitoringOwnerOptions,
+            ...securityMonitoringOptions,
           ]}
           placeholder="Not set"
         />

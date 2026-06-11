@@ -9,6 +9,7 @@ import { Link } from "react-router-dom"
 import {
   Building2,
   ShieldCheck,
+  Shield,
   Server,
   KeyRound,
   ClipboardList,
@@ -214,7 +215,7 @@ export const DashboardPage = ({
         </Link>
       </section>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <CategoryCard
           title="Profile"
           description="Company identity, operating context, and contacts."
@@ -235,6 +236,13 @@ export const DashboardPage = ({
           href="/company/infrastructure"
           isComplete={isProgressComplete(progress.infrastructure)}
           icon={Server}
+        />
+        <CategoryCard
+          title="Security"
+          description="Development security, vulnerabilities, and incident response."
+          href="/company/security"
+          isComplete={isProgressComplete(progress.security)}
+          icon={Shield}
         />
         <CategoryCard
           title="Access"

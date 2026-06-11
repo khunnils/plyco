@@ -20,7 +20,7 @@ export const requiredCodeSetIds = [
   "security_encryption_algorithms",
   "security_tls_versions",
   "security_key_management_providers",
-  "security_monitoring_owners",
+  "security_monitoring_modes",
   "security_notification_timelines",
   "security_customer_notification_processes",
   "data_categories",

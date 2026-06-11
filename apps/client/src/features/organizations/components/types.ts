@@ -3,6 +3,7 @@ import {
   emptyCompanyProfile,
   emptyInfrastructureProfile,
   emptyPrivacyProfile,
+  emptySecurityProfile,
   emptyServiceProfile,
   type CompanyProfile,
   type PrivacyProfile,
@@ -290,6 +291,7 @@ export const toProfileDraft = (
   ],
   privacy: draft.privacy,
   infrastructure: emptyInfrastructureProfile,
+  security: emptySecurityProfile,
   dataHandling: {
     dataTypesStored: draft.dataTypes,
   },

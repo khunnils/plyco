@@ -1,5 +1,17 @@
 # Product Spec
 
+## Security Profile
+
+The Company workspace includes a Security profile after Infrastructure.
+Security contains Development Security, Vulnerability Detection, Vulnerability
+Remediation, and Incident Response. Development Security records whether code
+review, dependency monitoring, secret scanning, automated pre-deployment tests,
+CI/CD deployments, and production deployment approval are required.
+
+Infrastructure contains Monitoring & Detection. It records whether centralized
+logging is enabled and whether security monitoring is none, manual, or
+automated; log-retention duration and monitoring-owner fields are not collected.
+
 ## Create Organization Flow
 
 New users create an organization from a split-panel setup flow. The left panel

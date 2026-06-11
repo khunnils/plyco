@@ -17,11 +17,8 @@ export const infrastructureHelperText = {
     "How encryption keys are managed, such as a cloud KMS or provider-managed keys.",
   centralizedLoggingEnabled:
     "Important system and application logs are collected in one place.",
-  logRetentionDaysStatus:
-    "Whether you have a defined retention period for logs.",
-  logRetentionDays: "How long logs are kept before deletion or archival.",
-  securityMonitoringOwner:
-    "Who is responsible for reviewing alerts and security-relevant logs.",
+  securityMonitoring:
+    "Whether security monitoring is absent, performed manually, or automated.",
   scanningCadence:
     "How often you scan your app, dependencies, or infrastructure for known issues.",
   patchingSlaCriticalDaysStatus:

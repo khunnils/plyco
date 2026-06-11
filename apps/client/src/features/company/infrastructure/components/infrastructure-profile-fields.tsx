@@ -174,28 +174,22 @@ export const InfrastructureProfileFields = ({
   form,
   providers = [],
   securityCadenceOptions = [],
-  securityCustomerNotificationProcessOptions = [],
   securityEncryptionAlgorithmOptions = [],
   securityKeyManagementProviderOptions = [],
-  securityMonitoringOwnerOptions = [],
-  securityNotificationTimelineOptions = [],
+  securityMonitoringOptions = [],
   securityTlsVersionOptions = [],
 }: {
   form: UseFormReturn<ProfileDraft>
   providers?: Provider[]
   securityCadenceOptions?: Option[]
-  securityCustomerNotificationProcessOptions?: Option[]
   securityEncryptionAlgorithmOptions?: Option[]
   securityKeyManagementProviderOptions?: Option[]
-  securityMonitoringOwnerOptions?: Option[]
-  securityNotificationTimelineOptions?: Option[]
+  securityMonitoringOptions?: Option[]
   securityTlsVersionOptions?: Option[]
 }) => {
   const backupsEnabled = form.watch("infrastructure.backupsEnabled")
-  const centralizedLoggingEnabled = form.watch("infrastructure.centralizedLoggingEnabled")
   const vendorReviewRequired = form.watch("infrastructure.vendorReviewRequired")
   const complianceGoals = form.watch("company.complianceGoals")
-  const incidentResponsePlanExists = form.watch("infrastructure.incidentResponsePlanExists")
 
   useEffect(() => {
     if (!backupsEnabled) {
@@ -204,12 +198,6 @@ export const InfrastructureProfileFields = ({
       form.setValue("infrastructure.restoreTestingCadence", null)
     }
   }, [backupsEnabled, form])
-
-  useEffect(() => {
-    if (!centralizedLoggingEnabled) {
-      form.setValue("infrastructure.logRetentionDays", null)
-    }
-  }, [centralizedLoggingEnabled, form])
 
   useEffect(() => {
     if (!vendorReviewRequired) {
@@ -227,12 +215,6 @@ export const InfrastructureProfileFields = ({
       form.setValue("infrastructure.dpaRequiredForProcessors", null)
     }
   }, [showDpaRequired, form])
-
-  useEffect(() => {
-    if (!incidentResponsePlanExists) {
-      form.setValue("infrastructure.incidentResponseLastTestedDate", null)
-    }
-  }, [incidentResponsePlanExists, form])
 
   return (
     <div className="grid gap-6">
@@ -292,7 +274,7 @@ export const InfrastructureProfileFields = ({
       </section>
       <section className="grid gap-4">
         <h3 className="text-sm font-semibold text-slate-900">
-          Logging & Monitoring
+          Monitoring & Detection
         </h3>
         <div className="grid gap-4 md:grid-cols-2">
           <ToggleField
@@ -300,88 +282,13 @@ export const InfrastructureProfileFields = ({
             label="Centralized logging enabled"
             name="infrastructure.centralizedLoggingEnabled"
           />
-          {centralizedLoggingEnabled && (
-            <TextField
-              error={form.formState.errors.infrastructure?.logRetentionDays}
-              label="Log retention days"
-              name="infrastructure.logRetentionDays"
-              register={form.register}
-              type="number"
-              min={0}
-            />
-          )}
           <SelectField
             control={form.control}
-            label="Security monitoring owner"
-            name="infrastructure.securityMonitoringOwner"
-            options={[{ value: "", label: "Not set" }, ...securityMonitoringOwnerOptions]}
+            label="Security monitoring"
+            name="infrastructure.securityMonitoring"
+            options={[{ value: "", label: "Not set" }, ...securityMonitoringOptions]}
             placeholder="Not set"
           />
-        </div>
-      </section>
-      <section className="grid gap-4">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Vulnerability Management
-        </h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          <SelectField
-            control={form.control}
-            label="Scanning cadence"
-            name="infrastructure.scanningCadence"
-            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
-            placeholder="Not set"
-          />
-          <TextField
-            error={form.formState.errors.infrastructure?.patchingSlaCriticalDays}
-            label="Critical patching SLA days"
-            name="infrastructure.patchingSlaCriticalDays"
-            register={form.register}
-            type="number"
-            min={0}
-          />
-          <TextField
-            error={form.formState.errors.infrastructure?.patchingSlaHighDays}
-            label="High patching SLA days"
-            name="infrastructure.patchingSlaHighDays"
-            register={form.register}
-            type="number"
-            min={0}
-          />
-        </div>
-      </section>
-      <section className="grid gap-4">
-        <h3 className="text-sm font-semibold text-slate-900">
-          Incident Response
-        </h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          <ToggleField
-            control={form.control}
-            label="Plan exists"
-            name="infrastructure.incidentResponsePlanExists"
-          />
-          <SelectField
-            control={form.control}
-            label="Notification timeline"
-            name="infrastructure.incidentNotificationTimeline"
-            options={[{ value: "", label: "Not set" }, ...securityNotificationTimelineOptions]}
-            placeholder="Not set"
-          />
-          <SelectField
-            control={form.control}
-            label="Customer notification process"
-            name="infrastructure.customerNotificationProcess"
-            options={[{ value: "", label: "Not set" }, ...securityCustomerNotificationProcessOptions]}
-            placeholder="Not set"
-          />
-          {incidentResponsePlanExists && (
-            <TextField
-              error={form.formState.errors.infrastructure?.incidentResponseLastTestedDate}
-              label="Last tested date"
-              name="infrastructure.incidentResponseLastTestedDate"
-              register={form.register}
-              type="date"
-            />
-          )}
         </div>
       </section>
       <section className="grid gap-4">

@@ -152,8 +152,10 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
   codeSet("security_key_management_providers", "Security key management providers", false, [
     ["aws_kms", "AWS KMS"],
   ]),
-  codeSet("security_monitoring_owners", "Security monitoring owners", false, [
-    ["security", "Security"],
+  codeSet("security_monitoring_modes", "Security monitoring modes", false, [
+    ["none", "None"],
+    ["manual", "Manual"],
+    ["automated", "Automated"],
   ]),
   codeSet("security_notification_timelines", "Security notification timelines", false, [
     ["within_72_hours", "Within 72 hours"],

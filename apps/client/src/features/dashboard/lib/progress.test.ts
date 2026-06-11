@@ -5,6 +5,7 @@ import { emptyProfileDraft } from "@/features/company/lib/profile"
 import {
   dashboardProgress,
   infrastructureProgress,
+  securityProgress,
   isAnswered,
   privacyProgress,
   serviceProgress,
@@ -173,10 +174,10 @@ describe("dashboard progress", () => {
   })
 
   it("skips incident response last tested date when no plan exists", () => {
-    const progressNoPlan = infrastructureProgress({
+    const progressNoPlan = securityProgress({
       ...emptyProfileDraft,
-      infrastructure: {
-        ...emptyProfileDraft.infrastructure,
+      security: {
+        ...emptyProfileDraft.security,
         incidentResponsePlanExists: false,
         incidentNotificationTimeline: "none",
         customerNotificationProcess: "none",
@@ -191,10 +192,10 @@ describe("dashboard progress", () => {
       totalFields: 3,
     })
 
-    const progressWithPlan = infrastructureProgress({
+    const progressWithPlan = securityProgress({
       ...emptyProfileDraft,
-      infrastructure: {
-        ...emptyProfileDraft.infrastructure,
+      security: {
+        ...emptyProfileDraft.security,
         incidentResponsePlanExists: true,
         incidentNotificationTimeline: "none",
         customerNotificationProcess: "none",
@@ -240,16 +241,17 @@ describe("dashboard progress", () => {
     })
   })
 
-  it("adjusts centralized logging fields count based on centralizedLoggingEnabled", () => {
+  it("tracks centralized logging and security monitoring", () => {
     const progressNoLogs = infrastructureProgress({
       ...emptyProfileDraft,
       infrastructure: {
         ...emptyProfileDraft.infrastructure,
         centralizedLoggingEnabled: false,
+        securityMonitoring: "none",
       },
     })
     const logsNo = progressNoLogs.sections.find(
-      (section) => section.title === "Logging & Monitoring"
+      (section) => section.title === "Monitoring & Detection"
     )
     expect(logsNo).toMatchObject({
       totalFields: 2,
@@ -260,13 +262,14 @@ describe("dashboard progress", () => {
       infrastructure: {
         ...emptyProfileDraft.infrastructure,
         centralizedLoggingEnabled: true,
+        securityMonitoring: "automated",
       },
     })
     const logsYes = progressWithLogs.sections.find(
-      (section) => section.title === "Logging & Monitoring"
+      (section) => section.title === "Monitoring & Detection"
     )
     expect(logsYes).toMatchObject({
-      totalFields: 3,
+      totalFields: 2,
     })
   })
 

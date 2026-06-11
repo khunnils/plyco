@@ -3,6 +3,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type SecurityProfile,
   type PrivacyProfile,
   type SecurityProgramSnapshot,
   type ServiceProfileInput,
@@ -13,6 +14,7 @@ export type ProfileDraft = {
   services: ServiceProfileInput[]
   privacy: PrivacyProfile
   infrastructure: InfrastructureProfile
+  security: SecurityProfile
   dataHandling: DataHandlingProfile
   access: AccessProfile
 }

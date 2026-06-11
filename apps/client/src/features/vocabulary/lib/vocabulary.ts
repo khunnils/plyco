@@ -51,7 +51,7 @@ const CODE_SETS_WITH_NONE = new Set([
   "security_key_management_providers",
   "security_customer_notification_processes",
   "security_notification_timelines",
-  "security_monitoring_owners",
+  "security_monitoring_modes",
   "security_penetration_testing_strategies",
 ])
 

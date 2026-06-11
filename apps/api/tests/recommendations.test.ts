@@ -176,12 +176,12 @@ describe("recommendation rules", () => {
           frameworks: ["soc_2"],
           appliesWhen: { anyComplianceGoal: ["soc_2"] },
           condition: {
-            field: "infrastructure.scanningCadence",
+            field: "security.vulnerabilityManagement.scanningCadence",
             in: [null, "none", "not_defined"],
           },
           message: "Vulnerability scanning is not configured.",
           recommendation: "Configure recurring vulnerability scanning.",
-          relatedFields: ["infrastructure.scanningCadence"],
+          relatedFields: ["security.vulnerabilityManagement.scanningCadence"],
         },
       ],
       {
@@ -190,8 +190,8 @@ describe("recommendation rules", () => {
           ...organization.company,
           complianceGoals: ["gdpr", "soc_2"],
         },
-        infrastructure: {
-          ...organization.infrastructure,
+        security: {
+          ...organization.security,
           scanningCadence: null,
         },
         privacy: {

@@ -6,6 +6,7 @@ import {
   dataHandlingProfileSchema,
   organizationProviderInventorySchema,
   infrastructureProfileSchema,
+  securityProfileSchema,
   privacyProfileSchema,
   serviceProfileSchema,
   serviceProviderUsageSchema,
@@ -125,21 +126,10 @@ export function mapOrganizationRecord(record: {
     encryptedDevicesRequired: boolean | null;
     backupsEnabled: boolean | null;
     centralizedLoggingEnabled: boolean | null;
+    securityMonitoring: string | null;
     atRestAlgorithm: string | null;
     inTransitMinimumTlsVersion: string | null;
     keyManagementProvider: string | null;
-    logRetentionDays: number | null;
-    logRetentionDaysStatus: string | null;
-    securityMonitoringOwner: string | null;
-    scanningCadence: string | null;
-    patchingSlaCriticalDays: number | null;
-    patchingSlaCriticalDaysStatus: string | null;
-    patchingSlaHighDays: number | null;
-    patchingSlaHighDaysStatus: string | null;
-    incidentResponsePlanExists: boolean | null;
-    incidentNotificationTimeline: string | null;
-    customerNotificationProcess: string | null;
-    incidentResponseLastTestedDate: string | null;
     backupCadence: string | null;
     backupRetentionDays: number | null;
     backupRetentionDaysStatus: string | null;
@@ -147,13 +137,30 @@ export function mapOrganizationRecord(record: {
     vendorReviewRequired: boolean | null;
     vendorReviewCadence: string | null;
     dpaRequiredForProcessors: boolean | null;
+    encryptionAtRest: boolean | null;
+    encryptionInTransit: boolean | null;
+  } | null;
+  securityProfile: {
+    codeReviewRequired: boolean | null;
+    dependencySecurityMonitoring: boolean | null;
+    secretScanning: boolean | null;
+    automatedTestingBeforeDeployment: boolean | null;
+    cicdDeploymentProcess: boolean | null;
+    productionDeploymentApprovalRequired: boolean | null;
+    scanningCadence: string | null;
     penetrationTestingStrategy: string | null;
     penetrationTestingCadence: string | null;
     penetrationTestLastDate: string | null;
+    patchingSlaCriticalDays: number | null;
+    patchingSlaCriticalDaysStatus: string | null;
+    patchingSlaHighDays: number | null;
+    patchingSlaHighDaysStatus: string | null;
     vulnerabilityDisclosureProgramExists: boolean | null;
     vulnerabilityDisclosureUrl: string | null;
-    encryptionAtRest: boolean | null;
-    encryptionInTransit: boolean | null;
+    incidentResponsePlanExists: boolean | null;
+    incidentNotificationTimeline: string | null;
+    customerNotificationProcess: string | null;
+    incidentResponseLastTestedDate: string | null;
   } | null;
   organizationProviders: Array<{
     providerId: string | null;
@@ -229,33 +236,13 @@ export function mapOrganizationRecord(record: {
     backupsEnabled: record.infrastructureProfile?.backupsEnabled ?? null,
     centralizedLoggingEnabled:
       record.infrastructureProfile?.centralizedLoggingEnabled ?? null,
+    securityMonitoring:
+      record.infrastructureProfile?.securityMonitoring ?? null,
     atRestAlgorithm: record.infrastructureProfile?.atRestAlgorithm ?? null,
     inTransitMinimumTlsVersion:
       record.infrastructureProfile?.inTransitMinimumTlsVersion ?? null,
     keyManagementProvider:
       record.infrastructureProfile?.keyManagementProvider ?? null,
-    logRetentionDays: record.infrastructureProfile?.logRetentionDays ?? null,
-    logRetentionDaysStatus:
-      record.infrastructureProfile?.logRetentionDaysStatus ?? null,
-    securityMonitoringOwner:
-      record.infrastructureProfile?.securityMonitoringOwner ?? null,
-    scanningCadence: record.infrastructureProfile?.scanningCadence ?? null,
-    patchingSlaCriticalDays:
-      record.infrastructureProfile?.patchingSlaCriticalDays ?? null,
-    patchingSlaCriticalDaysStatus:
-      record.infrastructureProfile?.patchingSlaCriticalDaysStatus ?? null,
-    patchingSlaHighDays:
-      record.infrastructureProfile?.patchingSlaHighDays ?? null,
-    patchingSlaHighDaysStatus:
-      record.infrastructureProfile?.patchingSlaHighDaysStatus ?? null,
-    incidentResponsePlanExists:
-      record.infrastructureProfile?.incidentResponsePlanExists ?? null,
-    incidentNotificationTimeline:
-      record.infrastructureProfile?.incidentNotificationTimeline ?? null,
-    customerNotificationProcess:
-      record.infrastructureProfile?.customerNotificationProcess ?? null,
-    incidentResponseLastTestedDate:
-      record.infrastructureProfile?.incidentResponseLastTestedDate ?? null,
     backupCadence: record.infrastructureProfile?.backupCadence ?? null,
     backupRetentionDays:
       record.infrastructureProfile?.backupRetentionDays ?? null,
@@ -269,20 +256,47 @@ export function mapOrganizationRecord(record: {
       record.infrastructureProfile?.vendorReviewCadence ?? null,
     dpaRequiredForProcessors:
       record.infrastructureProfile?.dpaRequiredForProcessors ?? null,
-    penetrationTestingStrategy:
-      record.infrastructureProfile?.penetrationTestingStrategy ?? null,
-    penetrationTestingCadence:
-      record.infrastructureProfile?.penetrationTestingCadence ?? null,
-    penetrationTestLastDate:
-      record.infrastructureProfile?.penetrationTestLastDate ?? null,
-    vulnerabilityDisclosureProgramExists:
-      record.infrastructureProfile?.vulnerabilityDisclosureProgramExists ??
-      null,
-    vulnerabilityDisclosureUrl:
-      record.infrastructureProfile?.vulnerabilityDisclosureUrl ?? null,
     encryptionAtRest: record.infrastructureProfile?.encryptionAtRest ?? null,
     encryptionInTransit:
       record.infrastructureProfile?.encryptionInTransit ?? null,
+  });
+  const security = securityProfileSchema.parse({
+    codeReviewRequired: record.securityProfile?.codeReviewRequired ?? null,
+    dependencySecurityMonitoring:
+      record.securityProfile?.dependencySecurityMonitoring ?? null,
+    secretScanning: record.securityProfile?.secretScanning ?? null,
+    automatedTestingBeforeDeployment:
+      record.securityProfile?.automatedTestingBeforeDeployment ?? null,
+    cicdDeploymentProcess:
+      record.securityProfile?.cicdDeploymentProcess ?? null,
+    productionDeploymentApprovalRequired:
+      record.securityProfile?.productionDeploymentApprovalRequired ?? null,
+    scanningCadence: record.securityProfile?.scanningCadence ?? null,
+    penetrationTestingStrategy:
+      record.securityProfile?.penetrationTestingStrategy ?? null,
+    penetrationTestingCadence:
+      record.securityProfile?.penetrationTestingCadence ?? null,
+    penetrationTestLastDate:
+      record.securityProfile?.penetrationTestLastDate ?? null,
+    patchingSlaCriticalDays:
+      record.securityProfile?.patchingSlaCriticalDays ?? null,
+    patchingSlaCriticalDaysStatus:
+      record.securityProfile?.patchingSlaCriticalDaysStatus ?? null,
+    patchingSlaHighDays: record.securityProfile?.patchingSlaHighDays ?? null,
+    patchingSlaHighDaysStatus:
+      record.securityProfile?.patchingSlaHighDaysStatus ?? null,
+    vulnerabilityDisclosureProgramExists:
+      record.securityProfile?.vulnerabilityDisclosureProgramExists ?? null,
+    vulnerabilityDisclosureUrl:
+      record.securityProfile?.vulnerabilityDisclosureUrl ?? null,
+    incidentResponsePlanExists:
+      record.securityProfile?.incidentResponsePlanExists ?? null,
+    incidentNotificationTimeline:
+      record.securityProfile?.incidentNotificationTimeline ?? null,
+    customerNotificationProcess:
+      record.securityProfile?.customerNotificationProcess ?? null,
+    incidentResponseLastTestedDate:
+      record.securityProfile?.incidentResponseLastTestedDate ?? null,
   });
   const serviceRecords =
     record.services ?? (record.serviceProfile ? [record.serviceProfile] : []);
@@ -404,6 +418,7 @@ export function mapOrganizationRecord(record: {
     services,
     privacy,
     infrastructure,
+    security,
     dataHandling,
     access,
     createdAt: toIsoString(record.createdAt),

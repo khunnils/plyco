@@ -28,6 +28,7 @@ model Organization {
   services              ServiceProfile[]
   privacyProfile        PrivacyProfile?
   infrastructureProfile InfrastructureProfile?
+  securityProfile       SecurityProfile?
   accessProfile         AccessProfile?
   dataTypes             OrganizationDataType[]
   businessActivities    BusinessActivity[]
@@ -224,21 +225,10 @@ model InfrastructureProfile {
   encryptedDevicesRequired             Boolean?     @map("encrypted_devices_required")
   backupsEnabled                       Boolean?     @map("backups_enabled")
   centralizedLoggingEnabled            Boolean?     @map("centralized_logging_enabled")
+  securityMonitoring                   String?      @map("security_monitoring")
   atRestAlgorithm                      String?      @map("at_rest_algorithm")
   inTransitMinimumTlsVersion           String?      @map("in_transit_minimum_tls_version")
   keyManagementProvider                String?      @map("key_management_provider")
-  logRetentionDays                     Int?         @map("log_retention_days")
-  logRetentionDaysStatus               String?      @map("log_retention_days_status")
-  securityMonitoringOwner              String?      @map("security_monitoring_owner")
-  scanningCadence                      String?      @map("scanning_cadence")
-  patchingSlaCriticalDays              Int?         @map("patching_sla_critical_days")
-  patchingSlaCriticalDaysStatus        String?      @map("patching_sla_critical_days_status")
-  patchingSlaHighDays                  Int?         @map("patching_sla_high_days")
-  patchingSlaHighDaysStatus            String?      @map("patching_sla_high_days_status")
-  incidentResponsePlanExists           Boolean?     @map("incident_response_plan_exists")
-  incidentNotificationTimeline         String?      @map("incident_notification_timeline")
-  customerNotificationProcess          String?      @map("customer_notification_process")
-  incidentResponseLastTestedDate       String?      @map("incident_response_last_tested_date")
   backupCadence                        String?      @map("backup_cadence")
   backupRetentionDays                  Int?         @map("backup_retention_days")
   backupRetentionDaysStatus            String?      @map("backup_retention_days_status")
@@ -246,17 +236,42 @@ model InfrastructureProfile {
   vendorReviewRequired                 Boolean?     @map("vendor_review_required")
   vendorReviewCadence                  String?      @map("vendor_review_cadence")
   dpaRequiredForProcessors             Boolean?     @map("dpa_required_for_processors")
-  penetrationTestingStrategy           String?      @map("penetration_testing_strategy")
-  penetrationTestingCadence            String?      @map("penetration_testing_cadence")
-  penetrationTestLastDate              String?      @map("penetration_test_last_date")
-  vulnerabilityDisclosureProgramExists Boolean?     @map("vulnerability_disclosure_program_exists")
-  vulnerabilityDisclosureUrl           String?      @map("vulnerability_disclosure_url")
   encryptionAtRest                     Boolean?     @map("encryption_at_rest")
   encryptionInTransit                  Boolean?     @map("encryption_in_transit")
   createdAt                            DateTime     @default(now()) @map("created_at")
   updatedAt                            DateTime     @updatedAt @map("updated_at")
 
   @@map("infrastructure_profiles")
+}
+
+model SecurityProfile {
+  id                                   String       @id(map: "security_profiles_pkey") @default(cuid())
+  organizationId                       String       @unique(map: "security_profiles_organization_id_key") @map("organization_id")
+  organization                         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "security_profiles_organization_id_fkey")
+  codeReviewRequired                   Boolean?     @map("code_review_required")
+  dependencySecurityMonitoring         Boolean?     @map("dependency_security_monitoring")
+  secretScanning                       Boolean?     @map("secret_scanning")
+  automatedTestingBeforeDeployment     Boolean?     @map("automated_testing_before_deployment")
+  cicdDeploymentProcess                Boolean?     @map("cicd_deployment_process")
+  productionDeploymentApprovalRequired Boolean?     @map("production_deployment_approval_required")
+  scanningCadence                      String?      @map("scanning_cadence")
+  penetrationTestingStrategy           String?      @map("penetration_testing_strategy")
+  penetrationTestingCadence            String?      @map("penetration_testing_cadence")
+  penetrationTestLastDate              String?      @map("penetration_test_last_date")
+  patchingSlaCriticalDays              Int?         @map("patching_sla_critical_days")
+  patchingSlaCriticalDaysStatus        String?      @map("patching_sla_critical_days_status")
+  patchingSlaHighDays                  Int?         @map("patching_sla_high_days")
+  patchingSlaHighDaysStatus            String?      @map("patching_sla_high_days_status")
+  vulnerabilityDisclosureProgramExists Boolean?     @map("vulnerability_disclosure_program_exists")
+  vulnerabilityDisclosureUrl           String?      @map("vulnerability_disclosure_url")
+  incidentResponsePlanExists           Boolean?     @map("incident_response_plan_exists")
+  incidentNotificationTimeline         String?      @map("incident_notification_timeline")
+  customerNotificationProcess          String?      @map("customer_notification_process")
+  incidentResponseLastTestedDate       String?      @map("incident_response_last_tested_date")
+  createdAt                            DateTime     @default(now()) @map("created_at")
+  updatedAt                            DateTime     @updatedAt @map("updated_at")
+
+  @@map("security_profiles")
 }
 
 model OrganizationDataType {

@@ -4,6 +4,7 @@ import {
   emptyDataHandlingProfile,
   emptyInfrastructureProfile,
   emptyPrivacyProfile,
+  emptySecurityProfile,
   type BusinessActivity,
   type OrganizationProvider,
   type OrganizationSecurityProfile,
@@ -128,6 +129,7 @@ const snapshot = (
     ],
     privacy: emptyPrivacyProfile,
     infrastructure: emptyInfrastructureProfile,
+    security: emptySecurityProfile,
     dataHandling: {
       ...emptyDataHandlingProfile,
       dataTypesStored: [

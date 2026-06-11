@@ -6,6 +6,7 @@ import {
   KeyRound,
   Network,
   Server,
+  Shield,
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
@@ -27,6 +28,7 @@ export type CompanySectionId =
   | "graph"
   | "privacy"
   | "infrastructure"
+  | "security"
   | "dataHandling"
   | "access"
 
@@ -59,6 +61,13 @@ export const companySections: CompanySection[] = [
     title: "Infrastructure",
     description: "The baseline systems behind the product.",
     icon: Server,
+  },
+  {
+    id: "security",
+    path: "/company/security",
+    title: "Security",
+    description: "Development security, vulnerabilities, and incident response.",
+    icon: Shield,
   },
   {
     id: "access",

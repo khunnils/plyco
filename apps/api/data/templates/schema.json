@@ -861,36 +861,36 @@
       "example": true
     },
     {
-      "key": "security.logging.logRetentionDays",
-      "label": "Log retention days",
-      "type": "number",
-      "category": "Security",
-      "description": "Number of days security logs are retained. A value of 0 means unset.",
-      "example": 365
-    },
-    {
-      "key": "security.logging.logRetentionDaysStatus",
-      "label": "Log retention days status",
+      "key": "security.logging.securityMonitoring",
+      "label": "Security monitoring",
       "type": "string",
       "category": "Security",
-      "description": "Whether log retention days is defined or not.",
-      "example": "defined"
+      "description": "Security monitoring mode code.",
+      "example": "automated"
     },
     {
-      "key": "security.logging.logRetentionDaysStatusLabel",
-      "label": "Log retention days status label",
+      "key": "security.logging.securityMonitoringLabel",
+      "label": "Security monitoring label",
       "type": "string",
       "category": "Security",
-      "description": "Whether log retention days is defined or not label.",
-      "example": "Defined"
+      "description": "Human-readable security monitoring mode.",
+      "example": "Automated"
     },
     {
-      "key": "security.logging.securityMonitoringOwnerLabel",
-      "label": "Security monitoring owner label",
-      "type": "string",
+      "key": "security.developmentSecurity.codeReviewRequired",
+      "label": "Code review required",
+      "type": "boolean",
       "category": "Security",
-      "description": "Human-readable security monitoring owner label.",
-      "example": "Security"
+      "description": "Whether code review is required.",
+      "example": true
+    },
+    {
+      "key": "security.developmentSecurity.dependencySecurityMonitoring",
+      "label": "Dependency security monitoring",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether dependencies are monitored for vulnerabilities.",
+      "example": true
     },
     {
       "key": "security.vulnerabilityManagement.scanningCadenceLabel",
@@ -899,6 +899,30 @@
       "category": "Security",
       "description": "Human-readable vulnerability scanning cadence label.",
       "example": "Weekly"
+    },
+    {
+      "key": "security.developmentSecurity.automatedTestingBeforeDeployment",
+      "label": "Automated testing before deployment",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether automated tests run before deployment.",
+      "example": true
+    },
+    {
+      "key": "security.developmentSecurity.cicdDeploymentProcess",
+      "label": "CI/CD deployment process",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether deployments use a CI/CD process.",
+      "example": true
+    },
+    {
+      "key": "security.developmentSecurity.productionDeploymentApprovalRequired",
+      "label": "Production deployment approval required",
+      "type": "boolean",
+      "category": "Security",
+      "description": "Whether production deployments require approval.",
+      "example": true
     },
     {
       "key": "security.vulnerabilityManagement.patchingSlaCriticalDays",
@@ -1069,12 +1093,12 @@
       "example": "aws_kms"
     },
     {
-      "key": "security.logging.securityMonitoringOwner",
-      "label": "Security monitoring owner",
-      "type": "string",
+      "key": "security.developmentSecurity.secretScanning",
+      "label": "Secret scanning",
+      "type": "boolean",
       "category": "Security",
-      "description": "Security monitoring owner code.",
-      "example": "security"
+      "description": "Whether source code is scanned for secrets.",
+      "example": true
     },
     {
       "key": "security.vulnerabilityManagement.scanningCadence",
@@ -1210,7 +1234,7 @@
       "example": false
     },
     {
-      "key": "infrastructure.penetrationTestingStrategy",
+      "key": "security.vulnerabilityManagement.penetrationTestingStrategy",
       "label": "Penetration testing strategy",
       "type": "string",
       "category": "Infrastructure",
@@ -1218,7 +1242,7 @@
       "example": "external"
     },
     {
-      "key": "infrastructure.penetrationTestingStrategyLabel",
+      "key": "security.vulnerabilityManagement.penetrationTestingStrategyLabel",
       "label": "Penetration testing strategy label",
       "type": "string",
       "category": "Infrastructure",
@@ -1226,7 +1250,7 @@
       "example": "External"
     },
     {
-      "key": "infrastructure.penetrationTestingCadence",
+      "key": "security.vulnerabilityManagement.penetrationTestingCadence",
       "label": "Penetration testing cadence",
       "type": "string",
       "category": "Infrastructure",
@@ -1234,7 +1258,7 @@
       "example": "annually"
     },
     {
-      "key": "infrastructure.penetrationTestingCadenceLabel",
+      "key": "security.vulnerabilityManagement.penetrationTestingCadenceLabel",
       "label": "Penetration testing cadence label",
       "type": "string",
       "category": "Infrastructure",
@@ -1242,7 +1266,7 @@
       "example": "Annually"
     },
     {
-      "key": "infrastructure.penetrationTestLastDate",
+      "key": "security.vulnerabilityManagement.penetrationTestLastDate",
       "label": "Last penetration test date",
       "type": "string",
       "category": "Infrastructure",
@@ -1250,7 +1274,7 @@
       "example": "2026-03-15"
     },
     {
-      "key": "infrastructure.vulnerabilityDisclosureProgramExists",
+      "key": "security.vulnerabilityManagement.vulnerabilityDisclosureProgramExists",
       "label": "Responsible disclosure program exists",
       "type": "boolean",
       "category": "Infrastructure",
@@ -1258,7 +1282,7 @@
       "example": true
     },
     {
-      "key": "infrastructure.vulnerabilityDisclosureUrl",
+      "key": "security.vulnerabilityManagement.vulnerabilityDisclosureUrl",
       "label": "Responsible disclosure URL",
       "type": "string",
       "category": "Infrastructure",

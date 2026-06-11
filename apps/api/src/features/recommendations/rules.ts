@@ -203,6 +203,7 @@ const recommendationContext = (
   company: organization.company,
   privacy: organization.privacy,
   infrastructure: organization.infrastructure,
+  securityProfile: organization.security,
   access: organization.access,
   dataHandling: organization.dataHandling,
   businessActivities,
@@ -220,7 +221,7 @@ const recommendationContext = (
       mfaRequired: organization.access.mfaRequired,
     },
     incidentResponse: {
-      planExists: organization.infrastructure.incidentResponsePlanExists,
+      planExists: organization.security.incidentResponsePlanExists,
     },
     backups: {
       backupsEnabled: organization.infrastructure.backupsEnabled,
@@ -228,7 +229,7 @@ const recommendationContext = (
       backupRetentionDays: organization.infrastructure.backupRetentionDays,
     },
     vulnerabilityManagement: {
-      scanningCadence: organization.infrastructure.scanningCadence,
+      scanningCadence: organization.security.scanningCadence,
     },
   },
 })

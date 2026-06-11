@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
-  infrastructureProfileSchema,
-  type InfrastructureProfile,
+  securityProfileSchema,
+  type SecurityProfile,
   type Vocabulary,
 } from "@plyco/shared"
 import { useState, useEffect } from "react"
@@ -18,9 +18,9 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
-import { infrastructureHelperText } from "../infrastructure-helper-text"
+import { securityHelperText as infrastructureHelperText } from "../security-helper-text"
 
-const incidentSchema = infrastructureProfileSchema.pick({
+const incidentSchema = securityProfileSchema.pick({
   incidentResponsePlanExists: true,
   incidentNotificationTimeline: true,
   customerNotificationProcess: true,
@@ -30,12 +30,12 @@ const incidentSchema = infrastructureProfileSchema.pick({
 type IncidentDraft = z.infer<typeof incidentSchema>
 
 const toIncidentDraft = (
-  infrastructure: InfrastructureProfile
+  security: SecurityProfile
 ): IncidentDraft => ({
-  incidentResponsePlanExists: infrastructure.incidentResponsePlanExists,
-  incidentNotificationTimeline: infrastructure.incidentNotificationTimeline,
-  customerNotificationProcess: infrastructure.customerNotificationProcess,
-  incidentResponseLastTestedDate: infrastructure.incidentResponseLastTestedDate,
+  incidentResponsePlanExists: security.incidentResponsePlanExists,
+  incidentNotificationTimeline: security.incidentNotificationTimeline,
+  customerNotificationProcess: security.customerNotificationProcess,
+  incidentResponseLastTestedDate: security.incidentResponseLastTestedDate,
 })
 
 const incidentRows = (
@@ -86,7 +86,7 @@ const incidentRows = (
 export const IncidentResponsePanel = ({
   isMutationPending,
   needsAttention,
-  infrastructure,
+  security,
   securityCustomerNotificationProcessOptions,
   securityNotificationTimelineOptions,
   vocabulary,
@@ -94,14 +94,14 @@ export const IncidentResponsePanel = ({
 }: {
   isMutationPending: boolean
   needsAttention?: boolean
-  infrastructure: InfrastructureProfile
+  security: SecurityProfile
   securityCustomerNotificationProcessOptions: Option[]
   securityNotificationTimelineOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (patch: IncidentDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const draft = toIncidentDraft(infrastructure)
+  const draft = toIncidentDraft(security)
 
   const form = useForm<IncidentDraft>({
     defaultValues: draft,

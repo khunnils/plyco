@@ -21,12 +21,12 @@
   appliesWhen:
     anyComplianceGoal: [soc_2, iso_27001]
   condition:
-    field: infrastructure.incidentResponsePlanExists
+    field: security.incidentResponse.planExists
     equals: false
   message: Incident response plan is missing.
   recommendation: Create a lightweight incident response plan covering triage, ownership, communication, and customer notification.
   relatedFields:
-    - infrastructure.incidentResponsePlanExists
+    - security.incidentResponse.planExists
 
 - id: security.backups_disabled
   title: Backups are not enabled
@@ -53,12 +53,12 @@
   appliesWhen:
     anyComplianceGoal: [soc_2, iso_27001]
   condition:
-    field: infrastructure.scanningCadence
+    field: security.vulnerabilityManagement.scanningCadence
     in: [null, none, not_defined]
   message: Vulnerability scanning is not configured.
   recommendation: Configure recurring vulnerability scanning for dependencies, application code, containers, or infrastructure.
   relatedFields:
-    - infrastructure.scanningCadence
+    - security.vulnerabilityManagement.scanningCadence
 
 - id: security.shared_accounts_exist
   title: Shared accounts are in use

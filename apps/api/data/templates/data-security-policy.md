@@ -84,14 +84,12 @@ We build on established infrastructure and platform providers, including:
 {% endif %}
 {% endif %}
 
-{% if security.logging.centralizedLoggingHasValue or security.logging.logRetentionDaysHasValue or security.logging.securityMonitoringOwnerLabel %}
+{% if security.logging.centralizedLoggingHasValue or security.logging.securityMonitoringHasValue %}
 ## Logging and monitoring
 
 {% if security.logging.centralizedLoggingHasValue %}Security-relevant logs are centralized to support monitoring and review.
 {% endif %}
-{% if security.logging.logRetentionDaysHasValue %}Security logs are retained for {{ security.logging.logRetentionDays }} days.
-{% endif %}
-{% if security.logging.securityMonitoringOwnerLabel %}Security monitoring is owned by {{ security.logging.securityMonitoringOwnerLabel }}.
+{% if security.logging.securityMonitoringHasValue %}Security monitoring is {{ security.logging.securityMonitoringLabel | lower }}.
 {% endif %}
 {% endif %}
 
@@ -106,12 +104,12 @@ We build on established infrastructure and platform providers, including:
 {% endif %}
 {% endif %}
 
-{% if infrastructure.penetrationTestingCadenceLabel or infrastructure.penetrationTestLastDate %}
+{% if security.vulnerabilityManagement.penetrationTestingCadenceLabel or security.vulnerabilityManagement.penetrationTestLastDate %}
 ## Penetration testing
 
-{% if infrastructure.penetrationTestingCadenceLabel %}We engage independent third parties to perform penetration testing on a {{ infrastructure.penetrationTestingCadenceLabel | lower }} basis.
+{% if security.vulnerabilityManagement.penetrationTestingCadenceLabel %}We engage independent third parties to perform penetration testing on a {{ security.vulnerabilityManagement.penetrationTestingCadenceLabel | lower }} basis.
 {% endif %}
-{% if infrastructure.penetrationTestLastDate %}Our most recent penetration test was completed on {{ infrastructure.penetrationTestLastDate }}.
+{% if security.vulnerabilityManagement.penetrationTestLastDate %}Our most recent penetration test was completed on {{ security.vulnerabilityManagement.penetrationTestLastDate }}.
 {% endif %}
 {% endif %}
 
@@ -167,11 +165,11 @@ The vendors that process customer data on our behalf are:
 {% endif %}
 {% endif %}
 
-{% if infrastructure.vulnerabilityDisclosureProgramExistsHasValue %}
+{% if security.vulnerabilityManagement.vulnerabilityDisclosureProgramExistsHasValue %}
 ## Responsible disclosure
 
 We welcome reports from security researchers and operate a responsible disclosure process. We ask that researchers give us a reasonable opportunity to investigate and remediate before any public disclosure.
-{% if infrastructure.vulnerabilityDisclosureUrl %}Details of our disclosure program are available at {{ infrastructure.vulnerabilityDisclosureUrl }}.
+{% if security.vulnerabilityManagement.vulnerabilityDisclosureUrl %}Details of our disclosure program are available at {{ security.vulnerabilityManagement.vulnerabilityDisclosureUrl }}.
 {% endif %}
 {% endif %}
 

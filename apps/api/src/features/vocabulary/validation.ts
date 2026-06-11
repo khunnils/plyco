@@ -4,6 +4,7 @@ import {
   type CompanyProfile,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type SecurityProfile,
   type PrivacyProfile,
   type ServiceProfileInput,
   type ServiceProviderUsageInput,
@@ -217,31 +218,13 @@ export const validateInfrastructureProfileCodes = async (
           "infrastructure.keyManagementProvider",
         )
       : Promise.resolve(),
-    infrastructure.logRetentionDaysStatus
+    infrastructure.securityMonitoring
       ? assertCode(
           vocabularyRepository,
           organizationId,
-          "defined_statuses",
-          infrastructure.logRetentionDaysStatus,
-          "infrastructure.logRetentionDaysStatus",
-        )
-      : Promise.resolve(),
-    infrastructure.patchingSlaCriticalDaysStatus
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "defined_statuses",
-          infrastructure.patchingSlaCriticalDaysStatus,
-          "infrastructure.patchingSlaCriticalDaysStatus",
-        )
-      : Promise.resolve(),
-    infrastructure.patchingSlaHighDaysStatus
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "defined_statuses",
-          infrastructure.patchingSlaHighDaysStatus,
-          "infrastructure.patchingSlaHighDaysStatus",
+          "security_monitoring_modes",
+          infrastructure.securityMonitoring,
+          "infrastructure.securityMonitoring",
         )
       : Promise.resolve(),
     infrastructure.backupRetentionDaysStatus
@@ -251,42 +234,6 @@ export const validateInfrastructureProfileCodes = async (
           "defined_statuses",
           infrastructure.backupRetentionDaysStatus,
           "infrastructure.backupRetentionDaysStatus",
-        )
-      : Promise.resolve(),
-    infrastructure.securityMonitoringOwner
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "security_monitoring_owners",
-          infrastructure.securityMonitoringOwner,
-          "infrastructure.securityMonitoringOwner",
-        )
-      : Promise.resolve(),
-    infrastructure.scanningCadence
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "security_cadences",
-          infrastructure.scanningCadence,
-          "infrastructure.scanningCadence",
-        )
-      : Promise.resolve(),
-    infrastructure.incidentNotificationTimeline
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "security_notification_timelines",
-          infrastructure.incidentNotificationTimeline,
-          "infrastructure.incidentNotificationTimeline",
-        )
-      : Promise.resolve(),
-    infrastructure.customerNotificationProcess
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "security_customer_notification_processes",
-          infrastructure.customerNotificationProcess,
-          "infrastructure.customerNotificationProcess",
         )
       : Promise.resolve(),
     infrastructure.backupCadence
@@ -316,22 +263,76 @@ export const validateInfrastructureProfileCodes = async (
           "infrastructure.vendorReviewCadence",
         )
       : Promise.resolve(),
-    infrastructure.penetrationTestingCadence
+  ]);
+};
+
+export const validateSecurityProfileCodes = async (
+  vocabularyRepository: VocabularyRepository,
+  organizationId: string,
+  security: SecurityProfile,
+) => {
+  await Promise.all([
+    security.patchingSlaCriticalDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          security.patchingSlaCriticalDaysStatus,
+          "security.patchingSlaCriticalDaysStatus",
+        )
+      : Promise.resolve(),
+    security.patchingSlaHighDaysStatus
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "defined_statuses",
+          security.patchingSlaHighDaysStatus,
+          "security.patchingSlaHighDaysStatus",
+        )
+      : Promise.resolve(),
+    security.scanningCadence
       ? assertCode(
           vocabularyRepository,
           organizationId,
           "security_cadences",
-          infrastructure.penetrationTestingCadence,
-          "infrastructure.penetrationTestingCadence",
+          security.scanningCadence,
+          "security.scanningCadence",
         )
       : Promise.resolve(),
-    infrastructure.penetrationTestingStrategy
+    security.incidentNotificationTimeline
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_notification_timelines",
+          security.incidentNotificationTimeline,
+          "security.incidentNotificationTimeline",
+        )
+      : Promise.resolve(),
+    security.customerNotificationProcess
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_customer_notification_processes",
+          security.customerNotificationProcess,
+          "security.customerNotificationProcess",
+        )
+      : Promise.resolve(),
+    security.penetrationTestingCadence
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "security_cadences",
+          security.penetrationTestingCadence,
+          "security.penetrationTestingCadence",
+        )
+      : Promise.resolve(),
+    security.penetrationTestingStrategy
       ? assertCode(
           vocabularyRepository,
           organizationId,
           "security_penetration_testing_strategies",
-          infrastructure.penetrationTestingStrategy,
-          "infrastructure.penetrationTestingStrategy",
+          security.penetrationTestingStrategy,
+          "security.penetrationTestingStrategy",
         )
       : Promise.resolve(),
   ]);

@@ -6,6 +6,7 @@ import {
   type BusinessActivity,
   type DataHandlingProfile,
   type InfrastructureProfile,
+  type SecurityProfile,
   type OrganizationSecurityProfile,
   type PrivacyProfile,
   type ServiceProfile,
@@ -128,11 +129,12 @@ export class ReportContextBuilder {
         ? this.securityContext(
             organization.access,
             organization.infrastructure,
+            organization.security,
             vocabulary,
           )
         : {},
       infrastructure: organization
-        ? this.infrastructureContext(organization.infrastructure, vocabulary)
+        ? this.infrastructureContext(organization.infrastructure)
         : {},
       dataHandling: organization
         ? this.dataHandlingContext(organization.dataHandling, vocabulary)
@@ -202,21 +204,8 @@ export class ReportContextBuilder {
 
   private infrastructureContext(
     infrastructure: InfrastructureProfile,
-    vocabulary?: Vocabulary,
   ) {
-    return {
-      ...this.withAnswerFlags(infrastructure),
-      penetrationTestingCadenceLabel: this.codeLabel(
-        vocabulary,
-        "security_cadences",
-        infrastructure.penetrationTestingCadence,
-      ),
-      penetrationTestingStrategyLabel: this.codeLabel(
-        vocabulary,
-        "security_penetration_testing_strategies",
-        infrastructure.penetrationTestingStrategy,
-      ),
-    };
+    return this.withAnswerFlags(infrastructure);
   }
 
   private dataHandlingContext(
@@ -444,6 +433,7 @@ export class ReportContextBuilder {
   private securityContext(
     access: AccessProfile,
     infrastructure: InfrastructureProfile,
+    security: SecurityProfile,
     vocabulary?: Vocabulary,
   ) {
     return {
@@ -501,74 +491,107 @@ export class ReportContextBuilder {
       },
       logging: {
         centralizedLogging: infrastructure.centralizedLoggingEnabled,
-        logRetentionDays: infrastructure.logRetentionDays,
-        logRetentionDaysStatus: infrastructure.logRetentionDaysStatus,
-        logRetentionDaysStatusLabel: this.codeLabel(
+        securityMonitoring: infrastructure.securityMonitoring,
+        securityMonitoringLabel: this.codeLabel(
           vocabulary,
-          "defined_statuses",
-          infrastructure.logRetentionDaysStatus,
-        ),
-        securityMonitoringOwner: infrastructure.securityMonitoringOwner,
-        securityMonitoringOwnerLabel: this.codeLabel(
-          vocabulary,
-          "security_monitoring_owners",
-          infrastructure.securityMonitoringOwner,
+          "security_monitoring_modes",
+          infrastructure.securityMonitoring,
         ),
         ...this.answerFlags({
           centralizedLogging: infrastructure.centralizedLoggingEnabled,
-          logRetentionDays: infrastructure.logRetentionDays,
-          securityMonitoringOwner: infrastructure.securityMonitoringOwner,
+          securityMonitoring: infrastructure.securityMonitoring,
+        }),
+      },
+      developmentSecurity: {
+        codeReviewRequired: security.codeReviewRequired,
+        dependencySecurityMonitoring: security.dependencySecurityMonitoring,
+        secretScanning: security.secretScanning,
+        automatedTestingBeforeDeployment:
+          security.automatedTestingBeforeDeployment,
+        cicdDeploymentProcess: security.cicdDeploymentProcess,
+        productionDeploymentApprovalRequired:
+          security.productionDeploymentApprovalRequired,
+        ...this.answerFlags({
+          codeReviewRequired: security.codeReviewRequired,
+          dependencySecurityMonitoring: security.dependencySecurityMonitoring,
+          secretScanning: security.secretScanning,
+          automatedTestingBeforeDeployment:
+            security.automatedTestingBeforeDeployment,
+          cicdDeploymentProcess: security.cicdDeploymentProcess,
+          productionDeploymentApprovalRequired:
+            security.productionDeploymentApprovalRequired,
         }),
       },
       vulnerabilityManagement: {
-        scanningCadence: infrastructure.scanningCadence,
+        scanningCadence: security.scanningCadence,
         scanningCadenceLabel: this.codeLabel(
           vocabulary,
           "security_cadences",
-          infrastructure.scanningCadence,
+          security.scanningCadence,
         ),
-        patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
+        penetrationTestingStrategy: security.penetrationTestingStrategy,
+        penetrationTestingStrategyLabel: this.codeLabel(
+          vocabulary,
+          "security_penetration_testing_strategies",
+          security.penetrationTestingStrategy,
+        ),
+        penetrationTestingCadence: security.penetrationTestingCadence,
+        penetrationTestingCadenceLabel: this.codeLabel(
+          vocabulary,
+          "security_cadences",
+          security.penetrationTestingCadence,
+        ),
+        penetrationTestLastDate: security.penetrationTestLastDate,
+        patchingSlaCriticalDays: security.patchingSlaCriticalDays,
         patchingSlaCriticalDaysStatus:
-          infrastructure.patchingSlaCriticalDaysStatus,
+          security.patchingSlaCriticalDaysStatus,
         patchingSlaCriticalDaysStatusLabel: this.codeLabel(
           vocabulary,
           "defined_statuses",
-          infrastructure.patchingSlaCriticalDaysStatus,
+          security.patchingSlaCriticalDaysStatus,
         ),
-        patchingSlaHighDays: infrastructure.patchingSlaHighDays,
-        patchingSlaHighDaysStatus: infrastructure.patchingSlaHighDaysStatus,
+        patchingSlaHighDays: security.patchingSlaHighDays,
+        patchingSlaHighDaysStatus: security.patchingSlaHighDaysStatus,
         patchingSlaHighDaysStatusLabel: this.codeLabel(
           vocabulary,
           "defined_statuses",
-          infrastructure.patchingSlaHighDaysStatus,
+          security.patchingSlaHighDaysStatus,
         ),
+        vulnerabilityDisclosureProgramExists:
+          security.vulnerabilityDisclosureProgramExists,
+        vulnerabilityDisclosureUrl: security.vulnerabilityDisclosureUrl,
         ...this.answerFlags({
-          scanningCadence: infrastructure.scanningCadence,
-          patchingSlaCriticalDays: infrastructure.patchingSlaCriticalDays,
-          patchingSlaHighDays: infrastructure.patchingSlaHighDays,
+          scanningCadence: security.scanningCadence,
+          penetrationTestingStrategy: security.penetrationTestingStrategy,
+          penetrationTestingCadence: security.penetrationTestingCadence,
+          penetrationTestLastDate: security.penetrationTestLastDate,
+          patchingSlaCriticalDays: security.patchingSlaCriticalDays,
+          patchingSlaHighDays: security.patchingSlaHighDays,
+          vulnerabilityDisclosureProgramExists:
+            security.vulnerabilityDisclosureProgramExists,
+          vulnerabilityDisclosureUrl: security.vulnerabilityDisclosureUrl,
         }),
       },
       incidentResponse: {
-        planExists: infrastructure.incidentResponsePlanExists,
-        notificationTimeline: infrastructure.incidentNotificationTimeline,
+        planExists: security.incidentResponsePlanExists,
+        notificationTimeline: security.incidentNotificationTimeline,
         notificationTimelineLabel: this.codeLabel(
           vocabulary,
           "security_notification_timelines",
-          infrastructure.incidentNotificationTimeline,
+          security.incidentNotificationTimeline,
         ),
-        customerNotificationProcess: infrastructure.customerNotificationProcess,
+        customerNotificationProcess: security.customerNotificationProcess,
         customerNotificationProcessLabel: this.codeLabel(
           vocabulary,
           "security_customer_notification_processes",
-          infrastructure.customerNotificationProcess,
+          security.customerNotificationProcess,
         ),
-        lastTestedDate: infrastructure.incidentResponseLastTestedDate,
+        lastTestedDate: security.incidentResponseLastTestedDate,
         ...this.answerFlags({
-          planExists: infrastructure.incidentResponsePlanExists,
-          notificationTimeline: infrastructure.incidentNotificationTimeline,
-          customerNotificationProcess:
-            infrastructure.customerNotificationProcess,
-          lastTestedDate: infrastructure.incidentResponseLastTestedDate,
+          planExists: security.incidentResponsePlanExists,
+          notificationTimeline: security.incidentNotificationTimeline,
+          customerNotificationProcess: security.customerNotificationProcess,
+          lastTestedDate: security.incidentResponseLastTestedDate,
         }),
       },
       backups: {

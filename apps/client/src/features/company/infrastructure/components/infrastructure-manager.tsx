@@ -2,12 +2,9 @@ import { type Provider, type Vocabulary } from "@plyco/shared"
 
 import { BackupsPanel } from "@/features/company/infrastructure/components/panels/backups-panel"
 import { EncryptionPanel } from "@/features/company/infrastructure/components/panels/encryption-panel"
-import { IncidentResponsePanel } from "@/features/company/infrastructure/components/panels/incident-response-panel"
 import { InfrastructureProvidersPanel } from "@/features/company/infrastructure/components/panels/infrastructure-providers-panel"
 import { LoggingMonitoringPanel } from "@/features/company/infrastructure/components/panels/logging-monitoring-panel"
 import { VendorRiskPanel } from "@/features/company/infrastructure/components/panels/vendor-risk-panel"
-import { VulnerabilityDetectionPanel } from "@/features/company/infrastructure/components/panels/vulnerability-detection-panel"
-import { VulnerabilityRemediationPanel } from "@/features/company/infrastructure/components/panels/vulnerability-remediation-panel"
 import {
   type ProfileDraft,
   type SaveProfile,
@@ -20,13 +17,10 @@ export const InfrastructureManager = ({
   profile,
   providers,
   securityCadenceOptions,
-  securityCustomerNotificationProcessOptions,
   securityEncryptionAlgorithmOptions,
   securityKeyManagementProviderOptions,
-  securityMonitoringOwnerOptions,
-  securityNotificationTimelineOptions,
+  securityMonitoringOptions,
   securityTlsVersionOptions,
-  penetrationTestingStrategyOptions,
   vocabulary,
   onSaveProfile,
 }: {
@@ -34,13 +28,10 @@ export const InfrastructureManager = ({
   profile: ProfileDraft
   providers: Provider[]
   securityCadenceOptions: Option[]
-  securityCustomerNotificationProcessOptions: Option[]
   securityEncryptionAlgorithmOptions: Option[]
   securityKeyManagementProviderOptions: Option[]
-  securityMonitoringOwnerOptions: Option[]
-  securityNotificationTimelineOptions: Option[]
+  securityMonitoringOptions: Option[]
   securityTlsVersionOptions: Option[]
-  penetrationTestingStrategyOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
 }) => {
@@ -92,37 +83,8 @@ export const InfrastructureManager = ({
       <LoggingMonitoringPanel
         infrastructure={profile.infrastructure}
         isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Logging & Monitoring")}
-        securityMonitoringOwnerOptions={securityMonitoringOwnerOptions}
-        vocabulary={vocabulary}
-        onSave={saveInfrastructure}
-      />
-      <VulnerabilityDetectionPanel
-        infrastructure={profile.infrastructure}
-        isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Vulnerability Detection")}
-        securityCadenceOptions={securityCadenceOptions}
-        penetrationTestingStrategyOptions={penetrationTestingStrategyOptions}
-        vocabulary={vocabulary}
-        onSave={saveInfrastructure}
-      />
-      <VulnerabilityRemediationPanel
-        infrastructure={profile.infrastructure}
-        isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Vulnerability Remediation")}
-        vocabulary={vocabulary}
-        onSave={saveInfrastructure}
-      />
-      <IncidentResponsePanel
-        infrastructure={profile.infrastructure}
-        isMutationPending={isMutationPending}
-        needsAttention={getNeedsAttention("Incident Response")}
-        securityCustomerNotificationProcessOptions={
-          securityCustomerNotificationProcessOptions
-        }
-        securityNotificationTimelineOptions={
-          securityNotificationTimelineOptions
-        }
+        needsAttention={getNeedsAttention("Monitoring & Detection")}
+        securityMonitoringOptions={securityMonitoringOptions}
         vocabulary={vocabulary}
         onSave={saveInfrastructure}
       />

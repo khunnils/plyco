@@ -3,6 +3,7 @@ import {
   companyProfileSchema,
   dataHandlingProfileSchema,
   infrastructureProfileSchema,
+  securityProfileSchema,
   privacyProfileSchema,
   reorderEntitiesSchema,
   serviceProfileInputSchema,
@@ -18,6 +19,7 @@ import {
   validateCompanyProfileCodes,
   validateDataHandlingProfileCodes,
   validateInfrastructureProfileCodes,
+  validateSecurityProfileCodes,
   validatePrivacyProfileCodes,
   validateServiceProfileCodes,
 } from "../vocabulary/validation.js";
@@ -32,6 +34,7 @@ const securityProfileBodySchema = z.object({
     .min(1, "At least one service is required"),
   privacy: privacyProfileSchema,
   infrastructure: infrastructureProfileSchema,
+  security: securityProfileSchema,
   dataHandling: dataHandlingProfileSchema,
   access: accessProfileSchema,
 });
@@ -116,6 +119,11 @@ export async function registerOrganizationRoutes(
         vocabularyRepository,
         request.params.organizationId,
         body.infrastructure,
+      );
+      await validateSecurityProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body.security,
       );
       await validateAccessProfileCodes(
         vocabularyRepository,
