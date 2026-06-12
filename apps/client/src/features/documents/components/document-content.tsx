@@ -7,7 +7,7 @@ const markdownStyles =
 
 export const DocumentContent = ({ document }: { document: Document }) => (
   <article
-    className={`rounded-md border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-800 font-sans ${markdownStyles}`}
+    className={`text-sm leading-6 text-slate-800 font-sans ${markdownStyles}`}
   >
     <ReactMarkdown remarkPlugins={[remarkGfm]}>
       {document.renderedContent}
