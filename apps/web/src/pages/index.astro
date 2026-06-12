@@ -1,35 +1,100 @@
 ---
+import ChecklistPanel from "../components/ChecklistPanel.astro";
+import ChipList from "../components/ChipList.astro";
+import ComparisonCard from "../components/ComparisonCard.astro";
+import FeatureCard from "../components/FeatureCard.astro";
+import SurfaceCard from "../components/SurfaceCard.astro";
+import TileList from "../components/TileList.astro";
+import TimelineCard from "../components/TimelineCard.astro";
 import "../styles/global.css";
 
 const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
-const signInUrl = `${apiUrl}/auth/google`;
 
-const inventory = [
+const features = [
 	{
-		label: "Activities",
-		description: "Why your company processes data.",
-		items: ["Student assessment processing", "Lead generation", "Account management"],
-		accent: "blue",
+		title: "Shared compliance workspace",
+		body: "Track controls, tasks, owners, notes, and evidence in one place instead of scattered docs and spreadsheets.",
 	},
 	{
-		label: "Data types",
-		description: "The information moving through your products.",
-		items: ["Student content", "Account data", "Usage analytics"],
-		accent: "teal",
+		title: "SOC 2 and GDPR readiness",
+		body: "Work through startup-friendly controls that map to common SOC 2 and GDPR expectations.",
 	},
 	{
-		label: "Services",
-		description: "The products and surfaces customers use.",
-		items: ["Northstar Platform", "Marketing website", "Mobile app"],
-		accent: "amber",
+		title: "Evidence collection",
+		body: "Upload screenshots, policies, notes, and links once, then reuse them across mapped controls.",
+	},
+	{
+		title: "Vendor inventory",
+		body: "Track subprocessors, DPAs, data processed, criticality, and ownership before procurement teams ask.",
+	},
+	{
+		title: "Policy templates",
+		body: "Start with plain-English templates for access control, incident response, data retention, acceptable use, and vendor management.",
+	},
+	{
+		title: "Readiness dashboard",
+		body: "See what is complete, what needs evidence, and which gaps could block a pilot or security review.",
 	},
 ];
 
-const onboardingChecks = [
-	"Found privacy policy",
-	"Detected services",
-	"Identified vendors",
-	"Imported data categories",
+const timeline = [
+	["Build fast", "MVP, demos, customer feedback"],
+	["Get traction", "Pilot interest, enterprise conversations"],
+	["Security review", "SOC 2 questions, vendor reviews, data handling requests"],
+	["Compliance panic", "Missing evidence, unclear controls, costly rebuilds"],
+	["With plyco", "Collect evidence early, track controls, stay pilot-ready"],
+];
+
+const included = [
+	"SOC 2 readiness checklist",
+	"GDPR-lite readiness layer",
+	"Shared controls mapped across frameworks",
+	"Evidence uploads and links",
+	"Policy templates",
+	"Vendor inventory",
+	"Task ownership and due dates",
+	"Readiness dashboard",
+];
+
+const excluded = [
+	"Automated cloud scanning",
+	"Endpoint agents",
+	"Auditor portal",
+	"Enterprise workflow engines",
+	"Guaranteed certification",
+];
+
+const audiences = [
+	"Have a working product",
+	"Are getting early customer interest",
+	"Sell to regulated or enterprise-adjacent customers",
+	"Need to answer security questionnaires",
+	"Want to prepare for SOC 2 later",
+	"Want GDPR basics handled in the same workspace",
+];
+
+const examples = [
+	"AI copilots",
+	"Healthcare tools",
+	"HR tech",
+	"Fintech products",
+	"Edtech platforms",
+	"Workflow automation SaaS",
+	"Developer tools selling upmarket",
+];
+
+const notThis = [
+	"Enterprise GRC platform",
+	"Continuous monitoring suite",
+	"Audit guarantee",
+	"Six-month onboarding",
+];
+
+const thisInstead = [
+	"Lightweight readiness workspace",
+	"Evidence and task tracking",
+	"Startup-friendly controls",
+	"Practical operating hygiene",
 ];
 ---
 
@@ -40,253 +105,347 @@ const onboardingChecks = [
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Plyco — Build customer trust from structured data</title>
+		<title>plyco — Compliance readiness for early-stage startups</title>
 		<meta
 			name="description"
-			content="Build your startup's trust inventory once. Keep privacy policies, subprocessors, security answers, and customer-facing documents aligned as your product changes."
+			content="A lightweight workspace that helps startups organize policies, vendors, evidence, and security basics before enterprise customers ask for SOC 2 or GDPR readiness."
 		/>
-		<meta property="og:title" content="Your product changes. Your trust documents should too." />
+		<meta property="og:title" content="Avoid Compliance Debt Early" />
 		<meta
 			property="og:description"
-			content="Plyco connects services, activities, data, and vendors so startup trust documents stay grounded in reality."
+			content="Lightweight compliance readiness for startups moving toward enterprise customers."
 		/>
 		<meta property="og:type" content="website" />
 	</head>
-	<body>
-		<header class="site-header">
-			<nav class="site-nav" aria-label="Main navigation">
-				<a href="#top" class="brand" aria-label="Plyco home">
-					<span class="brand-mark" aria-hidden="true">
-						<svg viewBox="0 0 32 32" fill="none"><path d="M8 9.5h8.5a6.5 6.5 0 0 1 0 13H12v-4h4.5a2.5 2.5 0 0 0 0-5H8v10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
-					</span>
+	<body class="bg-slate-50 text-slate-950 antialiased">
+		<header class="absolute inset-x-0 top-0 z-50">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5" aria-label="Main navigation">
+				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950">
+					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-base font-black text-slate-950">C</span>
 					<span>plyco</span>
 				</a>
-				<div class="nav-links">
-					<a href="#inventory">How it works</a>
-					<a href="#documents">Documents</a>
-					<a href="#drift">Drift detection</a>
+				<div class="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
+					<a class="transition hover:text-slate-950" href="#problem">All Pages</a>
+					<a class="transition hover:text-slate-950" href="#features">Features</a>
+					<a class="transition hover:text-slate-950" href="#early-access">Pricing</a>
+					<a class="transition hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
 				</div>
-				<div class="nav-actions">
-					<a class="sign-in" href={signInUrl}>Sign in</a>
-					<a class="button button-small" href="#waitlist">Join waitlist</a>
-				</div>
+				<a
+					href="#early-access"
+					class="inline-flex min-h-12 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-6 pr-2 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800"
+				>
+					Get Started
+					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-xl leading-none text-neutral-950">→</span>
+				</a>
 			</nav>
 		</header>
 
-		<main id="top">
-			<section class="hero section-shell">
-				<div class="hero-glow hero-glow-one"></div>
-				<div class="hero-glow hero-glow-two"></div>
-				<div class="hero-copy">
-					<p class="eyebrow"><span class="status-dot"></span>Customer trust infrastructure for startups</p>
-					<h1>Your product changes.<br /><span>Your trust documents should too.</span></h1>
-					<p class="hero-lede">
-						Connect what your company does, the data it handles, and the vendors it relies on. Plyco turns that structured truth into customer-ready policies and keeps them current.
-					</p>
-					<form class="waitlist-form hero-form" novalidate>
-						<label class="sr-only" for="hero-email">Work email</label>
-						<input id="hero-email" name="email" type="email" required autocomplete="email" placeholder="you@company.com" />
-						<input class="honeypot" name="website" type="url" tabindex="-1" autocomplete="off" aria-hidden="true" />
-						<button type="submit">Join the waitlist <span aria-hidden="true">→</span></button>
-					</form>
-					<p class="form-status" role="status" aria-live="polite"></p>
-					<p class="hero-note">Built for technical founders preparing for serious customer conversations.</p>
-				</div>
+		<main>
+			<section class="relative overflow-hidden bg-white px-6 pb-16 pt-32 md:pb-20 md:pt-36">
+				<div class="absolute inset-0 z-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:92px_92px]"></div>
+				<div class="absolute inset-x-0 top-0 z-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent"></div>
+				<div class="absolute inset-x-0 bottom-0 z-0 h-64 bg-linear-to-t from-slate-50 via-white/90 to-transparent"></div>
 
-				<div class="trust-map" aria-label="Northstar Labs trust inventory connecting services, activities, data, providers, and documents">
-					<div class="map-toolbar">
-						<div class="map-company"><span class="northstar-mark">N</span><div><strong>Northstar Labs</strong><small>Trust inventory</small></div></div>
-						<span class="live-pill"><span></span>All systems aligned</span>
-					</div>
-					<div class="map-flow">
-						<div class="map-stage map-stage-company">
-							<p>Service</p><div class="map-node node-blue"><span class="node-icon">01</span><strong>Learning platform</strong><small>app.northstar.dev</small></div>
+				<div class="relative z-10 mx-auto max-w-6xl text-center">
+					<div class="mx-auto max-w-4xl">
+						<p class="mb-6 inline-flex rounded-full border border-lime-200 bg-lime-100 px-4 py-2 text-sm font-bold text-slate-900">
+							Compliance readiness for early-stage startups
+						</p>
+						<h1 class="heading-hero">
+							Stop winging your policy docs
+						</h1>
+						<p class="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
+							A lightweight compliance readiness platform for early-stage startups building toward enterprise customers.
+						</p>
+						<div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+							<a
+								href="#early-access"
+								class="inline-flex min-h-14 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-7 pr-2 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800"
+							>
+								Join early access
+								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-2xl leading-none text-neutral-950">→</span>
+							</a>
+							<a
+								href="#features"
+								class="inline-flex min-h-14 items-center gap-4 rounded-full border border-slate-200 bg-white py-1.5 pl-7 pr-2 text-base font-bold text-slate-900 shadow-sm transition hover:bg-slate-100"
+							>
+								See what it helps with
+								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-2xl leading-none text-neutral-950">→</span>
+							</a>
 						</div>
-						<span class="map-arrow" aria-hidden="true">→</span>
-						<div class="map-stage"><p>Activities</p><div class="map-node"><span class="node-icon">02</span><strong>Student assessment</strong><small>Core processing</small></div></div>
-						<span class="map-arrow" aria-hidden="true">→</span>
-						<div class="map-stage"><p>Data types</p><div class="map-node"><span class="node-icon">03</span><strong>Student content</strong><small>Personal data</small></div></div>
-						<span class="map-arrow" aria-hidden="true">→</span>
-						<div class="map-stage"><p>Providers</p><div class="map-node node-teal"><span class="node-icon">04</span><strong>Cloud storage</strong><small>US + EU regions</small></div></div>
+						<p class="mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-500">
+							For founders preparing for SOC 2, GDPR readiness, security reviews, and enterprise pilots.
+						</p>
 					</div>
-					<div class="map-documents">
-						<div><span class="doc-icon"></span><strong>Privacy Policy</strong><small>Current</small></div>
-						<div><span class="doc-icon"></span><strong>Subprocessor List</strong><small>Current</small></div>
-						<div><span class="doc-icon"></span><strong>Security Policy</strong><small>Current</small></div>
+
+					<div class="policy-map" role="img" aria-label="Policy documents connected to one central source of truth">
+						<div class="policy-map__connector policy-map__connector--top-left" aria-hidden="true"></div>
+						<div class="policy-map__connector policy-map__connector--top-right" aria-hidden="true"></div>
+						<div class="policy-map__connector policy-map__connector--left" aria-hidden="true"></div>
+						<div class="policy-map__connector policy-map__connector--right" aria-hidden="true"></div>
+						<div class="policy-map__connector policy-map__connector--bottom-left" aria-hidden="true"></div>
+						<div class="policy-map__connector policy-map__connector--bottom-right" aria-hidden="true"></div>
+
+						<div class="policy-document policy-document--top-left" aria-hidden="true">
+							<span class="policy-document__icon">AC</span>
+							<strong>Access control</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+						<div class="policy-document policy-document--top-right" aria-hidden="true">
+							<span class="policy-document__icon">IR</span>
+							<strong>Incident response</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+						<div class="policy-document policy-document--left" aria-hidden="true">
+							<span class="policy-document__icon">DR</span>
+							<strong>Data retention</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+						<div class="policy-document policy-document--right" aria-hidden="true">
+							<span class="policy-document__icon">VM</span>
+							<strong>Vendor management</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+						<div class="policy-document policy-document--bottom-left" aria-hidden="true">
+							<span class="policy-document__icon">AU</span>
+							<strong>Acceptable use</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+						<div class="policy-document policy-document--bottom-right" aria-hidden="true">
+							<span class="policy-document__icon">IS</span>
+							<strong>Information security</strong>
+							<span class="policy-document__line policy-document__line--long"></span>
+							<span class="policy-document__line"></span>
+							<span class="policy-document__status">Current</span>
+						</div>
+
+						<div class="policy-source" aria-hidden="true">
+							<div class="policy-source__mark">
+								<span></span><span></span><span></span>
+							</div>
+							<p>Single source of truth</p>
+							<strong>Policies stay aligned</strong>
+							<div class="policy-source__meta">
+								<span><i></i> 6 policies</span>
+								<span>Synced now</span>
+							</div>
+						</div>
 					</div>
-					<div class="map-footer"><span>Structured company data</span><span class="map-line"></span><strong>Automatically generated</strong></div>
 				</div>
 			</section>
 
-			<section class="problem-section section-shell" id="problem">
-				<div class="section-intro">
-					<p class="section-number">01 / The problem</p>
-					<h2>Most startups manage customer trust manually.</h2>
-					<p>Your product lives in code. Your trust story is scattered across files, tabs, and answers written from memory.</p>
-				</div>
-				<div class="manual-work">
-					<div class="manual-card policy-sheet"><span class="file-tab">DOC</span><p>Privacy Policy</p><div class="text-line long"></div><div class="text-line"></div><div class="text-line short"></div><small>Last updated 8 months ago</small></div>
-					<div class="manual-card spreadsheet"><span class="file-tab green">XLS</span><p>Vendor list.xlsx</p><div class="sheet-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>Which version is current?</small></div>
-					<div class="manual-card questionnaire"><span class="file-tab amber">Q&A</span><p>Security questionnaire</p><div class="answer-row"><span>Encryption at rest?</span><b>Ask engineering</b></div><div class="answer-row"><span>Subprocessors?</span><b>Check spreadsheet</b></div></div>
-					<div class="manual-card soc-card"><span class="file-tab purple">SOC</span><p>SOC 2 answers</p><div class="text-line long"></div><div class="text-line short"></div><small>Copied from last customer</small></div>
-					<div class="manual-center"><span>?</span><strong>No shared source of truth</strong></div>
+			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-3xl">
+					<h2 class="heading-section">The product worked. The pitch rocked. The pilot stalled.</h2>
+					<div class="mt-6 space-y-5 text-lg leading-8 text-slate-600">
+						<p>A small team builds fast, gets early demos, and lands serious interest from a customer.</p>
+						<p>Then the security review starts.</p>
+						<p>Suddenly the blocker is not the product. It is missing policies, scattered evidence, unclear vendors, shared credentials, and no audit-friendly process.</p>
+					</div>
+					<p class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-base font-medium leading-7 text-amber-800">
+						That gap is compliance debt, and it gets expensive when discovered late.
+					</p>
 				</div>
 			</section>
 
-			<section class="inventory-section" id="inventory">
-				<div class="section-shell">
-					<div class="section-intro centered">
-						<p class="section-number">02 / The foundation</p>
-						<h2>Build your trust inventory once.</h2>
-						<p>Describe your company in the language of your actual product. Plyco keeps the relationships, not just a pile of disconnected answers.</p>
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Most startups discover compliance too late.</h2>
 					</div>
-					<div class="inventory-grid">
-						{inventory.map((group, index) => (
-							<article class={`inventory-card accent-${group.accent}`}>
-								<div class="inventory-card-head"><span>0{index + 1}</span><div><h3>{group.label}</h3><p>{group.description}</p></div></div>
-								<ul>{group.items.map((item) => <li><span></span>{item}</li>)}</ul>
-							</article>
+					<div class="mt-10 grid gap-4 md:grid-cols-5">
+						{timeline.map(([title, body], index) => (
+							<TimelineCard title={title} body={body} step={index + 1} highlighted={index === timeline.length - 1} />
 						))}
 					</div>
-					<div class="inventory-connection"><span></span><p>One connected model of how your company works</p><span></span></div>
 				</div>
 			</section>
 
-			<section class="vendors-section section-shell">
-				<div class="split-copy">
-					<div><p class="section-number">03 / Vendor reality</p><h2>Connect vendors to reality.</h2><p>Know exactly who processes what, for which product, and in which region. No more reverse-engineering your architecture during a customer review.</p></div>
-					<div class="quote-line">A vendor list says who you use.<br /><strong>Plyco explains why they matter.</strong></div>
-				</div>
-				<div class="vendor-visual">
-					<div class="vendor-service"><small>SERVICE</small><strong>Northstar Platform</strong><span>Production application</span></div>
-					<div class="vendor-links" aria-hidden="true"><i></i><i></i><i></i></div>
-					<div class="vendor-stack">
-						<div><span class="vendor-logo blue-logo">C</span><p><strong>Cloudbase</strong><small>Student content · Account data</small></p><b>US + EU</b></div>
-						<div><span class="vendor-logo dark-logo">A</span><p><strong>Authkit</strong><small>Account data · Login events</small></p><b>Global</b></div>
-						<div><span class="vendor-logo coral-logo">P</span><p><strong>Productloop</strong><small>Usage analytics</small></p><b>EU</b></div>
+			<section id="features" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Everything you wish you had organized before the customer asked.</h2>
+					</div>
+					<div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+						{features.map((feature) => <FeatureCard title={feature.title} body={feature.body} />)}
 					</div>
 				</div>
 			</section>
 
-			<section class="documents-section" id="documents">
-				<div class="section-shell documents-layout">
-					<div class="document-stack" aria-label="Automatically generated trust documents">
-						<div class="document-page page-back"><span>Security Policy</span></div>
-						<div class="document-page page-middle"><span>Subprocessor List</span></div>
-						<div class="document-page page-front">
-							<div class="document-brand"><span>N</span>Northstar Labs</div><small>PRIVACY POLICY</small><h3>How we handle personal data</h3><div class="doc-rule"></div><p>Northstar Labs processes account data, student content, and usage analytics to provide and improve its services.</p><div class="doc-meta"><span>Generated from 12 connected records</span><b>Current</b></div>
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Built for the messy stage before your first audit.</h2>
+						<p class="mt-4 text-lg leading-8 text-slate-600">The first version focuses on lightweight operational hygiene, not heavy automation.</p>
+					</div>
+					<div class="mt-10 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-2">
+						<ChecklistPanel title="Included in the MVP" items={included} listClass="grid gap-3 text-base text-slate-700 sm:grid-cols-2 lg:grid-cols-1" />
+						<ChecklistPanel
+							title="Intentionally not included"
+							items={excluded}
+							marker="—"
+							markerClass="text-slate-400"
+							class="border-t border-slate-200 bg-slate-50 lg:border-l lg:border-t-0"
+						/>
+					</div>
+				</div>
+			</section>
+
+			<section id="for" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">Designed for startups that are almost ready for bigger customers.</h2>
+					</div>
+					<div class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+						<SurfaceCard>
+							<h3 class="heading-card text-slate-950">For teams that</h3>
+							<TileList items={audiences} />
+						</SurfaceCard>
+						<SurfaceCard variant="muted">
+							<h3 class="heading-card text-slate-950">Common examples</h3>
+							<ChipList items={examples} />
+						</SurfaceCard>
+					</div>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-20">
+				<div class="mx-auto max-w-6xl">
+					<div class="max-w-3xl">
+						<h2 class="heading-section">This is not another enterprise compliance platform.</h2>
+						<p class="mt-5 text-lg leading-8 text-slate-600">
+							We are not trying to replace Vanta, Drata, auditors, lawyers, or mature GRC systems. This is for the stage before that, when you need to become organized, credible, and ready for serious customer conversations.
+						</p>
+					</div>
+					<div class="mt-10 grid gap-5 md:grid-cols-2">
+						<ComparisonCard title="Not this" items={notThis} />
+						<ComparisonCard title="This" items={thisInstead} variant="positive" />
+					</div>
+				</div>
+			</section>
+
+			<section id="early-access" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
+				<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+					<div>
+						<h2 class="heading-section">Help shape the compliance readiness tool for startups.</h2>
+						<p class="mt-5 text-lg leading-8 text-slate-600">
+							We are validating the first version with founders and small teams who have hit security reviews, SOC 2 questions, GDPR concerns, or enterprise pilot blockers.
+						</p>
+						<a
+							href="#blocker"
+							class="mt-7 inline-flex min-h-12 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-base font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100"
+						>
+							Tell us what blocked you
+						</a>
+						<p class="mt-5 text-sm leading-6 text-slate-500">No spam. Occasional product updates and founder interviews.</p>
+					</div>
+					<form class="waitlist-form rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:p-8" novalidate>
+						<input class="waitlist-honeypot" name="website" type="url" tabindex="-1" autocomplete="off" aria-hidden="true" />
+						<div class="grid gap-5">
+							<div>
+								<label for="email" class="block text-sm font-semibold text-slate-900">Email</label>
+								<input
+									id="email"
+									name="email"
+									type="email"
+									required
+									placeholder="founder@example.com"
+									class="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+								/>
+							</div>
+							<div>
+								<label for="blocker" class="block text-sm font-semibold text-slate-900">Biggest compliance blocker <span class="font-normal text-slate-500">(optional)</span></label>
+								<textarea
+									id="blocker"
+									name="blocker"
+									rows="4"
+									placeholder="Security questionnaire, SOC 2 prep, GDPR questions, vendor review..."
+									class="mt-2 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+								></textarea>
+							</div>
+							<button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-blue-600 px-5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto">
+								Join early access
+							</button>
+							<p class="waitlist-status hidden text-sm font-medium" role="status" aria-live="polite"></p>
+							<p class="text-sm leading-6 text-slate-500">
+								Compliance Starter provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
+							</p>
 						</div>
-					</div>
-					<div class="section-intro">
-						<p class="section-number">04 / Documents</p>
-						<h2>One-click policy generation from structured data.</h2>
-						<p>Generate privacy, security, and subprocessor documents from the same inventory you use to answer customers. Every claim stays tied to something real.</p>
-						<ul class="feature-checks"><li>Plain-language templates</li><li>Traceable source data</li><li>Regenerate when your company changes</li></ul>
-					</div>
-				</div>
-			</section>
-
-			<section class="drift-section section-shell" id="drift">
-				<div class="section-intro centered">
-					<p class="section-number">05 / Stay current</p>
-					<h2>Detect compliance drift.</h2>
-					<p>You move fast. Your documents probably should too.</p>
-				</div>
-				<div class="drift-board">
-					<div class="drift-header"><div><span class="pulse-icon"></span><strong>Changes that affect trust</strong></div><small>2 need review</small></div>
-					<div class="notification warning-note"><span class="notification-icon">↗</span><div><strong>New US data region enabled</strong><p>Northstar Platform · Cloudbase hosting</p></div><time>12 min ago</time><button type="button">Review impact</button></div>
-					<div class="notification"><span class="notification-icon">+</span><div><strong>Subprocessor list changed</strong><p>Productloop added to Usage Analytics</p></div><time>Yesterday</time><button type="button">Update document</button></div>
-					<div class="notification resolved"><span class="notification-icon">✓</span><div><strong>Privacy policy regenerated</strong><p>Published from the latest inventory</p></div><time>May 28</time><span class="resolved-label">Resolved</span></div>
-				</div>
-			</section>
-
-			<section class="onboarding-section">
-				<div class="section-shell onboarding-layout">
-					<div class="section-intro">
-						<p class="section-number">06 / Fast setup</p>
-						<h2>Start with your URL.</h2>
-						<p>Plyco reads your public product and policy pages to prepare an editable first draft. You review every detail before it becomes part of your trust inventory.</p>
-						<p class="grounded-note">Useful automation, with a human in control.</p>
-					</div>
-					<div class="onboarding-card">
-						<div class="browser-bar"><span></span><span></span><span></span><p>plyco / new organization</p></div>
-						<div class="url-entry"><label>Company website</label><div><span>https://</span><strong>northstarlabs.dev</strong><b>Analyze →</b></div></div>
-						<div class="scan-progress"><span></span></div>
-						<ul>{onboardingChecks.map((item, index) => <li style={`--delay:${index * 0.12}s`}><span>✓</span>{item}<small>{index === 0 ? "/privacy" : index === 1 ? "3 services" : index === 2 ? "7 vendors" : "8 categories"}</small></li>)}</ul>
-					</div>
-				</div>
-			</section>
-
-			<section class="waitlist-section" id="waitlist">
-				<div class="waitlist-panel">
-					<div><p class="eyebrow light"><span class="status-dot"></span>Private beta</p><h2>Build trust before the questionnaire arrives.</h2><p>Join the waitlist for early access and occasional product updates. No compliance theater. No spam.</p></div>
-					<form class="waitlist-form final-form" novalidate>
-						<div><label for="waitlist-email">Work email</label><input id="waitlist-email" name="email" type="email" required autocomplete="email" placeholder="founder@company.com" /></div>
-						<div><label for="waitlist-blocker">Biggest compliance blocker <span>(optional)</span></label><textarea id="waitlist-blocker" name="blocker" rows="3" placeholder="Security questionnaire, vendor review, privacy policy..."></textarea></div>
-						<input class="honeypot" name="website" type="url" tabindex="-1" autocomplete="off" aria-hidden="true" />
-						<button type="submit">Join the waitlist <span aria-hidden="true">→</span></button>
-						<p class="form-status light-status" role="status" aria-live="polite"></p>
 					</form>
 				</div>
 			</section>
 		</main>
 
-		<footer>
-			<div class="footer-inner">
-				<a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 9.5h8.5a6.5 6.5 0 0 1 0 13H12v-4h4.5a2.5 2.5 0 0 0 0-5H8v10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg></span><span>plyco</span></a>
-				<p>Practical trust infrastructure for early-stage startups.</p>
-				<nav aria-label="Footer navigation"><a href={signInUrl}>Sign in</a><a href="mailto:hello@plyco.dev">Contact</a><a href="#waitlist">Privacy</a></nav>
+		<footer class="px-6 py-10">
+			<div class="mx-auto flex max-w-6xl flex-col gap-6 border-t border-slate-200 pt-8 md:flex-row md:items-start md:justify-between">
+				<div>
+					<p class="font-semibold text-slate-950">plyco</p>
+					<p class="mt-2 max-w-md text-sm leading-6 text-slate-600">Lightweight compliance readiness for early-stage startups.</p>
+					<p class="mt-3 max-w-xl text-xs leading-5 text-slate-500">Readiness guidance only. Not legal advice, certification, or audit assurance.</p>
+				</div>
+				<nav class="flex flex-wrap gap-5 text-sm font-medium text-slate-600" aria-label="Footer navigation">
+					<a class="hover:text-slate-950" href="#early-access">Early access</a>
+					<a class="hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
+					<a class="hover:text-slate-950" href="#early-access">Privacy</a>
+				</nav>
 			</div>
-			<p class="legal-note">Plyco provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.</p>
 		</footer>
-
 		<script is:inline define:vars={{ apiUrl }}>
-			const forms = document.querySelectorAll(".waitlist-form");
+			const form = document.querySelector(".waitlist-form");
 
-			for (const form of forms) {
-				form.addEventListener("submit", async (event) => {
-					event.preventDefault();
-					const status = form.parentElement?.querySelector(".form-status") ?? form.querySelector(".form-status");
-					const button = form.querySelector("button[type='submit']");
-					const data = new FormData(form);
-					const email = String(data.get("email") ?? "").trim();
+			form?.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				const status = form.querySelector(".waitlist-status");
+				const button = form.querySelector("button[type='submit']");
+				const data = new FormData(form);
+				const email = String(data.get("email") ?? "").trim();
 
-					if (!email || !email.includes("@")) {
-						status.textContent = "Enter a valid work email.";
-						status.dataset.state = "error";
-						return;
-					}
+				status.classList.remove("hidden", "text-green-700", "text-red-700");
 
-					button.disabled = true;
-					button.dataset.label = button.textContent;
-					button.textContent = "Joining...";
-					status.textContent = "";
+				if (!email || !email.includes("@")) {
+					status.textContent = "Enter a valid email address.";
+					status.classList.add("text-red-700");
+					return;
+				}
 
-					try {
-						const response = await fetch(`${apiUrl}/waitlist`, {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								email,
-								blocker: String(data.get("blocker") ?? "").trim() || undefined,
-								website: String(data.get("website") ?? ""),
-							}),
-						});
+				button.disabled = true;
+				button.textContent = "Joining...";
+				status.textContent = "";
 
-						if (!response.ok) throw new Error("Request failed");
+				try {
+					const response = await fetch(`${apiUrl}/waitlist`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							email,
+							blocker: String(data.get("blocker") ?? "").trim() || undefined,
+							website: String(data.get("website") ?? ""),
+						}),
+					});
 
-						form.reset();
-						status.textContent = "You're on the list. We'll be in touch.";
-						status.dataset.state = "success";
-					} catch {
-						status.textContent = "We couldn't save your spot. Please try again.";
-						status.dataset.state = "error";
-					} finally {
-						button.disabled = false;
-						button.textContent = button.dataset.label;
-					}
-				});
-			}
+					if (!response.ok) throw new Error("Request failed");
+
+					form.reset();
+					status.textContent = "You're on the list. We'll be in touch.";
+					status.classList.add("text-green-700");
+				} catch {
+					status.textContent = "We couldn't save your spot. Please try again.";
+					status.classList.add("text-red-700");
+				} finally {
+					button.disabled = false;
+					button.textContent = "Join early access";
+				}
+			});
 		</script>
 	</body>
 </html>
