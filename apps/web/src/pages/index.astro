@@ -1,101 +1,7 @@
 ---
-import ChecklistPanel from "../components/ChecklistPanel.astro";
-import ChipList from "../components/ChipList.astro";
-import ComparisonCard from "../components/ComparisonCard.astro";
-import FeatureCard from "../components/FeatureCard.astro";
-import SurfaceCard from "../components/SurfaceCard.astro";
-import TileList from "../components/TileList.astro";
-import TimelineCard from "../components/TimelineCard.astro";
 import "../styles/global.css";
 
 const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
-
-const features = [
-	{
-		title: "Shared compliance workspace",
-		body: "Track controls, tasks, owners, notes, and evidence in one place instead of scattered docs and spreadsheets.",
-	},
-	{
-		title: "SOC 2 and GDPR readiness",
-		body: "Work through startup-friendly controls that map to common SOC 2 and GDPR expectations.",
-	},
-	{
-		title: "Evidence collection",
-		body: "Upload screenshots, policies, notes, and links once, then reuse them across mapped controls.",
-	},
-	{
-		title: "Vendor inventory",
-		body: "Track subprocessors, DPAs, data processed, criticality, and ownership before procurement teams ask.",
-	},
-	{
-		title: "Policy templates",
-		body: "Start with plain-English templates for access control, incident response, data retention, acceptable use, and vendor management.",
-	},
-	{
-		title: "Readiness dashboard",
-		body: "See what is complete, what needs evidence, and which gaps could block a pilot or security review.",
-	},
-];
-
-const timeline = [
-	["Build fast", "MVP, demos, customer feedback"],
-	["Get traction", "Pilot interest, enterprise conversations"],
-	["Security review", "SOC 2 questions, vendor reviews, data handling requests"],
-	["Compliance panic", "Missing evidence, unclear controls, costly rebuilds"],
-	["With plyco", "Collect evidence early, track controls, stay pilot-ready"],
-];
-
-const included = [
-	"SOC 2 readiness checklist",
-	"GDPR-lite readiness layer",
-	"Shared controls mapped across frameworks",
-	"Evidence uploads and links",
-	"Policy templates",
-	"Vendor inventory",
-	"Task ownership and due dates",
-	"Readiness dashboard",
-];
-
-const excluded = [
-	"Automated cloud scanning",
-	"Endpoint agents",
-	"Auditor portal",
-	"Enterprise workflow engines",
-	"Guaranteed certification",
-];
-
-const audiences = [
-	"Have a working product",
-	"Are getting early customer interest",
-	"Sell to regulated or enterprise-adjacent customers",
-	"Need to answer security questionnaires",
-	"Want to prepare for SOC 2 later",
-	"Want GDPR basics handled in the same workspace",
-];
-
-const examples = [
-	"AI copilots",
-	"Healthcare tools",
-	"HR tech",
-	"Fintech products",
-	"Edtech platforms",
-	"Workflow automation SaaS",
-	"Developer tools selling upmarket",
-];
-
-const notThis = [
-	"Enterprise GRC platform",
-	"Continuous monitoring suite",
-	"Audit guarantee",
-	"Six-month onboarding",
-];
-
-const thisInstead = [
-	"Lightweight readiness workspace",
-	"Evidence and task tracking",
-	"Startup-friendly controls",
-	"Practical operating hygiene",
-];
 ---
 
 <html lang="en">
@@ -162,7 +68,7 @@ const thisInstead = [
 								href="#early-access"
 								class="inline-flex min-h-14 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-7 pr-2 text-base font-bold text-white shadow-sm transition hover:bg-neutral-800"
 							>
-								Join early access
+								Join the waitlist
 								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-2xl leading-none text-neutral-950">→</span>
 							</a>
 							<a
@@ -244,112 +150,223 @@ const thisInstead = [
 				</div>
 			</section>
 
-			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-3xl">
-					<h2 class="heading-section">The product worked. The pitch rocked. The pilot stalled.</h2>
-					<div class="mt-6 space-y-5 text-lg leading-8 text-slate-600">
-						<p>A small team builds fast, gets early demos, and lands serious interest from a customer.</p>
-						<p>Then the security review starts.</p>
-						<p>Suddenly the blocker is not the product. It is missing policies, scattered evidence, unclear vendors, shared credentials, and no audit-friendly process.</p>
-					</div>
-					<p class="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-base font-medium leading-7 text-amber-800">
-						That gap is compliance debt, and it gets expensive when discovered late.
-					</p>
-				</div>
-			</section>
-
-			<section class="px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-6xl">
-					<div class="max-w-3xl">
-						<h2 class="heading-section">Most startups discover compliance too late.</h2>
-					</div>
-					<div class="mt-10 grid gap-4 md:grid-cols-5">
-						{timeline.map(([title, body], index) => (
-							<TimelineCard title={title} body={body} step={index + 1} highlighted={index === timeline.length - 1} />
-						))}
-					</div>
-				</div>
-			</section>
-
-			<section id="features" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-6xl">
-					<div class="max-w-3xl">
-						<h2 class="heading-section">Everything you wish you had organized before the customer asked.</h2>
-					</div>
-					<div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-						{features.map((feature) => <FeatureCard title={feature.title} body={feature.body} />)}
-					</div>
-				</div>
-			</section>
-
-			<section class="px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-6xl">
-					<div class="max-w-3xl">
-						<h2 class="heading-section">Built for the messy stage before your first audit.</h2>
-						<p class="mt-4 text-lg leading-8 text-slate-600">The first version focuses on lightweight operational hygiene, not heavy automation.</p>
-					</div>
-					<div class="mt-10 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:grid-cols-2">
-						<ChecklistPanel title="Included in the MVP" items={included} listClass="grid gap-3 text-base text-slate-700 sm:grid-cols-2 lg:grid-cols-1" />
-						<ChecklistPanel
-							title="Intentionally not included"
-							items={excluded}
-							marker="—"
-							markerClass="text-slate-400"
-							class="border-t border-slate-200 bg-slate-50 lg:border-l lg:border-t-0"
-						/>
-					</div>
-				</div>
-			</section>
-
-			<section id="for" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-6xl">
-					<div class="max-w-3xl">
-						<h2 class="heading-section">Designed for startups that are almost ready for bigger customers.</h2>
-					</div>
-					<div class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-						<SurfaceCard>
-							<h3 class="heading-card text-slate-950">For teams that</h3>
-							<TileList items={audiences} />
-						</SurfaceCard>
-						<SurfaceCard variant="muted">
-							<h3 class="heading-card text-slate-950">Common examples</h3>
-							<ChipList items={examples} />
-						</SurfaceCard>
-					</div>
-				</div>
-			</section>
-
-			<section class="px-6 py-14 md:py-20">
-				<div class="mx-auto max-w-6xl">
-					<div class="max-w-3xl">
-						<h2 class="heading-section">This is not another enterprise compliance platform.</h2>
-						<p class="mt-5 text-lg leading-8 text-slate-600">
-							We are not trying to replace Vanta, Drata, auditors, lawyers, or mature GRC systems. This is for the stage before that, when you need to become organized, credible, and ready for serious customer conversations.
-						</p>
-					</div>
-					<div class="mt-10 grid gap-5 md:grid-cols-2">
-						<ComparisonCard title="Not this" items={notThis} />
-						<ComparisonCard title="This" items={thisInstead} variant="positive" />
-					</div>
-				</div>
-			</section>
-
-			<section id="early-access" class="border-y border-slate-200 bg-white px-6 py-14 md:py-20">
-				<div class="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
+				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
 					<div>
-						<h2 class="heading-section">Help shape the compliance readiness tool for startups.</h2>
-						<p class="mt-5 text-lg leading-8 text-slate-600">
-							We are validating the first version with founders and small teams who have hit security reviews, SOC 2 questions, GDPR concerns, or enterprise pilot blockers.
-						</p>
-						<a
-							href="#blocker"
-							class="mt-7 inline-flex min-h-12 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-base font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100"
-						>
-							Tell us what blocked you
-						</a>
-						<p class="mt-5 text-sm leading-6 text-slate-500">No spam. Occasional product updates and founder interviews.</p>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Model the foundations</p>
+						<h2 class="heading-section mt-4">Model the facts. We’ll handle the documents.</h2>
+						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
+							<p class="font-semibold text-slate-950">Most policy tools start with templates.</p>
+							<p class="font-semibold text-slate-950">We start with your business.</p>
+							<p>
+								Define the services you offer, the data you collect, the activities you perform, and the vendors you rely on. Claire turns that information into structured documentation that stays consistent across your entire trust stack.
+							</p>
+							<p>No more updating the same information in five different places.</p>
+						</div>
+						<ul class="mt-8 grid gap-3 text-base font-medium text-slate-700">
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Define processing activities once</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Track data types and retention policies</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Maintain a vendor and subprocessor inventory</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Map services to the data they actually use</span></li>
+						</ul>
 					</div>
-					<form class="waitlist-form rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:p-8" novalidate>
+
+					<div class="foundation-flow" role="img" aria-label="Activities flow into data types, vendors, and policies">
+						<div class="foundation-flow__stage foundation-flow__stage--activities">
+							<span class="foundation-flow__number">01</span>
+							<div class="foundation-flow__icon"><i></i><i></i><i></i></div>
+							<strong>Activities</strong>
+							<small>What your business does</small>
+							<div class="foundation-flow__tags"><span>Support</span><span>Analytics</span></div>
+						</div>
+						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
+						<div class="foundation-flow__stage foundation-flow__stage--data">
+							<span class="foundation-flow__number">02</span>
+							<div class="foundation-flow__icon foundation-flow__icon--data"><i></i><i></i><i></i></div>
+							<strong>Data Types</strong>
+							<small>What each activity uses</small>
+							<div class="foundation-flow__tags"><span>Account</span><span>Usage</span></div>
+						</div>
+						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
+						<div class="foundation-flow__stage foundation-flow__stage--vendors">
+							<span class="foundation-flow__number">03</span>
+							<div class="foundation-flow__icon foundation-flow__icon--vendors"><i></i><i></i><i></i></div>
+							<strong>Vendors</strong>
+							<small>Who processes the data</small>
+							<div class="foundation-flow__tags"><span>Hosting</span><span>Auth</span></div>
+						</div>
+						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
+						<div class="foundation-flow__stage foundation-flow__stage--policies">
+							<span class="foundation-flow__number">04</span>
+							<div class="foundation-flow__icon foundation-flow__icon--document"><i></i><i></i><i></i></div>
+							<strong>Policies</strong>
+							<small>Always aligned and current</small>
+							<div class="foundation-flow__tags"><span>Privacy</span><span>Security</span></div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-24">
+				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+					<div>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">One-click policy creation</p>
+						<h2 class="heading-section mt-4">Generate policies from reality, not guesswork.</h2>
+						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
+							<p class="font-semibold text-slate-950">Your policies should reflect how your company actually operates.</p>
+							<p>Claire generates customer-facing documentation directly from your source of truth using fully customizable templates.</p>
+						</div>
+						<p class="mt-7 text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Create and maintain</p>
+						<ul class="mt-4 grid gap-3 text-base font-medium text-slate-700 sm:grid-cols-2">
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Privacy Policies</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Security Policies</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Subprocessor Lists</span></li>
+							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>GDPR Records of Processing Activities (RoPA)</span></li>
+							<li class="flex items-start gap-3 sm:col-span-2"><span class="mt-1 text-lime-600">✓</span><span>Data Processing Agreements (DPA)</span></li>
+						</ul>
+						<div class="mt-8 rounded-xl border border-lime-200 bg-lime-50 p-5 text-base leading-7 text-slate-700">
+							<p>Every document stays connected to the underlying facts.</p>
+							<p class="mt-1 font-bold text-slate-950">Update the facts once. Regenerate everything.</p>
+						</div>
+					</div>
+
+					<div class="policy-previews" role="img" aria-label="Previews of generated privacy, security, and processing activity documents">
+						<div class="policy-preview policy-preview--privacy">
+							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span><i>Current</i></div>
+							<p>Privacy Policy</p>
+							<h3>How we handle personal data</h3>
+							<div class="policy-preview__rule"></div>
+							<span class="policy-preview__line policy-preview__line--long"></span>
+							<span class="policy-preview__line"></span>
+							<span class="policy-preview__line policy-preview__line--short"></span>
+							<div class="policy-preview__source"><span></span>Generated from 12 connected facts</div>
+						</div>
+						<div class="policy-preview policy-preview--security" aria-hidden="true">
+							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span></div>
+							<p>Security Policy</p>
+							<h3>Protecting company systems</h3>
+							<div class="policy-preview__rule"></div>
+							<span class="policy-preview__line policy-preview__line--long"></span>
+							<span class="policy-preview__line"></span>
+						</div>
+						<div class="policy-preview policy-preview--ropa" aria-hidden="true">
+							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span></div>
+							<p>GDPR RoPA</p>
+							<h3>Processing activities</h3>
+							<div class="policy-preview__table"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+						</div>
+						<div class="policy-previews__sync" aria-hidden="true"><span></span>Source facts synced</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="features" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
+				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+					<div>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Avoid compliance drift</p>
+						<h2 class="heading-section mt-4">The fastest way to lose trust is inconsistent documentation.</h2>
+						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
+							<p>Customers notice when your documents don’t agree with each other.</p>
+							<p>And they definitely notice when they don’t match reality.</p>
+							<p>Claire continuously checks for inconsistencies, missing information, and documentation gaps before your customers find them.</p>
+							<p class="font-semibold text-slate-950">Instead of discovering issues during a customer review, fix them before they become questions.</p>
+						</div>
+					</div>
+
+					<div class="drift-dashboard" aria-label="Illustrative customer feedback about documentation inconsistencies">
+						<div class="drift-dashboard__header">
+							<div>
+								<span class="drift-dashboard__eyebrow">Customer review feedback</span>
+								<strong>Questions you don’t want to receive</strong>
+							</div>
+							<span class="drift-dashboard__example-label">Illustrative examples</span>
+						</div>
+						<div class="drift-dashboard__alerts">
+							<article class="drift-alert">
+								<span class="drift-alert__icon">“</span>
+								<div>
+									<blockquote>“Your privacy policy states student submissions are retained for 90 days, but your security policy references a 30-day retention period.”</blockquote>
+									<p>Fictional customer security reviewer</p>
+								</div>
+							</article>
+							<article class="drift-alert">
+								<span class="drift-alert__icon">“</span>
+								<div>
+									<blockquote>“Your subprocessor list doesn’t include Mixpanel.”</blockquote>
+									<p>Fictional procurement lead</p>
+								</div>
+							</article>
+							<article class="drift-alert">
+								<span class="drift-alert__icon">“</span>
+								<div>
+									<blockquote>“Your security policy mentions MFA, but MFA is marked as optional in your access controls.”</blockquote>
+									<p>Fictional enterprise buyer</p>
+								</div>
+							</article>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="px-6 py-14 md:py-24">
+				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
+					<div>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Customer questionnaires in minutes, not days</p>
+						<h2 class="heading-section mt-4">Stop digging through docs for answers.</h2>
+						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
+							<p class="font-semibold text-slate-950">Enterprise customers don’t just ask for policies.</p>
+							<p class="font-semibold text-slate-950">They send spreadsheets.</p>
+							<p class="font-semibold text-slate-950">Lots of spreadsheets.</p>
+							<p>Claire keeps your privacy, security, vendor, and data handling information in one place, making customer questionnaires dramatically easier to complete.</p>
+							<p>Instead of hunting for answers across Slack, Notion, spreadsheets, and old documents, start with a source of truth that’s already organized.</p>
+							<p class="font-bold text-slate-950">Less scrambling. More shipping.</p>
+						</div>
+					</div>
+
+					<div class="questionnaire-demo" role="img" aria-label="Customer security questionnaire with answers generated from an organized source of truth">
+						<div class="questionnaire-demo__toolbar">
+							<div><span></span><span></span><span></span></div>
+							<strong>Enterprise security questionnaire.xlsx</strong>
+							<i>42 of 48 answered</i>
+						</div>
+						<div class="questionnaire-demo__columns"><span>Question</span><span>Answer</span><span>Source</span></div>
+						<div class="questionnaire-row">
+							<div><b>01</b><span>Is data encrypted at rest?</span></div>
+							<p><i>✓</i> Yes, using AES-256 encryption.</p>
+							<small>Security Policy</small>
+						</div>
+						<div class="questionnaire-row">
+							<div><b>02</b><span>Do you require MFA?</span></div>
+							<p><i>✓</i> Required for all production access.</p>
+							<small>Access Controls</small>
+						</div>
+						<div class="questionnaire-row">
+							<div><b>03</b><span>List your subprocessors.</span></div>
+							<p><i>✓</i> AWS, Stripe, Auth0, Mixpanel.</p>
+							<small>Vendor Inventory</small>
+						</div>
+						<div class="questionnaire-row questionnaire-row--active">
+							<div><b>04</b><span>How long is customer data retained?</span></div>
+							<p><i>✓</i> 90 days after account termination.</p>
+							<small>Retention Rules</small>
+						</div>
+						<div class="questionnaire-demo__footer">
+							<span><i></i> Answers linked to source facts</span>
+							<button type="button" tabindex="-1">Export answers <b>→</b></button>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section id="early-access" class="px-6 py-14 md:py-24">
+				<div class="waitlist-panel mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+					<div>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-300">Join the waitlist</p>
+						<h2 class="mt-4 font-heading text-4xl leading-tight text-white md:text-5xl">Build your source of truth before customers start asking.</h2>
+						<p class="mt-5 text-lg leading-8 text-slate-300">Get early access to Claire and help shape a simpler way to manage policies, drift, and customer questionnaires.</p>
+						<p class="mt-6 text-sm leading-6 text-slate-400">No spam. Occasional product updates and founder interviews.</p>
+					</div>
+					<form class="waitlist-form rounded-2xl border border-white/10 bg-white p-6 shadow-2xl sm:p-8" novalidate>
 						<input class="waitlist-honeypot" name="website" type="url" tabindex="-1" autocomplete="off" aria-hidden="true" />
 						<div class="grid gap-5">
 							<div>
@@ -360,7 +377,7 @@ const thisInstead = [
 									type="email"
 									required
 									placeholder="founder@example.com"
-									class="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+									class="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-lime-500 focus:outline-none focus:ring-4 focus:ring-lime-100"
 								/>
 							</div>
 							<div>
@@ -370,15 +387,15 @@ const thisInstead = [
 									name="blocker"
 									rows="4"
 									placeholder="Security questionnaire, SOC 2 prep, GDPR questions, vendor review..."
-									class="mt-2 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100"
+									class="mt-2 w-full resize-y rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-950 shadow-sm placeholder:text-slate-400 focus:border-lime-500 focus:outline-none focus:ring-4 focus:ring-lime-100"
 								></textarea>
 							</div>
-							<button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-blue-600 px-5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto">
+							<button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-lime-300 px-5 text-base font-bold text-slate-950 shadow-sm transition hover:bg-lime-200 disabled:cursor-wait disabled:opacity-60 sm:w-auto">
 								Join early access
 							</button>
 							<p class="waitlist-status hidden text-sm font-medium" role="status" aria-live="polite"></p>
 							<p class="text-sm leading-6 text-slate-500">
-								Compliance Starter provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
+								Claire provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
 							</p>
 						</div>
 					</form>
@@ -443,7 +460,7 @@ const thisInstead = [
 					status.classList.add("text-red-700");
 				} finally {
 					button.disabled = false;
-					button.textContent = "Join early access";
+					button.textContent = "Join the waitlist";
 				}
 			});
 		</script>
