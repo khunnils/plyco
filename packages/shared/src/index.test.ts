@@ -32,7 +32,29 @@ import {
   templateSchema,
   templateVariableCatalogSchema,
   countryCodeSchema,
+  waitlistInputSchema,
 } from "./index.js";
+
+describe("waitlist schemas", () => {
+  it("normalizes email and optional blocker text", () => {
+    expect(
+      waitlistInputSchema.parse({
+        email: "  Founder@Example.COM ",
+        blocker: "  Security questionnaires  ",
+      }),
+    ).toEqual({
+      email: "founder@example.com",
+      blocker: "Security questionnaires",
+      website: "",
+    });
+  });
+
+  it("rejects invalid email addresses", () => {
+    expect(
+      waitlistInputSchema.safeParse({ email: "not-an-email" }).success,
+    ).toBe(false);
+  });
+});
 
 describe("shared security profile schemas", () => {
   it("requires a company name and a positive employee count", () => {

@@ -47,6 +47,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build web
+        env:
+          PUBLIC_API_URL: ${{ vars.API_PUBLIC_URL }}
         run: pnpm --filter cf-web build
 
       - name: Authenticate to Google Cloud

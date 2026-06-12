@@ -2,6 +2,8 @@
 
 `@plyco/db` owns Prisma and database mapping.
 
+Public beta interest is stored in `waitlist_entries`, independent of users and organizations. Normalized email is unique, and repeat submissions retain the latest optional blocker for that address.
+
 Vocabulary tables persist Airtable hint-display flags and optional code descriptions. Newly cloned or backfilled organization codes inherit system descriptions, while later catalog loads preserve organization-edited descriptions.
 
 Explicit infrastructure answers that no provider is used are stored in `infrastructure_profiles.explicit_no_provider_system_types`. They are mapped to `providerId: "none"` in profile payloads and are not organization-provider inventory records.

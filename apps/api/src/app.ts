@@ -72,6 +72,10 @@ import {
   FileSystemTemplateSource,
   type SystemTemplateSource,
 } from "./infrastructure/system-templates.js"
+import { InMemoryWaitlistRepository } from "./features/waitlist/in-memory-repository.js"
+import { PrismaWaitlistRepository } from "./features/waitlist/prisma-repository.js"
+import { type WaitlistRepository } from "./features/waitlist/repository.js"
+import { registerWaitlistRoutes } from "./features/waitlist/routes.js"
 
 export type CreateAppOptions = {
   auth?: false | AuthConfig
@@ -96,6 +100,7 @@ export type CreateAppOptions = {
     airtableApiKey?: string
     airtableBase?: string
   }
+  waitlistRepository?: WaitlistRepository
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -124,6 +129,7 @@ export async function createApp({
   systemTemplateSource = new FileSystemTemplateSource(),
   codeLoader,
   codeLoaderConfig,
+  waitlistRepository,
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -139,7 +145,7 @@ export async function createApp({
   await app.register(cors, {
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    origin: auth ? auth.clientUrl : true,
+    origin: auth ? [auth.clientUrl, auth.webUrl] : true,
   })
 
   app.setErrorHandler((error, request, reply) => {
@@ -156,6 +162,14 @@ export async function createApp({
   })
 
   app.get("/health", async () => ({ status: "ok" }))
+
+  await registerWaitlistRoutes(app, {
+    waitlistRepository:
+      waitlistRepository ??
+      (process.env.DATABASE_URL
+        ? new PrismaWaitlistRepository()
+        : new InMemoryWaitlistRepository()),
+  })
 
   if (auth) {
     await registerAuth(app, {

@@ -500,6 +500,116 @@ describe("documents / templates API", () => {
     );
   });
 
+  it("renders the RoPA system template from processing activity data", async () => {
+    const templatePath = fileURLToPath(
+      new URL(
+        "../data/templates/record-of-processing-activities.md",
+        import.meta.url,
+      ),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "record-of-processing-activities.md",
+    );
+    const template = {
+      id: "template-ropa",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [
+            {
+              ...storedService,
+              businessActivityIds: ["activity-account-management"],
+            },
+          ],
+          dataHandling: {
+            dataTypesStored: [
+              {
+                ...profileBody.dataHandling.dataTypesStored[0],
+                id: "data-type-account",
+                sortOrder: 0,
+              },
+            ],
+          },
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [
+          {
+            id: "activity-account-management",
+            sortOrder: 0,
+            name: "Account management",
+            purpose: "Create and operate customer accounts",
+            role: "controller",
+            legalBasis: ["contract"],
+            dataTypeIds: ["data-type-account"],
+            retentionPolicy: "fixed",
+            retentionDays: 365,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        vendors: [
+          {
+            id: "vendor-subprocessor",
+            ...subprocessorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        serviceVendorUses: [
+          {
+            id: "vendor-use-subprocessor",
+            ...subprocessorUseBody,
+            vendorName: "Stripe",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(systemTemplate).toMatchObject({
+      slug: "record-of-processing-activities",
+      name: "Record of Processing Activities (RoPA)",
+    });
+    expect(renderedContent).toContain(
+      "# Acme AI Record of Processing Activities",
+    );
+    expect(renderedContent).toContain("#### Account management");
+    expect(renderedContent).toContain("Create and operate customer accounts");
+    expect(renderedContent).toContain("Controller");
+    expect(renderedContent).toContain("Contract");
+    expect(renderedContent).toContain("365 days");
+    expect(renderedContent).toContain(
+      "| Customer account data: Profile and billing contact details | customer, administrator | Yes | account_signup |",
+    );
+    expect(renderedContent).toContain(
+      "| Stripe | subprocessor | Payment processing | Customer account data | us, eu |",
+    );
+    expect(renderedContent).toContain("SCCs, Data Privacy Framework");
+    expect(renderedContent).toContain("Encryption at rest using AES-256");
+  });
+
   it("renders the data security policy from current profile fields", async () => {
     const templatePath = fileURLToPath(
       new URL("../data/templates/data-security-policy.md", import.meta.url),

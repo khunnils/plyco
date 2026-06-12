@@ -48,6 +48,26 @@ describe("security profile API", () => {
     expect(response.json()).toEqual({ user: null, organizations: [] });
   });
 
+  it("allows the configured marketing origin through CORS", async () => {
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+    });
+    const response = await app.inject({
+      method: "OPTIONS",
+      url: "/waitlist",
+      headers: {
+        origin: authConfig.webUrl,
+        "access-control-request-method": "POST",
+      },
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      authConfig.webUrl,
+    );
+  });
+
   it("supports idempotent logout without a session", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
@@ -87,6 +107,7 @@ describe("security profile API", () => {
         SESSION_KEY: "short",
         API_PUBLIC_URL: "http://localhost:4000",
         CLIENT_URL: "http://localhost:5173",
+        WEB_URL: "http://localhost:4321",
         GOOGLE_OAUTH_CLIENT_ID: "client",
         GOOGLE_OAUTH_CLIENT_SECRET: "secret",
       } as NodeJS.ProcessEnv),

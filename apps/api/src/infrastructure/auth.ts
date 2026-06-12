@@ -172,6 +172,7 @@ export async function registerAuth(
   app.addHook("preHandler", async (request) => {
     if (
       request.url === "/health" ||
+      request.url === "/waitlist" ||
       request.url.startsWith("/auth/") ||
       request.url.startsWith("/codes/load") ||
       request.url.startsWith("/providers/lookup") ||

@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model WaitlistEntry {
+  id        String   @id(map: "waitlist_entries_pkey") @default(cuid())
+  email     String   @unique(map: "waitlist_entries_email_key")
+  blocker   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("waitlist_entries")
+}
+
 model Organization {
   id                    String                   @id(map: "organizations_pkey") @default(cuid())
   companyName           String                   @map("company_name")

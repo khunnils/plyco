@@ -18,7 +18,7 @@ plyco/
       docs/
         architecture.md
     cli/                 # Commander-based operations CLI
-    web/                 # Astro marketing site
+    web/                 # Astro marketing and waitlist site
   packages/
     shared/              # DTOs, Zod schemas, enums
     db/                  # Prisma schema, migrations, DB client
@@ -53,6 +53,12 @@ plyco/
 - React Hook Form
 - Zustand for global state
 - Firebase Hosting for client
+
+### Marketing Site
+
+- Astro static site with Tailwind CSS
+- Firebase Hosting on the separate `web` target
+- `PUBLIC_API_URL` points waitlist submissions and sign-in links at the API
 
 Client source is organized by product feature. Feature-specific screens,
 components, TanStack Query hooks (`features/<name>/hooks`), Zustand stores, and
@@ -96,6 +102,10 @@ The API also exposes machine-facing global routes for the Plyco tool. `POST /cod
 The create organization flow also has authenticated pre-organization lookup helpers. `POST /organization-lookup/website` accepts a website URL, loads lookup code IDs from Airtable master data, compiles the Langfuse `website_parser` prompt with `websiteUrl` and plain-text code-set IDs, and executes Gemini through the Google Gen AI SDK with structured JSON output plus Google Search and URL Context tools enabled. It returns editable defaults for the shared onboarding profile, one primary service, multiple starting data types, multiple starting activities, and a privacy policy URL when one is found. The client can then call `POST /organization-lookup/privacy-policy` with that privacy policy URL; the API loads privacy code IDs from Airtable, compiles `privacy_policy_parser` with `privacyPolicyUrl` and those code sets, uses the same Gemini tools, and returns organization-level privacy profile defaults. Lookup output is validated with shared Zod schemas and is only used as editable defaults; persistence still happens through organization creation, business activity creation for each onboarding activity, the existing security profile save route for service and data-type drafts, and provider inventory routes. If Airtable, `GEMINI_API_KEY`, or Langfuse credentials are not configured, local website lookup returns a manual fallback draft with a warning and privacy policy lookup returns an empty privacy profile.
 
 Explicit infrastructure answers that no provider is used are stored on `infrastructure_profiles.explicit_no_provider_system_types`. They round-trip as `providerId: "none"` profile selections but never create `organization_providers` inventory rows.
+
+## Public Waitlist
+
+The marketing site submits to public `POST /waitlist`. The API validates and normalizes the shared payload, applies a per-instance fixed-window IP limit, silently accepts honeypot submissions without persistence, and upserts legitimate entries by normalized email in `waitlist_entries`. Accepted requests return the opaque `202 { accepted: true }` response. Production CORS permits both the authenticated `CLIENT_URL` and public `WEB_URL` origins.
 
 ## Local Development
 

@@ -1,5 +1,11 @@
 # Product Spec
 
+## Marketing Site and Waitlist
+
+The public Astro site explains Plyco as structured customer-trust infrastructure for early-stage startups. Its story follows a fictional company, Northstar Labs, from services through processing activities, data types, providers, generated documents, and compliance drift. Calls to action collect a work email and an optional compliance blocker for the private-beta waitlist. Accepted submissions receive an inline confirmation; no confirmation email is sent.
+
+Existing users can follow a secondary Sign in link directly to Google OAuth. Public copy must stay concrete about website and policy analysis: imported values are editable starting points, not guaranteed compliance or legal conclusions.
+
 ## Security Profile
 
 The Company workspace includes a Security profile after Infrastructure.

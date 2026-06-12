@@ -13,6 +13,7 @@ function readPort(value: string | undefined) {
 export type AuthConfig = {
   apiPublicUrl: string
   clientUrl: string
+  webUrl: string
   googleClientId: string
   googleClientSecret: string
   sessionKey: string
@@ -40,6 +41,7 @@ export function readAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
   return {
     apiPublicUrl: readRequired(env.API_PUBLIC_URL, "API_PUBLIC_URL"),
     clientUrl: readRequired(env.CLIENT_URL, "CLIENT_URL"),
+    webUrl: readRequired(env.WEB_URL, "WEB_URL"),
     googleClientId: readRequired(
       env.GOOGLE_OAUTH_CLIENT_ID,
       "GOOGLE_OAUTH_CLIENT_ID",
