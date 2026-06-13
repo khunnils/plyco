@@ -12,13 +12,13 @@ const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-
 ---
 
 <div
-	class="relative mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-3 rounded-[1.75rem] border border-slate-200/90 bg-[radial-gradient(circle_at_center,rgba(217,249,157,0.2),transparent_34%),linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:auto,40px_40px,40px_40px] bg-white/80 p-4 shadow-[0_30px_100px_rgba(15,23,42,0.08)] sm:grid-cols-2 md:block md:min-h-[620px] md:p-0"
+	class="relative mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 md:block md:min-h-[620px] md:p-0"
 	role="img"
 	aria-label="Policy documents connected to one central source of truth"
 >
 	{connectors.map((rotation) => (
 		<div class:list={["absolute left-1/2 top-1/2 z-0 hidden h-0.5 w-[260px] origin-left bg-linear-to-r from-lime-400 via-slate-300 to-transparent md:block", rotation]} aria-hidden="true">
-			<span class="absolute -left-1 -top-[3px] h-2 w-2 rounded-full bg-lime-500"></span>
+			<span class="absolute -left-1 top-[-3px] h-2 w-2 rounded-full bg-lime-500"></span>
 		</div>
 	))}
 
@@ -27,9 +27,8 @@ const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-
 			<span class="h-3 w-1 rounded-full bg-lime-900"></span><span class="h-6 w-1 rounded-full bg-lime-900"></span><span class="h-4 w-1 rounded-full bg-lime-900"></span>
 		</div>
 		<p class="m-0 text-[0.72rem] font-extrabold uppercase tracking-[0.08em] text-lime-700">Single source of truth</p>
-		<strong class="mt-1 block text-[1.35rem] leading-tight text-slate-950">Policies stay aligned</strong>
+		<strong class="mt-1 block text-[1.35rem] leading-tight text-slate-950">Knowledge graph</strong>
 		<div class="mt-5 flex justify-between border-t border-slate-200 pt-3 text-[0.68rem] font-bold text-slate-500">
-			<span><i class="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-lime-600"></i>6 policies</span><span>Synced now</span>
 		</div>
 	</div>
 
