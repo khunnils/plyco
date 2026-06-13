@@ -189,7 +189,7 @@ export const TemplateForm = ({
 
   return (
     <form className="grid gap-4" id="template-form" onSubmit={handleSubmit}>
-      <div className="flex flex-wrap items-center justify-between gap-2 border border-slate-200 bg-slate-50 p-2 rounded-md">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-slate-200 border-b pb-4">
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -245,7 +245,7 @@ export const TemplateForm = ({
       </div>
 
       <div className={`grid h-[calc(100vh-385px)] min-h-[620px] gap-4 ${gridColsClass}`}>
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${!isSchemaOpen ? "hidden" : ""}`}>
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3  bg-white ${!isSchemaOpen ? "hidden" : ""}`}>
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
               <ListTree className="size-4 text-slate-500" />
@@ -366,7 +366,7 @@ export const TemplateForm = ({
           </div>
         </section>
 
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${editorMode === "preview" ? "hidden" : ""}`}>
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 mt-4 bg-white  ${editorMode === "preview" ? "hidden" : ""}`}>
           <div className="flex items-center gap-2">
             <FileCode className="size-4 text-slate-500" />
             <h2 className="text-sm font-semibold text-slate-950">Content</h2>
@@ -386,7 +386,7 @@ export const TemplateForm = ({
           />
         </section>
 
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 border border-slate-200 bg-white p-4 ${editorMode === "content" ? "hidden" : ""}`}>
+        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 bg-white mt-4 ${editorMode === "content" ? "hidden" : ""}`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Eye className="size-4 text-slate-500" />
