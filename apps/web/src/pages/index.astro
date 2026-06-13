@@ -66,7 +66,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							Stop winging your policy docs
 						</h1>
 						<p class="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
-							A lightweight compliance readiness platform for early-stage startups building toward enterprise customers.
+							A lightweight policy management platform for early-stage startups building toward enterprise customers.
 						</p>
 						<div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<a
@@ -111,17 +111,21 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 				</div>
 			</section>
 
-			<section class="px-6 py-14 md:py-24">
-				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
-					<div>
+			<section class="px-6 py-10 md:py-24">
+				<div class="mx-auto max-w-6xl">
+					<div class="mx-auto max-w-4xl text-center">
 						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">One-click policy creation</p>
-						<h2 class="heading-section mt-4">Generate policies from reality, not guesswork.</h2>
+						<h2 class="mt-4 text-5xl">Generate policies from reality, <br/>not guesswork.</h2>
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
 							<p class="font-semibold text-slate-950">Your policies should reflect how your company actually operates.</p>
 							<p>Plyco generates customer-facing documentation directly from your source of truth using fully customizable templates.</p>
 						</div>
+					</div>
+
+					<div class="mt-12 grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+						<div>
 						<p class="mt-7 text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Create and maintain</p>
-						<ul class="mt-4 grid gap-3 text-base font-medium text-slate-700 sm:grid-cols-2">
+						<ul class="mt-4 text-base font-medium text-slate-700">
 							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Privacy Policies</span></li>
 							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Security Policies</span></li>
 							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Subprocessor Lists</span></li>
@@ -132,9 +136,10 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							<p>Every document stays connected to the underlying facts.</p>
 							<p class="mt-1 font-bold text-slate-950">Update the facts once. Regenerate everything.</p>
 						</div>
-					</div>
+						</div>
 
-					<PolicyPreviewsIllustration />
+						<PolicyPreviewsIllustration />
+					</div>
 				</div>
 			</section>
 
