@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import {
   Background,
+  Panel,
   ReactFlow,
   type NodeTypes,
 } from "@xyflow/react"
@@ -27,6 +28,14 @@ const nodeTypes: NodeTypes = {
   entity: ProductDataGraphNodeComponent,
 }
 
+const graphStages = [
+  { label: "Company", className: "bg-slate-900" },
+  { label: "Services", className: "bg-blue-500" },
+  { label: "Activities", className: "bg-amber-500" },
+  { label: "Data", className: "bg-teal-500" },
+  { label: "Vendors", className: "bg-violet-500" },
+]
+
 export const ProductDataGraphRoutePage = () => {
   const securityProfile = useSecurityProfile()
   const graph = useMemo(
@@ -47,12 +56,12 @@ export const ProductDataGraphRoutePage = () => {
       />
 
       {securityProfile.isLoading ? (
-        <div className="flex min-h-[520px] items-center justify-center border border-slate-200 bg-white text-sm text-slate-600">
+        <div className="-mx-4 -mb-6 flex h-[calc(100svh-6rem)] items-center justify-center bg-white text-sm text-slate-600 md:-mx-12">
           <Loader2 className="mr-2 size-4 animate-spin" />
           Loading product graph
         </div>
       ) : !hasGraphContent ? (
-        <Empty className="min-h-[520px] border-slate-200 bg-white">
+        <Empty className="-mx-4 -mb-6 h-[calc(100svh-6rem)] border-0 bg-white md:-mx-12">
           <EmptyHeader>
             <EmptyMedia
               className="size-12 rounded-full border-slate-200 bg-slate-50"
@@ -68,14 +77,15 @@ export const ProductDataGraphRoutePage = () => {
           </EmptyHeader>
         </Empty>
       ) : (
-        <section className="h-[640px] overflow-hidden border border-slate-200 bg-white">
+        <section className="-mx-4 -mb-6 h-[calc(100svh-6rem)] overflow-hidden bg-white md:-mx-12">
           <ReactFlow
+            aria-label="Product data relationship graph"
             colorMode="light"
             edges={graph.edges}
             edgesFocusable={false}
             elementsSelectable={false}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.12 }}
             maxZoom={1.4}
             minZoom={0.35}
             nodes={graph.nodes}
@@ -86,7 +96,25 @@ export const ProductDataGraphRoutePage = () => {
             panOnDrag
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#cbd5e1" gap={24} size={1} />
+            <Panel position="top-left">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md bg-white/90 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm ring-1 ring-slate-200 backdrop-blur-sm">
+                {graphStages.map((stage, index) => (
+                  <div className="flex items-center gap-2" key={stage.label}>
+                    <span
+                      aria-hidden="true"
+                      className={`size-2 rounded-full ${stage.className}`}
+                    />
+                    <span>{stage.label}</span>
+                    {index < graphStages.length - 1 ? (
+                      <span aria-hidden="true" className="text-slate-300">
+                        →
+                      </span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </Panel>
+            <Background color="#dbe3ec" gap={28} size={1} />
           </ReactFlow>
         </section>
       )}

@@ -212,6 +212,20 @@ describe("buildProductDataGraph", () => {
     )
   })
 
+  it("lays out each relationship stage in a separate left-to-right column", () => {
+    const graph = buildProductDataGraph(snapshot())
+    const xPosition = (nodeId: string) =>
+      graph.nodes.find((node) => node.id === nodeId)?.position.x
+
+    expect([
+      xPosition("company"),
+      xPosition("service:svc_1"),
+      xPosition("activity:act_1"),
+      xPosition("data:email-address"),
+      xPosition("provider:prov_1"),
+    ]).toEqual([0, 340, 680, 1020, 1360])
+  })
+
   it("ignores stale activity data type mappings", () => {
     const graph = buildProductDataGraph(
       snapshot({

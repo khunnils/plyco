@@ -16,7 +16,7 @@ const KIND_STYLES: Record<ProductDataGraphNode["data"]["kind"], string> = {
   service: "border-blue-200 bg-blue-50 text-blue-950",
   activity: "border-amber-200 bg-amber-50 text-amber-950",
   data: "border-teal-200 bg-teal-50 text-teal-950",
-  provider: "border-slate-200 bg-white text-slate-950",
+  provider: "border-violet-200 bg-violet-50 text-violet-950",
 }
 
 export const ProductDataGraphNodeComponent = ({
@@ -24,7 +24,7 @@ export const ProductDataGraphNodeComponent = ({
 }: NodeProps<ProductDataGraphNode>) => (
   <div
     className={cn(
-      "w-56 rounded-md border px-4 py-3 text-left shadow-sm",
+      "w-56 rounded-md border px-4 py-3 text-left shadow-sm ring-1 ring-black/[0.02]",
       KIND_STYLES[data.kind]
     )}
   >

@@ -1,0 +1,28 @@
+---
+const stages = [
+	{ number: "01", title: "Activities", description: "What your business does", tags: ["Support", "Analytics"], icon: "bars" },
+	{ number: "02", title: "Data Types", description: "What each activity uses", tags: ["Account", "Usage"], icon: "lines" },
+	{ number: "03", title: "Vendors", description: "Who processes the data", tags: ["Hosting", "Auth"], icon: "dots" },
+	{ number: "04", title: "Policies", description: "Always aligned and current", tags: ["Privacy", "Security"], icon: "document" },
+];
+---
+
+<div class="mx-auto mt-12 grid max-w-5xl gap-3 rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:32px_32px] bg-slate-50 p-4 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:flex sm:items-center sm:gap-2 sm:p-6" role="img" aria-label="Activities flow into data types, vendors, and policies">
+	{stages.map((stage, index) => (
+		<>
+			<article class:list={["relative rounded-2xl border bg-white/95 p-5 text-left shadow-[0_12px_30px_rgba(15,23,42,0.07)] sm:min-w-0 sm:flex-1", index === 3 ? "border-lime-300" : "border-slate-200"]}>
+				<span class="absolute right-4 top-4 text-[0.65rem] font-extrabold tracking-[0.08em] text-slate-400">{stage.number}</span>
+				<div class="mb-4 flex h-11 w-11 items-center justify-center gap-[3px] rounded-xl bg-lime-100 p-2.5">
+					{stage.icon === "bars" && <><i class="h-3 w-1 rounded-full bg-lime-700"></i><i class="h-6 w-1 rounded-full bg-lime-700"></i><i class="h-4 w-1 rounded-full bg-lime-700"></i></>}
+					{stage.icon === "lines" && <span class="grid w-full gap-1"><i class="h-1 rounded-full bg-lime-700"></i><i class="h-1 rounded-full bg-lime-700"></i><i class="h-1 rounded-full bg-lime-700"></i></span>}
+					{stage.icon === "dots" && <><i class="h-2 w-2 rounded-full bg-lime-700"></i><i class="h-2 w-2 rounded-full bg-lime-700"></i><i class="h-2 w-2 rounded-full bg-lime-700"></i></>}
+					{stage.icon === "document" && <span class="grid w-full gap-1"><i class="h-[3px] rounded-full bg-lime-700"></i><i class="h-[3px] rounded-full bg-lime-700"></i><i class="h-[3px] rounded-full bg-lime-700"></i></span>}
+				</div>
+				<strong class="block text-base text-slate-950">{stage.title}</strong>
+				<small class="mt-1 block text-[0.72rem] leading-snug text-slate-500">{stage.description}</small>
+				<div class="mt-4 flex flex-wrap gap-1.5">{stage.tags.map((tag) => <span class="rounded-full bg-slate-100 px-2 py-1 text-[0.62rem] font-bold text-slate-500">{tag}</span>)}</div>
+			</article>
+			{index < stages.length - 1 && <div class="mx-auto h-6 w-0.5 shrink-0 bg-slate-300 sm:h-0.5 sm:w-6" aria-hidden="true"><span class="block h-2 w-2 -translate-x-[3px] animate-pulse rounded-full bg-lime-500 sm:-translate-y-[3px] sm:translate-x-0 motion-reduce:animate-none"></span></div>}
+		</>
+	))}
+</div>

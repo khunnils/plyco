@@ -1,4 +1,9 @@
 ---
+import DriftFeedbackIllustration from "../components/DriftFeedbackIllustration.astro";
+import FoundationFlowIllustration from "../components/FoundationFlowIllustration.astro";
+import PolicyMapIllustration from "../components/PolicyMapIllustration.astro";
+import PolicyPreviewsIllustration from "../components/PolicyPreviewsIllustration.astro";
+import QuestionnaireIllustration from "../components/QuestionnaireIllustration.astro";
 import "../styles/global.css";
 
 const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
@@ -84,69 +89,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						</p>
 					</div>
 
-					<div class="policy-map" role="img" aria-label="Policy documents connected to one central source of truth">
-						<div class="policy-map__connector policy-map__connector--top-left" aria-hidden="true"></div>
-						<div class="policy-map__connector policy-map__connector--top-right" aria-hidden="true"></div>
-						<div class="policy-map__connector policy-map__connector--left" aria-hidden="true"></div>
-						<div class="policy-map__connector policy-map__connector--right" aria-hidden="true"></div>
-						<div class="policy-map__connector policy-map__connector--bottom-left" aria-hidden="true"></div>
-						<div class="policy-map__connector policy-map__connector--bottom-right" aria-hidden="true"></div>
-
-						<div class="policy-document policy-document--top-left" aria-hidden="true">
-							<span class="policy-document__icon">AC</span>
-							<strong>Access control</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-						<div class="policy-document policy-document--top-right" aria-hidden="true">
-							<span class="policy-document__icon">IR</span>
-							<strong>Incident response</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-						<div class="policy-document policy-document--left" aria-hidden="true">
-							<span class="policy-document__icon">DR</span>
-							<strong>Data retention</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-						<div class="policy-document policy-document--right" aria-hidden="true">
-							<span class="policy-document__icon">VM</span>
-							<strong>Vendor management</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-						<div class="policy-document policy-document--bottom-left" aria-hidden="true">
-							<span class="policy-document__icon">AU</span>
-							<strong>Acceptable use</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-						<div class="policy-document policy-document--bottom-right" aria-hidden="true">
-							<span class="policy-document__icon">IS</span>
-							<strong>Information security</strong>
-							<span class="policy-document__line policy-document__line--long"></span>
-							<span class="policy-document__line"></span>
-							<span class="policy-document__status">Current</span>
-						</div>
-
-						<div class="policy-source" aria-hidden="true">
-							<div class="policy-source__mark">
-								<span></span><span></span><span></span>
-							</div>
-							<p>Single source of truth</p>
-							<strong>Policies stay aligned</strong>
-							<div class="policy-source__meta">
-								<span><i></i> 6 policies</span>
-								<span>Synced now</span>
-							</div>
-						</div>
-					</div>
+					<PolicyMapIllustration />
 				</div>
 			</section>
 
@@ -164,39 +107,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							<!-- <p>No more updating the same information in five different places.</p> -->
 					</div>
 
-					<div class="foundation-flow foundation-flow--wide" role="img" aria-label="Activities flow into data types, vendors, and policies">
-						<div class="foundation-flow__stage foundation-flow__stage--activities">
-							<span class="foundation-flow__number">01</span>
-							<div class="foundation-flow__icon"><i></i><i></i><i></i></div>
-							<strong>Activities</strong>
-							<small>What your business does</small>
-							<div class="foundation-flow__tags"><span>Support</span><span>Analytics</span></div>
-						</div>
-						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
-						<div class="foundation-flow__stage foundation-flow__stage--data">
-							<span class="foundation-flow__number">02</span>
-							<div class="foundation-flow__icon foundation-flow__icon--data"><i></i><i></i><i></i></div>
-							<strong>Data Types</strong>
-							<small>What each activity uses</small>
-							<div class="foundation-flow__tags"><span>Account</span><span>Usage</span></div>
-						</div>
-						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
-						<div class="foundation-flow__stage foundation-flow__stage--vendors">
-							<span class="foundation-flow__number">03</span>
-							<div class="foundation-flow__icon foundation-flow__icon--vendors"><i></i><i></i><i></i></div>
-							<strong>Vendors</strong>
-							<small>Who processes the data</small>
-							<div class="foundation-flow__tags"><span>Hosting</span><span>Auth</span></div>
-						</div>
-						<div class="foundation-flow__connector" aria-hidden="true"><span></span></div>
-						<div class="foundation-flow__stage foundation-flow__stage--policies">
-							<span class="foundation-flow__number">04</span>
-							<div class="foundation-flow__icon foundation-flow__icon--document"><i></i><i></i><i></i></div>
-							<strong>Policies</strong>
-							<small>Always aligned and current</small>
-							<div class="foundation-flow__tags"><span>Privacy</span><span>Security</span></div>
-						</div>
-					</div>
+					<FoundationFlowIllustration />
 				</div>
 			</section>
 
@@ -223,32 +134,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						</div>
 					</div>
 
-					<div class="policy-previews" role="img" aria-label="Previews of generated privacy, security, and processing activity documents">
-						<div class="policy-preview policy-preview--privacy">
-							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span><i>Current</i></div>
-							<p>Privacy Policy</p>
-							<h3>How we handle personal data</h3>
-							<div class="policy-preview__rule"></div>
-							<span class="policy-preview__line policy-preview__line--long"></span>
-							<span class="policy-preview__line"></span>
-							<span class="policy-preview__line policy-preview__line--short"></span>
-							<div class="policy-preview__source"><span></span>Generated from 12 connected facts</div>
-						</div>
-						<div class="policy-preview policy-preview--security" aria-hidden="true">
-							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span></div>
-							<p>Security Policy</p>
-							<h3>Protecting company systems</h3>
-							<div class="policy-preview__rule"></div>
-							<span class="policy-preview__line policy-preview__line--long"></span>
-							<span class="policy-preview__line"></span>
-						</div>
-						<div class="policy-preview policy-preview--ropa" aria-hidden="true">
-							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span></div>
-							<p>GDPR RoPA</p>
-							<h3>Processing activities</h3>
-							<div class="policy-preview__table"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-						</div>
-					</div>
+					<PolicyPreviewsIllustration />
 				</div>
 			</section>
 
@@ -265,38 +151,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						</div>
 					</div>
 
-					<div class="drift-dashboard" aria-label="Illustrative customer feedback about documentation inconsistencies">
-						<div class="drift-dashboard__header">
-							<div>
-								<span class="drift-dashboard__eyebrow">Customer review feedback</span>
-								<strong>Questions you don’t want to receive</strong>
-							</div>
-							<span class="drift-dashboard__example-label">Illustrative examples</span>
-						</div>
-						<div class="drift-dashboard__alerts">
-							<article class="drift-alert">
-								<span class="drift-alert__icon">“</span>
-								<div>
-									<blockquote>“Your privacy policy states student submissions are retained for 90 days, but your security policy references a 30-day retention period.”</blockquote>
-									<p>Fictional customer security reviewer</p>
-								</div>
-							</article>
-							<article class="drift-alert">
-								<span class="drift-alert__icon">“</span>
-								<div>
-									<blockquote>“Your subprocessor list doesn’t include Mixpanel.”</blockquote>
-									<p>Fictional procurement lead</p>
-								</div>
-							</article>
-							<article class="drift-alert">
-								<span class="drift-alert__icon">“</span>
-								<div>
-									<blockquote>“Your security policy mentions MFA, but MFA is marked as optional in your access controls.”</blockquote>
-									<p>Fictional enterprise buyer</p>
-								</div>
-							</article>
-						</div>
-					</div>
+					<DriftFeedbackIllustration />
 				</div>
 			</section>
 
@@ -315,38 +170,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						</div>
 					</div>
 
-					<div class="questionnaire-demo" role="img" aria-label="Customer security questionnaire with answers generated from an organized source of truth">
-						<div class="questionnaire-demo__toolbar">
-							<div><span></span><span></span><span></span></div>
-							<strong>Enterprise security questionnaire.xlsx</strong>
-							<i>42 of 48 answered</i>
-						</div>
-						<div class="questionnaire-demo__columns"><span>Question</span><span>Answer</span><span>Source</span></div>
-						<div class="questionnaire-row">
-							<div><b>01</b><span>Is data encrypted at rest?</span></div>
-							<p><i>✓</i> Yes, using AES-256 encryption.</p>
-							<small>Security Policy</small>
-						</div>
-						<div class="questionnaire-row">
-							<div><b>02</b><span>Do you require MFA?</span></div>
-							<p><i>✓</i> Required for all production access.</p>
-							<small>Access Controls</small>
-						</div>
-						<div class="questionnaire-row">
-							<div><b>03</b><span>List your subprocessors.</span></div>
-							<p><i>✓</i> AWS, Stripe, Auth0, Mixpanel.</p>
-							<small>Vendor Inventory</small>
-						</div>
-						<div class="questionnaire-row questionnaire-row--active">
-							<div><b>04</b><span>How long is customer data retained?</span></div>
-							<p><i>✓</i> 90 days after account termination.</p>
-							<small>Retention Rules</small>
-						</div>
-						<div class="questionnaire-demo__footer">
-							<span><i></i> Answers linked to source facts</span>
-							<button type="button" tabindex="-1">Export answers <b>→</b></button>
-						</div>
-					</div>
+					<QuestionnaireIllustration />
 				</div>
 			</section>
 

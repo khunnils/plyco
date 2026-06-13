@@ -1,4 +1,4 @@
-import type { Edge, Node } from "@xyflow/react"
+import { MarkerType, type Edge, type Node } from "@xyflow/react"
 import type { SecurityProgramSnapshot } from "@plyco/shared"
 
 export type ProductDataGraphNodeKind =
@@ -22,9 +22,9 @@ export type ProductDataGraph = {
   edges: ProductDataGraphEdge[]
 }
 
-const COLUMN_X = 360
-const ROW_Y = 120
-const NODE_START_Y = 40
+const COLUMN_X = 340
+const ROW_Y = 128
+const NODE_START_Y = 80
 
 const normalizeDataTypeName = (name: string) =>
   name.trim().toLowerCase().replace(/\s+/g, "-")
@@ -44,6 +44,13 @@ const edge = (
   source,
   target,
   type: "smoothstep",
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    width: 16,
+    height: 16,
+    color: "#94a3b8",
+  },
+  style: { stroke: "#94a3b8", strokeWidth: 1.5 },
   ...options,
 })
 
@@ -133,7 +140,6 @@ export const buildProductDataGraph = (
       .filter(([normalizedName]) => normalizedName.length > 0)
   )
   const dataRows = new Map<string, number>()
-  const dataColumnOffset = snapshot.businessActivities.length
   const dataNodeIdByDataTypeId = new Map<string, string>()
 
   organization.dataHandling.dataTypesStored.forEach((dataType) => {
@@ -148,7 +154,7 @@ export const buildProductDataGraph = (
     }
 
     const dataNodeId = `data:${normalizedName}`
-    addNode(dataNodeId, 2, dataColumnOffset + dataRows.get(normalizedName)!, {
+    addNode(dataNodeId, 3, dataRows.get(normalizedName)!, {
       kind: "data",
       label: dataType.name,
       detail: dataType.description ?? undefined,
@@ -180,7 +186,7 @@ export const buildProductDataGraph = (
   const providerRows = new Map<string, number>()
   snapshot.organizationProviders.forEach((provider, index) => {
     providerRows.set(provider.id, index)
-    addNode(`provider:${provider.id}`, 3, index, {
+    addNode(`provider:${provider.id}`, 4, index, {
       kind: "provider",
       label: provider.name,
       detail: provider.purpose || provider.category || undefined,

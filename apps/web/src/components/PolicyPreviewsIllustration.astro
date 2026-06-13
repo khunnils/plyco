@@ -1,0 +1,22 @@
+---
+const baseDocument = "absolute min-h-[350px] w-[min(270px,calc(100%-3rem))] rounded-2xl border border-slate-200 p-5 text-left shadow-[0_24px_60px_rgba(15,23,42,0.13)] transition-transform duration-300 motion-reduce:transition-none sm:min-h-[420px] sm:w-[330px] sm:p-[1.6rem]";
+---
+
+<div class="group relative min-h-[470px] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[radial-gradient(circle_at_50%_44%,rgba(217,249,157,0.28),transparent_35%),linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px] bg-slate-50 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:min-h-[570px]" role="img" aria-label="Previews of generated privacy, security, and processing activity documents">
+	<div class:list={[baseDocument, "left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 bg-white group-hover:-translate-y-[52%]"]}>
+		<div class="flex items-center gap-2 border-b border-slate-200 pb-4 text-xs font-extrabold text-slate-950"><img src="/logo.png" alt="" width="360" height="360" class="h-7 w-7 object-contain" /><span>Plyco</span><i class="ml-auto rounded-full bg-lime-100 px-2 py-1 text-[0.58rem] not-italic text-lime-800">Current</i></div>
+		<p class="mt-8 text-[0.65rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">Privacy Policy</p>
+		<h3 class="mt-2 text-[1.45rem] leading-tight text-slate-950">How we handle personal data</h3>
+		<div class="my-5 h-[3px] w-10 rounded-full bg-lime-400"></div>
+		<span class="mt-2.5 block h-1.5 w-full rounded-full bg-slate-200"></span><span class="mt-2.5 block h-1.5 w-[82%] rounded-full bg-slate-200"></span><span class="mt-2.5 block h-1.5 w-[58%] rounded-full bg-slate-200"></span>
+	</div>
+	<div class:list={[baseDocument, "left-[3%] top-[14%] z-20 -rotate-7 bg-slate-50 group-hover:-translate-x-2 group-hover:-rotate-9 sm:left-[9%]"]} aria-hidden="true">
+		<div class="flex items-center gap-2 border-b border-slate-200 pb-4 text-xs font-extrabold text-slate-950"><img src="/logo.png" alt="" width="360" height="360" class="h-7 w-7 object-contain" /><span>Plyco</span></div>
+		<p class="mt-8 text-[0.65rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">Security Policy</p><h3 class="mt-2 text-[1.45rem] leading-tight text-slate-950">Protecting company systems</h3><div class="my-5 h-[3px] w-10 rounded-full bg-lime-400"></div><span class="mt-2.5 block h-1.5 w-full rounded-full bg-slate-200"></span><span class="mt-2.5 block h-1.5 w-[82%] rounded-full bg-slate-200"></span>
+	</div>
+	<div class:list={[baseDocument, "right-[3%] top-[16%] z-10 rotate-7 bg-lime-50 group-hover:translate-x-2 group-hover:rotate-9 sm:right-[8%]"]} aria-hidden="true">
+		<div class="flex items-center gap-2 border-b border-slate-200 pb-4 text-xs font-extrabold text-slate-950"><img src="/logo.png" alt="" width="360" height="360" class="h-7 w-7 object-contain" /><span>Plyco</span></div>
+		<p class="mt-8 text-[0.65rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">GDPR RoPA</p><h3 class="mt-2 text-[1.45rem] leading-tight text-slate-950">Processing activities</h3>
+		<div class="mt-6 grid grid-cols-2 border-l border-t border-blue-100">{Array.from({ length: 6 }).map(() => <i class="h-10 border-b border-r border-blue-100 bg-white/60"></i>)}</div>
+	</div>
+</div>
