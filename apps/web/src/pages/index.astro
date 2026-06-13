@@ -11,7 +11,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>plyco — Compliance readiness for early-stage startups</title>
+		<title>Plyco — Compliance readiness for early-stage startups</title>
 		<meta
 			name="description"
 			content="A lightweight workspace that helps startups organize policies, vendors, evidence, and security basics before enterprise customers ask for SOC 2 or GDPR readiness."
@@ -26,9 +26,9 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 	<body class="bg-slate-50 text-slate-950 antialiased">
 		<header class="absolute inset-x-0 top-0 z-50">
 			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5" aria-label="Main navigation">
-				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950">
-					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-base font-black text-slate-950">C</span>
-					<span>plyco</span>
+				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950" aria-label="Plyco home">
+					<img src="/logo.png" alt="" width="360" height="360" class="h-10 w-10 object-contain rounded-md" />
+					<span>Plyco</span>
 				</a>
 				<div class="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
 					<a class="transition hover:text-slate-950" href="#problem">All Pages</a>
@@ -151,27 +151,20 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 			</section>
 
 			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
-				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
-					<div>
+				<div class="mx-auto max-w-6xl text-center">
 						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Model the foundations</p>
-						<h2 class="heading-section mt-4">Model the facts. We’ll handle the documents.</h2>
+						<h2 class="text-5xl mt-4">You model the facts. </h2>
+						<h2 class="text-5xl mt-4">We handle the documents. </h2>
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
-							<p class="font-semibold text-slate-950">Most policy tools start with templates.</p>
-							<p class="font-semibold text-slate-950">We start with your business.</p>
+							<p class="font-semibold text-slate-950">Most policy tools start with templates. We start with your business.</p>
 							<p>
-								Define the services you offer, the data you collect, the activities you perform, and the vendors you rely on. Claire turns that information into structured documentation that stays consistent across your entire trust stack.
+								Define the services you offer, the data you collect, the activities you perform, and the vendors you rely on. 
+								<br/>Plyco turns that information into structured documents that stay consistent.
 							</p>
-							<p>No more updating the same information in five different places.</p>
-						</div>
-						<ul class="mt-8 grid gap-3 text-base font-medium text-slate-700">
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Define processing activities once</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Track data types and retention policies</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Maintain a vendor and subprocessor inventory</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Map services to the data they actually use</span></li>
-						</ul>
+							<!-- <p>No more updating the same information in five different places.</p> -->
 					</div>
 
-					<div class="foundation-flow" role="img" aria-label="Activities flow into data types, vendors, and policies">
+					<div class="foundation-flow foundation-flow--wide" role="img" aria-label="Activities flow into data types, vendors, and policies">
 						<div class="foundation-flow__stage foundation-flow__stage--activities">
 							<span class="foundation-flow__number">01</span>
 							<div class="foundation-flow__icon"><i></i><i></i><i></i></div>
@@ -214,7 +207,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						<h2 class="heading-section mt-4">Generate policies from reality, not guesswork.</h2>
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
 							<p class="font-semibold text-slate-950">Your policies should reflect how your company actually operates.</p>
-							<p>Claire generates customer-facing documentation directly from your source of truth using fully customizable templates.</p>
+							<p>Plyco generates customer-facing documentation directly from your source of truth using fully customizable templates.</p>
 						</div>
 						<p class="mt-7 text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Create and maintain</p>
 						<ul class="mt-4 grid gap-3 text-base font-medium text-slate-700 sm:grid-cols-2">
@@ -232,7 +225,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 
 					<div class="policy-previews" role="img" aria-label="Previews of generated privacy, security, and processing activity documents">
 						<div class="policy-preview policy-preview--privacy">
-							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span><i>Current</i></div>
+							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span><i>Current</i></div>
 							<p>Privacy Policy</p>
 							<h3>How we handle personal data</h3>
 							<div class="policy-preview__rule"></div>
@@ -242,7 +235,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							<div class="policy-preview__source"><span></span>Generated from 12 connected facts</div>
 						</div>
 						<div class="policy-preview policy-preview--security" aria-hidden="true">
-							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span></div>
+							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span></div>
 							<p>Security Policy</p>
 							<h3>Protecting company systems</h3>
 							<div class="policy-preview__rule"></div>
@@ -250,12 +243,11 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							<span class="policy-preview__line"></span>
 						</div>
 						<div class="policy-preview policy-preview--ropa" aria-hidden="true">
-							<div class="policy-preview__header"><span class="policy-preview__logo">C</span><span>Claire</span></div>
+							<div class="policy-preview__header"><img src="/logo.png" alt="" width="360" height="360" class="policy-preview__logo" /><span>Plyco</span></div>
 							<p>GDPR RoPA</p>
 							<h3>Processing activities</h3>
 							<div class="policy-preview__table"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 						</div>
-						<div class="policy-previews__sync" aria-hidden="true"><span></span>Source facts synced</div>
 					</div>
 				</div>
 			</section>
@@ -268,7 +260,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
 							<p>Customers notice when your documents don’t agree with each other.</p>
 							<p>And they definitely notice when they don’t match reality.</p>
-							<p>Claire continuously checks for inconsistencies, missing information, and documentation gaps before your customers find them.</p>
+							<p>Plyco continuously checks for inconsistencies, missing information, and documentation gaps before your customers find them.</p>
 							<p class="font-semibold text-slate-950">Instead of discovering issues during a customer review, fix them before they become questions.</p>
 						</div>
 					</div>
@@ -317,7 +309,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							<p class="font-semibold text-slate-950">Enterprise customers don’t just ask for policies.</p>
 							<p class="font-semibold text-slate-950">They send spreadsheets.</p>
 							<p class="font-semibold text-slate-950">Lots of spreadsheets.</p>
-							<p>Claire keeps your privacy, security, vendor, and data handling information in one place, making customer questionnaires dramatically easier to complete.</p>
+							<p>Plyco keeps your privacy, security, vendor, and data handling information in one place, making customer questionnaires dramatically easier to complete.</p>
 							<p>Instead of hunting for answers across Slack, Notion, spreadsheets, and old documents, start with a source of truth that’s already organized.</p>
 							<p class="font-bold text-slate-950">Less scrambling. More shipping.</p>
 						</div>
@@ -363,7 +355,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 					<div>
 						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-300">Join the waitlist</p>
 						<h2 class="mt-4 font-heading text-4xl leading-tight text-white md:text-5xl">Build your source of truth before customers start asking.</h2>
-						<p class="mt-5 text-lg leading-8 text-slate-300">Get early access to Claire and help shape a simpler way to manage policies, drift, and customer questionnaires.</p>
+						<p class="mt-5 text-lg leading-8 text-slate-300">Get early access to Plyco and help shape a simpler way to manage policies, drift, and customer questionnaires.</p>
 						<p class="mt-6 text-sm leading-6 text-slate-400">No spam. Occasional product updates and founder interviews.</p>
 					</div>
 					<form class="waitlist-form rounded-2xl border border-white/10 bg-white p-6 shadow-2xl sm:p-8" novalidate>
@@ -395,7 +387,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 							</button>
 							<p class="waitlist-status hidden text-sm font-medium" role="status" aria-live="polite"></p>
 							<p class="text-sm leading-6 text-slate-500">
-								Claire provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
+								Plyco provides readiness guidance and organization tools. It does not provide legal advice, certification, or audit assurance.
 							</p>
 						</div>
 					</form>
