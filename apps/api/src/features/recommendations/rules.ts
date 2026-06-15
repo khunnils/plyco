@@ -65,7 +65,7 @@ const ruleConditionSchema: z.ZodType<RuleCondition> = z.lazy(() =>
   z.union([
     fieldConditionSchema,
     z.object({
-      anyComplianceGoal: z.array(z.string().trim().min(1)).default([]),
+      anyComplianceGoal: z.array(z.string().trim().min(1)).min(1),
     }),
     z.object({
       all: z.array(ruleConditionSchema).min(1),

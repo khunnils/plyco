@@ -19,12 +19,23 @@ const mfaRule: AdvisorRule = {
     anyComplianceGoal: ["soc_2", "iso_27001"],
   },
   condition: {
-    field: "security.authentication.mfaRequired",
-    equals: false,
+    any: [
+      {
+        field: "security.authentication.mfaRequired",
+        equals: false,
+      },
+      {
+        field: "infrastructure.mfaEnabled",
+        equals: false,
+      },
+    ],
   },
   message: "Multi-factor authentication is not required.",
   recommendation: "Require MFA for workforce and administrative access.",
-  relatedFields: ["security.authentication.mfaRequired"],
+  relatedFields: [
+    "security.authentication.mfaRequired",
+    "infrastructure.mfaEnabled",
+  ],
 }
 
 const organization = ({
@@ -54,12 +65,16 @@ describe("recommendation rules", () => {
   appliesWhen:
     anyComplianceGoal: [soc_2, iso_27001]
   condition:
-    field: security.authentication.mfaRequired
-    equals: false
+    any:
+      - field: security.authentication.mfaRequired
+        equals: false
+      - field: infrastructure.mfaEnabled
+        equals: false
   message: Multi-factor authentication is not required.
   recommendation: Require MFA for workforce and administrative access.
   relatedFields:
     - security.authentication.mfaRequired
+    - infrastructure.mfaEnabled
 `)
 
     expect(rules).toEqual([mfaRule])
@@ -106,6 +121,28 @@ describe("recommendation rules", () => {
     })
 
     expect(response.recommendations).toEqual([])
+  })
+
+  it("returns an MFA recommendation when infrastructure MFA is disabled", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: true,
+      },
+      infrastructure: {
+        ...organization.infrastructure,
+        mfaEnabled: false,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["soc_2"],
+      },
+    })
+
+    expect(response.recommendations).toMatchObject([
+      { id: "security.mfa_required", severity: "high" },
+    ])
   })
 
   it("does not return the MFA recommendation when compliance goals do not match", () => {
@@ -352,9 +389,9 @@ describe("recommendations API", () => {
           ...profileBody.company,
           complianceGoals: ["soc_2"],
         },
-        access: {
-          ...profileBody.access,
-          mfaRequired: false,
+        infrastructure: {
+          ...profileBody.infrastructure,
+          mfaEnabled: false,
         },
       },
     })

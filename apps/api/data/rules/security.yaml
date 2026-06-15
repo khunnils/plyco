@@ -6,12 +6,16 @@
   appliesWhen:
     anyComplianceGoal: [soc_2, iso_27001]
   condition:
-    field: security.authentication.mfaRequired
-    equals: false
+    any:
+      - field: security.authentication.mfaRequired
+        equals: false
+      - field: infrastructure.mfaEnabled
+        equals: false
   message: Multi-factor authentication is not required.
   recommendation: Require MFA for workforce and administrative access.
   relatedFields:
     - security.authentication.mfaRequired
+    - infrastructure.mfaEnabled
 
 - id: security.incident_response_plan_missing
   title: Incident response plan is missing
