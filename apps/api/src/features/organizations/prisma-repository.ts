@@ -69,7 +69,10 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     providerCatalog: Provider[],
   ): Promise<OrganizationSecurityProfile> {
     const organizationData = this.organizationData(input.company);
-    const infrastructureData = this.infrastructureData(input.infrastructure);
+    const infrastructureData = this.infrastructureData(
+      input.infrastructure,
+      input.privacy,
+    );
     const securityData = this.securityData(input.security);
     const privacyData = this.privacyData(input.privacy);
     const accessData = this.accessData(input.access);
@@ -210,7 +213,10 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     };
   }
 
-  private infrastructureData(input: InfrastructureProfile) {
+  private infrastructureData(
+    input: InfrastructureProfile,
+    privacy: PrivacyProfile,
+  ) {
     return {
       mfaEnabled: input.mfaEnabled,
       encryptedDevicesRequired: input.encryptedDevicesRequired,
@@ -231,7 +237,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       encryptionInTransit: input.encryptionInTransit,
       explicitNoProviderSystemTypes: Array.from(
         new Set(
-          input.organizationProviders
+          [...input.organizationProviders, ...privacy.organizationProviders]
             .filter((provider) => provider.providerId === "none")
             .map((provider) => provider.systemType),
         ),

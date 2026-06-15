@@ -105,6 +105,7 @@ export const DashboardPage = ({
     organizationProviders,
     profile,
     serviceProviderUsage,
+    businessActivities,
   })
   const recommendationCounts = recommendations?.countsBySeverity ?? {
     low: 0,

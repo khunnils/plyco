@@ -1019,6 +1019,29 @@ describe("organizations API", () => {
     expect(response.json().organizationProviders).toEqual([]);
   });
 
+  it("preserves an explicit 'none' newsletter provider outside inventory", async () => {
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        privacy: {
+          ...profileBody.privacy,
+          organizationProviders: [
+            { systemType: "newsletter", providerId: "none" },
+          ],
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().organization.privacy.organizationProviders).toEqual([
+      { systemType: "newsletter", providerId: "none", name: "None" },
+    ]);
+    expect(response.json().organizationProviders).toEqual([]);
+  });
+
   it("replaces explicit none with a real infrastructure provider", async () => {
     const app = await createTestApp();
     await app.inject({

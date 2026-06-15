@@ -48,6 +48,7 @@ export type DashboardProgress = {
     dataTypes: ProgressSection[]
   }
   vendors: ProgressItem[]
+  activities: ProgressSection[]
 }
 
 type ReadinessField = {
@@ -94,6 +95,27 @@ export const isActivityComplete = (
 
   return (
     isNameSet && isPurposeSet && isRoleSet && isRetentionSet && isLegalBasisSet
+  )
+}
+
+export const activityProgress = (
+  activity: BusinessActivity,
+  showLegalBasis: boolean,
+  index: number
+): ProgressSection => {
+  const fields = [
+    field("Activity name", activity.name),
+    field("Purpose", activity.purpose),
+    field("Role", activity.role),
+    field("Retention policy", activity.retentionPolicy),
+    ...(showLegalBasis
+      ? [field("Legal basis", activity.legalBasis)]
+      : []),
+  ]
+
+  return sectionProgress(
+    activity.name?.trim() || `Activity ${index + 1}`,
+    fields
   )
 }
 
@@ -642,10 +664,12 @@ export const dashboardProgress = ({
   organizationProviders,
   profile,
   serviceProviderUsage,
+  businessActivities = [],
 }: {
   organizationProviders: OrganizationProvider[]
   profile: ProfileDraft
   serviceProviderUsage: ServiceProviderUsage[]
+  businessActivities?: BusinessActivity[]
 }): DashboardProgress => {
   const profileGroup = profileProgress(profile)
   const privacyGroup = privacyProgress(profile)
@@ -659,15 +683,50 @@ export const dashboardProgress = ({
   const vendors = organizationProviders.map((provider) =>
     vendorProgress(provider, serviceProviderUsage)
   )
+
+  const showLegalBasis = isComplianceFieldVisible(
+    "businessActivity.legalBasis",
+    profile.company.complianceGoals
+  )
+  const activities = businessActivities.map((activity, index) =>
+    activityProgress(activity, showLegalBasis, index)
+  )
+
+  const servicesTotalFields = services.reduce((sum, s) => sum + s.totalFields, 0)
+  const servicesCompletedFields = services.reduce((sum, s) => sum + s.completedFields, 0)
+  const servicesSection: ProgressMetric = {
+    completedFields: servicesCompletedFields,
+    totalFields: servicesTotalFields,
+    percent: percent(servicesCompletedFields, servicesTotalFields),
+  }
+
+  const dataTypesTotalFields = data.dataTypes.reduce((sum, d) => sum + d.totalFields, 0)
+  const dataTypesCompletedFields = data.dataTypes.reduce((sum, d) => sum + d.completedFields, 0)
+  const dataTypesSection: ProgressMetric = {
+    completedFields: dataTypesCompletedFields,
+    totalFields: dataTypesTotalFields,
+    percent: percent(dataTypesCompletedFields, dataTypesTotalFields),
+  }
+
+  const activitiesTotalFields = activities.reduce((sum, a) => sum + a.totalFields, 0)
+  const activitiesCompletedFields = activities.reduce((sum, a) => sum + a.completedFields, 0)
+  const activitiesSection: ProgressMetric = {
+    completedFields: activitiesCompletedFields,
+    totalFields: activitiesTotalFields,
+    percent: percent(activitiesCompletedFields, activitiesTotalFields),
+  }
+
   const topLevelSections = [
     profileGroup,
     privacyGroup,
     infrastructureGroup,
     securityGroup,
     accessGroup,
-    ...services,
-    ...data.dataTypes,
+    servicesSection,
+    dataTypesSection,
+    activitiesSection,
   ]
+
   const completedFields = topLevelSections.reduce(
     (total, section) => total + section.completedFields,
     0
@@ -676,10 +735,12 @@ export const dashboardProgress = ({
     (total, section) => total + section.totalFields,
     0
   )
-  const completedSections = topLevelSections.filter(
-    (section) =>
-      section.totalFields > 0 && section.completedFields === section.totalFields
+
+  const activeSections = topLevelSections.filter((section) => section.totalFields > 0)
+  const completedSections = activeSections.filter(
+    (section) => section.completedFields === section.totalFields
   ).length
+  const totalSections = activeSections.length
 
   return {
     overall: {
@@ -687,7 +748,7 @@ export const dashboardProgress = ({
       totalFields,
       percent: percent(completedFields, totalFields),
       completedSections,
-      totalSections: topLevelSections.length,
+      totalSections,
     },
     profile: profileGroup,
     privacy: privacyGroup,
@@ -697,5 +758,6 @@ export const dashboardProgress = ({
     services,
     data,
     vendors,
+    activities,
   }
 }

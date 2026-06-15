@@ -136,7 +136,9 @@ export async function registerOrganizationRoutes(
         body.infrastructure.organizationProviders.some(
           (provider) => provider.providerId !== "none",
         ) ||
-          body.privacy.organizationProviders.length > 0
+          body.privacy.organizationProviders.some(
+            (provider) => provider.providerId !== "none",
+          )
           ? await providerSource.listProviders()
           : [],
       );

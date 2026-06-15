@@ -11,7 +11,7 @@ API code is organized by feature area under `src/features`:
 - `features/documents` owns template routes, generated document routes, document persistence, and document-generation orchestration.
 - `features/waitlist` owns the public waitlist route, rate limiting, and persistence contract.
 
-Infrastructure `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
+Infrastructure and newsletter `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
 
 `POST /waitlist` is public. It validates the shared payload, applies a fixed-window IP limit, ignores populated honeypot submissions, and idempotently upserts normalized emails. Production CORS allows both configured `CLIENT_URL` and `WEB_URL` origins; other product routes remain protected by session authentication unless explicitly documented otherwise.
 

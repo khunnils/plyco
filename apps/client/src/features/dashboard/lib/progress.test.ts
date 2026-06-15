@@ -119,6 +119,26 @@ describe("dashboard progress", () => {
     expect(representation).toMatchObject({ completedFields: 2, totalFields: 2 })
   })
 
+  it("counts an explicit no-newsletter-provider answer", () => {
+    const progress = privacyProgress({
+      ...emptyProfileDraft,
+      privacy: {
+        ...emptyProfileDraft.privacy,
+        sendsMarketingEmails: true,
+        marketingOptOutMethod: "unsubscribe_link",
+        transactionalEmailsSent: false,
+        organizationProviders: [
+          { systemType: "newsletter", providerId: "none" },
+        ],
+      },
+    })
+    const marketing = progress.sections.find(
+      (section) => section.title === "Marketing & Communications"
+    )
+
+    expect(marketing).toMatchObject({ completedFields: 4, totalFields: 4 })
+  })
+
   it("skips response timeline days when status is not_defined", () => {
     const progress = privacyProgress({
       ...emptyProfileDraft,
@@ -371,5 +391,95 @@ describe("dashboard progress", () => {
     expect(progress.services).toEqual([])
     expect(progress.data.dataTypes).toEqual([])
     expect(progress.vendors).toEqual([])
+  })
+
+  it("consolidates services, data types, and activities into single top level sections for overall progress", () => {
+    const progress = dashboardProgress({
+      organizationProviders: [
+        {
+          id: "prov_1",
+          name: "AWS",
+          legalName: "Amazon Web Services",
+          category: "hosting",
+          countryOfRegistration: "US",
+          criticality: "high",
+          systemTypes: ["cloud"],
+        },
+      ],
+      profile: {
+        ...emptyProfileDraft,
+        services: [
+          {
+            id: "svc_1",
+            serviceName: "App",
+            serviceDescription: "Customer app",
+            serviceUrl: "https://app.example",
+            businessActivityIds: ["act_1"],
+            userTypes: ["admin"],
+            customerTypes: ["b2b"],
+            availabilityRegions: ["us"],
+            childrenDirected: false,
+            minimumUserAge: 0,
+            privacy: {
+              usesCookiesOrTrackingTechnologies: false,
+              cookieTrackingCategories: [],
+              cookieConsentMechanism: null,
+              doNotTrackResponse: null,
+              globalPrivacyControlSupported: null,
+              primaryHostingRegion: "us",
+            },
+          },
+        ],
+        dataHandling: {
+          ...emptyProfileDraft.dataHandling,
+          dataTypesStored: [
+            {
+              name: "Email address",
+              description: "For login",
+              subjectTypes: ["customer"],
+              collectionMethods: ["form"],
+              isSensitive: false,
+              isRequired: true,
+            },
+          ],
+        },
+      },
+      serviceProviderUsage: [
+        {
+          id: "use_1",
+          organizationProviderId: "prov_1",
+          serviceId: "svc_1",
+          providerName: "AWS",
+          purpose: "Hosting",
+          dataProcessingLevel: "none",
+        },
+      ],
+      businessActivities: [
+        {
+          id: "act_1",
+          name: "User registration",
+          purpose: "Create account",
+          role: "controller",
+          retentionPolicy: "30 days",
+          legalBasis: ["consent"],
+        },
+      ],
+    })
+
+    // Profile, Privacy, Infrastructure, Security, Access, Services, Data Types, Activities
+    // All 8 sections are active and should be counted
+    expect(progress.overall.totalSections).toBe(8)
+
+    // The single consolidated Services, Data Types, and Activities sections are fully complete
+    // Because we filled all fields for our 1 service, 1 data type, and 1 activity
+    // So completedSections should be at least 3
+    // Profile, Privacy, Infrastructure, Security, Access, Services, Data Types, Activities
+    // All 8 sections are active and should be counted
+    expect(progress.overall.totalSections).toBe(8)
+
+    // The single consolidated Services, Data Types, and Activities sections are fully complete
+    // Because we filled all fields for our 1 service, 1 data type, and 1 activity
+    // So completedSections should be at least 3
+    expect(progress.overall.completedSections).toBe(3)
   })
 })

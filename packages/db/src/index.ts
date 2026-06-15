@@ -361,17 +361,30 @@ export function mapOrganizationRecord(record: {
     authorizedAgentSupported:
       record.privacyProfile?.authorizedAgentSupported ?? null,
     appealProcessExists: record.privacyProfile?.appealProcessExists ?? null,
-    organizationProviders: record.organizationProviders.flatMap((provider) =>
-      provider.providerId && provider.systemTypes.includes("newsletter")
+    organizationProviders: [
+      ...record.organizationProviders.flatMap((provider) =>
+        provider.providerId && provider.systemTypes.includes("newsletter")
+          ? [
+              {
+                providerId: provider.providerId,
+                systemType: "newsletter" as const,
+                name: provider.name,
+              },
+            ]
+          : [],
+      ),
+      ...(record.infrastructureProfile?.explicitNoProviderSystemTypes.includes(
+        "newsletter",
+      )
         ? [
             {
-              providerId: provider.providerId,
-              systemType: "newsletter",
-              name: provider.name,
+              providerId: "none",
+              systemType: "newsletter" as const,
+              name: "None",
             },
           ]
-        : [],
-    ),
+        : []),
+    ],
     sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? null,
     marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? null,
     transactionalEmailsSent:
