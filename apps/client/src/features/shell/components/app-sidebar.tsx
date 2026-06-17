@@ -1,19 +1,15 @@
 import {
   LayoutDashboard,
   Lightbulb,
-  LogOut,
   ScrollText,
   Tags,
   Users,
 } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
-import { type AuthUser } from "@plyco/shared"
 
-import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -28,13 +24,7 @@ import {
 
 export type { CompanySection, CompanySectionId } from "@/features/shell/lib/navigation"
 
-export const AppSidebar = ({
-  onLogout,
-  user,
-}: {
-  onLogout: () => void
-  user: AuthUser
-}) => {
+export const AppSidebar = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -133,38 +123,6 @@ export const AppSidebar = ({
           </SidebarMenuButton>
         </div>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="flex items-center gap-3 rounded-md px-2 py-2">
-          {user.picture ? (
-            <img
-              alt=""
-              className="size-9 shrink-0 rounded-full"
-              src={user.picture}
-            />
-          ) : (
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-              {user.name.slice(0, 1).toUpperCase()}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-slate-900">
-              {user.name}
-            </p>
-            <p className="truncate text-xs text-slate-500" title={user.email}>
-              {user.email}
-            </p>
-          </div>
-          <Button
-            aria-label="Logout"
-            size="icon-sm"
-            type="button"
-            variant="ghost"
-            onClick={onLogout}
-          >
-            <LogOut className="size-4" />
-          </Button>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   )
 }

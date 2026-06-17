@@ -21,8 +21,8 @@ export const PageHeader = ({
   const items = breadcrumbs ?? [{ label: eyebrow }, { label: title }]
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-slate-50 px-4 py-1 text-primary md:left-64 md:px-12">
-      <div className="flex min-h-8 flex-col justify-between gap-2 md:flex-row md:items-center">
+    <header className="fixed top-0 right-24 left-24 z-50 px-4 py-2 text-primary md:right-28 md:left-64 md:px-12">
+      <div className="flex min-h-10 flex-col justify-between gap-2 md:flex-row md:items-center">
         <nav aria-label="Breadcrumb">
           <ol className="flex flex-wrap items-center gap-2 text-sm text-primary">
             {items.map((item, index) => {
