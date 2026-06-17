@@ -593,6 +593,7 @@ export function mapDocumentRecord(record: {
   renderedContent: string;
   pdfObjectPath: string | null;
   sourceHash: string;
+  sourceFingerprint: unknown;
   templateVersionMajor: number;
   templateVersionMinor: number;
   generatedAt: Date;
@@ -605,6 +606,7 @@ export function mapDocumentRecord(record: {
     renderedContent: record.renderedContent,
     hasPdf: Boolean(record.pdfObjectPath),
     sourceHash: record.sourceHash,
+    sourceFingerprint: record.sourceFingerprint,
     templateVersionMajor: record.templateVersionMajor,
     templateVersionMinor: record.templateVersionMinor,
     generatedAt: toIsoString(record.generatedAt),

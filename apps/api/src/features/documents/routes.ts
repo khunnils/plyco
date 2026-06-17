@@ -12,9 +12,11 @@ import {
 import { type FastifyInstance } from "fastify";
 
 import {
+  documentSourceFingerprint,
+  evaluateDocumentFreshness,
   Jinja2Renderer,
   ReportContextBuilder,
-  templateSourceHash,
+  sourceHashFromFingerprint,
 } from "./document-generation.js";
 import { ApiError } from "../../infrastructure/errors.js";
 import { requireOrganizationMembership } from "../../infrastructure/organization-context.js";
@@ -178,11 +180,16 @@ export async function registerDocumentRoutes(
 
       return documentRepository.listDocumentSummaries(
         request.params.organizationId,
-        (template) =>
-          templateSourceHash(
+        (template, document) => {
+          const context = contextBuilder.build(
+            snapshot,
             template,
-            contextBuilder.build(snapshot, template, members, vocabulary),
-          ),
+            members,
+            vocabulary,
+          );
+
+          return evaluateDocumentFreshness({ context, document, template });
+        },
       );
     },
   );
@@ -338,6 +345,8 @@ export async function registerDocumentRoutes(
         ),
       );
       const renderedContent = renderer.render(template, context);
+      const sourceFingerprint = documentSourceFingerprint(template, context);
+      const sourceHash = sourceHashFromFingerprint(sourceFingerprint);
       const pdf = await documentPdfStorage.generateAndUpload({
         organizationId: request.params.organizationId,
         template,
@@ -351,7 +360,8 @@ export async function registerDocumentRoutes(
           title: template.name,
           renderedContent,
           pdfObjectPath: pdf?.objectPath ?? null,
-          sourceHash: templateSourceHash(template, context),
+          sourceHash,
+          sourceFingerprint,
           templateVersionMajor: template.versionMajor,
           templateVersionMinor: template.versionMinor,
         });
@@ -361,7 +371,8 @@ export async function registerDocumentRoutes(
           title: template.name,
           renderedContent,
           pdfObjectPath: pdf?.objectPath ?? null,
-          sourceHash: templateSourceHash(template, context),
+          sourceHash,
+          sourceFingerprint,
         });
       }
 

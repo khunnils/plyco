@@ -553,6 +553,22 @@ export const createTemplateFromSystemSchema = z.object({
   sourceSystemTemplateSlug: templateSlugSchema,
 });
 
+export const documentSourceFingerprintSchema = z.object({
+  version: z.literal(1),
+  contentHash: z.string().min(1),
+  entries: z.array(
+    z.object({
+      path: z.string().min(1),
+      label: z.string().min(1),
+      valueHash: z.string().min(1),
+      summary: z.object({
+        display: z.string(),
+        names: z.array(z.string()).default([]),
+      }),
+    }),
+  ),
+});
+
 export const documentSchema = z.object({
   id: z.string().min(1),
   organizationId: z.string().min(1),
@@ -561,6 +577,7 @@ export const documentSchema = z.object({
   renderedContent: z.string(),
   hasPdf: z.boolean(),
   sourceHash: z.string().min(1),
+  sourceFingerprint: documentSourceFingerprintSchema,
   templateVersionMajor: z.number().int().default(1),
   templateVersionMinor: z.number().int().default(0),
   generatedAt: z.string().datetime(),
@@ -576,6 +593,7 @@ export const documentSummarySchema = z.object({
   template: templateSchema,
   document: documentSchema.nullable(),
   status: documentStatusSchema,
+  staleReasons: z.array(z.string().min(1)).default([]),
   documents: z.array(documentSchema).default([]),
 });
 
@@ -767,6 +785,9 @@ export type TemplateVariableCatalog = z.infer<
 >;
 export type CreateTemplateFromSystem = z.infer<
   typeof createTemplateFromSystemSchema
+>;
+export type DocumentSourceFingerprint = z.infer<
+  typeof documentSourceFingerprintSchema
 >;
 export type Document = z.infer<typeof documentSchema>;
 export type DocumentStatus = z.infer<typeof documentStatusSchema>;

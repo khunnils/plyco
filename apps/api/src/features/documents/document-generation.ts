@@ -5,6 +5,8 @@ import {
   type AccessProfile,
   type BusinessActivity,
   type DataHandlingProfile,
+  type Document,
+  type DocumentSourceFingerprint,
   type InfrastructureProfile,
   type SecurityProfile,
   type OrganizationSecurityProfile,
@@ -832,9 +834,123 @@ export function templateSourceHash(
   template: Pick<Template, "content">,
   context: NormalizedTemplateContext,
 ) {
-  return createHash("sha256")
-    .update(stableStringify({ content: template.content, context }))
-    .digest("hex");
+  return sourceHashFromFingerprint(documentSourceFingerprint(template, context));
+}
+
+export function documentSourceFingerprint(
+  template: Pick<Template, "content">,
+  context: NormalizedTemplateContext,
+): DocumentSourceFingerprint {
+  const paths = referencedTemplatePaths(template.content);
+
+  return {
+    version: 1,
+    contentHash: hashValue(template.content),
+    entries: paths.map((path) => {
+      const value = valueAtPath(context, path);
+
+      return {
+        path,
+        label: labelForPath(path),
+        valueHash: hashValue(value),
+        summary: summarizeValue(value),
+      };
+    }),
+  };
+}
+
+export function sourceHashFromFingerprint(
+  fingerprint: DocumentSourceFingerprint,
+) {
+  return hashValue({
+    contentHash: fingerprint.contentHash,
+    entries: fingerprint.entries.map((entry) => ({
+      path: entry.path,
+      valueHash: entry.valueHash,
+    })),
+  });
+}
+
+export function documentStaleReasons(
+  previous: DocumentSourceFingerprint,
+  current: DocumentSourceFingerprint,
+) {
+  const reasons: string[] = [];
+
+  if (previous.contentHash !== current.contentHash) {
+    return ["Template content changed."];
+  }
+
+  const previousEntries = new Map(
+    previous.entries.map((entry) => [entry.path, entry]),
+  );
+
+  for (const entry of current.entries) {
+    const previousEntry = previousEntries.get(entry.path);
+
+    if (!previousEntry) {
+      reasons.push(`${entry.label} changed.`);
+      continue;
+    }
+
+    if (previousEntry.valueHash === entry.valueHash) {
+      continue;
+    }
+
+    reasons.push(...reasonForChangedEntry(previousEntry, entry));
+  }
+
+  const uniqueReasons = Array.from(new Set(reasons));
+
+  return uniqueReasons.filter((reason) => {
+    if (!reason.endsWith(" changed.")) {
+      return true;
+    }
+
+    const label = reason.slice(0, -" changed.".length);
+    return !uniqueReasons.some((otherReason) =>
+      otherReason.endsWith(` to ${label}.`),
+    );
+  });
+}
+
+export function evaluateDocumentFreshness({
+  context,
+  document,
+  template,
+}: {
+  context: NormalizedTemplateContext;
+  document: Pick<Document, "sourceHash" | "sourceFingerprint">;
+  template: Pick<Template, "content">;
+}) {
+  const currentFingerprint = documentSourceFingerprint(template, context);
+  const currentSourceHash = sourceHashFromFingerprint(currentFingerprint);
+
+  return {
+    status:
+      document.sourceHash === currentSourceHash
+        ? ("current" as const)
+        : ("stale" as const),
+    staleReasons:
+      document.sourceHash === currentSourceHash
+        ? []
+        : documentStaleReasons(document.sourceFingerprint, currentFingerprint),
+  };
+}
+
+export function referencedTemplatePaths(content: string): string[] {
+  const ast = (
+    nunjucks as typeof nunjucks & {
+      parser: { parse: (source: string) => TemplateAstNode };
+    }
+  ).parser.parse(content);
+  const paths = new Set<string>();
+
+  collectReferencedPaths(ast, new Map(), paths);
+
+  return Array.from(paths)
+    .filter((path) => !path.startsWith("loop."))
+    .sort();
 }
 
 function stableStringify(value: unknown): string {
@@ -851,4 +967,275 @@ function stableStringify(value: unknown): string {
   }
 
   return JSON.stringify(value);
+}
+
+function hashValue(value: unknown) {
+  return createHash("sha256").update(stableStringify(value)).digest("hex");
+}
+
+type TemplateAstNode = {
+  typename?: string;
+  value?: unknown;
+  target?: TemplateAstNode;
+  val?: TemplateAstNode;
+  arr?: TemplateAstNode;
+  name?: TemplateAstNode;
+  body?: TemplateAstNode;
+  else_?: TemplateAstNode | null;
+  children?: TemplateAstNode[];
+  [key: string]: unknown;
+};
+
+function collectReferencedPaths(
+  node: unknown,
+  aliases: Map<string, string>,
+  paths: Set<string>,
+) {
+  if (!node || typeof node !== "object") {
+    return;
+  }
+
+  const astNode = node as TemplateAstNode;
+
+  if (astNode.typename === "For") {
+    const arrayPath = expressionPath(astNode.arr, aliases);
+    if (arrayPath) {
+      paths.add(arrayPath);
+    }
+
+    const scopedAliases = new Map(aliases);
+    if (
+      astNode.name?.typename === "Symbol" &&
+      typeof astNode.name.value === "string" &&
+      arrayPath
+    ) {
+      scopedAliases.set(astNode.name.value, arrayPath);
+    }
+
+    collectReferencedPaths(astNode.body, scopedAliases, paths);
+    collectReferencedPaths(astNode.else_, aliases, paths);
+    return;
+  }
+
+  if (astNode.typename === "LookupVal") {
+    const path = expressionPath(astNode, aliases);
+    if (path) {
+      paths.add(path);
+    }
+    return;
+  }
+
+  if (astNode.typename === "Symbol" && typeof astNode.value === "string") {
+    const aliasPath = aliases.get(astNode.value);
+    if (aliasPath) {
+      paths.add(aliasPath);
+    }
+    return;
+  }
+
+  for (const value of Object.values(astNode)) {
+    if (Array.isArray(value)) {
+      for (const child of value) {
+        collectReferencedPaths(child, aliases, paths);
+      }
+    } else if (value && typeof value === "object") {
+      collectReferencedPaths(value, aliases, paths);
+    }
+  }
+}
+
+function expressionPath(
+  node: TemplateAstNode | undefined,
+  aliases: Map<string, string>,
+): string | null {
+  if (!node) {
+    return null;
+  }
+
+  if (node.typename === "Symbol" && typeof node.value === "string") {
+    return aliases.get(node.value) ?? node.value;
+  }
+
+  if (node.typename === "LookupVal") {
+    const targetPath = expressionPath(node.target, aliases);
+    const key = lookupKey(node.val);
+
+    return targetPath && key ? `${targetPath}.${key}` : targetPath;
+  }
+
+  return null;
+}
+
+function lookupKey(node: TemplateAstNode | undefined) {
+  if (!node) {
+    return null;
+  }
+
+  if (typeof node.value === "string") {
+    return node.value;
+  }
+
+  return null;
+}
+
+function valueAtPath(value: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((current, key) => {
+    if (Array.isArray(current)) {
+      return current.map((item) => valueAtPath(item, key));
+    }
+
+    if (!current || typeof current !== "object") {
+      return undefined;
+    }
+
+    return (current as Record<string, unknown>)[key];
+  }, value);
+}
+
+function summarizeValue(value: unknown) {
+  return {
+    display: displaySummary(value),
+    names: collectNames(value),
+  };
+}
+
+function displaySummary(value: unknown): string {
+  if (Array.isArray(value)) {
+    const names = collectNames(value);
+    if (names.length > 0) {
+      return names.slice(0, 4).join(", ");
+    }
+
+    return `${value.length} item${value.length === 1 ? "" : "s"}`;
+  }
+
+  if (value === null || value === undefined || value === "") {
+    return "Not set";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  return "Updated";
+}
+
+function collectNames(value: unknown): string[] {
+  const names = new Set<string>();
+  collectNamesInto(value, names, true);
+  return Array.from(names).sort((a, b) => a.localeCompare(b));
+}
+
+function collectNamesInto(
+  value: unknown,
+  names: Set<string>,
+  includePrimitiveStrings: boolean,
+) {
+  if (
+    includePrimitiveStrings &&
+    typeof value === "string" &&
+    value.trim()
+  ) {
+    names.add(value.trim());
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    const primitiveStringArray = value.every(
+      (item) => typeof item === "string",
+    );
+    for (const item of value) {
+      collectNamesInto(
+        item,
+        names,
+        includePrimitiveStrings && primitiveStringArray,
+      );
+    }
+    return;
+  }
+
+  if (!value || typeof value !== "object") {
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.name === "string" && record.name.trim()) {
+    names.add(record.name.trim());
+  }
+
+  for (const [key, nestedValue] of Object.entries(record)) {
+    if (key === "name") {
+      continue;
+    }
+    collectNamesInto(nestedValue, names, false);
+  }
+}
+
+function reasonForChangedEntry(
+  previous: DocumentSourceFingerprint["entries"][number],
+  current: DocumentSourceFingerprint["entries"][number],
+) {
+  const addedNames = current.summary.names.filter(
+    (name) => !previous.summary.names.includes(name),
+  );
+  const removedNames = previous.summary.names.filter(
+    (name) => !current.summary.names.includes(name),
+  );
+  const reasons: string[] = [];
+
+  if (isProviderPath(current.path)) {
+    reasons.push(
+      ...addedNames.map((name) => `${name} added to ${current.label}.`),
+      ...removedNames.map((name) => `${name} removed from ${current.label}.`),
+    );
+  }
+
+  if (reasons.length > 0) {
+    return reasons;
+  }
+
+  return [`${current.label} changed.`];
+}
+
+function isProviderPath(path: string) {
+  return path.startsWith("vendors.") || path.startsWith("providers.");
+}
+
+function labelForPath(path: string) {
+  const exactLabels: Record<string, string> = {
+    "vendors.byService": "subprocessor list",
+    "vendors.dataProcessors": "processor list",
+    "vendors.subprocessors": "subprocessor list",
+    "providers.byService": "subprocessor list",
+    "providers.dataProcessors": "processor list",
+    "providers.subprocessors": "subprocessor list",
+    "privacy.supportedRightLabels": "Privacy rights",
+    "service.privacy.primaryHostingRegionLabel": "Primary hosting region",
+    "services.all.privacy.primaryHostingRegionLabel": "Primary hosting region",
+  };
+
+  if (exactLabels[path]) {
+    return exactLabels[path];
+  }
+
+  const providerPrefix = [
+    "vendors.byService.",
+    "vendors.subprocessors.",
+    "providers.byService.",
+    "providers.subprocessors.",
+  ].find((prefix) => path.startsWith(prefix));
+
+  if (providerPrefix) {
+    return "subprocessor list";
+  }
+
+  const lastSegment = path.split(".").at(-1) ?? path;
+  return lastSegment
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }

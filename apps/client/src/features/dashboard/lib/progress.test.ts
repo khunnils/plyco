@@ -404,6 +404,8 @@ describe("dashboard progress", () => {
           countryOfRegistration: "US",
           criticality: "high",
           systemTypes: ["cloud"],
+          createdAt: "2026-06-17T00:00:00.000Z",
+          updatedAt: "2026-06-17T00:00:00.000Z",
         },
       ],
       profile: {
@@ -411,6 +413,7 @@ describe("dashboard progress", () => {
         services: [
           {
             id: "svc_1",
+            sortOrder: 0,
             serviceName: "App",
             serviceDescription: "Customer app",
             serviceUrl: "https://app.example",
@@ -435,6 +438,7 @@ describe("dashboard progress", () => {
           dataTypesStored: [
             {
               name: "Email address",
+              sortOrder: 0,
               description: "For login",
               subjectTypes: ["customer"],
               collectionMethods: ["form"],
@@ -450,18 +454,31 @@ describe("dashboard progress", () => {
           organizationProviderId: "prov_1",
           serviceId: "svc_1",
           providerName: "AWS",
+          serviceName: "App",
+          systemType: null,
           purpose: "Hosting",
           dataProcessingLevel: "none",
+          dataProcessed: [],
+          dpaStatus: null,
+          dataRegions: [],
+          notes: "",
+          createdAt: "2026-06-17T00:00:00.000Z",
+          updatedAt: "2026-06-17T00:00:00.000Z",
         },
       ],
       businessActivities: [
         {
           id: "act_1",
+          sortOrder: 0,
           name: "User registration",
           purpose: "Create account",
           role: "controller",
           retentionPolicy: "30 days",
+          retentionDays: 30,
           legalBasis: ["consent"],
+          dataTypeIds: [],
+          createdAt: "2026-06-17T00:00:00.000Z",
+          updatedAt: "2026-06-17T00:00:00.000Z",
         },
       ],
     })

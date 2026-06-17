@@ -28,7 +28,7 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 		/>
 		<meta property="og:type" content="website" />
 	</head>
-	<body class="bg-slate-50 text-slate-950 antialiased">
+	<body class="page-enter bg-slate-50 text-slate-950 antialiased">
 		<header class="absolute inset-x-0 top-0 z-50">
 			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5" aria-label="Main navigation">
 				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950" aria-label="Plyco home">
@@ -122,23 +122,11 @@ const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 						</div>
 					</div>
 
-					<div class="mt-12 grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
-						<div>
-						<p class="mt-7 text-sm font-bold uppercase tracking-[0.12em] text-slate-500">Create and maintain</p>
-						<ul class="mt-4 text-base font-medium text-slate-700">
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Privacy Policies</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Security Policies</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>Subprocessor Lists</span></li>
-							<li class="flex items-start gap-3"><span class="mt-1 text-lime-600">✓</span><span>GDPR Records of Processing Activities (RoPA)</span></li>
-							<li class="flex items-start gap-3 sm:col-span-2"><span class="mt-1 text-lime-600">✓</span><span>Data Processing Agreements (DPA)</span></li>
-						</ul>
-						<div class="mt-8 rounded-xl border border-lime-200 bg-lime-50 p-5 text-base leading-7 text-slate-700">
-							<p>Every document stays connected to the underlying facts.</p>
-							<p class="mt-1 font-bold text-slate-950">Update the facts once. Regenerate everything.</p>
-						</div>
-						</div>
-
+					<div class="mx-auto mt-12 max-w-5xl">
 						<PolicyPreviewsIllustration />
+						<p class="mx-auto mt-3 max-w-2xl text-center text-base leading-7 text-slate-500">
+							We ship with privacy, security, GDPR, and more. Add any additional templates you need.
+						</p>
 					</div>
 				</div>
 			</section>

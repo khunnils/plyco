@@ -1222,6 +1222,14 @@ describe("documents / templates API", () => {
       hasPdf: false,
     });
     expect(generateResponse.json().sourceHash).toHaveLength(64);
+    expect(generateResponse.json().sourceFingerprint).toMatchObject({
+      version: 1,
+      entries: expect.arrayContaining([
+        expect.objectContaining({ path: "company.name" }),
+        expect.objectContaining({ path: "privacy.supportedRightLabels" }),
+        expect.objectContaining({ path: "service.name" }),
+      ]),
+    });
 
     const currentDocumentsResponse = await app.inject({
       method: "GET",
@@ -1253,6 +1261,7 @@ describe("documents / templates API", () => {
       {
         document: { id: generateResponse.json().id },
         status: "stale",
+        staleReasons: ["Privacy rights changed."],
       },
     ]);
 
@@ -1288,14 +1297,15 @@ describe("documents / templates API", () => {
         ],
       },
     });
-    const transferStaleDocumentsResponse = await app.inject({
+    const transferUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
     });
-    expect(transferStaleDocumentsResponse.json()).toMatchObject([
+    expect(transferUnchangedDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
-        status: "stale",
+        status: "current",
+        staleReasons: [],
       },
     ]);
 
@@ -1316,14 +1326,15 @@ describe("documents / templates API", () => {
         },
       },
     });
-    const securityStaleDocumentsResponse = await app.inject({
+    const securityUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
     });
-    expect(securityStaleDocumentsResponse.json()).toMatchObject([
+    expect(securityUnchangedDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
-        status: "stale",
+        status: "current",
+        staleReasons: [],
       },
     ]);
 
@@ -1353,14 +1364,15 @@ describe("documents / templates API", () => {
         ],
       },
     });
-    const cookieStaleDocumentsResponse = await app.inject({
+    const cookieUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
     });
-    expect(cookieStaleDocumentsResponse.json()).toMatchObject([
+    expect(cookieUnchangedDocumentsResponse.json()).toMatchObject([
       {
         document: { id: generateResponse.json().id },
-        status: "stale",
+        status: "current",
+        staleReasons: [],
       },
     ]);
 
@@ -1404,6 +1416,72 @@ describe("documents / templates API", () => {
       {
         document: { id: generateResponse.json().id },
         status: "stale",
+        staleReasons: ["Template content changed."],
+      },
+    ]);
+  });
+
+  it("reports named stale reasons when subprocessors change", async () => {
+    const app = await createTestApp();
+    const profileResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: profileBody,
+    });
+    const serviceId = profileResponse.json().organization.services[0].id;
+    const createTemplateResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Subprocessor list",
+        content:
+          "# {{ organization.name }} Subprocessors\n{% for group in vendors.byService %}{% for vendor in group.vendors %}{{ vendor.name }}{% endfor %}{% endfor %}\n",
+      },
+    });
+    const template = createTemplateResponse.json();
+
+    const generateResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+    expect(generateResponse.statusCode).toBe(201);
+
+    const providerResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/organization-providers",
+      payload: {
+        ...vendorBody,
+        providerId: "",
+        name: "Mixpanel",
+        legalName: "Mixpanel, Inc.",
+        category: "source_control",
+      },
+    });
+    expect(providerResponse.statusCode).toBe(201);
+
+    const usageResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/service-provider-usage",
+      payload: {
+        ...subprocessorUseBody,
+        serviceId,
+        organizationProviderId: providerResponse.json().id,
+        purpose: "Product analytics",
+      },
+    });
+    expect(usageResponse.statusCode).toBe(201);
+
+    const documentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    });
+
+    expect(documentsResponse.json()).toMatchObject([
+      {
+        document: { id: generateResponse.json().id },
+        status: "stale",
+        staleReasons: ["Mixpanel added to subprocessor list."],
       },
     ]);
   });

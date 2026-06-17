@@ -444,6 +444,11 @@ export const DocumentsRoutePage = () => {
                         </span>
                       </h2>
                       <Badge
+                        title={
+                          summary.staleReasons.length
+                            ? summary.staleReasons.join("\n")
+                            : undefined
+                        }
                         variant={
                           summary.status === "stale"
                             ? "warning"

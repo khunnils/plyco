@@ -7,6 +7,7 @@ import {
   createOrganizationSchema,
   businessActivityInputSchema,
   dataHandlingProfileSchema,
+  documentSummarySchema,
   emptyAccessProfile,
   emptyInfrastructureProfile,
   emptySecurityProfile,
@@ -737,6 +738,55 @@ describe("shared security profile schemas", () => {
         renderedContent: "# Acme AI",
       }).success,
     ).toBe(true);
+  });
+
+  it("accepts document summaries with stale reasons and source fingerprints", () => {
+    const result = documentSummarySchema.safeParse({
+      template: {
+        id: "template-1",
+        organizationId: "org-1",
+        name: "Subprocessors",
+        slug: "subprocessors",
+        sourceSystemTemplateSlug: null,
+        content: "# {{ vendors.byService }}",
+        versionMajor: 1,
+        versionMinor: 0,
+        createdAt: "2026-06-17T00:00:00.000Z",
+        updatedAt: "2026-06-17T00:00:00.000Z",
+      },
+      document: {
+        id: "document-1",
+        organizationId: "org-1",
+        templateId: "template-1",
+        title: "Subprocessors",
+        renderedContent: "# Subprocessors",
+        hasPdf: false,
+        sourceHash: "abc123",
+        sourceFingerprint: {
+          version: 1,
+          contentHash: "content-hash",
+          entries: [
+            {
+              path: "vendors.byService",
+              label: "subprocessor list",
+              valueHash: "value-hash",
+              summary: {
+                display: "Mixpanel",
+                names: ["Mixpanel"],
+              },
+            },
+          ],
+        },
+        templateVersionMajor: 1,
+        templateVersionMinor: 0,
+        generatedAt: "2026-06-17T00:00:00.000Z",
+      },
+      status: "stale",
+      staleReasons: ["Mixpanel added to subprocessor list."],
+      documents: [],
+    });
+
+    expect(result.success).toBe(true);
   });
 
   it("accepts template variable catalogs with collection item fields", () => {

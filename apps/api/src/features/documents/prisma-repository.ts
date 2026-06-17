@@ -2,6 +2,7 @@ import {
   mapDocumentRecord,
   mapTemplateRecord,
   prisma,
+  Prisma,
   type PrismaClient,
 } from "@plyco/db";
 import {
@@ -14,7 +15,10 @@ import {
 
 import { ApiError } from "../../infrastructure/errors.js";
 import { type OrganizationRepository } from "../organizations/repository.js";
-import { type DocumentRepository } from "./repository.js";
+import {
+  type DocumentFreshness,
+  type DocumentRepository,
+} from "./repository.js";
 
 function slugify(name: string): string {
   return name
@@ -24,6 +28,10 @@ function slugify(name: string): string {
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function sourceFingerprintJson(fingerprint: Document["sourceFingerprint"]) {
+  return fingerprint as Prisma.InputJsonValue;
 }
 
 export class PrismaDocumentRepository implements DocumentRepository {
@@ -140,7 +148,10 @@ export class PrismaDocumentRepository implements DocumentRepository {
 
   async listDocumentSummaries(
     organizationId: string,
-    sourceHashForTemplate: (template: Template) => string,
+    freshnessForTemplate: (
+      template: Template,
+      document: Document,
+    ) => DocumentFreshness,
   ): Promise<DocumentSummary[]> {
     const templates = await this.client.template.findMany({
       where: { organizationId },
@@ -156,15 +167,15 @@ export class PrismaDocumentRepository implements DocumentRepository {
       const template = mapTemplateRecord(templateRecord);
       const documents = templateRecord.documents.map(mapDocumentRecord);
       const document = documents[0] ?? null;
+      const freshness = document
+        ? freshnessForTemplate(template, document)
+        : null;
 
       return {
         template,
         document,
-        status: !document
-          ? "not_generated"
-          : document.sourceHash === sourceHashForTemplate(template)
-            ? "current"
-            : "stale",
+        status: freshness?.status ?? "not_generated",
+        staleReasons: freshness?.staleReasons ?? [],
         documents,
       };
     });
@@ -176,6 +187,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
     renderedContent: string;
     pdfObjectPath: string | null;
     sourceHash: string;
+    sourceFingerprint: Document["sourceFingerprint"];
   }): Promise<Document> {
     try {
       const document = await this.client.document.create({
@@ -186,6 +198,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
           renderedContent: input.renderedContent,
           pdfObjectPath: input.pdfObjectPath,
           sourceHash: input.sourceHash,
+          sourceFingerprint: sourceFingerprintJson(input.sourceFingerprint),
           templateVersionMajor: input.template.versionMajor,
           templateVersionMinor: input.template.versionMinor,
         },
@@ -204,6 +217,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      sourceFingerprint: Document["sourceFingerprint"];
       templateVersionMajor: number;
       templateVersionMinor: number;
     },
@@ -215,6 +229,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
         renderedContent: input.renderedContent,
         pdfObjectPath: input.pdfObjectPath,
         sourceHash: input.sourceHash,
+        sourceFingerprint: sourceFingerprintJson(input.sourceFingerprint),
         templateVersionMajor: input.templateVersionMajor,
         templateVersionMinor: input.templateVersionMinor,
         generatedAt: new Date(),

@@ -6,6 +6,11 @@ import {
   type TemplateInput,
 } from "@plyco/shared";
 
+export type DocumentFreshness = {
+  status: "current" | "stale";
+  staleReasons: string[];
+};
+
 export interface DocumentRepository {
   listTemplates(organizationId: string): Promise<Template[]>;
   createTemplateFromSystem(
@@ -24,7 +29,10 @@ export interface DocumentRepository {
   deleteTemplate(organizationId: string, id: string): Promise<boolean>;
   listDocumentSummaries(
     organizationId: string,
-    sourceHashForTemplate: (template: Template) => string,
+    freshnessForTemplate: (
+      template: Template,
+      document: Document,
+    ) => DocumentFreshness,
   ): Promise<DocumentSummary[]>;
   createDocument(input: {
     template: Template;
@@ -32,6 +40,7 @@ export interface DocumentRepository {
     renderedContent: string;
     pdfObjectPath: string | null;
     sourceHash: string;
+    sourceFingerprint: Document["sourceFingerprint"];
   }): Promise<Document>;
   updateDocument(
     id: string,
@@ -40,6 +49,7 @@ export interface DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      sourceFingerprint: Document["sourceFingerprint"];
       templateVersionMajor: number;
       templateVersionMinor: number;
     },

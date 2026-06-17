@@ -460,6 +460,7 @@ model Document {
   renderedContent      String       @map("rendered_content")
   pdfObjectPath        String?      @map("pdf_object_path")
   sourceHash           String       @map("source_hash")
+  sourceFingerprint    Json         @map("source_fingerprint")
   templateVersionMajor Int          @default(1) @map("template_version_major")
   templateVersionMinor Int          @default(0) @map("template_version_minor")
   generatedAt          DateTime     @default(now()) @map("generated_at")

@@ -8,7 +8,10 @@ import {
 
 import { ApiError } from "../../infrastructure/errors.js";
 import { type OrganizationRepository } from "../organizations/repository.js";
-import { type DocumentRepository } from "./repository.js";
+import {
+  type DocumentFreshness,
+  type DocumentRepository,
+} from "./repository.js";
 
 function now() {
   return new Date().toISOString();
@@ -175,7 +178,10 @@ export class InMemoryDocumentRepository implements DocumentRepository {
 
   async listDocumentSummaries(
     organizationId: string,
-    sourceHashForTemplate: (template: Template) => string,
+    freshnessForTemplate: (
+      template: Template,
+      document: Document,
+    ) => DocumentFreshness,
   ): Promise<DocumentSummary[]> {
     return Array.from(this.templates.values())
       .filter((template) => template.organizationId === organizationId)
@@ -189,15 +195,15 @@ export class InMemoryDocumentRepository implements DocumentRepository {
           .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
 
         const document = documents[0] ?? null;
+        const freshness = document
+          ? freshnessForTemplate(template, document)
+          : null;
 
         return {
           template,
           document,
-          status: !document
-            ? "not_generated"
-            : document.sourceHash === sourceHashForTemplate(template)
-              ? "current"
-              : "stale",
+          status: freshness?.status ?? "not_generated",
+          staleReasons: freshness?.staleReasons ?? [],
           documents,
         };
       });
@@ -209,6 +215,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
     renderedContent: string;
     pdfObjectPath: string | null;
     sourceHash: string;
+    sourceFingerprint: Document["sourceFingerprint"];
   }): Promise<Document> {
     const existingDocument = Array.from(this.documents.values()).find(
       (document) =>
@@ -234,6 +241,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: input.renderedContent,
       hasPdf: Boolean(input.pdfObjectPath),
       sourceHash: input.sourceHash,
+      sourceFingerprint: input.sourceFingerprint,
       templateVersionMajor: input.template.versionMajor,
       templateVersionMinor: input.template.versionMinor,
       generatedAt: now(),
@@ -255,6 +263,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: string;
       pdfObjectPath: string | null;
       sourceHash: string;
+      sourceFingerprint: Document["sourceFingerprint"];
       templateVersionMajor: number;
       templateVersionMinor: number;
     },
@@ -270,6 +279,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       renderedContent: input.renderedContent,
       hasPdf: Boolean(input.pdfObjectPath),
       sourceHash: input.sourceHash,
+      sourceFingerprint: input.sourceFingerprint,
       templateVersionMajor: input.templateVersionMajor,
       templateVersionMinor: input.templateVersionMinor,
       generatedAt: now(),

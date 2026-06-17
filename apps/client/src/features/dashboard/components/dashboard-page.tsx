@@ -1,4 +1,5 @@
 import {
+  type DocumentSummary,
   type OrganizationProvider,
   type RecommendationsResponse,
   type ServiceProviderUsage,
@@ -15,7 +16,7 @@ import {
   ClipboardList,
   Database,
   CheckCircle2,
-  Lightbulb,
+  FileText,
 } from "lucide-react"
 
 import { type ProfileDraft } from "@/features/company/types/company"
@@ -28,6 +29,7 @@ import {
   isActivityComplete,
 } from "@/features/dashboard/lib/progress"
 import {
+  severityBorderClass,
   severityLabel,
   severityOrder,
 } from "@/features/recommendations/lib/recommendations"
@@ -86,7 +88,53 @@ const SectionHeading = ({ children }: { children: string }) => (
   </span>
 )
 
+const DocumentReasonsTooltip = ({
+  outdatedDocuments,
+}: {
+  outdatedDocuments: DocumentSummary[]
+}) => {
+  if (outdatedDocuments.length === 0) {
+    return null
+  }
+
+  return (
+    <span className="group relative inline-flex">
+      <button
+        aria-label="Outdated document details"
+        className="text-sm font-medium text-amber-700 underline-offset-4 hover:text-amber-900 hover:underline focus-visible:ring-3 focus-visible:ring-amber-100 focus-visible:outline-none"
+        type="button"
+      >
+        Details
+      </button>
+      <span
+        className="pointer-events-none absolute right-0 top-7 z-20 hidden w-80 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-slate-600 shadow-lg group-hover:block group-focus-within:block"
+        role="tooltip"
+      >
+        {outdatedDocuments.slice(0, 4).map((summary) => (
+          <span className="block py-1" key={summary.template.id}>
+            <strong className="block font-semibold text-slate-900">
+              {summary.template.name}
+            </strong>
+            {(summary.staleReasons.length
+              ? summary.staleReasons
+              : ["Regenerate to refresh this document."]
+            )
+              .slice(0, 2)
+              .map((reason) => (
+                <span className="block" key={reason}>
+                  {reason}
+                </span>
+              ))}
+          </span>
+        ))}
+      </span>
+    </span>
+  )
+}
+
 export const DashboardPage = ({
+  documents = [],
+  documentsLoading = false,
   organizationProviders,
   profile,
   recommendations,
@@ -94,6 +142,8 @@ export const DashboardPage = ({
   serviceProviderUsage,
   businessActivities = [],
 }: {
+  documents?: DocumentSummary[]
+  documentsLoading?: boolean
   organizationProviders: OrganizationProvider[]
   profile: ProfileDraft
   recommendations?: RecommendationsResponse
@@ -116,6 +166,13 @@ export const DashboardPage = ({
   const recommendationTotal = severityOrder.reduce(
     (total, severity) => total + recommendationCounts[severity],
     0
+  )
+  const generatedDocuments = documents.filter((summary) => summary.document)
+  const currentDocuments = documents.filter(
+    (summary) => summary.status === "current"
+  )
+  const outdatedDocuments = documents.filter(
+    (summary) => summary.status === "stale"
   )
 
   // Calculate completeness for activities
@@ -150,71 +207,107 @@ export const DashboardPage = ({
 
   return (
     <div className="grid gap-8">
-      {/* Centered Total Progress Card */}
-      <div className="overflow-hidden border border-slate-200 bg-white mx-auto w-full">
-        <div className="flex flex-col items-center justify-center text-center p-8 gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section className="flex min-h-64 flex-col items-center justify-center gap-2 border border-slate-200 bg-white p-8 text-center">
+          <span className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
             Completed
           </span>
-          <span className="text-5xl font-extrabold text-slate-600 mb-2">
+          <span className="mb-2 text-5xl font-extrabold text-slate-600">
             {progress.overall.percent}%
           </span>
           <div className="inline-flex items-center rounded-full bg-slate-50 px-4 py-1.5 text-xs font-semibold text-slate-700">
-            {progress.overall.completedSections} of {progress.overall.totalSections} areas complete
+            {progress.overall.completedSections} of{" "}
+            {progress.overall.totalSections} areas complete
           </div>
-        </div>
-      </div>
+        </section>
 
-      <section className="grid gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <SectionHeading>Recommendations</SectionHeading>
-          <Link
-            className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline"
-            to="/recommendations"
-          >
-            View all
-          </Link>
-        </div>
-        <Link
-          className="grid gap-4 border border-slate-200 bg-white p-4 hover:border-slate-300 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
-          to="/recommendations"
-        >
+        <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-md bg-amber-50 text-amber-700">
-                <Lightbulb className="size-5" />
-              </div>
               <div>
-                <h3 className="text-base font-semibold text-slate-950">
+                <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
                   {recommendationsLoading
                     ? "Checking recommendations"
                     : recommendationTotal === 0
                       ? "No recommendations right now"
                       : `${recommendationTotal} ${recommendationTotal === 1 ? "recommendation" : "recommendations"}`}
                 </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Advisor findings from your saved profile.
-                </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex">
-              {severityOrder.map((severity) => (
-                <div
-                  className="min-w-24 border border-slate-200 bg-slate-50 px-3 py-2 text-center"
-                  key={severity}
-                >
-                  <div className="text-lg font-semibold text-slate-950">
-                    {recommendationCounts[severity]}
-                  </div>
-                  <div className="text-xs font-medium text-slate-500">
-                    {severityLabel(severity)}
-                  </div>
+            <Link
+              className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+              to="/recommendations"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {severityOrder.map((severity) => (
+              <div
+                className={`rounded-sm border border-l-4 border-slate-200 px-4 py-3 ${severityBorderClass(severity)}`}
+                key={severity}
+              >
+                <div className="text-xl font-semibold text-slate-950">
+                  {recommendationsLoading
+                    ? "..."
+                    : recommendationCounts[severity]}
                 </div>
-              ))}
+                <div className="mt-1 text-xs font-medium text-slate-500">
+                  {severityLabel(severity)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
+                Documents
+              </h3>
+              <p className="text-sm text-slate-500">
+                Generated policy freshness.
+              </p>
+            </div>
+            <Link
+              className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+              to="/documents"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-sm border border-l-4 border-slate-200 border-l-emerald-500 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <FileText className="size-4 text-emerald-700" />
+                <div className="text-xl font-semibold text-slate-950">
+                  {documentsLoading ? "..." : currentDocuments.length}
+                </div>
+              </div>
+              <div className="mt-1 text-xs font-medium text-slate-500">
+                Policies up to date
+              </div>
+            </div>
+            <div className="rounded-sm border border-l-4 border-slate-200 border-l-amber-500 px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xl font-semibold text-slate-950">
+                  {documentsLoading ? "..." : outdatedDocuments.length}
+                </div>
+                <DocumentReasonsTooltip outdatedDocuments={outdatedDocuments} />
+              </div>
+              <div className="mt-1 text-xs font-medium text-slate-500">
+                Documents outdated
+              </div>
             </div>
           </div>
-        </Link>
-      </section>
+          <p className="text-xs text-slate-500">
+            {documentsLoading
+              ? "Checking document status..."
+              : `${generatedDocuments.length} of ${documents.length} templates generated`}
+          </p>
+        </section>
+      </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <CategoryCard
