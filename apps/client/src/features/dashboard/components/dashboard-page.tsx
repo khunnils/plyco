@@ -167,7 +167,6 @@ export const DashboardPage = ({
     (total, severity) => total + recommendationCounts[severity],
     0
   )
-  const generatedDocuments = documents.filter((summary) => summary.document)
   const currentDocuments = documents.filter(
     (summary) => summary.status === "current"
   )
@@ -266,9 +265,6 @@ export const DashboardPage = ({
               <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
                 Documents
               </h3>
-              <p className="text-sm text-slate-500">
-                Generated policy freshness.
-              </p>
             </div>
             <Link
               className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
@@ -277,7 +273,7 @@ export const DashboardPage = ({
               View all
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <div className="rounded-sm border border-l-4 border-slate-200 border-l-emerald-500 px-4 py-3">
               <div className="flex items-center gap-2">
                 <FileText className="size-4 text-emerald-700" />
@@ -301,11 +297,6 @@ export const DashboardPage = ({
               </div>
             </div>
           </div>
-          <p className="text-xs text-slate-500">
-            {documentsLoading
-              ? "Checking document status..."
-              : `${generatedDocuments.length} of ${documents.length} templates generated`}
-          </p>
         </section>
       </div>
 
