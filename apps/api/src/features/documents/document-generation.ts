@@ -443,6 +443,15 @@ export class ReportContextBuilder {
     security: SecurityProfile,
     vocabulary?: Vocabulary,
   ) {
+    const atRestAlgorithm =
+      infrastructure.encryptionAtRest === true
+        ? infrastructure.atRestAlgorithm
+        : null;
+    const inTransitMinimumTlsVersion =
+      infrastructure.encryptionInTransit === true
+        ? infrastructure.inTransitMinimumTlsVersion
+        : null;
+
     return {
       accessControl: {
         leastPrivilege: access.leastPrivilege,
@@ -472,17 +481,17 @@ export class ReportContextBuilder {
         }),
       },
       encryption: {
-        atRestAlgorithm: infrastructure.atRestAlgorithm,
+        atRestAlgorithm,
         atRestAlgorithmLabel: this.codeLabel(
           vocabulary,
           "security_encryption_algorithms",
-          infrastructure.atRestAlgorithm,
+          atRestAlgorithm,
         ),
-        inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
+        inTransitMinimumTlsVersion,
         inTransitMinimumTlsVersionLabel: this.codeLabel(
           vocabulary,
           "security_tls_versions",
-          infrastructure.inTransitMinimumTlsVersion,
+          inTransitMinimumTlsVersion,
         ),
         keyManagementProvider: infrastructure.keyManagementProvider,
         keyManagementProviderLabel: this.codeLabel(
@@ -491,8 +500,8 @@ export class ReportContextBuilder {
           infrastructure.keyManagementProvider,
         ),
         ...this.answerFlags({
-          atRestAlgorithm: infrastructure.atRestAlgorithm,
-          inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
+          atRestAlgorithm,
+          inTransitMinimumTlsVersion,
           keyManagementProvider: infrastructure.keyManagementProvider,
         }),
       },

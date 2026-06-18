@@ -726,6 +726,58 @@ describe("documents / templates API", () => {
     expect(renderedContent).not.toContain("Stripe");
   });
 
+  it("does not render stale encryption details when encryption is disabled", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/data-security-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "data-security-policy.md",
+    );
+    const template = {
+      id: "template-data-security-policy-disabled-encryption",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          infrastructure: {
+            ...profileBody.infrastructure,
+            encryptionAtRest: false,
+            encryptionInTransit: false,
+          },
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [],
+        serviceVendorUses: [],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(renderedContent).not.toContain("Data at rest is encrypted using");
+    expect(renderedContent).not.toContain("Data in transit is protected using");
+    expect(renderedContent).not.toContain("AES-256");
+    expect(renderedContent).not.toContain("TLS 1.2");
+  });
+
   it("omits unsupported controls and dependent security details", async () => {
     const templatePath = fileURLToPath(
       new URL("../data/templates/data-security-policy.md", import.meta.url),

@@ -139,6 +139,25 @@ describe("dashboard progress", () => {
     expect(marketing).toMatchObject({ completedFields: 4, totalFields: 4 })
   })
 
+  it("skips encryption detail progress when parent encryption answers are negative", () => {
+    const progress = infrastructureProgress({
+      ...emptyProfileDraft,
+      infrastructure: {
+        ...emptyProfileDraft.infrastructure,
+        encryptionAtRest: false,
+        atRestAlgorithm: null,
+        encryptionInTransit: false,
+        inTransitMinimumTlsVersion: null,
+        keyManagementProvider: "aws_kms",
+      },
+    })
+    const encryption = progress.sections.find(
+      (section) => section.title === "Encryption"
+    )
+
+    expect(encryption).toMatchObject({ completedFields: 3, totalFields: 3 })
+  })
+
   it("skips response timeline days when status is not_defined", () => {
     const progress = privacyProgress({
       ...emptyProfileDraft,

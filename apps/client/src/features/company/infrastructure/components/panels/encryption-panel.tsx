@@ -4,7 +4,7 @@ import {
   type InfrastructureProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -13,6 +13,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
+  type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
@@ -42,39 +43,17 @@ const toEncryptionDraft = (
 const encryptionRows = (
   draft: EncryptionDraft,
   vocabulary: Vocabulary | undefined
-) =>
-  [
+) => {
+  const rows: ProfilePanelDetailRow[] = [
     [
       "Encrypted at rest",
       boolText(draft.encryptionAtRest),
       dataHelperText.encryptionAtRest,
     ],
     [
-      "Stored data encryption",
-      draft.atRestAlgorithm
-        ? codeLabel(
-            vocabulary,
-            "security_encryption_algorithms",
-            draft.atRestAlgorithm
-          )
-        : "Not set",
-      infrastructureHelperText.atRestAlgorithm,
-    ],
-    [
       "Encrypted in transit",
       boolText(draft.encryptionInTransit),
       dataHelperText.encryptionInTransit,
-    ],
-    [
-      "Minimum TLS version",
-      draft.inTransitMinimumTlsVersion
-        ? codeLabel(
-            vocabulary,
-            "security_tls_versions",
-            draft.inTransitMinimumTlsVersion
-          )
-        : "Not set",
-      infrastructureHelperText.inTransitMinimumTlsVersion,
     ],
     [
       "Key management",
@@ -87,7 +66,39 @@ const encryptionRows = (
         : "Not set",
       infrastructureHelperText.keyManagementProvider,
     ],
-  ] as const
+  ]
+
+  if (draft.encryptionAtRest === true) {
+    rows.splice(1, 0, [
+      "Stored data encryption",
+      draft.atRestAlgorithm
+        ? codeLabel(
+            vocabulary,
+            "security_encryption_algorithms",
+            draft.atRestAlgorithm
+          )
+        : "Not set",
+      infrastructureHelperText.atRestAlgorithm,
+    ])
+  }
+
+  if (draft.encryptionInTransit === true) {
+    const keyManagementRowIndex = rows.length - 1
+    rows.splice(keyManagementRowIndex, 0, [
+      "Minimum TLS version",
+      draft.inTransitMinimumTlsVersion
+        ? codeLabel(
+            vocabulary,
+            "security_tls_versions",
+            draft.inTransitMinimumTlsVersion
+          )
+        : "Not set",
+      infrastructureHelperText.inTransitMinimumTlsVersion,
+    ])
+  }
+
+  return rows
+}
 
 export const EncryptionPanel = ({
   isMutationPending,
@@ -118,8 +129,40 @@ export const EncryptionPanel = ({
     values: draft,
   })
 
+  const encryptionAtRest = form.watch("encryptionAtRest")
+  const encryptionInTransit = form.watch("encryptionInTransit")
+
+  useEffect(() => {
+    if (encryptionAtRest !== true) {
+      form.setValue("atRestAlgorithm", null, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+  }, [encryptionAtRest, form])
+
+  useEffect(() => {
+    if (encryptionInTransit !== true) {
+      form.setValue("inTransitMinimumTlsVersion", null, {
+        shouldDirty: false,
+        shouldValidate: true,
+      })
+    }
+  }, [encryptionInTransit, form])
+
   const submit = form.handleSubmit((next) => {
-    onSave(next, () => setIsEditing(false))
+    onSave(
+      {
+        ...next,
+        atRestAlgorithm:
+          next.encryptionAtRest === true ? next.atRestAlgorithm : null,
+        inTransitMinimumTlsVersion:
+          next.encryptionInTransit === true
+            ? next.inTransitMinimumTlsVersion
+            : null,
+      },
+      () => setIsEditing(false)
+    )
   })
 
   return (
@@ -147,34 +190,38 @@ export const EncryptionPanel = ({
           label="Encrypted at rest"
           name="encryptionAtRest"
         />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.atRestAlgorithm}
-          label="Stored data encryption"
-          name="atRestAlgorithm"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityEncryptionAlgorithmOptions,
-          ]}
-          placeholder="Not set"
-        />
+        {encryptionAtRest === true ? (
+          <SelectField
+            control={form.control}
+            helperText={infrastructureHelperText.atRestAlgorithm}
+            label="Stored data encryption"
+            name="atRestAlgorithm"
+            options={[
+              { value: "", label: "Not set" },
+              ...securityEncryptionAlgorithmOptions,
+            ]}
+            placeholder="Not set"
+          />
+        ) : null}
         <ToggleField
           control={form.control}
           helperText={dataHelperText.encryptionInTransit}
           label="Encrypted in transit"
           name="encryptionInTransit"
         />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.inTransitMinimumTlsVersion}
-          label="Minimum TLS version"
-          name="inTransitMinimumTlsVersion"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityTlsVersionOptions,
-          ]}
-          placeholder="Not set"
-        />
+        {encryptionInTransit === true ? (
+          <SelectField
+            control={form.control}
+            helperText={infrastructureHelperText.inTransitMinimumTlsVersion}
+            label="Minimum TLS version"
+            name="inTransitMinimumTlsVersion"
+            options={[
+              { value: "", label: "Not set" },
+              ...securityTlsVersionOptions,
+            ]}
+            placeholder="Not set"
+          />
+        ) : null}
         <SelectField
           control={form.control}
           helperText={infrastructureHelperText.keyManagementProvider}

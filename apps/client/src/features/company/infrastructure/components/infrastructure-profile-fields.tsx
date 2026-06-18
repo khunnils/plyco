@@ -187,6 +187,8 @@ export const InfrastructureProfileFields = ({
   securityTlsVersionOptions?: Option[]
 }) => {
   const backupsEnabled = form.watch("infrastructure.backupsEnabled")
+  const encryptionAtRest = form.watch("infrastructure.encryptionAtRest")
+  const encryptionInTransit = form.watch("infrastructure.encryptionInTransit")
   const vendorReviewRequired = form.watch("infrastructure.vendorReviewRequired")
   const complianceGoals = form.watch("company.complianceGoals")
 
@@ -203,6 +205,18 @@ export const InfrastructureProfileFields = ({
       form.setValue("infrastructure.vendorReviewCadence", null)
     }
   }, [vendorReviewRequired, form])
+
+  useEffect(() => {
+    if (encryptionAtRest !== true) {
+      form.setValue("infrastructure.atRestAlgorithm", null)
+    }
+  }, [encryptionAtRest, form])
+
+  useEffect(() => {
+    if (encryptionInTransit !== true) {
+      form.setValue("infrastructure.inTransitMinimumTlsVersion", null)
+    }
+  }, [encryptionInTransit, form])
 
   const showDpaRequired = isComplianceFieldVisible(
     "infrastructure.dpaRequiredForProcessors",
@@ -248,20 +262,34 @@ export const InfrastructureProfileFields = ({
       <section className="grid gap-4">
         <h3 className="text-sm font-semibold text-slate-900">Encryption</h3>
         <div className="grid gap-4 md:grid-cols-2">
-          <SelectField
+          <ToggleField
             control={form.control}
-            label="At-rest algorithm"
-            name="infrastructure.atRestAlgorithm"
-            options={[{ value: "", label: "Not set" }, ...securityEncryptionAlgorithmOptions]}
-            placeholder="Not set"
+            label="Encrypted at rest"
+            name="infrastructure.encryptionAtRest"
           />
-          <SelectField
+          {encryptionAtRest === true ? (
+            <SelectField
+              control={form.control}
+              label="At-rest algorithm"
+              name="infrastructure.atRestAlgorithm"
+              options={[{ value: "", label: "Not set" }, ...securityEncryptionAlgorithmOptions]}
+              placeholder="Not set"
+            />
+          ) : null}
+          <ToggleField
             control={form.control}
-            label="Minimum TLS version"
-            name="infrastructure.inTransitMinimumTlsVersion"
-            options={[{ value: "", label: "Not set" }, ...securityTlsVersionOptions]}
-            placeholder="Not set"
+            label="Encrypted in transit"
+            name="infrastructure.encryptionInTransit"
           />
+          {encryptionInTransit === true ? (
+            <SelectField
+              control={form.control}
+              label="Minimum TLS version"
+              name="infrastructure.inTransitMinimumTlsVersion"
+              options={[{ value: "", label: "Not set" }, ...securityTlsVersionOptions]}
+              placeholder="Not set"
+            />
+          ) : null}
           <SelectField
             control={form.control}
             label="Key management provider"

@@ -314,9 +314,18 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
     ]),
     sectionProgress("Encryption", [
       field("Encrypted at rest", infrastructure.encryptionAtRest),
-      field("Stored data encryption", infrastructure.atRestAlgorithm),
+      ...(infrastructure.encryptionAtRest === true
+        ? [field("Stored data encryption", infrastructure.atRestAlgorithm)]
+        : []),
       field("Encrypted in transit", infrastructure.encryptionInTransit),
-      field("Minimum TLS version", infrastructure.inTransitMinimumTlsVersion),
+      ...(infrastructure.encryptionInTransit === true
+        ? [
+            field(
+              "Minimum TLS version",
+              infrastructure.inTransitMinimumTlsVersion
+            ),
+          ]
+        : []),
       field("Key management", infrastructure.keyManagementProvider),
     ]),
     sectionProgress("Monitoring & Detection", [
