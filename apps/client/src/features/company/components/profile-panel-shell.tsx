@@ -1,5 +1,10 @@
 import { AlertCircle, Loader2 } from "lucide-react"
-import { type ReactNode } from "react"
+import {
+  type ReactNode,
+  useEffect,
+  useId,
+  useSyncExternalStore,
+} from "react"
 
 import { Button } from "@/components/ui/button"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
@@ -11,6 +16,32 @@ export type ProfilePanelDetailRow = readonly [
   value: string | number | null,
   helperText?: string,
 ]
+
+let activeProfilePanelId: string | null = null
+const profilePanelEditListeners = new Set<() => void>()
+
+const setActiveProfilePanelId = (panelId: string | null) => {
+  if (activeProfilePanelId === panelId) {
+    return
+  }
+
+  activeProfilePanelId = panelId
+  profilePanelEditListeners.forEach((listener) => listener())
+}
+
+const subscribeToActiveProfilePanel = (listener: () => void) => {
+  profilePanelEditListeners.add(listener)
+  return () => profilePanelEditListeners.delete(listener)
+}
+
+const getActiveProfilePanelSnapshot = () => activeProfilePanelId
+
+const useActiveProfilePanelId = () =>
+  useSyncExternalStore(
+    subscribeToActiveProfilePanel,
+    getActiveProfilePanelSnapshot,
+    getActiveProfilePanelSnapshot
+  )
 
 export const ProfilePanelShell = ({
   children,
@@ -37,8 +68,47 @@ export const ProfilePanelShell = ({
   onEdit: () => void
   onSave: () => void
 }) => {
+  const panelId = useId()
+  const activePanelId = useActiveProfilePanelId()
+  const isPanelLocked = activePanelId !== null && activePanelId !== panelId
+
+  useEffect(() => {
+    if (isEditing) {
+      setActiveProfilePanelId(panelId)
+
+      return () => {
+        if (activeProfilePanelId === panelId) {
+          setActiveProfilePanelId(null)
+        }
+      }
+    }
+
+    if (activeProfilePanelId === panelId) {
+      setActiveProfilePanelId(null)
+    }
+
+    return undefined
+  }, [isEditing, panelId])
+
+  const handleCancel = () => {
+    onCancel()
+
+    if (activeProfilePanelId === panelId) {
+      setActiveProfilePanelId(null)
+    }
+  }
+
+  const handleEdit = () => {
+    if (isPanelLocked) {
+      return
+    }
+
+    setActiveProfilePanelId(panelId)
+    onEdit()
+  }
+
   return (
-    <div>
+    <div className={cn("transition-opacity", isPanelLocked && "opacity-45")}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
         <div className="">
           <div className="flex items-center gap-2">
@@ -69,7 +139,7 @@ export const ProfilePanelShell = ({
               disabled={isMutationPending}
               type="button"
               variant="outline"
-              onClick={onCancel}
+              onClick={handleCancel}
             >
               Cancel
             </Button>
@@ -77,9 +147,10 @@ export const ProfilePanelShell = ({
         ) : (
           <Button
             className="align-self-end"
+            disabled={isPanelLocked}
             type="button"
             variant="link"
-            onClick={onEdit}
+            onClick={handleEdit}
           >
             Edit
           </Button>
