@@ -74,6 +74,15 @@ offer an in-context editor for adding, renaming, describing, activating,
 deactivating, and removing codes without leaving the current page. System code
 sets remain read-only.
 
+The workspace Settings area is opened from the settings button at the bottom of
+the sidebar. Settings contains Team and Vocabulary tabs. Team shows current
+members to all members. Owners can invite people by email as either member or
+owner, cancel pending invitations, change member roles, remove members, and
+delete the organization after confirming its name. Members can edit workspace
+data but cannot manage the team or delete the organization. Invitation links
+require Google sign-in with the invited email before the user is added to the
+organization.
+
 ## Product and Data Graph
 
 The workspace includes a read-only Product and Data graph at `/company/graph`.

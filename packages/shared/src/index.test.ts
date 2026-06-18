@@ -19,6 +19,9 @@ import {
   securityProfileSchema,
   isComplianceFieldVisible,
   organizationProviderInputSchema,
+  organizationInvitationInputSchema,
+  organizationInvitationSchema,
+  organizationMemberRoleUpdateSchema,
   organizationLookupResultSchema,
   providerCriticalitySchema,
   providerSystemTypeSchema,
@@ -239,6 +242,48 @@ describe("shared security profile schemas", () => {
         name: "Startup Founder",
       }).success,
     ).toBe(false);
+  });
+
+  it("normalizes organization invitation emails", () => {
+    const result = organizationInvitationInputSchema.safeParse({
+      email: " Teammate@Example.COM ",
+      role: "member",
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({
+        email: "teammate@example.com",
+        role: "member",
+      });
+    }
+  });
+
+  it("requires organization invitations and member updates to use supported roles", () => {
+    expect(
+      organizationInvitationInputSchema.safeParse({
+        email: "teammate@example.com",
+        role: "admin",
+      }).success,
+    ).toBe(false);
+    expect(
+      organizationMemberRoleUpdateSchema.safeParse({ role: "owner" }).success,
+    ).toBe(true);
+  });
+
+  it("accepts pending organization invitation summaries", () => {
+    expect(
+      organizationInvitationSchema.safeParse({
+        id: "invite_1",
+        organizationId: "org_1",
+        email: "teammate@example.com",
+        role: "owner",
+        invitedByUserId: "user_1",
+        invitedByName: "Founder",
+        expiresAt: "2026-06-30T00:00:00.000Z",
+        createdAt: "2026-06-18T00:00:00.000Z",
+      }).success,
+    ).toBe(true);
   });
 
   it("limits provider criticality to the supported readiness levels", () => {

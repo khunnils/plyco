@@ -615,6 +615,7 @@ export const organizationMemberSchema = z.object({
   name: z.string().trim().min(1),
   email: z.string().email(),
   role: organizationMembershipRoleSchema,
+  createdAt: z.string().datetime().optional(),
 });
 
 export const organizationSummarySchema = z.object({
@@ -633,6 +634,38 @@ export const authStateSchema = z.object({
 export const createOrganizationSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
   website: z.string().trim().url().optional(),
+});
+
+export const organizationInvitationInputSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Invite email must be valid")
+    .transform((email) => email.toLowerCase()),
+  role: organizationMembershipRoleSchema,
+});
+
+export const organizationInvitationSchema = z.object({
+  id: z.string().min(1),
+  organizationId: z.string().min(1),
+  email: z.string().email(),
+  role: organizationMembershipRoleSchema,
+  invitedByUserId: z.string().min(1),
+  invitedByName: z.string().trim().min(1),
+  expiresAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
+});
+
+export const organizationMemberRoleUpdateSchema = z.object({
+  role: organizationMembershipRoleSchema,
+});
+
+export const acceptOrganizationInvitationSchema = z.object({
+  organization: organizationSummarySchema,
+});
+
+export const deleteOrganizationResponseSchema = z.object({
+  deleted: z.literal(true),
 });
 
 export const organizationLookupInputSchema = z.object({
@@ -802,6 +835,21 @@ export type OrganizationMember = z.infer<typeof organizationMemberSchema>;
 export type OrganizationSummary = z.infer<typeof organizationSummarySchema>;
 export type AuthState = z.infer<typeof authStateSchema>;
 export type CreateOrganization = z.infer<typeof createOrganizationSchema>;
+export type OrganizationInvitationInput = z.infer<
+  typeof organizationInvitationInputSchema
+>;
+export type OrganizationInvitation = z.infer<
+  typeof organizationInvitationSchema
+>;
+export type OrganizationMemberRoleUpdate = z.infer<
+  typeof organizationMemberRoleUpdateSchema
+>;
+export type AcceptOrganizationInvitation = z.infer<
+  typeof acceptOrganizationInvitationSchema
+>;
+export type DeleteOrganizationResponse = z.infer<
+  typeof deleteOrganizationResponseSchema
+>;
 export type OrganizationLookupInput = z.infer<
   typeof organizationLookupInputSchema
 >;

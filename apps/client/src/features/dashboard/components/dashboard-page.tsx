@@ -88,7 +88,7 @@ const SectionHeading = ({ children }: { children: string }) => (
   </span>
 )
 
-const DocumentReasonsTooltip = ({
+const PolicyReasonsTooltip = ({
   outdatedDocuments,
 }: {
   outdatedDocuments: DocumentSummary[]
@@ -100,11 +100,12 @@ const DocumentReasonsTooltip = ({
   return (
     <span className="group relative inline-flex">
       <button
-        aria-label="Outdated document details"
-        className="text-sm font-medium text-amber-700 underline-offset-4 hover:text-amber-900 hover:underline focus-visible:ring-3 focus-visible:ring-amber-100 focus-visible:outline-none"
+        aria-label="Outdated policy details"
+        className="relative flex size-5 items-center justify-center rounded-full focus-visible:ring-3 focus-visible:ring-amber-100 focus-visible:outline-none"
         type="button"
       >
-        Details
+        <span className="absolute inline-flex size-4 animate-ping rounded-full bg-amber-400 opacity-75" />
+        <span className="relative inline-flex size-3 rounded-full bg-amber-500" />
       </button>
       <span
         className="pointer-events-none absolute right-0 top-7 z-20 hidden w-80 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-slate-600 shadow-lg group-hover:block group-focus-within:block"
@@ -117,7 +118,7 @@ const DocumentReasonsTooltip = ({
             </strong>
             {(summary.staleReasons.length
               ? summary.staleReasons
-              : ["Regenerate to refresh this document."]
+              : ["Regenerate to refresh this policy."]
             )
               .slice(0, 2)
               .map((reason) => (
@@ -263,7 +264,7 @@ export const DashboardPage = ({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-                Documents
+                Policies
               </h3>
             </div>
             <Link
@@ -287,13 +288,16 @@ export const DashboardPage = ({
             </div>
             <div className="rounded-sm border border-l-4 border-slate-200 border-l-amber-500 px-4 py-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-xl font-semibold text-slate-950">
-                  {documentsLoading ? "..." : outdatedDocuments.length}
+                <div className="flex items-center gap-2">
+                  <FileText className="size-4 text-amber-700" />
+                  <div className="text-xl font-semibold text-slate-950">
+                    {documentsLoading ? "..." : outdatedDocuments.length}
+                  </div>
                 </div>
-                <DocumentReasonsTooltip outdatedDocuments={outdatedDocuments} />
+                <PolicyReasonsTooltip outdatedDocuments={outdatedDocuments} />
               </div>
               <div className="mt-1 text-xs font-medium text-slate-500">
-                Documents outdated
+                Policies outdated
               </div>
             </div>
           </div>

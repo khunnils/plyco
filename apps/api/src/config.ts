@@ -76,5 +76,7 @@ export const apiConfig = {
   langfuseBaseUrl: process.env.LANGFUSE_BASE_URL,
   documentPdfBucket: process.env.DOCUMENT_PDF_BUCKET ?? "plyco-public",
   gcpProjectId: process.env.GCP_PROJECT_ID ?? "plyco-prod",
+  resendApiKey: process.env.RESEND_API_KEY,
+  invitationEmailFrom: process.env.INVITATION_EMAIL_FROM,
   auth: () => readAuthConfig(),
 }

@@ -26,8 +26,13 @@ import {
   documentSummarySchema,
   templateSchema,
   createOrganizationSchema,
+  acceptOrganizationInvitationSchema,
+  deleteOrganizationResponseSchema,
+  organizationInvitationInputSchema,
+  organizationInvitationSchema,
   organizationSummarySchema,
   organizationMemberSchema,
+  organizationMemberRoleUpdateSchema,
   type Provider,
   type Country,
   type Vocabulary,
@@ -58,6 +63,11 @@ import {
   type PrivacyProfile,
   type OrganizationSummary,
   type OrganizationMember,
+  type OrganizationInvitation,
+  type OrganizationInvitationInput,
+  type OrganizationMemberRoleUpdate,
+  type AcceptOrganizationInvitation,
+  type DeleteOrganizationResponse,
   type RecommendationsResponse,
 } from "@plyco/shared"
 import { z } from "zod"
@@ -86,16 +96,40 @@ const apiRequest = async <T>(
   schema: z.ZodType<T>,
   init?: RequestInit
 ): Promise<T> => {
+  const hasBody = init?.body !== undefined
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
     },
   })
 
   return parseResponse(response, schema)
+}
+
+const emptyApiRequest = async (
+  path: string,
+  init?: RequestInit
+): Promise<void> => {
+  const hasBody = init?.body !== undefined
+  const response = await fetch(`${API_URL}${path}`, {
+    ...init,
+    credentials: "include",
+    headers: {
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      ...init?.headers,
+    },
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const parsedError = structuredErrorSchema.safeParse(body)
+    throw new Error(
+      parsedError.success ? parsedError.data.error.message : "Request failed"
+    )
+  }
 }
 
 export const startGoogleLogin = () => {
@@ -151,6 +185,76 @@ export const getOrganizationMembers = (
   apiRequest(
     `/organizations/${organizationId}/members`,
     z.array(organizationMemberSchema)
+  )
+
+export const getOrganizationInvitations = (
+  organizationId: string
+): Promise<OrganizationInvitation[]> =>
+  apiRequest(
+    `/organizations/${organizationId}/invitations`,
+    z.array(organizationInvitationSchema)
+  )
+
+export const inviteOrganizationMember = (
+  organizationId: string,
+  input: OrganizationInvitationInput
+): Promise<OrganizationInvitation> =>
+  apiRequest(
+    `/organizations/${organizationId}/invitations`,
+    organizationInvitationSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(organizationInvitationInputSchema.parse(input)),
+    }
+  )
+
+export const cancelOrganizationInvitation = async (
+  organizationId: string,
+  invitationId: string
+): Promise<void> =>
+  emptyApiRequest(
+    `/organizations/${organizationId}/invitations/${invitationId}`,
+    { method: "DELETE" }
+  )
+
+export const updateOrganizationMemberRole = (
+  organizationId: string,
+  userId: string,
+  input: OrganizationMemberRoleUpdate
+): Promise<OrganizationMember> =>
+  apiRequest(
+    `/organizations/${organizationId}/members/${userId}`,
+    organizationMemberSchema,
+    {
+      method: "PATCH",
+      body: JSON.stringify(organizationMemberRoleUpdateSchema.parse(input)),
+    }
+  )
+
+export const removeOrganizationMember = async (
+  organizationId: string,
+  userId: string
+): Promise<void> =>
+  emptyApiRequest(`/organizations/${organizationId}/members/${userId}`, {
+    method: "DELETE",
+  })
+
+export const deleteOrganization = (
+  organizationId: string
+): Promise<DeleteOrganizationResponse> =>
+  apiRequest(
+    `/organizations/${organizationId}`,
+    deleteOrganizationResponseSchema,
+    { method: "DELETE" }
+  )
+
+export const acceptOrganizationInvitation = (
+  token: string
+): Promise<AcceptOrganizationInvitation> =>
+  apiRequest(
+    `/invitations/${token}/accept`,
+    acceptOrganizationInvitationSchema,
+    { method: "POST" }
   )
 
 export const lookupOrganizationWebsite = (

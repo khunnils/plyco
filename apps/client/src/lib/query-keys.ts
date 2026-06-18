@@ -10,6 +10,9 @@ export const vocabularyQueryKey = (organizationId: string) =>
 export const organizationMembersQueryKey = (organizationId: string) =>
   ["organization-members", organizationId] as const
 
+export const organizationInvitationsQueryKey = (organizationId: string) =>
+  ["organization-invitations", organizationId] as const
+
 export const securityProfileQueryKey = (organizationId: string) =>
   ["security-profile", organizationId] as const
 

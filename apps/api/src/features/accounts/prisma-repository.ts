@@ -1,16 +1,21 @@
-import { prisma, type PrismaClient } from "@plyco/db"
+import { Prisma, prisma, type PrismaClient } from "@plyco/db"
 import {
   authUserSchema,
+  organizationInvitationSchema,
   organizationMemberSchema,
   organizationMembershipRoleSchema,
   organizationSummarySchema,
   type AuthUser,
   type CreateOrganization,
+  type OrganizationInvitation,
+  type OrganizationInvitationInput,
   type OrganizationMember,
+  type OrganizationMemberRoleUpdate,
   type OrganizationMembershipRole,
   type OrganizationSummary,
 } from "@plyco/shared"
 
+import { ApiError } from "../../infrastructure/errors.js"
 import {
   type AccountRepository,
   type AccountUserInput,
@@ -91,10 +96,288 @@ export class PrismaAccountRepository implements AccountRepository {
       organizationMemberSchema.parse({
         userId: membership.user.id,
         name: membership.user.name,
-        email: membership.user.email,
-        role: membership.role,
+          email: membership.user.email,
+          role: membership.role,
+          createdAt: toIsoString(membership.createdAt),
+        }),
+    )
+  }
+
+  async listOrganizationInvitations(
+    organizationId: string,
+  ): Promise<OrganizationInvitation[]> {
+    const invitations = await this.client.organizationInvitation.findMany({
+      where: {
+        organizationId,
+        acceptedAt: null,
+        canceledAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: { invitedByUser: true },
+      orderBy: { createdAt: "asc" },
+    })
+
+    return invitations.map((invitation) =>
+      organizationInvitationSchema.parse({
+        id: invitation.id,
+        organizationId: invitation.organizationId,
+        email: invitation.email,
+        role: invitation.role,
+        invitedByUserId: invitation.invitedByUserId,
+        invitedByName: invitation.invitedByUser.name,
+        expiresAt: toIsoString(invitation.expiresAt),
+        createdAt: toIsoString(invitation.createdAt),
       }),
     )
+  }
+
+  async createOrganizationInvitation(input: {
+    organizationId: string
+    invitedByUserId: string
+    invitation: OrganizationInvitationInput
+    tokenHash: string
+    expiresAt: Date
+  }): Promise<OrganizationInvitation> {
+    const existingMember = await this.client.organizationMembership.findFirst({
+      where: {
+        organizationId: input.organizationId,
+        user: { email: { equals: input.invitation.email, mode: "insensitive" } },
+      },
+      select: { id: true },
+    })
+
+    if (existingMember) {
+      throw new ApiError(
+        "ORGANIZATION_MEMBER_ALREADY_EXISTS",
+        "That email already belongs to this organization.",
+        409,
+      )
+    }
+
+    const existingInvitation =
+      await this.client.organizationInvitation.findFirst({
+        where: {
+          organizationId: input.organizationId,
+          email: { equals: input.invitation.email, mode: "insensitive" },
+          acceptedAt: null,
+          canceledAt: null,
+          expiresAt: { gt: new Date() },
+        },
+        select: { id: true },
+      })
+
+    if (existingInvitation) {
+      throw new ApiError(
+        "ORGANIZATION_INVITATION_ALREADY_EXISTS",
+        "That email already has a pending invitation.",
+        409,
+      )
+    }
+
+    const invitation = await this.client.organizationInvitation.create({
+      data: {
+        organizationId: input.organizationId,
+        email: input.invitation.email,
+        role: input.invitation.role,
+        tokenHash: input.tokenHash,
+        invitedByUserId: input.invitedByUserId,
+        expiresAt: input.expiresAt,
+      },
+      include: { invitedByUser: true },
+    })
+
+    return organizationInvitationSchema.parse({
+      id: invitation.id,
+      organizationId: invitation.organizationId,
+      email: invitation.email,
+      role: invitation.role,
+      invitedByUserId: invitation.invitedByUserId,
+      invitedByName: invitation.invitedByUser.name,
+      expiresAt: toIsoString(invitation.expiresAt),
+      createdAt: toIsoString(invitation.createdAt),
+    })
+  }
+
+  async cancelOrganizationInvitation(
+    organizationId: string,
+    invitationId: string,
+  ): Promise<boolean> {
+    const result = await this.client.organizationInvitation.updateMany({
+      where: {
+        id: invitationId,
+        organizationId,
+        acceptedAt: null,
+        canceledAt: null,
+      },
+      data: { canceledAt: new Date() },
+    })
+
+    return result.count > 0
+  }
+
+  async acceptOrganizationInvitation(input: {
+    tokenHash: string
+    userId: string
+    email: string
+    now: Date
+  }): Promise<OrganizationSummary> {
+    return this.client.$transaction(async (transaction) => {
+      const invitation = await transaction.organizationInvitation.findUnique({
+        where: { tokenHash: input.tokenHash },
+        include: { organization: true },
+      })
+
+      if (!invitation || invitation.canceledAt || invitation.expiresAt <= input.now) {
+        throw new ApiError(
+          "ORGANIZATION_INVITATION_INVALID",
+          "This invitation is no longer valid.",
+          400,
+        )
+      }
+
+      if (invitation.email.toLowerCase() !== input.email.toLowerCase()) {
+        throw new ApiError(
+          "ORGANIZATION_INVITATION_EMAIL_MISMATCH",
+          "Sign in with the email address this invitation was sent to.",
+          403,
+        )
+      }
+
+      if (invitation.acceptedAt) {
+        const existingMembership =
+          await transaction.organizationMembership.findUnique({
+            where: {
+              userId_organizationId: {
+                userId: input.userId,
+                organizationId: invitation.organizationId,
+              },
+            },
+          })
+
+        if (existingMembership) {
+          return organizationSummarySchema.parse({
+            id: invitation.organization.id,
+            name: invitation.organization.companyName,
+            role: existingMembership.role,
+            createdAt: toIsoString(invitation.organization.createdAt),
+            updatedAt: toIsoString(invitation.organization.updatedAt),
+          })
+        }
+
+        throw new ApiError(
+          "ORGANIZATION_INVITATION_INVALID",
+          "This invitation is no longer valid.",
+          400,
+        )
+      }
+
+      const membership = await transaction.organizationMembership.upsert({
+        where: {
+          userId_organizationId: {
+            userId: input.userId,
+            organizationId: invitation.organizationId,
+          },
+        },
+        create: {
+          userId: input.userId,
+          organizationId: invitation.organizationId,
+          role: invitation.role,
+        },
+        update: {},
+      })
+
+      await transaction.organizationInvitation.update({
+        where: { id: invitation.id },
+        data: {
+          acceptedAt: input.now,
+          acceptedByUserId: input.userId,
+        },
+      })
+
+      return organizationSummarySchema.parse({
+        id: invitation.organization.id,
+        name: invitation.organization.companyName,
+        role: membership.role,
+        createdAt: toIsoString(invitation.organization.createdAt),
+        updatedAt: toIsoString(invitation.organization.updatedAt),
+      })
+    })
+  }
+
+  async updateOrganizationMemberRole(
+    organizationId: string,
+    userId: string,
+    input: OrganizationMemberRoleUpdate,
+  ): Promise<OrganizationMember | null> {
+    return this.client.$transaction(async (transaction) => {
+      const membership = await transaction.organizationMembership.findUnique({
+        where: { userId_organizationId: { userId, organizationId } },
+        include: { user: true },
+      })
+
+      if (!membership) {
+        return null
+      }
+
+      if (membership.role === "owner" && input.role !== "owner") {
+        await ensureAnotherOwner(transaction, organizationId, userId)
+      }
+
+      const updated = await transaction.organizationMembership.update({
+        where: { id: membership.id },
+        data: { role: input.role },
+        include: { user: true },
+      })
+
+      return organizationMemberSchema.parse({
+        userId: updated.user.id,
+        name: updated.user.name,
+        email: updated.user.email,
+        role: updated.role,
+        createdAt: toIsoString(updated.createdAt),
+      })
+    })
+  }
+
+  async removeOrganizationMember(
+    organizationId: string,
+    userId: string,
+  ): Promise<boolean> {
+    return this.client.$transaction(async (transaction) => {
+      const membership = await transaction.organizationMembership.findUnique({
+        where: { userId_organizationId: { userId, organizationId } },
+      })
+
+      if (!membership) {
+        return false
+      }
+
+      if (membership.role === "owner") {
+        await ensureAnotherOwner(transaction, organizationId, userId)
+      }
+
+      await transaction.organizationMembership.delete({ where: { id: membership.id } })
+
+      return true
+    })
+  }
+
+  async deleteOrganization(organizationId: string): Promise<boolean> {
+    try {
+      await this.client.organization.delete({ where: { id: organizationId } })
+      return true
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "P2025"
+      ) {
+        return false
+      }
+
+      throw error
+    }
   }
 
   async createOrganization(
@@ -142,5 +425,27 @@ export class PrismaAccountRepository implements AccountRepository {
     }
 
     return organizationMembershipRoleSchema.parse(membership.role)
+  }
+}
+
+const ensureAnotherOwner = async (
+  transaction: Prisma.TransactionClient,
+  organizationId: string,
+  userId: string,
+) => {
+  const ownerCount = await transaction.organizationMembership.count({
+    where: {
+      organizationId,
+      role: "owner",
+      userId: { not: userId },
+    },
+  })
+
+  if (ownerCount < 1) {
+    throw new ApiError(
+      "ORGANIZATION_REQUIRES_OWNER",
+      "An organization must have at least one owner.",
+      400,
+    )
   }
 }

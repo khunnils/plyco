@@ -19,6 +19,10 @@ import {
 } from "./infrastructure/document-pdfs.js"
 import { ApiError, sendError } from "./infrastructure/errors.js"
 import { InMemoryAccountRepository } from "./features/accounts/in-memory-repository.js"
+import {
+  ResendInvitationEmailSender,
+  type InvitationEmailSender,
+} from "./features/accounts/invitation-email.js"
 import { PrismaAccountRepository } from "./features/accounts/prisma-repository.js"
 import { type AccountRepository } from "./features/accounts/repository.js"
 import { registerAccountRoutes } from "./features/accounts/routes.js"
@@ -101,6 +105,7 @@ export type CreateAppOptions = {
     airtableBase?: string
   }
   waitlistRepository?: WaitlistRepository
+  invitationEmailSender?: InvitationEmailSender
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -130,6 +135,7 @@ export async function createApp({
   codeLoader,
   codeLoaderConfig,
   waitlistRepository,
+  invitationEmailSender,
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -180,6 +186,13 @@ export async function createApp({
 
   await registerAccountRoutes(app, {
     accountRepository: repositories.accountRepository,
+    clientUrl: auth ? auth.clientUrl : apiConfig.cliApiUrl,
+    invitationEmailSender:
+      invitationEmailSender ??
+      new ResendInvitationEmailSender({
+        apiKey: apiConfig.resendApiKey,
+        from: apiConfig.invitationEmailFrom,
+      }),
     vocabularyRepository: repositories.vocabularyRepository,
   })
   const resolvedOrganizationLookupService =

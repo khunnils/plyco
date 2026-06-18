@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom"
 
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
@@ -25,11 +26,21 @@ import { SecurityProfileRoutePage } from "@/features/company/security/pages/secu
 import { DataHandlingProfileRoutePage } from "@/features/company/data-handling/pages/data-handling-profile-route-page"
 import { AccessProfileRoutePage } from "@/features/company/access/pages/access-profile-route-page"
 import { VendorsRoutePage } from "@/features/vendors/pages/vendors-route-page"
-import { VocabularyRoutePage } from "@/features/vocabulary/pages/vocabulary-route-page"
 import { DocumentsRoutePage } from "@/features/documents/pages/documents-route-page"
+import {
+  InvitationAcceptRoutePage,
+  pendingInvitationStorageKey,
+} from "@/features/invitations/pages/invitation-accept-route-page"
+import {
+  SettingsIndexRoutePage,
+  SettingsRoutePage,
+} from "@/features/settings/pages/settings-route-page"
+import { TeamSettingsRoutePage } from "@/features/settings/pages/team-settings-route-page"
+import { VocabularySettingsRoutePage } from "@/features/settings/pages/vocabulary-settings-route-page"
 
 export const App = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const authState = useAuthState()
   const user = authState.data?.user ?? null
   const isAuthenticated = Boolean(user)
@@ -41,6 +52,20 @@ export const App = () => {
     isAuthenticated && Boolean(selectedOrganization)
   )
   const logout = useLogout()
+  const pendingInvitationToken =
+    typeof window === "undefined"
+      ? null
+      : window.localStorage.getItem(pendingInvitationStorageKey)
+
+  useEffect(() => {
+    if (
+      user &&
+      pendingInvitationToken &&
+      !location.pathname.startsWith("/invites/")
+    ) {
+      navigate(`/invites/${pendingInvitationToken}`, { replace: true })
+    }
+  }, [location.pathname, navigate, pendingInvitationToken, user])
 
   const shouldShowOnboarding = selectedOrganization
     ? onboardingOrganizationIds.has(selectedOrganization.id)
@@ -56,6 +81,18 @@ export const App = () => {
   }
 
   if (!user) {
+    if (location.pathname.startsWith("/invites/")) {
+      return (
+        <Routes>
+          <Route
+            path="/invites/:token"
+            element={<InvitationAcceptRoutePage user={null} />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      )
+    }
+
     return (
       <LoginScreen
         error={authState.error?.message ?? null}
@@ -67,6 +104,10 @@ export const App = () => {
   if (!selectedOrganization) {
     return (
       <Routes>
+        <Route
+          path="/invites/:token"
+          element={<InvitationAcceptRoutePage user={user} />}
+        />
         <Route
           path="/onboarding/organization/*"
           element={
@@ -103,6 +144,10 @@ export const App = () => {
           />
         }
       />
+      <Route
+        path="/invites/:token"
+        element={<InvitationAcceptRoutePage user={user} />}
+      />
       <Route element={<WorkspaceLayout user={user} />}>
         <Route path="/" element={<DashboardRoutePage />} />
         <Route path="/recommendations" element={<RecommendationsRoutePage />} />
@@ -126,7 +171,15 @@ export const App = () => {
         />
         <Route path="/company/access" element={<AccessProfileRoutePage />} />
         <Route path="/vendors" element={<VendorsRoutePage />} />
-        <Route path="/vocabulary" element={<VocabularyRoutePage />} />
+        <Route path="/settings" element={<SettingsRoutePage />}>
+          <Route index element={<SettingsIndexRoutePage />} />
+          <Route path="team" element={<TeamSettingsRoutePage />} />
+          <Route path="vocabulary" element={<VocabularySettingsRoutePage />} />
+        </Route>
+        <Route
+          path="/vocabulary"
+          element={<Navigate to="/settings/vocabulary" replace />}
+        />
         <Route path="/documents" element={<DocumentsRoutePage />} />
         <Route path="/documents/:mode" element={<DocumentsRoutePage />} />
         <Route path="/documents/:mode/:id" element={<DocumentsRoutePage />} />

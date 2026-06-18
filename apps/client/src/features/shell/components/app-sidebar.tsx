@@ -2,7 +2,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   ScrollText,
-  Tags,
+  Settings,
   Users,
 } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -112,17 +113,16 @@ export const AppSidebar = () => {
           </div>
         </SidebarMenu>
 
-        <SidebarSectionLabel>{SIDEBAR_SECTION.settings}</SidebarSectionLabel>
-        <div className="ml-2 grid gap-1">
-          <SidebarMenuButton
-            active={pathname.startsWith("/vocabulary")}
-            onClick={() => navigate("/vocabulary")}
-          >
-            <Tags className="size-4" />
-            Vocabulary
-          </SidebarMenuButton>
-        </div>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenuButton
+          active={pathname.startsWith("/settings")}
+          onClick={() => navigate("/settings/team")}
+        >
+          <Settings className="size-4" />
+          Settings
+        </SidebarMenuButton>
+      </SidebarFooter>
     </Sidebar>
   )
 }

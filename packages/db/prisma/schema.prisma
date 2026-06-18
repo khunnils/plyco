@@ -47,6 +47,7 @@ model Organization {
   templates             Template[]
   documents             Document[]
   memberships           OrganizationMembership[]
+  invitations           OrganizationInvitation[]
   codeSets              OrganizationCodeSet[]
   createdAt             DateTime                 @default(now()) @map("created_at")
   updatedAt             DateTime                 @updatedAt @map("updated_at")
@@ -143,6 +144,8 @@ model User {
   name          String
   picture       String?
   memberships   OrganizationMembership[]
+  sentInvitations OrganizationInvitation[] @relation("OrganizationInvitationInviter")
+  acceptedInvitations OrganizationInvitation[] @relation("OrganizationInvitationAcceptedUser")
   createdAt     DateTime                 @default(now()) @map("created_at")
   updatedAt     DateTime                 @updatedAt @map("updated_at")
 
@@ -163,6 +166,28 @@ model OrganizationMembership {
   @@index([userId], map: "idx_organization_memberships_user_id")
   @@index([organizationId], map: "idx_organization_memberships_organization_id")
   @@map("organization_memberships")
+}
+
+model OrganizationInvitation {
+  id             String       @id(map: "organization_invitations_pkey") @default(cuid())
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_invitations_organization_id_fkey")
+  email          String
+  role           String
+  tokenHash      String       @unique(map: "organization_invitations_token_hash_key") @map("token_hash")
+  invitedByUserId String      @map("invited_by_user_id")
+  invitedByUser   User        @relation("OrganizationInvitationInviter", fields: [invitedByUserId], references: [id], onDelete: Cascade, map: "organization_invitations_invited_by_user_id_fkey")
+  acceptedByUserId String?    @map("accepted_by_user_id")
+  acceptedByUser   User?      @relation("OrganizationInvitationAcceptedUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull, map: "organization_invitations_accepted_by_user_id_fkey")
+  expiresAt      DateTime     @map("expires_at")
+  acceptedAt     DateTime?    @map("accepted_at")
+  canceledAt     DateTime?    @map("canceled_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([organizationId], map: "idx_organization_invitations_organization_id")
+  @@index([email], map: "idx_organization_invitations_email")
+  @@map("organization_invitations")
 }
 
 model ServiceProfile {
