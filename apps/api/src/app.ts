@@ -23,6 +23,10 @@ import {
   ResendInvitationEmailSender,
   type InvitationEmailSender,
 } from "./features/accounts/invitation-email.js"
+import {
+  ResendMagicLinkEmailSender,
+  type MagicLinkEmailSender,
+} from "./features/accounts/magic-link-email.js"
 import { PrismaAccountRepository } from "./features/accounts/prisma-repository.js"
 import { type AccountRepository } from "./features/accounts/repository.js"
 import { registerAccountRoutes } from "./features/accounts/routes.js"
@@ -106,6 +110,7 @@ export type CreateAppOptions = {
   }
   waitlistRepository?: WaitlistRepository
   invitationEmailSender?: InvitationEmailSender
+  magicLinkEmailSender?: MagicLinkEmailSender
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -136,6 +141,7 @@ export async function createApp({
   codeLoaderConfig,
   waitlistRepository,
   invitationEmailSender,
+  magicLinkEmailSender,
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -181,6 +187,12 @@ export async function createApp({
     await registerAuth(app, {
       accountRepository: repositories.accountRepository,
       authConfig: auth,
+      magicLinkEmailSender:
+        magicLinkEmailSender ??
+        new ResendMagicLinkEmailSender({
+          apiKey: apiConfig.resendApiKey,
+          from: apiConfig.invitationEmailFrom,
+        }),
     })
   }
 

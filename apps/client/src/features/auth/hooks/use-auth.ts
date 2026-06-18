@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { type MagicLinkRequest } from "@plyco/shared"
 import { toast } from "sonner"
 
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
-import { getAuthState, logout } from "@/lib/api"
+import { getAuthState, logout, sendMagicLink } from "@/lib/api"
 import {
   authStateQueryKey,
   providersQueryKey,
@@ -36,3 +37,11 @@ export const useLogout = () => {
     },
   })
 }
+
+export const useSendMagicLink = () =>
+  useMutation({
+    mutationFn: (input: MagicLinkRequest) => sendMagicLink(input),
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Could not send sign-in link")
+    },
+  })

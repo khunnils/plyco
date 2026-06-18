@@ -631,6 +631,19 @@ export const authStateSchema = z.object({
   organizations: z.array(organizationSummarySchema).default([]),
 });
 
+export const magicLinkRequestSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("Email must be valid")
+    .transform((email) => email.toLowerCase()),
+  returnTo: z.string().trim().min(1).optional(),
+});
+
+export const magicLinkResponseSchema = z.object({
+  sent: z.literal(true),
+});
+
 export const createOrganizationSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
   website: z.string().trim().url().optional(),
@@ -834,6 +847,8 @@ export type OrganizationMembershipRole = z.infer<
 export type OrganizationMember = z.infer<typeof organizationMemberSchema>;
 export type OrganizationSummary = z.infer<typeof organizationSummarySchema>;
 export type AuthState = z.infer<typeof authStateSchema>;
+export type MagicLinkRequest = z.infer<typeof magicLinkRequestSchema>;
+export type MagicLinkResponse = z.infer<typeof magicLinkResponseSchema>;
 export type CreateOrganization = z.infer<typeof createOrganizationSchema>;
 export type OrganizationInvitationInput = z.infer<
   typeof organizationInvitationInputSchema

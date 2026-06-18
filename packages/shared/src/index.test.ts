@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   authStateSchema,
   authUserSchema,
+  magicLinkRequestSchema,
+  magicLinkResponseSchema,
   companyProfileSchema,
   createOrganizationSchema,
   businessActivityInputSchema,
@@ -242,6 +244,24 @@ describe("shared security profile schemas", () => {
         name: "Startup Founder",
       }).success,
     ).toBe(false);
+  });
+
+  it("normalizes magic-link request emails", () => {
+    const result = magicLinkRequestSchema.safeParse({
+      email: " Founder@Example.COM ",
+      returnTo: "/invites/token",
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({
+        email: "founder@example.com",
+        returnTo: "/invites/token",
+      });
+    }
+    expect(magicLinkResponseSchema.parse({ sent: true })).toEqual({
+      sent: true,
+    });
   });
 
   it("normalizes organization invitation emails", () => {

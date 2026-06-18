@@ -18,7 +18,7 @@ import {
 import { ApiError } from "../../infrastructure/errors.js"
 import {
   type AccountRepository,
-  type AccountUserInput,
+  type GoogleAccountUserInput,
 } from "./repository.js"
 
 const toIsoString = (value: Date) => value.toISOString()
@@ -41,20 +41,60 @@ export class PrismaAccountRepository implements AccountRepository {
       : null
   }
 
-  async upsertUser(input: AccountUserInput): Promise<AuthUser> {
-    const user = await this.client.user.upsert({
-      where: { googleSubject: input.googleSubject },
-      create: {
-        googleSubject: input.googleSubject,
-        email: input.email,
-        name: input.name,
-        picture: input.picture,
-      },
-      update: {
-        email: input.email,
-        name: input.name,
-        picture: input.picture,
-      },
+  async upsertGoogleUser(input: GoogleAccountUserInput): Promise<AuthUser> {
+    const email = input.email.toLowerCase()
+
+    const user = await this.client.$transaction(async (transaction) => {
+      const existingBySubject = await transaction.user.findUnique({
+        where: { googleSubject: input.googleSubject },
+      })
+
+      if (existingBySubject) {
+        return transaction.user.update({
+          where: { id: existingBySubject.id },
+          data: {
+            email,
+            name: input.name,
+            picture: input.picture,
+          },
+        })
+      }
+
+      const existingByEmail = await transaction.user.findFirst({
+        where: { email: { equals: email, mode: "insensitive" } },
+      })
+
+      if (existingByEmail) {
+        if (
+          existingByEmail.googleSubject &&
+          existingByEmail.googleSubject !== input.googleSubject
+        ) {
+          throw new ApiError(
+            "AUTH_EMAIL_ALREADY_LINKED",
+            "That email is already linked to another Google account.",
+            409,
+          )
+        }
+
+        return transaction.user.update({
+          where: { id: existingByEmail.id },
+          data: {
+            googleSubject: input.googleSubject,
+            email,
+            name: input.name,
+            picture: input.picture,
+          },
+        })
+      }
+
+      return transaction.user.create({
+        data: {
+          googleSubject: input.googleSubject,
+          email,
+          name: input.name,
+          picture: input.picture,
+        },
+      })
     })
 
     return authUserSchema.parse({
@@ -62,6 +102,92 @@ export class PrismaAccountRepository implements AccountRepository {
       email: user.email,
       name: user.name,
       picture: user.picture ?? undefined,
+    })
+  }
+
+  async upsertEmailUser(email: string): Promise<AuthUser> {
+    const normalizedEmail = email.toLowerCase()
+    const existing = await this.client.user.findFirst({
+      where: { email: { equals: normalizedEmail, mode: "insensitive" } },
+    })
+
+    const user = existing
+      ? await this.client.user.update({
+          where: { id: existing.id },
+          data: { email: normalizedEmail },
+        })
+      : await this.client.user.create({
+          data: {
+            email: normalizedEmail,
+            name: normalizedEmail,
+          },
+        })
+
+    return authUserSchema.parse({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      picture: user.picture ?? undefined,
+    })
+  }
+
+  async createMagicLinkToken(input: {
+    email: string
+    tokenHash: string
+    expiresAt: Date
+  }): Promise<void> {
+    await this.client.magicLinkToken.create({
+      data: {
+        email: input.email.toLowerCase(),
+        tokenHash: input.tokenHash,
+        expiresAt: input.expiresAt,
+      },
+    })
+  }
+
+  async consumeMagicLinkToken(input: {
+    tokenHash: string
+    now: Date
+  }): Promise<AuthUser> {
+    return this.client.$transaction(async (transaction) => {
+      const token = await transaction.magicLinkToken.findUnique({
+        where: { tokenHash: input.tokenHash },
+      })
+
+      if (!token || token.usedAt || token.expiresAt <= input.now) {
+        throw new ApiError(
+          "MAGIC_LINK_INVALID",
+          "This sign-in link is no longer valid.",
+          400,
+        )
+      }
+
+      await transaction.magicLinkToken.update({
+        where: { id: token.id },
+        data: { usedAt: input.now },
+      })
+
+      const existing = await transaction.user.findFirst({
+        where: { email: { equals: token.email, mode: "insensitive" } },
+      })
+      const user = existing
+        ? await transaction.user.update({
+            where: { id: existing.id },
+            data: { email: token.email.toLowerCase() },
+          })
+        : await transaction.user.create({
+            data: {
+              email: token.email.toLowerCase(),
+              name: token.email.toLowerCase(),
+            },
+          })
+
+      return authUserSchema.parse({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        picture: user.picture ?? undefined,
+      })
     })
   }
 

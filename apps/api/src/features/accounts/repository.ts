@@ -9,7 +9,7 @@ import {
   type OrganizationSummary,
 } from "@plyco/shared"
 
-export type AccountUserInput = {
+export type GoogleAccountUserInput = {
   googleSubject: string
   email: string
   name: string
@@ -18,7 +18,17 @@ export type AccountUserInput = {
 
 export interface AccountRepository {
   getUser(userId: string): Promise<AuthUser | null>
-  upsertUser(input: AccountUserInput): Promise<AuthUser>
+  upsertGoogleUser(input: GoogleAccountUserInput): Promise<AuthUser>
+  upsertEmailUser(email: string): Promise<AuthUser>
+  createMagicLinkToken(input: {
+    email: string
+    tokenHash: string
+    expiresAt: Date
+  }): Promise<void>
+  consumeMagicLinkToken(input: {
+    tokenHash: string
+    now: Date
+  }): Promise<AuthUser>
   listOrganizations(userId: string): Promise<OrganizationSummary[]>
   listOrganizationMembers(organizationId: string): Promise<OrganizationMember[]>
   listOrganizationInvitations(

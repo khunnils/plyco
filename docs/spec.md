@@ -80,8 +80,8 @@ members to all members. Owners can invite people by email as either member or
 owner, cancel pending invitations, change member roles, remove members, and
 delete the organization after confirming its name. Members can edit workspace
 data but cannot manage the team or delete the organization. Invitation links
-require Google sign-in with the invited email before the user is added to the
-organization.
+require Google or magic-link sign-in with the invited email before the user is
+added to the organization.
 
 ## Product and Data Graph
 

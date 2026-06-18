@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createApp } from "../src/app.js";
+import { type MagicLinkEmailInput } from "../src/features/accounts/magic-link-email.js";
 import { createTestApp } from "./helpers.js";
 import { readAuthConfig } from "../src/config.js";
 import { authConfig, createInMemoryRepositories } from "./helpers.js";
@@ -78,6 +79,89 @@ describe("security profile API", () => {
     expect(response.statusCode).toBe(204);
   });
 
+  it("sends magic links with a generic accepted response", async () => {
+    const magicLinkEmailSender = new CapturingMagicLinkEmailSender();
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+      magicLinkEmailSender,
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/auth/magic-link",
+      payload: {
+        email: "Founder@Example.com",
+        returnTo: "/invites/invite-token",
+      },
+    });
+
+    expect(response.statusCode).toBe(202);
+    expect(response.json()).toEqual({ sent: true });
+    expect(magicLinkEmailSender.sent).toHaveLength(1);
+    expect(magicLinkEmailSender.sent[0]).toMatchObject({
+      email: "founder@example.com",
+    });
+    expect(new URL(magicLinkEmailSender.sent[0].loginUrl).pathname).toBe(
+      "/auth/magic-link/callback",
+    );
+  });
+
+  it("sets a session cookie when a magic-link callback is consumed", async () => {
+    const magicLinkEmailSender = new CapturingMagicLinkEmailSender();
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+      magicLinkEmailSender,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/auth/magic-link",
+      payload: {
+        email: "founder@example.com",
+        returnTo: "/invites/invite-token",
+      },
+    });
+
+    const loginUrl = new URL(magicLinkEmailSender.sent[0].loginUrl);
+    const response = await app.inject({
+      method: "GET",
+      url: `${loginUrl.pathname}${loginUrl.search}`,
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe(
+      `${authConfig.clientUrl}/invites/invite-token`,
+    );
+    expect(response.headers["set-cookie"]).toBeDefined();
+  });
+
+  it("normalizes unsafe magic-link callback redirects to the client root", async () => {
+    const magicLinkEmailSender = new CapturingMagicLinkEmailSender();
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+      magicLinkEmailSender,
+    });
+    await app.inject({
+      method: "POST",
+      url: "/auth/magic-link",
+      payload: {
+        email: "founder@example.com",
+        returnTo: "/",
+      },
+    });
+    const loginUrl = new URL(magicLinkEmailSender.sent[0].loginUrl);
+    loginUrl.searchParams.set("returnTo", "https://evil.example");
+
+    const response = await app.inject({
+      method: "GET",
+      url: `${loginUrl.pathname}${loginUrl.search}`,
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe(`${authConfig.clientUrl}/`);
+  });
+
   it("clears stale authenticated sessions whose user no longer exists", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),
@@ -114,3 +198,11 @@ describe("security profile API", () => {
     ).toThrow("SESSION_KEY must be at least 32 characters");
   });
 });
+
+class CapturingMagicLinkEmailSender {
+  readonly sent: MagicLinkEmailInput[] = [];
+
+  async sendMagicLink(input: MagicLinkEmailInput) {
+    this.sent.push(input);
+  }
+}

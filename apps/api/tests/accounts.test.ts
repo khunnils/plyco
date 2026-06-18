@@ -8,12 +8,12 @@ const expiresAt = () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
 describe("account repository invitations", () => {
   it("creates and accepts an organization invitation", async () => {
     const repository = new InMemoryAccountRepository()
-    const owner = await repository.upsertUser({
+    const owner = await repository.upsertGoogleUser({
       googleSubject: "owner-google",
       email: "owner@example.com",
       name: "Owner",
     })
-    const member = await repository.upsertUser({
+    const member = await repository.upsertGoogleUser({
       googleSubject: "member-google",
       email: "teammate@example.com",
       name: "Teammate",
@@ -57,12 +57,12 @@ describe("account repository invitations", () => {
 
   it("rejects duplicate pending invitations and wrong acceptance email", async () => {
     const repository = new InMemoryAccountRepository()
-    const owner = await repository.upsertUser({
+    const owner = await repository.upsertGoogleUser({
       googleSubject: "owner-google",
       email: "owner@example.com",
       name: "Owner",
     })
-    const invited = await repository.upsertUser({
+    const invited = await repository.upsertGoogleUser({
       googleSubject: "invited-google",
       email: "wrong@example.com",
       name: "Wrong Person",
@@ -105,12 +105,12 @@ describe("account repository invitations", () => {
 
   it("protects the last owner and deletes organizations", async () => {
     const repository = new InMemoryAccountRepository()
-    const owner = await repository.upsertUser({
+    const owner = await repository.upsertGoogleUser({
       googleSubject: "owner-google",
       email: "owner@example.com",
       name: "Owner",
     })
-    const member = await repository.upsertUser({
+    const member = await repository.upsertGoogleUser({
       googleSubject: "member-google",
       email: "member@example.com",
       name: "Member",
@@ -143,5 +143,124 @@ describe("account repository invitations", () => {
       false,
     )
     expect(await repository.getMembershipRole(member.id, organization.id)).toBeNull()
+  })
+
+  it("creates users from magic links and merges later Google login by email", async () => {
+    const repository = new InMemoryAccountRepository()
+    await repository.createMagicLinkToken({
+      email: "founder@example.com",
+      tokenHash: "token-hash",
+      expiresAt: expiresAt(),
+    })
+
+    const emailUser = await repository.consumeMagicLinkToken({
+      tokenHash: "token-hash",
+      now: new Date(),
+    })
+    const googleUser = await repository.upsertGoogleUser({
+      googleSubject: "founder-google",
+      email: "Founder@Example.com",
+      name: "Founder",
+      picture: "https://example.com/avatar.png",
+    })
+
+    expect(googleUser).toMatchObject({
+      id: emailUser.id,
+      email: "founder@example.com",
+      name: "Founder",
+    })
+  })
+
+  it("merges magic-link login into an existing Google user by email", async () => {
+    const repository = new InMemoryAccountRepository()
+    const googleUser = await repository.upsertGoogleUser({
+      googleSubject: "founder-google",
+      email: "founder@example.com",
+      name: "Founder",
+    })
+    await repository.createMagicLinkToken({
+      email: "Founder@Example.com",
+      tokenHash: "token-hash",
+      expiresAt: expiresAt(),
+    })
+
+    const emailUser = await repository.consumeMagicLinkToken({
+      tokenHash: "token-hash",
+      now: new Date(),
+    })
+
+    expect(emailUser.id).toBe(googleUser.id)
+    expect(emailUser.name).toBe("Founder")
+  })
+
+  it("rejects reused and expired magic links", async () => {
+    const repository = new InMemoryAccountRepository()
+    await repository.createMagicLinkToken({
+      email: "founder@example.com",
+      tokenHash: "token-hash",
+      expiresAt: expiresAt(),
+    })
+
+    await expect(
+      repository.consumeMagicLinkToken({
+        tokenHash: "token-hash",
+        now: new Date(),
+      }),
+    ).resolves.toMatchObject({ email: "founder@example.com" })
+    await expect(
+      repository.consumeMagicLinkToken({
+        tokenHash: "token-hash",
+        now: new Date(),
+      }),
+    ).rejects.toMatchObject({ code: "MAGIC_LINK_INVALID" })
+
+    await repository.createMagicLinkToken({
+      email: "expired@example.com",
+      tokenHash: "expired-token-hash",
+      expiresAt: new Date(Date.now() - 1000),
+    })
+    await expect(
+      repository.consumeMagicLinkToken({
+        tokenHash: "expired-token-hash",
+        now: new Date(),
+      }),
+    ).rejects.toMatchObject({ code: "MAGIC_LINK_INVALID" })
+  })
+
+  it("accepts invitations after magic-link login with the invited email", async () => {
+    const repository = new InMemoryAccountRepository()
+    const owner = await repository.upsertGoogleUser({
+      googleSubject: "owner-google",
+      email: "owner@example.com",
+      name: "Owner",
+    })
+    const organization = await repository.createOrganization(owner.id, {
+      name: "Acme AI",
+    })
+    await repository.createOrganizationInvitation({
+      organizationId: organization.id,
+      invitedByUserId: owner.id,
+      invitation: { email: "teammate@example.com", role: "member" },
+      tokenHash: "invite-token-hash",
+      expiresAt: expiresAt(),
+    })
+    await repository.createMagicLinkToken({
+      email: "Teammate@Example.com",
+      tokenHash: "login-token-hash",
+      expiresAt: expiresAt(),
+    })
+
+    const member = await repository.consumeMagicLinkToken({
+      tokenHash: "login-token-hash",
+      now: new Date(),
+    })
+    const accepted = await repository.acceptOrganizationInvitation({
+      tokenHash: "invite-token-hash",
+      userId: member.id,
+      email: member.email,
+      now: new Date(),
+    })
+
+    expect(accepted).toMatchObject({ id: organization.id, role: "member" })
   })
 })

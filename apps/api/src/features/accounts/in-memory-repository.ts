@@ -16,7 +16,7 @@ import {
 import { ApiError } from "../../infrastructure/errors.js"
 import {
   type AccountRepository,
-  type AccountUserInput,
+  type GoogleAccountUserInput,
 } from "./repository.js"
 
 const now = () => new Date().toISOString()
@@ -25,6 +25,11 @@ const newId = (prefix: string) => `${prefix}_${crypto.randomUUID()}`
 export class InMemoryAccountRepository implements AccountRepository {
   private users = new Map<string, AuthUser>()
   private googleSubjectUserIds = new Map<string, string>()
+  private emailUserIds = new Map<string, string>()
+  private magicLinkTokens = new Map<
+    string,
+    { email: string; expiresAt: string; usedAt: string | null }
+  >()
   private organizations = new Map<string, OrganizationSummary>()
   private memberships = new Map<string, OrganizationMembershipRole>()
   private invitations = new Map<
@@ -41,19 +46,95 @@ export class InMemoryAccountRepository implements AccountRepository {
     return this.users.get(userId) ?? null
   }
 
-  async upsertUser(input: AccountUserInput): Promise<AuthUser> {
-    const id = this.googleSubjectUserIds.get(input.googleSubject) ?? newId("user")
+  async upsertGoogleUser(input: GoogleAccountUserInput): Promise<AuthUser> {
+    const email = input.email.toLowerCase()
+    const existingBySubjectId = this.googleSubjectUserIds.get(input.googleSubject)
+    const existingByEmailId = this.emailUserIds.get(email)
+    const id = existingBySubjectId ?? existingByEmailId ?? newId("user")
+    const existingUser = this.users.get(id)
+
+    if (
+      existingByEmailId &&
+      existingBySubjectId &&
+      existingByEmailId !== existingBySubjectId
+    ) {
+      throw new ApiError(
+        "AUTH_EMAIL_ALREADY_LINKED",
+        "That email is already linked to another Google account.",
+        409,
+      )
+    }
+
     const user = authUserSchema.parse({
       id,
-      email: input.email,
+      email,
       name: input.name,
       picture: input.picture,
     })
 
+    if (existingUser) {
+      this.emailUserIds.delete(existingUser.email.toLowerCase())
+    }
     this.googleSubjectUserIds.set(input.googleSubject, id)
+    this.emailUserIds.set(email, id)
     this.users.set(id, user)
 
     return user
+  }
+
+  async upsertEmailUser(email: string): Promise<AuthUser> {
+    const normalizedEmail = email.toLowerCase()
+    const id = this.emailUserIds.get(normalizedEmail) ?? newId("user")
+    const existing = this.users.get(id)
+    const user = authUserSchema.parse({
+      id,
+      email: normalizedEmail,
+      name: existing?.name ?? normalizedEmail,
+      picture: existing?.picture,
+    })
+
+    this.emailUserIds.set(normalizedEmail, id)
+    this.users.set(id, user)
+
+    return user
+  }
+
+  async createMagicLinkToken(input: {
+    email: string
+    tokenHash: string
+    expiresAt: Date
+  }): Promise<void> {
+    this.magicLinkTokens.set(input.tokenHash, {
+      email: input.email.toLowerCase(),
+      expiresAt: input.expiresAt.toISOString(),
+      usedAt: null,
+    })
+  }
+
+  async consumeMagicLinkToken(input: {
+    tokenHash: string
+    now: Date
+  }): Promise<AuthUser> {
+    const token = this.magicLinkTokens.get(input.tokenHash)
+
+    if (
+      !token ||
+      token.usedAt ||
+      Date.parse(token.expiresAt) <= input.now.getTime()
+    ) {
+      throw new ApiError(
+        "MAGIC_LINK_INVALID",
+        "This sign-in link is no longer valid.",
+        400,
+      )
+    }
+
+    this.magicLinkTokens.set(input.tokenHash, {
+      ...token,
+      usedAt: input.now.toISOString(),
+    })
+
+    return this.upsertEmailUser(token.email)
   }
 
   async listOrganizations(userId: string): Promise<OrganizationSummary[]> {

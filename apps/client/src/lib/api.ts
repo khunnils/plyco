@@ -1,5 +1,7 @@
 import {
   authStateSchema,
+  magicLinkRequestSchema,
+  magicLinkResponseSchema,
   securityProgramSnapshotSchema,
   structuredErrorSchema,
   providerSchema,
@@ -44,6 +46,8 @@ import {
   type Document,
   type DocumentSummary,
   type AuthState,
+  type MagicLinkRequest,
+  type MagicLinkResponse,
   type SecurityProgramSnapshot,
   type Template,
   type TemplateCatalog,
@@ -135,6 +139,14 @@ const emptyApiRequest = async (
 export const startGoogleLogin = () => {
   window.location.href = `${API_URL}/auth/google`
 }
+
+export const sendMagicLink = (
+  input: MagicLinkRequest
+): Promise<MagicLinkResponse> =>
+  apiRequest("/auth/magic-link", magicLinkResponseSchema, {
+    method: "POST",
+    body: JSON.stringify(magicLinkRequestSchema.parse(input)),
+  })
 
 export const getAuthState = (): Promise<AuthState> =>
   apiRequest("/auth/me", authStateSchema)

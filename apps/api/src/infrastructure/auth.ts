@@ -1,12 +1,18 @@
 import oauthPlugin, { type OAuth2Namespace } from "@fastify/oauth2"
 import secureSession from "@fastify/secure-session"
-import { type AuthUser } from "@plyco/shared"
+import {
+  magicLinkRequestSchema,
+  magicLinkResponseSchema,
+  type AuthUser,
+} from "@plyco/shared"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
+import { createHash, randomBytes } from "node:crypto"
 import { z } from "zod"
 
 import { type AuthConfig } from "../config.js"
 import { ApiError } from "./errors.js"
 import { type AccountRepository } from "../features/accounts/repository.js"
+import { type MagicLinkEmailSender } from "../features/accounts/magic-link-email.js"
 
 type OAuthPluginWithProviders = typeof oauthPlugin & {
   GOOGLE_CONFIGURATION: {
@@ -74,7 +80,12 @@ export async function registerAuth(
   {
     accountRepository,
     authConfig,
-  }: { accountRepository: AccountRepository; authConfig: AuthConfig },
+    magicLinkEmailSender,
+  }: {
+    accountRepository: AccountRepository
+    authConfig: AuthConfig
+    magicLinkEmailSender: MagicLinkEmailSender
+  },
 ) {
   const cookieOptions = {
     path: "/",
@@ -140,7 +151,7 @@ export async function registerAuth(
       )
     }
 
-    const user = await accountRepository.upsertUser({
+    const user = await accountRepository.upsertGoogleUser({
       googleSubject: userinfo.sub,
       email: userinfo.email,
       name: userinfo.name ?? userinfo.email,
@@ -150,6 +161,46 @@ export async function registerAuth(
     request.session.set("user", user)
 
     return reply.redirect(authConfig.clientUrl)
+  })
+
+  app.post("/auth/magic-link", async (request, reply) => {
+    const body = magicLinkRequestSchema.parse(request.body)
+    const token = randomBytes(32).toString("base64url")
+    const returnTo = normalizeReturnTo(body.returnTo)
+    await accountRepository.createMagicLinkToken({
+      email: body.email,
+      tokenHash: hashMagicLinkToken(token),
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    })
+    const loginUrl = new URL("/auth/magic-link/callback", authConfig.apiPublicUrl)
+    loginUrl.searchParams.set("token", token)
+    loginUrl.searchParams.set("returnTo", returnTo)
+
+    await magicLinkEmailSender.sendMagicLink({
+      email: body.email,
+      loginUrl: loginUrl.toString(),
+    })
+
+    return reply.status(202).send(magicLinkResponseSchema.parse({ sent: true }))
+  })
+
+  app.get("/auth/magic-link/callback", async (request, reply) => {
+    const query = z
+      .object({
+        token: z.string().min(20),
+        returnTo: z.string().optional(),
+      })
+      .parse(request.query)
+    const user = await accountRepository.consumeMagicLinkToken({
+      tokenHash: hashMagicLinkToken(query.token),
+      now: new Date(),
+    })
+
+    request.session.set("user", user)
+
+    return reply.redirect(
+      new URL(normalizeReturnTo(query.returnTo), authConfig.clientUrl).toString(),
+    )
   })
 
   app.get("/auth/me", async (request) => {
@@ -189,4 +240,25 @@ export async function registerAuth(
       )
     }
   })
+}
+
+const hashMagicLinkToken = (token: string) =>
+  createHash("sha256").update(token).digest("hex")
+
+const normalizeReturnTo = (returnTo: string | undefined) => {
+  if (!returnTo?.startsWith("/") || returnTo.startsWith("//")) {
+    return "/"
+  }
+
+  try {
+    const parsed = new URL(returnTo, "https://plyco.local")
+
+    if (parsed.origin !== "https://plyco.local") {
+      return "/"
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    return "/"
+  }
 }

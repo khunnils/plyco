@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useSendMagicLink } from "@/features/auth/hooks/use-auth"
 
 const GoogleLogo = () => (
   <svg aria-hidden="true" className="size-5" viewBox="0 0 18 18">
@@ -34,10 +35,18 @@ export const LoginScreen = ({
 }) => {
   const [email, setEmail] = useState("")
   const [magicLinkSent, setMagicLinkSent] = useState(false)
+  const sendMagicLinkMutation = useSendMagicLink()
 
-  const sendMagicLink = (event: FormEvent<HTMLFormElement>) => {
+  const sendMagicLinkForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setMagicLinkSent(true)
+    sendMagicLinkMutation.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          setMagicLinkSent(true)
+        },
+      }
+    )
   }
 
   return (
@@ -79,7 +88,7 @@ export const LoginScreen = ({
           <div className="h-px flex-1 bg-slate-200" />
         </div>
 
-        <form className="grid gap-3" onSubmit={sendMagicLink}>
+        <form className="grid gap-3" onSubmit={sendMagicLinkForm}>
           <label className="grid gap-2 text-sm font-medium text-slate-800">
             Email
             <Input
@@ -94,8 +103,12 @@ export const LoginScreen = ({
               }}
             />
           </label>
-          <Button className="h-11 w-full" type="submit">
-            Send magic link
+          <Button
+            className="h-11 w-full"
+            disabled={sendMagicLinkMutation.isPending}
+            type="submit"
+          >
+            {sendMagicLinkMutation.isPending ? "Sending..." : "Send magic link"}
             <ArrowRight />
           </Button>
         </form>
