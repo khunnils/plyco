@@ -1,28 +1,58 @@
 ---
-const stages = [
-	{ number: "01", title: "Activities", description: "What your business does", tags: ["Support", "Analytics"], icon: "bars" },
-	{ number: "02", title: "Data Types", description: "What each activity uses", tags: ["Account", "Usage"], icon: "lines" },
-	{ number: "03", title: "Vendors", description: "Who processes the data", tags: ["Hosting", "Auth"], icon: "dots" },
-	{ number: "04", title: "Policies", description: "Always aligned and current", tags: ["Privacy", "Security"], icon: "document" },
+const foundations = [
+	"Company profile",
+	"Privacy posture",
+	"Infrastructure",
+	"Security controls",
+	"Access model",
+	"Services",
+	"Data types",
+	"Activities",
+	"Providers",
 ];
+const policies = ["Privacy policy", "Security policy", "Subprocessors"];
 ---
 
-<div class="mx-auto mt-12 grid max-w-5xl gap-3 p-4  sm:flex sm:items-center sm:gap-2 sm:p-6" role="img" aria-label="Activities flow into data types, vendors, and policies">
-	{stages.map((stage, index) => (
-		<>
-			<article class:list={["relative rounded-2xl border bg-white/95 p-5 text-left shadow-[0_12px_30px_rgba(15,23,42,0.07)] sm:min-w-0 sm:flex-1", index === 3 ? "border-lime-300" : "border-slate-200"]}>
-				<span class="absolute right-4 top-4 text-[0.65rem] font-extrabold tracking-[0.08em] text-slate-400">{stage.number}</span>
-				<div class="mb-4 flex h-11 w-11 items-center justify-center gap-[3px] rounded-xl bg-lime-100 p-2.5">
-					{stage.icon === "bars" && <><i class="h-3 w-1 rounded-full bg-lime-700"></i><i class="h-6 w-1 rounded-full bg-lime-700"></i><i class="h-4 w-1 rounded-full bg-lime-700"></i></>}
-					{stage.icon === "lines" && <span class="grid w-full gap-1"><i class="h-1 rounded-full bg-lime-700"></i><i class="h-1 rounded-full bg-lime-700"></i><i class="h-1 rounded-full bg-lime-700"></i></span>}
-					{stage.icon === "dots" && <><i class="h-2 w-2 rounded-full bg-lime-700"></i><i class="h-2 w-2 rounded-full bg-lime-700"></i><i class="h-2 w-2 rounded-full bg-lime-700"></i></>}
-					{stage.icon === "document" && <span class="grid w-full gap-1"><i class="h-[3px] rounded-full bg-lime-700"></i><i class="h-[3px] rounded-full bg-lime-700"></i><i class="h-[3px] rounded-full bg-lime-700"></i></span>}
-				</div>
-				<strong class="block text-base text-slate-950">{stage.title}</strong>
-				<small class="mt-1 block text-[0.72rem] leading-snug text-slate-500">{stage.description}</small>
-				<div class="mt-4 flex flex-wrap gap-1.5">{stage.tags.map((tag) => <span class="rounded-full bg-slate-100 px-2 py-1 text-[0.62rem] font-bold text-slate-500">{tag}</span>)}</div>
-			</article>
-			{index < stages.length - 1 && <div class="mx-auto h-6 w-0.5 shrink-0 bg-slate-300 sm:h-0.5 sm:w-6" aria-hidden="true"><span class="block h-2 w-2 -translate-x-[3px] animate-pulse rounded-full bg-lime-500 sm:-translate-y-[3px] sm:translate-x-0 motion-reduce:animate-none"></span></div>}
-		</>
-	))}
+<div
+	class="mx-auto mt-12 max-w-4xl rounded-3xl border border-slate-200 bg-slate-50/80 p-4 text-left shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-6"
+	role="img"
+	aria-label="Your modeled business foundations feed Plyco, which generates consistent policies."
+>
+	<div class="grid items-stretch gap-4 lg:grid-cols-[1.5fr_auto_1fr]">
+		<article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_30px_rgba(15,23,42,0.06)] sm:p-6">
+			<p class="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-lime-700">The facts you model</p>
+			<strong class="mt-2 block text-base text-slate-950">Your business foundations</strong>
+			<div class="mt-4 flex flex-wrap gap-2">
+				{foundations.map((item) => (
+					<span class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-bold text-slate-700">{item}</span>
+				))}
+			</div>
+		</article>
+
+		<div class="flex items-center justify-center gap-2 lg:flex-col" aria-hidden="true">
+			<span class="h-0.5 w-10 bg-linear-to-r from-slate-200 to-lime-300 lg:h-12 lg:w-0.5 lg:bg-linear-to-b"></span>
+			<span class="flex flex-col items-center gap-1.5 rounded-2xl border border-lime-300 bg-white px-4 py-3 shadow-[0_16px_42px_rgba(54,83,20,0.11)]">
+				<img src="/logo.png" alt="" width="360" height="360" class="h-8 w-8 object-contain" />
+				<small class="text-[0.6rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">Generates</small>
+			</span>
+			<span class="h-0.5 w-10 bg-linear-to-r from-lime-300 to-slate-200 lg:h-12 lg:w-0.5 lg:bg-linear-to-b"></span>
+		</div>
+
+		<article class="flex flex-col rounded-2xl border border-lime-300 bg-white p-5 shadow-[0_16px_42px_rgba(54,83,20,0.11)] sm:p-6">
+			<p class="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-lime-700">Output</p>
+			<strong class="mt-2 block text-base text-slate-950">Consistent policies</strong>
+			<div class="mt-4 grid gap-2">
+				{policies.map((policy) => (
+					<span class="grid grid-cols-[1.75rem_1fr] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+						<i class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-lime-700">
+							<svg viewBox="0 0 20 20" fill="none" class="h-4 w-4" aria-hidden="true">
+								<path d="m5 10.5 3.2 3.2L15 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</i>
+						{policy}
+					</span>
+				))}
+			</div>
+		</article>
+	</div>
 </div>
