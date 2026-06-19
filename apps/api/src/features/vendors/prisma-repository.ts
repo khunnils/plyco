@@ -452,6 +452,12 @@ export class PrismaVendorRepository implements ProviderRepository {
       legalBasis: input.legalBasis,
       retentionPolicy: input.retentionPolicy,
       retentionDays: input.retentionDays,
+      usesAi: input.usesAi,
+      aiUseCases: input.aiUseCases,
+      aiCustomerDataUsedForTraining: input.aiCustomerDataUsedForTraining,
+      aiCustomerDataSentToProviders: input.aiCustomerDataSentToProviders,
+      aiHumanReviewOfOutputs: input.aiHumanReviewOfOutputs,
+      aiUsersInformedWhenUsed: input.aiUsersInformedWhenUsed,
     };
   }
 

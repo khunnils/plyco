@@ -355,6 +355,12 @@ model BusinessActivity {
   legalBasis      String[]                   @default([]) @map("legal_basis")
   retentionPolicy String?                    @map("retention_policy")
   retentionDays   Int                        @default(0) @map("retention_days")
+  usesAi          Boolean?                   @map("uses_ai")
+  aiUseCases      String                     @default("") @map("ai_use_cases")
+  aiCustomerDataUsedForTraining Boolean?     @map("ai_customer_data_used_for_training")
+  aiCustomerDataSentToProviders Boolean?     @map("ai_customer_data_sent_to_providers")
+  aiHumanReviewOfOutputs       Boolean?      @map("ai_human_review_of_outputs")
+  aiUsersInformedWhenUsed      Boolean?      @map("ai_users_informed_when_used")
   sortOrder       Int                        @default(0) @map("sort_order")
   services        ServiceBusinessActivity[]
   dataTypes       BusinessActivityDataType[]

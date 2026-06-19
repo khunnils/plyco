@@ -466,6 +466,12 @@ const defaultActivity = (): BusinessActivityInput => ({
   dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
+  usesAi: null,
+  aiUseCases: "",
+  aiCustomerDataUsedForTraining: null,
+  aiCustomerDataSentToProviders: null,
+  aiHumanReviewOfOutputs: null,
+  aiUsersInformedWhenUsed: null,
 });
 
 const policyTitle = (url: string) => {
@@ -598,6 +604,12 @@ const mapWebsiteLookupResult = (
             dataTypeIds: [],
             retentionPolicy: null,
             retentionDays: 0,
+            usesAi: null,
+            aiUseCases: "",
+            aiCustomerDataUsedForTraining: null,
+            aiCustomerDataSentToProviders: null,
+            aiHumanReviewOfOutputs: null,
+            aiUsersInformedWhenUsed: null,
           }))
         : [defaultActivity()],
     suggestedProviders: [],

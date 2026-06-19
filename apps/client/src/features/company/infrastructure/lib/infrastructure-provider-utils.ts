@@ -6,6 +6,7 @@ export type InfrastructureProviderSystemType = Exclude<
 >
 
 export const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
+  "ai",
   "cloud",
   "source_control",
   "auth",
@@ -16,6 +17,7 @@ export const infrastructureProviderLabels: Record<
   InfrastructureProviderSystemType,
   string
 > = {
+  ai: "AI providers",
   auth: "Login provider",
   source_control: "Code repository",
   cloud: "Cloud providers",

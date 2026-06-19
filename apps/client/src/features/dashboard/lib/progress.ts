@@ -89,12 +89,26 @@ export const isActivityComplete = (
   const isPurposeSet = isAnswered(activity.purpose)
   const isRoleSet = isAnswered(activity.role)
   const isRetentionSet = isAnswered(activity.retentionPolicy)
+  const isUsesAiSet = isAnswered(activity.usesAi)
   const isLegalBasisSet =
     !showLegalBasis ||
     (Array.isArray(activity.legalBasis) && activity.legalBasis.length > 0)
+  const isAiDetailSet =
+    activity.usesAi !== true ||
+    (isAnswered(activity.aiUseCases) &&
+      isAnswered(activity.aiCustomerDataUsedForTraining) &&
+      isAnswered(activity.aiCustomerDataSentToProviders) &&
+      isAnswered(activity.aiHumanReviewOfOutputs) &&
+      isAnswered(activity.aiUsersInformedWhenUsed))
 
   return (
-    isNameSet && isPurposeSet && isRoleSet && isRetentionSet && isLegalBasisSet
+    isNameSet &&
+    isPurposeSet &&
+    isRoleSet &&
+    isRetentionSet &&
+    isUsesAiSet &&
+    isLegalBasisSet &&
+    isAiDetailSet
   )
 }
 
@@ -108,6 +122,25 @@ export const activityProgress = (
     field("Purpose", activity.purpose),
     field("Role", activity.role),
     field("Retention policy", activity.retentionPolicy),
+    field("Uses AI", activity.usesAi),
+    ...(activity.usesAi === true
+      ? [
+          field("AI use cases", activity.aiUseCases),
+          field(
+            "Customer data used for training",
+            activity.aiCustomerDataUsedForTraining
+          ),
+          field(
+            "Customer data sent to AI providers",
+            activity.aiCustomerDataSentToProviders
+          ),
+          field("Human review of AI outputs", activity.aiHumanReviewOfOutputs),
+          field(
+            "Users informed when AI is used",
+            activity.aiUsersInformedWhenUsed
+          ),
+        ]
+      : []),
     ...(showLegalBasis
       ? [field("Legal basis", activity.legalBasis)]
       : []),
@@ -290,6 +323,10 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
 
   return groupProgress([
     sectionProgress("Infrastructure Providers", [
+      field(
+        "AI providers",
+        providersForType(infrastructure.organizationProviders, "ai")
+      ),
       field(
         "Cloud providers",
         providersForType(infrastructure.organizationProviders, "cloud")

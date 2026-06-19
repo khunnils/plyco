@@ -32,6 +32,7 @@ type InfrastructureProviderSystemType = Exclude<
 >
 
 const systemLabels: Record<InfrastructureProviderSystemType, string> = {
+  ai: "AI providers",
   auth: "Auth provider",
   source_control: "Source control provider",
   cloud: "Cloud provider",
@@ -39,6 +40,7 @@ const systemLabels: Record<InfrastructureProviderSystemType, string> = {
 }
 
 const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
+  "ai",
   "cloud",
   "source_control",
   "auth",
@@ -61,36 +63,39 @@ const providerOptions = (
     .filter((provider) => provider.systemTypes.includes(systemType))
     .map((provider) => ({ value: provider.id, label: provider.name }))
 
-const CloudProviderPicker = ({
+const MultiProviderPicker = ({
   form,
   providers,
+  systemType,
 }: {
   form: UseFormReturn<ProfileDraft>
   providers: Provider[]
+  systemType: InfrastructureProviderSystemType
 }) => {
   const organizationProviders = form.watch(
     "infrastructure.organizationProviders"
   )
-  const selectedIds = selectedProviderIds(organizationProviders, "cloud")
+  const selectedIds = selectedProviderIds(organizationProviders, systemType)
   const options = [
     { value: "none", label: "None" },
-    ...providerOptions(providers, "cloud"),
+    ...providerOptions(providers, systemType),
   ]
+  const label = systemLabels[systemType]
 
   return (
     <MultiSelectField
       control={form.control}
-      label="Cloud providers"
+      label={label}
       name="infrastructure.organizationProviders"
       options={options}
-      placeholder="Select cloud providers"
+      placeholder={`Select ${label.toLowerCase()}`}
       value={selectedIds}
       onValueChange={(providerIds) => {
         form.setValue(
           "infrastructure.organizationProviders",
           updateInfrastructureProviderSelection(
             organizationProviders,
-            "cloud",
+            systemType,
             providerIds
           ),
           { shouldDirty: true, shouldValidate: true }
@@ -236,9 +241,18 @@ export const InfrastructureProfileFields = ({
           Infrastructure Providers
         </h3>
         <div className="grid gap-4 md:grid-cols-2">
-          <CloudProviderPicker form={form} providers={providers} />
+          <MultiProviderPicker
+            form={form}
+            providers={providers}
+            systemType="ai"
+          />
+          <MultiProviderPicker
+            form={form}
+            providers={providers}
+            systemType="cloud"
+          />
           {infrastructureSystemTypes
-            .filter((systemType) => systemType !== "cloud")
+            .filter((systemType) => systemType !== "ai" && systemType !== "cloud")
             .map((systemType) => (
               <ProviderPicker
                 form={form}

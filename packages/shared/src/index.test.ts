@@ -373,6 +373,12 @@ describe("shared security profile schemas", () => {
       legalBasis: ["contract"],
       dataTypeIds: ["data_type_customer_account"],
       retentionDays: 365,
+      usesAi: true,
+      aiUseCases: "Summarize account history for support agents",
+      aiCustomerDataUsedForTraining: false,
+      aiCustomerDataSentToProviders: true,
+      aiHumanReviewOfOutputs: true,
+      aiUsersInformedWhenUsed: true,
     });
 
     expect(result.success).toBe(true);
@@ -772,6 +778,7 @@ describe("shared security profile schemas", () => {
   });
 
   it("accepts marketing and issue tracking provider system types", () => {
+    expect(providerSystemTypeSchema.safeParse("ai").success).toBe(true);
     expect(providerSystemTypeSchema.safeParse("analytics").success).toBe(true);
     expect(providerSystemTypeSchema.safeParse("advertising").success).toBe(
       true,

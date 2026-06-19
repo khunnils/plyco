@@ -65,6 +65,15 @@ organization creation, except onboarding automatically links Operate marketing
 website to Website visitor data so the default website service appears in the
 Product and Data graph.
 
+Activities also record whether AI is used. When an activity uses AI, the
+workspace captures free-text AI use cases plus whether customer data is used for
+training, whether customer data is sent to AI providers, whether AI outputs get
+human review, and whether users are informed when AI is used.
+
+Infrastructure Providers include AI providers as a multi-select provider
+category. Users can select multiple AI providers or explicitly answer that no AI
+provider is used.
+
 ## Vocabulary Selectors
 
 Workspace editors use searchable selectors for controlled vocabulary fields.

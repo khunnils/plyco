@@ -1,4 +1,6 @@
 export const infrastructureHelperText = {
+  aiProviders:
+    "The AI providers used for model APIs, hosted AI tools, assistants, or AI processing.",
   cloudProviders:
     "The cloud platforms that host your product, databases, storage, or infrastructure.",
   sourceControlProvider: "Where your team stores and reviews source code.",

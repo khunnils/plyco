@@ -9,7 +9,7 @@ import { type Resolver, useForm } from "react-hook-form"
 
 import { ToggleField } from "@/components/form/toggle-field"
 import {
-  CloudProviderField,
+  MultiProviderField,
   type ProvidersDraft,
   SingleProviderField,
 } from "@/features/company/infrastructure/components/infrastructure-provider-fields"
@@ -38,6 +38,15 @@ const toProvidersDraft = (
 
 const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
   [
+    [
+      "AI providers",
+      providerNamesForSystem(
+        draft.organizationProviders,
+        catalogProviders,
+        "ai"
+      ),
+      infrastructureHelperText.aiProviders,
+    ],
     [
       "Cloud providers",
       providerNamesForSystem(
@@ -132,13 +141,20 @@ export const InfrastructureProvidersPanel = ({
       onSave={submit}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <CloudProviderField
+        <MultiProviderField
+          form={form}
+          helperText={infrastructureHelperText.aiProviders}
+          providers={catalogProviders}
+          systemType="ai"
+        />
+        <MultiProviderField
           form={form}
           helperText={infrastructureHelperText.cloudProviders}
           providers={catalogProviders}
+          systemType="cloud"
         />
         {infrastructureSystemTypes
-          .filter((systemType) => systemType !== "cloud")
+          .filter((systemType) => systemType !== "ai" && systemType !== "cloud")
           .map((systemType) => (
             <SingleProviderField
               form={form}

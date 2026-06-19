@@ -11,6 +11,7 @@ import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { TextAreaField } from "@/components/form/text-area-field"
 import { TextField } from "@/components/form/text-field"
+import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
@@ -55,6 +56,10 @@ export const ActivityForm = ({
   const retentionPolicy = useWatch({
     control: form.control,
     name: "retentionPolicy",
+  })
+  const usesAi = useWatch({
+    control: form.control,
+    name: "usesAi",
   })
   const isRetentionDaysDisabled = retentionPolicy !== "fixed"
 
@@ -131,6 +136,55 @@ export const ActivityForm = ({
         register={form.register}
         type="number"
       />
+      <section className="grid gap-3 border-t border-slate-200 pt-4">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-950">AI</h3>
+        </div>
+        <ToggleField
+          control={form.control}
+          helperText={activityHelperText.usesAi}
+          label="Uses AI"
+          name="usesAi"
+        />
+        {usesAi === true ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <TextAreaField
+                error={form.formState.errors.aiUseCases}
+                helperText={activityHelperText.aiUseCases}
+                label="AI use cases"
+                name="aiUseCases"
+                placeholder="How AI is used in this activity"
+                register={form.register}
+              />
+            </div>
+            <ToggleField
+              control={form.control}
+              helperText={activityHelperText.aiCustomerDataUsedForTraining}
+              label="Customer data used for training"
+              name="aiCustomerDataUsedForTraining"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={activityHelperText.aiCustomerDataSentToProviders}
+              label="Customer data sent to AI providers"
+              name="aiCustomerDataSentToProviders"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={activityHelperText.aiHumanReviewOfOutputs}
+              label="Human review of AI outputs"
+              name="aiHumanReviewOfOutputs"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={activityHelperText.aiUsersInformedWhenUsed}
+              label="Users informed when AI is used"
+              name="aiUsersInformedWhenUsed"
+            />
+          </div>
+        ) : null}
+      </section>
       {showButtons ? (
         <div className="flex items-center justify-end gap-2">
           {onCancel ? (

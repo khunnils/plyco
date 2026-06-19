@@ -133,6 +133,12 @@ export const defaultActivity: BusinessActivityInput = {
   dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
+  usesAi: null,
+  aiUseCases: "",
+  aiCustomerDataUsedForTraining: null,
+  aiCustomerDataSentToProviders: null,
+  aiHumanReviewOfOutputs: null,
+  aiUsersInformedWhenUsed: null,
 }
 
 export const defaultWebsiteActivity: BusinessActivityInput = {
@@ -144,6 +150,12 @@ export const defaultWebsiteActivity: BusinessActivityInput = {
   dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
+  usesAi: null,
+  aiUseCases: "",
+  aiCustomerDataUsedForTraining: null,
+  aiCustomerDataSentToProviders: null,
+  aiHumanReviewOfOutputs: null,
+  aiUsersInformedWhenUsed: null,
 }
 
 export const defaultWebsiteService = (

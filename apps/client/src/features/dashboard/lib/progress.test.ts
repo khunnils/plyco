@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest"
 import { emptyProfileDraft } from "@/features/company/lib/profile"
 import {
   dashboardProgress,
+  activityProgress,
   infrastructureProgress,
   securityProgress,
+  isActivityComplete,
   isAnswered,
   privacyProgress,
   serviceProgress,
@@ -320,6 +322,7 @@ describe("dashboard progress", () => {
         ...emptyProfileDraft.infrastructure,
         organizationProviders: [
           { systemType: "cloud", providerId: "none" },
+          { systemType: "ai", providerId: "none" },
           { systemType: "source_control", providerId: "none" },
           { systemType: "auth", providerId: "none" },
           { systemType: "password_manager", providerId: "none" },
@@ -334,7 +337,54 @@ describe("dashboard progress", () => {
     )
 
     expect(unansweredProviders?.completedFields).toBe(0)
-    expect(answeredProviders?.completedFields).toBe(4)
+    expect(answeredProviders?.completedFields).toBe(5)
+  })
+
+  it("requires AI details only when an activity uses AI", () => {
+    const baseActivity = {
+      id: "act_ai",
+      sortOrder: 0,
+      name: "Support triage",
+      purpose: "Route support tickets",
+      role: "controller",
+      retentionPolicy: "fixed",
+      retentionDays: 30,
+      legalBasis: [],
+      dataTypeIds: [],
+      createdAt: "2026-06-17T00:00:00.000Z",
+      updatedAt: "2026-06-17T00:00:00.000Z",
+    }
+
+    expect(
+      isActivityComplete(
+        {
+          ...baseActivity,
+          usesAi: false,
+          aiUseCases: "",
+          aiCustomerDataUsedForTraining: null,
+          aiCustomerDataSentToProviders: null,
+          aiHumanReviewOfOutputs: null,
+          aiUsersInformedWhenUsed: null,
+        },
+        false
+      )
+    ).toBe(true)
+
+    const incompleteAiActivity = {
+      ...baseActivity,
+      usesAi: true,
+      aiUseCases: "Draft support replies",
+      aiCustomerDataUsedForTraining: false,
+      aiCustomerDataSentToProviders: true,
+      aiHumanReviewOfOutputs: null,
+      aiUsersInformedWhenUsed: true,
+    }
+
+    expect(isActivityComplete(incompleteAiActivity, false)).toBe(false)
+    expect(activityProgress(incompleteAiActivity, false, 0)).toMatchObject({
+      completedFields: 9,
+      totalFields: 10,
+    })
   })
 
   it("adjusts vendor risk fields count based on vendorReviewRequired and compliance goals", () => {
@@ -496,6 +546,12 @@ describe("dashboard progress", () => {
           retentionDays: 30,
           legalBasis: ["consent"],
           dataTypeIds: [],
+          usesAi: false,
+          aiUseCases: "",
+          aiCustomerDataUsedForTraining: null,
+          aiCustomerDataSentToProviders: null,
+          aiHumanReviewOfOutputs: null,
+          aiUsersInformedWhenUsed: null,
           createdAt: "2026-06-17T00:00:00.000Z",
           updatedAt: "2026-06-17T00:00:00.000Z",
         },

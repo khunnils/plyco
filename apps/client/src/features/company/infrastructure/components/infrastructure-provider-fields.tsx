@@ -40,37 +40,40 @@ const providerOptions = (
     .filter((provider) => provider.systemTypes.includes(systemType))
     .map((provider) => ({ value: provider.id, label: provider.name }))
 
-export const CloudProviderField = ({
+export const MultiProviderField = ({
   form,
   helperText,
   providers,
+  systemType,
 }: {
   form: UseFormReturn<ProvidersDraft>
   helperText?: string
   providers: Provider[]
+  systemType: InfrastructureProviderSystemType
 }) => {
   const organizationProviders = form.watch("organizationProviders")
-  const selectedIds = selectedProviderIds(organizationProviders, "cloud")
+  const selectedIds = selectedProviderIds(organizationProviders, systemType)
   const options = [
     { value: "none", label: "None" },
-    ...providerOptions(providers, "cloud"),
+    ...providerOptions(providers, systemType),
   ]
+  const label = infrastructureProviderLabels[systemType]
 
   return (
     <MultiSelectField
       control={form.control}
       helperText={helperText}
-      label="Cloud providers"
+      label={label}
       name="organizationProviders"
       options={options}
-      placeholder="Select cloud providers"
+      placeholder={`Select ${label.toLowerCase()}`}
       value={selectedIds}
       onValueChange={(providerIds) => {
         form.setValue(
           "organizationProviders",
           updateInfrastructureProviderSelection(
             organizationProviders,
-            "cloud",
+            systemType,
             providerIds
           ),
           { shouldDirty: true, shouldValidate: true }

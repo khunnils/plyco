@@ -11,6 +11,12 @@ export const emptyActivityDraft: BusinessActivityInput = {
   dataTypeIds: [],
   retentionPolicy: null,
   retentionDays: 0,
+  usesAi: null,
+  aiUseCases: "",
+  aiCustomerDataUsedForTraining: null,
+  aiCustomerDataSentToProviders: null,
+  aiHumanReviewOfOutputs: null,
+  aiUsersInformedWhenUsed: null,
 }
 
 export const toActivityInput = (
@@ -23,4 +29,10 @@ export const toActivityInput = (
   dataTypeIds: activity.dataTypeIds,
   retentionPolicy: activity.retentionPolicy ?? null,
   retentionDays: activity.retentionDays,
+  usesAi: activity.usesAi,
+  aiUseCases: activity.aiUseCases,
+  aiCustomerDataUsedForTraining: activity.aiCustomerDataUsedForTraining,
+  aiCustomerDataSentToProviders: activity.aiCustomerDataSentToProviders,
+  aiHumanReviewOfOutputs: activity.aiHumanReviewOfOutputs,
+  aiUsersInformedWhenUsed: activity.aiUsersInformedWhenUsed,
 })

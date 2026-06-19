@@ -115,11 +115,25 @@ describe("vendors / providers API", () => {
         dataTypeIds: [dataTypeIds[0]],
         retentionPolicy: null,
         retentionDays: 0,
+        usesAi: true,
+        aiUseCases: "Summarize account history for support",
+        aiCustomerDataUsedForTraining: false,
+        aiCustomerDataSentToProviders: true,
+        aiHumanReviewOfOutputs: true,
+        aiUsersInformedWhenUsed: true,
       },
     });
 
     expect(createResponse.statusCode).toBe(201);
     expect(createResponse.json().dataTypeIds).toEqual([dataTypeIds[0]]);
+    expect(createResponse.json()).toMatchObject({
+      usesAi: true,
+      aiUseCases: "Summarize account history for support",
+      aiCustomerDataUsedForTraining: false,
+      aiCustomerDataSentToProviders: true,
+      aiHumanReviewOfOutputs: true,
+      aiUsersInformedWhenUsed: true,
+    });
 
     const createdActivity = createResponse.json();
     const updateResponse = await app.inject({
@@ -133,11 +147,25 @@ describe("vendors / providers API", () => {
         dataTypeIds,
         retentionPolicy: null,
         retentionDays: 0,
+        usesAi: false,
+        aiUseCases: "",
+        aiCustomerDataUsedForTraining: null,
+        aiCustomerDataSentToProviders: null,
+        aiHumanReviewOfOutputs: null,
+        aiUsersInformedWhenUsed: null,
       },
     });
 
     expect(updateResponse.statusCode).toBe(200);
     expect(updateResponse.json().dataTypeIds).toEqual(dataTypeIds);
+    expect(updateResponse.json()).toMatchObject({
+      usesAi: false,
+      aiUseCases: "",
+      aiCustomerDataUsedForTraining: null,
+      aiCustomerDataSentToProviders: null,
+      aiHumanReviewOfOutputs: null,
+      aiUsersInformedWhenUsed: null,
+    });
 
     const listResponse = await app.inject({
       method: "GET",

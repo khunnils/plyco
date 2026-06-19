@@ -31,6 +31,12 @@ const activity = (
   dataTypeIds,
   retentionPolicy: null,
   retentionDays: 0,
+  usesAi: null,
+  aiUseCases: "",
+  aiCustomerDataUsedForTraining: null,
+  aiCustomerDataSentToProviders: null,
+  aiHumanReviewOfOutputs: null,
+  aiUsersInformedWhenUsed: null,
   createdAt: now,
   updatedAt: now,
 })

@@ -195,6 +195,13 @@ export function mapOrganizationRecord(record: {
   createdAt: Date;
   updatedAt: Date;
 }): OrganizationSecurityProfile {
+  const infrastructureProviderSystemTypes = [
+    "ai",
+    "auth",
+    "source_control",
+    "cloud",
+    "password_manager",
+  ];
   const company = companyProfileSchema.parse({
     companyName: record.companyName,
     legalEntityName: record.legalEntityName,
@@ -218,9 +225,7 @@ export function mapOrganizationRecord(record: {
       ...record.organizationProviders.flatMap((provider) =>
         provider.providerId
           ? provider.systemTypes.flatMap((systemType) =>
-              ["auth", "source_control", "cloud", "password_manager"].includes(
-                systemType,
-              )
+              infrastructureProviderSystemTypes.includes(systemType)
                 ? [
                     {
                       providerId: provider.providerId,
@@ -234,9 +239,7 @@ export function mapOrganizationRecord(record: {
       ),
       ...(record.infrastructureProfile?.explicitNoProviderSystemTypes ?? [])
         .filter((systemType) =>
-          ["auth", "source_control", "cloud", "password_manager"].includes(
-            systemType,
-          ),
+          infrastructureProviderSystemTypes.includes(systemType),
         )
         .map((systemType) => ({
           providerId: "none",
@@ -460,6 +463,12 @@ export function mapBusinessActivityRecord(record: {
   purpose: string;
   role: string;
   legalBasis: string[];
+  usesAi: boolean | null;
+  aiUseCases: string;
+  aiCustomerDataUsedForTraining: boolean | null;
+  aiCustomerDataSentToProviders: boolean | null;
+  aiHumanReviewOfOutputs: boolean | null;
+  aiUsersInformedWhenUsed: boolean | null;
   dataTypes?: Array<{
     organizationDataTypeId: string;
   }>;
@@ -475,6 +484,12 @@ export function mapBusinessActivityRecord(record: {
     purpose: record.purpose,
     role: record.role,
     legalBasis: record.legalBasis,
+    usesAi: record.usesAi,
+    aiUseCases: record.aiUseCases,
+    aiCustomerDataUsedForTraining: record.aiCustomerDataUsedForTraining,
+    aiCustomerDataSentToProviders: record.aiCustomerDataSentToProviders,
+    aiHumanReviewOfOutputs: record.aiHumanReviewOfOutputs,
+    aiUsersInformedWhenUsed: record.aiUsersInformedWhenUsed,
     dataTypeIds:
       record.dataTypes?.map((dataType) => dataType.organizationDataTypeId) ??
       [],

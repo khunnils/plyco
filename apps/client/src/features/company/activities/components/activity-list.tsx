@@ -3,8 +3,12 @@ import { type BusinessActivity, type Vocabulary } from "@plyco/shared"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { ProfilePanelDetailGrid } from "@/features/company/components/profile-panel-shell"
+import {
+  ProfilePanelDetailGrid,
+  type ProfilePanelDetailRow,
+} from "@/features/company/components/profile-panel-shell"
 import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
+import { boolText } from "@/features/company/lib/display"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 import {
   activityRetentionLabel,
@@ -132,6 +136,44 @@ export const ActivityList = ({
                           ),
                           activityHelperText.retentionPolicy,
                         ],
+                        [
+                          "Uses AI",
+                          boolText(activity.usesAi),
+                          activityHelperText.usesAi,
+                        ],
+                        ...(activity.usesAi === true
+                          ? ([
+                              [
+                                "AI use cases",
+                                activity.aiUseCases.trim() || "Not set",
+                                activityHelperText.aiUseCases,
+                              ],
+                              [
+                                "Customer data used for training",
+                                boolText(
+                                  activity.aiCustomerDataUsedForTraining
+                                ),
+                                activityHelperText.aiCustomerDataUsedForTraining,
+                              ],
+                              [
+                                "Customer data sent to AI providers",
+                                boolText(
+                                  activity.aiCustomerDataSentToProviders
+                                ),
+                                activityHelperText.aiCustomerDataSentToProviders,
+                              ],
+                              [
+                                "Human review of AI outputs",
+                                boolText(activity.aiHumanReviewOfOutputs),
+                                activityHelperText.aiHumanReviewOfOutputs,
+                              ],
+                              [
+                                "Users informed when AI is used",
+                                boolText(activity.aiUsersInformedWhenUsed),
+                                activityHelperText.aiUsersInformedWhenUsed,
+                              ],
+                            ] satisfies ProfilePanelDetailRow[])
+                          : []),
                       ]}
                     />
                   ) : null}

@@ -48,6 +48,7 @@ export const providerDataProcessingLevelSchema = z.enum([
 ]);
 
 export const providerSystemTypeSchema = z.enum([
+  "ai",
   "auth",
   "source_control",
   "cloud",
@@ -177,6 +178,12 @@ export const businessActivityInputSchema = z.object({
   dataTypeIds: z.array(z.string().trim().min(1)).default([]),
   retentionPolicy: nullableCodeIdSchema,
   retentionDays: z.number().int().min(0).default(0),
+  usesAi: nullableBooleanSchema,
+  aiUseCases: z.string().trim().default(""),
+  aiCustomerDataUsedForTraining: nullableBooleanSchema,
+  aiCustomerDataSentToProviders: nullableBooleanSchema,
+  aiHumanReviewOfOutputs: nullableBooleanSchema,
+  aiUsersInformedWhenUsed: nullableBooleanSchema,
 });
 
 export const businessActivitySchema = businessActivityInputSchema.extend({

@@ -128,6 +128,7 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
     ["subprocessor", "Subprocessor"],
   ]),
   codeSet("provider_system_types", "Provider system types", true, [
+    ["ai", "AI"],
     ["auth", "Auth"],
     ["source_control", "Source control"],
     ["cloud", "Cloud"],
