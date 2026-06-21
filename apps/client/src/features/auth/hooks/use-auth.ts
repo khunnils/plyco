@@ -1,13 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { type MagicLinkRequest } from "@plyco/shared"
 import { toast } from "sonner"
+import { usePostHog } from "@posthog/react"
 
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
 import { getAuthState, logout, sendMagicLink } from "@/lib/api"
-import {
-  authStateQueryKey,
-  providersQueryKey,
-} from "@/lib/query-keys"
+import { authStateQueryKey, providersQueryKey } from "@/lib/query-keys"
 
 export const useAuthState = () =>
   useQuery({
@@ -17,10 +15,12 @@ export const useAuthState = () =>
 
 export const useLogout = () => {
   const queryClient = useQueryClient()
+  const posthog = usePostHog()
 
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      posthog.reset()
       useCurrentOrganizationStore.getState().reset()
       queryClient.setQueryData(authStateQueryKey, {
         user: null,

@@ -1,10 +1,5 @@
 import { useMemo } from "react"
-import {
-  Background,
-  Panel,
-  ReactFlow,
-  type NodeTypes,
-} from "@xyflow/react"
+import { Background, Panel, ReactFlow, type NodeTypes } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 import { Loader2, Network } from "lucide-react"
 

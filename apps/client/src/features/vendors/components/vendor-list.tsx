@@ -26,7 +26,9 @@ export const VendorList = ({
   onEdit: (provider: OrganizationProvider) => void
   onDelete: (provider: OrganizationProvider) => void
 }) => {
-  const [expandedProviderId, setExpandedProviderId] = useState<string | null>(null)
+  const [expandedProviderId, setExpandedProviderId] = useState<string | null>(
+    null
+  )
 
   if (organizationProviders.length === 0) {
     return (
@@ -40,7 +42,7 @@ export const VendorList = ({
     <div className="grid gap-4">
       {organizationProviders.map((provider) => {
         const providerUsage = serviceProviderUsage.filter(
-          (usage) => usage.organizationProviderId === provider.id,
+          (usage) => usage.organizationProviderId === provider.id
         )
         const usesByService = Array.from(
           providerUsage
@@ -52,12 +54,15 @@ export const VendorList = ({
 
               return groups
             }, new Map<string, ServiceProviderUsage[]>())
-            .entries(),
+            .entries()
         )
         const expanded = expandedProviderId === provider.id
 
         return (
-          <article className="border border-slate-200 bg-white p-4" key={provider.id}>
+          <article
+            className="border border-slate-200 bg-white p-4"
+            key={provider.id}
+          >
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <button
                 aria-expanded={expanded}
@@ -65,7 +70,7 @@ export const VendorList = ({
                 type="button"
                 onClick={() =>
                   setExpandedProviderId((current) =>
-                    current === provider.id ? null : provider.id,
+                    current === provider.id ? null : provider.id
                   )
                 }
               >
@@ -78,12 +83,16 @@ export const VendorList = ({
                       {codeLabel(
                         vocabulary,
                         "vendor_criticality",
-                        provider.criticality,
+                        provider.criticality
                       )}
                     </Badge>
                   </div>
                   <p className="mt-2 text-xs text-slate-500">
-                    {codeLabel(vocabulary, "provider_categories", provider.category)}
+                    {codeLabel(
+                      vocabulary,
+                      "provider_categories",
+                      provider.category
+                    )}
                     {provider.countryOfRegistration
                       ? ` - ${countryLabel(countries, provider.countryOfRegistration)}`
                       : ""}
@@ -95,13 +104,15 @@ export const VendorList = ({
               </button>
               <div className="flex gap-2">
                 <Button
-                  aria-label={expanded ? "Collapse provider" : "Expand provider"}
+                  aria-label={
+                    expanded ? "Collapse provider" : "Expand provider"
+                  }
                   size="icon-sm"
                   type="button"
                   variant="outline"
                   onClick={() =>
                     setExpandedProviderId((current) =>
-                      current === provider.id ? null : provider.id,
+                      current === provider.id ? null : provider.id
                     )
                   }
                 >
@@ -135,10 +146,10 @@ export const VendorList = ({
                         codeLabel(
                           vocabulary,
                           "data_processing_level",
-                          usage.dataProcessingLevel,
-                        ),
-                      ),
-                    ),
+                          usage.dataProcessingLevel
+                        )
+                      )
+                    )
                   )
 
                   return (
@@ -162,7 +173,7 @@ export const VendorList = ({
                           ))}
                         </span>
                       </div>
-                      <div className="grid gap-2 border-t border-slate-200 px-3 pb-4 pt-0">
+                      <div className="grid gap-2 border-t border-slate-200 px-3 pt-0 pb-4">
                         {serviceUses.map((usage) => (
                           <div
                             className="rounded-md bg-slate-50 px-3 py-0"

@@ -24,31 +24,36 @@ const CATEGORIES: ProviderCategoryDefinition[] = [
   {
     id: "auth",
     title: "Workforce Identity Provider",
-    description: "How employees signing on to systems, networks, and services are authenticated.",
+    description:
+      "How employees signing on to systems, networks, and services are authenticated.",
     systemType: "auth",
   },
   {
     id: "source_control",
     title: "Code repository",
-    description: "Where your team stores, manages, and reviews source code for your products.",
+    description:
+      "Where your team stores, manages, and reviews source code for your products.",
     systemType: "source_control",
   },
   {
     id: "cloud",
     title: "Main Cloud Providers",
-    description: "The cloud platforms that host your product, databases, storage, or infrastructure.",
+    description:
+      "The cloud platforms that host your product, databases, storage, or infrastructure.",
     systemType: "cloud",
   },
   {
     id: "analytics",
     title: "Analytics",
-    description: "Tools used to capture, aggregate, and analyze user interactions with your product.",
+    description:
+      "Tools used to capture, aggregate, and analyze user interactions with your product.",
     systemType: "analytics",
   },
   {
     id: "issue_tracking",
     title: "Issue tracking",
-    description: "Where your team tracks bugs, roadmap work, and customer/product issues.",
+    description:
+      "Where your team tracks bugs, roadmap work, and customer/product issues.",
     systemType: "issue_tracking",
   },
 ]
@@ -67,8 +72,15 @@ const mapToOrganizationProviderInput = (
   systemType: ProviderSystemType
 ): OrganizationProviderInput => {
   const rawCriticality = (provider.securityCriticality || "").toLowerCase()
-  const validCriticalities: ProviderCriticality[] = ["low", "medium", "high", "critical"]
-  const criticality = validCriticalities.includes(rawCriticality as ProviderCriticality)
+  const validCriticalities: ProviderCriticality[] = [
+    "low",
+    "medium",
+    "high",
+    "critical",
+  ]
+  const criticality = validCriticalities.includes(
+    rawCriticality as ProviderCriticality
+  )
     ? (rawCriticality as ProviderCriticality)
     : "medium"
 
@@ -90,7 +102,9 @@ const toggleProviderSystemType = (
   provider: Provider,
   systemType: ProviderSystemType
 ) => {
-  const existingProvider = providers.find((item) => item.providerId === provider.id)
+  const existingProvider = providers.find(
+    (item) => item.providerId === provider.id
+  )
 
   if (!existingProvider) {
     return [...providers, mapToOrganizationProviderInput(provider, systemType)]
@@ -123,7 +137,11 @@ export const ProvidersStep = () => {
     onLogout,
   } = useOnboardingStore()
 
-  const { data: providers = [], isLoading, error } = useProviders(Boolean(draft))
+  const {
+    data: providers = [],
+    isLoading,
+    error,
+  } = useProviders(Boolean(draft))
 
   useEffect(() => {
     if (!draft) {
@@ -172,17 +190,13 @@ export const ProvidersStep = () => {
   }
 
   const footer = (
-    <div className="flex items-center justify-between border-t border-slate-200 pt-5 mt-8">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleBack}
-      >
+    <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-5">
+      <Button type="button" variant="outline" onClick={handleBack}>
         <ArrowLeft />
         Back
       </Button>
       <Button
-        className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
+        className="bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-950 focus-visible:ring-slate-100"
         type="button"
         onClick={handleNext}
       >
@@ -205,7 +219,9 @@ export const ProvidersStep = () => {
         {isLoading ? (
           <div className="flex min-h-60 flex-col items-center justify-center gap-2">
             <Loader2 className="size-8 animate-spin text-slate-400" />
-            <p className="text-sm font-medium text-slate-500">Loading catalog providers...</p>
+            <p className="text-sm font-medium text-slate-500">
+              Loading catalog providers...
+            </p>
           </div>
         ) : error ? (
           <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
@@ -225,11 +241,15 @@ export const ProvidersStep = () => {
               return (
                 <div key={category.id} className="flex flex-col gap-3">
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">{category.title}</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">{category.description}</p>
+                    <h3 className="text-sm font-semibold text-slate-900">
+                      {category.title}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {category.description}
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {categoryProviders.map((provider) => {
                       const isSelected = draft.providers.some(
                         (p) =>
@@ -238,40 +258,47 @@ export const ProvidersStep = () => {
                       )
 
                       const domain = getDomain(provider.url)
-                      const faviconUrl = provider.logoUrl || (domain ? `https://www.google.com/s2/favicons?sz=128&domain=${domain}` : undefined)
+                      const faviconUrl =
+                        provider.logoUrl ||
+                        (domain
+                          ? `https://www.google.com/s2/favicons?sz=128&domain=${domain}`
+                          : undefined)
 
                       return (
                         <div
                           key={provider.id}
-                          className={`flex items-center justify-between gap-3 p-3.5 rounded-lg border cursor-pointer select-none transition-all ${
+                          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3.5 transition-all select-none ${
                             isSelected
                               ? "border-slate-950 bg-slate-50/50 ring-1 ring-slate-950/20"
                               : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/20"
                           }`}
-                          onClick={() => toggleProvider(provider, category.systemType)}
+                          onClick={() =>
+                            toggleProvider(provider, category.systemType)
+                          }
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex min-w-0 items-center gap-3">
                             {faviconUrl ? (
                               <img
                                 src={faviconUrl}
                                 alt=""
-                                className="size-8 rounded-md object-contain shrink-0 bg-white border border-slate-100 p-0.5"
+                                className="size-8 shrink-0 rounded-md border border-slate-100 bg-white object-contain p-0.5"
                                 onError={(e) => {
                                   // Fallback if image fails to load
-                                  (e.target as HTMLElement).style.display = "none"
+                                  ;(e.target as HTMLElement).style.display =
+                                    "none"
                                 }}
                               />
                             ) : (
-                              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-sm font-semibold text-slate-600 border border-slate-200">
+                              <div className="flex size-8 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-600">
                                 {provider.name.charAt(0)}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-slate-950 truncate">
+                              <p className="truncate text-sm font-medium text-slate-950">
                                 {provider.name}
                               </p>
                               {provider.category ? (
-                                <p className="text-xs text-slate-400 truncate">
+                                <p className="truncate text-xs text-slate-400">
                                   {provider.category}
                                 </p>
                               ) : null}

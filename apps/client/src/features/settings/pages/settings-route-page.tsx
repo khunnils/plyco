@@ -28,13 +28,7 @@ export const SettingsIndexRoutePage = () => (
   <Navigate replace to="/settings/team" />
 )
 
-const SettingsTab = ({
-  children,
-  to,
-}: {
-  children: string
-  to: string
-}) => (
+const SettingsTab = ({ children, to }: { children: string; to: string }) => (
   <NavLink
     className={({ isActive }) =>
       cn(

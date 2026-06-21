@@ -342,12 +342,11 @@ const DataTypesEditor = <T extends FieldValues>({
                       <p className="truncate text-sm font-semibold text-slate-950">
                         {dataTypeTitle(item, index)}
                       </p>
-                      {item.isSensitive ? (
-                        <SensitiveTooltip />
-                      ) : null}
+                      {item.isSensitive ? <SensitiveTooltip /> : null}
                       {item.isRequired ? (
-                        <span className="text-muted-foreground text-xs">Required</span>
-
+                        <span className="text-xs text-muted-foreground">
+                          Required
+                        </span>
                       ) : null}
                     </div>
                     {!expanded && item.description ? (

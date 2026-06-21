@@ -129,10 +129,12 @@ export const useDeleteOrganization = (organizationId: string) => {
   return useMutation({
     mutationFn: () => deleteOrganization(organizationId),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: authStateQueryKey }).then(() => {
-        resetOrganization()
-        toast.success("Organization deleted")
-      }),
+      queryClient
+        .invalidateQueries({ queryKey: authStateQueryKey })
+        .then(() => {
+          resetOrganization()
+          toast.success("Organization deleted")
+        }),
     onError: (err: Error) =>
       toast.error(err.message ?? "Could not delete organization"),
   })
@@ -167,8 +169,8 @@ export const useAcceptOrganizationInvitation = () => {
           organizations,
         }
       })
-        selectOrganization(result.organization.id)
-        toast.success(`Joined ${result.organization.name}`)
+      selectOrganization(result.organization.id)
+      toast.success(`Joined ${result.organization.name}`)
       void queryClient.invalidateQueries({ queryKey: authStateQueryKey })
     },
     onError: (err: Error) =>

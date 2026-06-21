@@ -23,7 +23,10 @@ import {
   productAndDataSections,
 } from "@/features/shell/lib/navigation"
 
-export type { CompanySection, CompanySectionId } from "@/features/shell/lib/navigation"
+export type {
+  CompanySection,
+  CompanySectionId,
+} from "@/features/shell/lib/navigation"
 
 export const AppSidebar = () => {
   const location = useLocation()
@@ -69,7 +72,9 @@ export const AppSidebar = () => {
               )
             })}
           </div>
-          <SidebarSectionLabel>{SIDEBAR_SECTION.productAndData}</SidebarSectionLabel>
+          <SidebarSectionLabel>
+            {SIDEBAR_SECTION.productAndData}
+          </SidebarSectionLabel>
           <div className="ml-2 grid gap-1">
             {productAndDataSections.map((section) => {
               const Icon = section.icon
@@ -112,7 +117,6 @@ export const AppSidebar = () => {
             </SidebarMenuButton>
           </div>
         </SidebarMenu>
-
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenuButton

@@ -8,7 +8,10 @@ interface ReviewCompanyTabProps {
   goalOptions: Array<{ value: string; label: string }>
 }
 
-export const ReviewCompanyTab = ({ regionOptions, goalOptions }: ReviewCompanyTabProps) => {
+export const ReviewCompanyTab = ({
+  regionOptions,
+  goalOptions,
+}: ReviewCompanyTabProps) => {
   const { draft, updateDraft } = useOnboardingStore()
 
   if (!draft) {

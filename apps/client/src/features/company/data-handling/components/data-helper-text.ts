@@ -17,10 +17,8 @@ export const dataHelperText = {
     "What this data includes and why your product or business uses it.",
   subjectTypes:
     "The people this data is about, such as customers, employees, or end users.",
-  collectionMethods:
-    "How this data enters your product or systems.",
+  collectionMethods: "How this data enters your product or systems.",
   isSensitive:
     "Whether this data needs extra care because misuse could create higher risk.",
-  isRequired:
-    "Whether the product needs this data to work as expected.",
+  isRequired: "Whether the product needs this data to work as expected.",
 } as const

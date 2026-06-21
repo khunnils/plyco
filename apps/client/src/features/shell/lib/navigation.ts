@@ -66,7 +66,8 @@ export const companySections: CompanySection[] = [
     id: "security",
     path: "/company/security",
     title: "Security",
-    description: "Development security, vulnerabilities, and incident response.",
+    description:
+      "Development security, vulnerabilities, and incident response.",
     icon: Shield,
   },
   {
@@ -107,7 +108,7 @@ export const productAndDataSections: CompanySection[] = [
     description: "Read-only map of services, data, activities, and providers.",
     icon: Network,
   },
-  ]
+]
 
 export const sectionPageBreadcrumbs = (
   section: string,

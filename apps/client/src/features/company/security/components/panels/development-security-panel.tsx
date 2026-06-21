@@ -30,7 +30,10 @@ const fields = [
   ["secretScanning", "Secret scanning"],
   ["automatedTestingBeforeDeployment", "Automated testing before deployment"],
   ["cicdDeploymentProcess", "CI/CD deployment process"],
-  ["productionDeploymentApprovalRequired", "Production deployment approval required"],
+  [
+    "productionDeploymentApprovalRequired",
+    "Production deployment approval required",
+  ],
 ] as const
 
 export const DevelopmentSecurityPanel = ({
@@ -49,7 +52,9 @@ export const DevelopmentSecurityPanel = ({
   const form = useForm<DevelopmentSecurityDraft>({
     defaultValues: draft,
     mode: "onBlur",
-    resolver: zodResolver(developmentSecuritySchema) as Resolver<DevelopmentSecurityDraft>,
+    resolver: zodResolver(
+      developmentSecuritySchema
+    ) as Resolver<DevelopmentSecurityDraft>,
     values: draft,
   })
   const rows: ProfilePanelDetailRow[] = fields.map(([name, label]) => [
@@ -67,9 +72,14 @@ export const DevelopmentSecurityPanel = ({
       readOnlyContent={<ProfilePanelDetailGrid rows={rows} />}
       saveLabel="Save"
       title="Development Security"
-      onCancel={() => { form.reset(draft); setIsEditing(false) }}
+      onCancel={() => {
+        form.reset(draft)
+        setIsEditing(false)
+      }}
       onEdit={() => setIsEditing(true)}
-      onSave={form.handleSubmit((next) => onSave(next, () => setIsEditing(false)))}
+      onSave={form.handleSubmit((next) =>
+        onSave(next, () => setIsEditing(false))
+      )}
     >
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map(([name, label]) => (

@@ -10,7 +10,7 @@ import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
   codeSetId: string,
-  values: string[] | null,
+  values: string[] | null
 ) =>
   values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
@@ -28,7 +28,7 @@ export const DataHandlingReadOnlySection = ({
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
 
   return (
-    <div className="grid gap-4 max-w-3xl">
+    <div className="grid max-w-3xl gap-4">
       <div className="grid gap-4">
         <section className="grid content-start gap-3">
           <h3 className="text-sm font-semibold text-slate-950">Data types</h3>
@@ -61,7 +61,7 @@ export const DataHandlingReadOnlySection = ({
                       type="button"
                       onClick={() =>
                         setExpandedIndex((current) =>
-                          current === index ? null : index,
+                          current === index ? null : index
                         )
                       }
                     >
@@ -70,11 +70,11 @@ export const DataHandlingReadOnlySection = ({
                           <h4 className="text-sm font-semibold text-slate-950">
                             {displayTitle}
                           </h4>
-                          {dataType.isSensitive ? (
-                            <SensitiveTooltip />
-                          ) : null}
+                          {dataType.isSensitive ? <SensitiveTooltip /> : null}
                           {dataType.isRequired ? (
-                            <span className="text-muted-foreground text-xs">Required</span>
+                            <span className="text-xs text-muted-foreground">
+                              Required
+                            </span>
                           ) : null}
                         </div>
                         {dataType.description ? (
@@ -100,7 +100,7 @@ export const DataHandlingReadOnlySection = ({
                             {codeValueList(
                               vocabulary,
                               "subject_types",
-                              dataType.subjectTypes,
+                              dataType.subjectTypes
                             )}
                           </dd>
                         </div>
@@ -112,7 +112,7 @@ export const DataHandlingReadOnlySection = ({
                             {codeValueList(
                               vocabulary,
                               "collection_methods",
-                              dataType.collectionMethods,
+                              dataType.collectionMethods
                             )}
                           </dd>
                         </div>

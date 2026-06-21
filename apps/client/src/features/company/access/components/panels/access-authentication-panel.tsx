@@ -31,30 +31,35 @@ const toAuthenticationDraft = (access: AccessProfile): AuthenticationDraft => ({
   offboardingProcessExists: access.offboardingProcessExists,
 })
 
-const authenticationRows = (draft: AuthenticationDraft): ProfilePanelDetailRow[] =>
+const authenticationRows = (
+  draft: AuthenticationDraft
+): ProfilePanelDetailRow[] => [
   [
-    [
-      "Multi-factor authentication (MFA) required",
-      boolText(draft.mfaRequired),
-      accessHelperText.mfaRequired,
-    ],
-    ["Single sign-on supported", boolText(draft.ssoEnabled), accessHelperText.ssoEnabled],
-    [
-      "Password manager required",
-      boolText(draft.passwordManagerRequired),
-      accessHelperText.passwordManagerRequired,
-    ],
-    [
-      "Shared accounts exist",
-      boolText(draft.sharedAccountsExist),
-      accessHelperText.sharedAccountsExist,
-    ],
-    [
-      "Employee offboarding process exists",
-      boolText(draft.offboardingProcessExists),
-      accessHelperText.offboardingProcessExists,
-    ],
-  ]
+    "Multi-factor authentication (MFA) required",
+    boolText(draft.mfaRequired),
+    accessHelperText.mfaRequired,
+  ],
+  [
+    "Single sign-on supported",
+    boolText(draft.ssoEnabled),
+    accessHelperText.ssoEnabled,
+  ],
+  [
+    "Password manager required",
+    boolText(draft.passwordManagerRequired),
+    accessHelperText.passwordManagerRequired,
+  ],
+  [
+    "Shared accounts exist",
+    boolText(draft.sharedAccountsExist),
+    accessHelperText.sharedAccountsExist,
+  ],
+  [
+    "Employee offboarding process exists",
+    boolText(draft.offboardingProcessExists),
+    accessHelperText.offboardingProcessExists,
+  ],
+]
 
 export const AccessAuthenticationPanel = ({
   access,
@@ -73,7 +78,9 @@ export const AccessAuthenticationPanel = ({
   const form = useForm<AuthenticationDraft>({
     defaultValues: draft,
     mode: "onBlur",
-    resolver: zodResolver(authenticationSchema) as Resolver<AuthenticationDraft>,
+    resolver: zodResolver(
+      authenticationSchema
+    ) as Resolver<AuthenticationDraft>,
     values: draft,
   })
 

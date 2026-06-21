@@ -1,6 +1,23 @@
-import { Check, Globe, Flag, Euro, Shield, ShieldCheck, Landmark, Compass, Map, Scale } from "lucide-react"
+import {
+  Check,
+  Globe,
+  Flag,
+  Euro,
+  Shield,
+  ShieldCheck,
+  Landmark,
+  Compass,
+  Map,
+  Scale,
+} from "lucide-react"
 
-const IconWrapper = ({ name, className }: { name: string; className?: string }) => {
+const IconWrapper = ({
+  name,
+  className,
+}: {
+  name: string
+  className?: string
+}) => {
   switch (name) {
     case "globe":
       return <Globe className={className} />
@@ -43,7 +60,12 @@ export const OptionPicker = ({
   onChange,
 }: {
   label?: string
-  options: Array<{ value: string; label: string; description?: string; icon?: string }>
+  options: Array<{
+    value: string
+    label: string
+    description?: string
+    icon?: string
+  }>
   value: string[] | null
   helperText?: string
   hideHeader?: boolean
@@ -52,15 +74,16 @@ export const OptionPicker = ({
   onChange: (value: string[]) => void
 }) => {
   const selectedValues = value ?? []
-  const gridColsClass = cols === 2
-    ? "sm:grid-cols-2"
-    : `sm:grid-cols-2 ${options.length >= 3 ? "lg:grid-cols-3" : ""}`
+  const gridColsClass =
+    cols === 2
+      ? "sm:grid-cols-2"
+      : `sm:grid-cols-2 ${options.length >= 3 ? "lg:grid-cols-3" : ""}`
 
   return (
     <fieldset className="grid gap-4">
       {!hideHeader && label ? (
         <div className="grid gap-1 text-center">
-          <legend className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+          <legend className="text-sm font-semibold tracking-wide text-slate-600 uppercase">
             {label}
           </legend>
           {helperText ? (
@@ -72,7 +95,9 @@ export const OptionPicker = ({
         {options.map((option) => {
           const selected = selectedValues.includes(option.value)
           const iconName = isCompliance
-            ? (selected ? "shield-check" : "shield")
+            ? selected
+              ? "shield-check"
+              : "shield"
             : option.icon
           const hasDetails = option.description || iconName
 
@@ -80,7 +105,7 @@ export const OptionPicker = ({
             return (
               <button
                 key={option.value}
-                className={`relative flex flex-col items-center p-6 text-center rounded-xl border transition-all ${
+                className={`relative flex flex-col items-center rounded-xl border p-6 text-center transition-all ${
                   selected
                     ? "border-slate-900 bg-slate-50 text-slate-900 ring-1 ring-slate-900"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50/10"
@@ -103,19 +128,23 @@ export const OptionPicker = ({
 
                 {/* Icon in Circular Container */}
                 {iconName && (
-                  <div className={`mb-4 flex size-12 items-center justify-center rounded-full transition-all ${
-                    selected ? "bg-slate-200 text-slate-800" : "bg-slate-100 text-slate-500"
-                  }`}>
+                  <div
+                    className={`mb-4 flex size-12 items-center justify-center rounded-full transition-all ${
+                      selected
+                        ? "bg-slate-200 text-slate-800"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
                     <IconWrapper name={iconName} className="size-5" />
                   </div>
                 )}
 
-                <span className="block text-base font-bold text-slate-900 mb-1">
+                <span className="mb-1 block text-base font-bold text-slate-900">
                   {option.label}
                 </span>
 
                 {option.description && (
-                  <span className="block text-xs leading-relaxed text-slate-500 font-normal">
+                  <span className="block text-xs leading-relaxed font-normal text-slate-500">
                     {option.description}
                   </span>
                 )}

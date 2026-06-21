@@ -141,9 +141,7 @@ export const activityProgress = (
           ),
         ]
       : []),
-    ...(showLegalBasis
-      ? [field("Legal basis", activity.legalBasis)]
-      : []),
+    ...(showLegalBasis ? [field("Legal basis", activity.legalBasis)] : []),
   ]
 
   return sectionProgress(
@@ -377,8 +375,14 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       ...(infrastructure.backupsEnabled === true
         ? [
             field("Backup frequency", infrastructure.backupCadence),
-            field("Backup retention status", infrastructure.backupRetentionDaysStatus),
-            field("Restore test frequency", infrastructure.restoreTestingCadence),
+            field(
+              "Backup retention status",
+              infrastructure.backupRetentionDaysStatus
+            ),
+            field(
+              "Restore test frequency",
+              infrastructure.restoreTestingCadence
+            ),
           ]
         : []),
     ]),
@@ -387,8 +391,16 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       ...(infrastructure.vendorReviewRequired === true
         ? [field("Vendor review frequency", infrastructure.vendorReviewCadence)]
         : []),
-      ...(isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", profile.company.complianceGoals)
-        ? [field("DPA required for processors", infrastructure.dpaRequiredForProcessors)]
+      ...(isComplianceFieldVisible(
+        "infrastructure.dpaRequiredForProcessors",
+        profile.company.complianceGoals
+      )
+        ? [
+            field(
+              "DPA required for processors",
+              infrastructure.dpaRequiredForProcessors
+            ),
+          ]
         : []),
     ]),
   ])
@@ -399,11 +411,20 @@ export const securityProgress = (profile: ProfileDraft) => {
   return groupProgress([
     sectionProgress("Development Security", [
       field("Code review required", security.codeReviewRequired),
-      field("Dependency security monitoring", security.dependencySecurityMonitoring),
+      field(
+        "Dependency security monitoring",
+        security.dependencySecurityMonitoring
+      ),
       field("Secret scanning", security.secretScanning),
-      field("Automated testing before deployment", security.automatedTestingBeforeDeployment),
+      field(
+        "Automated testing before deployment",
+        security.automatedTestingBeforeDeployment
+      ),
       field("CI/CD deployment process", security.cicdDeploymentProcess),
-      field("Production deployment approval required", security.productionDeploymentApprovalRequired),
+      field(
+        "Production deployment approval required",
+        security.productionDeploymentApprovalRequired
+      ),
     ]),
     sectionProgress("Vulnerability Detection", [
       field("Vulnerability scan frequency", security.scanningCadence),
@@ -426,10 +447,7 @@ export const securityProgress = (profile: ProfileDraft) => {
         "Critical patch timeline status",
         security.patchingSlaCriticalDaysStatus
       ),
-      field(
-        "High patch timeline status",
-        security.patchingSlaHighDaysStatus
-      ),
+      field("High patch timeline status", security.patchingSlaHighDaysStatus),
       field(
         "Responsible disclosure program exists",
         security.vulnerabilityDisclosureProgramExists
@@ -448,21 +466,13 @@ export const securityProgress = (profile: ProfileDraft) => {
         "Incident response plan exists",
         security.incidentResponsePlanExists
       ),
-      field(
-        "Notification timeline",
-        security.incidentNotificationTimeline
-      ),
+      field("Notification timeline", security.incidentNotificationTimeline),
       field(
         "Customer notification process",
         security.customerNotificationProcess
       ),
       ...(security.incidentResponsePlanExists === true
-        ? [
-            field(
-              "Last tested date",
-              security.incidentResponseLastTestedDate
-            ),
-          ]
+        ? [field("Last tested date", security.incidentResponseLastTestedDate)]
         : []),
     ]),
   ])
@@ -525,7 +535,8 @@ export const providerUsageProgress = (usage: ServiceProviderUsage) =>
   sectionProgress(usage.providerName || "Selected provider", [
     field("Purpose", usage.purpose),
     field("Data processing level", usage.dataProcessingLevel),
-    ...(usage.dataProcessingLevel !== "none" && usage.dataProcessingLevel !== "not_set"
+    ...(usage.dataProcessingLevel !== "none" &&
+    usage.dataProcessingLevel !== "not_set"
       ? [
           field("Data processed", usage.dataProcessed),
           field("DPA status", usage.dpaStatus),
@@ -562,10 +573,7 @@ export const serviceDetailsProgress = (
             "Cookie consent mechanism",
             service.privacy.cookieConsentMechanism
           ),
-          field(
-            "Do Not Track response",
-            service.privacy.doNotTrackResponse
-          ),
+          field("Do Not Track response", service.privacy.doNotTrackResponse),
           field(
             "Global Privacy Control supported",
             service.privacy.globalPrivacyControlSupported
@@ -738,24 +746,42 @@ export const dashboardProgress = ({
     activityProgress(activity, showLegalBasis, index)
   )
 
-  const servicesTotalFields = services.reduce((sum, s) => sum + s.totalFields, 0)
-  const servicesCompletedFields = services.reduce((sum, s) => sum + s.completedFields, 0)
+  const servicesTotalFields = services.reduce(
+    (sum, s) => sum + s.totalFields,
+    0
+  )
+  const servicesCompletedFields = services.reduce(
+    (sum, s) => sum + s.completedFields,
+    0
+  )
   const servicesSection: ProgressMetric = {
     completedFields: servicesCompletedFields,
     totalFields: servicesTotalFields,
     percent: percent(servicesCompletedFields, servicesTotalFields),
   }
 
-  const dataTypesTotalFields = data.dataTypes.reduce((sum, d) => sum + d.totalFields, 0)
-  const dataTypesCompletedFields = data.dataTypes.reduce((sum, d) => sum + d.completedFields, 0)
+  const dataTypesTotalFields = data.dataTypes.reduce(
+    (sum, d) => sum + d.totalFields,
+    0
+  )
+  const dataTypesCompletedFields = data.dataTypes.reduce(
+    (sum, d) => sum + d.completedFields,
+    0
+  )
   const dataTypesSection: ProgressMetric = {
     completedFields: dataTypesCompletedFields,
     totalFields: dataTypesTotalFields,
     percent: percent(dataTypesCompletedFields, dataTypesTotalFields),
   }
 
-  const activitiesTotalFields = activities.reduce((sum, a) => sum + a.totalFields, 0)
-  const activitiesCompletedFields = activities.reduce((sum, a) => sum + a.completedFields, 0)
+  const activitiesTotalFields = activities.reduce(
+    (sum, a) => sum + a.totalFields,
+    0
+  )
+  const activitiesCompletedFields = activities.reduce(
+    (sum, a) => sum + a.completedFields,
+    0
+  )
   const activitiesSection: ProgressMetric = {
     completedFields: activitiesCompletedFields,
     totalFields: activitiesTotalFields,
@@ -782,7 +808,9 @@ export const dashboardProgress = ({
     0
   )
 
-  const activeSections = topLevelSections.filter((section) => section.totalFields > 0)
+  const activeSections = topLevelSections.filter(
+    (section) => section.totalFields > 0
+  )
   const completedSections = activeSections.filter(
     (section) => section.completedFields === section.totalFields
   ).length

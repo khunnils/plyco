@@ -71,7 +71,10 @@ const EmptyDescription = ({
 const EmptyContent = ({ className, ...props }: React.ComponentProps<"div">) => (
   <div
     data-slot="empty-content"
-    className={cn("flex flex-wrap items-center justify-center gap-2", className)}
+    className={cn(
+      "flex flex-wrap items-center justify-center gap-2",
+      className
+    )}
     {...props}
   />
 )

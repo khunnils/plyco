@@ -1,6 +1,9 @@
 import { type Vocabulary } from "@plyco/shared"
 
-import { type ProfileDraft, type SaveProfile } from "@/features/company/types/company"
+import {
+  type ProfileDraft,
+  type SaveProfile,
+} from "@/features/company/types/company"
 import { securityProgress } from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { DevelopmentSecurityPanel } from "./panels/development-security-panel"
@@ -9,9 +12,14 @@ import { VulnerabilityDetectionPanel } from "./panels/vulnerability-detection-pa
 import { VulnerabilityRemediationPanel } from "./panels/vulnerability-remediation-panel"
 
 export const SecurityManager = ({
-  isMutationPending, profile, securityCadenceOptions,
-  securityCustomerNotificationProcessOptions, securityNotificationTimelineOptions,
-  penetrationTestingStrategyOptions, vocabulary, onSaveProfile,
+  isMutationPending,
+  profile,
+  securityCadenceOptions,
+  securityCustomerNotificationProcessOptions,
+  securityNotificationTimelineOptions,
+  penetrationTestingStrategyOptions,
+  vocabulary,
+  onSaveProfile,
 }: {
   isMutationPending: boolean
   profile: ProfileDraft
@@ -27,13 +35,52 @@ export const SecurityManager = ({
     const section = progress.sections.find((item) => item.title === title)
     return Boolean(section && section.totalFields > section.completedFields)
   }
-  const saveSecurity = (patch: Partial<ProfileDraft["security"]>, onSuccess?: () => void) =>
-    onSaveProfile({ ...profile, security: { ...profile.security, ...patch } }, onSuccess)
+  const saveSecurity = (
+    patch: Partial<ProfileDraft["security"]>,
+    onSuccess?: () => void
+  ) =>
+    onSaveProfile(
+      { ...profile, security: { ...profile.security, ...patch } },
+      onSuccess
+    )
 
-  return <div className="grid gap-8">
-    <DevelopmentSecurityPanel security={profile.security} isMutationPending={isMutationPending} needsAttention={needsAttention("Development Security")} onSave={saveSecurity} />
-    <VulnerabilityDetectionPanel security={profile.security} isMutationPending={isMutationPending} needsAttention={needsAttention("Vulnerability Detection")} securityCadenceOptions={securityCadenceOptions} penetrationTestingStrategyOptions={penetrationTestingStrategyOptions} vocabulary={vocabulary} onSave={saveSecurity} />
-    <VulnerabilityRemediationPanel security={profile.security} isMutationPending={isMutationPending} needsAttention={needsAttention("Vulnerability Remediation")} vocabulary={vocabulary} onSave={saveSecurity} />
-    <IncidentResponsePanel security={profile.security} isMutationPending={isMutationPending} needsAttention={needsAttention("Incident Response")} securityCustomerNotificationProcessOptions={securityCustomerNotificationProcessOptions} securityNotificationTimelineOptions={securityNotificationTimelineOptions} vocabulary={vocabulary} onSave={saveSecurity} />
-  </div>
+  return (
+    <div className="grid gap-8">
+      <DevelopmentSecurityPanel
+        security={profile.security}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention("Development Security")}
+        onSave={saveSecurity}
+      />
+      <VulnerabilityDetectionPanel
+        security={profile.security}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention("Vulnerability Detection")}
+        securityCadenceOptions={securityCadenceOptions}
+        penetrationTestingStrategyOptions={penetrationTestingStrategyOptions}
+        vocabulary={vocabulary}
+        onSave={saveSecurity}
+      />
+      <VulnerabilityRemediationPanel
+        security={profile.security}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention("Vulnerability Remediation")}
+        vocabulary={vocabulary}
+        onSave={saveSecurity}
+      />
+      <IncidentResponsePanel
+        security={profile.security}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention("Incident Response")}
+        securityCustomerNotificationProcessOptions={
+          securityCustomerNotificationProcessOptions
+        }
+        securityNotificationTimelineOptions={
+          securityNotificationTimelineOptions
+        }
+        vocabulary={vocabulary}
+        onSave={saveSecurity}
+      />
+    </div>
+  )
 }

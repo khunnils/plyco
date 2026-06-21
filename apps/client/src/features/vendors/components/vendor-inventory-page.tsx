@@ -20,7 +20,10 @@ import {
   toOrganizationProviderInput,
   organizationProviderInputFromProvider,
 } from "@/features/company/lib/profile"
-import { codeOptions, countryOptions } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeOptions,
+  countryOptions,
+} from "@/features/vocabulary/lib/vocabulary"
 
 export const VendorInventoryPage = ({
   countries,
@@ -63,11 +66,12 @@ export const VendorInventoryPage = ({
 
   return (
     <div className="grid gap-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
+      <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-slate-950">Vendors</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Review organization providers or add common providers from the catalog.
+            Review organization providers or add common providers from the
+            catalog.
           </p>
         </div>
         {!showVendorCatalog && !showCustomVendorForm && !editingProvider ? (
@@ -91,7 +95,7 @@ export const VendorInventoryPage = ({
             <ProviderSelector
               error={providerError ?? null}
               existingProviderNames={organizationProviders.map(
-                (provider) => provider.name,
+                (provider) => provider.name
               )}
               isLoading={isLoadingProviders}
               providers={providers}
@@ -105,7 +109,7 @@ export const VendorInventoryPage = ({
               }}
               onChooseProviders={(selectedProviders) => {
                 onCreateProviders(
-                  selectedProviders.map(organizationProviderInputFromProvider),
+                  selectedProviders.map(organizationProviderInputFromProvider)
                 )
               }}
             />
@@ -124,7 +128,10 @@ export const VendorInventoryPage = ({
             submitDisabled={isMutationPending}
             submitLabel={editingProvider ? "Save" : "Add provider"}
             title={editingProvider ? "Edit provider" : "Add provider"}
-            providerCategoryOptions={codeOptions(vocabulary, "provider_categories")}
+            providerCategoryOptions={codeOptions(
+              vocabulary,
+              "provider_categories"
+            )}
             onCancel={
               editingProvider
                 ? () => {

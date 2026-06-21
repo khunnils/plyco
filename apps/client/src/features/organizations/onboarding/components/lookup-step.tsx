@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Building2, ClipboardList, FileSearch, Loader2, Check } from "lucide-react"
+import {
+  Building2,
+  ClipboardList,
+  FileSearch,
+  Loader2,
+  Check,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
@@ -29,8 +35,7 @@ const wait = (durationMs: number) =>
 const lookupPanelTone = (status: LookupPanelStatus) => {
   if (status === "complete") {
     return {
-      panel:
-        "border-slate-300 bg-white shadow-sm ring-1 ring-slate-100",
+      panel: "border-slate-300 bg-white shadow-sm ring-1 ring-slate-100",
       icon: "bg-slate-900 text-white",
       bar: "bg-slate-900",
       status: "text-slate-700",
@@ -39,8 +44,7 @@ const lookupPanelTone = (status: LookupPanelStatus) => {
 
   if (status === "active") {
     return {
-      panel:
-        "border-slate-300 bg-white shadow-sm ring-2 ring-slate-200",
+      panel: "border-slate-300 bg-white shadow-sm ring-2 ring-slate-200",
       icon: "bg-slate-100 text-slate-900",
       bar: "bg-slate-800",
       status: "text-slate-900",
@@ -87,7 +91,9 @@ const LookupStatusPanel = ({
     <div
       className={`grid min-h-24 grid-cols-[auto_1fr_auto] items-center gap-4 rounded-lg border px-4 py-3 text-left transition ${tone.panel}`}
     >
-      <div className={`flex size-12 items-center justify-center rounded-md ${tone.icon}`}>
+      <div
+        className={`flex size-12 items-center justify-center rounded-md ${tone.icon}`}
+      >
         {icon}
       </div>
       <div className="min-w-0">
@@ -110,7 +116,9 @@ const LookupStatusPanel = ({
           />
         </div>
       </div>
-      <div className={`flex size-7 items-center justify-center rounded-full ${tone.status}`}>
+      <div
+        className={`flex size-7 items-center justify-center rounded-full ${tone.status}`}
+      >
         {status === "complete" ? (
           <Check className="size-4" />
         ) : status === "active" ? (
@@ -131,25 +139,25 @@ const LookupIllustration = () => (
     <div className="absolute inset-4 rounded-full border border-slate-300" />
     <div className="absolute inset-8 rounded-full border border-slate-300" />
     <div className="absolute inset-12 rounded-full border border-slate-300" />
-    <div className="absolute inset-17 rounded-full border border-slate-200 bg-slate-50 onboarding-lookup-core" />
-    <span className="onboarding-lookup-dot onboarding-lookup-dot-primary absolute right-6 top-2 size-3 rounded-full bg-slate-900 shadow-sm" />
+    <div className="onboarding-lookup-core absolute inset-17 rounded-full border border-slate-200 bg-slate-50" />
+    <span className="onboarding-lookup-dot onboarding-lookup-dot-primary absolute top-2 right-6 size-3 rounded-full bg-slate-900 shadow-sm" />
     <span className="onboarding-lookup-dot onboarding-lookup-dot-secondary absolute bottom-9 left-4 size-2.5 rounded-full bg-slate-400 shadow-sm" />
-    <span className="onboarding-lookup-dot onboarding-lookup-dot-tertiary absolute bottom-1 right-12 size-2 rounded-full bg-slate-500 shadow-sm" />
+    <span className="onboarding-lookup-dot onboarding-lookup-dot-tertiary absolute right-12 bottom-1 size-2 rounded-full bg-slate-500 shadow-sm" />
     <div className="absolute inset-0 flex items-center justify-center text-slate-900">
       <div className="relative size-12">
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-0 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-60 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-120 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-180 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-240 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-300 bg-slate-900" />
-        <span className="absolute left-1/2 top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
-        <span className="absolute left-0 top-1/2 size-3 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
-        <span className="absolute right-0 top-1/2 size-3 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
-        <span className="absolute left-[0.55rem] top-1 size-3 rounded-full border-4 border-slate-900 bg-white" />
-        <span className="absolute right-[0.55rem] top-1 size-3 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-0 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-60 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-120 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-180 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-240 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 h-0.5 w-7 origin-left -translate-y-1/2 rotate-300 bg-slate-900" />
+        <span className="absolute top-1/2 left-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute top-1/2 left-0 size-3 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute top-1/2 right-0 size-3 -translate-y-1/2 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute top-1 left-[0.55rem] size-3 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute top-1 right-[0.55rem] size-3 rounded-full border-4 border-slate-900 bg-white" />
         <span className="absolute bottom-1 left-[0.55rem] size-3 rounded-full border-4 border-slate-900 bg-white" />
-        <span className="absolute bottom-1 right-[0.55rem] size-3 rounded-full border-4 border-slate-900 bg-white" />
+        <span className="absolute right-[0.55rem] bottom-1 size-3 rounded-full border-4 border-slate-900 bg-white" />
       </div>
     </div>
   </div>
@@ -170,7 +178,8 @@ const LookupLoadingView = ({
       Building an understanding
     </h1>
     <p className="mt-4 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-      We are analyzing your website and existing policies to streamline workspace setup.
+      We are analyzing your website and existing policies to streamline
+      workspace setup.
     </p>
     <div className="mt-10 grid w-full gap-3">
       <LookupStatusPanel
@@ -189,7 +198,7 @@ const LookupLoadingView = ({
         status={privacyLookupStatus}
       />
     </div>
-    <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-700">
+    <div className="mt-8 flex items-center gap-2 text-xs font-semibold tracking-widest text-slate-700 uppercase">
       <span className="size-2 rounded-full bg-slate-900" />
       <span className="size-2 rounded-full bg-slate-700" />
       <span className="size-2 rounded-full bg-slate-500" />
@@ -200,16 +209,14 @@ const LookupLoadingView = ({
 
 export const LookupStep = () => {
   const navigate = useNavigate()
-  const {
-    draft,
-    setDraft,
-    setSubmitError,
-    onCancel,
-  } = useOnboardingStore()
+  const { draft, setDraft, setSubmitError, onCancel } = useOnboardingStore()
 
-  const [organizationDetailsComplete, setOrganizationDetailsComplete] = useState(false)
-  const [organizationLookupComplete, setOrganizationLookupComplete] = useState(false)
-  const [privacyLookupStatus, setPrivacyLookupStatus] = useState<LookupPanelStatus>("pending")
+  const [organizationDetailsComplete, setOrganizationDetailsComplete] =
+    useState(false)
+  const [organizationLookupComplete, setOrganizationLookupComplete] =
+    useState(false)
+  const [privacyLookupStatus, setPrivacyLookupStatus] =
+    useState<LookupPanelStatus>("pending")
 
   const lookupOrganizationWebsite = useLookupOrganizationWebsite()
   const lookupPrivacyPolicy = useLookupPrivacyPolicy()
@@ -236,13 +243,13 @@ export const LookupStep = () => {
         setPrivacyLookupStatus("pending")
       }
 
-      const organizationDetailsPromise = wait(organizationDetailsDurationMs).then(
-        () => {
-          if (isMounted) {
-            setOrganizationDetailsComplete(true)
-          }
+      const organizationDetailsPromise = wait(
+        organizationDetailsDurationMs
+      ).then(() => {
+        if (isMounted) {
+          setOrganizationDetailsComplete(true)
         }
-      )
+      })
 
       try {
         const result = await lookupOrganizationWebsite.mutateAsync({
@@ -308,7 +315,8 @@ export const LookupStep = () => {
     }
   }, []) // Empty dependency array means runs on mount
 
-  const stepName = privacyLookupStatus === "active" ? "lookup-privacy" : "lookup-organization"
+  const stepName =
+    privacyLookupStatus === "active" ? "lookup-privacy" : "lookup-organization"
 
   return (
     <CreateShell

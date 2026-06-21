@@ -29,9 +29,7 @@ const incidentSchema = securityProfileSchema.pick({
 
 type IncidentDraft = z.infer<typeof incidentSchema>
 
-const toIncidentDraft = (
-  security: SecurityProfile
-): IncidentDraft => ({
+const toIncidentDraft = (security: SecurityProfile): IncidentDraft => ({
   incidentResponsePlanExists: security.incidentResponsePlanExists,
   incidentNotificationTimeline: security.incidentNotificationTimeline,
   customerNotificationProcess: security.customerNotificationProcess,

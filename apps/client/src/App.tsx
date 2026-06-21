@@ -1,5 +1,12 @@
-import { useEffect } from "react"
-import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom"
+import { useEffect, useRef } from "react"
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from "react-router-dom"
+import { usePostHog } from "@posthog/react"
 
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
@@ -41,9 +48,11 @@ import { VocabularySettingsRoutePage } from "@/features/settings/pages/vocabular
 export const App = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const posthog = usePostHog()
   const authState = useAuthState()
   const user = authState.data?.user ?? null
   const isAuthenticated = Boolean(user)
+  const identifiedRef = useRef(false)
   const { selectedOrganization } = useSelectedOrganization()
   const onboardingOrganizationIds = useCurrentOrganizationStore(
     (state) => state.onboardingOrganizationIds
@@ -56,6 +65,17 @@ export const App = () => {
     typeof window === "undefined"
       ? null
       : window.localStorage.getItem(pendingInvitationStorageKey)
+
+  useEffect(() => {
+    if (user && !identifiedRef.current) {
+      identifiedRef.current = true
+      posthog.identify(user.email, { name: user.name, email: user.email })
+      posthog.capture("user_signed_in")
+    }
+    if (!user) {
+      identifiedRef.current = false
+    }
+  }, [user, posthog])
 
   useEffect(() => {
     if (
@@ -117,7 +137,10 @@ export const App = () => {
             />
           }
         />
-        <Route path="*" element={<Navigate to="/onboarding/organization/identity" replace />} />
+        <Route
+          path="*"
+          element={<Navigate to="/onboarding/organization/identity" replace />}
+        />
       </Routes>
     )
   }
@@ -164,7 +187,10 @@ export const App = () => {
           path="/company/infrastructure"
           element={<InfrastructureProfileRoutePage />}
         />
-        <Route path="/company/security" element={<SecurityProfileRoutePage />} />
+        <Route
+          path="/company/security"
+          element={<SecurityProfileRoutePage />}
+        />
         <Route
           path="/company/data"
           element={<DataHandlingProfileRoutePage />}

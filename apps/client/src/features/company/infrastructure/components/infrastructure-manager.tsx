@@ -40,7 +40,9 @@ export const InfrastructureManager = ({
   const getNeedsAttention = (sectionTitle: string) => {
     const section = progress.sections.find((s) => s.title === sectionTitle)
     if (!section) return false
-    return section.totalFields > 0 && section.completedFields < section.totalFields
+    return (
+      section.totalFields > 0 && section.completedFields < section.totalFields
+    )
   }
 
   const saveInfrastructure = (

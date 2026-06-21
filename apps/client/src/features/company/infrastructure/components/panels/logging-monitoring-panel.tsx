@@ -16,10 +16,7 @@ import {
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import {
-  codeLabel,
-  type Option,
-} from "@/features/vocabulary/lib/vocabulary"
+import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const loggingSchema = infrastructureProfileSchema.pick({
@@ -36,7 +33,10 @@ const toLoggingDraft = (
   securityMonitoring: infrastructure.securityMonitoring,
 })
 
-const loggingRows = (draft: LoggingDraft, vocabulary: Vocabulary | undefined) => {
+const loggingRows = (
+  draft: LoggingDraft,
+  vocabulary: Vocabulary | undefined
+) => {
   const rows: ProfilePanelDetailRow[] = [
     [
       "Centralized logging enabled",

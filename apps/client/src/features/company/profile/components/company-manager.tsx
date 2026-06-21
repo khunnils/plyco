@@ -1,4 +1,8 @@
-import { type CompanyProfile, type Country, type Vocabulary } from "@plyco/shared"
+import {
+  type CompanyProfile,
+  type Country,
+  type Vocabulary,
+} from "@plyco/shared"
 
 import { CompanyContactsPanel } from "@/features/company/profile/components/panels/company-contacts-panel"
 import { CompanyDataProfilePanel } from "@/features/company/profile/components/panels/company-data-profile-panel"
@@ -8,7 +12,10 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
-import { codeOptions, countryOptions } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeOptions,
+  countryOptions,
+} from "@/features/vocabulary/lib/vocabulary"
 
 export const CompanyManager = ({
   countries,

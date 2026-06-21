@@ -13,7 +13,6 @@ import { ToggleField } from "@/components/form/toggle-field"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
-
 const selectedProviderIds = (
   organizationProviders: ProviderSelection[],
   systemType: ProviderSystemType

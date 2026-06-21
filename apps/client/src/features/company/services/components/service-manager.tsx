@@ -1,5 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AlertCircle, ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react"
+import {
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react"
 import {
   type BusinessActivity,
   emptyServiceProfile,
@@ -28,12 +35,7 @@ import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ProfilePanelDetailGrid,
   ProfilePanelShell,
@@ -1065,13 +1067,15 @@ const ServiceProviderUsagePanel = ({
               onClick={() => {
                 checkedProviderIds.forEach((organizationProviderId) => {
                   const mappedProvider = organizationProviders.find(
-                    (p) => p.id === organizationProviderId,
+                    (p) => p.id === organizationProviderId
                   )
                   onCreate({
                     ...emptyServiceProviderUsageDraft,
                     serviceId: service.id ?? "",
                     organizationProviderId,
-                    purpose: mappedProvider?.purpose || serviceProviderPurpose(service),
+                    purpose:
+                      mappedProvider?.purpose ||
+                      serviceProviderPurpose(service),
                   })
                 })
                 setShowAddProviders(false)
@@ -1192,7 +1196,7 @@ const ServiceProviderUsagePanel = ({
                         </h4>
                         {needsAttention(providerUsage) && (
                           <span title="Needs attention">
-                            <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+                            <AlertCircle className="h-4 w-4 shrink-0 text-amber-500" />
                           </span>
                         )}
                       </div>
@@ -1211,7 +1215,8 @@ const ServiceProviderUsagePanel = ({
                               ),
                               serviceProviderUsageHelperText.dataProcessingLevel,
                             ],
-                            ...(providerUsage.dataProcessingLevel !== "none" && providerUsage.dataProcessingLevel !== "not_set"
+                            ...(providerUsage.dataProcessingLevel !== "none" &&
+                            providerUsage.dataProcessingLevel !== "not_set"
                               ? ([
                                   [
                                     "DPA status",
@@ -1457,23 +1462,23 @@ export const ServiceManager = ({
     >
       <TabsList
         variant="line"
-        className="gap-6 border-b border-slate-200 w-full justify-start pb-0 h-auto rounded-none p-0"
+        className="h-auto w-full justify-start gap-6 rounded-none border-b border-slate-200 p-0 pb-0"
       >
         <TabsTrigger
           value="details"
-          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
+          className="mb-[-2px] h-auto rounded-none px-0 pt-0 pb-3 font-medium text-slate-500 after:bottom-[-2px] data-active:font-semibold data-active:text-slate-900"
         >
           Service details
         </TabsTrigger>
         <TabsTrigger
           value="activities"
-          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
+          className="mb-[-2px] h-auto rounded-none px-0 pt-0 pb-3 font-medium text-slate-500 after:bottom-[-2px] data-active:font-semibold data-active:text-slate-900"
         >
           Service Activities ({activitiesCount})
         </TabsTrigger>
         <TabsTrigger
           value="providers"
-          className="mb-[-2px] pb-3 pt-0 px-0 rounded-none text-slate-500 data-active:text-slate-900 font-medium data-active:font-semibold h-auto after:bottom-[-2px]"
+          className="mb-[-2px] h-auto rounded-none px-0 pt-0 pb-3 font-medium text-slate-500 after:bottom-[-2px] data-active:font-semibold data-active:text-slate-900"
         >
           Service Providers ({providersCount})
         </TabsTrigger>

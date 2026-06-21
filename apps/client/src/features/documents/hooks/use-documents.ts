@@ -20,15 +20,11 @@ export const useDocuments = (enabled = true) => {
   return useQuery({
     enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
     queryKey: documentsQueryKey(selectedOrganizationId ?? ""),
-    queryFn: () =>
-      getOrganizationDocuments(selectedOrganizationId ?? ""),
+    queryFn: () => getOrganizationDocuments(selectedOrganizationId ?? ""),
   })
 }
 
-export const useDocument = (
-  id: string | null,
-  enabled = true
-) => {
+export const useDocument = (id: string | null, enabled = true) => {
   const { data: auth } = useAuthState()
   const user = auth?.user ?? null
   const { selectedOrganizationId } = useSelectedOrganization()
@@ -40,8 +36,7 @@ export const useDocument = (
       Boolean(selectedOrganizationId) &&
       Boolean(id),
     queryKey: documentQueryKey(selectedOrganizationId ?? "", id ?? ""),
-    queryFn: () =>
-      getDocument(selectedOrganizationId ?? "", id ?? ""),
+    queryFn: () => getDocument(selectedOrganizationId ?? "", id ?? ""),
   })
 }
 

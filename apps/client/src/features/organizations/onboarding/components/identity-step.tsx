@@ -60,10 +60,7 @@ export const IdentityStep = () => {
       step="identity"
       title="Let's build your workspace"
     >
-      <form
-        className="mx-auto grid max-w-2xl gap-6"
-        onSubmit={handleSubmit}
-      >
+      <form className="mx-auto grid max-w-2xl gap-6" onSubmit={handleSubmit}>
         <TextInput
           label="Organization name"
           placeholder="Acme AI"
@@ -80,12 +77,12 @@ export const IdentityStep = () => {
           value={website}
           onChange={setWebsite}
         />
-        <div className="flex gap-4 rounded-lg border border-primary-100 bg-primary-50 p-4 text-left">
+        <div className="border-primary-100 bg-primary-50 flex gap-4 rounded-lg border p-4 text-left">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-slate-200 text-slate-700">
             <Info className="size-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-primary-900">
+            <p className="text-primary-900 text-sm font-semibold">
               Workspace identity
             </p>
             <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -100,14 +97,10 @@ export const IdentityStep = () => {
           </p>
         ) : null}
         <div className="grid gap-4 pt-2">
-          <Button
-            className="h-12"
-            type="submit"
-          >
+          <Button className="h-12" type="submit">
             <Sparkles />
             Continue
           </Button>
-
         </div>
       </form>
     </CreateShell>

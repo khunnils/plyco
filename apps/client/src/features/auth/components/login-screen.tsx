@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react"
 import { useState, type FormEvent } from "react"
+import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,9 +37,11 @@ export const LoginScreen = ({
   const [email, setEmail] = useState("")
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const sendMagicLinkMutation = useSendMagicLink()
+  const posthog = usePostHog()
 
   const sendMagicLinkForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    posthog.capture("magic_link_sent", { email })
     sendMagicLinkMutation.mutate(
       { email },
       {

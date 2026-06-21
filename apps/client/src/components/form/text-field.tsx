@@ -31,7 +31,7 @@ export const TextField = <T extends FieldValues>({
   <label className="grid gap-2 text-sm font-medium text-slate-800">
     <span>{label}</span>
     {helperText ? (
-      <span className="-mt-1 text-xs font-normal leading-5 text-slate-500">
+      <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
         {helperText}
       </span>
     ) : null}

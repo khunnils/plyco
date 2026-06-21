@@ -38,7 +38,7 @@ export const OrganizationProviderForm = ({
     defaultValues,
     mode: "onBlur",
     resolver: zodResolver(
-      organizationProviderInputSchema,
+      organizationProviderInputSchema
     ) as Resolver<OrganizationProviderInput>,
   })
 
@@ -67,7 +67,10 @@ export const OrganizationProviderForm = ({
           control={form.control}
           label="Category"
           name="category"
-          options={[{ value: "", label: "Not set" }, ...providerCategoryOptions]}
+          options={[
+            { value: "", label: "Not set" },
+            ...providerCategoryOptions,
+          ]}
         />
         <TextField
           error={form.formState.errors.legalName}
@@ -108,7 +111,11 @@ export const OrganizationProviderForm = ({
             Cancel
           </Button>
         ) : null}
-        <Button disabled={submitDisabled} type="button" onClick={submitProvider}>
+        <Button
+          disabled={submitDisabled}
+          type="button"
+          onClick={submitProvider}
+        >
           {submitDisabled ? (
             <Loader2 className="animate-spin" />
           ) : onCancel ? (

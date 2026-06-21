@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, Loader2, LogOut, Save } from "lucide-react"
 import { type AuthUser } from "@plyco/shared"
 import { type FieldErrors } from "react-hook-form"
+import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -79,6 +80,7 @@ export const Onboarding = ({
   user: AuthUser
   onLogout: () => void
 }) => {
+  const posthog = usePostHog()
   const providers = useProviders()
   const countries = useCountries()
   const vocabulary = useVocabulary()
@@ -135,6 +137,7 @@ export const Onboarding = ({
           onSubmit={(profile) => {
             saveProfile.mutate(profile, {
               onSuccess: () => {
+                posthog.capture("security_profile_saved")
                 const orgId = selectedOrganization?.id
                 if (orgId) {
                   completeOnboarding(orgId)

@@ -62,7 +62,8 @@ export const ServiceProviderUsageForm = ({
       name: "dataProcessingLevel",
       defaultValue: defaultValues.dataProcessingLevel,
     }) ?? defaultValues.dataProcessingLevel
-  const showDataProcessingDetail = dataProcessingLevel !== "none" && dataProcessingLevel !== "not_set"
+  const showDataProcessingDetail =
+    dataProcessingLevel !== "none" && dataProcessingLevel !== "not_set"
 
   useEffect(() => {
     if (dataProcessingLevel === "none" || dataProcessingLevel === "not_set") {

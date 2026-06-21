@@ -35,11 +35,11 @@ export const ProgressPanel = ({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <section className="border border-slate-200 bg-white p-5 flex flex-col justify-between">
+    <section className="flex flex-col justify-between border border-slate-200 bg-white p-5">
       <div>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-wrap items-baseline gap-2 min-w-0">
-            <h2 className="text-base font-semibold text-slate-950 hover:text-slate-700 hover:underline transition-colors">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-2">
+            <h2 className="text-base font-semibold text-slate-950 transition-colors hover:text-slate-700 hover:underline">
               <Link to={href}>{title}</Link>
             </h2>
             <span className="text-sm text-slate-500">
@@ -47,7 +47,7 @@ export const ProgressPanel = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex shrink-0 items-center gap-4">
             <ProgressStatusBadge metric={group} />
             {!isProgressComplete(group) ? (
               <div className="w-24 sm:w-32">
@@ -57,7 +57,7 @@ export const ProgressPanel = ({
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-150"
+              className="p-1 text-slate-400 transition-colors duration-150 hover:text-slate-600 focus:outline-none"
               type="button"
               aria-label={isExpanded ? "Collapse" : "Expand"}
             >
@@ -73,7 +73,7 @@ export const ProgressPanel = ({
         <p className="mt-2 text-sm text-slate-500">{description}</p>
 
         {isExpanded && (
-          <div className="mt-4 border-t border-slate-100 pt-4 grid gap-2">
+          <div className="mt-4 grid gap-2 border-t border-slate-100 pt-4">
             {group.sections.map((section) => {
               const isComplete =
                 section.totalFields > 0 &&
@@ -81,11 +81,13 @@ export const ProgressPanel = ({
               return (
                 <div
                   key={section.title}
-                  className="flex items-center justify-between py-1 text-sm border-b border-slate-50 last:border-0"
+                  className="flex items-center justify-between border-b border-slate-50 py-1 text-sm last:border-0"
                 >
-                  <span className="font-medium text-slate-700">{section.title}</span>
+                  <span className="font-medium text-slate-700">
+                    {section.title}
+                  </span>
                   <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       isComplete
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-slate-100 text-slate-400"
@@ -109,8 +111,8 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
   return (
     <article className="border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex flex-wrap items-baseline gap-2 min-w-0">
-          <h3 className="text-sm font-semibold text-slate-950 hover:text-slate-700 hover:underline transition-colors truncate">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-2">
+          <h3 className="truncate text-sm font-semibold text-slate-950 transition-colors hover:text-slate-700 hover:underline">
             {item.href ? <Link to={item.href}>{item.title}</Link> : item.title}
           </h3>
           <span className="text-xs text-slate-500">
@@ -118,7 +120,7 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
           </span>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex shrink-0 items-center gap-3">
           <ProgressStatusBadge metric={item} />
           {!isProgressComplete(item) ? (
             <div className="w-24 sm:w-32">
@@ -128,7 +130,7 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors duration-150"
+            className="p-1 text-slate-400 transition-colors duration-150 hover:text-slate-600 focus:outline-none"
             type="button"
             aria-label={isExpanded ? "Collapse" : "Expand"}
           >
@@ -146,7 +148,7 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
       </p>
 
       {isExpanded && (
-        <div className="mt-3 border-t border-slate-100 pt-3 grid gap-1.5">
+        <div className="mt-3 grid gap-1.5 border-t border-slate-100 pt-3">
           {item.sections.map((section) => {
             const isComplete =
               section.totalFields > 0 &&
@@ -154,11 +156,13 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
             return (
               <div
                 key={section.title}
-                className="flex items-center justify-between py-0.5 text-xs border-b border-slate-50 last:border-0"
+                className="flex items-center justify-between border-b border-slate-50 py-0.5 text-xs last:border-0"
               >
-                <span className="font-medium text-slate-600">{section.title}</span>
+                <span className="font-medium text-slate-600">
+                  {section.title}
+                </span>
                 <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                     isComplete
                       ? "bg-emerald-50 text-emerald-700"
                       : "bg-slate-100 text-slate-400"

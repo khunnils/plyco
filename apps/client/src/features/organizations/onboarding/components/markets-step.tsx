@@ -13,36 +13,37 @@ import {
   complianceGoalsForRegions,
 } from "../../components/types"
 
-const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> = {
-  global: {
-    description: "Cross-border operations spanning multiple continents.",
-    icon: "globe",
-  },
-  us: {
-    description: "North American domestic market and regulatory compliance.",
-    icon: "us",
-  },
-  eu: {
-    description: "EMEA focus with GDPR and regional policy adherence.",
-    icon: "eu",
-  },
-  uk: {
-    description: "UK market presence and UK GDPR alignment.",
-    icon: "uk",
-  },
-  apac: {
-    description: "APAC fast-growing markets and local compliance needs.",
-    icon: "apac",
-  },
-  latam: {
-    description: "LATAM presence and emerging data protection frameworks.",
-    icon: "latam",
-  },
-  mea: {
-    description: "MEA operations and localized compliance standards.",
-    icon: "mea",
-  },
-}
+const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> =
+  {
+    global: {
+      description: "Cross-border operations spanning multiple continents.",
+      icon: "globe",
+    },
+    us: {
+      description: "North American domestic market and regulatory compliance.",
+      icon: "us",
+    },
+    eu: {
+      description: "EMEA focus with GDPR and regional policy adherence.",
+      icon: "eu",
+    },
+    uk: {
+      description: "UK market presence and UK GDPR alignment.",
+      icon: "uk",
+    },
+    apac: {
+      description: "APAC fast-growing markets and local compliance needs.",
+      icon: "apac",
+    },
+    latam: {
+      description: "LATAM presence and emerging data protection frameworks.",
+      icon: "latam",
+    },
+    mea: {
+      description: "MEA operations and localized compliance standards.",
+      icon: "mea",
+    },
+  }
 
 export const MarketsStep = () => {
   const navigate = useNavigate()
@@ -105,16 +106,12 @@ export const MarketsStep = () => {
 
   const footer = (
     <div className="flex items-center justify-between border-t border-slate-200 pt-5">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleBack}
-      >
+      <Button type="button" variant="outline" onClick={handleBack}>
         <ArrowLeft />
         Back
       </Button>
       <Button
-        className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
+        className="bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-950 focus-visible:ring-slate-100"
         type="button"
         onClick={handleNext}
       >

@@ -44,7 +44,10 @@ const toRepresentationDraft = (
 const detailValue = (status: string | null, value: string | null) =>
   status === APPOINTED_STATUS ? value || "Not set" : "—"
 
-const dpoRows = (draft: RepresentationDraft, vocabulary: Vocabulary | undefined) =>
+const dpoRows = (
+  draft: RepresentationDraft,
+  vocabulary: Vocabulary | undefined
+) =>
   [
     [
       "DPO status",
@@ -79,10 +82,7 @@ const euRepresentativeRows = (
     ],
     [
       "EU representative address",
-      detailValue(
-        draft.euRepresentativeStatus,
-        draft.euRepresentativeAddress
-      ),
+      detailValue(draft.euRepresentativeStatus, draft.euRepresentativeAddress),
     ],
   ] as const
 
@@ -140,8 +140,7 @@ export const PrivacyRepresentationPanel = ({
     name: "euRepresentativeStatus",
   })
   const dpoAppointed = dpoStatus === APPOINTED_STATUS
-  const euRepresentativeAppointed =
-    euRepresentativeStatus === APPOINTED_STATUS
+  const euRepresentativeAppointed = euRepresentativeStatus === APPOINTED_STATUS
 
   useEffect(() => {
     if (!dpoAppointed) {
@@ -170,7 +169,9 @@ export const PrivacyRepresentationPanel = ({
       readOnlyContent={
         <div className="grid gap-6 sm:grid-cols-2">
           <ProfilePanelDetailGrid rows={dpoRows(draft, vocabulary)} />
-          <ProfilePanelDetailGrid rows={euRepresentativeRows(draft, vocabulary)} />
+          <ProfilePanelDetailGrid
+            rows={euRepresentativeRows(draft, vocabulary)}
+          />
         </div>
       }
       saveLabel="Save"

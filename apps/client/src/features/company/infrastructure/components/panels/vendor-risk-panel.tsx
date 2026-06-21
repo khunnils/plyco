@@ -59,7 +59,12 @@ const vendorRiskRows = (
     ])
   }
 
-  if (isComplianceFieldVisible("infrastructure.dpaRequiredForProcessors", complianceGoals)) {
+  if (
+    isComplianceFieldVisible(
+      "infrastructure.dpaRequiredForProcessors",
+      complianceGoals
+    )
+  ) {
     rows.push([
       "DPA required for processors",
       boolText(draft.dpaRequiredForProcessors),
@@ -126,7 +131,9 @@ export const VendorRiskPanel = ({
       isMutationPending={isMutationPending}
       needsAttention={needsAttention}
       readOnlyContent={
-        <ProfilePanelDetailGrid rows={vendorRiskRows(draft, vocabulary, complianceGoals)} />
+        <ProfilePanelDetailGrid
+          rows={vendorRiskRows(draft, vocabulary, complianceGoals)}
+        />
       }
       saveLabel="Save"
       title="Vendor Risk"
@@ -150,7 +157,10 @@ export const VendorRiskPanel = ({
             helperText={infrastructureHelperText.vendorReviewCadence}
             label="Vendor review frequency"
             name="vendorReviewCadence"
-            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+            options={[
+              { value: "", label: "Not set" },
+              ...securityCadenceOptions,
+            ]}
             placeholder="Not set"
           />
         )}

@@ -1,4 +1,7 @@
-import { type ServiceProfileInput, type ServiceProviderUsage } from "@plyco/shared"
+import {
+  type ServiceProfileInput,
+  type ServiceProviderUsage,
+} from "@plyco/shared"
 import { Link } from "react-router-dom"
 import { ArrowRight, Box, CheckCircle2, Globe2 } from "lucide-react"
 
@@ -41,7 +44,7 @@ export const DashboardServiceCard = ({
           <div className="mb-3 flex size-10 items-center justify-center rounded-md bg-slate-50 text-slate-600 transition group-hover:bg-slate-100">
             <Box className="size-5" />
           </div>
-          <h2 className="truncate text-lg font-semibold text-slate-950 group-hover:text-slate-700 transition-colors">
+          <h2 className="truncate text-lg font-semibold text-slate-950 transition-colors group-hover:text-slate-700">
             {service.serviceName?.trim() || "Unnamed service"}
           </h2>
           {url ? (
@@ -54,25 +57,25 @@ export const DashboardServiceCard = ({
         <ArrowRight className="mt-1 size-5 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-slate-900" />
       </div>
 
-      <div className="p-5 flex-1 flex flex-col justify-between gap-5">
+      <div className="flex flex-1 flex-col justify-between gap-5 p-5">
         <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
           {service.serviceDescription?.trim() ||
             "No service description has been provided."}
         </p>
 
-        <div className="grid gap-4 grid-cols-3">
+        <div className="grid grid-cols-3 gap-4">
           <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Details
             </span>
-            <div className="flex items-center gap-1 mt-0.5">
+            <div className="mt-0.5 flex items-center gap-1">
               {detailsProgress.isComplete ? (
-                <span className="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 fill-emerald-50 shrink-0" />
+                <span className="flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 fill-emerald-50 text-emerald-500" />
                   Complete
                 </span>
               ) : (
-                <span className="text-xs font-semibold text-slate-900 flex items-center gap-1">
+                <span className="flex items-center gap-1 text-xs font-semibold text-slate-900">
                   <div className="h-1.5 w-1.5 rounded-full bg-blue-600"></div>
                   {detailsProgress.percent}%
                 </span>
@@ -81,19 +84,19 @@ export const DashboardServiceCard = ({
           </div>
 
           <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Activities
             </span>
-            <span className="text-xs font-semibold text-slate-900 mt-0.5">
+            <span className="mt-0.5 text-xs font-semibold text-slate-900">
               {activitiesCount} mapped
             </span>
           </div>
 
           <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               Providers
             </span>
-            <span className="text-xs font-semibold text-slate-900 mt-0.5">
+            <span className="mt-0.5 text-xs font-semibold text-slate-900">
               {totalProviders} ({completedProviders} compl.)
             </span>
           </div>
@@ -109,7 +112,7 @@ export const DashboardServiceCard = ({
               ? "Yes"
               : "No"}
         </span>
-        <span className="text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1">
+        <span className="flex items-center gap-1 text-slate-900 transition group-hover:text-blue-600">
           View service <ArrowRight className="size-3.5" />
         </span>
       </div>

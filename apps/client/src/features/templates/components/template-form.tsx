@@ -5,7 +5,17 @@ import {
   type TemplateVariable,
   type TemplateVariableField,
 } from "@plyco/shared"
-import { Braces, ChevronDown, ChevronRight, Columns, Eye, FileCode, ListTree, Loader2, Search } from "lucide-react"
+import {
+  Braces,
+  ChevronDown,
+  ChevronRight,
+  Columns,
+  Eye,
+  FileCode,
+  ListTree,
+  Loader2,
+  Search,
+} from "lucide-react"
 import {
   useMemo,
   useEffect,
@@ -100,8 +110,12 @@ export const TemplateForm = ({
   const previewContent = preview.data?.renderedContent ?? ""
 
   const [isSchemaOpen, setIsSchemaOpen] = useState(false)
-  const [editorMode, setEditorMode] = useState<"content" | "preview" | "compare">("compare")
-  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({})
+  const [editorMode, setEditorMode] = useState<
+    "content" | "preview" | "compare"
+  >("compare")
+  const [collapsedCategories, setCollapsedCategories] = useState<
+    Record<string, boolean>
+  >({})
 
   const toggleCategory = (category: string) => {
     setCollapsedCategories((prev) => ({
@@ -189,7 +203,7 @@ export const TemplateForm = ({
 
   return (
     <form className="grid gap-4" id="template-form" onSubmit={handleSubmit}>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-slate-200 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -208,10 +222,10 @@ export const TemplateForm = ({
           <button
             type="button"
             onClick={() => setEditorMode("content")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
               editorMode === "content"
                 ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
           >
             <FileCode className="size-3.5" />
@@ -220,10 +234,10 @@ export const TemplateForm = ({
           <button
             type="button"
             onClick={() => setEditorMode("preview")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
               editorMode === "preview"
                 ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
           >
             <Eye className="size-3.5" />
@@ -232,10 +246,10 @@ export const TemplateForm = ({
           <button
             type="button"
             onClick={() => setEditorMode("compare")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
               editorMode === "compare"
                 ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             }`}
           >
             <Columns className="size-3.5" />
@@ -244,8 +258,12 @@ export const TemplateForm = ({
         </div>
       </div>
 
-      <div className={`grid h-[calc(100vh-385px)] min-h-[620px] gap-4 ${gridColsClass}`}>
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3  bg-white ${!isSchemaOpen ? "hidden" : ""}`}>
+      <div
+        className={`grid h-[calc(100vh-385px)] min-h-[620px] gap-4 ${gridColsClass}`}
+      >
+        <section
+          className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 bg-white ${!isSchemaOpen ? "hidden" : ""}`}
+        >
           <div className="grid gap-3">
             <div className="flex items-center gap-2">
               <ListTree className="size-4 text-slate-500" />
@@ -276,11 +294,14 @@ export const TemplateForm = ({
                   ([category, variables]) => {
                     const isCollapsed = collapsedCategories[category] ?? false
                     return (
-                      <div className="grid gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0" key={category}>
+                      <div
+                        className="grid gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0"
+                        key={category}
+                      >
                         <button
                           type="button"
                           onClick={() => toggleCategory(category)}
-                          className="flex w-full items-center justify-between text-left hover:bg-slate-50 p-1.5 rounded transition cursor-pointer"
+                          className="flex w-full cursor-pointer items-center justify-between rounded p-1.5 text-left transition hover:bg-slate-50"
                         >
                           <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
                             {category}
@@ -292,7 +313,7 @@ export const TemplateForm = ({
                           )}
                         </button>
                         {!isCollapsed && (
-                          <div className="grid gap-2 mt-1">
+                          <div className="mt-1 grid gap-2">
                             {variables.map((variable) => {
                               const snippet = variableSnippet(variable)
 
@@ -332,7 +353,7 @@ export const TemplateForm = ({
 
                                           return (
                                             <button
-                                              className="rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50 cursor-pointer"
+                                              className="cursor-pointer rounded border border-slate-200 px-1.5 py-1 text-xs text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                                               draggable
                                               key={field.key}
                                               type="button"
@@ -366,13 +387,15 @@ export const TemplateForm = ({
           </div>
         </section>
 
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 mt-4 bg-white  ${editorMode === "preview" ? "hidden" : ""}`}>
+        <section
+          className={`mt-4 grid min-h-0 grid-rows-[auto_1fr] gap-3 bg-white ${editorMode === "preview" ? "hidden" : ""}`}
+        >
           <div className="flex items-center gap-2">
             <FileCode className="size-4 text-slate-500" />
             <h2 className="text-sm font-semibold text-slate-950">Content</h2>
           </div>
           <textarea
-            className="h-full w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 overflow-y-auto"
+            className="h-full w-full resize-none overflow-y-auto rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             ref={textareaRef}
             value={draft.content}
             onChange={(event) =>
@@ -386,7 +409,9 @@ export const TemplateForm = ({
           />
         </section>
 
-        <section className={`grid min-h-0 grid-rows-[auto_1fr] gap-3 bg-white mt-4 ${editorMode === "content" ? "hidden" : ""}`}>
+        <section
+          className={`mt-4 grid min-h-0 grid-rows-[auto_1fr] gap-3 bg-white ${editorMode === "content" ? "hidden" : ""}`}
+        >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Eye className="size-4 text-slate-500" />
@@ -409,7 +434,9 @@ export const TemplateForm = ({
               </p>
             ) : previewContent ? (
               <div className={`font-sans ${markdownStyles}`}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{previewContent}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {previewContent}
+                </ReactMarkdown>
               </div>
             ) : preview.isLoading ? (
               <p className="font-sans text-sm text-slate-500">

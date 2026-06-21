@@ -51,7 +51,7 @@ export const AddProviderDialog = ({
     try {
       const result = await resolveProviderByUrl(
         selectedOrganizationId ?? "",
-        targetUrl,
+        targetUrl
       )
 
       // Map lookup result to OrganizationProviderInput
@@ -59,7 +59,9 @@ export const AddProviderDialog = ({
       const organization = result.organization
 
       const validCriticalities = ["low", "medium", "high", "critical"]
-      const lookupCriticality = (provider.securityCriticality || "").toLowerCase()
+      const lookupCriticality = (
+        provider.securityCriticality || ""
+      ).toLowerCase()
       const criticality = validCriticalities.includes(lookupCriticality)
         ? (lookupCriticality as "low" | "medium" | "high" | "critical")
         : "medium"
@@ -80,7 +82,10 @@ export const AddProviderDialog = ({
       onSuccess(providerInput)
     } catch (err: unknown) {
       console.error("Failed to resolve provider:", err)
-      const message = err instanceof Error ? err.message : "Could not retrieve details from the website."
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Could not retrieve details from the website."
       setErrorMsg(message)
       setStatus("error")
     }
@@ -92,13 +97,13 @@ export const AddProviderDialog = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs transition-opacity duration-200">
       <div className="relative w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl transition-all">
         {/* Close Button */}
         <button
           onClick={onClose}
           disabled={status === "loading"}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 disabled:pointer-events-none"
+          className="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
         >
           <X className="size-4" />
           <span className="sr-only">Close</span>
@@ -107,14 +112,20 @@ export const AddProviderDialog = ({
         {status === "idle" && (
           <form onSubmit={handleResolve} className="grid gap-4">
             <div>
-              <h3 className="text-lg font-semibold text-slate-950">Add new provider</h3>
+              <h3 className="text-lg font-semibold text-slate-950">
+                Add new provider
+              </h3>
               <p className="mt-1.5 text-sm text-slate-500">
-                Enter the vendor website URL to automatically import name, legal details, country, and security parameters.
+                Enter the vendor website URL to automatically import name, legal
+                details, country, and security parameters.
               </p>
             </div>
 
             <div className="grid gap-2">
-              <label htmlFor="vendor-url" className="text-sm font-medium text-slate-700">
+              <label
+                htmlFor="vendor-url"
+                className="text-sm font-medium text-slate-700"
+              >
                 Website URL
               </label>
               <div className="relative">
@@ -124,7 +135,7 @@ export const AddProviderDialog = ({
                   type="text"
                   required
                   placeholder="https://example.com"
-                  className="pl-9 h-10 border border-slate-200"
+                  className="h-10 border border-slate-200 pl-9"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   autoFocus
@@ -132,12 +143,8 @@ export const AddProviderDialog = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 mt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+            <div className="mt-2 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit">Import provider</Button>
@@ -148,24 +155,32 @@ export const AddProviderDialog = ({
         {status === "loading" && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <Loader2 className="size-10 animate-spin text-slate-900" />
-            <h4 className="mt-4 font-semibold text-slate-950">Analyzing vendor website...</h4>
-            <p className="mt-2 text-sm text-slate-500 max-w-xs">
-              We are automatically resolving company details, category, and security criticality from the website. This might take up to 10 seconds.
+            <h4 className="mt-4 font-semibold text-slate-950">
+              Analyzing vendor website...
+            </h4>
+            <p className="mt-2 max-w-xs text-sm text-slate-500">
+              We are automatically resolving company details, category, and
+              security criticality from the website. This might take up to 10
+              seconds.
             </p>
           </div>
         )}
 
         {status === "error" && (
           <div className="grid gap-4">
-            <div className="flex flex-col items-center justify-center text-center py-4">
-              <div className="flex size-12 items-center justify-center rounded-full bg-amber-50 text-amber-700 mb-3 border border-amber-100">
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <div className="mb-3 flex size-12 items-center justify-center rounded-full border border-amber-100 bg-amber-50 text-amber-700">
                 <AlertTriangle className="size-6" />
               </div>
-              <h4 className="font-semibold text-slate-950">Failed to resolve provider</h4>
-              <p className="mt-2 text-sm text-slate-500 max-w-sm">
-                We couldn&apos;t automatically retrieve details from <span className="font-medium text-slate-800">{url}</span>. ({errorMsg})
+              <h4 className="font-semibold text-slate-950">
+                Failed to resolve provider
+              </h4>
+              <p className="mt-2 max-w-sm text-sm text-slate-500">
+                We couldn&apos;t automatically retrieve details from{" "}
+                <span className="font-medium text-slate-800">{url}</span>. (
+                {errorMsg})
               </p>
-              <p className="mt-3 text-sm text-slate-600 max-w-sm font-medium">
+              <p className="mt-3 max-w-sm text-sm font-medium text-slate-600">
                 Would you like to manually define this provider instead?
               </p>
             </div>

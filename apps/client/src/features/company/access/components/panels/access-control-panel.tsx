@@ -175,7 +175,10 @@ export const AccessControlPanel = ({
             helperText={accessHelperText.accessReviewCadence}
             label="Access review frequency"
             name="accessReviewCadence"
-            options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+            options={[
+              { value: "", label: "Not set" },
+              ...securityCadenceOptions,
+            ]}
             placeholder="Not set"
           />
         )}

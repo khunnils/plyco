@@ -1,10 +1,5 @@
 import { AlertCircle, Loader2 } from "lucide-react"
-import {
-  type ReactNode,
-  useEffect,
-  useId,
-  useSyncExternalStore,
-} from "react"
+import { type ReactNode, useEffect, useId, useSyncExternalStore } from "react"
 
 import { Button } from "@/components/ui/button"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
@@ -109,15 +104,13 @@ export const ProfilePanelShell = ({
 
   return (
     <div className={cn("transition-opacity", isPanelLocked && "opacity-45")}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4 pb-2 border-b">
+      <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-slate-950">{title}</h3>
             {needsAttention && (
               <span title="Needs attention">
-                <AlertCircle
-                  className="h-4 w-4 text-amber-500 shrink-0"
-                />
+                <AlertCircle className="h-4 w-4 shrink-0 text-amber-500" />
               </span>
             )}
           </div>
@@ -127,12 +120,10 @@ export const ProfilePanelShell = ({
         </div>
         {isEditing ? (
           <div className="flex items-center gap-2">
-            <Button
-              disabled={isMutationPending}
-              type="button"
-              onClick={onSave}
-            >
-              {isMutationPending && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+            <Button disabled={isMutationPending} type="button" onClick={onSave}>
+              {isMutationPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               {saveLabel}
             </Button>
             <Button
@@ -182,7 +173,7 @@ export const ProfilePanelDetailGrid = ({
       >
         <dt className="pr-7 text-xs font-medium text-slate-500">{label}</dt>
         {helperText ? (
-          <div className="absolute right-2 top-2">
+          <div className="absolute top-2 right-2">
             <InfoTooltip text={helperText} />
           </div>
         ) : null}

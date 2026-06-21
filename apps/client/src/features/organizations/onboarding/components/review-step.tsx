@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Check, Loader2, LogOut } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -89,6 +90,7 @@ const setupTabs: Array<{ value: SetupTab; label: string }> = [
 
 export const ReviewStep = () => {
   const navigate = useNavigate()
+  const posthog = usePostHog()
   const {
     draft,
     submitError,
@@ -253,6 +255,12 @@ export const ReviewStep = () => {
         queryKey: securityProfileQueryKey(organization.id),
       })
       store.completeOnboarding(organization.id)
+      posthog.capture("organization_created", {
+        organization_id: organization.id,
+        organization_name: draft.company.companyName,
+        compliance_goals: draft.company.complianceGoals,
+        regions: draft.company.regions,
+      })
       onComplete?.()
       toast.success("Organization created")
     } catch (error) {
@@ -313,7 +321,6 @@ export const ReviewStep = () => {
       title="Review workspace setup"
     >
       <section className="grid gap-6">
-     
         <Tabs
           className="h-120 min-h-0 gap-6"
           value={setupTab}
@@ -357,7 +364,6 @@ export const ReviewStep = () => {
           >
             <ReviewActivitiesTab />
           </TabsContent>
-
         </Tabs>
 
         {submitError ? (

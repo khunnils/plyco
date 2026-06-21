@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { type Recommendation } from "@plyco/shared"
 import { ChevronDown, Lightbulb } from "lucide-react"
+import { usePostHog } from "@posthog/react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -11,9 +12,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  severityBorderClass,
-} from "@/features/recommendations/lib/recommendations"
+import { severityBorderClass } from "@/features/recommendations/lib/recommendations"
 
 export const RecommendationsList = ({
   isLoading,
@@ -23,6 +22,7 @@ export const RecommendationsList = ({
   recommendations: Recommendation[]
 }) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const posthog = usePostHog()
 
   const toggleRecommendation = (id: string) => {
     setExpandedIds((current) => {
@@ -32,6 +32,15 @@ export const RecommendationsList = ({
         next.delete(id)
       } else {
         next.add(id)
+        const rec = recommendations.find((r) => r.id === id)
+        if (rec) {
+          posthog.capture("recommendation_expanded", {
+            recommendation_id: rec.id,
+            recommendation_title: rec.title,
+            recommendation_category: rec.category,
+            recommendation_severity: rec.severity,
+          })
+        }
       }
 
       return next
@@ -74,7 +83,7 @@ export const RecommendationsList = ({
 
         return (
           <article
-            className={`grid gap-4 border border-l-4 rounded-sm border-slate-200 bg-white p-4 ${severityBorderClass(recommendation.severity)}`}
+            className={`grid gap-4 rounded-sm border border-l-4 border-slate-200 bg-white p-4 ${severityBorderClass(recommendation.severity)}`}
             key={recommendation.id}
           >
             <button
@@ -108,7 +117,7 @@ export const RecommendationsList = ({
 
             {isExpanded ? (
               <div className="grid gap-1 border-t border-slate-100 pt-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                   Recommendation
                 </span>
                 <p className="text-sm text-slate-700">

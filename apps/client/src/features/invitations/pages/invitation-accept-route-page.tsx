@@ -66,7 +66,7 @@ export const InvitationAcceptRoutePage = ({
           onSuccess: () => {
             setMagicLinkSent(true)
           },
-        },
+        }
       )
     }
 

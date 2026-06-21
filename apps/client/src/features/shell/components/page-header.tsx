@@ -38,7 +38,9 @@ export const PageHeader = ({
                       {item.label}
                     </Link>
                   ) : (
-                    <span className={isLast ? "text-primary" : "text-primary/75"}>
+                    <span
+                      className={isLast ? "text-primary" : "text-primary/75"}
+                    >
                       {item.label}
                     </span>
                   )}

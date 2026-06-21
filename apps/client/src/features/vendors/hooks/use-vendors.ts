@@ -58,8 +58,8 @@ export const useCreateOrganizationProviders = () => {
     mutationFn: (providers: OrganizationProviderInput[]) =>
       Promise.all(
         providers.map((provider) =>
-          createOrganizationProvider(selectedOrganizationId ?? "", provider),
-        ),
+          createOrganizationProvider(selectedOrganizationId ?? "", provider)
+        )
       ),
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export const useUpdateOrganizationProvider = () => {
             (currentProvider) =>
               currentProvider.id === id
                 ? { ...currentProvider, ...provider }
-                : currentProvider,
+                : currentProvider
           ),
         }
       })
@@ -114,7 +114,7 @@ export const useUpdateOrganizationProvider = () => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
           securityProfileQueryKey(organizationId),
-          context.previousSnapshot,
+          context.previousSnapshot
         )
       }
       toast.error(err.message ?? "Could not update provider")
@@ -156,7 +156,7 @@ export const useDeleteOrganizationProvider = () => {
         return {
           ...snapshot,
           organizationProviders: snapshot.organizationProviders.filter(
-            (provider) => provider.id !== id,
+            (provider) => provider.id !== id
           ),
         }
       })
@@ -167,7 +167,7 @@ export const useDeleteOrganizationProvider = () => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
           securityProfileQueryKey(organizationId),
-          context.previousSnapshot,
+          context.previousSnapshot
         )
       }
       toast.error(err.message ?? "Could not delete provider")
@@ -234,7 +234,7 @@ export const useUpdateServiceProviderUsage = () => {
             (currentUsage) =>
               currentUsage.id === id
                 ? { ...currentUsage, ...providerUsage }
-                : currentUsage,
+                : currentUsage
           ),
         }
       })
@@ -245,7 +245,7 @@ export const useUpdateServiceProviderUsage = () => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
           securityProfileQueryKey(organizationId),
-          context.previousSnapshot,
+          context.previousSnapshot
         )
       }
       toast.error(err.message ?? "Could not update provider usage")

@@ -10,6 +10,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
+import { usePostHog } from "@posthog/react"
 import {
   type DocumentSummary,
   type TemplateCatalog,
@@ -84,9 +85,12 @@ const getFileName = (orgName: string, slug: string, version: string) => {
 export const DocumentsRoutePage = () => {
   const { mode, id } = useParams()
   const navigate = useNavigate()
+  const posthog = usePostHog()
   const { selectedOrganization } = useSelectedOrganization()
   const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([])
-  const [documentFilters, setDocumentFilters] = useState<Record<string, "current" | "all">>({})
+  const [documentFilters, setDocumentFilters] = useState<
+    Record<string, "current" | "all">
+  >({})
   const [prevMode, setPrevMode] = useState(mode)
   const [prevId, setPrevId] = useState(id)
   const [templateName, setTemplateName] = useState("Untitled Template")
@@ -111,7 +115,9 @@ export const DocumentsRoutePage = () => {
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === id
   )
-  const [prevEditingTemplateName, setPrevEditingTemplateName] = useState<string | undefined>(editingTemplate?.name)
+  const [prevEditingTemplateName, setPrevEditingTemplateName] = useState<
+    string | undefined
+  >(editingTemplate?.name)
 
   // Sync state during render when route params change
   if (mode !== prevMode || id !== prevId) {
@@ -127,7 +133,11 @@ export const DocumentsRoutePage = () => {
   }
 
   // Sync state during render when editingTemplate loads asynchronously
-  if (mode === "edit" && editingTemplate && editingTemplate.name !== prevEditingTemplateName) {
+  if (
+    mode === "edit" &&
+    editingTemplate &&
+    editingTemplate.name !== prevEditingTemplateName
+  ) {
     setPrevEditingTemplateName(editingTemplate.name)
     setTemplateName(editingTemplate.name)
   }
@@ -156,7 +166,8 @@ export const DocumentsRoutePage = () => {
   let pageTitle = "Policies & Documents"
 
   let bannerTitle = "Documents & Policies"
-  let bannerSubtitle = "Manage security policy templates and generate customized compliance documents."
+  let bannerSubtitle =
+    "Manage security policy templates and generate customized compliance documents."
   let bannerButtons: React.ReactNode = null
   let content: React.ReactNode = null
 
@@ -167,7 +178,8 @@ export const DocumentsRoutePage = () => {
     ])
     pageTitle = "Add"
     bannerTitle = "Add template"
-    bannerSubtitle = "Choose a pre-defined system template or start from scratch."
+    bannerSubtitle =
+      "Choose a pre-defined system template or start from scratch."
     bannerButtons = (
       <Button asChild type="button" variant="outline">
         <Link to="/documents">Cancel</Link>
@@ -239,7 +251,8 @@ export const DocumentsRoutePage = () => {
     ])
     pageTitle = templateName
     bannerTitle = templateName
-    bannerSubtitle = "Draft a new policy template using markdown and schema variables."
+    bannerSubtitle =
+      "Draft a new policy template using markdown and schema variables."
     bannerButtons = (
       <>
         <Button
@@ -330,12 +343,16 @@ export const DocumentsRoutePage = () => {
             disabled={downloadDocumentPdf.isPending}
             type="button"
             variant="outline"
-            onClick={() =>
+            onClick={() => {
+              posthog.capture("document_pdf_downloaded", {
+                document_id: documentRecord.id,
+                document_title: documentRecord.title,
+              })
               downloadDocumentPdf.mutate({
                 id: documentRecord.id,
                 title: documentRecord.title,
               })
-            }
+            }}
           >
             Download PDF
           </Button>
@@ -364,7 +381,8 @@ export const DocumentsRoutePage = () => {
     ])
     pageTitle = "Policies & Documents"
     bannerTitle = "Documents & Policies"
-    bannerSubtitle = "Manage security policy templates and generate customized compliance documents."
+    bannerSubtitle =
+      "Manage security policy templates and generate customized compliance documents."
     bannerButtons = (
       <Button asChild className="w-fit" type="button">
         <Link to="/documents/add">Add</Link>
@@ -407,18 +425,18 @@ export const DocumentsRoutePage = () => {
 
           return (
             <article
-              className="border border-slate-200 bg-white rounded-md overflow-hidden"
+              className="overflow-hidden rounded-md border border-slate-200 bg-white"
               key={summary.template.id}
             >
               <div className="grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-start">
-                <div className="flex items-start gap-2.5 min-w-0">
+                <div className="flex min-w-0 items-start gap-2.5">
                   {summary.document ? (
                     <Button
                       size="icon-xs"
                       type="button"
                       variant="ghost"
                       onClick={toggleExpand}
-                      className="mt-0.5 text-slate-500 hover:text-slate-900 shrink-0"
+                      className="mt-0.5 shrink-0 text-slate-500 hover:text-slate-900"
                     >
                       {isExpanded ? (
                         <ChevronUp className="size-4" />
@@ -439,8 +457,9 @@ export const DocumentsRoutePage = () => {
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-slate-950">
                         {summary.template.name}
-                        <span className="text-xs font-normal text-slate-500 ml-2">
-                          v{summary.template.versionMajor}.{summary.template.versionMinor}
+                        <span className="ml-2 text-xs font-normal text-slate-500">
+                          v{summary.template.versionMajor}.
+                          {summary.template.versionMinor}
                         </span>
                       </h2>
                       <Badge
@@ -465,7 +484,7 @@ export const DocumentsRoutePage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap justify-start gap-2 md:justify-end shrink-0">
+                <div className="flex shrink-0 flex-wrap justify-start gap-2 md:justify-end">
                   <Button
                     size="icon"
                     type="button"
@@ -491,9 +510,18 @@ export const DocumentsRoutePage = () => {
                     type="button"
                     variant="outline"
                     onClick={() =>
-                      createDocument.mutate({
-                        templateId: summary.template.id,
-                      })
+                      createDocument.mutate(
+                        { templateId: summary.template.id },
+                        {
+                          onSuccess: (doc) => {
+                            posthog.capture("document_published", {
+                              template_id: summary.template.id,
+                              template_name: summary.template.name,
+                              document_id: doc.id,
+                            })
+                          },
+                        }
+                      )
                     }
                   >
                     Publish
@@ -502,29 +530,42 @@ export const DocumentsRoutePage = () => {
               </div>
 
               {isExpanded && summary.document && (
-                <div className="border-t border-slate-100 bg-slate-50/50 p-4 pl-12 flex flex-col gap-3">
+                <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 p-4 pl-12">
                   {summary.documents && summary.documents.length > 1 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-500">Document Versions</span>
+                      <span className="text-xs font-medium text-slate-500">
+                        Document Versions
+                      </span>
                       <div className="flex items-center rounded-md border border-slate-200 bg-white p-0.5">
                         <button
                           type="button"
-                          onClick={() => setDocumentFilters(prev => ({ ...prev, [summary.template.id]: "current" }))}
-                          className={`px-2 py-1 rounded-sm text-xs font-medium cursor-pointer ${
-                            (documentFilters[summary.template.id] ?? "current") === "current"
+                          onClick={() =>
+                            setDocumentFilters((prev) => ({
+                              ...prev,
+                              [summary.template.id]: "current",
+                            }))
+                          }
+                          className={`cursor-pointer rounded-sm px-2 py-1 text-xs font-medium ${
+                            (documentFilters[summary.template.id] ??
+                              "current") === "current"
                               ? "bg-slate-900 text-white"
-                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                           }`}
                         >
                           Current
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDocumentFilters(prev => ({ ...prev, [summary.template.id]: "all" }))}
-                          className={`px-2 py-1 rounded-sm text-xs font-medium cursor-pointer ${
+                          onClick={() =>
+                            setDocumentFilters((prev) => ({
+                              ...prev,
+                              [summary.template.id]: "all",
+                            }))
+                          }
+                          className={`cursor-pointer rounded-sm px-2 py-1 text-xs font-medium ${
                             documentFilters[summary.template.id] === "all"
                               ? "bg-slate-900 text-white"
-                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                           }`}
                         >
                           All ({summary.documents.length})
@@ -534,40 +575,48 @@ export const DocumentsRoutePage = () => {
                   )}
 
                   <div className="flex flex-col gap-2">
-                    {((documentFilters[summary.template.id] ?? "current") === "current"
+                    {((documentFilters[summary.template.id] ?? "current") ===
+                    "current"
                       ? [summary.document]
-                      : (summary.documents || [])
+                      : summary.documents || []
                     ).map((doc) => {
-                      if (!doc) return null;
+                      if (!doc) return null
                       const isCurrentVersion =
-                        doc.templateVersionMajor === summary.template.versionMajor &&
-                        doc.templateVersionMinor === summary.template.versionMinor;
+                        doc.templateVersionMajor ===
+                          summary.template.versionMajor &&
+                        doc.templateVersionMinor ===
+                          summary.template.versionMinor
 
                       return (
-                        <div key={doc.id} className="flex items-center justify-between gap-4 py-2 bg-white border border-slate-100 rounded-md px-3">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <FileText className="size-5 text-slate-500 shrink-0" />
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between gap-4 rounded-md border border-slate-100 bg-white px-3 py-2"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <FileText className="size-5 shrink-0 text-slate-500" />
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-slate-900 truncate flex items-center gap-2">
+                              <p className="flex items-center gap-2 truncate text-sm font-medium text-slate-900">
                                 <span>
                                   {getFileName(
-                                    selectedOrganization?.name ?? "organization",
+                                    selectedOrganization?.name ??
+                                      "organization",
                                     summary.template.slug,
                                     `${doc.templateVersionMajor}.${doc.templateVersionMinor}`
                                   )}
                                 </span>
                                 {isCurrentVersion && (
-                                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset">
                                     Current
                                   </span>
                                 )}
                               </p>
-                              <p className="text-xs text-slate-500 mt-0.5">
-                                Published on {new Date(doc.generatedAt).toLocaleString()}
+                              <p className="mt-0.5 text-xs text-slate-500">
+                                Published on{" "}
+                                {new Date(doc.generatedAt).toLocaleString()}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex shrink-0 items-center gap-2">
                             <Button
                               size="icon"
                               type="button"
@@ -585,12 +634,16 @@ export const DocumentsRoutePage = () => {
                                 size="icon"
                                 type="button"
                                 variant="outline"
-                                onClick={() =>
+                                onClick={() => {
+                                  posthog.capture("document_pdf_downloaded", {
+                                    document_id: doc.id,
+                                    document_title: doc.title,
+                                  })
                                   downloadDocumentPdf.mutate({
                                     id: doc.id,
                                     title: doc.title,
                                   })
-                                }
+                                }}
                                 title="Download PDF"
                               >
                                 <Download />
@@ -598,7 +651,7 @@ export const DocumentsRoutePage = () => {
                             )}
                           </div>
                         </div>
-                      );
+                      )
                     })}
                   </div>
                 </div>
@@ -618,15 +671,15 @@ export const DocumentsRoutePage = () => {
         title={pageTitle}
       />
       <div className="grid gap-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b border-slate-200 pb-4">
+        <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-base font-semibold text-slate-950 flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
               <span>{bannerTitle}</span>
               {(mode === "new" || mode === "edit") && (
                 <button
                   type="button"
                   onClick={() => setIsRenameOpen(true)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded hover:bg-slate-100"
+                  className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
                   title="Rename template"
                 >
                   <Pencil className="size-3.5" />
@@ -636,7 +689,7 @@ export const DocumentsRoutePage = () => {
             <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
           </div>
           {bannerButtons ? (
-            <div className="flex flex-wrap gap-2 shrink-0">{bannerButtons}</div>
+            <div className="flex shrink-0 flex-wrap gap-2">{bannerButtons}</div>
           ) : null}
         </div>
         {content}
@@ -644,8 +697,10 @@ export const DocumentsRoutePage = () => {
 
       {isRenameOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            <h3 className="text-lg font-semibold text-slate-950">Rename template</h3>
+          <div className="animate-in fade-in zoom-in-95 w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl duration-150">
+            <h3 className="text-lg font-semibold text-slate-950">
+              Rename template
+            </h3>
             <p className="mt-1 text-sm text-slate-500">
               Enter a new name for this policy template.
             </p>

@@ -51,7 +51,10 @@ export const AccessProfileFields = ({
               control={form.control}
               label="Access review cadence"
               name="access.accessReviewCadence"
-              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
               placeholder="Not set"
             />
           )}

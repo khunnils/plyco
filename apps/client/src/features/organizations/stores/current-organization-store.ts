@@ -16,9 +16,9 @@ export const useCurrentOrganizationStore = create<CurrentOrganizationState>(
     selectOrganization: (id) => set({ selectedOrganizationId: id }),
     markOnboarding: (organizationId) =>
       set((state) => ({
-        onboardingOrganizationIds: new Set(
-          state.onboardingOrganizationIds
-        ).add(organizationId),
+        onboardingOrganizationIds: new Set(state.onboardingOrganizationIds).add(
+          organizationId
+        ),
       })),
     completeOnboarding: (organizationId) =>
       set((state) => {

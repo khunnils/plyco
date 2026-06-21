@@ -84,7 +84,7 @@ export const ProviderSelector = ({
   return (
     <div className="grid gap-4">
       {/* Header section with search input and action buttons */}
-      <div className="flex gap-2 justify-between">
+      <div className="flex justify-between gap-2">
         <div>
           <h3 className="font-semibold text-slate-950">
             Add providers from catalog
@@ -94,7 +94,7 @@ export const ProviderSelector = ({
             inventory.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0 a">
+        <div className="a flex shrink-0 items-center gap-2">
           <Button
             disabled={submitDisabled || selectedProviders.length === 0}
             type="button"
@@ -102,13 +102,12 @@ export const ProviderSelector = ({
           >
             Add selected
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} >
+          <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
         </div>
-
       </div>
-      <Separator /> 
+      <Separator />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full max-w-xl flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -130,7 +129,7 @@ export const ProviderSelector = ({
               className={cn(
                 "shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950",
                 selectedCategory === category &&
-                "border-slate-900 bg-slate-900 text-white hover:border-slate-900 hover:text-white"
+                  "border-slate-900 bg-slate-900 text-white hover:border-slate-900 hover:text-white"
               )}
               key={category}
               type="button"
@@ -156,13 +155,11 @@ export const ProviderSelector = ({
             <button
               aria-pressed={alreadyAdded || selected}
               className={cn(
-                "border p-4 text-left transition focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:outline-none ",
+                "border p-4 text-left transition focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:outline-none",
                 alreadyAdded
                   ? "border-slate-200 bg-slate-50 text-slate-400"
                   : "border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50",
-                selected &&
-                !alreadyAdded &&
-                "border-slate-900 bg-slate-50"
+                selected && !alreadyAdded && "border-slate-900 bg-slate-50"
               )}
               disabled={alreadyAdded}
               key={provider.id}
@@ -203,18 +200,21 @@ export const ProviderSelector = ({
       </div>
 
       {!isLoading && filteredProviders.length === 0 ? (
-        <p className="text-sm text-slate-500 my-4">
+        <p className="my-4 text-sm text-slate-500">
           {searchTerm.trim() !== ""
             ? "No providers match your search."
             : "No providers match this category."}
         </p>
       ) : null}
       {isLoading ? (
-        <p className="text-sm text-slate-500 my-4">Loading provider catalog...</p>
+        <p className="my-4 text-sm text-slate-500">
+          Loading provider catalog...
+        </p>
       ) : null}
       {error ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 my-4">
-          Provider catalog unavailable. Use "Provider not listed? click to import..." below to add a custom provider.
+        <p className="my-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Provider catalog unavailable. Use "Provider not listed? click to
+          import..." below to add a custom provider.
         </p>
       ) : null}
 
@@ -222,14 +222,17 @@ export const ProviderSelector = ({
       <button
         type="button"
         onClick={onChooseOther}
-        className="mt-4 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition hover:border-slate-300 hover:bg-slate-100/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2 cursor-pointer"
+        className="mt-4 flex w-full cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition hover:border-slate-300 hover:bg-slate-100/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
       >
-        <div className="flex size-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 mb-3">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
           <Plus className="size-5" />
         </div>
-        <h4 className="text-sm font-semibold text-slate-950">Add custom provider</h4>
-        <p className="mt-1 text-xs text-slate-500 max-w-sm">
-          Can't find the provider you are looking for? Import company details automatically from any website URL.
+        <h4 className="text-sm font-semibold text-slate-950">
+          Add custom provider
+        </h4>
+        <p className="mt-1 max-w-sm text-xs text-slate-500">
+          Can't find the provider you are looking for? Import company details
+          automatically from any website URL.
         </p>
       </button>
     </div>

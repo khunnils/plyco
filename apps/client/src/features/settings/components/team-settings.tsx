@@ -88,8 +88,8 @@ export const TeamSettings = ({
         <div>
           <h2 className="text-xl font-semibold text-slate-950">Team</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Members can edit workspace data. Owners can manage members and delete
-            the organization.
+            Members can edit workspace data. Owners can manage members and
+            delete the organization.
           </p>
         </div>
 
@@ -139,26 +139,33 @@ export const TeamSettings = ({
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                {isOwner ? <TableHead className="text-right">Actions</TableHead> : null}
+                {isOwner ? (
+                  <TableHead className="text-right">Actions</TableHead>
+                ) : null}
               </TableRow>
             </TableHeader>
             <TableBody>
               {members.isLoading ? (
                 <TableRow>
-                  <TableCell className="text-slate-500" colSpan={isOwner ? 4 : 3}>
+                  <TableCell
+                    className="text-slate-500"
+                    colSpan={isOwner ? 4 : 3}
+                  >
                     Loading team members...
                   </TableCell>
                 </TableRow>
               ) : activeMembers.length === 0 ? (
                 <TableRow>
-                  <TableCell className="text-slate-500" colSpan={isOwner ? 4 : 3}>
+                  <TableCell
+                    className="text-slate-500"
+                    colSpan={isOwner ? 4 : 3}
+                  >
                     No members found.
                   </TableCell>
                 </TableRow>
               ) : (
                 activeMembers.map((member) => {
-                  const isLastOwner =
-                    member.role === "owner" && ownerCount <= 1
+                  const isLastOwner = member.role === "owner" && ownerCount <= 1
                   const isCurrentUser = member.userId === user.id
 
                   return (
@@ -290,9 +297,7 @@ export const TeamSettings = ({
                           size="sm"
                           type="button"
                           variant="ghost"
-                          onClick={() =>
-                            cancelInvitation.mutate(invitation.id)
-                          }
+                          onClick={() => cancelInvitation.mutate(invitation.id)}
                         >
                           Cancel
                         </Button>

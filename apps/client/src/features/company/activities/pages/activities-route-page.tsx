@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { isComplianceFieldVisible } from "@plyco/shared"
+import { usePostHog } from "@posthog/react"
 
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
@@ -20,6 +21,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const ActivitiesRoutePage = () => {
+  const posthog = usePostHog()
   const securityProfile = useSecurityProfile()
   const vocabulary = useVocabulary()
   const createBusinessActivity = useCreateBusinessActivity()
@@ -117,11 +119,28 @@ export const ActivitiesRoutePage = () => {
           showLegalBasis={showLegalBasis}
           vocabulary={vocabularyData}
           onCreate={(activity, onSuccess) =>
-            createBusinessActivity.mutate(activity, { onSuccess })
+            createBusinessActivity.mutate(activity, {
+              onSuccess: () => {
+                posthog.capture("activity_created", {
+                  activity_name: activity.name,
+                })
+                onSuccess?.()
+              },
+            })
           }
-          onDelete={(activity) => deleteBusinessActivity.mutate(activity.id)}
+          onDelete={(activity) => {
+            posthog.capture("activity_deleted", {
+              activity_name: activity.name,
+            })
+            deleteBusinessActivity.mutate(activity.id)
+          }}
           onUpdate={(input, onSuccess) =>
-            updateBusinessActivity.mutate(input, { onSuccess })
+            updateBusinessActivity.mutate(input, {
+              onSuccess: () => {
+                posthog.capture("activity_updated", { activity_id: input.id })
+                onSuccess?.()
+              },
+            })
           }
           onReorder={(ids) => reorderBusinessActivities.mutate(ids)}
           reorderDisabled={reorderBusinessActivities.isPending}

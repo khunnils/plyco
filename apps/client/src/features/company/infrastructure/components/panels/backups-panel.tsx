@@ -44,7 +44,10 @@ const toBackupsDraft = (
   restoreTestingCadence: infrastructure.restoreTestingCadence,
 })
 
-const backupRows = (draft: BackupsDraft, vocabulary: Vocabulary | undefined) => {
+const backupRows = (
+  draft: BackupsDraft,
+  vocabulary: Vocabulary | undefined
+) => {
   const rows: ProfilePanelDetailRow[] = [
     [
       "Backups enabled",
@@ -169,7 +172,10 @@ export const BackupsPanel = ({
               helperText={infrastructureHelperText.backupCadence}
               label="Backup frequency"
               name="backupCadence"
-              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
               placeholder="Not set"
             />
             <SelectField
@@ -198,7 +204,10 @@ export const BackupsPanel = ({
               helperText={infrastructureHelperText.restoreTestingCadence}
               label="Restore test frequency"
               name="restoreTestingCadence"
-              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
               placeholder="Not set"
             />
           </>

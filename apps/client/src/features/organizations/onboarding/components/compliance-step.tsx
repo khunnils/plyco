@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, ArrowRight, LogOut } from "lucide-react"
+import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
@@ -13,7 +14,10 @@ import {
   onboardingComplianceGoalOptions,
 } from "../../components/types"
 
-const ENRICHED_COMPLIANCE: Record<string, { description: string; icon: string }> = {
+const ENRICHED_COMPLIANCE: Record<
+  string,
+  { description: string; icon: string }
+> = {
   soc_2: {
     description: "Security, availability, and confidentiality trust standard.",
     icon: "shield",
@@ -26,6 +30,7 @@ const ENRICHED_COMPLIANCE: Record<string, { description: string; icon: string }>
 
 export const ComplianceStep = () => {
   const navigate = useNavigate()
+  const posthog = usePostHog()
   const {
     draft,
     updateDraft,
@@ -74,6 +79,9 @@ export const ComplianceStep = () => {
   ) : null
 
   const handleNext = () => {
+    posthog.capture("onboarding_compliance_goals_selected", {
+      compliance_goals: draft?.company.complianceGoals ?? [],
+    })
     setSubmitError(null)
     navigate("../lookup")
   }
@@ -84,16 +92,12 @@ export const ComplianceStep = () => {
 
   const footer = (
     <div className="flex items-center justify-between border-t border-slate-200 pt-5">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleBack}
-      >
+      <Button type="button" variant="outline" onClick={handleBack}>
         <ArrowLeft />
         Back
       </Button>
       <Button
-        className="bg-slate-900 hover:bg-slate-800 text-white focus-visible:border-slate-950 focus-visible:ring-slate-100"
+        className="bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-950 focus-visible:ring-slate-100"
         type="button"
         onClick={handleNext}
       >

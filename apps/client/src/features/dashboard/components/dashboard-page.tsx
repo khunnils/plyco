@@ -56,25 +56,25 @@ const CategoryCard = ({
   return (
     <Link
       to={href}
-      className={`group relative flex flex-col justify-between border border-slate-200 bg-white p-4  hover:border-slate-300 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none ${className}`}
+      className={`group relative flex flex-col justify-between border border-slate-200 bg-white p-4 hover:border-slate-300 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none ${className}`}
     >
       <div>
-        <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="mb-4 flex items-center justify-between gap-4">
           <div className="flex size-10 items-center justify-center rounded-md bg-blue-50 text-slate-600">
             <Icon className="h-5 w-5" />
           </div>
           {isComplete ? (
-            <CheckCircle2 className="h-6 w-6 text-emerald-600 fill-emerald-50 shrink-0" />
+            <CheckCircle2 className="h-6 w-6 shrink-0 fill-emerald-50 text-emerald-600" />
           ) : (
-            <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-blue-600 shrink-0">
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-blue-600">
               <div className="h-2 w-2 rounded-full bg-blue-600"></div>
             </div>
           )}
         </div>
-        <h3 className="text-base font-semibold text-slate-950 group-hover:text-slate-700 transition-colors">
+        <h3 className="text-base font-semibold text-slate-950 transition-colors group-hover:text-slate-700">
           {title}
         </h3>
-        <p className="mt-1 text-sm text-slate-500 leading-normal">
+        <p className="mt-1 text-sm leading-normal text-slate-500">
           {statusText || description}
         </p>
       </div>
@@ -83,7 +83,7 @@ const CategoryCard = ({
 }
 
 const SectionHeading = ({ children }: { children: string }) => (
-  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+  <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
     {children}
   </span>
 )
@@ -108,7 +108,7 @@ const PolicyReasonsTooltip = ({
         <span className="relative inline-flex size-3 rounded-full bg-amber-500" />
       </button>
       <span
-        className="pointer-events-none absolute right-0 top-7 z-20 hidden w-80 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-xs font-normal leading-5 text-slate-600 shadow-lg group-hover:block group-focus-within:block"
+        className="pointer-events-none absolute top-7 right-0 z-20 hidden w-80 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-xs leading-5 font-normal text-slate-600 shadow-lg group-focus-within:block group-hover:block"
         role="tooltip"
       >
         {outdatedDocuments.slice(0, 4).map((summary) => (
@@ -304,7 +304,7 @@ export const DashboardPage = ({
         </section>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <CategoryCard
           title="Profile"
           description="Company identity, operating context, and contacts."
@@ -344,7 +344,7 @@ export const DashboardPage = ({
 
       <section className="grid gap-4">
         <SectionHeading>{SIDEBAR_SECTION.productAndData}</SectionHeading>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <CategoryCard
             title="Activities"
             description="Processing activities mapping."
@@ -368,8 +368,10 @@ export const DashboardPage = ({
         <SectionHeading>Services</SectionHeading>
 
         {progress.services.length === 0 ? (
-          <div className="border border-dashed border-slate-300 bg-slate-50 p-8 text-center rounded-lg">
-            <h3 className="text-sm font-semibold text-slate-950">No services defined</h3>
+          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+            <h3 className="text-sm font-semibold text-slate-950">
+              No services defined
+            </h3>
             <p className="mt-1 text-sm text-slate-500">
               No services have been defined yet.
             </p>
@@ -377,7 +379,9 @@ export const DashboardPage = ({
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
             {progress.services.map((service) => {
-              const rawService = profile.services.find((s) => s.id === service.id)
+              const rawService = profile.services.find(
+                (s) => s.id === service.id
+              )
               if (!rawService) return null
 
               return (

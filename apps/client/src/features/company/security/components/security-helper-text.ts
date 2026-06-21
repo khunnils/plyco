@@ -1,5 +1,6 @@
 export const securityHelperText = {
-  codeReviewRequired: "Changes are reviewed by another person before they are merged.",
+  codeReviewRequired:
+    "Changes are reviewed by another person before they are merged.",
   dependencySecurityMonitoring:
     "Dependencies are monitored for known security vulnerabilities.",
   secretScanning: "Source code is scanned for exposed credentials and secrets.",
@@ -13,7 +14,8 @@ export const securityHelperText = {
     "How often you scan your app, dependencies, or infrastructure for known issues.",
   patchingSlaCriticalDaysStatus:
     "Whether you have a defined fix timeline for critical vulnerabilities.",
-  patchingSlaCriticalDays: "How quickly critical vulnerabilities should be fixed.",
+  patchingSlaCriticalDays:
+    "How quickly critical vulnerabilities should be fixed.",
   patchingSlaHighDaysStatus:
     "Whether you have a defined fix timeline for high-severity vulnerabilities.",
   patchingSlaHighDays:

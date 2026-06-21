@@ -1,6 +1,10 @@
 import { useState } from "react"
+import { usePostHog } from "@posthog/react"
 
-import { useCountries, useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
+import {
+  useCountries,
+  useVocabulary,
+} from "@/features/vocabulary/hooks/use-vocabulary"
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
 import {
   useCreateOrganizationProvider,
@@ -18,6 +22,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const VendorsRoutePage = () => {
+  const posthog = usePostHog()
   const providers = useProviders()
   const countries = useCountries()
   const vocabulary = useVocabulary()
@@ -74,14 +79,22 @@ export const VendorsRoutePage = () => {
         onCreateProviders={(providerInputs) =>
           createProviders.mutate(providerInputs, {
             onSuccess: () => {
+              posthog.capture("vendor_added_from_catalog", {
+                vendor_count: providerInputs.length,
+                vendor_names: providerInputs.map((p) => p.name),
+              })
               setShowVendorCatalog(false)
               setShowCustomVendorForm(false)
             },
           })
         }
-        onDeleteProvider={(provider) =>
+        onDeleteProvider={(provider) => {
+          posthog.capture("vendor_deleted", {
+            vendor_name: provider.name,
+            vendor_category: provider.category,
+          })
           deleteProvider.mutate(provider.id)
-        }
+        }}
         onEditProvider={startEditingVendor}
         onShowCustomVendorFormChange={setShowCustomVendorForm}
         onShowVendorCatalogChange={setShowVendorCatalog}
@@ -91,6 +104,10 @@ export const VendorsRoutePage = () => {
               { id: editingProvider.id, provider },
               {
                 onSuccess: () => {
+                  posthog.capture("vendor_updated", {
+                    vendor_name: provider.name,
+                    vendor_category: provider.category,
+                  })
                   startEditingVendor(null)
                   setShowVendorCatalog(false)
                   setShowCustomVendorForm(false)
@@ -102,6 +119,10 @@ export const VendorsRoutePage = () => {
 
           createProvider.mutate(provider, {
             onSuccess: () => {
+              posthog.capture("vendor_added_manually", {
+                vendor_name: provider.name,
+                vendor_category: provider.category,
+              })
               setShowVendorCatalog(false)
               setShowCustomVendorForm(false)
             },

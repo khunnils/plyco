@@ -173,7 +173,6 @@ const ProviderPicker = ({
   )
 }
 
-
 export const InfrastructureProfileFields = ({
   form,
   providers = [],
@@ -252,7 +251,9 @@ export const InfrastructureProfileFields = ({
             systemType="cloud"
           />
           {infrastructureSystemTypes
-            .filter((systemType) => systemType !== "ai" && systemType !== "cloud")
+            .filter(
+              (systemType) => systemType !== "ai" && systemType !== "cloud"
+            )
             .map((systemType) => (
               <ProviderPicker
                 form={form}
@@ -286,7 +287,10 @@ export const InfrastructureProfileFields = ({
               control={form.control}
               label="At-rest algorithm"
               name="infrastructure.atRestAlgorithm"
-              options={[{ value: "", label: "Not set" }, ...securityEncryptionAlgorithmOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityEncryptionAlgorithmOptions,
+              ]}
               placeholder="Not set"
             />
           ) : null}
@@ -300,7 +304,10 @@ export const InfrastructureProfileFields = ({
               control={form.control}
               label="Minimum TLS version"
               name="infrastructure.inTransitMinimumTlsVersion"
-              options={[{ value: "", label: "Not set" }, ...securityTlsVersionOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityTlsVersionOptions,
+              ]}
               placeholder="Not set"
             />
           ) : null}
@@ -308,7 +315,10 @@ export const InfrastructureProfileFields = ({
             control={form.control}
             label="Key management provider"
             name="infrastructure.keyManagementProvider"
-            options={[{ value: "", label: "Not set" }, ...securityKeyManagementProviderOptions]}
+            options={[
+              { value: "", label: "Not set" },
+              ...securityKeyManagementProviderOptions,
+            ]}
             placeholder="Not set"
           />
         </div>
@@ -327,7 +337,10 @@ export const InfrastructureProfileFields = ({
             control={form.control}
             label="Security monitoring"
             name="infrastructure.securityMonitoring"
-            options={[{ value: "", label: "Not set" }, ...securityMonitoringOptions]}
+            options={[
+              { value: "", label: "Not set" },
+              ...securityMonitoringOptions,
+            ]}
             placeholder="Not set"
           />
         </div>
@@ -346,11 +359,16 @@ export const InfrastructureProfileFields = ({
                 control={form.control}
                 label="Backup cadence"
                 name="infrastructure.backupCadence"
-                options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+                options={[
+                  { value: "", label: "Not set" },
+                  ...securityCadenceOptions,
+                ]}
                 placeholder="Not set"
               />
               <TextField
-                error={form.formState.errors.infrastructure?.backupRetentionDays}
+                error={
+                  form.formState.errors.infrastructure?.backupRetentionDays
+                }
                 label="Backup retention days"
                 name="infrastructure.backupRetentionDays"
                 register={form.register}
@@ -361,7 +379,10 @@ export const InfrastructureProfileFields = ({
                 control={form.control}
                 label="Restore testing cadence"
                 name="infrastructure.restoreTestingCadence"
-                options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+                options={[
+                  { value: "", label: "Not set" },
+                  ...securityCadenceOptions,
+                ]}
                 placeholder="Not set"
               />
             </>
@@ -381,7 +402,10 @@ export const InfrastructureProfileFields = ({
               control={form.control}
               label="Vendor review cadence"
               name="infrastructure.vendorReviewCadence"
-              options={[{ value: "", label: "Not set" }, ...securityCadenceOptions]}
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
               placeholder="Not set"
             />
           )}
