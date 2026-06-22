@@ -46,7 +46,10 @@ export const DataTypesPanel = ({
   subjectTypeOptions,
   vocabulary,
   onSave,
+  onCreate,
+  onDelete,
   onReorder,
+  onUpdate,
   reorderDisabled,
 }: {
   collectionMethodOptions: Option[]
@@ -55,7 +58,10 @@ export const DataTypesPanel = ({
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (dataTypes: StoredDataType[], onSuccess?: () => void) => void
+  onCreate?: (dataType: StoredDataType) => void
+  onDelete?: (dataType: StoredDataType) => void
   onReorder: (ids: string[]) => void
+  onUpdate?: (dataType: StoredDataType) => void
   reorderDisabled: boolean
 }) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
@@ -85,7 +91,11 @@ export const DataTypesPanel = ({
   }
 
   const handleCreate = (dataType: StoredDataType) => {
-    onSave([...dataTypes, normalizeDataType(dataType)], closeForm)
+    const normalizedDataType = normalizeDataType(dataType)
+    onSave([...dataTypes, normalizedDataType], () => {
+      onCreate?.(normalizedDataType)
+      closeForm()
+    })
   }
 
   const handleUpdate = (dataType: StoredDataType) => {
@@ -93,16 +103,23 @@ export const DataTypesPanel = ({
       return
     }
 
+    const normalizedDataType = normalizeDataType(dataType)
     onSave(
       dataTypes.map((item, index) =>
-        index === editingIndex ? normalizeDataType(dataType) : item
+        index === editingIndex ? normalizedDataType : item
       ),
-      closeForm
+      () => {
+        onUpdate?.(normalizedDataType)
+        closeForm()
+      }
     )
   }
 
   const handleDelete = (index: number) => {
-    onSave(dataTypes.filter((_, currentIndex) => currentIndex !== index))
+    const deletedDataType = dataTypes[index]
+    onSave(dataTypes.filter((_, currentIndex) => currentIndex !== index), () => {
+      if (deletedDataType) onDelete?.(deletedDataType)
+    })
     const deletedId = dataTypes[index]?.id
     setExpandedIds((current) => {
       const next = new Set(current)

@@ -1,6 +1,7 @@
 import { MailPlus, MoreHorizontal, Trash2 } from "lucide-react"
 import { type FormEvent } from "react"
 import { useMemo, useState } from "react"
+import { usePostHog } from "@posthog/react"
 import {
   organizationInvitationInputSchema,
   type AuthUser,
@@ -10,6 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +45,7 @@ export const TeamSettings = ({
   organization: OrganizationSummary
   user: AuthUser
 }) => {
+  const posthog = usePostHog()
   const isOwner = organization.role === "owner"
   const members = useOrganizationMembers(organization.id)
   const invitations = useOrganizationInvitations(organization.id, isOwner)
@@ -55,8 +58,11 @@ export const TeamSettings = ({
   const [role, setRole] = useState<OrganizationMembershipRole>("member")
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
-  const activeMembers = members.data ?? []
-  const pendingInvites = invitations.data ?? []
+  const activeMembers = useMemo(() => members.data ?? [], [members.data])
+  const pendingInvites = useMemo(
+    () => invitations.data ?? [],
+    [invitations.data]
+  )
   const ownerCount = useMemo(
     () => activeMembers.filter((member) => member.role === "owner").length,
     [activeMembers]
@@ -74,6 +80,9 @@ export const TeamSettings = ({
     setInviteError(null)
     inviteMember.mutate(parsed.data, {
       onSuccess: () => {
+        posthog.capture(POSTHOG_EVENTS.TEAM_INVITATION_SENT, {
+          role: parsed.data.role,
+        })
         setEmail("")
         setRole("member")
       },
@@ -201,10 +210,21 @@ export const TeamSettings = ({
                               <DropdownMenuItem
                                 disabled={member.role === "member"}
                                 onSelect={() =>
-                                  updateRole.mutate({
-                                    userId: member.userId,
-                                    input: { role: "member" },
-                                  })
+                                  updateRole.mutate(
+                                    {
+                                      userId: member.userId,
+                                      input: { role: "member" },
+                                    },
+                                    {
+                                      onSuccess: () =>
+                                        posthog.capture(
+                                          POSTHOG_EVENTS.TEAM_MEMBER_ROLE_UPDATED,
+                                          {
+                                            role: "member",
+                                          }
+                                        ),
+                                    }
+                                  )
                                 }
                               >
                                 Make member
@@ -212,10 +232,21 @@ export const TeamSettings = ({
                               <DropdownMenuItem
                                 disabled={member.role === "owner"}
                                 onSelect={() =>
-                                  updateRole.mutate({
-                                    userId: member.userId,
-                                    input: { role: "owner" },
-                                  })
+                                  updateRole.mutate(
+                                    {
+                                      userId: member.userId,
+                                      input: { role: "owner" },
+                                    },
+                                    {
+                                      onSuccess: () =>
+                                        posthog.capture(
+                                          POSTHOG_EVENTS.TEAM_MEMBER_ROLE_UPDATED,
+                                          {
+                                            role: "owner",
+                                          }
+                                        ),
+                                    }
+                                  )
                                 }
                               >
                                 Make owner
@@ -225,7 +256,15 @@ export const TeamSettings = ({
                                 disabled={isLastOwner}
                                 variant="destructive"
                                 onSelect={() =>
-                                  removeMember.mutate(member.userId)
+                                  removeMember.mutate(member.userId, {
+                                    onSuccess: () =>
+                                      posthog.capture(
+                                        POSTHOG_EVENTS.TEAM_MEMBER_REMOVED,
+                                        {
+                                          previous_role: member.role,
+                                        }
+                                      ),
+                                  })
                                 }
                               >
                                 Remove member
@@ -297,7 +336,17 @@ export const TeamSettings = ({
                           size="sm"
                           type="button"
                           variant="ghost"
-                          onClick={() => cancelInvitation.mutate(invitation.id)}
+                          onClick={() =>
+                            cancelInvitation.mutate(invitation.id, {
+                              onSuccess: () =>
+                                posthog.capture(
+                                  POSTHOG_EVENTS.TEAM_INVITATION_CANCELED,
+                                  {
+                                    role: invitation.role,
+                                  }
+                                ),
+                            })
+                          }
                         >
                           Cancel
                         </Button>
@@ -334,7 +383,12 @@ export const TeamSettings = ({
             disabled={!canDeleteOrganization || deleteOrganization.isPending}
             type="button"
             variant="destructive"
-            onClick={() => deleteOrganization.mutate()}
+            onClick={() =>
+              deleteOrganization.mutate(undefined, {
+                onSuccess: () =>
+                  posthog.capture(POSTHOG_EVENTS.ORGANIZATION_DELETED),
+              })
+            }
           >
             <Trash2 />
             Delete organization

@@ -90,11 +90,13 @@ export const VendorsRoutePage = () => {
           })
         }
         onDeleteProvider={(provider) => {
-          posthog.capture(POSTHOG_EVENTS.VENDOR_DELETED, {
-            vendor_name: provider.name,
-            vendor_category: provider.category,
+          deleteProvider.mutate(provider.id, {
+            onSuccess: () =>
+              posthog.capture(POSTHOG_EVENTS.VENDOR_DELETED, {
+                vendor_id: provider.id,
+                vendor_category: provider.category,
+              }),
           })
-          deleteProvider.mutate(provider.id)
         }}
         onEditProvider={startEditingVendor}
         onShowCustomVendorFormChange={setShowCustomVendorForm}

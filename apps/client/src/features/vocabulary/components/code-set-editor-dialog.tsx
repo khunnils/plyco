@@ -1,9 +1,11 @@
 import { useState } from "react"
 import { Ellipsis, Pencil, Plus, Trash2, X } from "lucide-react"
 import { type VocabularyCode, type VocabularyCodeInput } from "@plyco/shared"
+import { usePostHog } from "@posthog/react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +55,7 @@ export const CodeSetEditorDialog = ({
   onChange?: (change: CodeSetChange) => void
   onClose: () => void
 }) => {
+  const posthog = usePostHog()
   const vocabulary = useVocabulary(isOpen)
   const createCode = useCreateVocabularyCode()
   const updateCode = useUpdateVocabularyCode()
@@ -171,13 +174,24 @@ export const CodeSetEditorDialog = ({
                       codeId: editingCodeId,
                       code: draft,
                     })
+                    posthog.capture(POSTHOG_EVENTS.VOCABULARY_CODE_UPDATED, {
+                      code_set_id: codeSetId,
+                      code_id: updated.codeId,
+                    })
                     onChange?.({
                       type: "update",
                       previousCodeId: editingCodeId,
                       code: updated,
                     })
                   } else {
-                    await createCode.mutateAsync({ codeSetId, code: draft })
+                    const created = await createCode.mutateAsync({
+                      codeSetId,
+                      code: draft,
+                    })
+                    posthog.capture(POSTHOG_EVENTS.VOCABULARY_CODE_CREATED, {
+                      code_set_id: codeSetId,
+                      code_id: created.codeId,
+                    })
                   }
                   resetForm()
                 }}
@@ -251,6 +265,13 @@ export const CodeSetEditorDialog = ({
                                 codeSetId,
                                 codeId: code.codeId,
                               })
+                              posthog.capture(
+                                POSTHOG_EVENTS.VOCABULARY_CODE_DELETED,
+                                {
+                                  code_set_id: codeSetId,
+                                  code_id: code.codeId,
+                                }
+                              )
                               onChange?.({
                                 type: "delete",
                                 codeId: code.codeId,

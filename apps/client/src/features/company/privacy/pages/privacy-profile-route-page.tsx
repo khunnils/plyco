@@ -1,3 +1,6 @@
+import { usePostHog } from "@posthog/react"
+
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useProviders } from "@/features/vendors/hooks/use-vendors"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import {
@@ -13,6 +16,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const PrivacyProfileRoutePage = () => {
+  const posthog = usePostHog()
   const providers = useProviders()
   const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
@@ -38,7 +42,12 @@ export const PrivacyProfileRoutePage = () => {
         providers={providersList}
         vocabulary={vocabularyData}
         onSaveProfile={(profile, onSuccess) =>
-          saveProfile.mutate(profile, { onSuccess })
+          saveProfile.mutate(profile, {
+            onSuccess: (snapshot) => {
+              posthog.capture(POSTHOG_EVENTS.PRIVACY_PROFILE_SAVED)
+              onSuccess?.(snapshot)
+            },
+          })
         }
       />
     </>

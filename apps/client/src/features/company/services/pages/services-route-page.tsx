@@ -3,6 +3,7 @@ import {
   type ServiceProviderUsage,
   type Vocabulary,
 } from "@plyco/shared"
+import { usePostHog } from "@posthog/react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowRight,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react"
 import { SortableList } from "@/components/sortable-list"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import {
   useSaveSecurityProfile,
@@ -261,6 +263,7 @@ const ServiceSelectorPage = ({
 }
 
 export const ServicesRoutePage = () => {
+  const posthog = usePostHog()
   const { serviceId } = useParams()
   const navigate = useNavigate()
   const securityProfile = useSecurityProfile()
@@ -329,7 +332,14 @@ export const ServicesRoutePage = () => {
           serviceProviderUsage={serviceProviderUsage}
           services={defaultValues.services}
           vocabulary={vocabularyData}
-          onReorder={(ids) => reorderServices.mutate(ids)}
+          onReorder={(ids) =>
+            reorderServices.mutate(ids, {
+              onSuccess: () =>
+                posthog.capture(POSTHOG_EVENTS.SERVICE_REORDERED, {
+                  count: ids.length,
+                }),
+            })
+          }
           reorderDisabled={reorderServices.isPending}
         />
       ) : (
@@ -354,14 +364,51 @@ export const ServicesRoutePage = () => {
           }
           onCreateProviderUsage={(providerUsage, onSuccess) =>
             createServiceProviderUsage.mutate(providerUsage, {
-              onSuccess,
+              onSuccess: (createdProviderUsage) => {
+                posthog.capture(
+                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_CREATED,
+                  {
+                    service_id: createdProviderUsage.serviceId,
+                    provider_id: createdProviderUsage.organizationProviderId,
+                    system_type: createdProviderUsage.systemType,
+                    data_type_count:
+                      createdProviderUsage.dataProcessed.length,
+                  }
+                )
+                onSuccess?.()
+              },
             })
           }
           onDeleteProviderUsage={(providerUsage) =>
-            deleteServiceProviderUsage.mutate(providerUsage.id)
+            deleteServiceProviderUsage.mutate(providerUsage.id, {
+              onSuccess: () =>
+                posthog.capture(
+                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_DELETED,
+                  {
+                    service_provider_usage_id: providerUsage.id,
+                    service_id: providerUsage.serviceId,
+                    provider_id: providerUsage.organizationProviderId,
+                    system_type: providerUsage.systemType,
+                  }
+                ),
+            })
           }
           onSaveProfile={(profile, onSuccess) =>
             saveProfile.mutate(profile, { onSuccess })
+          }
+          onServiceCreated={(service) =>
+            posthog.capture(POSTHOG_EVENTS.SERVICE_CREATED, {
+              service_id: service.id,
+              business_activity_count:
+                service.businessActivityIds?.length ?? 0,
+            })
+          }
+          onServiceUpdated={(service, changedFields) =>
+            posthog.capture(POSTHOG_EVENTS.SERVICE_UPDATED, {
+              service_id: service.id,
+              changed_fields: changedFields,
+              changed_field_count: changedFields.length,
+            })
           }
           onSelectService={(serviceId) => {
             navigate(
@@ -369,7 +416,21 @@ export const ServicesRoutePage = () => {
             )
           }}
           onUpdateProviderUsage={(input, onSuccess) =>
-            updateServiceProviderUsage.mutate(input, { onSuccess })
+            updateServiceProviderUsage.mutate(input, {
+              onSuccess: (providerUsage) => {
+                posthog.capture(
+                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_UPDATED,
+                  {
+                    service_provider_usage_id: providerUsage.id,
+                    service_id: providerUsage.serviceId,
+                    provider_id: providerUsage.organizationProviderId,
+                    system_type: providerUsage.systemType,
+                    data_type_count: providerUsage.dataProcessed.length,
+                  }
+                )
+                onSuccess?.()
+              },
+            })
           }
         />
       )}

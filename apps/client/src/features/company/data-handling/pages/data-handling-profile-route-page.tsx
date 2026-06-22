@@ -1,4 +1,7 @@
+import { usePostHog } from "@posthog/react"
+
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
@@ -13,6 +16,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const DataHandlingProfileRoutePage = () => {
+  const posthog = usePostHog()
   const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
   const securityProfile = useSecurityProfile()
@@ -35,10 +39,36 @@ export const DataHandlingProfileRoutePage = () => {
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}
         vocabulary={vocabularyData}
+        onCreateDataType={(dataType) =>
+          posthog.capture(POSTHOG_EVENTS.DATA_TYPE_CREATED, {
+            data_type_id: dataType.id,
+            is_sensitive: dataType.isSensitive,
+            is_required: dataType.isRequired,
+          })
+        }
+        onDeleteDataType={(dataType) =>
+          posthog.capture(POSTHOG_EVENTS.DATA_TYPE_DELETED, {
+            data_type_id: dataType.id,
+          })
+        }
         onSaveProfile={(profile, onSuccess) =>
           saveProfile.mutate(profile, { onSuccess })
         }
-        onReorder={(ids) => reorderDataTypes.mutate(ids)}
+        onUpdateDataType={(dataType) =>
+          posthog.capture(POSTHOG_EVENTS.DATA_TYPE_UPDATED, {
+            data_type_id: dataType.id,
+            is_sensitive: dataType.isSensitive,
+            is_required: dataType.isRequired,
+          })
+        }
+        onReorder={(ids) =>
+          reorderDataTypes.mutate(ids, {
+            onSuccess: () =>
+              posthog.capture(POSTHOG_EVENTS.DATA_TYPE_REORDERED, {
+                count: ids.length,
+              }),
+          })
+        }
         reorderDisabled={reorderDataTypes.isPending}
       />
     </>

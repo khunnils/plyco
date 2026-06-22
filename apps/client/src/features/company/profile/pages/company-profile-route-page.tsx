@@ -1,7 +1,10 @@
+import { usePostHog } from "@posthog/react"
+
 import {
   useCountries,
   useVocabulary,
 } from "@/features/vocabulary/hooks/use-vocabulary"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
@@ -15,6 +18,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const CompanyProfileRoutePage = () => {
+  const posthog = usePostHog()
   const countries = useCountries()
   const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
@@ -41,7 +45,12 @@ export const CompanyProfileRoutePage = () => {
         profile={defaultValues}
         vocabulary={vocabularyData}
         onSaveProfile={(profile, onSuccess) =>
-          saveProfile.mutate(profile, { onSuccess })
+          saveProfile.mutate(profile, {
+            onSuccess: (snapshot) => {
+              posthog.capture(POSTHOG_EVENTS.COMPANY_PROFILE_SAVED)
+              onSuccess?.(snapshot)
+            },
+          })
         }
       />
     </>

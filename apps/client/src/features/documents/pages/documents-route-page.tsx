@@ -234,7 +234,18 @@ export const DocumentsRoutePage = () => {
                 onClick={() =>
                   createTemplateFromSystem.mutate(
                     { sourceSystemTemplateSlug: template.slug },
-                    { onSuccess: () => navigate("/documents") }
+                    {
+                      onSuccess: (createdTemplate) => {
+                        posthog.capture(
+                          POSTHOG_EVENTS.TEMPLATE_ADDED_FROM_SYSTEM,
+                          {
+                            template_id: createdTemplate.id,
+                            source_system_template_slug: template.slug,
+                          }
+                        )
+                        navigate("/documents")
+                      },
+                    }
                   )
                 }
               >
@@ -281,7 +292,12 @@ export const DocumentsRoutePage = () => {
         members={organizationMembersData}
         onSubmit={(template) =>
           createTemplate.mutate(template, {
-            onSuccess: () => navigate("/documents"),
+            onSuccess: (createdTemplate) => {
+              posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
+                template_id: createdTemplate.id,
+              })
+              navigate("/documents")
+            },
           })
         }
       />
@@ -321,7 +337,14 @@ export const DocumentsRoutePage = () => {
         onSubmit={(template) =>
           updateTemplate.mutate(
             { id: editingTemplate.id, template },
-            { onSuccess: () => navigate("/documents") }
+            {
+              onSuccess: (updatedTemplate) => {
+                posthog.capture(POSTHOG_EVENTS.TEMPLATE_UPDATED, {
+                  template_id: updatedTemplate.id,
+                })
+                navigate("/documents")
+              },
+            }
           )
         }
       />
@@ -502,7 +525,14 @@ export const DocumentsRoutePage = () => {
                     size="icon"
                     type="button"
                     variant="destructive"
-                    onClick={() => deleteTemplate.mutate(summary.template.id)}
+                    onClick={() =>
+                      deleteTemplate.mutate(summary.template.id, {
+                        onSuccess: () =>
+                          posthog.capture(POSTHOG_EVENTS.TEMPLATE_DELETED, {
+                            template_id: summary.template.id,
+                          }),
+                      })
+                    }
                     title="Delete template"
                   >
                     <Trash2 />

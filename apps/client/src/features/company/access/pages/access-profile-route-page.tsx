@@ -1,4 +1,7 @@
+import { usePostHog } from "@posthog/react"
+
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
@@ -12,6 +15,7 @@ import {
 } from "@/features/shell/lib/navigation"
 
 export const AccessProfileRoutePage = () => {
+  const posthog = usePostHog()
   const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
   const securityProfile = useSecurityProfile()
@@ -34,7 +38,12 @@ export const AccessProfileRoutePage = () => {
         profile={defaultValues}
         vocabulary={vocabularyData}
         onSaveProfile={(profile, onSuccess) =>
-          saveProfile.mutate(profile, { onSuccess })
+          saveProfile.mutate(profile, {
+            onSuccess: (snapshot) => {
+              posthog.capture(POSTHOG_EVENTS.ACCESS_PROFILE_SAVED)
+              onSuccess?.(snapshot)
+            },
+          })
         }
       />
     </>

@@ -1,4 +1,4 @@
-import { type Vocabulary } from "@plyco/shared"
+import { type StoredDataType, type Vocabulary } from "@plyco/shared"
 
 import { DataTypesPanel } from "@/features/company/data-handling/components/panels/data-types-panel"
 import {
@@ -13,7 +13,10 @@ export const DataHandlingManager = ({
   profile,
   subjectTypeOptions,
   vocabulary,
+  onCreateDataType,
+  onDeleteDataType,
   onSaveProfile,
+  onUpdateDataType,
   onReorder,
   reorderDisabled,
 }: {
@@ -22,7 +25,10 @@ export const DataHandlingManager = ({
   profile: ProfileDraft
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
+  onCreateDataType?: (dataType: StoredDataType) => void
+  onDeleteDataType?: (dataType: StoredDataType) => void
   onSaveProfile: SaveProfile
+  onUpdateDataType?: (dataType: StoredDataType) => void
   onReorder: (ids: string[]) => void
   reorderDisabled: boolean
 }) => {
@@ -56,7 +62,10 @@ export const DataHandlingManager = ({
             onSuccess
           )
         }
+        onCreate={onCreateDataType}
+        onDelete={onDeleteDataType}
         onReorder={onReorder}
+        onUpdate={onUpdateDataType}
         reorderDisabled={reorderDisabled}
       />
     </div>

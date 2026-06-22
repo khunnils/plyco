@@ -25,6 +25,8 @@ export const ServiceProfilePage = ({
   onCancelCreateService,
   onCreateProviderUsage,
   onDeleteProviderUsage,
+  onServiceCreated,
+  onServiceUpdated,
   onSaveProfile,
   onSelectService,
   onUpdateProviderUsage,
@@ -46,6 +48,8 @@ export const ServiceProfilePage = ({
     onSuccess?: () => void
   ) => void
   onDeleteProviderUsage: (providerUsage: ServiceProviderUsage) => void
+  onServiceCreated?: Parameters<typeof ServiceManager>[0]["onServiceCreated"]
+  onServiceUpdated?: Parameters<typeof ServiceManager>[0]["onServiceUpdated"]
   onSaveProfile: Parameters<typeof ServiceManager>[0]["onSaveProfile"]
   onSelectService: (id: string | null) => void
   onUpdateProviderUsage: (
@@ -88,6 +92,8 @@ export const ServiceProfilePage = ({
     onCancelCreateService={onCancelCreateService}
     onCreateProviderUsage={onCreateProviderUsage}
     onDeleteProviderUsage={onDeleteProviderUsage}
+    onServiceCreated={onServiceCreated}
+    onServiceUpdated={onServiceUpdated}
     onSaveProfile={onSaveProfile}
     onSelectService={onSelectService}
     onUpdateProviderUsage={onUpdateProviderUsage}

@@ -1,8 +1,11 @@
+import { usePostHog } from "@posthog/react"
+
 import {
   useSaveSecurityProfile,
   useSecurityProfile,
 } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { PageHeader } from "@/features/shell/components/page-header"
 import {
   SIDEBAR_SECTION,
@@ -12,6 +15,7 @@ import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { SecurityProfilePage } from "./security-profile-page"
 
 export const SecurityProfileRoutePage = () => {
+  const posthog = usePostHog()
   const vocabulary = useVocabulary()
   const saveProfile = useSaveSecurityProfile()
   const securityProfile = useSecurityProfile()
@@ -33,7 +37,12 @@ export const SecurityProfileRoutePage = () => {
         profile={profile}
         vocabulary={vocabulary.data}
         onSaveProfile={(next, onSuccess) =>
-          saveProfile.mutate(next, { onSuccess })
+          saveProfile.mutate(next, {
+            onSuccess: (snapshot) => {
+              posthog.capture(POSTHOG_EVENTS.SECURITY_PROFILE_SAVED)
+              onSuccess?.(snapshot)
+            },
+          })
         }
       />
     </>

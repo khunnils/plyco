@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { type AuthUser } from "@plyco/shared"
+import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { startGoogleLogin } from "@/lib/api"
 import { useSendMagicLink } from "@/features/auth/hooks/use-auth"
 import { useAcceptOrganizationInvitation } from "@/features/settings/hooks/use-team"
@@ -15,6 +17,7 @@ export const InvitationAcceptRoutePage = ({
 }: {
   user: AuthUser | null
 }) => {
+  const posthog = usePostHog()
   const { token } = useParams()
   const navigate = useNavigate()
   const acceptInvitation = useAcceptOrganizationInvitation()
@@ -38,11 +41,15 @@ export const InvitationAcceptRoutePage = ({
 
     attemptedToken.current = token
     acceptInvitation.mutate(token, {
-      onSuccess: () => {
+      onSuccess: (result) => {
+        posthog.capture(POSTHOG_EVENTS.INVITATION_ACCEPTED, {
+          organization_id: result.organization.id,
+          role: result.organization.role,
+        })
         window.localStorage.removeItem(pendingInvitationStorageKey)
       },
     })
-  }, [acceptInvitation, navigate, token, user])
+  }, [acceptInvitation, navigate, posthog, token, user])
 
   useEffect(() => {
     if (!acceptInvitation.data) {

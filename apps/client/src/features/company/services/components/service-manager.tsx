@@ -1329,6 +1329,8 @@ export const ServiceManager = ({
   onCancelCreateService,
   onCreateProviderUsage,
   onDeleteProviderUsage,
+  onServiceCreated,
+  onServiceUpdated,
   onSaveProfile,
   onSelectService,
   onUpdateProviderUsage,
@@ -1358,6 +1360,11 @@ export const ServiceManager = ({
     onSuccess?: () => void
   ) => void
   onDeleteProviderUsage: (providerUsage: ServiceProviderUsage) => void
+  onServiceCreated?: (service: ServiceProfileInput) => void
+  onServiceUpdated?: (
+    service: ServiceProfileInput,
+    changedFields: string[]
+  ) => void
   onSaveProfile: SaveProfile
   onSelectService: (id: string | null) => void
   onUpdateProviderUsage: (
@@ -1411,19 +1418,21 @@ export const ServiceManager = ({
     patch: Partial<ServiceProfileInput>,
     onSuccess?: () => void
   ) => {
+    const nextService = {
+      ...selectedService,
+      ...patch,
+    }
     onSaveProfile(
       {
         ...profile,
         services: profile.services.map((currentService, index) =>
-          index === selectedIndex
-            ? {
-                ...currentService,
-                ...patch,
-              }
-            : currentService
+          index === selectedIndex ? nextService : currentService
         ),
       },
-      onSuccess
+      () => {
+        onServiceUpdated?.(nextService, Object.keys(patch))
+        onSuccess?.()
+      }
     )
   }
 
@@ -1436,6 +1445,7 @@ export const ServiceManager = ({
       (snapshot) => {
         const createdService = snapshot.organization?.services.at(-1)
 
+        onServiceCreated?.(createdService ?? service)
         onSelectService(createdService?.id ?? null)
         onCancelCreateService()
       }

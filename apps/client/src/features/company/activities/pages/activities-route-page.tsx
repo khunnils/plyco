@@ -130,10 +130,13 @@ export const ActivitiesRoutePage = () => {
             })
           }
           onDelete={(activity) => {
-            posthog.capture(POSTHOG_EVENTS.ACTIVITY_DELETED, {
-              activity_name: activity.name,
+            deleteBusinessActivity.mutate(activity.id, {
+              onSuccess: () => {
+                posthog.capture(POSTHOG_EVENTS.ACTIVITY_DELETED, {
+                  activity_id: activity.id,
+                })
+              },
             })
-            deleteBusinessActivity.mutate(activity.id)
           }}
           onUpdate={(input, onSuccess) =>
             updateBusinessActivity.mutate(input, {
@@ -143,7 +146,14 @@ export const ActivitiesRoutePage = () => {
               },
             })
           }
-          onReorder={(ids) => reorderBusinessActivities.mutate(ids)}
+          onReorder={(ids) =>
+            reorderBusinessActivities.mutate(ids, {
+              onSuccess: () =>
+                posthog.capture(POSTHOG_EVENTS.ACTIVITY_REORDERED, {
+                  count: ids.length,
+                }),
+            })
+          }
           reorderDisabled={reorderBusinessActivities.isPending}
           showForm={showActivityForm}
           setShowForm={setShowActivityForm}
