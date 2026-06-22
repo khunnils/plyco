@@ -190,8 +190,8 @@ describe("security profile API", () => {
       readAuthConfig({
         SESSION_KEY: "short",
         API_PUBLIC_URL: "http://localhost:4000",
-        CLIENT_URL: "http://localhost:5173",
-        WEB_URL: "http://localhost:4321",
+        CLIENT_URL: "http://localhost:4200",
+        WEB_URL: "http://localhost:4300",
         GOOGLE_OAUTH_CLIENT_ID: "client",
         GOOGLE_OAUTH_CLIENT_SECRET: "secret",
       } as NodeJS.ProcessEnv),

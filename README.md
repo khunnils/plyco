@@ -58,7 +58,7 @@ pnpm dev:client
 Open the client URL printed by Vite, usually:
 
 ```text
-http://localhost:5173
+http://localhost:4200
 ```
 
 ## Checks

@@ -71,7 +71,11 @@ jobs:
       - name: Build client
         run: |
           set -euo pipefail
-          VITE_API_URL="${{ vars.VITE_API_URL }}" NODE_ENV=production pnpm --filter cf-app build
+          VITE_API_URL="${{ vars.VITE_API_URL }}" \
+          VITE_PUBLIC_POSTHOG_PROJECT_TOKEN="${{ vars.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN }}" \
+          VITE_PUBLIC_POSTHOG_HOST="${{ vars.VITE_PUBLIC_POSTHOG_HOST }}" \
+          VITE_UI_POSTHOG_HOST="${{ vars.VITE_UI_POSTHOG_HOST }}" \
+          NODE_ENV=production pnpm --filter cf-app build
 
       - name: Deploy client to Firebase Hosting
         run: |

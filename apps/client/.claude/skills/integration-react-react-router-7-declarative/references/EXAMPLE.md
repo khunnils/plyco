@@ -49,7 +49,7 @@ npm run dev
 pnpm dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) with your browser to see the app.
+Open [http://localhost:4200](http://localhost:4200) with your browser to see the app.
 
 ## Project Structure
 

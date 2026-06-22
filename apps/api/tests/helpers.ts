@@ -337,8 +337,8 @@ export const noProcessingVendorUseBody = {
 
 export const authConfig = {
   apiPublicUrl: "http://localhost:4000",
-  clientUrl: "http://localhost:5173",
-  webUrl: "http://localhost:4321",
+  clientUrl: "http://localhost:4200",
+  webUrl: "http://localhost:4300",
   googleClientId: "google-client-id",
   googleClientSecret: "google-client-secret",
   sessionKey: "test-session-key-with-at-least-32-chars",
