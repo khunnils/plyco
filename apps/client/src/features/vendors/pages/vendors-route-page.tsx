@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   useCountries,
   useVocabulary,
@@ -79,7 +80,7 @@ export const VendorsRoutePage = () => {
         onCreateProviders={(providerInputs) =>
           createProviders.mutate(providerInputs, {
             onSuccess: () => {
-              posthog.capture("vendor_added_from_catalog", {
+              posthog.capture(POSTHOG_EVENTS.VENDOR_ADDED_FROM_CATALOG, {
                 vendor_count: providerInputs.length,
                 vendor_names: providerInputs.map((p) => p.name),
               })
@@ -89,7 +90,7 @@ export const VendorsRoutePage = () => {
           })
         }
         onDeleteProvider={(provider) => {
-          posthog.capture("vendor_deleted", {
+          posthog.capture(POSTHOG_EVENTS.VENDOR_DELETED, {
             vendor_name: provider.name,
             vendor_category: provider.category,
           })
@@ -104,7 +105,7 @@ export const VendorsRoutePage = () => {
               { id: editingProvider.id, provider },
               {
                 onSuccess: () => {
-                  posthog.capture("vendor_updated", {
+                  posthog.capture(POSTHOG_EVENTS.VENDOR_UPDATED, {
                     vendor_name: provider.name,
                     vendor_category: provider.category,
                   })
@@ -119,7 +120,7 @@ export const VendorsRoutePage = () => {
 
           createProvider.mutate(provider, {
             onSuccess: () => {
-              posthog.capture("vendor_added_manually", {
+              posthog.capture(POSTHOG_EVENTS.VENDOR_ADDED_MANUALLY, {
                 vendor_name: provider.name,
                 vendor_category: provider.category,
               })

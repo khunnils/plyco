@@ -8,6 +8,7 @@ import {
 } from "react-router-dom"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
 import { OnboardingWizardPage } from "@/features/organizations/onboarding/pages/onboarding-wizard-page"
@@ -70,7 +71,7 @@ export const App = () => {
     if (user && !identifiedRef.current) {
       identifiedRef.current = true
       posthog.identify(user.email, { name: user.name, email: user.email })
-      posthog.capture("user_signed_in")
+      posthog.capture(POSTHOG_EVENTS.USER_SIGNED_IN)
     }
     if (!user) {
       identifiedRef.current = false

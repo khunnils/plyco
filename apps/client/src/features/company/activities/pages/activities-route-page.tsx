@@ -3,6 +3,7 @@ import { Plus } from "lucide-react"
 import { isComplianceFieldVisible } from "@plyco/shared"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
 import {
@@ -121,7 +122,7 @@ export const ActivitiesRoutePage = () => {
           onCreate={(activity, onSuccess) =>
             createBusinessActivity.mutate(activity, {
               onSuccess: () => {
-                posthog.capture("activity_created", {
+                posthog.capture(POSTHOG_EVENTS.ACTIVITY_CREATED, {
                   activity_name: activity.name,
                 })
                 onSuccess?.()
@@ -129,7 +130,7 @@ export const ActivitiesRoutePage = () => {
             })
           }
           onDelete={(activity) => {
-            posthog.capture("activity_deleted", {
+            posthog.capture(POSTHOG_EVENTS.ACTIVITY_DELETED, {
               activity_name: activity.name,
             })
             deleteBusinessActivity.mutate(activity.id)
@@ -137,7 +138,7 @@ export const ActivitiesRoutePage = () => {
           onUpdate={(input, onSuccess) =>
             updateBusinessActivity.mutate(input, {
               onSuccess: () => {
-                posthog.capture("activity_updated", { activity_id: input.id })
+                posthog.capture(POSTHOG_EVENTS.ACTIVITY_UPDATED, { activity_id: input.id })
                 onSuccess?.()
               },
             })

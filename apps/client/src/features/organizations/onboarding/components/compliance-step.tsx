@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { ArrowLeft, ArrowRight, LogOut } from "lucide-react"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { CreateShell } from "../../components/create-shell"
@@ -79,7 +80,7 @@ export const ComplianceStep = () => {
   ) : null
 
   const handleNext = () => {
-    posthog.capture("onboarding_compliance_goals_selected", {
+    posthog.capture(POSTHOG_EVENTS.ONBOARDING_COMPLIANCE_GOALS_SELECTED, {
       compliance_goals: draft?.company.complianceGoals ?? [],
     })
     setSubmitError(null)

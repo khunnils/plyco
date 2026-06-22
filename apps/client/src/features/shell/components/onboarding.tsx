@@ -3,6 +3,7 @@ import { type AuthUser } from "@plyco/shared"
 import { type FieldErrors } from "react-hook-form"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
 import {
   ProfileAccessFields,
@@ -137,7 +138,7 @@ export const Onboarding = ({
           onSubmit={(profile) => {
             saveProfile.mutate(profile, {
               onSuccess: () => {
-                posthog.capture("security_profile_saved")
+                posthog.capture(POSTHOG_EVENTS.SECURITY_PROFILE_SAVED)
                 const orgId = selectedOrganization?.id
                 if (orgId) {
                   completeOnboarding(orgId)

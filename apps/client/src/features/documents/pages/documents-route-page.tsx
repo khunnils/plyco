@@ -11,6 +11,8 @@ import {
   Trash2,
 } from "lucide-react"
 import { usePostHog } from "@posthog/react"
+
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   type DocumentSummary,
   type TemplateCatalog,
@@ -344,7 +346,7 @@ export const DocumentsRoutePage = () => {
             type="button"
             variant="outline"
             onClick={() => {
-              posthog.capture("document_pdf_downloaded", {
+              posthog.capture(POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED, {
                 document_id: documentRecord.id,
                 document_title: documentRecord.title,
               })
@@ -514,7 +516,7 @@ export const DocumentsRoutePage = () => {
                         { templateId: summary.template.id },
                         {
                           onSuccess: (doc) => {
-                            posthog.capture("document_published", {
+                            posthog.capture(POSTHOG_EVENTS.DOCUMENT_PUBLISHED, {
                               template_id: summary.template.id,
                               template_name: summary.template.name,
                               document_id: doc.id,
@@ -635,7 +637,7 @@ export const DocumentsRoutePage = () => {
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
-                                  posthog.capture("document_pdf_downloaded", {
+                                  posthog.capture(POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED, {
                                     document_id: doc.id,
                                     document_title: doc.title,
                                   })

@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useOnboardingStore } from "../stores/onboarding-store"
@@ -255,7 +256,7 @@ export const ReviewStep = () => {
         queryKey: securityProfileQueryKey(organization.id),
       })
       store.completeOnboarding(organization.id)
-      posthog.capture("organization_created", {
+      posthog.capture(POSTHOG_EVENTS.ORGANIZATION_CREATED, {
         organization_id: organization.id,
         organization_name: draft.company.companyName,
         compliance_goals: draft.company.complianceGoals,

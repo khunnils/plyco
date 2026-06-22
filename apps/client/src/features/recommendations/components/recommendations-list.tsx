@@ -4,6 +4,7 @@ import { type Recommendation } from "@plyco/shared"
 import { ChevronDown, Lightbulb } from "lucide-react"
 import { usePostHog } from "@posthog/react"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Badge } from "@/components/ui/badge"
 import {
   Empty,
@@ -34,7 +35,7 @@ export const RecommendationsList = ({
         next.add(id)
         const rec = recommendations.find((r) => r.id === id)
         if (rec) {
-          posthog.capture("recommendation_expanded", {
+          posthog.capture(POSTHOG_EVENTS.RECOMMENDATION_EXPANDED, {
             recommendation_id: rec.id,
             recommendation_title: rec.title,
             recommendation_category: rec.category,
