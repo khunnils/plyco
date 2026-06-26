@@ -1,4 +1,4 @@
-import { Command } from "commander"
+import { Command, CommanderError } from "commander"
 
 import { ApiResponseError, postJson } from "./api.js"
 import { readCliConfig } from "./config.js"
@@ -142,4 +142,11 @@ export function printCliError(
   } else {
     stderr.write(`${String(error)}\n`)
   }
+}
+
+export function isCliHelpExit(error: unknown) {
+  return (
+    error instanceof CommanderError &&
+    (error.code === "commander.help" || error.code === "commander.helpDisplayed")
+  )
 }

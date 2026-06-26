@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { createProgram } from "./program.js"
+import { createProgram, isCliHelpExit } from "./program.js"
 
 describe("createProgram", () => {
   it("posts codes load to the configured API", async () => {
@@ -88,6 +88,24 @@ describe("createProgram", () => {
     await expect(
       program.parseAsync(["providers", "lookup"], { from: "user" }),
     ).rejects.toThrow(/provider URL is required/)
+  })
+
+  it("treats no-command help as a CLI help exit", async () => {
+    const stdout = createWritable()
+    const program = createProgram({
+      exitOverride: true,
+      stderr: createWritable(),
+      stdout,
+    })
+    let caughtError: unknown
+
+    try {
+      await program.parseAsync(["node", "plyco"])
+    } catch (error) {
+      caughtError = error
+    }
+
+    expect(isCliHelpExit(caughtError)).toBe(true)
   })
 })
 
