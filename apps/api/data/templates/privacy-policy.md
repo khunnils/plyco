@@ -54,10 +54,10 @@ We collect the personal data needed to provide, secure, and improve {{ service.n
 {% endif %}
 We process personal data for the following purposes:
 
-| Purpose | Our role | Legal basis | Retention |
-| --- | --- | --- | --- |
+| Purpose | Data used | Our role | Legal basis | Retention |
+| --- | --- | --- | --- | --- |
 {% for activity in service.activities -%}
-| {{ activity.purpose or activity.name }} | {{ activity.roleLabel or "—" }} | {{ activity.legalBasisLabels | join(", ") or "—" }} | {{ activity.retentionLabel or "—" }} |
+| {{ activity.purpose or activity.name }} | {{ activity.dataTypeNames | join(", ") or "—" }} | {{ activity.roleLabel or "—" }} | {{ activity.legalBasisLabels | join(", ") or "—" }} | {{ activity.retentionLabel or "—" }} |
 {% endfor %}
 
 {% endif %}
@@ -137,7 +137,7 @@ If we decline your request, you may appeal that decision.
 
 {% for service in services.all %}
 {% if service.privacy.usesCookiesOrTrackingTechnologies %}
-{% if services.all.length > 1 %}**{{ service.name }}.** {% endif %}We use cookies and similar technologies{% if service.privacy.cookieTrackingCategoryLabels.length %} for the following purposes: {{ service.privacy.cookieTrackingCategoryLabels | join(", ") }}{% endif %}.{% if service.privacy.cookieConsentMechanismLabel %} You can manage your preferences through {{ service.privacy.cookieConsentMechanismLabel }}.{% endif %}{% if service.privacy.globalPrivacyControlSupported %} We honor Global Privacy Control signals.{% endif %}
+{% if services.all.length > 1 %}**{{ service.name }}.** {% endif %}We use cookies and similar technologies{% if service.privacy.cookieTrackingCategoryLabels.length %} for the following purposes: {{ service.privacy.cookieTrackingCategoryLabels | join(", ") }}{% endif %}.{% if service.privacy.cookieConsentMechanismLabel %} You can manage your preferences through {{ service.privacy.cookieConsentMechanismLabel }}.{% endif %}{% if service.privacy.globalPrivacyControlSupported %} We honor Global Privacy Control signals.{% endif %}{% if service.privacy.doNotTrackResponse %} We respond to browser "Do Not Track" signals.{% endif %}
 {% if service.privacy.analyticsProviders.length %}Analytics providers we use include: {{ service.privacy.analyticsProviders | join(", ") }}.{% endif %}
 {% if service.privacy.advertisingProviders.length %}Advertising providers we use include: {{ service.privacy.advertisingProviders | join(", ") }}.{% endif %}
 {% elif service.privacy.usesCookiesOrTrackingTechnologiesAnswered and services.all.length == 1 %}
