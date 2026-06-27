@@ -435,14 +435,14 @@ export class ReportContextBuilder {
   }
 
   private providerNames(providers: Array<Record<string, unknown>>) {
-    return providers.map((provider) => {
+    return providers.flatMap((provider) => {
       const id = String(
         provider.providerId ?? provider.organizationProviderId ?? "",
       );
       if (id === "none") {
-        return "None";
+        return [];
       }
-      return String(provider.name ?? provider.providerName ?? id ?? "");
+      return [String(provider.name ?? provider.providerName ?? id ?? "")];
     });
   }
 
@@ -671,10 +671,15 @@ export class ReportContextBuilder {
       (currentCodeSet) => currentCodeSet.codeSetId === codeSetId,
     );
 
-    return (values ?? []).map(
-      (value) =>
+    return (values ?? []).flatMap((value) => {
+      if (value === "none") {
+        return [];
+      }
+
+      return [
         codeSet?.codes.find((code) => code.codeId === value)?.name ?? value,
-    );
+      ];
+    });
   }
 
   private codeLabel(
