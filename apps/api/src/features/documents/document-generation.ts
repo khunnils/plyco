@@ -42,6 +42,7 @@ export type NormalizedTemplateContext = {
     all: Array<Record<string, unknown>>;
     primary: Record<string, unknown>;
     hasActivities: boolean;
+    usesAi: boolean;
     cookiesAnswered: boolean;
     hasHostingRegion: boolean;
   };
@@ -108,6 +109,14 @@ export class ReportContextBuilder {
         hasActivities: services.some(
           (service) =>
             Array.isArray(service.activities) && service.activities.length > 0,
+        ),
+        usesAi: services.some(
+          (service) =>
+            Array.isArray(service.activities) &&
+            service.activities.some(
+              (activity) =>
+                (activity as Record<string, unknown>).usesAi === true,
+            ),
         ),
         cookiesAnswered: services.some((service) => {
           const servicePrivacy = service.privacy as
@@ -813,6 +822,20 @@ export class ReportContextBuilder {
                 "activity_retention_policies",
                 activity.retentionPolicy,
               ) || "Not set",
+      usesAi: activity.usesAi,
+      aiUseCases: activity.aiUseCases,
+      aiCustomerDataUsedForTraining: activity.aiCustomerDataUsedForTraining,
+      aiCustomerDataSentToProviders: activity.aiCustomerDataSentToProviders,
+      aiHumanReviewOfOutputs: activity.aiHumanReviewOfOutputs,
+      aiUsersInformedWhenUsed: activity.aiUsersInformedWhenUsed,
+      ...this.answerFlags({
+        usesAi: activity.usesAi,
+        aiUseCases: activity.aiUseCases,
+        aiCustomerDataUsedForTraining: activity.aiCustomerDataUsedForTraining,
+        aiCustomerDataSentToProviders: activity.aiCustomerDataSentToProviders,
+        aiHumanReviewOfOutputs: activity.aiHumanReviewOfOutputs,
+        aiUsersInformedWhenUsed: activity.aiUsersInformedWhenUsed,
+      }),
     };
   }
 

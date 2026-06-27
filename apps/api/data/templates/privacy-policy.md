@@ -64,6 +64,39 @@ We process personal data for the following purposes:
 {% endfor %}
 {% endif %}
 
+{% if services.usesAi %}
+## Use of artificial intelligence
+
+We use artificial intelligence (AI) in parts of {{ service.name }}. Below we explain where we use AI and the safeguards we apply.
+
+{% for service in services.all %}
+{% for activity in service.activities %}
+{% if activity.usesAi %}
+**{{ activity.purpose or activity.name }}{% if services.all.length > 1 %} ({{ service.name }}){% endif %}.** {% if activity.aiUseCasesHasValue %}{{ activity.aiUseCases }}{% else %}We use AI to support this activity.{% endif %}
+{% if activity.aiCustomerDataUsedForTraining == true %}
+- We use personal data from this activity to train or fine-tune AI models.
+{% elif activity.aiCustomerDataUsedForTraining == false %}
+- We do not use your personal data to train or fine-tune AI models.
+{% endif %}
+{% if activity.aiCustomerDataSentToProviders == true %}
+- We share data from this activity with external AI providers who process it on our behalf under appropriate contractual safeguards.
+{% elif activity.aiCustomerDataSentToProviders == false %}
+- We do not send data from this activity to external AI providers.
+{% endif %}
+{% if activity.aiHumanReviewOfOutputs == true %}
+- A person reviews AI outputs before they affect you or significant decisions.
+{% elif activity.aiHumanReviewOfOutputs == false %}
+- AI outputs are not routinely reviewed by a person before they are used.
+{% endif %}
+{% if activity.aiUsersInformedWhenUsed == true %}
+- We let you know when AI is used in this activity.
+{% endif %}
+
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
 {% if service.childrenDirected %}
 ## Children's privacy
 

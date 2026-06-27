@@ -525,6 +525,14 @@
       }
     },
     {
+      "key": "services.usesAi",
+      "label": "Any service uses AI",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Generated helper flag. True when at least one activity on any service is marked as using AI.",
+      "example": true
+    },
+    {
       "key": "privacy.supportedRights",
       "label": "Privacy supported rights",
       "type": "string[]",
@@ -1491,6 +1499,48 @@
           "type": "string",
           "description": "Human-readable retention description, derived from the retention policy and retention days.",
           "example": "365 days"
+        },
+        {
+          "key": "usesAi",
+          "label": "Uses AI",
+          "type": "boolean",
+          "description": "Whether this activity uses AI models, assistants, or automated generation.",
+          "example": true
+        },
+        {
+          "key": "aiUseCases",
+          "label": "AI use cases",
+          "type": "string",
+          "description": "Free-text description of how AI is used in this activity, such as support triage, summarization, classification, or content generation.",
+          "example": "Summarizing support tickets and drafting reply suggestions"
+        },
+        {
+          "key": "aiCustomerDataUsedForTraining",
+          "label": "Customer data used for AI training",
+          "type": "boolean",
+          "description": "Whether customer data from this activity is used to train or fine-tune AI models.",
+          "example": false
+        },
+        {
+          "key": "aiCustomerDataSentToProviders",
+          "label": "Customer data sent to AI providers",
+          "type": "boolean",
+          "description": "Whether customer data from this activity is sent to external AI providers.",
+          "example": true
+        },
+        {
+          "key": "aiHumanReviewOfOutputs",
+          "label": "Human review of AI outputs",
+          "type": "boolean",
+          "description": "Whether people review AI outputs before they affect customers or important decisions.",
+          "example": true
+        },
+        {
+          "key": "aiUsersInformedWhenUsed",
+          "label": "Users informed when AI is used",
+          "type": "boolean",
+          "description": "Whether users are told when AI is used in this activity.",
+          "example": true
         }
       ]
     },
