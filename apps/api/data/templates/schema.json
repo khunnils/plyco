@@ -1686,48 +1686,6 @@
           "example": "Stripe, Inc."
         },
         {
-          "key": "displayName",
-          "label": "Display name",
-          "type": "string",
-          "description": "Customer-facing vendor display name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationName",
-          "label": "Provider organization",
-          "type": "string",
-          "description": "Provider organization name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationLegalName",
-          "label": "Provider organization legal name",
-          "type": "string",
-          "description": "Provider organization legal entity name.",
-          "example": "Stripe, Inc."
-        },
-        {
-          "key": "privacyPolicyUrl",
-          "label": "Privacy policy URL",
-          "type": "string",
-          "description": "Vendor privacy policy URL.",
-          "example": "https://stripe.com/privacy"
-        },
-        {
-          "key": "dpaUrl",
-          "label": "DPA URL",
-          "type": "string",
-          "description": "Vendor data processing agreement URL.",
-          "example": "https://stripe.com/legal/dpa"
-        },
-        {
-          "key": "securityPageUrl",
-          "label": "Security page URL",
-          "type": "string",
-          "description": "Vendor security page URL.",
-          "example": "https://stripe.com/docs/security"
-        },
-        {
           "key": "category",
           "label": "Category",
           "type": "string",
@@ -1838,48 +1796,6 @@
           "example": "Stripe, Inc."
         },
         {
-          "key": "displayName",
-          "label": "Display name",
-          "type": "string",
-          "description": "Customer-facing vendor display name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationName",
-          "label": "Provider organization",
-          "type": "string",
-          "description": "Provider organization name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationLegalName",
-          "label": "Provider organization legal name",
-          "type": "string",
-          "description": "Provider organization legal entity name.",
-          "example": "Stripe, Inc."
-        },
-        {
-          "key": "privacyPolicyUrl",
-          "label": "Privacy policy URL",
-          "type": "string",
-          "description": "Vendor privacy policy URL.",
-          "example": "https://stripe.com/privacy"
-        },
-        {
-          "key": "dpaUrl",
-          "label": "DPA URL",
-          "type": "string",
-          "description": "Vendor data processing agreement URL.",
-          "example": "https://stripe.com/legal/dpa"
-        },
-        {
-          "key": "securityPageUrl",
-          "label": "Security page URL",
-          "type": "string",
-          "description": "Vendor security page URL.",
-          "example": "https://stripe.com/docs/security"
-        },
-        {
           "key": "category",
           "label": "Category",
           "type": "string",
@@ -1987,48 +1903,6 @@
           "type": "string",
           "description": "Vendor legal entity name.",
           "example": "Stripe, Inc."
-        },
-        {
-          "key": "displayName",
-          "label": "Display name",
-          "type": "string",
-          "description": "Customer-facing vendor display name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationName",
-          "label": "Provider organization",
-          "type": "string",
-          "description": "Provider organization name.",
-          "example": "Stripe"
-        },
-        {
-          "key": "providerOrganizationLegalName",
-          "label": "Provider organization legal name",
-          "type": "string",
-          "description": "Provider organization legal entity name.",
-          "example": "Stripe, Inc."
-        },
-        {
-          "key": "privacyPolicyUrl",
-          "label": "Privacy policy URL",
-          "type": "string",
-          "description": "Vendor privacy policy URL.",
-          "example": "https://stripe.com/privacy"
-        },
-        {
-          "key": "dpaUrl",
-          "label": "DPA URL",
-          "type": "string",
-          "description": "Vendor data processing agreement URL.",
-          "example": "https://stripe.com/legal/dpa"
-        },
-        {
-          "key": "securityPageUrl",
-          "label": "Security page URL",
-          "type": "string",
-          "description": "Vendor security page URL.",
-          "example": "https://stripe.com/docs/security"
         },
         {
           "key": "category",
