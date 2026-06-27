@@ -493,10 +493,10 @@ describe("documents / templates API", () => {
     );
     expect(renderedContent).toContain("## Acme AI Platform");
     expect(renderedContent).toContain(
-      "| GitHub |  | Acme AI Platform | limited | Code hosting and pull requests | Customer account data | us | signed |",
+      "| GitHub |  | Code hosting and pull requests | Customer account data | US |",
     );
     expect(renderedContent).toContain(
-      "| Stripe |  | Acme AI Platform | subprocessor | Payment processing | Customer account data | us, eu | signed |",
+      "| Stripe |  | Payment processing | Customer account data | US, EU |",
     );
   });
 

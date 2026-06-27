@@ -820,16 +820,19 @@ export class ReportContextBuilder {
     services: Array<Record<string, unknown>>,
     providers: Array<Record<string, unknown>>,
   ) {
-    return services.map((service) => ({
-      serviceId: service.id,
-      serviceName: service.name,
-      providers: providers.filter(
-        (provider) => provider.serviceId === service.id,
-      ),
-      vendors: providers.filter(
-        (provider) => provider.serviceId === service.id,
-      ),
-    }));
+    return services.map((service) => {
+      const activeProviders = providers.filter(
+        (provider) =>
+          provider.serviceId === service.id &&
+          provider.dataProcessingLevel !== "none",
+      );
+      return {
+        serviceId: service.id,
+        serviceName: service.name,
+        providers: activeProviders,
+        vendors: activeProviders,
+      };
+    });
   }
 }
 
