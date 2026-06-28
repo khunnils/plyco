@@ -522,6 +522,20 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain(
       "Specific cookie purposes, providers, and durations are available through Cookie banner.",
     );
+    expect(renderedContent).toContain("## At a glance");
+    expect(renderedContent).toContain(
+      "Here is the short version. The full details are below.",
+    );
+    expect(renderedContent).toContain(
+      "You can contact us to exercise privacy rights, ask questions, or withdraw consent where consent applies.",
+    );
+    expect(renderedContent).toContain("## Plain-language terms");
+    expect(renderedContent).toContain(
+      "Controller** means the organization that decides why and how personal data is used.",
+    );
+    expect(renderedContent).toContain(
+      "Contractual safeguards** means written privacy and security promises from a service provider.",
+    );
     expect(renderedContent).toContain(
       "If you are in the EU or EEA, GDPR gives you rights over your personal data.",
     );

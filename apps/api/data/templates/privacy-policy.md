@@ -10,6 +10,16 @@
 
 This Privacy Policy explains how {{ organization.legalEntityName or organization.name }} ("{{ organization.name }}", "we", "us", or "our") collects, uses, shares, and protects personal data in connection with {{ service.name }}{% if service.url %} ({{ service.url }}){% endif %} and our related products and services.
 
+## At a glance
+
+Here is the short version. The full details are below.
+
+- We collect personal data to provide, secure, support, and improve {{ service.name }}.
+- We explain the types of data we collect, why we use it, who receives it, and how long we keep it.
+- We use service providers only when they help us operate our services.
+- You can contact us to exercise privacy rights, ask questions, or withdraw consent where consent applies.
+- If you are in the EU or EEA, you can also complain to your local data protection authority.
+
 ## Who we are
 
 {{ organization.name }} provides {{ service.name }}{% if service.description %} — {{ service.description }}{% endif %}.
@@ -79,7 +89,7 @@ We use artificial intelligence (AI) in parts of {{ service.name }}. Below we exp
 - We do not use your personal data to train or fine-tune AI models.
 {% endif %}
 {% if activity.aiCustomerDataSentToProviders == true %}
-- We share data from this activity with external AI providers who process it on our behalf under appropriate contractual safeguards.
+- We share data from this activity with external AI providers. They use it only to provide services to us under written terms.
 {% elif activity.aiCustomerDataSentToProviders == false %}
 - We do not send data from this activity to external AI providers.
 {% endif %}
@@ -167,18 +177,30 @@ We use {{ privacy.newsletterProvider }} to manage email communications.
 {% endif %}
 {% endif %}
 
+## Plain-language terms
+
+Some privacy laws use technical terms. In this policy:
+
+- **Personal data** means information that identifies a person or can reasonably be linked to a person.
+- **Controller** means the organization that decides why and how personal data is used.
+- **Processor** or **subprocessor** means a service provider that handles personal data for us.
+- **Legal basis** means the reason privacy law allows us to use personal data, such as a contract, consent, legal duty, or legitimate interest.
+- **Legitimate interest** means a business reason to use data that does not override your rights.
+- **Contractual safeguards** means written privacy and security promises from a service provider.
+- **Cross-context behavioral advertising** means using data from different services to target ads.
+
 ## How we share personal data
 
 {% if vendors.subprocessorsHasValue %}
-We share personal data with the subprocessors listed below, who process it on our behalf under appropriate contractual safeguards.
+We share personal data with the subprocessors listed below. They handle data for us under written privacy and security terms.
 {% endif %}
 {% if privacy.crossBorderTransfers %}
-We may transfer personal data internationally. Where we do, we rely on appropriate safeguards such as: {{ privacy.transferMechanismLabels | join(", ") }}.
+We may transfer personal data to another country. When we do, we use safeguards such as: {{ privacy.transferMechanismLabels | join(", ") }}.
 {% endif %}
 {% if privacy.sellsOrSharesData %}
-We may "sell" or "share" personal data for cross-context behavioral advertising as those terms are defined under applicable law.{% if privacy.doNotSellLink %} You can opt out here: {{ privacy.doNotSellLink }}.{% endif %}
+We may "sell" or "share" personal data for targeted advertising as those terms are defined under applicable law.{% if privacy.doNotSellLink %} You can opt out here: {{ privacy.doNotSellLink }}.{% endif %}
 {% else %}
-We do not sell your personal data, and we do not share it for cross-context behavioral advertising.
+We do not sell your personal data, and we do not share it for targeted advertising across different services.
 {% endif %}
 
 {% if vendors.subprocessorsHasValue %}
@@ -221,5 +243,5 @@ We may update this Privacy Policy from time to time. When we make material chang
 {% if organization.country %}
 ## Governing law
 
-This policy is governed by the laws applicable to {{ organization.legalEntityName or organization.name }} in its jurisdiction of establishment ({{ organization.country }}), without regard to conflict-of-laws principles.
+This policy is governed by the laws that apply to {{ organization.legalEntityName or organization.name }} in {{ organization.country }}.
 {% endif %}
