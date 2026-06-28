@@ -67,6 +67,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_DEPLOY_SERVICE_ACCOUNT_JSON }}
           create_credentials_file: true
+          export_environment_variables: true
 
       - name: Build client
         run: |
@@ -77,17 +78,32 @@ jobs:
           VITE_UI_POSTHOG_HOST="${{ vars.VITE_UI_POSTHOG_HOST }}" \
           NODE_ENV=production pnpm --filter cf-app build
 
+      - name: Verify Firebase authentication
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
+          CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: ${{ steps.auth.outputs.credentials_file_path }}
+        run: |
+          set -euo pipefail
+          test -n "${GOOGLE_APPLICATION_CREDENTIALS}"
+          test -s "${GOOGLE_APPLICATION_CREDENTIALS}"
+          node -e "const fs=require('fs'); const creds=JSON.parse(fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS,'utf8')); console.log('Firebase deploy service account:', creds.client_email);"
+          pnpm exec firebase --version
+          pnpm exec firebase hosting:sites:list \
+            --project "${FIREBASE_PROJECT_ID}" \
+            --non-interactive \
+            --debug
+
       - name: Deploy client to Firebase Hosting
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
           CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: ${{ steps.auth.outputs.credentials_file_path }}
         run: |
           set -euo pipefail
-          pnpm exec firebase --version
           pnpm exec firebase deploy \
             --only hosting:client \
             --project "${FIREBASE_PROJECT_ID}" \
-            --non-interactive
+            --non-interactive \
+            --debug
 
       - name: Send Telegram Notification
         uses: appleboy/telegram-action@v1.0.1
