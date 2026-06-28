@@ -98,8 +98,10 @@ export const PrivacyProfileFields = ({
 }) => {
   const dpoStatus = form.watch("privacy.dpoStatus")
   const euRepresentativeStatus = form.watch("privacy.euRepresentativeStatus")
+  const sendsMarketingEmails = form.watch("privacy.sendsMarketingEmails")
   const dpoAppointed = dpoStatus === "appointed"
   const euRepresentativeAppointed = euRepresentativeStatus === "appointed"
+  const sendsMarketingEmailsTrue = sendsMarketingEmails === true
 
   useEffect(() => {
     if (!dpoAppointed) {
@@ -114,6 +116,23 @@ export const PrivacyProfileFields = ({
       form.setValue("privacy.euRepresentativeAddress", null)
     }
   }, [euRepresentativeAppointed, form])
+
+  useEffect(() => {
+    if (!sendsMarketingEmailsTrue) {
+      form.setValue("privacy.marketingOptOutMethod", null)
+      const currentProviders = form.getValues("privacy.organizationProviders") || []
+      const hasNewsletter = currentProviders.some(
+        (p) => p.systemType === "newsletter"
+      )
+      if (hasNewsletter) {
+        form.setValue(
+          "privacy.organizationProviders",
+          currentProviders.filter((p) => p.systemType !== "newsletter"),
+          { shouldDirty: true }
+        )
+      }
+    }
+  }, [sendsMarketingEmailsTrue, form])
 
   return (
     <div className="grid gap-6">
@@ -173,28 +192,32 @@ export const PrivacyProfileFields = ({
             label="Sends marketing emails"
             name="privacy.sendsMarketingEmails"
           />
-          <SelectField
-            control={form.control}
-            label="Marketing opt-out method"
-            name="privacy.marketingOptOutMethod"
-            options={[
-              { value: "", label: "Not set" },
-              ...marketingOptOutMethodOptions,
-            ]}
-            placeholder="Not set"
-          />
+          {sendsMarketingEmailsTrue && (
+            <SelectField
+              control={form.control}
+              label="Marketing opt-out method"
+              name="privacy.marketingOptOutMethod"
+              options={[
+                { value: "", label: "Not set" },
+                ...marketingOptOutMethodOptions,
+              ]}
+              placeholder="Not set"
+            />
+          )}
           <ToggleField
             control={form.control}
             label="Transactional emails sent"
             name="privacy.transactionalEmailsSent"
           />
-          <PrivacyProviderPicker
-            form={form}
-            label="Newsletter provider"
-            multiple={false}
-            providers={providers}
-            systemType="newsletter"
-          />
+          {sendsMarketingEmailsTrue && (
+            <PrivacyProviderPicker
+              form={form}
+              label="Newsletter provider"
+              multiple={false}
+              providers={providers}
+              systemType="newsletter"
+            />
+          )}
         </div>
       </section>
       <section className="grid gap-4">

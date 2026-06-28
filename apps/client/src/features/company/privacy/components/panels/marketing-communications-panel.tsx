@@ -6,7 +6,7 @@ import {
   type PrivacyProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type Resolver, useForm, useWatch } from "react-hook-form"
 import { z } from "zod"
 
@@ -127,6 +127,29 @@ export const MarketingCommunicationsPanel = ({
       name: "organizationProviders",
     }) ?? draft.organizationProviders
 
+  const sendsMarketingEmails = useWatch({
+    control: form.control,
+    name: "sendsMarketingEmails",
+  })
+  const sendsMarketingEmailsTrue = sendsMarketingEmails === true
+
+  useEffect(() => {
+    if (!sendsMarketingEmailsTrue) {
+      form.setValue("marketingOptOutMethod", null)
+      const currentProviders = form.getValues("organizationProviders") || []
+      const hasNewsletter = currentProviders.some(
+        (p) => p.systemType === "newsletter"
+      )
+      if (hasNewsletter) {
+        form.setValue(
+          "organizationProviders",
+          currentProviders.filter((p) => p.systemType !== "newsletter"),
+          { shouldDirty: true }
+        )
+      }
+    }
+  }, [sendsMarketingEmailsTrue, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -158,50 +181,54 @@ export const MarketingCommunicationsPanel = ({
           label="Sends marketing emails"
           name="sendsMarketingEmails"
         />
-        <SelectField
-          control={form.control}
-          helperText={privacyHelperText.marketingOptOutMethod}
-          label="Marketing opt-out method"
-          name="marketingOptOutMethod"
-          options={[
-            { value: "", label: "Not set" },
-            ...marketingOptOutMethodOptions,
-          ]}
-          placeholder="Not set"
-        />
+        {sendsMarketingEmailsTrue && (
+          <SelectField
+            control={form.control}
+            helperText={privacyHelperText.marketingOptOutMethod}
+            label="Marketing opt-out method"
+            name="marketingOptOutMethod"
+            options={[
+              { value: "", label: "Not set" },
+              ...marketingOptOutMethodOptions,
+            ]}
+            placeholder="Not set"
+          />
+        )}
         <ToggleField
           control={form.control}
           helperText={privacyHelperText.transactionalEmailsSent}
           label="Transactional emails sent"
           name="transactionalEmailsSent"
         />
-        <MultiSelectField
-          control={form.control}
-          helperText={privacyHelperText.newsletterProvider}
-          label="Newsletter provider"
-          name="organizationProviders"
-          options={newsletterProviderOptions}
-          placeholder="Select newsletter provider"
-          value={selectedNewsletterIds(organizationProviders)}
-          onValueChange={(providerIds) => {
-            const selectedId = providerIds.slice(-1)
-            const otherProviders = organizationProviders.filter(
-              (provider) => provider.systemType !== "newsletter"
-            )
+        {sendsMarketingEmailsTrue && (
+          <MultiSelectField
+            control={form.control}
+            helperText={privacyHelperText.newsletterProvider}
+            label="Newsletter provider"
+            name="organizationProviders"
+            options={newsletterProviderOptions}
+            placeholder="Select newsletter provider"
+            value={selectedNewsletterIds(organizationProviders)}
+            onValueChange={(providerIds) => {
+              const selectedId = providerIds.slice(-1)
+              const otherProviders = organizationProviders.filter(
+                (provider) => provider.systemType !== "newsletter"
+              )
 
-            form.setValue(
-              "organizationProviders",
-              [
-                ...otherProviders,
-                ...selectedId.map((providerId) => ({
-                  systemType: "newsletter" as const,
-                  providerId,
-                })),
-              ],
-              { shouldDirty: true, shouldValidate: true }
-            )
-          }}
-        />
+              form.setValue(
+                "organizationProviders",
+                [
+                  ...otherProviders,
+                  ...selectedId.map((providerId) => ({
+                    systemType: "newsletter" as const,
+                    providerId,
+                  })),
+                ],
+                { shouldDirty: true, shouldValidate: true }
+              )
+            }}
+          />
+        )}
       </div>
     </ProfilePanelShell>
   )
