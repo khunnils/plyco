@@ -107,12 +107,14 @@ We use artificial intelligence (AI) in parts of {{ service.name }}. Below we exp
 {{ service.name }} is intended for users aged {{ service.minimumUserAge }} and older and is not directed to children. We do not knowingly collect personal data from anyone under that age.
 {% endif %}
 
-{% if privacy.supportedRightLabels.length or privacy.requestMethodLabels.length or organization.privacyContactEmail or privacy.responseTimelineDaysHasValue or privacy.identityVerificationRequired or privacy.authorizedAgentSupported or privacy.appealProcessExists %}
 ## Your privacy rights
 
 {% if privacy.supportedRightLabels.length %}
-Depending on where you live, you may have the right to: {{ privacy.supportedRightLabels | join(", ") }}.
+If you are in the EU or EEA, GDPR gives you rights over your personal data. These rights can include access, rectification, erasure, restriction, portability, and objection. Based on our current profile, the rights we support include: {{ privacy.supportedRightLabels | join(", ") }}.
+{% else %}
+If you are in the EU or EEA, GDPR gives you rights over your personal data. These rights can include access, rectification, erasure, restriction, portability, and objection.
 {% endif %}
+Where we rely on consent to process your personal data, you may withdraw that consent at any time. Withdrawing consent does not affect processing that already happened before withdrawal.
 {% if privacy.requestMethodLabels.length %}
 To exercise your rights, you can reach us via: {{ privacy.requestMethodLabels | join(", ") }}{% if organization.privacyContactEmail %}, or by email at {{ organization.privacyContactEmail }}{% endif %}.
 {% elif organization.privacyContactEmail %}
@@ -130,7 +132,7 @@ You may use an authorized agent to submit a request on your behalf where permitt
 {% if privacy.appealProcessExists %}
 If we decline your request, you may appeal that decision.
 {% endif %}
-{% endif %}
+You also have the right to lodge a complaint with your local EU/EEA data protection supervisory authority.
 
 {% if services.cookiesAnswered %}
 ## Cookies and similar technologies

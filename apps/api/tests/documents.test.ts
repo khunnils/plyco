@@ -522,6 +522,15 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain(
       "Specific cookie purposes, providers, and durations are available through Cookie banner.",
     );
+    expect(renderedContent).toContain(
+      "If you are in the EU or EEA, GDPR gives you rights over your personal data.",
+    );
+    expect(renderedContent).toContain(
+      "Where we rely on consent to process your personal data, you may withdraw that consent at any time.",
+    );
+    expect(renderedContent).toContain(
+      "You also have the right to lodge a complaint with your local EU/EEA data protection supervisory authority.",
+    );
   });
 
   it("renders the subprocessors system template with data processors", async () => {
