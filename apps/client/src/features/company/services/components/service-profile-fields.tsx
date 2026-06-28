@@ -62,6 +62,7 @@ const MinimumAgeField = ({
 export const ServiceProfileFields = ({
   businessActivityOptions,
   cookieConsentMechanismOptions,
+  cookieConsentWithdrawalMethodOptions,
   cookieTrackingCategoryOptions,
   customerTypeOptions,
   form,
@@ -70,6 +71,7 @@ export const ServiceProfileFields = ({
 }: {
   businessActivityOptions: Option[]
   cookieConsentMechanismOptions: Option[]
+  cookieConsentWithdrawalMethodOptions: Option[]
   cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
@@ -213,6 +215,43 @@ export const ServiceProfileFields = ({
                 ...cookieConsentMechanismOptions,
               ]}
               placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={
+                serviceHelperText.nonEssentialCookiesBlockedUntilConsent
+              }
+              label="Blocks non-essential cookies until consent"
+              name={servicePrivacyPath(
+                index,
+                "nonEssentialCookiesBlockedUntilConsent"
+              )}
+            />
+            <ToggleField
+              control={form.control}
+              helperText={serviceHelperText.cookieRejectAsEasyAsAccept}
+              label="Reject is as easy as accept"
+              name={servicePrivacyPath(index, "cookieRejectAsEasyAsAccept")}
+            />
+            <SelectField
+              control={form.control}
+              helperText={serviceHelperText.cookieConsentWithdrawalMethod}
+              label="Consent withdrawal method"
+              name={servicePrivacyPath(
+                index,
+                "cookieConsentWithdrawalMethod"
+              )}
+              options={[
+                { value: "", label: "Not set" },
+                ...cookieConsentWithdrawalMethodOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={serviceHelperText.cookieConsentNoPretickedBoxes}
+              label="No pre-ticked boxes"
+              name={servicePrivacyPath(index, "cookieConsentNoPretickedBoxes")}
             />
             <ToggleField
               control={form.control}

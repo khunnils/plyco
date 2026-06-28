@@ -330,6 +330,22 @@ export class ReportContextBuilder {
               service.privacy.cookieConsentMechanism,
             ])[0]
           : "",
+        nonEssentialCookiesBlockedUntilConsent:
+          service.privacy.nonEssentialCookiesBlockedUntilConsent,
+        cookieRejectAsEasyAsAccept:
+          service.privacy.cookieRejectAsEasyAsAccept,
+        cookieConsentWithdrawalMethod:
+          service.privacy.cookieConsentWithdrawalMethod,
+        cookieConsentWithdrawalMethodLabel: service.privacy
+          .cookieConsentWithdrawalMethod
+          ? this.codeLabels(
+              vocabulary,
+              "privacy_cookie_consent_withdrawal_methods",
+              [service.privacy.cookieConsentWithdrawalMethod],
+            )[0]
+          : "",
+        cookieConsentNoPretickedBoxes:
+          service.privacy.cookieConsentNoPretickedBoxes,
         doNotTrackResponse: service.privacy.doNotTrackResponse,
         globalPrivacyControlSupported:
           service.privacy.globalPrivacyControlSupported,

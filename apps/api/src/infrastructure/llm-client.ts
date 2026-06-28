@@ -40,6 +40,7 @@ export type OrganizationLookupCodeSetId =
   | "service_customer_types"
   | "cookie_tracking_categories"
   | "privacy_cookie_consent_mechanisms"
+  | "privacy_cookie_consent_withdrawal_methods"
   | "subject_types"
   | "collection_methods"
   | "activity_role"
@@ -78,6 +79,9 @@ const servicePrivacyResponseSchema = (
     cookieConsentMechanism: nullableCodeIdSchema(
       codeSets.privacy_cookie_consent_mechanisms,
     ),
+    cookieConsentWithdrawalMethod: nullableCodeIdSchema(
+      codeSets.privacy_cookie_consent_withdrawal_methods,
+    ),
     doNotTrackResponse: nullableBooleanSchema,
     globalPrivacyControlSupported: nullableBooleanSchema,
     primaryHostingRegion: nullableCodeIdSchema(codeSets.regions),
@@ -86,6 +90,7 @@ const servicePrivacyResponseSchema = (
     "usesCookiesOrTrackingTechnologies",
     "cookieTrackingCategories",
     "cookieConsentMechanism",
+    "cookieConsentWithdrawalMethod",
     "doNotTrackResponse",
     "globalPrivacyControlSupported",
     "primaryHostingRegion",

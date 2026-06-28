@@ -5,6 +5,7 @@ import {
   emptyInfrastructureProfile,
   emptyPrivacyProfile,
   emptySecurityProfile,
+  emptyServiceProfile,
   type BusinessActivity,
   type OrganizationProvider,
   type OrganizationSecurityProfile,
@@ -99,6 +100,7 @@ const snapshot = (
         childrenDirected: null,
         minimumUserAge: null,
         privacy: {
+          ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: null,
           cookieTrackingCategories: null,
           cookieConsentMechanism: null,
@@ -122,6 +124,7 @@ const snapshot = (
         childrenDirected: null,
         minimumUserAge: null,
         privacy: {
+          ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: null,
           cookieTrackingCategories: null,
           cookieConsentMechanism: null,

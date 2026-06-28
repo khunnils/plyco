@@ -949,6 +949,35 @@ describe("organizations API", () => {
         },
       },
     });
+
+    const invalidWithdrawalResponse = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/security-profile",
+      payload: {
+        ...profileBody,
+        services: [
+          {
+            ...serviceBody,
+            privacy: {
+              ...serviceBody.privacy,
+              cookieConsentWithdrawalMethod: "not_a_real_method",
+            },
+          },
+        ],
+      },
+    });
+
+    expect(invalidWithdrawalResponse.statusCode).toBe(400);
+    expect(invalidWithdrawalResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "privacy_cookie_consent_withdrawal_methods",
+          field: "services.0.privacy.cookieConsentWithdrawalMethod",
+          value: "not_a_real_method",
+        },
+      },
+    });
   });
 
   it("rejects infrastructure providers that are not available for the selected system type", async () => {

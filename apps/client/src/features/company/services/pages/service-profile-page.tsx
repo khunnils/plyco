@@ -67,6 +67,10 @@ export const ServiceProfilePage = ({
       vocabulary,
       "privacy_cookie_consent_mechanisms"
     )}
+    cookieConsentWithdrawalMethodOptions={codeOptions(
+      vocabulary,
+      "privacy_cookie_consent_withdrawal_methods"
+    )}
     cookieTrackingCategoryOptions={codeOptions(
       vocabulary,
       "cookie_tracking_categories"

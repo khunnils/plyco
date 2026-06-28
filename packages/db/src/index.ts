@@ -64,6 +64,10 @@ export function mapOrganizationRecord(record: {
     usesCookiesOrTrackingTechnologies: boolean | null;
     cookieTrackingCategories: unknown;
     cookieConsentMechanism: string | null;
+    nonEssentialCookiesBlockedUntilConsent: boolean | null;
+    cookieRejectAsEasyAsAccept: boolean | null;
+    cookieConsentWithdrawalMethod: string | null;
+    cookieConsentNoPretickedBoxes: boolean | null;
     doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
@@ -87,6 +91,10 @@ export function mapOrganizationRecord(record: {
     usesCookiesOrTrackingTechnologies: boolean | null;
     cookieTrackingCategories: unknown;
     cookieConsentMechanism: string | null;
+    nonEssentialCookiesBlockedUntilConsent: boolean | null;
+    cookieRejectAsEasyAsAccept: boolean | null;
+    cookieConsentWithdrawalMethod: string | null;
+    cookieConsentNoPretickedBoxes: boolean | null;
     doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
@@ -342,6 +350,13 @@ export function mapOrganizationRecord(record: {
                 service.cookieTrackingCategories,
               ),
               cookieConsentMechanism: service.cookieConsentMechanism,
+              nonEssentialCookiesBlockedUntilConsent:
+                service.nonEssentialCookiesBlockedUntilConsent,
+              cookieRejectAsEasyAsAccept: service.cookieRejectAsEasyAsAccept,
+              cookieConsentWithdrawalMethod:
+                service.cookieConsentWithdrawalMethod,
+              cookieConsentNoPretickedBoxes:
+                service.cookieConsentNoPretickedBoxes,
               doNotTrackResponse: service.doNotTrackResponse,
               globalPrivacyControlSupported:
                 service.globalPrivacyControlSupported,

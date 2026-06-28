@@ -215,6 +215,21 @@ describe("documents / templates API", () => {
         expect.objectContaining({
           key: "service.privacy.cookieConsentMechanismLabel",
         }),
+        expect.objectContaining({
+          key: "service.privacy.nonEssentialCookiesBlockedUntilConsent",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieRejectAsEasyAsAccept",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentWithdrawalMethod",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentWithdrawalMethodLabel",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentNoPretickedBoxes",
+        }),
         expect.objectContaining({ key: "service.privacy.doNotTrackResponse" }),
         expect.objectContaining({
           key: "service.privacy.globalPrivacyControlSupported",
@@ -319,6 +334,11 @@ describe("documents / templates API", () => {
         cookieTrackingCategoryLabels: ["Necessary", "Analytics"],
         cookieConsentMechanism: "cookie_banner",
         cookieConsentMechanismLabel: "Cookie banner",
+        nonEssentialCookiesBlockedUntilConsent: true,
+        cookieRejectAsEasyAsAccept: true,
+        cookieConsentWithdrawalMethod: "cookie_preferences",
+        cookieConsentWithdrawalMethodLabel: "Cookie preferences",
+        cookieConsentNoPretickedBoxes: true,
         doNotTrackResponse: false,
         globalPrivacyControlSupported: true,
         analyticsProviders: [],
@@ -422,6 +442,75 @@ describe("documents / templates API", () => {
         dpaRequiredForProcessors: true,
       },
     });
+  });
+
+  it("renders cookie consent transparency details in the privacy policy", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/privacy-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "privacy-policy.md",
+    );
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        organizationProviders: [],
+        serviceProviderUsage: [],
+      },
+      {
+        id: "template-privacy",
+        organizationId: "org-test",
+        sourceSystemTemplateSlug: systemTemplate.slug,
+        versionMajor: 1,
+        versionMinor: 0,
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+        ...systemTemplate,
+      },
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(
+      {
+        id: "template-privacy",
+        organizationId: "org-test",
+        sourceSystemTemplateSlug: systemTemplate.slug,
+        versionMajor: 1,
+        versionMinor: 0,
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+        ...systemTemplate,
+      },
+      context,
+    );
+
+    expect(renderedContent).toContain(
+      "We do not set non-essential cookies or similar tracking technologies until you have given consent.",
+    );
+    expect(renderedContent).toContain(
+      "You can reject non-essential cookies as easily as you can accept them.",
+    );
+    expect(renderedContent).toContain(
+      "We do not use pre-ticked boxes for cookie consent.",
+    );
+    expect(renderedContent).toContain(
+      "You can withdraw cookie consent through Cookie preferences.",
+    );
+    expect(renderedContent).toContain(
+      "Specific cookie purposes, providers, and durations are available through Cookie banner.",
+    );
   });
 
   it("renders the subprocessors system template with data processors", async () => {

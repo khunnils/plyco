@@ -424,6 +424,15 @@ export const validateServiceProfileCodes = async (
           `${fieldPrefix}.privacy.cookieConsentMechanism`,
         )
       : Promise.resolve(),
+    service.privacy.cookieConsentWithdrawalMethod
+      ? assertCode(
+          vocabularyRepository,
+          organizationId,
+          "privacy_cookie_consent_withdrawal_methods",
+          service.privacy.cookieConsentWithdrawalMethod,
+          `${fieldPrefix}.privacy.cookieConsentWithdrawalMethod`,
+        )
+      : Promise.resolve(),
     service.privacy.primaryHostingRegion
       ? assertCode(
           vocabularyRepository,

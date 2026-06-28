@@ -242,6 +242,46 @@
       "example": "Cookie banner"
     },
     {
+      "key": "service.privacy.nonEssentialCookiesBlockedUntilConsent",
+      "label": "Non-essential cookies blocked until consent",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service blocks non-essential cookies until consent is given.",
+      "example": true
+    },
+    {
+      "key": "service.privacy.cookieRejectAsEasyAsAccept",
+      "label": "Cookie reject as easy as accept",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether rejecting non-essential cookies is as easy as accepting them.",
+      "example": true
+    },
+    {
+      "key": "service.privacy.cookieConsentWithdrawalMethod",
+      "label": "Cookie consent withdrawal method",
+      "type": "string",
+      "category": "Service",
+      "description": "Cookie consent withdrawal method code for the primary service.",
+      "example": "cookie_preferences"
+    },
+    {
+      "key": "service.privacy.cookieConsentWithdrawalMethodLabel",
+      "label": "Cookie consent withdrawal method label",
+      "type": "string",
+      "category": "Service",
+      "description": "Human-readable cookie consent withdrawal method for the primary service.",
+      "example": "Cookie preferences"
+    },
+    {
+      "key": "service.privacy.cookieConsentNoPretickedBoxes",
+      "label": "No pre-ticked cookie consent boxes",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service avoids pre-ticked boxes for cookie consent.",
+      "example": true
+    },
+    {
       "key": "service.privacy.doNotTrackResponse",
       "label": "Do Not Track response",
       "type": "boolean",
@@ -418,6 +458,41 @@
           "type": "string",
           "description": "Human-readable label for this service's cookie consent mechanism.",
           "example": "Cookie banner"
+        },
+        {
+          "key": "privacy.nonEssentialCookiesBlockedUntilConsent",
+          "label": "Non-essential cookies blocked until consent",
+          "type": "boolean",
+          "description": "Whether this service blocks non-essential cookies until consent is given.",
+          "example": true
+        },
+        {
+          "key": "privacy.cookieRejectAsEasyAsAccept",
+          "label": "Cookie reject as easy as accept",
+          "type": "boolean",
+          "description": "Whether rejecting non-essential cookies is as easy as accepting them.",
+          "example": true
+        },
+        {
+          "key": "privacy.cookieConsentWithdrawalMethod",
+          "label": "Cookie consent withdrawal method",
+          "type": "string",
+          "description": "Cookie consent withdrawal method code used by this service.",
+          "example": "cookie_preferences"
+        },
+        {
+          "key": "privacy.cookieConsentWithdrawalMethodLabel",
+          "label": "Cookie consent withdrawal method label",
+          "type": "string",
+          "description": "Human-readable cookie consent withdrawal method for this service.",
+          "example": "Cookie preferences"
+        },
+        {
+          "key": "privacy.cookieConsentNoPretickedBoxes",
+          "label": "No pre-ticked cookie consent boxes",
+          "type": "boolean",
+          "description": "Whether this service avoids pre-ticked boxes for cookie consent.",
+          "example": true
         },
         {
           "key": "privacy.doNotTrackResponse",

@@ -288,6 +288,13 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
         input.privacy.cookieTrackingCategories,
       ),
       cookieConsentMechanism: input.privacy.cookieConsentMechanism,
+      nonEssentialCookiesBlockedUntilConsent:
+        input.privacy.nonEssentialCookiesBlockedUntilConsent,
+      cookieRejectAsEasyAsAccept: input.privacy.cookieRejectAsEasyAsAccept,
+      cookieConsentWithdrawalMethod:
+        input.privacy.cookieConsentWithdrawalMethod,
+      cookieConsentNoPretickedBoxes:
+        input.privacy.cookieConsentNoPretickedBoxes,
       doNotTrackResponse: input.privacy.doNotTrackResponse,
       globalPrivacyControlSupported:
         input.privacy.globalPrivacyControlSupported,

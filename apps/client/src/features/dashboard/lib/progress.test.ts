@@ -45,6 +45,7 @@ describe("dashboard progress", () => {
         childrenDirected: false,
         minimumUserAge: 0,
         privacy: {
+          ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: false,
           cookieTrackingCategories: [],
           cookieConsentMechanism: null,
@@ -76,6 +77,40 @@ describe("dashboard progress", () => {
     expect(hosting).toMatchObject({
       completedFields: 1,
       totalFields: 1,
+    })
+  })
+
+  it("requires cookie transparency answers for non-essential cookie categories", () => {
+    const progress = serviceProgress(
+      {
+        ...emptyServiceProfile,
+        id: "svc_1",
+        serviceName: "App",
+        serviceDescription: "Customer app",
+        serviceUrl: "https://app.example",
+        businessActivityIds: ["activity_1"],
+        userTypes: ["admin"],
+        customerTypes: ["b2b"],
+        availabilityRegions: ["us"],
+        childrenDirected: false,
+        minimumUserAge: 0,
+        privacy: {
+          ...emptyServiceProfile.privacy,
+          usesCookiesOrTrackingTechnologies: true,
+          cookieTrackingCategories: ["analytics"],
+          cookieConsentMechanism: "cookie_banner",
+          primaryHostingRegion: "us",
+        },
+      },
+      []
+    )
+    const cookiePreferences = progress.sections.find(
+      (section) => section.title === "Cookie Preferences"
+    )
+
+    expect(cookiePreferences).toMatchObject({
+      completedFields: 3,
+      totalFields: 9,
     })
   })
 
@@ -493,6 +528,7 @@ describe("dashboard progress", () => {
             childrenDirected: false,
             minimumUserAge: 0,
             privacy: {
+              ...emptyServiceProfile.privacy,
               usesCookiesOrTrackingTechnologies: false,
               cookieTrackingCategories: [],
               cookieConsentMechanism: null,

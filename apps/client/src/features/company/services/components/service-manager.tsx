@@ -631,6 +631,7 @@ const ServiceAudiencePanel = ({
 
 const ServicePrivacyPanel = ({
   cookieConsentMechanismOptions,
+  cookieConsentWithdrawalMethodOptions,
   cookieTrackingCategoryOptions,
   isMutationPending,
   service,
@@ -638,6 +639,7 @@ const ServicePrivacyPanel = ({
   onSave,
 }: {
   cookieConsentMechanismOptions: Option[]
+  cookieConsentWithdrawalMethodOptions: Option[]
   cookieTrackingCategoryOptions: Option[]
   isMutationPending: boolean
   service: ServiceProfileInput
@@ -664,6 +666,13 @@ const ServicePrivacyPanel = ({
     if (usesCookiesOrTrackingTechnologies === false) {
       form.setValue(privacyPath("cookieTrackingCategories"), null)
       form.setValue(privacyPath("cookieConsentMechanism"), null)
+      form.setValue(
+        privacyPath("nonEssentialCookiesBlockedUntilConsent"),
+        null
+      )
+      form.setValue(privacyPath("cookieRejectAsEasyAsAccept"), null)
+      form.setValue(privacyPath("cookieConsentWithdrawalMethod"), null)
+      form.setValue(privacyPath("cookieConsentNoPretickedBoxes"), null)
       form.setValue(privacyPath("doNotTrackResponse"), null)
       form.setValue(privacyPath("globalPrivacyControlSupported"), null)
     }
@@ -701,6 +710,32 @@ const ServicePrivacyPanel = ({
             )
           : "Not set",
         serviceHelperText.cookieConsentMechanism,
+      ],
+      [
+        "Blocks non-essential cookies until consent",
+        boolText(service.privacy.nonEssentialCookiesBlockedUntilConsent),
+        serviceHelperText.nonEssentialCookiesBlockedUntilConsent,
+      ],
+      [
+        "Reject is as easy as accept",
+        boolText(service.privacy.cookieRejectAsEasyAsAccept),
+        serviceHelperText.cookieRejectAsEasyAsAccept,
+      ],
+      [
+        "Consent withdrawal",
+        service.privacy.cookieConsentWithdrawalMethod
+          ? codeLabel(
+              vocabulary,
+              "privacy_cookie_consent_withdrawal_methods",
+              service.privacy.cookieConsentWithdrawalMethod
+            )
+          : "Not set",
+        serviceHelperText.cookieConsentWithdrawalMethod,
+      ],
+      [
+        "No pre-ticked boxes",
+        boolText(service.privacy.cookieConsentNoPretickedBoxes),
+        serviceHelperText.cookieConsentNoPretickedBoxes,
       ],
       [
         "Do Not Track response",
@@ -760,6 +795,37 @@ const ServicePrivacyPanel = ({
                 ...cookieConsentMechanismOptions,
               ]}
               placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={
+                serviceHelperText.nonEssentialCookiesBlockedUntilConsent
+              }
+              label="Blocks non-essential cookies until consent"
+              name={privacyPath("nonEssentialCookiesBlockedUntilConsent")}
+            />
+            <ToggleField
+              control={form.control}
+              helperText={serviceHelperText.cookieRejectAsEasyAsAccept}
+              label="Reject is as easy as accept"
+              name={privacyPath("cookieRejectAsEasyAsAccept")}
+            />
+            <SelectField
+              control={form.control}
+              helperText={serviceHelperText.cookieConsentWithdrawalMethod}
+              label="Consent withdrawal method"
+              name={privacyPath("cookieConsentWithdrawalMethod")}
+              options={[
+                { value: "", label: "Not set" },
+                ...cookieConsentWithdrawalMethodOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <ToggleField
+              control={form.control}
+              helperText={serviceHelperText.cookieConsentNoPretickedBoxes}
+              label="No pre-ticked boxes"
+              name={privacyPath("cookieConsentNoPretickedBoxes")}
             />
             <ToggleField
               control={form.control}
@@ -1310,6 +1376,7 @@ export const ServiceManager = ({
   businessActivities,
   businessActivityOptions,
   cookieConsentMechanismOptions,
+  cookieConsentWithdrawalMethodOptions,
   cookieTrackingCategoryOptions,
   customerTypeOptions,
   dataProcessingLevelOptions,
@@ -1338,6 +1405,7 @@ export const ServiceManager = ({
   businessActivities: BusinessActivity[]
   businessActivityOptions: Option[]
   cookieConsentMechanismOptions: Option[]
+  cookieConsentWithdrawalMethodOptions: Option[]
   cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   dataProcessingLevelOptions: Option[]
@@ -1512,6 +1580,9 @@ export const ServiceManager = ({
           />
           <ServicePrivacyPanel
             cookieConsentMechanismOptions={cookieConsentMechanismOptions}
+            cookieConsentWithdrawalMethodOptions={
+              cookieConsentWithdrawalMethodOptions
+            }
             cookieTrackingCategoryOptions={cookieTrackingCategoryOptions}
             isMutationPending={isProfileMutationPending}
             service={selectedService}

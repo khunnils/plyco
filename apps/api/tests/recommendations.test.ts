@@ -279,9 +279,9 @@ describe("recommendation rules", () => {
         },
         {
           id: "privacy.cookies_tracking_without_consent",
-          title: "Tracking cookies are used without a consent mechanism",
+          title: "Non-essential tracking cookies need stronger consent transparency",
           category: "privacy",
-          severity: "medium",
+          severity: "high",
           frameworks: ["gdpr"],
           condition: {
             any: {
@@ -297,17 +297,45 @@ describe("recommendation rules", () => {
                     includesAny: ["analytics", "marketing", "advertising"],
                   },
                   {
-                    field: "privacy.cookieConsentMechanism",
-                    in: [null, "none", "not_set"],
+                    any: [
+                      {
+                        field: "privacy.cookieConsentMechanism",
+                        in: [null, "none", "not_set"],
+                      },
+                      {
+                        field:
+                          "privacy.nonEssentialCookiesBlockedUntilConsent",
+                        in: [null, false],
+                      },
+                      {
+                        field: "privacy.cookieRejectAsEasyAsAccept",
+                        in: [null, false],
+                      },
+                      {
+                        field: "privacy.cookieConsentNoPretickedBoxes",
+                        in: [null, false],
+                      },
+                      {
+                        field: "privacy.cookieConsentWithdrawalMethod",
+                        empty: true,
+                      },
+                    ],
                   },
                 ],
               },
             },
           },
           message:
-            "A service uses tracking cookies without a consent mechanism.",
-          recommendation: "Add a cookie consent mechanism.",
-          relatedFields: ["services.all.privacy.cookieConsentMechanism"],
+            "A service uses non-essential tracking cookies without complete consent transparency.",
+          recommendation:
+            "Confirm the service blocks non-essential cookies until consent, offers rejection as easily as acceptance, avoids pre-ticked boxes, and has a clear withdrawal method. Cookie purposes, providers, and durations should be available through the configured consent mechanism.",
+          relatedFields: [
+            "services.all.privacy.cookieConsentMechanism",
+            "services.all.privacy.nonEssentialCookiesBlockedUntilConsent",
+            "services.all.privacy.cookieRejectAsEasyAsAccept",
+            "services.all.privacy.cookieConsentNoPretickedBoxes",
+            "services.all.privacy.cookieConsentWithdrawalMethod",
+          ],
         },
       ],
       {
@@ -320,6 +348,10 @@ describe("recommendation rules", () => {
               usesCookiesOrTrackingTechnologies: true,
               cookieTrackingCategories: ["analytics"],
               cookieConsentMechanism: null,
+              nonEssentialCookiesBlockedUntilConsent: null,
+              cookieRejectAsEasyAsAccept: null,
+              cookieConsentWithdrawalMethod: null,
+              cookieConsentNoPretickedBoxes: null,
             },
           },
         ],
@@ -351,6 +383,73 @@ describe("recommendation rules", () => {
         "vendors.processor_dpa_missing",
         "privacy.cookies_tracking_without_consent",
       ])
+  })
+
+  it("does not flag necessary-only cookies for non-essential consent transparency", () => {
+    const response = evaluateAdvisorRules(
+      [
+        {
+          id: "privacy.cookies_tracking_without_consent",
+          title:
+            "Non-essential tracking cookies need stronger consent transparency",
+          category: "privacy",
+          severity: "high",
+          frameworks: ["gdpr"],
+          condition: {
+            any: {
+              collection: "services.all",
+              where: {
+                all: [
+                  {
+                    field: "privacy.usesCookiesOrTrackingTechnologies",
+                    equals: true,
+                  },
+                  {
+                    field: "privacy.cookieTrackingCategories",
+                    includesAny: ["analytics", "marketing", "advertising"],
+                  },
+                  {
+                    any: [
+                      {
+                        field: "privacy.cookieConsentMechanism",
+                        in: [null, "none", "not_set"],
+                      },
+                      {
+                        field:
+                          "privacy.nonEssentialCookiesBlockedUntilConsent",
+                        in: [null, false],
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          message:
+            "A service uses non-essential tracking cookies without complete consent transparency.",
+          recommendation:
+            "Confirm the service blocks non-essential cookies until consent.",
+          relatedFields: ["services.all.privacy.cookieTrackingCategories"],
+        },
+      ],
+      {
+        ...organization,
+        services: [
+          {
+            ...organization.services[0],
+            privacy: {
+              ...organization.services[0].privacy,
+              usesCookiesOrTrackingTechnologies: true,
+              cookieTrackingCategories: ["necessary"],
+              cookieConsentMechanism: null,
+              nonEssentialCookiesBlockedUntilConsent: null,
+            },
+          },
+        ],
+      },
+    )
+
+    expect(response.recommendations).toEqual([])
   })
 })
 

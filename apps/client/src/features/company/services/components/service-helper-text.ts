@@ -21,6 +21,14 @@ export const serviceHelperText = {
     "The categories of cookies or tracking used by this service.",
   cookieConsentMechanism:
     "How the service collects or manages cookie and tracking consent.",
+  nonEssentialCookiesBlockedUntilConsent:
+    "Whether analytics, marketing, advertising, or other non-essential cookies wait for consent before loading.",
+  cookieRejectAsEasyAsAccept:
+    "Whether rejecting non-essential cookies is as easy as accepting them.",
+  cookieConsentWithdrawalMethod:
+    "How users can change or withdraw cookie consent after making a choice.",
+  cookieConsentNoPretickedBoxes:
+    "Whether cookie consent choices start unchecked unless the user actively chooses them.",
   doNotTrackResponse:
     "Whether the service changes behavior when a browser sends Do Not Track.",
   globalPrivacyControlSupported:

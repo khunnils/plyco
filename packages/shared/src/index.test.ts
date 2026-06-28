@@ -454,6 +454,10 @@ describe("shared security profile schemas", () => {
           usesCookiesOrTrackingTechnologies: null,
           cookieTrackingCategories: null,
           cookieConsentMechanism: null,
+          nonEssentialCookiesBlockedUntilConsent: null,
+          cookieRejectAsEasyAsAccept: null,
+          cookieConsentWithdrawalMethod: null,
+          cookieConsentNoPretickedBoxes: null,
           doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
@@ -477,6 +481,10 @@ describe("shared security profile schemas", () => {
         usesCookiesOrTrackingTechnologies: true,
         cookieTrackingCategories: ["necessary", "analytics"],
         cookieConsentMechanism: "cookie_banner",
+        nonEssentialCookiesBlockedUntilConsent: true,
+        cookieRejectAsEasyAsAccept: true,
+        cookieConsentWithdrawalMethod: "cookie_preferences",
+        cookieConsentNoPretickedBoxes: true,
         doNotTrackResponse: false,
         globalPrivacyControlSupported: true,
         primaryHostingRegion: "us",
@@ -741,6 +749,30 @@ describe("shared security profile schemas", () => {
       privacy: {
         ...emptyServiceProfile.privacy,
         cookieConsentMechanism: "Cookie Banner",
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects service cookie consent withdrawal method values that violate the code id format", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        cookieConsentWithdrawalMethod: "Cookie Preferences",
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects service cookie transparency values with invalid types", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        nonEssentialCookiesBlockedUntilConsent: "yes",
       },
     });
 

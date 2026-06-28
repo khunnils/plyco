@@ -138,16 +138,16 @@ model OrganizationCode {
 }
 
 model User {
-  id            String                   @id(map: "users_pkey") @default(cuid())
-  googleSubject String?                  @unique(map: "users_google_subject_key") @map("google_subject")
-  email         String                   @unique(map: "users_email_key")
-  name          String
-  picture       String?
-  memberships   OrganizationMembership[]
-  sentInvitations OrganizationInvitation[] @relation("OrganizationInvitationInviter")
+  id                  String                   @id(map: "users_pkey") @default(cuid())
+  googleSubject       String?                  @unique(map: "users_google_subject_key") @map("google_subject")
+  email               String                   @unique(map: "users_email_key")
+  name                String
+  picture             String?
+  memberships         OrganizationMembership[]
+  sentInvitations     OrganizationInvitation[] @relation("OrganizationInvitationInviter")
   acceptedInvitations OrganizationInvitation[] @relation("OrganizationInvitationAcceptedUser")
-  createdAt     DateTime                 @default(now()) @map("created_at")
-  updatedAt     DateTime                 @updatedAt @map("updated_at")
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -182,21 +182,21 @@ model OrganizationMembership {
 }
 
 model OrganizationInvitation {
-  id             String       @id(map: "organization_invitations_pkey") @default(cuid())
-  organizationId String       @map("organization_id")
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_invitations_organization_id_fkey")
-  email          String
-  role           String
-  tokenHash      String       @unique(map: "organization_invitations_token_hash_key") @map("token_hash")
-  invitedByUserId String      @map("invited_by_user_id")
-  invitedByUser   User        @relation("OrganizationInvitationInviter", fields: [invitedByUserId], references: [id], onDelete: Cascade, map: "organization_invitations_invited_by_user_id_fkey")
-  acceptedByUserId String?    @map("accepted_by_user_id")
-  acceptedByUser   User?      @relation("OrganizationInvitationAcceptedUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull, map: "organization_invitations_accepted_by_user_id_fkey")
-  expiresAt      DateTime     @map("expires_at")
-  acceptedAt     DateTime?    @map("accepted_at")
-  canceledAt     DateTime?    @map("canceled_at")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id               String       @id(map: "organization_invitations_pkey") @default(cuid())
+  organizationId   String       @map("organization_id")
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_invitations_organization_id_fkey")
+  email            String
+  role             String
+  tokenHash        String       @unique(map: "organization_invitations_token_hash_key") @map("token_hash")
+  invitedByUserId  String       @map("invited_by_user_id")
+  invitedByUser    User         @relation("OrganizationInvitationInviter", fields: [invitedByUserId], references: [id], onDelete: Cascade, map: "organization_invitations_invited_by_user_id_fkey")
+  acceptedByUserId String?      @map("accepted_by_user_id")
+  acceptedByUser   User?        @relation("OrganizationInvitationAcceptedUser", fields: [acceptedByUserId], references: [id], onDelete: SetNull, map: "organization_invitations_accepted_by_user_id_fkey")
+  expiresAt        DateTime     @map("expires_at")
+  acceptedAt       DateTime?    @map("accepted_at")
+  canceledAt       DateTime?    @map("canceled_at")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
 
   @@index([organizationId], map: "idx_organization_invitations_organization_id")
   @@index([email], map: "idx_organization_invitations_email")
@@ -204,28 +204,32 @@ model OrganizationInvitation {
 }
 
 model ServiceProfile {
-  id                                String                    @id(map: "service_profiles_pkey") @default(cuid())
-  organizationId                    String                    @map("organization_id")
-  organization                      Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
-  serviceProviderUsage              ServiceProviderUsage[]
-  businessActivities                ServiceBusinessActivity[]
-  serviceName                       String?                   @map("service_name")
-  serviceDescription                String?                   @map("service_description")
-  serviceUrl                        String?                   @map("service_url")
-  userTypes                         Json?                     @map("user_types")
-  customerTypes                     Json?                     @map("customer_types")
-  availabilityRegions               Json?                     @map("availability_regions")
-  childrenDirected                  Boolean?                  @map("children_directed")
-  minimumUserAge                    Int?                      @map("minimum_user_age")
-  usesCookiesOrTrackingTechnologies Boolean?                  @map("uses_cookies_or_tracking_technologies")
-  cookieTrackingCategories          Json?                     @map("cookie_tracking_categories")
-  cookieConsentMechanism            String?                   @map("cookie_consent_mechanism")
-  doNotTrackResponse                Boolean?                  @map("do_not_track_response")
-  globalPrivacyControlSupported     Boolean?                  @map("global_privacy_control_supported")
-  primaryHostingRegion              String?                   @map("primary_hosting_region")
-  sortOrder                         Int                       @default(0) @map("sort_order")
-  createdAt                         DateTime                  @default(now()) @map("created_at")
-  updatedAt                         DateTime                  @updatedAt @map("updated_at")
+  id                                     String                    @id(map: "service_profiles_pkey") @default(cuid())
+  organizationId                         String                    @map("organization_id")
+  organization                           Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
+  serviceProviderUsage                   ServiceProviderUsage[]
+  businessActivities                     ServiceBusinessActivity[]
+  serviceName                            String?                   @map("service_name")
+  serviceDescription                     String?                   @map("service_description")
+  serviceUrl                             String?                   @map("service_url")
+  userTypes                              Json?                     @map("user_types")
+  customerTypes                          Json?                     @map("customer_types")
+  availabilityRegions                    Json?                     @map("availability_regions")
+  childrenDirected                       Boolean?                  @map("children_directed")
+  minimumUserAge                         Int?                      @map("minimum_user_age")
+  usesCookiesOrTrackingTechnologies      Boolean?                  @map("uses_cookies_or_tracking_technologies")
+  cookieTrackingCategories               Json?                     @map("cookie_tracking_categories")
+  cookieConsentMechanism                 String?                   @map("cookie_consent_mechanism")
+  nonEssentialCookiesBlockedUntilConsent Boolean?                  @map("non_essential_cookies_blocked_until_consent")
+  cookieRejectAsEasyAsAccept             Boolean?                  @map("cookie_reject_as_easy_as_accept")
+  cookieConsentWithdrawalMethod          String?                   @map("cookie_consent_withdrawal_method")
+  cookieConsentNoPretickedBoxes          Boolean?                  @map("cookie_consent_no_preticked_boxes")
+  doNotTrackResponse                     Boolean?                  @map("do_not_track_response")
+  globalPrivacyControlSupported          Boolean?                  @map("global_privacy_control_supported")
+  primaryHostingRegion                   String?                   @map("primary_hosting_region")
+  sortOrder                              Int                       @default(0) @map("sort_order")
+  createdAt                              DateTime                  @default(now()) @map("created_at")
+  updatedAt                              DateTime                  @updatedAt @map("updated_at")
 
   @@index([organizationId], map: "idx_service_profiles_organization_id")
   @@index([organizationId, sortOrder], map: "idx_service_profiles_organization_id_sort_order")
@@ -346,26 +350,26 @@ model OrganizationDataType {
 }
 
 model BusinessActivity {
-  id              String                     @id(map: "business_activities_pkey") @default(cuid())
-  organizationId  String                     @map("organization_id")
-  organization    Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
-  name            String
-  purpose         String                     @default("")
-  role            String                     @default("")
-  legalBasis      String[]                   @default([]) @map("legal_basis")
-  retentionPolicy String?                    @map("retention_policy")
-  retentionDays   Int                        @default(0) @map("retention_days")
-  usesAi          Boolean?                   @map("uses_ai")
-  aiUseCases      String                     @default("") @map("ai_use_cases")
-  aiCustomerDataUsedForTraining Boolean?     @map("ai_customer_data_used_for_training")
-  aiCustomerDataSentToProviders Boolean?     @map("ai_customer_data_sent_to_providers")
-  aiHumanReviewOfOutputs       Boolean?      @map("ai_human_review_of_outputs")
-  aiUsersInformedWhenUsed      Boolean?      @map("ai_users_informed_when_used")
-  sortOrder       Int                        @default(0) @map("sort_order")
-  services        ServiceBusinessActivity[]
-  dataTypes       BusinessActivityDataType[]
-  createdAt       DateTime                   @default(now()) @map("created_at")
-  updatedAt       DateTime                   @updatedAt @map("updated_at")
+  id                            String                     @id(map: "business_activities_pkey") @default(cuid())
+  organizationId                String                     @map("organization_id")
+  organization                  Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
+  name                          String
+  purpose                       String                     @default("")
+  role                          String                     @default("")
+  legalBasis                    String[]                   @default([]) @map("legal_basis")
+  retentionPolicy               String?                    @map("retention_policy")
+  retentionDays                 Int                        @default(0) @map("retention_days")
+  usesAi                        Boolean?                   @map("uses_ai")
+  aiUseCases                    String                     @default("") @map("ai_use_cases")
+  aiCustomerDataUsedForTraining Boolean?                   @map("ai_customer_data_used_for_training")
+  aiCustomerDataSentToProviders Boolean?                   @map("ai_customer_data_sent_to_providers")
+  aiHumanReviewOfOutputs        Boolean?                   @map("ai_human_review_of_outputs")
+  aiUsersInformedWhenUsed       Boolean?                   @map("ai_users_informed_when_used")
+  sortOrder                     Int                        @default(0) @map("sort_order")
+  services                      ServiceBusinessActivity[]
+  dataTypes                     BusinessActivityDataType[]
+  createdAt                     DateTime                   @default(now()) @map("created_at")
+  updatedAt                     DateTime                   @updatedAt @map("updated_at")
 
   @@unique([organizationId, name], map: "business_activities_organization_id_name_key")
   @@index([organizationId], map: "idx_business_activities_organization_id")

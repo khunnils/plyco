@@ -49,9 +49,9 @@
     - company.privacyContactEmail
 
 - id: privacy.cookies_tracking_without_consent
-  title: Tracking cookies are used without a consent mechanism
+  title: Non-essential tracking cookies need stronger consent transparency
   category: privacy
-  severity: medium
+  severity: high
   frameworks: [gdpr, ccpa]
   condition:
     any:
@@ -62,11 +62,24 @@
             equals: true
           - field: privacy.cookieTrackingCategories
             includesAny: [analytics, marketing, advertising]
-          - field: privacy.cookieConsentMechanism
-            in: [null, none, not_set]
-  message: A service uses tracking cookies without a consent mechanism.
-  recommendation: Add a cookie consent mechanism or update the service tracking configuration.
+          - any:
+              - field: privacy.cookieConsentMechanism
+                in: [null, none, not_set]
+              - field: privacy.nonEssentialCookiesBlockedUntilConsent
+                in: [null, false]
+              - field: privacy.cookieRejectAsEasyAsAccept
+                in: [null, false]
+              - field: privacy.cookieConsentNoPretickedBoxes
+                in: [null, false]
+              - field: privacy.cookieConsentWithdrawalMethod
+                empty: true
+  message: A service uses non-essential tracking cookies without complete consent transparency.
+  recommendation: Confirm the service blocks non-essential cookies until consent, offers rejection as easily as acceptance, avoids pre-ticked boxes, and has a clear withdrawal method. Cookie purposes, providers, and durations should be available through the configured consent mechanism.
   relatedFields:
     - services.all.privacy.usesCookiesOrTrackingTechnologies
     - services.all.privacy.cookieTrackingCategories
     - services.all.privacy.cookieConsentMechanism
+    - services.all.privacy.nonEssentialCookiesBlockedUntilConsent
+    - services.all.privacy.cookieRejectAsEasyAsAccept
+    - services.all.privacy.cookieConsentNoPretickedBoxes
+    - services.all.privacy.cookieConsentWithdrawalMethod

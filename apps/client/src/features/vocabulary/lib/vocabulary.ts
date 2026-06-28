@@ -45,6 +45,7 @@ const CODE_SETS_WITH_NONE = new Set([
   "privacy_supported_rights",
   "privacy_request_methods",
   "privacy_cookie_consent_mechanisms",
+  "privacy_cookie_consent_withdrawal_methods",
   "privacy_marketing_opt_out_methods",
   "privacy_transfer_mechanisms",
   "security_cadences",

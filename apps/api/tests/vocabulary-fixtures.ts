@@ -82,6 +82,13 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
   codeSet("privacy_cookie_consent_mechanisms", "Privacy cookie consent mechanisms", false, [
     ["cookie_banner", "Cookie banner"],
   ]),
+  codeSet("privacy_cookie_consent_withdrawal_methods", "Privacy cookie consent withdrawal methods", false, [
+    ["cookie_preferences", "Cookie preferences"],
+    ["reopen_cookie_banner", "Reopen cookie banner"],
+    ["account_settings", "Account settings"],
+    ["browser_settings", "Browser settings"],
+    ["privacy_contact", "Privacy contact"],
+  ]),
   codeSet("subject_types", "Subject types", false, [
     ["administrator", "Administrator"],
     ["customer", "Customer"],

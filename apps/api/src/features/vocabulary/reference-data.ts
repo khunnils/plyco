@@ -11,6 +11,7 @@ export const requiredCodeSetIds = [
   "cookie_tracking_categories",
   "privacy_cookie_types",
   "privacy_cookie_consent_mechanisms",
+  "privacy_cookie_consent_withdrawal_methods",
   "privacy_marketing_opt_out_methods",
   "privacy_transfer_mechanisms",
   "privacy_dpo_statuses",

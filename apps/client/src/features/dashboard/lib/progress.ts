@@ -209,6 +209,14 @@ const providersForType = (
   systemType: string
 ) => providers.filter((provider) => provider.systemType === systemType)
 
+const hasNonEssentialCookieCategories = (
+  categories: string[] | null | undefined
+) =>
+  Array.isArray(categories) &&
+  categories.some((category) =>
+    ["analytics", "marketing", "advertising"].includes(category)
+  )
+
 export const profileProgress = (profile: ProfileDraft) =>
   groupProgress([
     sectionProgress("Company details", [
@@ -548,6 +556,9 @@ export const providerUsageProgress = (usage: ServiceProviderUsage) =>
 export const serviceDetailsProgress = (
   service: ProfileDraft["services"][number]
 ) => {
+  const requiresCookieConsentTransparency = hasNonEssentialCookieCategories(
+    service.privacy.cookieTrackingCategories
+  )
   const fields = [
     field("Service name", service.serviceName),
     field("Service URL", service.serviceUrl),
@@ -573,6 +584,26 @@ export const serviceDetailsProgress = (
             "Cookie consent mechanism",
             service.privacy.cookieConsentMechanism
           ),
+          ...(requiresCookieConsentTransparency
+            ? [
+                field(
+                  "Blocks non-essential cookies until consent",
+                  service.privacy.nonEssentialCookiesBlockedUntilConsent
+                ),
+                field(
+                  "Reject is as easy as accept",
+                  service.privacy.cookieRejectAsEasyAsAccept
+                ),
+                field(
+                  "Consent withdrawal method",
+                  service.privacy.cookieConsentWithdrawalMethod
+                ),
+                field(
+                  "No pre-ticked boxes",
+                  service.privacy.cookieConsentNoPretickedBoxes
+                ),
+              ]
+            : []),
           field("Do Not Track response", service.privacy.doNotTrackResponse),
           field(
             "Global Privacy Control supported",
@@ -603,6 +634,9 @@ export const serviceProgress = (
   const selectedServiceUses = service.id
     ? serviceProviderUsage.filter((usage) => usage.serviceId === service.id)
     : []
+  const requiresCookieConsentTransparency = hasNonEssentialCookieCategories(
+    service.privacy.cookieTrackingCategories
+  )
 
   return {
     id: service.id ?? service.serviceName ?? "service",
@@ -639,6 +673,26 @@ export const serviceProgress = (
                 "Cookie consent mechanism",
                 service.privacy.cookieConsentMechanism
               ),
+              ...(requiresCookieConsentTransparency
+                ? [
+                    field(
+                      "Blocks non-essential cookies until consent",
+                      service.privacy.nonEssentialCookiesBlockedUntilConsent
+                    ),
+                    field(
+                      "Reject is as easy as accept",
+                      service.privacy.cookieRejectAsEasyAsAccept
+                    ),
+                    field(
+                      "Consent withdrawal method",
+                      service.privacy.cookieConsentWithdrawalMethod
+                    ),
+                    field(
+                      "No pre-ticked boxes",
+                      service.privacy.cookieConsentNoPretickedBoxes
+                    ),
+                  ]
+                : []),
               field(
                 "Do Not Track response",
                 service.privacy.doNotTrackResponse

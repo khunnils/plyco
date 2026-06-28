@@ -138,6 +138,11 @@ If we decline your request, you may appeal that decision.
 {% for service in services.all %}
 {% if service.privacy.usesCookiesOrTrackingTechnologies %}
 {% if services.all.length > 1 %}**{{ service.name }}.** {% endif %}We use cookies and similar technologies{% if service.privacy.cookieTrackingCategoryLabels.length %} for the following purposes: {{ service.privacy.cookieTrackingCategoryLabels | join(", ") }}{% endif %}.{% if service.privacy.cookieConsentMechanismLabel %} You can manage your preferences through {{ service.privacy.cookieConsentMechanismLabel }}.{% endif %}{% if service.privacy.globalPrivacyControlSupported %} We honor Global Privacy Control signals.{% endif %}{% if service.privacy.doNotTrackResponse %} We respond to browser "Do Not Track" signals.{% endif %}
+{% if service.privacy.nonEssentialCookiesBlockedUntilConsent %}We do not set non-essential cookies or similar tracking technologies until you have given consent.{% endif %}
+{% if service.privacy.cookieRejectAsEasyAsAccept %}You can reject non-essential cookies as easily as you can accept them.{% endif %}
+{% if service.privacy.cookieConsentNoPretickedBoxes %}We do not use pre-ticked boxes for cookie consent.{% endif %}
+{% if service.privacy.cookieConsentWithdrawalMethodLabel %}You can withdraw cookie consent through {{ service.privacy.cookieConsentWithdrawalMethodLabel }}.{% endif %}
+{% if service.privacy.cookieConsentMechanismLabel %}Specific cookie purposes, providers, and durations are available through {{ service.privacy.cookieConsentMechanismLabel }}.{% endif %}
 {% if service.privacy.analyticsProviders.length %}Analytics providers we use include: {{ service.privacy.analyticsProviders | join(", ") }}.{% endif %}
 {% if service.privacy.advertisingProviders.length %}Advertising providers we use include: {{ service.privacy.advertisingProviders | join(", ") }}.{% endif %}
 {% elif service.privacy.usesCookiesOrTrackingTechnologiesAnswered and services.all.length == 1 %}
