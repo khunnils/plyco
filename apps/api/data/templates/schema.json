@@ -298,6 +298,22 @@
       "example": true
     },
     {
+      "key": "service.privacy.allSubprocessorsDataRegion",
+      "label": "All subprocessors data region",
+      "type": "string",
+      "category": "Service",
+      "description": "Generated region code when every recorded subprocessor for the primary service has exactly one matching data region. Empty when subprocessors are missing, mixed-region, or multi-region.",
+      "example": "eu"
+    },
+    {
+      "key": "service.privacy.allSubprocessorsDataRegionLabel",
+      "label": "All subprocessors data region label",
+      "type": "string",
+      "category": "Service",
+      "description": "Human-readable generated data region when every recorded subprocessor for the primary service has exactly one matching data region.",
+      "example": "European Union"
+    },
+    {
       "key": "services.all",
       "label": "All services",
       "type": "collection",
@@ -317,7 +333,9 @@
             "globalPrivacyControlSupported": true,
             "analyticsProviders": ["Google Analytics"],
             "advertisingProviders": ["Google Ads"],
-            "primaryHostingRegion": "us"
+            "primaryHostingRegion": "us",
+            "allSubprocessorsDataRegion": "eu",
+            "allSubprocessorsDataRegionLabel": "European Union"
           },
           "vendors": [
             {
@@ -551,6 +569,20 @@
           "example": "United States"
         },
         {
+          "key": "privacy.allSubprocessorsDataRegion",
+          "label": "All subprocessors data region",
+          "type": "string",
+          "description": "Generated region code when every recorded subprocessor for this service has exactly one matching data region. Empty when subprocessors are missing, mixed-region, or multi-region.",
+          "example": "eu"
+        },
+        {
+          "key": "privacy.allSubprocessorsDataRegionLabel",
+          "label": "All subprocessors data region label",
+          "type": "string",
+          "description": "Human-readable generated data region when every recorded subprocessor for this service has exactly one matching data region.",
+          "example": "European Union"
+        },
+        {
           "key": "vendors",
           "label": "Vendors",
           "type": "collection",
@@ -605,6 +637,14 @@
       "type": "boolean",
       "category": "Service",
       "description": "Generated helper flag. True when at least one activity on any service is marked as using AI.",
+      "example": true
+    },
+    {
+      "key": "services.hasAllSubprocessorsDataRegion",
+      "label": "All subprocessors data region available",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Generated helper flag. True when at least one service has a calculated all-subprocessors data region.",
       "example": true
     },
     {

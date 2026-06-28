@@ -45,6 +45,7 @@ export type NormalizedTemplateContext = {
     usesAi: boolean;
     cookiesAnswered: boolean;
     hasHostingRegion: boolean;
+    hasAllSubprocessorsDataRegion: boolean;
   };
   privacy: Record<string, unknown>;
   security: Record<string, unknown>;
@@ -131,6 +132,12 @@ export class ReportContextBuilder {
             | Record<string, unknown>
             | undefined;
           return Boolean(servicePrivacy?.primaryHostingRegionLabel);
+        }),
+        hasAllSubprocessorsDataRegion: services.some((service) => {
+          const servicePrivacy = service.privacy as
+            | Record<string, unknown>
+            | undefined;
+          return Boolean(servicePrivacy?.allSubprocessorsDataRegionLabel);
         }),
       },
       privacy: organization
@@ -260,6 +267,8 @@ export class ReportContextBuilder {
     const advertisingProviders = serviceProviderUsage.filter(
       (usage) => usage.systemType === "advertising",
     );
+    const allSubprocessorsDataRegion =
+      this.allSubprocessorsDataRegion(serviceProviderUsage);
     const serviceActivities = activities
       .filter((activity) => service.businessActivityIds.includes(activity.id))
       .map((activity) =>
@@ -357,6 +366,12 @@ export class ReportContextBuilder {
         primaryHostingRegionLabel: service.privacy.primaryHostingRegion
           ? this.codeLabels(vocabulary, "regions", [
               service.privacy.primaryHostingRegion,
+            ])[0]
+          : "",
+        allSubprocessorsDataRegion,
+        allSubprocessorsDataRegionLabel: allSubprocessorsDataRegion
+          ? this.codeLabels(vocabulary, "regions", [
+              allSubprocessorsDataRegion,
             ])[0]
           : "",
         ...this.answerFlags(service.privacy),
@@ -797,6 +812,26 @@ export class ReportContextBuilder {
       dataRegions: providerUsage.dataRegions,
       notes: providerUsage.notes || provider.notes,
     };
+  }
+
+  private allSubprocessorsDataRegion(
+    providerUsage: Array<Record<string, unknown>>,
+  ) {
+    const subprocessorRegions = providerUsage
+      .filter((usage) => usage.dataProcessingLevel === "subprocessor")
+      .map((usage) =>
+        Array.isArray(usage.dataRegions) ? usage.dataRegions.map(String) : [],
+      );
+
+    if (
+      subprocessorRegions.length === 0 ||
+      subprocessorRegions.some((regions) => regions.length !== 1)
+    ) {
+      return "";
+    }
+
+    const uniqueRegions = new Set(subprocessorRegions.map(([region]) => region));
+    return uniqueRegions.size === 1 ? [...uniqueRegions][0] : "";
   }
 
   private businessActivityContext(

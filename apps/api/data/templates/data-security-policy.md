@@ -26,12 +26,15 @@ This policy covers {{ service.name }}.
 
 We review and update this policy when our services, security practices, or material risks change.
 
-{% if services.hasHostingRegion or infrastructure.organizationProviders.length %}
+{% if services.hasHostingRegion or services.hasAllSubprocessorsDataRegion or infrastructure.organizationProviders.length %}
 ## Infrastructure and hosting
 
 {% for service in services.all %}
 {% if service.privacy.primaryHostingRegionLabel %}
 {% if services.all.length > 1 %}{{ service.name }} is{% else %}The service is{% endif %} primarily hosted in {{ service.privacy.primaryHostingRegionLabel }}.
+{% endif %}
+{% if service.privacy.allSubprocessorsDataRegionLabel %}
+{% if services.all.length > 1 %}All recorded subprocessors for {{ service.name }} process service data in {{ service.privacy.allSubprocessorsDataRegionLabel }}.{% else %}All recorded subprocessors process service data in {{ service.privacy.allSubprocessorsDataRegionLabel }}.{% endif %}
 {% endif %}
 {% endfor %}
 {% if infrastructure.organizationProviders.length %}

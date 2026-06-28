@@ -234,8 +234,17 @@ describe("documents / templates API", () => {
         expect.objectContaining({
           key: "service.privacy.globalPrivacyControlSupported",
         }),
+        expect.objectContaining({
+          key: "service.privacy.allSubprocessorsDataRegion",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.allSubprocessorsDataRegionLabel",
+        }),
         expect.objectContaining({ key: "services.all" }),
         expect.objectContaining({ key: "services.primary" }),
+        expect.objectContaining({
+          key: "services.hasAllSubprocessorsDataRegion",
+        }),
         expect.objectContaining({ key: "privacy.supportedRights" }),
         expect.objectContaining({ key: "privacy.supportedRightLabels" }),
         expect.objectContaining({ key: "privacy.requestMethods" }),
@@ -347,6 +356,8 @@ describe("documents / templates API", () => {
         advertisingProviderIds: [],
         primaryHostingRegion: "us",
         primaryHostingRegionLabel: "United States",
+        allSubprocessorsDataRegion: "",
+        allSubprocessorsDataRegionLabel: "",
       },
     });
     expect(context.services.primary).toMatchObject(context.service);
@@ -762,6 +773,7 @@ describe("documents / templates API", () => {
           {
             id: "vendor-use-subprocessor",
             ...subprocessorUseBody,
+            dataRegions: ["eu"],
             vendorName: "Stripe",
             serviceName: "Acme AI Platform",
             createdAt: "2026-05-15T00:00:00.000Z",
@@ -780,6 +792,9 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain("- Acme Admin");
     expect(renderedContent).toContain(
       "Acme AI Platform is primarily hosted in United States.",
+    );
+    expect(renderedContent).toContain(
+      "All recorded subprocessors for Acme AI Platform process service data in European Union.",
     );
     expect(renderedContent).toContain(
       "Acme Admin is primarily hosted in European Union.",

@@ -90,6 +90,7 @@ organization-scoped workspace routes:
 - generated documents scoped to templates
 - advisor recommendations are computed from static YAML rules against the saved organization profile and returned from an organization-scoped endpoint
 - controlled vocabulary values are stored as stable code IDs, with labels and optional descriptions resolved from organization vocabulary or system code sets
+- document context derives `service.privacy.allSubprocessorsDataRegion` when every recorded subprocessor for a service has exactly one matching data region
 - Airtable vocabulary imports persist `Uses Hints`; organization code descriptions are copied on clone/backfill and remain locally editable
 - countries are app-owned ISO alpha-2 reference data, separate from editable vocabulary
 - services, business activities, and organization data types have organization-scoped, zero-based sort positions; reorder requests must contain the complete current ID set and update all positions atomically
