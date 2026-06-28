@@ -150,7 +150,7 @@ jobs:
             --image "${IMAGE_URI}" \
             --service-account "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" \
             --allow-unauthenticated \
-            --set-env-vars "NODE_ENV=production,HOST=0.0.0.0,GCP_PROJECT_ID=${PROJECT_ID},AIRTABLE_BASE=${{ vars.AIRTABLE_BASE }},CLIENT_URL=${{ vars.CLIENT_URL }},WEB_URL=${{ vars.WEB_URL }},API_PUBLIC_URL=${{ vars.API_PUBLIC_URL }},DOCUMENT_PDF_BUCKET=${{ vars.DOCUMENT_PDF_BUCKET }},LANGFUSE_BASE_URL=${LANGFUSE_BASE_URL},SENTRY_DSN=${{ vars.SENTRY_DSN }},SENTRY_ENVIRONMENT=production,GEMINI_PROVIDER_LOOKUP_MODEL=gemini-2.5-flash,ORGANIZATION_LOOKUP_MODEL=gemini-flash-latest" \
+            --set-env-vars "NODE_ENV=production,HOST=0.0.0.0,GCP_PROJECT_ID=${PROJECT_ID},AIRTABLE_BASE=${{ vars.AIRTABLE_BASE }},CLIENT_URL=${{ vars.CLIENT_URL }},WEB_URL=${{ vars.WEB_URL }},API_PUBLIC_URL=${{ vars.API_PUBLIC_URL }},DOCUMENT_PDF_BUCKET=${{ vars.DOCUMENT_PDF_BUCKET }},LANGFUSE_BASE_URL=${{ env.LANGFUSE_BASE_URL }},SENTRY_DSN=${{ vars.SENTRY_DSN }},SENTRY_ENVIRONMENT=production,GEMINI_PROVIDER_LOOKUP_MODEL=gemini-2.5-flash,ORGANIZATION_LOOKUP_MODEL=gemini-flash-latest" \
             --set-secrets "DATABASE_URL=database-url:latest,AIRTABLE_API_KEY=airtable-api-key:latest,PLYCO_API_KEY=plyco-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest,GOOGLE_OAUTH_CLIENT_ID=google-oauth-client-id:latest,GOOGLE_OAUTH_CLIENT_SECRET=google-oauth-client-secret:latest,SESSION_KEY=session-key:latest"
 
       - name: Verify health endpoint
