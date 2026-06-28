@@ -64,6 +64,7 @@ jobs:
           CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: ${{ steps.auth.outputs.credentials_file_path }}
         run: |
           set -euo pipefail
+          pnpm exec firebase --version
           pnpm exec firebase deploy \
             --only hosting:web \
             --project "${FIREBASE_PROJECT_ID}" \
