@@ -342,6 +342,13 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         providersForType(infrastructure.organizationProviders, "source_control")
       ),
       field(
+        "Issue tracking",
+        providersForType(
+          infrastructure.organizationProviders,
+          "issue_tracking"
+        )
+      ),
+      field(
         "Login provider",
         providersForType(infrastructure.organizationProviders, "auth")
       ),
@@ -353,7 +360,6 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
         )
       ),
       field("MFA enabled", infrastructure.mfaEnabled),
-      field("Work devices encrypted", infrastructure.encryptedDevicesRequired),
     ]),
     sectionProgress("Encryption", [
       field("Encrypted at rest", infrastructure.encryptionAtRest),
@@ -370,6 +376,7 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
           ]
         : []),
       field("Key management", infrastructure.keyManagementProvider),
+      field("Work devices encrypted", infrastructure.encryptedDevicesRequired),
     ]),
     sectionProgress("Monitoring & Detection", [
       field(

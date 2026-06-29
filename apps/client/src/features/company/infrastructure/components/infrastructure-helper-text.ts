@@ -4,6 +4,7 @@ export const infrastructureHelperText = {
   cloudProviders:
     "The cloud platforms that host your product, databases, storage, or infrastructure.",
   sourceControlProvider: "Where your team stores and reviews source code.",
+  issueTrackingProvider: "Where your team tracks bugs and project issues.",
   authProvider:
     "The identity provider your team uses to sign in to work systems.",
   passwordManager:

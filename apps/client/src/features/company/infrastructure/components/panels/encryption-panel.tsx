@@ -26,6 +26,7 @@ const encryptionSchema = infrastructureProfileSchema.pick({
   atRestAlgorithm: true,
   inTransitMinimumTlsVersion: true,
   keyManagementProvider: true,
+  encryptedDevicesRequired: true,
 })
 
 type EncryptionDraft = z.infer<typeof encryptionSchema>
@@ -38,6 +39,7 @@ const toEncryptionDraft = (
   atRestAlgorithm: infrastructure.atRestAlgorithm,
   inTransitMinimumTlsVersion: infrastructure.inTransitMinimumTlsVersion,
   keyManagementProvider: infrastructure.keyManagementProvider,
+  encryptedDevicesRequired: infrastructure.encryptedDevicesRequired,
 })
 
 const encryptionRows = (
@@ -96,6 +98,12 @@ const encryptionRows = (
       infrastructureHelperText.inTransitMinimumTlsVersion,
     ])
   }
+
+  rows.push([
+    "Work devices encrypted",
+    boolText(draft.encryptedDevicesRequired),
+    infrastructureHelperText.encryptedDevicesRequired,
+  ])
 
   return rows
 }
@@ -232,6 +240,12 @@ export const EncryptionPanel = ({
             ...securityKeyManagementProviderOptions,
           ]}
           placeholder="Not set"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={infrastructureHelperText.encryptedDevicesRequired}
+          label="Work devices encrypted"
+          name="encryptedDevicesRequired"
         />
       </div>
     </ProfilePanelShell>

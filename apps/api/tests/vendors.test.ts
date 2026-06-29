@@ -288,6 +288,15 @@ describe("vendors / providers API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([
       {
+        id: "prov-openai",
+        name: "OpenAI",
+        url: "https://openai.com",
+        category: "AI",
+        systemTypes: ["ai"],
+        securityCriticality: "Critical",
+        handlesCustomerData: true,
+      },
+      {
         id: "prov-github",
         name: "GitHub",
         url: "https://github.com",

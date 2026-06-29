@@ -289,26 +289,50 @@ export const toProfileDraft = (
     primaryActivityIds: string[]
     websiteActivityIds: string[]
   }
-): ProfileDraft => ({
-  company: draft.company,
-  services: [
-    {
-      ...draft.primaryService,
-      businessActivityIds: primaryActivityIds,
+): ProfileDraft => {
+  const onboardingProviders = (draft.providers || []).flatMap((provider) =>
+    provider.systemTypes.map((systemType) => ({
+      providerId: provider.providerId,
+      systemType,
+      name: provider.name,
+    }))
+  )
+
+  const infrastructureProviders = onboardingProviders.filter((p) =>
+    ["ai", "cloud", "source_control", "auth", "password_manager", "issue_tracking"].includes(p.systemType)
+  )
+
+  const privacyProviders = onboardingProviders.filter((p) =>
+    ["newsletter"].includes(p.systemType)
+  )
+
+  return {
+    company: draft.company,
+    services: [
+      {
+        ...draft.primaryService,
+        businessActivityIds: primaryActivityIds,
+      },
+      {
+        ...draft.websiteService,
+        businessActivityIds: websiteActivityIds,
+      },
+    ],
+    privacy: {
+      ...draft.privacy,
+      organizationProviders: privacyProviders,
     },
-    {
-      ...draft.websiteService,
-      businessActivityIds: websiteActivityIds,
+    infrastructure: {
+      ...emptyInfrastructureProfile,
+      organizationProviders: infrastructureProviders,
     },
-  ],
-  privacy: draft.privacy,
-  infrastructure: emptyInfrastructureProfile,
-  security: emptySecurityProfile,
-  dataHandling: {
-    dataTypesStored: draft.dataTypes,
-  },
-  access: emptyAccessProfile,
-})
+    security: emptySecurityProfile,
+    dataHandling: {
+      dataTypesStored: draft.dataTypes,
+    },
+    access: emptyAccessProfile,
+  }
+}
 
 export const normalizeUrl = (value: string) => {
   const trimmed = value.trim()

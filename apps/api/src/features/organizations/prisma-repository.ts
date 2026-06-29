@@ -469,6 +469,10 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       "cloud",
       "password_manager",
       "newsletter",
+      "ai",
+      "issue_tracking",
+      "analytics",
+      "advertising",
     ];
     const currentProviders = await this.client.organizationProvider.findMany({
       where: { organizationId },

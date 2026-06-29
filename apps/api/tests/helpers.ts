@@ -31,6 +31,15 @@ export function createTestApp() {
     vocabularyRepository,
     providerSource: new StaticProviderSource([
       {
+        id: "prov-openai",
+        name: "OpenAI",
+        url: "https://openai.com",
+        category: "AI",
+        systemTypes: ["ai"],
+        securityCriticality: "Critical",
+        handlesCustomerData: true,
+      },
+      {
         id: "prov-github",
         name: "GitHub",
         url: "https://github.com",

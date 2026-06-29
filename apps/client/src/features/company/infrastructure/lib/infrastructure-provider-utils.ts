@@ -2,13 +2,14 @@ import { type ProviderSelection, type ProviderSystemType } from "@plyco/shared"
 
 export type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
-  "analytics" | "advertising" | "issue_tracking" | "newsletter"
+  "analytics" | "advertising" | "newsletter"
 >
 
 export const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
   "ai",
   "cloud",
   "source_control",
+  "issue_tracking",
   "auth",
   "password_manager",
 ]
@@ -22,6 +23,7 @@ export const infrastructureProviderLabels: Record<
   source_control: "Code repository",
   cloud: "Cloud providers",
   password_manager: "Password manager",
+  issue_tracking: "Issue tracking",
 }
 
 export const updateInfrastructureProviderSelection = (

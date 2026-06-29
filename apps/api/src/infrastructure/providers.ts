@@ -80,6 +80,8 @@ const rawStringValues = (
 }
 
 const systemTypeAliases: Record<string, ProviderSystemType> = {
+  ai: "ai",
+  "ai provider": "ai",
   auth: "auth",
   authentication: "auth",
   "identity provider": "auth",

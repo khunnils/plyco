@@ -28,7 +28,7 @@ const comboboxInputClassName =
 
 type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
-  "analytics" | "advertising" | "issue_tracking" | "newsletter"
+  "analytics" | "advertising" | "newsletter"
 >
 
 const systemLabels: Record<InfrastructureProviderSystemType, string> = {
@@ -37,12 +37,14 @@ const systemLabels: Record<InfrastructureProviderSystemType, string> = {
   source_control: "Source control provider",
   cloud: "Cloud provider",
   password_manager: "Password manager",
+  issue_tracking: "Issue tracking provider",
 }
 
 const infrastructureSystemTypes: InfrastructureProviderSystemType[] = [
   "ai",
   "cloud",
   "source_control",
+  "issue_tracking",
   "auth",
   "password_manager",
 ]
@@ -267,11 +269,6 @@ export const InfrastructureProfileFields = ({
             label="MFA enabled"
             name="infrastructure.mfaEnabled"
           />
-          <ToggleField
-            control={form.control}
-            label="Encrypted devices required"
-            name="infrastructure.encryptedDevicesRequired"
-          />
         </div>
       </section>
       <section className="grid gap-4">
@@ -320,6 +317,11 @@ export const InfrastructureProfileFields = ({
               ...securityKeyManagementProviderOptions,
             ]}
             placeholder="Not set"
+          />
+          <ToggleField
+            control={form.control}
+            label="Encrypted devices required"
+            name="infrastructure.encryptedDevicesRequired"
           />
         </div>
       </section>

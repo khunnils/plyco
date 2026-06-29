@@ -209,6 +209,7 @@ export function mapOrganizationRecord(record: {
     "source_control",
     "cloud",
     "password_manager",
+    "issue_tracking",
   ];
   const company = companyProfileSchema.parse({
     companyName: record.companyName,

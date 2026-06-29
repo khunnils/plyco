@@ -25,7 +25,6 @@ import { infrastructureHelperText } from "../infrastructure-helper-text"
 const providersSchema = infrastructureProfileSchema.pick({
   organizationProviders: true,
   mfaEnabled: true,
-  encryptedDevicesRequired: true,
 })
 
 const toProvidersDraft = (
@@ -33,7 +32,6 @@ const toProvidersDraft = (
 ): ProvidersDraft => ({
   organizationProviders: infrastructure.organizationProviders,
   mfaEnabled: infrastructure.mfaEnabled,
-  encryptedDevicesRequired: infrastructure.encryptedDevicesRequired,
 })
 
 const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
@@ -66,6 +64,15 @@ const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
       infrastructureHelperText.sourceControlProvider,
     ],
     [
+      "Issue tracking",
+      providerNamesForSystem(
+        draft.organizationProviders,
+        catalogProviders,
+        "issue_tracking"
+      ),
+      infrastructureHelperText.issueTrackingProvider,
+    ],
+    [
       "Login provider",
       providerNamesForSystem(
         draft.organizationProviders,
@@ -87,11 +94,6 @@ const providerRows = (draft: ProvidersDraft, catalogProviders: Provider[]) =>
       "MFA enabled",
       boolText(draft.mfaEnabled),
       infrastructureHelperText.mfaEnabled,
-    ],
-    [
-      "Work devices encrypted",
-      boolText(draft.encryptedDevicesRequired),
-      infrastructureHelperText.encryptedDevicesRequired,
     ],
   ] as const
 
@@ -161,9 +163,11 @@ export const InfrastructureProvidersPanel = ({
               helperText={
                 systemType === "source_control"
                   ? infrastructureHelperText.sourceControlProvider
-                  : systemType === "auth"
-                    ? infrastructureHelperText.authProvider
-                    : infrastructureHelperText.passwordManager
+                  : systemType === "issue_tracking"
+                    ? infrastructureHelperText.issueTrackingProvider
+                    : systemType === "auth"
+                      ? infrastructureHelperText.authProvider
+                      : infrastructureHelperText.passwordManager
               }
               key={systemType}
               providers={catalogProviders}
@@ -175,12 +179,6 @@ export const InfrastructureProvidersPanel = ({
           helperText={infrastructureHelperText.mfaEnabled}
           label="MFA enabled"
           name="mfaEnabled"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.encryptedDevicesRequired}
-          label="Work devices encrypted"
-          name="encryptedDevicesRequired"
         />
       </div>
     </ProfilePanelShell>

@@ -195,13 +195,18 @@ export const validateInfrastructureProfileCodes = async (
   await Promise.all([
     ...infrastructure.organizationProviders.map((provider) => {
       if (
-        !["auth", "source_control", "cloud", "password_manager"].includes(
-          provider.systemType,
-        )
+        ![
+          "auth",
+          "source_control",
+          "cloud",
+          "password_manager",
+          "ai",
+          "issue_tracking",
+        ].includes(provider.systemType)
       ) {
         throw new ApiError(
           "INFRASTRUCTURE_PROVIDER_SYSTEM_TYPES_INVALID",
-          "Infrastructure providers must use cloud, source control, auth, or password manager system types.",
+          "Infrastructure providers must use cloud, source control, auth, password manager, ai, or issue tracking system types.",
           400,
           { systemType: provider.systemType },
         );

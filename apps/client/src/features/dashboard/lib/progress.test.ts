@@ -186,13 +186,14 @@ describe("dashboard progress", () => {
         encryptionInTransit: false,
         inTransitMinimumTlsVersion: null,
         keyManagementProvider: "aws_kms",
+        encryptedDevicesRequired: false,
       },
     })
     const encryption = progress.sections.find(
       (section) => section.title === "Encryption"
     )
 
-    expect(encryption).toMatchObject({ completedFields: 3, totalFields: 3 })
+    expect(encryption).toMatchObject({ completedFields: 4, totalFields: 4 })
   })
 
   it("skips response timeline days when status is not_defined", () => {
