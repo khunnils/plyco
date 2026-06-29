@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { privacyProfileSchema, type PrivacyProfile } from "@plyco/shared"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -92,6 +92,15 @@ export const ComplianceDisclosuresPanel = ({
     values: draft,
   })
 
+  const sellsOrSharesData = form.watch("sellsOrSharesData")
+  const sellsOrSharesDataTrue = sellsOrSharesData === true
+
+  useEffect(() => {
+    if (!sellsOrSharesDataTrue) {
+      form.setValue("doNotSellLink", null)
+    }
+  }, [sellsOrSharesDataTrue, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -119,13 +128,15 @@ export const ComplianceDisclosuresPanel = ({
           label="Sells or shares data (CCPA)"
           name="sellsOrSharesData"
         />
-        <TextField
-          error={form.formState.errors.doNotSellLink}
-          helperText={privacyHelperText.doNotSellLink}
-          label="Do Not Sell link"
-          name="doNotSellLink"
-          register={form.register}
-        />
+        {sellsOrSharesDataTrue && (
+          <TextField
+            error={form.formState.errors.doNotSellLink}
+            helperText={privacyHelperText.doNotSellLink}
+            label="Do Not Sell link"
+            name="doNotSellLink"
+            register={form.register}
+          />
+        )}
         <ToggleField
           control={form.control}
           helperText={privacyHelperText.usesAutomatedDecisionMaking}

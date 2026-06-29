@@ -99,9 +99,17 @@ export const PrivacyProfileFields = ({
   const dpoStatus = form.watch("privacy.dpoStatus")
   const euRepresentativeStatus = form.watch("privacy.euRepresentativeStatus")
   const sendsMarketingEmails = form.watch("privacy.sendsMarketingEmails")
+  const sellsOrSharesData = form.watch("privacy.sellsOrSharesData")
   const dpoAppointed = dpoStatus === "appointed"
   const euRepresentativeAppointed = euRepresentativeStatus === "appointed"
   const sendsMarketingEmailsTrue = sendsMarketingEmails === true
+  const sellsOrSharesDataTrue = sellsOrSharesData === true
+
+  useEffect(() => {
+    if (!sellsOrSharesDataTrue) {
+      form.setValue("privacy.doNotSellLink", null)
+    }
+  }, [sellsOrSharesDataTrue, form])
 
   useEffect(() => {
     if (!dpoAppointed) {
@@ -250,12 +258,14 @@ export const PrivacyProfileFields = ({
             label="Sells or shares data (CCPA)"
             name="privacy.sellsOrSharesData"
           />
-          <TextField
-            error={form.formState.errors.privacy?.doNotSellLink}
-            label="Do Not Sell link"
-            name="privacy.doNotSellLink"
-            register={form.register}
-          />
+          {sellsOrSharesDataTrue && (
+            <TextField
+              error={form.formState.errors.privacy?.doNotSellLink}
+              label="Do Not Sell link"
+              name="privacy.doNotSellLink"
+              register={form.register}
+            />
+          )}
           <ToggleField
             control={form.control}
             label="Uses automated decision making"
