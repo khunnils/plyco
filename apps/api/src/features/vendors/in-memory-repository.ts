@@ -130,6 +130,36 @@ export class InMemoryVendorRepository implements ProviderRepository {
     organizationId: string,
     input: OrganizationProviderInput,
   ) {
+    const duplicateProvider = Array.from(
+      this.organizationProviders.values(),
+    ).find(
+      (provider) =>
+        provider.organizationId === organizationId &&
+        provider.name === input.name,
+    );
+
+    if (duplicateProvider) {
+      const provider = organizationProviderInventorySchema.parse({
+        ...duplicateProvider,
+        providerId: duplicateProvider.providerId || input.providerId,
+        systemTypes: Array.from(
+          new Set([...duplicateProvider.systemTypes, ...input.systemTypes]),
+        ),
+        legalName: duplicateProvider.legalName || input.legalName,
+        category: duplicateProvider.category || input.category,
+        countryOfRegistration:
+          duplicateProvider.countryOfRegistration ||
+          input.countryOfRegistration,
+        criticality: duplicateProvider.criticality || input.criticality,
+        notes: duplicateProvider.notes || input.notes,
+        purpose: duplicateProvider.purpose || input.purpose,
+        updatedAt: now(),
+      }) as OrganizationProvider & { organizationId: string };
+      provider.organizationId = organizationId;
+      this.organizationProviders.set(provider.id, provider);
+      return provider;
+    }
+
     const timestamp = now();
     const provider = organizationProviderInventorySchema.parse({
       id: newId("provider"),

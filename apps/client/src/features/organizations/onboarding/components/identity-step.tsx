@@ -1,6 +1,5 @@
 import { type FormEvent } from "react"
 import { useNavigate } from "react-router-dom"
-import { Sparkles, Info, LogOut } from "lucide-react"
 import { organizationLookupInputSchema } from "@plyco/shared"
 
 import { Button } from "@/components/ui/button"
@@ -19,20 +18,7 @@ export const IdentityStep = () => {
     setDraft,
     submitError,
     setSubmitError,
-    onCancel,
-    onLogout,
   } = useOnboardingStore()
-
-  const actions = onCancel ? (
-    <Button type="button" variant="outline" onClick={onCancel}>
-      Close
-    </Button>
-  ) : onLogout ? (
-    <Button type="button" variant="outline" onClick={onLogout}>
-      <LogOut />
-      Logout
-    </Button>
-  ) : null
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -56,8 +42,9 @@ export const IdentityStep = () => {
 
   return (
     <CreateShell
-      actions={actions}
+      description="Add the basics first. We will ask for regions and goals before reading public pages for editable defaults."
       step="identity"
+      titleAbove
       title="Let's build your workspace"
     >
       <form className="mx-auto grid max-w-2xl gap-6" onSubmit={handleSubmit}>
@@ -77,20 +64,6 @@ export const IdentityStep = () => {
           value={website}
           onChange={setWebsite}
         />
-        <div className="border-primary-100 bg-primary-50 flex gap-4 rounded-lg border p-4 text-left">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-slate-200 text-slate-700">
-            <Info className="size-5" />
-          </div>
-          <div>
-            <p className="text-primary-900 text-sm font-semibold">
-              Workspace identity
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Add the basics first. We will ask for regions and goals before
-              reading public pages for editable defaults.
-            </p>
-          </div>
-        </div>
         {submitError ? (
           <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
             {submitError}
@@ -98,7 +71,6 @@ export const IdentityStep = () => {
         ) : null}
         <div className="grid gap-4 pt-2">
           <Button className="h-12" type="submit">
-            <Sparkles />
             Continue
           </Button>
         </div>

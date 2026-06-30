@@ -149,6 +149,22 @@
   }
 }
 
+@keyframes onboarding-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.onboarding-page-transition {
+  animation: onboarding-page-enter 280ms ease-out both;
+}
+
 .onboarding-lookup-core {
   animation: onboarding-lookup-core 6s ease-in-out infinite;
 }
@@ -166,6 +182,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .onboarding-page-transition,
   .onboarding-lookup-core,
   .onboarding-lookup-dot {
     animation: none;

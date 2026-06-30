@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, ArrowRight, LogOut } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
@@ -47,14 +47,8 @@ const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> =
 
 export const MarketsStep = () => {
   const navigate = useNavigate()
-  const {
-    draft,
-    updateDraft,
-    submitError,
-    setSubmitError,
-    onCancel,
-    onLogout,
-  } = useOnboardingStore()
+  const { draft, updateDraft, submitError, setSubmitError } =
+    useOnboardingStore()
 
   const vocabulary = useVocabulary(Boolean(draft))
   const allowedRegionValues = ["global", "us", "eu"]
@@ -79,17 +73,6 @@ export const MarketsStep = () => {
   if (!draft) {
     return null
   }
-
-  const actions = onCancel ? (
-    <Button type="button" variant="outline" onClick={onCancel}>
-      Close
-    </Button>
-  ) : onLogout ? (
-    <Button type="button" variant="outline" onClick={onLogout}>
-      <LogOut />
-      Logout
-    </Button>
-  ) : null
 
   const handleNext = () => {
     if (!draft.company.regions || draft.company.regions.length === 0) {
@@ -123,7 +106,6 @@ export const MarketsStep = () => {
 
   return (
     <CreateShell
-      actions={actions}
       onBack={handleBack}
       step="markets"
       titleAbove

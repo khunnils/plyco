@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, ArrowRight, LogOut, Check, Loader2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react"
 import {
   type Provider,
   type OrganizationProviderInput,
@@ -128,14 +128,8 @@ const toggleProviderSystemType = (
 
 export const ProvidersStep = () => {
   const navigate = useNavigate()
-  const {
-    draft,
-    updateDraft,
-    submitError,
-    setSubmitError,
-    onCancel,
-    onLogout,
-  } = useOnboardingStore()
+  const { draft, updateDraft, submitError, setSubmitError } =
+    useOnboardingStore()
 
   const {
     data: providers = [],
@@ -152,17 +146,6 @@ export const ProvidersStep = () => {
   if (!draft) {
     return null
   }
-
-  const actions = onCancel ? (
-    <Button type="button" variant="outline" onClick={onCancel}>
-      Close
-    </Button>
-  ) : onLogout ? (
-    <Button type="button" variant="outline" onClick={onLogout}>
-      <LogOut />
-      Logout
-    </Button>
-  ) : null
 
   const handleNext = () => {
     setSubmitError(null)
@@ -208,7 +191,6 @@ export const ProvidersStep = () => {
 
   return (
     <CreateShell
-      actions={actions}
       onBack={handleBack}
       step="providers"
       titleAbove

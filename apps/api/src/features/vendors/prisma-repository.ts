@@ -195,14 +195,22 @@ export class PrismaVendorRepository implements ProviderRepository {
     organizationId: string,
     input: OrganizationProviderInput,
   ): Promise<OrganizationProvider> {
-    const provider = await this.client.organizationProvider.create({
-      data: {
-        organizationId,
-        ...this.organizationProviderData(input),
-      },
-    });
+    try {
+      const provider = await this.client.organizationProvider.create({
+        data: {
+          organizationId,
+          ...this.organizationProviderData(input),
+        },
+      });
 
-    return mapOrganizationProviderRecord(provider);
+      return mapOrganizationProviderRecord(provider);
+    } catch (error) {
+      return this.mergeOrganizationProviderNameConflict(
+        organizationId,
+        input,
+        error,
+      );
+    }
   }
 
   async updateOrganizationProvider(
@@ -473,6 +481,48 @@ export class PrismaVendorRepository implements ProviderRepository {
       notes: input.notes || null,
       purpose: input.purpose || null,
     };
+  }
+
+  private async mergeOrganizationProviderNameConflict(
+    organizationId: string,
+    input: OrganizationProviderInput,
+    error: unknown,
+  ): Promise<OrganizationProvider> {
+    if (
+      !error ||
+      typeof error !== "object" ||
+      !("code" in error) ||
+      error.code !== "P2002"
+    ) {
+      throw error;
+    }
+
+    const existing = await this.client.organizationProvider.findFirst({
+      where: { organizationId, name: input.name },
+    });
+
+    if (!existing) {
+      throw error;
+    }
+
+    const provider = await this.client.organizationProvider.update({
+      where: { id: existing.id },
+      data: {
+        providerId: existing.providerId || input.providerId || null,
+        systemTypes: Array.from(
+          new Set([...existing.systemTypes, ...input.systemTypes]),
+        ),
+        legalName: existing.legalName || input.legalName,
+        category: existing.category || input.category,
+        countryOfRegistration:
+          existing.countryOfRegistration || input.countryOfRegistration,
+        criticality: existing.criticality || input.criticality,
+        notes: existing.notes || input.notes || null,
+        purpose: existing.purpose || input.purpose || null,
+      },
+    });
+
+    return mapOrganizationProviderRecord(provider);
   }
 
   private serviceProviderUsageData(input: ServiceProviderUsageInput) {

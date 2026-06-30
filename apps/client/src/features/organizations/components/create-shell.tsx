@@ -1,11 +1,10 @@
 import { type ReactNode } from "react"
-import { ArrowLeft, CircleHelp } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { type WizardStep, stepNumber, stepOrder } from "./types"
 
 export const CreateShell = ({
-  actions,
   children,
   onBack,
   step,
@@ -13,7 +12,6 @@ export const CreateShell = ({
   titleAbove,
   description,
 }: {
-  actions: ReactNode
   children: ReactNode
   onBack?: () => void
   step: WizardStep
@@ -26,7 +24,7 @@ export const CreateShell = ({
   return (
     <main className="min-h-svh bg-slate-50 text-slate-900">
       <section className="flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
-        <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
+        <header className="flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
             {stepNumber(step) > 1 ? (
               <Button
@@ -45,27 +43,8 @@ export const CreateShell = ({
               className="h-8 w-auto rounded-md object-contain"
             />
           </div>
-          <div className="flex items-center gap-4">
-            {stepNumber(step) > 0 ? (
-              <div className="hidden items-center gap-3 sm:flex">
-                <span className="text-sm font-semibold text-slate-600">
-                  Step {stepNumber(step)} of {stepOrder.length}
-                </span>
-                <div className="bg-primary-100 h-2 w-28 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{
-                      width: `${(stepNumber(step) / stepOrder.length) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ) : null}
-            <CircleHelp className="hidden size-5 text-slate-500 sm:block" />
-            {actions}
-          </div>
         </header>
-        <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 sm:px-8">
+        <div className="onboarding-page-transition flex flex-1 flex-col items-center justify-center px-4 pt-10 pb-20 sm:px-8">
           {titleAbove && title ? (
             <div className="mx-auto mb-8 max-w-2xl text-center">
               <p className="mb-2 text-xs font-semibold tracking-widest text-slate-500 uppercase">
@@ -99,6 +78,16 @@ export const CreateShell = ({
           </section>
         </div>
       </section>
+      {stepNumber(step) > 0 ? (
+        <div className="bg-primary-100 pointer-events-none fixed bottom-6 left-1/2 w-40 -translate-x-1/2 overflow-hidden rounded-full shadow-sm sm:w-56">
+          <div
+            className="h-2 rounded-full bg-primary transition-all duration-300"
+            style={{
+              width: `${(stepNumber(step) / stepOrder.length) * 100}%`,
+            }}
+          />
+        </div>
+      ) : null}
     </main>
   )
 }

@@ -13,12 +13,9 @@ import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
 import { OnboardingWizardPage } from "@/features/organizations/onboarding/pages/onboarding-wizard-page"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
-import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"
-import { emptyProfileDraft } from "@/features/company/lib/profile"
 import { useSecurityProfile } from "@/features/company/hooks/use-company"
 import { startGoogleLogin } from "@/lib/api"
 import { LoadingState } from "@/features/shell/components/loading-state"
-import { Onboarding } from "@/features/shell/components/onboarding"
 import { WorkspaceLayout } from "@/features/shell/components/workspace-layout"
 
 // Route Pages
@@ -55,9 +52,6 @@ export const App = () => {
   const isAuthenticated = Boolean(user)
   const identifiedRef = useRef(false)
   const { selectedOrganization } = useSelectedOrganization()
-  const onboardingOrganizationIds = useCurrentOrganizationStore(
-    (state) => state.onboardingOrganizationIds
-  )
   const securityProfile = useSecurityProfile(
     isAuthenticated && Boolean(selectedOrganization)
   )
@@ -87,10 +81,6 @@ export const App = () => {
       navigate(`/invites/${pendingInvitationToken}`, { replace: true })
     }
   }, [location.pathname, navigate, pendingInvitationToken, user])
-
-  const shouldShowOnboarding = selectedOrganization
-    ? onboardingOrganizationIds.has(selectedOrganization.id)
-    : false
 
   if (
     authState.isLoading ||
@@ -143,16 +133,6 @@ export const App = () => {
           element={<Navigate to="/onboarding/organization/identity" replace />}
         />
       </Routes>
-    )
-  }
-
-  if (shouldShowOnboarding) {
-    return (
-      <Onboarding
-        defaultValues={emptyProfileDraft}
-        user={user}
-        onLogout={() => logout.mutate()}
-      />
     )
   }
 

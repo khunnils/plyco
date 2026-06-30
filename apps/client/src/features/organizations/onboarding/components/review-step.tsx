@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Check, Loader2, LogOut } from "lucide-react"
+import { ArrowLeft, Check, Loader2 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { usePostHog } from "@posthog/react"
+import { type OrganizationProviderInput } from "@plyco/shared"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
@@ -89,6 +90,39 @@ const setupTabs: Array<{ value: SetupTab; label: string }> = [
   { value: "activities", label: "Activities" },
 ]
 
+const providerKey = (provider: OrganizationProviderInput) =>
+  provider.name.trim().toLowerCase()
+
+const mergeOrganizationProviders = (providers: OrganizationProviderInput[]) => {
+  const merged = new Map<string, OrganizationProviderInput>()
+
+  for (const provider of providers) {
+    const key = providerKey(provider)
+    const current = merged.get(key)
+
+    if (!current) {
+      merged.set(key, provider)
+      continue
+    }
+
+    merged.set(key, {
+      ...current,
+      providerId: current.providerId || provider.providerId,
+      systemTypes: Array.from(
+        new Set([...current.systemTypes, ...provider.systemTypes])
+      ),
+      legalName: current.legalName || provider.legalName,
+      category: current.category || provider.category,
+      countryOfRegistration:
+        current.countryOfRegistration || provider.countryOfRegistration,
+      notes: current.notes || provider.notes,
+      purpose: current.purpose || provider.purpose,
+    })
+  }
+
+  return Array.from(merged.values())
+}
+
 export const ReviewStep = () => {
   const navigate = useNavigate()
   const posthog = usePostHog()
@@ -98,9 +132,7 @@ export const ReviewStep = () => {
     setSubmitError,
     isSubmitting,
     setIsSubmitting,
-    onCancel,
     onComplete,
-    onLogout,
   } = useOnboardingStore()
 
   const [setupTab, setSetupTab] = useState<SetupTab>("company")
@@ -178,7 +210,6 @@ export const ReviewStep = () => {
       })
       const store = useCurrentOrganizationStore.getState()
       store.selectOrganization(organization.id)
-      store.markOnboarding(organization.id)
 
       const initialSnapshot = await saveSecurityProfile(
         organization.id,
@@ -220,9 +251,13 @@ export const ReviewStep = () => {
         .filter(({ input }) => isWebsiteActivity(input))
         .map(({ activity }) => activity.id)
 
-      if (draft.providers && draft.providers.length > 0) {
+      const organizationProviders = mergeOrganizationProviders(
+        draft.providers || []
+      )
+
+      if (organizationProviders.length > 0) {
         await Promise.all(
-          draft.providers.map((provider) =>
+          organizationProviders.map((provider) =>
             createOrganizationProvider(organization.id, provider)
           )
         )
@@ -255,7 +290,6 @@ export const ReviewStep = () => {
       await queryClient.invalidateQueries({
         queryKey: securityProfileQueryKey(organization.id),
       })
-      store.completeOnboarding(organization.id)
       posthog.capture(POSTHOG_EVENTS.ORGANIZATION_CREATED, {
         organization_id: organization.id,
         organization_name: draft.company.companyName,
@@ -278,17 +312,6 @@ export const ReviewStep = () => {
     navigate("../providers")
   }
 
-  const actions = onCancel ? (
-    <Button type="button" variant="outline" onClick={onCancel}>
-      Close
-    </Button>
-  ) : (
-    <Button type="button" variant="outline" onClick={onLogout}>
-      <LogOut />
-      Logout
-    </Button>
-  )
-
   const footer = (
     <div className="flex items-center justify-between border-t border-slate-200 pt-5">
       <Button
@@ -306,15 +329,14 @@ export const ReviewStep = () => {
         type="button"
         onClick={finishSetup}
       >
-        {isSubmitting ? <Loader2 className="animate-spin" /> : <Check />}
-        Create organization
+        {isSubmitting && <Loader2 className="animate-spin" />}
+        Create workspace
       </Button>
     </div>
   )
 
   return (
     <CreateShell
-      actions={actions}
       onBack={handleBack}
       step="setup-review"
       titleAbove

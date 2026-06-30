@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, ArrowRight, LogOut } from "lucide-react"
+import { ArrowLeft, ArrowRight } from "lucide-react"
 import { usePostHog } from "@posthog/react"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
@@ -32,14 +32,8 @@ const ENRICHED_COMPLIANCE: Record<
 export const ComplianceStep = () => {
   const navigate = useNavigate()
   const posthog = usePostHog()
-  const {
-    draft,
-    updateDraft,
-    submitError,
-    setSubmitError,
-    onCancel,
-    onLogout,
-  } = useOnboardingStore()
+  const { draft, updateDraft, submitError, setSubmitError } =
+    useOnboardingStore()
 
   const vocabulary = useVocabulary(Boolean(draft))
   const complianceGoalOptions = codeOptions(vocabulary.data, "compliance_goals")
@@ -67,17 +61,6 @@ export const ComplianceStep = () => {
   if (!draft) {
     return null
   }
-
-  const actions = onCancel ? (
-    <Button type="button" variant="outline" onClick={onCancel}>
-      Close
-    </Button>
-  ) : onLogout ? (
-    <Button type="button" variant="outline" onClick={onLogout}>
-      <LogOut />
-      Logout
-    </Button>
-  ) : null
 
   const handleNext = () => {
     posthog.capture(POSTHOG_EVENTS.ONBOARDING_COMPLIANCE_GOALS_SELECTED, {
@@ -110,7 +93,6 @@ export const ComplianceStep = () => {
 
   return (
     <CreateShell
-      actions={actions}
       onBack={handleBack}
       step="compliance"
       titleAbove

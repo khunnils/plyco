@@ -281,6 +281,41 @@ describe("vendors / providers API", () => {
     expect(emptyListResponse.json()).toHaveLength(0);
   });
 
+  it("merges duplicate organization provider names", async () => {
+    const app = await createTestApp();
+
+    const firstResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/organization-providers",
+      payload: {
+        ...vendorBody,
+        systemTypes: ["source_control"],
+      },
+    });
+    const duplicateResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/organization-providers",
+      payload: {
+        ...vendorBody,
+        providerId: "provider-other",
+        systemTypes: ["issue_tracking"],
+      },
+    });
+    const listResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/organization-providers",
+    });
+
+    expect(firstResponse.statusCode).toBe(201);
+    expect(duplicateResponse.statusCode).toBe(201);
+    expect(duplicateResponse.json().id).toBe(firstResponse.json().id);
+    expect(duplicateResponse.json().systemTypes).toEqual([
+      "source_control",
+      "issue_tracking",
+    ]);
+    expect(listResponse.json()).toHaveLength(1);
+  });
+
   it("returns provider catalog entries", async () => {
     const app = await createTestApp();
     const response = await app.inject({ method: "GET", url: "/providers" });

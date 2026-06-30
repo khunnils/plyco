@@ -8,7 +8,6 @@ import {
   Check,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { CreateShell } from "../../components/create-shell"
 import {
@@ -202,14 +201,14 @@ const LookupLoadingView = ({
       <span className="size-2 rounded-full bg-slate-900" />
       <span className="size-2 rounded-full bg-slate-700" />
       <span className="size-2 rounded-full bg-slate-500" />
-      Active discovery in progress
+      Discovery in progress
     </div>
   </div>
 )
 
 export const LookupStep = () => {
   const navigate = useNavigate()
-  const { draft, setDraft, setSubmitError, onCancel } = useOnboardingStore()
+  const { draft, setDraft, setSubmitError } = useOnboardingStore()
 
   const [organizationDetailsComplete, setOrganizationDetailsComplete] =
     useState(false)
@@ -319,17 +318,7 @@ export const LookupStep = () => {
     privacyLookupStatus === "active" ? "lookup-privacy" : "lookup-organization"
 
   return (
-    <CreateShell
-      actions={
-        onCancel ? (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Close
-          </Button>
-        ) : null
-      }
-      step={stepName}
-      title=""
-    >
+    <CreateShell step={stepName} title="">
       <LookupLoadingView
         organizationDetailsStatus={
           organizationDetailsComplete ? "complete" : "active"

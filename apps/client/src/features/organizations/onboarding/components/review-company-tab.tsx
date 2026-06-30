@@ -20,7 +20,7 @@ export const ReviewCompanyTab = ({
 
   return (
     <div className="grid gap-5">
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-1">
         <TextInput
           label="Organization name"
           required
@@ -72,18 +72,6 @@ export const ReviewCompanyTab = ({
         <ReviewRow
           label="Compliance goals"
           value={optionLabels(draft.company.complianceGoals, goalOptions)}
-        />
-        <ReviewRow
-          label="Privacy policy"
-          value={draft.privacyPolicyUrl ?? "Not detected"}
-        />
-        <ReviewRow
-          label="Suggested providers"
-          value={
-            draft.suggestedProviderNames.length > 0
-              ? draft.suggestedProviderNames.join(", ")
-              : "None detected"
-          }
         />
       </div>
     </div>
