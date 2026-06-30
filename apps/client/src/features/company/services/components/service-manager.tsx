@@ -955,7 +955,7 @@ const AddActivitiesForm = ({
             >
               <input
                 checked={disabled || checkedIds.includes(option.value)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                className="field-checkbox-focus h-4 w-4 rounded border-slate-300 text-blue-600"
                 disabled={disabled}
                 type="checkbox"
                 onChange={(event) =>
@@ -1009,7 +1009,7 @@ const AddVendorsForm = ({
             >
               <input
                 checked={disabled || checkedIds.includes(provider.id)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                className="field-checkbox-focus h-4 w-4 rounded border-slate-300 text-blue-600"
                 disabled={disabled}
                 type="checkbox"
                 onChange={(event) =>

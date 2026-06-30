@@ -29,7 +29,7 @@ import {
 } from "@/features/vocabulary/lib/vocabulary"
 
 const comboboxChipsClassName =
-  "min-h-10 flex-nowrap overflow-hidden rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
+  "field-focus-within min-h-10 flex-nowrap overflow-hidden rounded-md border-slate-200 bg-white px-3 py-2 shadow-none has-data-[slot=combobox-chip]:px-3"
 
 const comboboxChipClassName =
   "h-6 shrink-0 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-100"

@@ -88,7 +88,7 @@ const FieldInput = ({
   <label className="grid gap-2">
     {label}
     <input
-      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      className="field-focus h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none"
       inputMode={type === "number" ? "numeric" : undefined}
       min={type === "number" ? 0 : undefined}
       placeholder={placeholder}
@@ -145,7 +145,7 @@ const MultiSelectDropdown = ({
       >
         <ComboboxChips
           ref={anchorRef}
-          className="group/code-select min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100 has-data-[slot=combobox-chip]:px-3"
+          className="field-focus-within group/code-select min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none has-data-[slot=combobox-chip]:px-3"
         >
           {value.map((v) => (
             <ComboboxChip
@@ -234,7 +234,7 @@ const ToggleInput = ({
   <label className="flex min-h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-700">
     <input
       checked={checked}
-      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+      className="field-checkbox-focus h-4 w-4 rounded border-slate-300 text-blue-600"
       type="checkbox"
       onBlur={onBlur}
       onChange={(event) => onChange(event.target.checked)}

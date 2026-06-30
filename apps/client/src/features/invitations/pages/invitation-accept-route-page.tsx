@@ -100,7 +100,7 @@ export const InvitationAcceptRoutePage = ({
             <label className="grid gap-2 text-sm font-medium text-slate-800">
               Email
               <Input
-                className="h-11 rounded-md border-slate-200 bg-white px-3 text-sm focus-visible:border-blue-600 focus-visible:ring-blue-100"
+                className="field-focus-visible h-11 rounded-md border-slate-200 bg-white px-3 text-sm"
                 placeholder="you@company.com"
                 required
                 type="email"

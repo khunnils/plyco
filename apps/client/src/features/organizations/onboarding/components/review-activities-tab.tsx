@@ -21,7 +21,7 @@ const SetupTextArea = ({
   <label className="grid gap-2 text-sm font-medium text-slate-800 md:col-span-2">
     <span>{label}</span>
     <textarea
-      className="min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 font-normal text-slate-900 transition outline-none focus:border-blue-600 focus:ring-3 focus:ring-blue-100"
+      className="field-focus min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 font-normal text-slate-900 transition outline-none"
       placeholder={placeholder}
       value={value}
       onChange={(event) => onChange(event.target.value)}

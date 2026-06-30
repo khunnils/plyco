@@ -4,7 +4,7 @@ export const InfoTooltip = ({ text }: { text: string }) => (
   <span className="group relative inline-flex">
     <button
       aria-label={text}
-      className="inline-flex size-5 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:bg-slate-100 focus-visible:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-100 focus-visible:outline-none"
+      className="inline-flex size-5 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:bg-slate-100 focus-visible:text-slate-700 focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:outline-none"
       type="button"
     >
       <Info className="size-3.5" />

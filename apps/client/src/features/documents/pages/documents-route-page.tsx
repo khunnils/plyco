@@ -754,7 +754,7 @@ export const DocumentsRoutePage = () => {
                 defaultValue={templateName}
                 required
                 autoFocus
-                className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="field-focus-compact h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none"
                 placeholder="Template name"
               />
               <div className="flex justify-end gap-2">

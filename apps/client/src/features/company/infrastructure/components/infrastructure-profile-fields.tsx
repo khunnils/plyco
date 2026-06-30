@@ -24,7 +24,7 @@ import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 const comboboxInputClassName =
-  "h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none focus-within:border-blue-600 focus-within:ring-3 focus-within:ring-blue-100"
+  "field-focus-within h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none"
 
 type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
