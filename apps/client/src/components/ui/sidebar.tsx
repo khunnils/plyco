@@ -7,7 +7,7 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => (
 )
 
 export const Sidebar = ({ children }: { children: ReactNode }) => (
-  <aside className="fixed top-14 bottom-0 left-0 hidden w-64 border-r border-slate-200 bg-slate-100 md:flex md:flex-col">
+  <aside className="fixed top-14 bottom-0 left-0 z-[60] hidden w-64 border-r border-slate-200 bg-slate-100 md:flex md:flex-col">
     {children}
   </aside>
 )
