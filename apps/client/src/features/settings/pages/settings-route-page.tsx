@@ -16,7 +16,7 @@ export const SettingsRoutePage = () => (
         aria-label="Settings"
         className="flex w-fit gap-1 border-b border-slate-200"
       >
-        <SettingsTab to="/settings/team">Team</SettingsTab>
+        <SettingsTab to="/settings/team">General</SettingsTab>
         <SettingsTab to="/settings/vocabulary">Vocabulary</SettingsTab>
       </nav>
       <Outlet />

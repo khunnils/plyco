@@ -66,8 +66,8 @@ const CategoryCard = ({
           {isComplete ? (
             <CheckCircle2 className="h-6 w-6 shrink-0 fill-emerald-50 text-emerald-600" />
           ) : (
-            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-blue-600">
-              <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-slate-600">
+              <div className="h-2 w-2 rounded-full bg-slate-600"></div>
             </div>
           )}
         </div>

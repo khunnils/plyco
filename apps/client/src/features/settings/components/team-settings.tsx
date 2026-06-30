@@ -1,17 +1,15 @@
-import { MailPlus, MoreHorizontal, Trash2 } from "lucide-react"
-import { type FormEvent } from "react"
-import { useMemo, useState } from "react"
-import { usePostHog } from "@posthog/react"
 import {
   organizationInvitationInputSchema,
   type AuthUser,
   type OrganizationMembershipRole,
   type OrganizationSummary,
 } from "@plyco/shared"
+import { usePostHog } from "@posthog/react"
+import { MoreHorizontal, Trash2 } from "lucide-react"
+import { useMemo, useState, type FormEvent } from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +35,7 @@ import {
   useRemoveOrganizationMember,
   useUpdateOrganizationMemberRole,
 } from "@/features/settings/hooks/use-team"
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 
 export const TeamSettings = ({
   organization,
@@ -57,6 +56,8 @@ export const TeamSettings = ({
   const [email, setEmail] = useState("")
   const [role, setRole] = useState<OrganizationMembershipRole>("member")
   const [inviteError, setInviteError] = useState<string | null>(null)
+  const [isInvitePanelOpen, setIsInvitePanelOpen] = useState(false)
+  const [isDeletePanelOpen, setIsDeletePanelOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const activeMembers = useMemo(() => members.data ?? [], [members.data])
   const pendingInvites = useMemo(
@@ -94,15 +95,26 @@ export const TeamSettings = ({
   return (
     <div className="grid gap-6">
       <section className="grid gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-950">Team</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Members can edit workspace data. Owners can manage members and
-            delete the organization.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-950">Team</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Members can edit workspace data. Owners can manage members and
+              delete the organization.
+            </p>
+          </div>
+          {isOwner && !isInvitePanelOpen ? (
+            <Button
+              className="w-fit shrink-0"
+              type="button"
+              onClick={() => setIsInvitePanelOpen(true)}
+            >
+              Invite
+            </Button>
+          ) : null}
         </div>
 
-        {isOwner ? (
+        {isOwner && isInvitePanelOpen ? (
           <form
             className="grid gap-3 border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_10rem_auto]"
             onSubmit={handleInvite}
@@ -133,10 +145,22 @@ export const TeamSettings = ({
               </select>
             </label>
             <div className="flex items-end">
-              <Button disabled={inviteMember.isPending} type="submit">
-                <MailPlus />
-                Send invitation
-              </Button>
+              <div className="flex gap-2">
+                <Button disabled={inviteMember.isPending} type="submit">
+                  Send
+                </Button>
+                <Button
+                  disabled={inviteMember.isPending}
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setInviteError(null)
+                    setIsInvitePanelOpen(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </form>
         ) : null}
@@ -361,38 +385,78 @@ export const TeamSettings = ({
       ) : null}
 
       {isOwner ? (
-        <section className="grid gap-4 border border-red-200 bg-white p-4">
+        <section className="grid gap-4 border-t border-slate-200 pt-6">
           <div>
-            <h2 className="text-lg font-semibold text-red-800">
-              Delete organization
+            <h2 className="text-lg font-semibold text-slate-950">
+              Danger Zone
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              This permanently removes the organization, workspace data,
-              members, and pending invitations.
+              Destructive organization actions are hidden until you choose to
+              reveal them.
             </p>
           </div>
-          <label className="grid max-w-md gap-2 text-sm font-medium text-slate-800">
-            <span>Type {organization.name} to confirm</span>
-            <Input
-              value={deleteConfirmation}
-              onChange={(event) => setDeleteConfirmation(event.target.value)}
-            />
-          </label>
-          <Button
-            className="w-fit"
-            disabled={!canDeleteOrganization || deleteOrganization.isPending}
-            type="button"
-            variant="destructive"
-            onClick={() =>
-              deleteOrganization.mutate(undefined, {
-                onSuccess: () =>
-                  posthog.capture(POSTHOG_EVENTS.ORGANIZATION_DELETED),
-              })
-            }
-          >
-            <Trash2 />
-            Delete organization
-          </Button>
+          {!isDeletePanelOpen ? (
+            <Button
+              className="w-fit"
+              type="button"
+              variant="destructive"
+              onClick={() => setIsDeletePanelOpen(true)}
+            >
+              <Trash2 />
+              Delete Organization
+            </Button>
+          ) : (
+            <div className="grid gap-4 border border-red-200 bg-white p-4">
+              <div>
+                <h3 className="text-lg font-semibold text-red-800">
+                  Delete organization
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  This permanently removes the organization, workspace data,
+                  members, and pending invitations.
+                </p>
+              </div>
+              <label className="grid max-w-md gap-2 text-sm font-medium text-slate-800">
+                <span>Type {organization.name} to confirm</span>
+                <Input
+                  value={deleteConfirmation}
+                  onChange={(event) =>
+                    setDeleteConfirmation(event.target.value)
+                  }
+                />
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  className="w-fit"
+                  disabled={
+                    !canDeleteOrganization || deleteOrganization.isPending
+                  }
+                  type="button"
+                  variant="destructive"
+                  onClick={() =>
+                    deleteOrganization.mutate(undefined, {
+                      onSuccess: () =>
+                        posthog.capture(POSTHOG_EVENTS.ORGANIZATION_DELETED),
+                    })
+                  }
+                >
+                  <Trash2 />
+                  Delete organization
+                </Button>
+                <Button
+                  disabled={deleteOrganization.isPending}
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setDeleteConfirmation("")
+                    setIsDeletePanelOpen(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
       ) : null}
     </div>

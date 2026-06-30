@@ -1,5 +1,11 @@
 import { AlertCircle, Loader2 } from "lucide-react"
-import { type ReactNode, useEffect, useId, useSyncExternalStore } from "react"
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useSyncExternalStore,
+} from "react"
 
 import { Button } from "@/components/ui/button"
 import { InfoTooltip } from "@/components/ui/info-tooltip"
@@ -37,6 +43,22 @@ const useActiveProfilePanelId = () =>
     getActiveProfilePanelSnapshot,
     getActiveProfilePanelSnapshot
   )
+
+const shouldSkipEnterShortcut = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  if (
+    target instanceof HTMLTextAreaElement ||
+    target.isContentEditable ||
+    target.closest("button,a")
+  ) {
+    return true
+  }
+
+  return target.closest('[aria-expanded="true"]') !== null
+}
 
 export const ProfilePanelShell = ({
   children,
@@ -102,8 +124,40 @@ export const ProfilePanelShell = ({
     onEdit()
   }
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "F2" && !isEditing && !isPanelLocked) {
+      event.preventDefault()
+      handleEdit()
+      return
+    }
+
+    if (!isEditing || isMutationPending) {
+      return
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault()
+      event.stopPropagation()
+      handleCancel()
+      return
+    }
+
+    if (event.key === "Enter" && !shouldSkipEnterShortcut(event.target)) {
+      event.preventDefault()
+      event.stopPropagation()
+      onSave()
+    }
+  }
+
   return (
-    <div className={cn("transition-opacity", isPanelLocked && "opacity-45")}>
+    <div
+      className={cn(
+        "transition-opacity focus-visible:outline-none",
+        isPanelLocked && "opacity-45"
+      )}
+      tabIndex={isPanelLocked ? -1 : 0}
+      onKeyDown={handleKeyDown}
+    >
       <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="">
           <div className="flex items-center gap-2">
