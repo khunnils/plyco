@@ -290,13 +290,17 @@ export const toProfileDraft = (
     websiteActivityIds: string[]
   }
 ): ProfileDraft => {
-  const onboardingProviders = (draft.providers || []).flatMap((provider) =>
-    provider.systemTypes.map((systemType) => ({
-      providerId: provider.providerId,
-      systemType,
-      name: provider.name,
-    }))
-  )
+  const onboardingProviders = (draft.providers || []).flatMap((provider) => {
+    const providerId = provider.providerId
+
+    return providerId
+      ? provider.systemTypes.map((systemType) => ({
+          providerId,
+          systemType,
+          name: provider.name,
+        }))
+      : []
+  })
 
   const infrastructureProviders = onboardingProviders.filter((p) =>
     ["ai", "cloud", "source_control", "auth", "password_manager", "issue_tracking"].includes(p.systemType)

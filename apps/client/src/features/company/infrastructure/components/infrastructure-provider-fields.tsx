@@ -158,5 +158,5 @@ export const SingleProviderField = ({
 
 export type ProvidersDraft = Pick<
   ProfileDraft["infrastructure"],
-  "organizationProviders" | "mfaEnabled" | "encryptedDevicesRequired"
+  "organizationProviders" | "mfaEnabled"
 >
