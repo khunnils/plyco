@@ -14,6 +14,7 @@ export const POSTHOG_EVENTS = {
   VENDOR_DELETED: "vendor_deleted",
   SERVICE_CREATED: "service_created",
   SERVICE_UPDATED: "service_updated",
+  SERVICE_DELETED: "service_deleted",
   SERVICE_REORDERED: "service_reordered",
   DATA_TYPE_CREATED: "data_type_created",
   DATA_TYPE_UPDATED: "data_type_updated",
@@ -42,6 +43,6 @@ export const POSTHOG_EVENTS = {
   VOCABULARY_CODE_CREATED: "vocabulary_code_created",
   VOCABULARY_CODE_UPDATED: "vocabulary_code_updated",
   VOCABULARY_CODE_DELETED: "vocabulary_code_deleted",
-} as const;
+} as const
 
-export type PostHogEvent = typeof POSTHOG_EVENTS[keyof typeof POSTHOG_EVENTS];
+export type PostHogEvent = (typeof POSTHOG_EVENTS)[keyof typeof POSTHOG_EVENTS]

@@ -4,6 +4,8 @@ import {
   type Vocabulary,
 } from "@plyco/shared"
 import { usePostHog } from "@posthog/react"
+import { useId, useState } from "react"
+import { createPortal } from "react-dom"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowRight,
@@ -14,6 +16,7 @@ import {
   MapPin,
   RadioTower,
   Plus,
+  Trash2,
 } from "lucide-react"
 import { SortableList } from "@/components/sortable-list"
 
@@ -60,25 +63,136 @@ const codeValueList = (
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
 
+const DeleteServiceDialog = ({
+  isOpen,
+  isMutationPending,
+  providerUsageCount,
+  serviceName,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean
+  isMutationPending: boolean
+  providerUsageCount: number
+  serviceName: string
+  onClose: () => void
+  onConfirm: () => void
+}) => {
+  const titleId = useId()
+  const descriptionId = useId()
+
+  if (!isOpen) {
+    return null
+  }
+
+  return createPortal(
+    <div
+      aria-describedby={descriptionId}
+      aria-labelledby={titleId}
+      aria-modal="true"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4"
+      role="dialog"
+    >
+      <div className="w-full max-w-md border border-slate-200 bg-white p-6 shadow-2xl">
+        <div className="flex items-start gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-red-50 text-red-700">
+            <Trash2 className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-slate-950" id={titleId}>
+              Delete service?
+            </h2>
+            <p
+              className="mt-2 text-sm leading-6 text-slate-600"
+              id={descriptionId}
+            >
+              This will permanently delete{" "}
+              <span className="font-medium text-slate-950">{serviceName}</span>,
+              including service details, assigned activities, and{" "}
+              {providerUsageCount === 1
+                ? "1 linked provider usage record"
+                : `${providerUsageCount} linked provider usage records`}
+              . Providers and activity inventory items will not be deleted.
+            </p>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button
+            disabled={isMutationPending}
+            type="button"
+            variant="outline"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={isMutationPending}
+            type="button"
+            variant="destructive"
+            onClick={onConfirm}
+          >
+            Delete service
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
 const ServiceSelectorPage = ({
   businessActivityOptions,
+  deleteDisabled,
   serviceProviderUsage,
   services,
   vocabulary,
+  onDeleteService,
   onReorder,
   reorderDisabled,
 }: {
   businessActivityOptions: Option[]
+  deleteDisabled: boolean
   serviceProviderUsage: ServiceProviderUsage[]
   services: ServiceProfileInput[]
   vocabulary: Vocabulary | undefined
+  onDeleteService: (
+    service: ServiceProfileInput,
+    providerUsageCount: number,
+    onSuccess?: () => void
+  ) => void
   onReorder: (ids: string[]) => void
   reorderDisabled: boolean
 }) => {
   const availableServices = services.filter((service) => service.id)
+  const [servicePendingDelete, setServicePendingDelete] =
+    useState<ServiceProfileInput | null>(null)
+  const pendingDeleteUsageCount = servicePendingDelete?.id
+    ? serviceProviderUsage.filter(
+        (usage) => usage.serviceId === servicePendingDelete.id
+      ).length
+    : 0
 
   return (
     <div className="grid gap-5">
+      <DeleteServiceDialog
+        isOpen={Boolean(servicePendingDelete)}
+        isMutationPending={deleteDisabled}
+        providerUsageCount={pendingDeleteUsageCount}
+        serviceName={
+          servicePendingDelete?.serviceName?.trim() || "this service"
+        }
+        onClose={() => setServicePendingDelete(null)}
+        onConfirm={() => {
+          if (!servicePendingDelete) {
+            return
+          }
+
+          onDeleteService(servicePendingDelete, pendingDeleteUsageCount, () =>
+            setServicePendingDelete(null)
+          )
+        }}
+      />
+
       <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-slate-950">Services</h2>
@@ -153,7 +267,24 @@ const ServiceSelectorPage = ({
 
               return (
                 <div className="relative h-full">
-                  <div className="absolute top-4 right-12 z-10">
+                  <Button
+                    aria-label={`Delete ${
+                      service.serviceName?.trim() || `service ${index + 1}`
+                    }`}
+                    className="absolute top-4 right-4 z-20 bg-white/95"
+                    disabled={deleteDisabled}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      setServicePendingDelete(service)
+                    }}
+                  >
+                    <Trash2 />
+                  </Button>
+                  <div className="absolute top-4 right-14 z-20">
                     {dragHandle}
                   </div>
                   <Link
@@ -330,9 +461,35 @@ export const ServicesRoutePage = () => {
       {!serviceId ? (
         <ServiceSelectorPage
           businessActivityOptions={businessActivityOptions}
+          deleteDisabled={saveProfile.isPending}
           serviceProviderUsage={serviceProviderUsage}
           services={defaultValues.services}
           vocabulary={vocabularyData}
+          onDeleteService={(service, providerUsageCount, onSuccess) => {
+            if (!service.id) {
+              return
+            }
+
+            saveProfile.mutate(
+              {
+                ...defaultValues,
+                services: defaultValues.services.filter(
+                  (currentService) => currentService.id !== service.id
+                ),
+              },
+              {
+                onSuccess: () => {
+                  posthog.capture(POSTHOG_EVENTS.SERVICE_DELETED, {
+                    service_id: service.id,
+                    business_activity_count:
+                      service.businessActivityIds?.length ?? 0,
+                    provider_usage_count: providerUsageCount,
+                  })
+                  onSuccess?.()
+                },
+              }
+            )
+          }}
           onReorder={(ids) =>
             reorderServices.mutate(ids, {
               onSuccess: () =>
