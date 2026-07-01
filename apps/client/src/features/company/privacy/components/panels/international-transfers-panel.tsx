@@ -4,7 +4,7 @@ import {
   type PrivacyProfile,
   type Vocabulary,
 } from "@plyco/shared"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -87,6 +87,15 @@ export const InternationalTransfersPanel = ({
     values: draft,
   })
 
+  const crossBorderTransfers = form.watch("crossBorderTransfers")
+  const crossBorderTransfersTrue = crossBorderTransfers === true
+
+  useEffect(() => {
+    if (!crossBorderTransfersTrue) {
+      form.setValue("transferMechanisms", null)
+    }
+  }, [crossBorderTransfersTrue, form])
+
   const submit = form.handleSubmit((next) => {
     onSave(next, () => setIsEditing(false))
   })
@@ -116,15 +125,17 @@ export const InternationalTransfersPanel = ({
           label="Cross-border transfers"
           name="crossBorderTransfers"
         />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.transferMechanisms?.root}
-          helperText={privacyHelperText.transferMechanisms}
-          label="Transfer mechanisms"
-          name="transferMechanisms"
-          options={transferMechanismOptions}
-          placeholder="Select transfer mechanisms"
-        />
+        {crossBorderTransfersTrue && (
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.transferMechanisms?.root}
+            helperText={privacyHelperText.transferMechanisms}
+            label="Transfer mechanisms"
+            name="transferMechanisms"
+            options={transferMechanismOptions}
+            placeholder="Select transfer mechanisms"
+          />
+        )}
       </EditPanelGrid>
     </ProfilePanelShell>
   )

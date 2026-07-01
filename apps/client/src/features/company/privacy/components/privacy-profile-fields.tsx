@@ -99,11 +99,19 @@ export const PrivacyProfileFields = ({
   const dpoStatus = form.watch("privacy.dpoStatus")
   const euRepresentativeStatus = form.watch("privacy.euRepresentativeStatus")
   const sendsMarketingEmails = form.watch("privacy.sendsMarketingEmails")
+  const crossBorderTransfers = form.watch("privacy.crossBorderTransfers")
   const sellsOrSharesData = form.watch("privacy.sellsOrSharesData")
   const dpoAppointed = dpoStatus === "appointed"
   const euRepresentativeAppointed = euRepresentativeStatus === "appointed"
   const sendsMarketingEmailsTrue = sendsMarketingEmails === true
+  const crossBorderTransfersTrue = crossBorderTransfers === true
   const sellsOrSharesDataTrue = sellsOrSharesData === true
+
+  useEffect(() => {
+    if (!crossBorderTransfersTrue) {
+      form.setValue("privacy.transferMechanisms", null)
+    }
+  }, [crossBorderTransfersTrue, form])
 
   useEffect(() => {
     if (!sellsOrSharesDataTrue) {
@@ -238,14 +246,16 @@ export const PrivacyProfileFields = ({
             label="Transfers data internationally"
             name="privacy.crossBorderTransfers"
           />
-          <MultiSelectField
-            control={form.control}
-            error={form.formState.errors.privacy?.transferMechanisms?.root}
-            label="Transfer mechanisms"
-            name="privacy.transferMechanisms"
-            options={transferMechanismOptions}
-            placeholder="Select transfer mechanisms"
-          />
+          {crossBorderTransfersTrue && (
+            <MultiSelectField
+              control={form.control}
+              error={form.formState.errors.privacy?.transferMechanisms?.root}
+              label="Transfer mechanisms"
+              name="privacy.transferMechanisms"
+              options={transferMechanismOptions}
+              placeholder="Select transfer mechanisms"
+            />
+          )}
         </div>
       </section>
       <section className="grid gap-4">
