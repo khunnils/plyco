@@ -13,6 +13,7 @@ import {
   ComboboxChip,
   ComboboxChips,
   ComboboxChipsInput,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxItem,
@@ -119,6 +120,7 @@ const MultiSelectInput = <TValue extends string>({
   const optionLabelByValue = new Map(
     options.map((option) => [option.value, option.label])
   )
+  const optionByValue = new Map(options.map((option) => [option.value, option]))
   const visibleSelectedValues = selectedValues.slice(0, visibleChipCount)
   const hiddenSelectedCount =
     selectedValues.length - visibleSelectedValues.length
@@ -204,22 +206,32 @@ const MultiSelectInput = <TValue extends string>({
         >
           <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
           <ComboboxList>
-            {options.map((option) => (
-              <ComboboxItem
-                key={option.value}
-                className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
-                value={option.value}
-              >
-                <span className="grid gap-0.5">
-                  <span>{option.label}</span>
-                  {option.usesHints && option.description ? (
-                    <span className="text-xs font-normal text-slate-500">
-                      {option.description}
+            <ComboboxCollection>
+              {(value: TValue) => {
+                const option = optionByValue.get(value)
+
+                if (!option) {
+                  return null
+                }
+
+                return (
+                  <ComboboxItem
+                    key={option.value}
+                    className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
+                    value={option.value}
+                  >
+                    <span className="grid gap-0.5">
+                      <span>{option.label}</span>
+                      {option.usesHints && option.description ? (
+                        <span className="text-xs font-normal text-slate-500">
+                          {option.description}
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </span>
-              </ComboboxItem>
-            ))}
+                  </ComboboxItem>
+                )
+              }}
+            </ComboboxCollection>
           </ComboboxList>
         </ComboboxContent>
       </Combobox>

@@ -16,6 +16,7 @@ import {
   ComboboxChip,
   ComboboxChips,
   ComboboxChipsInput,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxItem,
@@ -126,6 +127,7 @@ const MultiSelectDropdown = ({
   const [isEditingOptions, setIsEditingOptions] = useState(false)
   const anchorRef = useComboboxAnchor()
   const optionLabelByValue = new Map(options.map((o) => [o.value, o.label]))
+  const optionByValue = new Map(options.map((option) => [option.value, option]))
   const codeSetId = options.find((option) => option.codeSetId)?.codeSetId
   const isEditable = options.some((option) => option.editable)
   const handleCodeSetChange = (change: CodeSetChange) => {
@@ -190,22 +192,32 @@ const MultiSelectDropdown = ({
         >
           <ComboboxEmpty>No options available</ComboboxEmpty>
           <ComboboxList>
-            {options.map((option) => (
-              <ComboboxItem
-                key={option.value}
-                className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
-                value={option.value}
-              >
-                <span className="grid gap-0.5">
-                  <span>{option.label}</span>
-                  {option.usesHints && option.description ? (
-                    <span className="text-xs font-normal text-slate-500">
-                      {option.description}
+            <ComboboxCollection>
+              {(value: string) => {
+                const option = optionByValue.get(value)
+
+                if (!option) {
+                  return null
+                }
+
+                return (
+                  <ComboboxItem
+                    key={option.value}
+                    className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
+                    value={option.value}
+                  >
+                    <span className="grid gap-0.5">
+                      <span>{option.label}</span>
+                      {option.usesHints && option.description ? (
+                        <span className="text-xs font-normal text-slate-500">
+                          {option.description}
+                        </span>
+                      ) : null}
                     </span>
-                  ) : null}
-                </span>
-              </ComboboxItem>
-            ))}
+                  </ComboboxItem>
+                )
+              }}
+            </ComboboxCollection>
           </ComboboxList>
         </ComboboxContent>
       </Combobox>

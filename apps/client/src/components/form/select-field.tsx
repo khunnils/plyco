@@ -9,6 +9,7 @@ import { useState } from "react"
 
 import {
   Combobox,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
@@ -47,11 +48,18 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
   const [isEditingOptions, setIsEditingOptions] = useState(false)
   const fieldId = name.replace(/\W+/g, "-")
+  const unsetOption = options.find((option) => option.value === "")
+  const selectableOptions = options.filter((option) => option.value !== "")
   const optionLabelByValue = new Map(
-    options.map((option) => [option.value, option.label])
+    selectableOptions.map((option) => [option.value, option.label])
   )
-  const codeSetId = options.find((option) => option.codeSetId)?.codeSetId
-  const isEditable = options.some((option) => option.editable)
+  const optionByValue = new Map(
+    selectableOptions.map((option) => [option.value, option])
+  )
+  const codeSetId = selectableOptions.find(
+    (option) => option.codeSetId
+  )?.codeSetId
+  const isEditable = selectableOptions.some((option) => option.editable)
 
   return (
     <Controller
@@ -80,8 +88,8 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
               ) : null}
               <Combobox<TValue>
                 open={isComboboxOpen}
-                items={options.map((option) => option.value)}
-                value={field.value ?? null}
+                items={selectableOptions.map((option) => option.value)}
+                value={field.value || null}
                 autoHighlight
                 itemToStringLabel={(value) =>
                   optionLabelByValue.get(value) ?? value
@@ -111,28 +119,43 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                       </button>
                     ) : null
                   }
-                  placeholder={placeholder}
+                  placeholder={
+                    field.value
+                      ? placeholder
+                      : (unsetOption?.label ?? placeholder)
+                  }
+                  showClear={!!field.value}
                   onBlur={field.onBlur}
                 />
                 <ComboboxContent className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0">
                   <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
                   <ComboboxList>
-                    {options.map((option) => (
-                      <ComboboxItem
-                        key={option.value}
-                        className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
-                        value={option.value}
-                      >
-                        <span className="grid gap-0.5">
-                          <span>{option.label}</span>
-                          {option.usesHints && option.description ? (
-                            <span className="text-xs font-normal text-slate-500">
-                              {option.description}
+                    <ComboboxCollection>
+                      {(value: TValue) => {
+                        const option = optionByValue.get(value)
+
+                        if (!option) {
+                          return null
+                        }
+
+                        return (
+                          <ComboboxItem
+                            key={option.value}
+                            className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
+                            value={option.value}
+                          >
+                            <span className="grid gap-0.5">
+                              <span>{option.label}</span>
+                              {option.usesHints && option.description ? (
+                                <span className="text-xs font-normal text-slate-500">
+                                  {option.description}
+                                </span>
+                              ) : null}
                             </span>
-                          ) : null}
-                        </span>
-                      </ComboboxItem>
-                    ))}
+                          </ComboboxItem>
+                        )
+                      }}
+                    </ComboboxCollection>
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>

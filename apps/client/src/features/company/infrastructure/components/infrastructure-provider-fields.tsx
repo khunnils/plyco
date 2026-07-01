@@ -8,6 +8,7 @@ import { type UseFormReturn } from "react-hook-form"
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import {
   Combobox,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
@@ -101,8 +102,12 @@ export const SingleProviderField = ({
     { value: "none", label: "None" },
     ...providerOptions(providers, systemType),
   ]
+  const selectableOptions = options.filter((option) => option.value !== "")
   const optionLabelByValue = new Map(
-    options.map((option) => [option.value, option.label])
+    selectableOptions.map((option) => [option.value, option.label])
+  )
+  const optionByValue = new Map(
+    selectableOptions.map((option) => [option.value, option])
   )
   const fieldId = `provider-${systemType}`
 
@@ -130,25 +135,40 @@ export const SingleProviderField = ({
         </span>
       ) : null}
       <Combobox
-        items={options.map((option) => option.value)}
-        value={selectedIds[0] ?? ""}
+        items={selectableOptions.map((option) => option.value)}
+        value={selectedIds[0] || null}
         autoHighlight
         itemToStringLabel={(value) => optionLabelByValue.get(value) ?? value}
         onValueChange={(value) => setSystemProvider(value ?? "")}
       >
-        <ComboboxInput id={fieldId} className={comboboxInputClassName} />
+        <ComboboxInput
+          id={fieldId}
+          className={comboboxInputClassName}
+          placeholder="Not set"
+          showClear={selectedIds.length > 0}
+        />
         <ComboboxContent className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0">
           <ComboboxEmpty>No providers available</ComboboxEmpty>
           <ComboboxList>
-            {options.map((option) => (
-              <ComboboxItem
-                key={option.value}
-                className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
-                value={option.value}
-              >
-                {option.label}
-              </ComboboxItem>
-            ))}
+            <ComboboxCollection>
+              {(value: string) => {
+                const option = optionByValue.get(value)
+
+                if (!option) {
+                  return null
+                }
+
+                return (
+                  <ComboboxItem
+                    key={option.value}
+                    className="rounded-sm text-slate-800 data-highlighted:bg-slate-50 data-highlighted:text-slate-900"
+                    value={option.value}
+                  >
+                    {option.label}
+                  </ComboboxItem>
+                )
+              }}
+            </ComboboxCollection>
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
