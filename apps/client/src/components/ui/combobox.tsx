@@ -51,6 +51,7 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
 }
 
 function ComboboxInput({
+  autoComplete = "new-password",
   className,
   children,
   disabled = false,
@@ -66,7 +67,7 @@ function ComboboxInput({
   return (
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
-        autoComplete="off"
+        autoComplete={autoComplete}
         render={<InputGroupInput disabled={disabled} />}
         {...props}
       />
@@ -271,12 +272,13 @@ function ComboboxChip({
 }
 
 function ComboboxChipsInput({
+  autoComplete = "new-password",
   className,
   ...props
 }: ComboboxPrimitive.Input.Props) {
   return (
     <ComboboxPrimitive.Input
-      autoComplete="off"
+      autoComplete={autoComplete}
       data-slot="combobox-chip-input"
       className={cn("min-w-16 flex-1 outline-none", className)}
       {...props}

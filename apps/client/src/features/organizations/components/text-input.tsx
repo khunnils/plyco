@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 export const TextInput = ({
   label,
   value,
-  autoComplete = "off",
+  autoComplete = "new-password",
   helperText,
   placeholder,
   required = false,

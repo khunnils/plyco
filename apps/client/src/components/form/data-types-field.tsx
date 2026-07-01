@@ -88,7 +88,7 @@ const FieldInput = ({
   <label className="grid gap-2">
     {label}
     <input
-      autoComplete="off"
+      autoComplete="new-password"
       className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 transition outline-none"
       inputMode={type === "number" ? "numeric" : undefined}
       min={type === "number" ? 0 : undefined}

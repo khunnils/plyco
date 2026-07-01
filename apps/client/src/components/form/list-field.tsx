@@ -34,7 +34,7 @@ export const ListField = <T extends FieldValues>({
       <label className="grid gap-2 text-sm font-medium text-slate-800">
         {label}
         <input
-          autoComplete="off"
+          autoComplete="new-password"
           className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 transition outline-none"
           placeholder={placeholder}
           type="text"

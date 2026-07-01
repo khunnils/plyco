@@ -420,7 +420,7 @@ export const TeamSettings = ({
               <label className="grid max-w-md gap-2 text-sm font-medium text-slate-800">
                 <span>Type {organization.name} to confirm</span>
                 <Input
-                  autoComplete="off"
+                  autoComplete="new-password"
                   value={deleteConfirmation}
                   onChange={(event) =>
                     setDeleteConfirmation(event.target.value)

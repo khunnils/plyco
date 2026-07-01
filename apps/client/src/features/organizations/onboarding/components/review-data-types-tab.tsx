@@ -21,7 +21,7 @@ const SetupTextArea = ({
   <label className="grid gap-2 text-sm font-medium text-slate-800 md:col-span-2">
     <span>{label}</span>
     <textarea
-      autoComplete="off"
+      autoComplete="new-password"
       className="field-focus min-h-24 rounded-sm border border-slate-300 bg-white px-4 py-3 text-sm leading-6 font-normal text-slate-900 transition outline-none"
       placeholder={placeholder}
       value={value}
