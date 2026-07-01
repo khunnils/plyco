@@ -11,6 +11,7 @@ import { z } from "zod"
 import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -107,7 +108,7 @@ export const LoggingMonitoringPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={infrastructureHelperText.centralizedLoggingEnabled}
@@ -125,7 +126,7 @@ export const LoggingMonitoringPanel = ({
           ]}
           placeholder="Not set"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

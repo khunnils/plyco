@@ -11,6 +11,7 @@ import { z } from "zod"
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -108,7 +109,7 @@ export const InternationalTransfersPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={privacyHelperText.crossBorderTransfers}
@@ -124,7 +125,7 @@ export const InternationalTransfersPanel = ({
           options={transferMechanismOptions}
           placeholder="Select transfer mechanisms"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

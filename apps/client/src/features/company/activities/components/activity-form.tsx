@@ -15,6 +15,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
+import { EditPanelGrid } from "@/features/company/components/profile-panel-shell"
 
 export const ActivityForm = ({
   defaultValues,
@@ -147,7 +148,7 @@ export const ActivityForm = ({
           name="usesAi"
         />
         {usesAi === true ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <EditPanelGrid>
             <div className="sm:col-span-2">
               <TextAreaField
                 error={form.formState.errors.aiUseCases}
@@ -182,7 +183,7 @@ export const ActivityForm = ({
               label="Users informed when AI is used"
               name="aiUsersInformedWhenUsed"
             />
-          </div>
+          </EditPanelGrid>
         ) : null}
       </section>
       {showButtons ? (

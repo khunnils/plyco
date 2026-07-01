@@ -10,6 +10,7 @@ import { ToggleField } from "@/components/form/toggle-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { dataHelperText } from "./data-helper-text"
+import { EditPanelGrid } from "@/features/company/components/profile-panel-shell"
 
 export const DataTypeForm = ({
   collectionMethodOptions,
@@ -83,7 +84,7 @@ export const DataTypeForm = ({
         options={collectionMethodOptions}
         placeholder="Select collection methods"
       />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={dataHelperText.isSensitive}
@@ -96,7 +97,7 @@ export const DataTypeForm = ({
           label="Required for product"
           name="isRequired"
         />
-      </div>
+      </EditPanelGrid>
       {showButtons ? (
         <div className="flex items-center justify-end gap-2">
           <Button

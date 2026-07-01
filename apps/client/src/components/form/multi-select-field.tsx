@@ -29,7 +29,7 @@ import {
 } from "@/features/vocabulary/lib/vocabulary"
 
 const comboboxChipsClassName =
-  "field-focus-within min-h-10 flex-nowrap overflow-hidden rounded-md border-slate-200 bg-white px-3 py-2 shadow-none has-data-[slot=combobox-chip]:px-3"
+  "field-focus-within min-h-11 flex-nowrap overflow-hidden rounded-sm border-slate-300 bg-white px-4 py-2.5 shadow-none has-data-[slot=combobox-chip]:px-4"
 
 const comboboxChipClassName =
   "h-6 shrink-0 rounded-sm bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-100"
@@ -200,7 +200,7 @@ const MultiSelectInput = <TValue extends string>({
         </ComboboxChips>
         <ComboboxContent
           anchor={anchorRef}
-          className="rounded-md border border-slate-200 bg-white shadow-lg ring-0"
+          className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0"
         >
           <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
           <ComboboxList>

@@ -42,12 +42,11 @@ export const LoginScreen = ({
 
   const sendMagicLinkForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    
+
     sendMagicLinkMutation.mutate(
       { email },
       {
         onSuccess: () => {
-          
           setMagicLinkSent(true)
           posthog.capture(POSTHOG_EVENTS.MAGIC_LINK_SENT, { email })
         },
@@ -98,7 +97,7 @@ export const LoginScreen = ({
           <label className="grid gap-2 text-sm font-medium text-slate-800">
             Email
             <Input
-              className="field-focus-visible h-11 rounded-md border-slate-200 bg-white px-3 text-sm"
+              className="field-focus-visible h-11 rounded-sm border-slate-300 bg-white px-4 text-sm"
               placeholder="you@company.com"
               required
               type="email"

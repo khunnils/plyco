@@ -24,7 +24,7 @@ import { type ProfileDraft } from "@/features/company/types/company"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 const comboboxInputClassName =
-  "field-focus-within h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none"
+  "field-focus-within h-11 w-full rounded-sm border-slate-300 bg-white text-sm font-normal text-slate-900 shadow-none"
 
 type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,
@@ -156,7 +156,7 @@ const ProviderPicker = ({
         onValueChange={(value) => setSystemProvider(value ?? "")}
       >
         <ComboboxInput id={fieldId} className={comboboxInputClassName} />
-        <ComboboxContent className="rounded-md border border-slate-200 bg-white shadow-lg ring-0">
+        <ComboboxContent className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0">
           <ComboboxEmpty>No providers available</ComboboxEmpty>
           <ComboboxList>
             {options.map((option) => (

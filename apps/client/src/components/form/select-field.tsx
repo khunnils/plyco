@@ -23,7 +23,7 @@ import {
 } from "@/features/vocabulary/lib/vocabulary"
 
 const comboboxInputClassName =
-  "field-focus-within h-10 w-full rounded-md border-slate-200 bg-white text-sm font-normal text-slate-900 shadow-none"
+  "field-focus-within h-11 w-full rounded-sm border-slate-300 bg-white text-sm font-normal text-slate-900 shadow-none"
 
 type SelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
@@ -114,7 +114,7 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                   placeholder={placeholder}
                   onBlur={field.onBlur}
                 />
-                <ComboboxContent className="rounded-md border border-slate-200 bg-white shadow-lg ring-0">
+                <ComboboxContent className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0">
                   <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
                   <ComboboxList>
                     {options.map((option) => (

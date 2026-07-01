@@ -6,6 +6,7 @@ import { z } from "zod"
 
 import { TextField } from "@/components/form/text-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
@@ -82,7 +83,7 @@ export const CompanyContactsPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <TextField
           error={form.formState.errors.contactEmail}
           helperText={companyHelperText.contactEmail}
@@ -107,7 +108,7 @@ export const CompanyContactsPanel = ({
           placeholder="privacy@acme.example"
           register={form.register}
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

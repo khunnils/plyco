@@ -14,6 +14,7 @@ import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -174,7 +175,7 @@ export const MarketingCommunicationsPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={privacyHelperText.sendsMarketingEmails}
@@ -229,7 +230,7 @@ export const MarketingCommunicationsPanel = ({
             }}
           />
         )}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

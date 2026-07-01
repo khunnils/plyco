@@ -88,7 +88,7 @@ const FieldInput = ({
   <label className="grid gap-2">
     {label}
     <input
-      className="field-focus h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none"
+      className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 transition outline-none"
       inputMode={type === "number" ? "numeric" : undefined}
       min={type === "number" ? 0 : undefined}
       placeholder={placeholder}
@@ -145,7 +145,7 @@ const MultiSelectDropdown = ({
       >
         <ComboboxChips
           ref={anchorRef}
-          className="field-focus-within group/code-select min-h-10 rounded-md border-slate-200 bg-white px-3 py-2 shadow-none has-data-[slot=combobox-chip]:px-3"
+          className="field-focus-within group/code-select min-h-11 rounded-sm border-slate-300 bg-white px-4 py-2.5 shadow-none has-data-[slot=combobox-chip]:px-4"
         >
           {value.map((v) => (
             <ComboboxChip
@@ -185,7 +185,7 @@ const MultiSelectDropdown = ({
         </ComboboxChips>
         <ComboboxContent
           anchor={anchorRef}
-          className="rounded-md border border-slate-200 bg-white shadow-lg ring-0"
+          className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0"
         >
           <ComboboxEmpty>No options available</ComboboxEmpty>
           <ComboboxList>
@@ -231,7 +231,7 @@ const ToggleInput = ({
   onBlur: () => void
   onChange: (value: boolean) => void
 }) => (
-  <label className="flex min-h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-700">
+  <label className="flex min-h-11 items-center gap-2 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-700">
     <input
       checked={checked}
       className="field-checkbox-focus h-4 w-4 rounded border-slate-300 text-blue-600"

@@ -667,10 +667,13 @@ export const DocumentsRoutePage = () => {
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
-                                  posthog.capture(POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED, {
-                                    document_id: doc.id,
-                                    document_title: doc.title,
-                                  })
+                                  posthog.capture(
+                                    POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED,
+                                    {
+                                      document_id: doc.id,
+                                      document_title: doc.title,
+                                    }
+                                  )
                                   downloadDocumentPdf.mutate({
                                     id: doc.id,
                                     title: doc.title,
@@ -754,7 +757,7 @@ export const DocumentsRoutePage = () => {
                 defaultValue={templateName}
                 required
                 autoFocus
-                className="field-focus-compact h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 transition outline-none"
+                className="field-focus-compact h-11 w-full rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition outline-none"
                 placeholder="Template name"
               />
               <div className="flex justify-end gap-2">

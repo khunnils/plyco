@@ -30,7 +30,7 @@ export const TextAreaField = <T extends FieldValues>({
       </span>
     ) : null}
     <textarea
-      className="field-focus min-h-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-900 transition outline-none"
+      className="field-focus min-h-24 rounded-sm border border-slate-300 bg-white px-4 py-3 text-sm font-normal text-slate-900 transition outline-none"
       placeholder={placeholder}
       {...register(name)}
     />

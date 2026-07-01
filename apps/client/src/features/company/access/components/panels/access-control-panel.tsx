@@ -11,6 +11,7 @@ import { z } from "zod"
 import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -144,7 +145,7 @@ export const AccessControlPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={accessHelperText.leastPrivilege}
@@ -182,7 +183,7 @@ export const AccessControlPanel = ({
             placeholder="Not set"
           />
         )}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

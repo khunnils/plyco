@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import { EditPanelGrid } from "@/features/company/components/profile-panel-shell"
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
@@ -189,7 +190,7 @@ const ServiceSelectorPage = ({
                           "No service description has been provided."}
                       </p>
 
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <EditPanelGrid>
                         <div className="grid gap-1 border-l-2 border-slate-200 pl-3">
                           <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                             <Layers3 className="size-3.5" />
@@ -236,7 +237,7 @@ const ServiceSelectorPage = ({
                               : `${serviceUses.length} providers`}
                           </span>
                         </div>
-                      </div>
+                      </EditPanelGrid>
                     </div>
 
                     <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 text-xs font-medium text-slate-500">
@@ -365,16 +366,12 @@ export const ServicesRoutePage = () => {
           onCreateProviderUsage={(providerUsage, onSuccess) =>
             createServiceProviderUsage.mutate(providerUsage, {
               onSuccess: (createdProviderUsage) => {
-                posthog.capture(
-                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_CREATED,
-                  {
-                    service_id: createdProviderUsage.serviceId,
-                    provider_id: createdProviderUsage.organizationProviderId,
-                    system_type: createdProviderUsage.systemType,
-                    data_type_count:
-                      createdProviderUsage.dataProcessed.length,
-                  }
-                )
+                posthog.capture(POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_CREATED, {
+                  service_id: createdProviderUsage.serviceId,
+                  provider_id: createdProviderUsage.organizationProviderId,
+                  system_type: createdProviderUsage.systemType,
+                  data_type_count: createdProviderUsage.dataProcessed.length,
+                })
                 onSuccess?.()
               },
             })
@@ -382,15 +379,12 @@ export const ServicesRoutePage = () => {
           onDeleteProviderUsage={(providerUsage) =>
             deleteServiceProviderUsage.mutate(providerUsage.id, {
               onSuccess: () =>
-                posthog.capture(
-                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_DELETED,
-                  {
-                    service_provider_usage_id: providerUsage.id,
-                    service_id: providerUsage.serviceId,
-                    provider_id: providerUsage.organizationProviderId,
-                    system_type: providerUsage.systemType,
-                  }
-                ),
+                posthog.capture(POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_DELETED, {
+                  service_provider_usage_id: providerUsage.id,
+                  service_id: providerUsage.serviceId,
+                  provider_id: providerUsage.organizationProviderId,
+                  system_type: providerUsage.systemType,
+                }),
             })
           }
           onSaveProfile={(profile, onSuccess) =>
@@ -399,8 +393,7 @@ export const ServicesRoutePage = () => {
           onServiceCreated={(service) =>
             posthog.capture(POSTHOG_EVENTS.SERVICE_CREATED, {
               service_id: service.id,
-              business_activity_count:
-                service.businessActivityIds?.length ?? 0,
+              business_activity_count: service.businessActivityIds?.length ?? 0,
             })
           }
           onServiceUpdated={(service, changedFields) =>
@@ -418,16 +411,13 @@ export const ServicesRoutePage = () => {
           onUpdateProviderUsage={(input, onSuccess) =>
             updateServiceProviderUsage.mutate(input, {
               onSuccess: (providerUsage) => {
-                posthog.capture(
-                  POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_UPDATED,
-                  {
-                    service_provider_usage_id: providerUsage.id,
-                    service_id: providerUsage.serviceId,
-                    provider_id: providerUsage.organizationProviderId,
-                    system_type: providerUsage.systemType,
-                    data_type_count: providerUsage.dataProcessed.length,
-                  }
-                )
+                posthog.capture(POSTHOG_EVENTS.SERVICE_PROVIDER_USAGE_UPDATED, {
+                  service_provider_usage_id: providerUsage.id,
+                  service_id: providerUsage.serviceId,
+                  provider_id: providerUsage.organizationProviderId,
+                  system_type: providerUsage.systemType,
+                  data_type_count: providerUsage.dataProcessed.length,
+                })
                 onSuccess?.()
               },
             })

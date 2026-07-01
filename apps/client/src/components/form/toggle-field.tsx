@@ -29,7 +29,7 @@ export const ToggleField = <T extends FieldValues>({
             {helperText}
           </span>
         ) : null}
-        <span className="grid min-h-10 [grid-template-columns:minmax(0,1fr)_auto] items-center gap-4 rounded-md border border-slate-200 bg-white px-3 py-2">
+        <span className="grid min-h-11 [grid-template-columns:minmax(0,1fr)_auto] items-center gap-4 rounded-sm border border-slate-300 bg-white px-4 py-2.5">
           <span className="min-w-0 text-xs font-medium text-slate-500">
             {field.value === null ? "Unanswered" : field.value ? "Yes" : "No"}
           </span>

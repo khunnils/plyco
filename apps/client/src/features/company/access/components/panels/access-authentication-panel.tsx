@@ -6,6 +6,7 @@ import { z } from "zod"
 
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -106,7 +107,7 @@ export const AccessAuthenticationPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={accessHelperText.mfaRequired}
@@ -137,7 +138,7 @@ export const AccessAuthenticationPanel = ({
           label="Employee offboarding process exists"
           name="offboardingProcessExists"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

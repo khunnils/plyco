@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -579,7 +580,7 @@ const ServiceAudiencePanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.userTypes?.root}
@@ -624,7 +625,7 @@ const ServiceAudiencePanel = ({
             min={0}
           />
         )}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }
@@ -666,10 +667,7 @@ const ServicePrivacyPanel = ({
     if (usesCookiesOrTrackingTechnologies === false) {
       form.setValue(privacyPath("cookieTrackingCategories"), null)
       form.setValue(privacyPath("cookieConsentMechanism"), null)
-      form.setValue(
-        privacyPath("nonEssentialCookiesBlockedUntilConsent"),
-        null
-      )
+      form.setValue(privacyPath("nonEssentialCookiesBlockedUntilConsent"), null)
       form.setValue(privacyPath("cookieRejectAsEasyAsAccept"), null)
       form.setValue(privacyPath("cookieConsentWithdrawalMethod"), null)
       form.setValue(privacyPath("cookieConsentNoPretickedBoxes"), null)
@@ -765,7 +763,7 @@ const ServicePrivacyPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
@@ -841,7 +839,7 @@ const ServicePrivacyPanel = ({
             />
           </>
         ) : null}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }
@@ -904,7 +902,7 @@ const ServiceHostingPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <SelectField
           control={form.control}
           helperText={serviceHelperText.primaryHostingRegion}
@@ -913,7 +911,7 @@ const ServiceHostingPanel = ({
           options={[{ value: "", label: "Not set" }, ...regionOptions]}
           placeholder="Not set"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

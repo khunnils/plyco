@@ -14,6 +14,7 @@ import {
   SingleProviderField,
 } from "@/features/company/infrastructure/components/infrastructure-provider-fields"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
@@ -142,7 +143,7 @@ export const InfrastructureProvidersPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <MultiProviderField
           form={form}
           helperText={infrastructureHelperText.aiProviders}
@@ -180,7 +181,7 @@ export const InfrastructureProvidersPanel = ({
           label="MFA enabled"
           name="mfaEnabled"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

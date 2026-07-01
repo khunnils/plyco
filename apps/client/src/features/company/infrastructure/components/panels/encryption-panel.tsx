@@ -11,6 +11,7 @@ import { z } from "zod"
 import { SelectField } from "@/components/form/select-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -191,7 +192,7 @@ export const EncryptionPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={dataHelperText.encryptionAtRest}
@@ -247,7 +248,7 @@ export const EncryptionPanel = ({
           label="Work devices encrypted"
           name="encryptedDevicesRequired"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

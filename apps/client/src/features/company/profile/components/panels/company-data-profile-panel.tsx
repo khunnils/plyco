@@ -6,6 +6,7 @@ import { z } from "zod"
 
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
@@ -87,7 +88,7 @@ export const CompanyDataProfilePanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={companyHelperText.handlesPii}
@@ -112,7 +113,7 @@ export const CompanyDataProfilePanel = ({
           label="Stores health data"
           name="storesHealthcareData"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

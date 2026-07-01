@@ -134,7 +134,7 @@ export const TeamSettings = ({
             <label className="grid gap-2 text-sm font-medium text-slate-800">
               <span>Role</span>
               <select
-                className="field-focus h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 outline-none"
+                className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 outline-none"
                 value={role}
                 onChange={(event) =>
                   setRole(event.target.value as OrganizationMembershipRole)

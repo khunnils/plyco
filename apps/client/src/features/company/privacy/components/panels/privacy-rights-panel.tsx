@@ -13,6 +13,7 @@ import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -171,7 +172,7 @@ export const PrivacyRightsPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <MultiSelectField
           control={form.control}
           error={form.formState.errors.supportedRights?.root}
@@ -229,7 +230,7 @@ export const PrivacyRightsPanel = ({
           label="Appeal process exists"
           name="appealProcessExists"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

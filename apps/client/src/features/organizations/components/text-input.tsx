@@ -25,7 +25,7 @@ export const TextInput = ({
       </span>
     ) : null}
     <Input
-      className="border-slate-200 bg-white"
+      className="border-slate-300 bg-white"
       placeholder={placeholder}
       required={required}
       type={type}

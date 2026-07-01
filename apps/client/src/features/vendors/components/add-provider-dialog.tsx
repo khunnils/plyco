@@ -135,7 +135,7 @@ export const AddProviderDialog = ({
                   type="text"
                   required
                   placeholder="https://example.com"
-                  className="h-10 border border-slate-200 pl-9"
+                  className="h-11 rounded-sm border-slate-300 pl-10"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   autoFocus

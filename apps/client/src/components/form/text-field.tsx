@@ -36,7 +36,7 @@ export const TextField = <T extends FieldValues>({
       </span>
     ) : null}
     <input
-      className="field-focus h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-normal text-slate-900 transition outline-none disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+      className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 transition outline-none disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
       disabled={disabled}
       inputMode={type === "number" ? "numeric" : undefined}
       min={type === "number" ? (min !== undefined ? min : 1) : undefined}

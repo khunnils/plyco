@@ -6,6 +6,7 @@ import { z } from "zod"
 
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -81,7 +82,7 @@ export const DevelopmentSecurityPanel = ({
         onSave(next, () => setIsEditing(false))
       )}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         {fields.map(([name, label]) => (
           <ToggleField
             key={name}
@@ -91,7 +92,7 @@ export const DevelopmentSecurityPanel = ({
             name={name}
           />
         ))}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

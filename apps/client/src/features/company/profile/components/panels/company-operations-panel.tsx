@@ -11,6 +11,7 @@ import { z } from "zod"
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { TextField } from "@/components/form/text-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
 } from "@/features/company/components/profile-panel-shell"
@@ -111,7 +112,7 @@ export const CompanyOperationsPanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <TextField
           error={form.formState.errors.employeeCount}
           helperText={companyHelperText.employeeCount}
@@ -147,7 +148,7 @@ export const CompanyOperationsPanel = ({
           options={complianceGoalOptions}
           placeholder="Select compliance goals"
         />
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

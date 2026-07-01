@@ -125,15 +125,15 @@
 
 @layer components {
   .field-focus {
-    @apply focus:border-ring focus:ring-3 focus:ring-ring/30;
+    @apply focus:border-ring focus:ring-2 focus:ring-ring/30;
   }
 
   .field-focus-within {
-    @apply focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/30;
+    @apply focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30;
   }
 
   .field-focus-visible {
-    @apply focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30;
+    @apply focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30;
   }
 
   .field-focus-compact {

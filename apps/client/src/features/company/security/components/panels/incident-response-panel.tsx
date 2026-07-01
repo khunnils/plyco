@@ -12,6 +12,7 @@ import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
 import {
+  EditPanelGrid,
   ProfilePanelDetailGrid,
   ProfilePanelShell,
   type ProfilePanelDetailRow,
@@ -138,7 +139,7 @@ export const IncidentResponsePanel = ({
       onEdit={() => setIsEditing(true)}
       onSave={submit}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <EditPanelGrid>
         <ToggleField
           control={form.control}
           helperText={infrastructureHelperText.incidentResponsePlanExists}
@@ -177,7 +178,7 @@ export const IncidentResponsePanel = ({
             type="date"
           />
         )}
-      </div>
+      </EditPanelGrid>
     </ProfilePanelShell>
   )
 }

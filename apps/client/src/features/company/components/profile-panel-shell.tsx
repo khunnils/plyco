@@ -202,7 +202,7 @@ export const ProfilePanelShell = ({
         )}
       </div>
       {isEditing ? (
-        <div className="border border-slate-200 bg-slate-50 p-5 shadow-sm">
+        <div className="border border-slate-200 bg-slate-50 px-6 py-8 shadow-sm">
           {children}
         </div>
       ) : (
@@ -237,4 +237,8 @@ export const ProfilePanelDetailGrid = ({
       </div>
     ))}
   </dl>
+)
+
+export const EditPanelGrid = ({ children }: { children: ReactNode }) => (
+  <div className="grid gap-4 sm:grid-cols-2">{children}</div>
 )
