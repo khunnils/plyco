@@ -127,6 +127,7 @@ export const CodeSetEditorDialog = ({
 
           <div className="grid gap-3 md:grid-cols-[10rem_1fr_1.5fr_auto]">
             <Input
+              autoComplete="off"
               aria-label="Code ID"
               className="bg-white font-mono"
               placeholder="code_id"
@@ -136,6 +137,7 @@ export const CodeSetEditorDialog = ({
               }
             />
             <Input
+              autoComplete="off"
               aria-label="Display name"
               className="bg-white"
               placeholder="Display name"
@@ -145,6 +147,7 @@ export const CodeSetEditorDialog = ({
               }
             />
             <Input
+              autoComplete="off"
               aria-label="Description"
               className="bg-white"
               placeholder="Description"

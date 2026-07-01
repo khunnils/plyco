@@ -122,6 +122,7 @@ export const TeamSettings = ({
             <label className="grid gap-2 text-sm font-medium text-slate-800">
               <span>Email</span>
               <Input
+                autoComplete="email"
                 type="email"
                 value={email}
                 placeholder="teammate@example.com"
@@ -419,6 +420,7 @@ export const TeamSettings = ({
               <label className="grid max-w-md gap-2 text-sm font-medium text-slate-800">
                 <span>Type {organization.name} to confirm</span>
                 <Input
+                  autoComplete="off"
                   value={deleteConfirmation}
                   onChange={(event) =>
                     setDeleteConfirmation(event.target.value)

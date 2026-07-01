@@ -72,6 +72,7 @@ export const VocabularyManager = ({
           <label className="relative mt-4 block">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
             <Input
+              autoComplete="off"
               className="rounded-md border-slate-200 bg-white pl-9"
               placeholder="Filter code sets or codes"
               value={filter}

@@ -272,6 +272,7 @@ export const TemplateForm = ({
             <label className="relative block">
               <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400" />
               <input
+                autoComplete="off"
                 className="field-focus-compact h-10 w-full rounded-sm border border-slate-300 bg-white pr-3 pl-9 text-sm text-slate-900 transition outline-none"
                 placeholder="Search variables"
                 value={schemaSearch}
@@ -395,6 +396,7 @@ export const TemplateForm = ({
             <h2 className="text-sm font-semibold text-slate-950">Content</h2>
           </div>
           <textarea
+            autoComplete="off"
             className="field-focus-compact h-full w-full resize-none overflow-y-auto rounded-sm border border-slate-300 bg-white px-4 py-3 font-mono text-sm text-slate-900 transition outline-none"
             ref={textareaRef}
             value={draft.content}

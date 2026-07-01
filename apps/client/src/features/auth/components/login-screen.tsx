@@ -97,6 +97,7 @@ export const LoginScreen = ({
           <label className="grid gap-2 text-sm font-medium text-slate-800">
             Email
             <Input
+              autoComplete="email"
               className="field-focus-visible h-11 rounded-sm border-slate-300 bg-white px-4 text-sm"
               placeholder="you@company.com"
               required

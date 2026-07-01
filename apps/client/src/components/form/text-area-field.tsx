@@ -30,6 +30,7 @@ export const TextAreaField = <T extends FieldValues>({
       </span>
     ) : null}
     <textarea
+      autoComplete="off"
       className="field-focus min-h-24 rounded-sm border border-slate-300 bg-white px-4 py-3 text-sm font-normal text-slate-900 transition outline-none"
       placeholder={placeholder}
       {...register(name)}

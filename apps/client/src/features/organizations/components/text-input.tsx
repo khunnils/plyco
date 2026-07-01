@@ -1,8 +1,11 @@
+import { type ComponentProps } from "react"
+
 import { Input } from "@/components/ui/input"
 
 export const TextInput = ({
   label,
   value,
+  autoComplete = "off",
   helperText,
   placeholder,
   required = false,
@@ -11,6 +14,7 @@ export const TextInput = ({
 }: {
   label: string
   value: string
+  autoComplete?: ComponentProps<"input">["autoComplete"]
   helperText?: string
   placeholder?: string
   required?: boolean
@@ -25,6 +29,7 @@ export const TextInput = ({
       </span>
     ) : null}
     <Input
+      autoComplete={autoComplete}
       className="border-slate-300 bg-white"
       placeholder={placeholder}
       required={required}

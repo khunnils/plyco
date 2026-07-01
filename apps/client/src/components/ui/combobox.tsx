@@ -66,6 +66,7 @@ function ComboboxInput({
   return (
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
+        autoComplete="off"
         render={<InputGroupInput disabled={disabled} />}
         {...props}
       />
@@ -275,6 +276,7 @@ function ComboboxChipsInput({
 }: ComboboxPrimitive.Input.Props) {
   return (
     <ComboboxPrimitive.Input
+      autoComplete="off"
       data-slot="combobox-chip-input"
       className={cn("min-w-16 flex-1 outline-none", className)}
       {...props}

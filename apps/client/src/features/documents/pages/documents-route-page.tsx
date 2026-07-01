@@ -752,6 +752,7 @@ export const DocumentsRoutePage = () => {
               className="mt-4 grid gap-4"
             >
               <input
+                autoComplete="off"
                 name="name"
                 type="text"
                 defaultValue={templateName}

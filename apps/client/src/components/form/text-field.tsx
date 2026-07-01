@@ -1,3 +1,4 @@
+import { type ComponentProps } from "react"
 import {
   type FieldError,
   type FieldPath,
@@ -9,6 +10,7 @@ type TextFieldProps<T extends FieldValues> = {
   label: string
   name: FieldPath<T>
   register: UseFormRegister<T>
+  autoComplete?: ComponentProps<"input">["autoComplete"]
   disabled?: boolean
   error?: FieldError
   helperText?: string
@@ -21,6 +23,7 @@ export const TextField = <T extends FieldValues>({
   label,
   name,
   register,
+  autoComplete = "off",
   disabled = false,
   error,
   helperText,
@@ -36,6 +39,7 @@ export const TextField = <T extends FieldValues>({
       </span>
     ) : null}
     <input
+      autoComplete={autoComplete}
       className="field-focus h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 transition outline-none disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
       disabled={disabled}
       inputMode={type === "number" ? "numeric" : undefined}

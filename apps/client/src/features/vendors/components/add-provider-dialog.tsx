@@ -131,6 +131,7 @@ export const AddProviderDialog = ({
               <div className="relative">
                 <Globe className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
+                  autoComplete="off"
                   id="vendor-url"
                   type="text"
                   required
