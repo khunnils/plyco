@@ -1,4 +1,5 @@
 import { createApp } from "../src/app.js";
+import { type FastifyInstance } from "fastify";
 import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js";
 import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-repository.js";
 import { InMemoryOrganizationRepository } from "../src/features/organizations/in-memory-repository.js";
@@ -288,6 +289,37 @@ export const profileBody = {
     passwordManagerRequired: true,
   },
 };
+
+export async function saveProfileDraft(
+  app: FastifyInstance,
+  organizationId = "org-test",
+  profile: any = profileBody,
+) {
+  const sections = [
+    ["profile", profile.company],
+    ["services", profile.services],
+    ["data", profile.dataHandling],
+    ["privacy", profile.privacy],
+    ["infrastructure", profile.infrastructure],
+    ["security", profile.security],
+    ["access", profile.access],
+  ] as const;
+  let response = await app.inject({ method: "GET", url: "/health" });
+
+  for (const [section, payload] of sections) {
+    response = await app.inject({
+      method: "PUT",
+      url: `/organizations/${organizationId}/${section}`,
+      payload,
+    });
+
+    if (response.statusCode >= 400) {
+      return response;
+    }
+  }
+
+  return response;
+}
 
 export const vendorBody = {
   providerId: "prov-github",

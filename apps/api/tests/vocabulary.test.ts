@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTestApp } from "./helpers.js";
-import { profileBody } from "./helpers.js";
+import { createTestApp, profileBody, saveProfileDraft } from "./helpers.js";
 
 describe("vocabulary API", () => {
   it("returns countries and organization vocabulary", async () => {
@@ -145,17 +144,13 @@ describe("vocabulary API", () => {
 
     expect(recreateDeletedResponse.statusCode).toBe(404);
 
-    const saveDeletedCodeResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const saveDeletedCodeResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         company: {
           ...profileBody.company,
           industries: ["edtech"],
         },
-      },
-    });
+      });
 
     expect(saveDeletedCodeResponse.statusCode).toBe(400);
   });

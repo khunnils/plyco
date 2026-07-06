@@ -5,7 +5,7 @@ import { usePostHog } from "@posthog/react"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
-import { useSecurityProfile } from "@/features/company/hooks/use-company"
+import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import {
   useCreateBusinessActivity,
   useDeleteBusinessActivity,
@@ -23,14 +23,14 @@ import {
 
 export const ActivitiesRoutePage = () => {
   const posthog = usePostHog()
-  const securityProfile = useSecurityProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
   const vocabulary = useVocabulary()
   const createBusinessActivity = useCreateBusinessActivity()
   const updateBusinessActivity = useUpdateBusinessActivity()
   const deleteBusinessActivity = useDeleteBusinessActivity()
   const reorderBusinessActivities = useReorderBusinessActivities()
 
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const businessActivities = snapshot?.businessActivities ?? []
   const dataTypeOptions =
     snapshot?.organization?.dataHandling.dataTypesStored.flatMap((dataType) =>

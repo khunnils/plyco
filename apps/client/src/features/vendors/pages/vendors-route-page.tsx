@@ -6,7 +6,7 @@ import {
   useCountries,
   useVocabulary,
 } from "@/features/vocabulary/hooks/use-vocabulary"
-import { useSecurityProfile } from "@/features/company/hooks/use-company"
+import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import {
   useCreateOrganizationProvider,
   useCreateOrganizationProviders,
@@ -27,7 +27,7 @@ export const VendorsRoutePage = () => {
   const providers = useProviders()
   const countries = useCountries()
   const vocabulary = useVocabulary()
-  const securityProfile = useSecurityProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
 
   const createProvider = useCreateOrganizationProvider()
   const createProviders = useCreateOrganizationProviders()
@@ -36,7 +36,7 @@ export const VendorsRoutePage = () => {
 
   const { editingVendorId, startEditingVendor } = useSecurityUiStore()
 
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []
   const organizationProviders = snapshot?.organizationProviders ?? []
   const providersList = providers.data ?? []

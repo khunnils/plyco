@@ -15,7 +15,7 @@ import {
   SIDEBAR_SECTION,
   sectionPageBreadcrumbs,
 } from "@/features/shell/lib/navigation"
-import { useSecurityProfile } from "@/features/company/hooks/use-company"
+import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import { ProductDataGraphNodeComponent } from "@/features/company/graph/components/product-data-graph-node"
 import { buildProductDataGraph } from "@/features/company/graph/lib/product-data-graph"
 
@@ -32,10 +32,10 @@ const graphStages = [
 ]
 
 export const ProductDataGraphRoutePage = () => {
-  const securityProfile = useSecurityProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
   const graph = useMemo(
-    () => buildProductDataGraph(securityProfile.data),
-    [securityProfile.data]
+    () => buildProductDataGraph(organizationSnapshot.data),
+    [organizationSnapshot.data]
   )
 
   const hasGraphContent = graph.nodes.length > 1
@@ -50,7 +50,7 @@ export const ProductDataGraphRoutePage = () => {
         title="Graph"
       />
 
-      {securityProfile.isLoading ? (
+      {organizationSnapshot.isLoading ? (
         <div className="-mx-4 -mb-6 flex h-[calc(100svh-6rem)] items-center justify-center bg-white text-sm text-slate-600 md:-mx-12">
           <Loader2 className="mr-2 size-4 animate-spin" />
           Loading product graph

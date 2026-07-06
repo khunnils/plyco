@@ -4,8 +4,8 @@ import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useProviders } from "@/features/vendors/hooks/use-vendors"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import {
-  useSaveSecurityProfile,
-  useSecurityProfile,
+  useSavePrivacyProfile,
+  useOrganizationSnapshot,
 } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { PrivacyProfilePage } from "./privacy-profile-page"
@@ -19,10 +19,10 @@ export const PrivacyProfileRoutePage = () => {
   const posthog = usePostHog()
   const providers = useProviders()
   const vocabulary = useVocabulary()
-  const saveProfile = useSaveSecurityProfile()
-  const securityProfile = useSecurityProfile()
+  const saveProfile = useSavePrivacyProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
 
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const providersList = providers.data ?? []
   const vocabularyData = vocabulary.data

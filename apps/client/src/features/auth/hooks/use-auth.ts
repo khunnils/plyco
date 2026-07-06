@@ -26,7 +26,7 @@ export const useLogout = () => {
         user: null,
         organizations: [],
       })
-      queryClient.removeQueries({ queryKey: ["security-profile"] })
+      queryClient.removeQueries({ queryKey: ["organization-snapshot"] })
       queryClient.removeQueries({ queryKey: providersQueryKey })
       queryClient.removeQueries({ queryKey: ["templates"] })
       queryClient.removeQueries({ queryKey: ["documents"] })

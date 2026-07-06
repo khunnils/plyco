@@ -16,6 +16,7 @@ import {
   noProcessingVendorBody,
   noProcessingVendorUseBody,
   profileBody,
+  saveProfileDraft,
   serviceBody,
   storedService,
   subprocessorBody,
@@ -1083,11 +1084,7 @@ describe("documents / templates API", () => {
 
   it("previews draft templates without generating documents", async () => {
     const app = await createTestApp();
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
     const response = await app.inject({
       method: "POST",
@@ -1237,11 +1234,7 @@ describe("documents / templates API", () => {
 
   it("implements automatic template versioning that increments versionMinor on save if a document exists for the current template version", async () => {
     const app = await createTestApp();
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
     // 1. Create a template from scratch. New templates start at v1.0.
     const createResponse = await app.inject({
@@ -1357,11 +1350,7 @@ describe("documents / templates API", () => {
 
   it("generates documents from templates and reports stale documents", async () => {
     const app = await createTestApp();
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
     const createTemplateResponse = await app.inject({
       method: "POST",
       url: "/organizations/org-test/templates",
@@ -1427,17 +1416,13 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         privacy: {
           ...profileBody.privacy,
           supportedRights: ["access", "deletion"],
         },
-      },
-    });
+      });
     const privacyStaleDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
@@ -1450,11 +1435,7 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
     const restoredDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
@@ -1466,10 +1447,7 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -1480,8 +1458,7 @@ describe("documents / templates API", () => {
             },
           },
         ],
-      },
-    });
+      });
     const transferUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
@@ -1494,23 +1471,15 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         security: {
           ...profileBody.security,
           codeReviewRequired: false,
         },
-      },
-    });
+      });
     const securityUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
@@ -1523,16 +1492,9 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -1547,8 +1509,7 @@ describe("documents / templates API", () => {
             },
           },
         ],
-      },
-    });
+      });
     const cookieUnchangedDocumentsResponse = await app.inject({
       method: "GET",
       url: "/organizations/org-test/documents",
@@ -1561,11 +1522,7 @@ describe("documents / templates API", () => {
       },
     ]);
 
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
     const duplicateResponse = await app.inject({
       method: "POST",
@@ -1608,11 +1565,7 @@ describe("documents / templates API", () => {
 
   it("reports named stale reasons when subprocessors change", async () => {
     const app = await createTestApp();
-    const profileResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    const profileResponse = await saveProfileDraft(app, "org-test", profileBody);
     const serviceId = profileResponse.json().organization.services[0].id;
     const createTemplateResponse = await app.inject({
       method: "POST",

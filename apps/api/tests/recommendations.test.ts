@@ -7,7 +7,12 @@ import {
   StaticAdvisorRuleSource,
   type AdvisorRule,
 } from "../src/features/recommendations/rules.js"
-import { createTestApp, profileBody, serviceBody } from "./helpers.js"
+import {
+  createTestApp,
+  profileBody,
+  saveProfileDraft,
+  serviceBody,
+} from "./helpers.js"
 
 const mfaRule: AdvisorRule = {
   id: "security.mfa_required",
@@ -479,10 +484,7 @@ describe("recommendations API", () => {
 
   it("evaluates recommendations for the current organization profile", async () => {
     const app = await createTestApp()
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         company: {
           ...profileBody.company,
@@ -492,8 +494,7 @@ describe("recommendations API", () => {
           ...profileBody.infrastructure,
           mfaEnabled: false,
         },
-      },
-    })
+      })
 
     const response = await app.inject({
       method: "GET",

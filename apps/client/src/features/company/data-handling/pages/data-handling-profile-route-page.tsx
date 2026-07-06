@@ -3,8 +3,8 @@ import { usePostHog } from "@posthog/react"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import {
-  useSaveSecurityProfile,
-  useSecurityProfile,
+  useSaveDataProfile,
+  useOrganizationSnapshot,
   useReorderDataTypes,
 } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
@@ -18,11 +18,11 @@ import {
 export const DataHandlingProfileRoutePage = () => {
   const posthog = usePostHog()
   const vocabulary = useVocabulary()
-  const saveProfile = useSaveSecurityProfile()
-  const securityProfile = useSecurityProfile()
+  const saveProfile = useSaveDataProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
   const reorderDataTypes = useReorderDataTypes()
 
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const vocabularyData = vocabulary.data
 

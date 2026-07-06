@@ -13,7 +13,7 @@ import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
 import { OnboardingWizardPage } from "@/features/organizations/onboarding/pages/onboarding-wizard-page"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
-import { useSecurityProfile } from "@/features/company/hooks/use-company"
+import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import { startGoogleLogin } from "@/lib/api"
 import { LoadingState } from "@/features/shell/components/loading-state"
 import { WorkspaceLayout } from "@/features/shell/components/workspace-layout"
@@ -52,7 +52,7 @@ export const App = () => {
   const isAuthenticated = Boolean(user)
   const identifiedRef = useRef(false)
   const { selectedOrganization } = useSelectedOrganization()
-  const securityProfile = useSecurityProfile(
+  const organizationSnapshot = useOrganizationSnapshot(
     isAuthenticated && Boolean(selectedOrganization)
   )
   const logout = useLogout()
@@ -86,7 +86,7 @@ export const App = () => {
     authState.isLoading ||
     (isAuthenticated &&
       Boolean(selectedOrganization) &&
-      securityProfile.isLoading)
+      organizationSnapshot.isLoading)
   ) {
     return <LoadingState />
   }

@@ -1,4 +1,4 @@
-import { useSecurityProfile } from "@/features/company/hooks/use-company"
+import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { DashboardPage } from "@/features/dashboard/components/dashboard-page"
 import { useDocuments } from "@/features/documents/hooks/use-documents"
@@ -6,10 +6,10 @@ import { useRecommendations } from "@/features/recommendations/hooks/use-recomme
 import { PageHeader } from "@/features/shell/components/page-header"
 
 export const DashboardRoutePage = () => {
-  const securityProfile = useSecurityProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
   const documents = useDocuments()
   const recommendations = useRecommendations()
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const organizationProviders = snapshot?.organizationProviders ?? []
   const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []

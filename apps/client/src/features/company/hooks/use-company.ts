@@ -3,15 +3,21 @@ import { toast } from "sonner"
 
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import {
-  getOrganizationSecurityProfile,
+  getOrganizationSnapshot,
   reorderDataTypes,
   reorderServices,
-  saveSecurityProfile,
+  saveAccessProfile,
+  saveCompanyProfile,
+  saveDataProfile,
+  saveInfrastructureProfile,
+  savePrivacyProfile,
+  saveSecurityProfileSection,
+  saveServicesProfile,
 } from "@/lib/api"
 import {
   authStateQueryKey,
+  organizationSnapshotQueryKey,
   recommendationsQueryKey,
-  securityProfileQueryKey,
 } from "@/lib/query-keys"
 import { type ProfileDraft } from "@/features/company/types/company"
 import { type SecurityProgramSnapshot } from "@plyco/shared"
@@ -20,7 +26,7 @@ const useReorderProfileEntities = (entity: "dataTypes" | "services") => {
   const queryClient = useQueryClient()
   const { selectedOrganizationId } = useSelectedOrganization()
   const organizationId = selectedOrganizationId ?? ""
-  const queryKey = securityProfileQueryKey(organizationId)
+  const queryKey = organizationSnapshotQueryKey(organizationId)
 
   return useMutation({
     mutationFn: (ids: string[]) =>
@@ -78,26 +84,31 @@ const useReorderProfileEntities = (entity: "dataTypes" | "services") => {
 export const useReorderServices = () => useReorderProfileEntities("services")
 export const useReorderDataTypes = () => useReorderProfileEntities("dataTypes")
 
-export const useSecurityProfile = (enabled = true) => {
+export const useOrganizationSnapshot = (enabled = true) => {
   const { selectedOrganizationId } = useSelectedOrganization()
 
   return useQuery({
     enabled: enabled && Boolean(selectedOrganizationId),
-    queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
-    queryFn: () => getOrganizationSecurityProfile(selectedOrganizationId ?? ""),
+    queryKey: organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
+    queryFn: () => getOrganizationSnapshot(selectedOrganizationId ?? ""),
   })
 }
 
-export const useSaveSecurityProfile = () => {
+const useSaveOrganizationProfileSection = (
+  save: (
+    organizationId: string,
+    profile: ProfileDraft,
+  ) => Promise<SecurityProgramSnapshot>,
+) => {
   const queryClient = useQueryClient()
   const { selectedOrganizationId } = useSelectedOrganization()
 
   return useMutation({
     mutationFn: (profile: ProfileDraft) =>
-      saveSecurityProfile(selectedOrganizationId ?? "", profile),
+      save(selectedOrganizationId ?? "", profile),
     onSuccess: (snapshot) => {
       queryClient.setQueryData(
-        securityProfileQueryKey(selectedOrganizationId ?? ""),
+        organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
         snapshot
       )
       void queryClient.invalidateQueries({
@@ -113,3 +124,38 @@ export const useSaveSecurityProfile = () => {
     },
   })
 }
+
+export const useSaveCompanyProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveCompanyProfile(organizationId, profile.company)
+  )
+
+export const useSaveServicesProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveServicesProfile(organizationId, profile.services)
+  )
+
+export const useSaveDataProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveDataProfile(organizationId, profile.dataHandling)
+  )
+
+export const useSavePrivacyProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    savePrivacyProfile(organizationId, profile.privacy)
+  )
+
+export const useSaveInfrastructureProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveInfrastructureProfile(organizationId, profile.infrastructure)
+  )
+
+export const useSaveSecurityProfileSection = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveSecurityProfileSection(organizationId, profile.security)
+  )
+
+export const useSaveAccessProfile = () =>
+  useSaveOrganizationProfileSection((organizationId, profile) =>
+    saveAccessProfile(organizationId, profile.access)
+  )

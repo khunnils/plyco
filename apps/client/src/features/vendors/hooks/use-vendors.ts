@@ -18,7 +18,7 @@ import {
   updateServiceProviderUsage,
   updateOrganizationProvider,
 } from "@/lib/api"
-import { providersQueryKey, securityProfileQueryKey } from "@/lib/query-keys"
+import { providersQueryKey, organizationSnapshotQueryKey } from "@/lib/query-keys"
 
 export const useProviders = (enabled = true) => {
   const { data: auth } = useAuthState()
@@ -40,7 +40,7 @@ export const useCreateOrganizationProvider = () => {
       createOrganizationProvider(selectedOrganizationId ?? "", provider),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
+        queryKey: organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
       })
       toast.success("Provider added")
     },
@@ -63,7 +63,7 @@ export const useCreateOrganizationProviders = () => {
       ),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
+        queryKey: organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
       })
       toast.success("Providers added")
     },
@@ -82,7 +82,7 @@ export const useUpdateOrganizationProvider = () => {
     mutationFn: (input: { id: string; provider: OrganizationProviderInput }) =>
       updateOrganizationProvider({ organizationId, ...input }),
     onMutate: async ({ id, provider }) => {
-      const key = securityProfileQueryKey(organizationId)
+      const key = organizationSnapshotQueryKey(organizationId)
       await queryClient.cancelQueries({ queryKey: key })
       const previousSnapshot = queryClient.getQueryData<{
         organization: unknown
@@ -113,7 +113,7 @@ export const useUpdateOrganizationProvider = () => {
     onError: (err: Error, _variables, context) => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
-          securityProfileQueryKey(organizationId),
+          organizationSnapshotQueryKey(organizationId),
           context.previousSnapshot
         )
       }
@@ -124,7 +124,7 @@ export const useUpdateOrganizationProvider = () => {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
     },
   })
@@ -138,7 +138,7 @@ export const useDeleteOrganizationProvider = () => {
   return useMutation({
     mutationFn: (id: string) => deleteOrganizationProvider(organizationId, id),
     onMutate: async (id) => {
-      const key = securityProfileQueryKey(organizationId)
+      const key = organizationSnapshotQueryKey(organizationId)
       await queryClient.cancelQueries({ queryKey: key })
       const previousSnapshot = queryClient.getQueryData<{
         organization: unknown
@@ -166,7 +166,7 @@ export const useDeleteOrganizationProvider = () => {
     onError: (err: Error, _id, context) => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
-          securityProfileQueryKey(organizationId),
+          organizationSnapshotQueryKey(organizationId),
           context.previousSnapshot
         )
       }
@@ -177,7 +177,7 @@ export const useDeleteOrganizationProvider = () => {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
     },
   })
@@ -192,7 +192,7 @@ export const useCreateServiceProviderUsage = () => {
       createServiceProviderUsage(selectedOrganizationId ?? "", providerUsage),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
+        queryKey: organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
       })
       toast.success("Provider usage added")
     },
@@ -213,7 +213,7 @@ export const useUpdateServiceProviderUsage = () => {
       providerUsage: ServiceProviderUsageInput
     }) => updateServiceProviderUsage({ organizationId, ...input }),
     onMutate: async ({ id, providerUsage }) => {
-      const key = securityProfileQueryKey(organizationId)
+      const key = organizationSnapshotQueryKey(organizationId)
       await queryClient.cancelQueries({ queryKey: key })
       const previousSnapshot = queryClient.getQueryData<{
         organization: unknown
@@ -244,7 +244,7 @@ export const useUpdateServiceProviderUsage = () => {
     onError: (err: Error, _variables, context) => {
       if (context?.previousSnapshot) {
         queryClient.setQueryData(
-          securityProfileQueryKey(organizationId),
+          organizationSnapshotQueryKey(organizationId),
           context.previousSnapshot
         )
       }
@@ -255,7 +255,7 @@ export const useUpdateServiceProviderUsage = () => {
     },
     onSettled: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
     },
   })
@@ -270,7 +270,7 @@ export const useDeleteServiceProviderUsage = () => {
     mutationFn: (id: string) => deleteServiceProviderUsage(organizationId, id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
       toast.success("Provider usage removed")
     },

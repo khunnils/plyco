@@ -22,9 +22,15 @@ import {
   createBusinessActivity,
   createOrganization,
   createOrganizationProvider,
-  saveSecurityProfile,
+  saveAccessProfile,
+  saveCompanyProfile,
+  saveDataProfile,
+  saveInfrastructureProfile,
+  savePrivacyProfile,
+  saveSecurityProfileSection,
+  saveServicesProfile,
 } from "@/lib/api"
-import { authStateQueryKey, securityProfileQueryKey } from "@/lib/query-keys"
+import { authStateQueryKey, organizationSnapshotQueryKey } from "@/lib/query-keys"
 import {
   MARKETING_WEBSITE_SERVICE_NAME,
   WEBSITE_DATA_TYPE_NAME,
@@ -211,13 +217,23 @@ export const ReviewStep = () => {
       const store = useCurrentOrganizationStore.getState()
       store.selectOrganization(organization.id)
 
-      const initialSnapshot = await saveSecurityProfile(
+      const initialProfile = toProfileDraft(draft, {
+        primaryActivityIds: [],
+        websiteActivityIds: [],
+      })
+      await saveCompanyProfile(organization.id, initialProfile.company)
+      await saveServicesProfile(organization.id, initialProfile.services)
+      const initialSnapshot = await saveDataProfile(
         organization.id,
-        toProfileDraft(draft, {
-          primaryActivityIds: [],
-          websiteActivityIds: [],
-        })
+        initialProfile.dataHandling
       )
+      await savePrivacyProfile(organization.id, initialProfile.privacy)
+      await saveInfrastructureProfile(
+        organization.id,
+        initialProfile.infrastructure
+      )
+      await saveSecurityProfileSection(organization.id, initialProfile.security)
+      await saveAccessProfile(organization.id, initialProfile.access)
       const websiteDataTypeId =
         initialSnapshot.organization?.dataHandling.dataTypesStored.find(
           (dataType) => dataType.name === WEBSITE_DATA_TYPE_NAME
@@ -280,15 +296,21 @@ export const ReviewStep = () => {
           websiteActivityIds,
         }
       )
-      const snapshot = await saveSecurityProfile(organization.id, profile)
+      await saveCompanyProfile(organization.id, profile.company)
+      await saveServicesProfile(organization.id, profile.services)
+      await saveDataProfile(organization.id, profile.dataHandling)
+      await savePrivacyProfile(organization.id, profile.privacy)
+      await saveInfrastructureProfile(organization.id, profile.infrastructure)
+      await saveSecurityProfileSection(organization.id, profile.security)
+      const snapshot = await saveAccessProfile(organization.id, profile.access)
 
       queryClient.setQueryData(
-        securityProfileQueryKey(organization.id),
+        organizationSnapshotQueryKey(organization.id),
         snapshot
       )
       await queryClient.invalidateQueries({ queryKey: authStateQueryKey })
       await queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organization.id),
+        queryKey: organizationSnapshotQueryKey(organization.id),
       })
       posthog.capture(POSTHOG_EVENTS.ORGANIZATION_CREATED, {
         organization_id: organization.id,

@@ -23,8 +23,8 @@ import { SortableList } from "@/components/sortable-list"
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import {
-  useSaveSecurityProfile,
-  useSecurityProfile,
+  useSaveServicesProfile,
+  useOrganizationSnapshot,
   useReorderServices,
 } from "@/features/company/hooks/use-company"
 import {
@@ -398,15 +398,15 @@ export const ServicesRoutePage = () => {
   const posthog = usePostHog()
   const { serviceId } = useParams()
   const navigate = useNavigate()
-  const securityProfile = useSecurityProfile()
+  const organizationSnapshot = useOrganizationSnapshot()
   const vocabulary = useVocabulary()
-  const saveProfile = useSaveSecurityProfile()
+  const saveProfile = useSaveServicesProfile()
   const reorderServices = useReorderServices()
   const createServiceProviderUsage = useCreateServiceProviderUsage()
   const deleteServiceProviderUsage = useDeleteServiceProviderUsage()
   const updateServiceProviderUsage = useUpdateServiceProviderUsage()
 
-  const snapshot = securityProfile.data
+  const snapshot = organizationSnapshot.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const organizationProviders = snapshot?.organizationProviders ?? []
   const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []

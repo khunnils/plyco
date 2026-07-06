@@ -13,6 +13,7 @@ import {
   authConfig,
   createInMemoryRepositories,
   profileBody,
+  saveProfileDraft,
   serviceBody,
   vendorBody,
   vendorUseBody,
@@ -125,10 +126,7 @@ const validPrivacyLookupGenerated = {
 describe("organizations API", () => {
   it("reorders services, data types, and business activities", async () => {
     const app = await createTestApp();
-    const profileResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const profileResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           { ...serviceBody, serviceName: "First service" },
@@ -154,8 +152,7 @@ describe("organizations API", () => {
             },
           ],
         },
-      },
-    });
+      });
     const organization = profileResponse.json().organization;
     const serviceIds = organization.services.map(
       (service: { id: string }) => service.id,
@@ -223,10 +220,7 @@ describe("organizations API", () => {
     }
 
     const snapshot = (
-      await app.inject({
-        method: "GET",
-        url: "/organizations/org-test/security-profile",
-      })
+      await app.inject({ method: "GET", url: "/organizations/org-test" })
     ).json();
     expect(
       snapshot.organization.services.map(
@@ -623,11 +617,7 @@ describe("organizations API", () => {
 
   it("creates and returns organization security profile services", async () => {
     const app = await createTestApp();
-    const saveResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    const saveResponse = await saveProfileDraft(app, "org-test", profileBody);
 
     expect(saveResponse.statusCode).toBe(200);
     expect(saveResponse.json().organization.company.companyName).toBe(
@@ -670,10 +660,7 @@ describe("organizations API", () => {
       profileBody.security,
     );
 
-    const getResponse = await app.inject({
-      method: "GET",
-      url: "/organizations/org-test/security-profile",
-    });
+    const getResponse = await app.inject({ method: "GET", url: "/organizations/org-test" });
 
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
@@ -743,11 +730,7 @@ describe("organizations API", () => {
       },
     };
     const app = await createTestApp();
-    const saveResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: explicitEmptyProfile,
-    });
+    const saveResponse = await saveProfileDraft(app, "org-test", explicitEmptyProfile);
 
     expect(saveResponse.statusCode).toBe(200);
     expect(saveResponse.json().organization.company.industries).toEqual([]);
@@ -767,10 +750,7 @@ describe("organizations API", () => {
 
   it("rejects service profile codes that are not in organization vocabulary", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -778,8 +758,7 @@ describe("organizations API", () => {
             userTypes: ["not_a_real_user_type"],
           },
         ],
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
@@ -796,10 +775,7 @@ describe("organizations API", () => {
 
   it("supports multiple services and service-scoped vendor inventory", async () => {
     const app = await createTestApp();
-    const saveResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const saveResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           profileBody.services[0],
@@ -810,8 +786,7 @@ describe("organizations API", () => {
             availabilityRegions: ["eu"],
           },
         ],
-      },
-    });
+      });
 
     expect(saveResponse.statusCode).toBe(200);
     const services = saveResponse.json().organization.services;
@@ -865,17 +840,13 @@ describe("organizations API", () => {
 
   it("rejects privacy profile codes that are not in organization vocabulary", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         privacy: {
           ...profileBody.privacy,
           supportedRights: ["not_a_real_right"],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
@@ -892,10 +863,7 @@ describe("organizations API", () => {
 
   it("rejects service cookie tracking codes that are not in organization vocabulary", async () => {
     const app = await createTestApp();
-    const invalidCookieTypeResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidCookieTypeResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -906,8 +874,7 @@ describe("organizations API", () => {
             },
           },
         ],
-      },
-    });
+      });
 
     expect(invalidCookieTypeResponse.statusCode).toBe(400);
     expect(invalidCookieTypeResponse.json()).toMatchObject({
@@ -921,10 +888,7 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidConsentResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidConsentResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -935,8 +899,7 @@ describe("organizations API", () => {
             },
           },
         ],
-      },
-    });
+      });
 
     expect(invalidConsentResponse.statusCode).toBe(400);
     expect(invalidConsentResponse.json()).toMatchObject({
@@ -950,10 +913,7 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidWithdrawalResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidWithdrawalResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -964,8 +924,7 @@ describe("organizations API", () => {
             },
           },
         ],
-      },
-    });
+      });
 
     expect(invalidWithdrawalResponse.statusCode).toBe(400);
     expect(invalidWithdrawalResponse.json()).toMatchObject({
@@ -982,10 +941,7 @@ describe("organizations API", () => {
 
   it("rejects infrastructure providers that are not available for the selected system type", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
@@ -996,8 +952,7 @@ describe("organizations API", () => {
             },
           ],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
@@ -1013,10 +968,7 @@ describe("organizations API", () => {
 
   it("preserves explicit 'none' infrastructure providers outside inventory", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
@@ -1039,8 +991,7 @@ describe("organizations API", () => {
             },
           ],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(200);
     expect(
@@ -1056,10 +1007,7 @@ describe("organizations API", () => {
 
   it("preserves an explicit 'none' newsletter provider outside inventory", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         privacy: {
           ...profileBody.privacy,
@@ -1067,8 +1015,7 @@ describe("organizations API", () => {
             { systemType: "newsletter", providerId: "none" },
           ],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(200);
     expect(response.json().organization.privacy.organizationProviders).toEqual([
@@ -1079,10 +1026,7 @@ describe("organizations API", () => {
 
   it("replaces explicit none with a real infrastructure provider", async () => {
     const app = await createTestApp();
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
@@ -1090,13 +1034,9 @@ describe("organizations API", () => {
             { systemType: "source_control", providerId: "none" },
           ],
         },
-      },
-    });
+      });
 
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
@@ -1104,8 +1044,7 @@ describe("organizations API", () => {
             { systemType: "source_control", providerId: "prov-github" },
           ],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(200);
     expect(
@@ -1121,10 +1060,7 @@ describe("organizations API", () => {
 
   it("rejects none alongside a real provider for the same system type", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
@@ -1133,8 +1069,7 @@ describe("organizations API", () => {
             { systemType: "source_control", providerId: "prov-github" },
           ],
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
@@ -1147,17 +1082,13 @@ describe("organizations API", () => {
 
   it("rejects invalid marketing opt-out method codes", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         privacy: {
           ...profileBody.privacy,
           marketingOptOutMethod: "phone_call",
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
@@ -1174,17 +1105,13 @@ describe("organizations API", () => {
 
   it("rejects invalid international transfer codes", async () => {
     const app = await createTestApp();
-    const invalidTransferResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidTransferResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         privacy: {
           ...profileBody.privacy,
           transferMechanisms: ["not_a_real_mechanism"],
         },
-      },
-    });
+      });
 
     expect(invalidTransferResponse.statusCode).toBe(400);
     expect(invalidTransferResponse.json()).toMatchObject({
@@ -1198,10 +1125,7 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidRegionResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidRegionResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -1212,8 +1136,7 @@ describe("organizations API", () => {
             },
           },
         ],
-      },
-    });
+      });
 
     expect(invalidRegionResponse.statusCode).toBe(400);
     expect(invalidRegionResponse.json()).toMatchObject({
@@ -1227,10 +1150,7 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidHostingRegionResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidHostingRegionResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         services: [
           {
@@ -1241,8 +1161,7 @@ describe("organizations API", () => {
             },
           },
         ],
-      },
-    });
+      });
 
     expect(invalidHostingRegionResponse.statusCode).toBe(400);
     expect(invalidHostingRegionResponse.json()).toMatchObject({
@@ -1259,17 +1178,13 @@ describe("organizations API", () => {
 
   it("rejects invalid security control codes", async () => {
     const app = await createTestApp();
-    const invalidAccessResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidAccessResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         access: {
           ...profileBody.access,
           accessReviewCadence: "every_quarter",
         },
-      },
-    });
+      });
 
     expect(invalidAccessResponse.statusCode).toBe(400);
     expect(invalidAccessResponse.json()).toMatchObject({
@@ -1283,17 +1198,13 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidInfrastructureResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidInfrastructureResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
           atRestAlgorithm: "aes_512",
         },
-      },
-    });
+      });
 
     expect(invalidInfrastructureResponse.statusCode).toBe(400);
     expect(invalidInfrastructureResponse.json()).toMatchObject({
@@ -1307,17 +1218,13 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidMonitoringResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const invalidMonitoringResponse = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
           securityMonitoring: "outsourced",
         },
-      },
-    });
+      });
 
     expect(invalidMonitoringResponse.statusCode).toBe(400);
     expect(invalidMonitoringResponse.json()).toMatchObject({
@@ -1334,14 +1241,10 @@ describe("organizations API", () => {
 
   it("returns structured validation errors", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         company: { ...profileBody.company, companyName: "" },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json().error.code).toBe("VALIDATION_FAILED");
@@ -1349,17 +1252,13 @@ describe("organizations API", () => {
 
   it("rejects unknown controlled codes and countries", async () => {
     const app = await createTestApp();
-    const response = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: {
+    const response = await saveProfileDraft(app, "org-test", {
         ...profileBody,
         company: {
           ...profileBody.company,
           country: "ZZ",
         },
-      },
-    });
+      });
 
     expect(response.statusCode).toBe(400);
     expect(response.json().error.code).toBe("COUNTRY_NOT_FOUND");

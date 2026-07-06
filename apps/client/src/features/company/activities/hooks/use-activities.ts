@@ -12,7 +12,7 @@ import {
   reorderBusinessActivities,
   updateBusinessActivity,
 } from "@/lib/api"
-import { securityProfileQueryKey } from "@/lib/query-keys"
+import { organizationSnapshotQueryKey } from "@/lib/query-keys"
 
 export const useCreateBusinessActivity = () => {
   const queryClient = useQueryClient()
@@ -23,7 +23,7 @@ export const useCreateBusinessActivity = () => {
       createBusinessActivity(selectedOrganizationId ?? "", activity),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(selectedOrganizationId ?? ""),
+        queryKey: organizationSnapshotQueryKey(selectedOrganizationId ?? ""),
       })
       toast.success("Activity added")
     },
@@ -37,7 +37,7 @@ export const useReorderBusinessActivities = () => {
   const queryClient = useQueryClient()
   const { selectedOrganizationId } = useSelectedOrganization()
   const organizationId = selectedOrganizationId ?? ""
-  const queryKey = securityProfileQueryKey(organizationId)
+  const queryKey = organizationSnapshotQueryKey(organizationId)
 
   return useMutation({
     mutationFn: (ids: string[]) =>
@@ -77,7 +77,7 @@ export const useUpdateBusinessActivity = () => {
       updateBusinessActivity({ organizationId, ...input }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
       toast.success("Activity updated")
     },
@@ -96,7 +96,7 @@ export const useDeleteBusinessActivity = () => {
     mutationFn: (id: string) => deleteBusinessActivity(organizationId, id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: securityProfileQueryKey(organizationId),
+        queryKey: organizationSnapshotQueryKey(organizationId),
       })
       toast.success("Activity removed")
     },

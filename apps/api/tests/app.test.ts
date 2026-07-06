@@ -35,7 +35,17 @@ describe("security profile API", () => {
     expect(document.openapi).toBe("3.1.0");
     expect(document.paths).toHaveProperty("/waitlist");
     expect(document.paths).toHaveProperty("/organizations");
+    expect(document.paths).toHaveProperty("/organizations/{organizationId}");
     expect(document.paths).toHaveProperty(
+      "/organizations/{organizationId}/profile",
+    );
+    expect(document.paths).toHaveProperty(
+      "/organizations/{organizationId}/data",
+    );
+    expect(document.paths).toHaveProperty(
+      "/organizations/{organizationId}/security",
+    );
+    expect(document.paths).not.toHaveProperty(
       "/organizations/{organizationId}/security-profile",
     );
     expect(document.paths).toHaveProperty("/providers/lookup");
@@ -63,7 +73,7 @@ describe("security profile API", () => {
     });
     const response = await app.inject({
       method: "GET",
-      url: "/organizations/org-test/security-profile",
+      url: "/organizations/org-test",
     });
 
     expect(response.statusCode).toBe(401);
@@ -73,6 +83,20 @@ describe("security profile API", () => {
         message: "Authentication is required.",
       },
     });
+  });
+
+  it("does not expose the old security-profile endpoint", async () => {
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: false,
+      apiDocs: false,
+    });
+    const response = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/security-profile",
+    });
+
+    expect(response.statusCode).toBe(404);
   });
 
   it("returns anonymous auth state before login", async () => {

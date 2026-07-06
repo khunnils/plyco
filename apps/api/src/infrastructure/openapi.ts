@@ -5,13 +5,17 @@ import {
   authStateSchema,
   businessActivityInputSchema,
   businessActivitySchema,
+  accessProfileSchema,
+  companyProfileSchema,
   countrySchema,
   createDocumentSchema,
   createOrganizationSchema,
   createTemplateFromSystemSchema,
+  dataHandlingProfileSchema,
   deleteOrganizationResponseSchema,
   documentSchema,
   documentSummarySchema,
+  infrastructureProfileSchema,
   magicLinkRequestSchema,
   magicLinkResponseSchema,
   organizationInvitationInputSchema,
@@ -31,7 +35,9 @@ import {
   providerSchema,
   recommendationsResponseSchema,
   reorderEntitiesSchema,
+  securityProgramSnapshotSchema,
   securityProfileSchema,
+  serviceProfileInputSchema,
   serviceProviderUsageInputSchema,
   serviceProviderUsageSchema,
   structuredErrorSchema,
@@ -84,21 +90,7 @@ const codeLoadResultSchema = z.object({
   codeCount: z.number().int().nonnegative(),
   countryCount: z.number().int().nonnegative(),
 })
-const securityProfileSnapshotSchema = z.object({
-  organization: z.unknown(),
-  businessActivities: z.array(businessActivitySchema),
-  organizationProviders: z.array(organizationProviderInventorySchema),
-  serviceProviderUsage: z.array(serviceProviderUsageSchema),
-})
-const securityProfileBodySchema = z.object({
-  company: z.unknown(),
-  services: z.array(z.unknown()).min(1),
-  privacy: z.unknown(),
-  infrastructure: z.unknown(),
-  security: securityProfileSchema,
-  dataHandling: z.unknown(),
-  access: z.unknown(),
-})
+const servicesProfileBodySchema = z.array(serviceProfileInputSchema).min(1)
 const templatePreviewResponseSchema = z.object({
   renderedContent: z.string(),
 })
@@ -293,6 +285,13 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}": {
+    get: route({
+      summary: "Load the organization profile snapshot.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
     delete: route({
       summary: "Delete an organization.",
       tag: "Organizations",
@@ -378,21 +377,74 @@ const paths: Record<string, PathItem> = {
       successSchema: privacyProfileSchema,
     }),
   },
-  "/organizations/{organizationId}/security-profile": {
-    get: route({
-      summary: "Load the organization security profile snapshot.",
-      tag: "Security Profile",
-      params: organizationIdParamsSchema,
-      success: 200,
-      successSchema: securityProfileSnapshotSchema,
-    }),
+  "/organizations/{organizationId}/profile": {
     put: route({
-      summary: "Save the organization security profile snapshot.",
+      summary: "Save the organization company profile section.",
       tag: "Security Profile",
       params: organizationIdParamsSchema,
-      body: securityProfileBodySchema,
+      body: companyProfileSchema,
       success: 200,
-      successSchema: securityProfileSnapshotSchema,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/services": {
+    put: route({
+      summary: "Save the organization services section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: servicesProfileBodySchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/data": {
+    put: route({
+      summary: "Save the organization data section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: dataHandlingProfileSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/privacy": {
+    put: route({
+      summary: "Save the organization privacy section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: privacyProfileSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/infrastructure": {
+    put: route({
+      summary: "Save the organization infrastructure section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: infrastructureProfileSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/security": {
+    put: route({
+      summary: "Save the organization security section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: securityProfileSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/access": {
+    put: route({
+      summary: "Save the organization access section.",
+      tag: "Security Profile",
+      params: organizationIdParamsSchema,
+      body: accessProfileSchema,
+      success: 200,
+      successSchema: securityProgramSnapshotSchema,
     }),
   },
   "/organizations/{organizationId}/services/order": {

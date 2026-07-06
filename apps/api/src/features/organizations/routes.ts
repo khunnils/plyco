@@ -2,7 +2,15 @@ import {
   accessProfileSchema,
   companyProfileSchema,
   dataHandlingProfileSchema,
+  emptyAccessProfile,
+  emptyCompanyProfile,
+  emptyDataHandlingProfile,
+  emptyInfrastructureProfile,
+  emptyPrivacyProfile,
+  emptySecurityProfile,
+  emptyServiceProfile,
   infrastructureProfileSchema,
+  type OrganizationSecurityProfile,
   securityProfileSchema,
   privacyProfileSchema,
   reorderEntitiesSchema,
@@ -25,19 +33,14 @@ import {
 } from "../vocabulary/validation.js";
 import { type VocabularyRepository } from "../vocabulary/repository.js";
 import { type ProviderRepository } from "../vendors/repository.js";
-import { type OrganizationRepository } from "./repository.js";
+import {
+  type OrganizationRepository,
+  type SecurityProfileInput,
+} from "./repository.js";
 
-const securityProfileBodySchema = z.object({
-  company: companyProfileSchema,
-  services: z
-    .array(serviceProfileInputSchema)
-    .min(1, "At least one service is required"),
-  privacy: privacyProfileSchema,
-  infrastructure: infrastructureProfileSchema,
-  security: securityProfileSchema,
-  dataHandling: dataHandlingProfileSchema,
-  access: accessProfileSchema,
-});
+const servicesProfileBodySchema = z
+  .array(serviceProfileInputSchema)
+  .min(1, "At least one service is required");
 
 export async function registerOrganizationRoutes(
   app: FastifyInstance,
@@ -56,7 +59,7 @@ export async function registerOrganizationRoutes(
   },
 ) {
   app.get<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/security-profile",
+    "/organizations/:organizationId",
     async (request) => {
       await requireOrganizationMembership(
         request,
@@ -64,44 +67,52 @@ export async function registerOrganizationRoutes(
         request.params.organizationId,
       );
 
-      return {
-        organization: await organizationRepository.getOrganization(
-          request.params.organizationId,
-        ),
-        businessActivities: await vendorRepository.listBusinessActivities(
-          request.params.organizationId,
-        ),
-        organizationProviders: await vendorRepository.listOrganizationProviders(
-          request.params.organizationId,
-        ),
-        serviceProviderUsage: await vendorRepository.listServiceProviderUsage(
-          request.params.organizationId,
-        ),
-      };
+      return organizationSnapshot(
+        request.params.organizationId,
+        organizationRepository,
+        vendorRepository,
+      );
     },
   );
 
   app.put<{ Params: { organizationId: string } }>(
-    "/organizations/:organizationId/security-profile",
+    "/organizations/:organizationId/profile",
     async (request, reply) => {
       await requireOrganizationMembership(
         request,
         accountRepository,
         request.params.organizationId,
       );
-      const body = securityProfileBodySchema.parse(request.body);
+      const body = companyProfileSchema.parse(request.body);
       await validateCompanyProfileCodes(
         vocabularyRepository,
         request.params.organizationId,
-        body.company,
+        body,
       );
-      await validateDataHandlingProfileCodes(
-        vocabularyRepository,
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, company: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/services",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
         request.params.organizationId,
-        body.dataHandling,
       );
+      const body = servicesProfileBodySchema.parse(request.body);
       await Promise.all(
-        body.services.map((service, index) =>
+        body.map((service, index) =>
           validateServiceProfileCodes(
             vocabularyRepository,
             request.params.organizationId,
@@ -110,56 +121,151 @@ export async function registerOrganizationRoutes(
           ),
         ),
       );
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, services: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/data",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = dataHandlingProfileSchema.parse(request.body);
+      await validateDataHandlingProfileCodes(
+        vocabularyRepository,
+        request.params.organizationId,
+        body,
+      );
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, dataHandling: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/privacy",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = privacyProfileSchema.parse(request.body);
       await validatePrivacyProfileCodes(
         vocabularyRepository,
         request.params.organizationId,
-        body.privacy,
+        body,
       );
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, privacy: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/infrastructure",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = infrastructureProfileSchema.parse(request.body);
       await validateInfrastructureProfileCodes(
         vocabularyRepository,
         request.params.organizationId,
-        body.infrastructure,
+        body,
       );
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, infrastructure: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/security",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = securityProfileSchema.parse(request.body);
       await validateSecurityProfileCodes(
         vocabularyRepository,
         request.params.organizationId,
-        body.security,
+        body,
       );
+
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, security: body }),
+        ),
+      );
+    },
+  );
+
+  app.put<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/access",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = accessProfileSchema.parse(request.body);
       await validateAccessProfileCodes(
         vocabularyRepository,
         request.params.organizationId,
-        body.access,
-      );
-      const organization = await organizationRepository.upsertProfile(
-        request.params.organizationId,
         body,
-        body.infrastructure.organizationProviders.some(
-          (provider) => provider.providerId !== "none",
-        ) ||
-          body.privacy.organizationProviders.some(
-            (provider) => provider.providerId !== "none",
-          )
-          ? await providerSource.listProviders()
-          : [],
       );
-      const organizationProviders =
-        await vendorRepository.listOrganizationProviders(
-          request.params.organizationId,
-        );
-      const businessActivities = await vendorRepository.listBusinessActivities(
-        request.params.organizationId,
-      );
-      const serviceProviderUsage =
-        await vendorRepository.listServiceProviderUsage(
-          request.params.organizationId,
-        );
 
-      return reply.send({
-        organization,
-        businessActivities,
-        organizationProviders,
-        serviceProviderUsage,
-      });
+      return reply.send(
+        await updateOrganizationProfileSection(
+          request.params.organizationId,
+          organizationRepository,
+          vendorRepository,
+          providerSource,
+          (current) => ({ ...current, access: body }),
+        ),
+      );
     },
   );
 
@@ -197,3 +303,77 @@ export async function registerOrganizationRoutes(
     },
   );
 }
+
+const organizationSnapshot = async (
+  organizationId: string,
+  organizationRepository: OrganizationRepository,
+  vendorRepository: ProviderRepository,
+) => ({
+  organization: await organizationRepository.getOrganization(organizationId),
+  businessActivities:
+    await vendorRepository.listBusinessActivities(organizationId),
+  organizationProviders:
+    await vendorRepository.listOrganizationProviders(organizationId),
+  serviceProviderUsage:
+    await vendorRepository.listServiceProviderUsage(organizationId),
+});
+
+const updateOrganizationProfileSection = async (
+  organizationId: string,
+  organizationRepository: OrganizationRepository,
+  vendorRepository: ProviderRepository,
+  providerSource: ProviderSource,
+  merge: (input: SecurityProfileInput) => SecurityProfileInput,
+) => {
+  const current = await organizationRepository.getOrganization(organizationId);
+  const input = merge(profileInputFromOrganization(current));
+  const providerCatalog =
+    input.infrastructure.organizationProviders.some(
+      (provider) => provider.providerId !== "none",
+    ) ||
+    input.privacy.organizationProviders.some(
+      (provider) => provider.providerId !== "none",
+    )
+      ? await providerSource.listProviders()
+      : [];
+
+  await organizationRepository.upsertProfile(
+    organizationId,
+    input,
+    providerCatalog,
+  );
+
+  return organizationSnapshot(
+    organizationId,
+    organizationRepository,
+    vendorRepository,
+  );
+};
+
+const profileInputFromOrganization = (
+  organization: OrganizationSecurityProfile | null,
+): SecurityProfileInput => ({
+  company: organization?.company ?? emptyCompanyProfile,
+  services:
+    organization && organization.services.length > 0
+      ? organization.services.map((service) => ({
+          id: service.id,
+          sortOrder: service.sortOrder,
+          serviceName: service.serviceName,
+          serviceDescription: service.serviceDescription,
+          serviceUrl: service.serviceUrl,
+          businessActivityIds: service.businessActivityIds,
+          userTypes: service.userTypes,
+          customerTypes: service.customerTypes,
+          availabilityRegions: service.availabilityRegions,
+          childrenDirected: service.childrenDirected,
+          minimumUserAge: service.minimumUserAge,
+          privacy: service.privacy,
+        }))
+      : [emptyServiceProfile],
+  privacy: organization?.privacy ?? emptyPrivacyProfile,
+  infrastructure: organization?.infrastructure ?? emptyInfrastructureProfile,
+  security: organization?.security ?? emptySecurityProfile,
+  dataHandling: organization?.dataHandling ?? emptyDataHandlingProfile,
+  access: organization?.access ?? emptyAccessProfile,
+});

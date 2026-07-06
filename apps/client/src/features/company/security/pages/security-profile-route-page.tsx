@@ -1,8 +1,8 @@
 import { usePostHog } from "@posthog/react"
 
 import {
-  useSaveSecurityProfile,
-  useSecurityProfile,
+  useSaveSecurityProfileSection,
+  useOrganizationSnapshot,
 } from "@/features/company/hooks/use-company"
 import { profileFromOrganization } from "@/features/company/lib/profile"
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
@@ -17,10 +17,10 @@ import { SecurityProfilePage } from "./security-profile-page"
 export const SecurityProfileRoutePage = () => {
   const posthog = usePostHog()
   const vocabulary = useVocabulary()
-  const saveProfile = useSaveSecurityProfile()
-  const securityProfile = useSecurityProfile()
+  const saveProfile = useSaveSecurityProfileSection()
+  const organizationSnapshot = useOrganizationSnapshot()
   const profile = profileFromOrganization(
-    securityProfile.data?.organization ?? null
+    organizationSnapshot.data?.organization ?? null
   )
 
   return (

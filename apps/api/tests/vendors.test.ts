@@ -19,6 +19,7 @@ import {
   createInMemoryRepositories,
   profileBody,
   providerLookupResult,
+  saveProfileDraft,
   vendorBody,
   vendorUseBody,
 } from "./helpers.js";
@@ -93,11 +94,7 @@ class InMemoryAirtableImportClient extends AirtableProviderImportClient {
 describe("vendors / providers API", () => {
   it("supports business activity data type mappings", async () => {
     const app = await createTestApp();
-    const profileResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    const profileResponse = await saveProfileDraft(app, "org-test", profileBody);
     const dataTypeIds = profileResponse
       .json()
       .organization.dataHandling.dataTypesStored.map(
@@ -178,11 +175,7 @@ describe("vendors / providers API", () => {
 
   it("rejects activity data types outside the organization", async () => {
     const app = await createTestApp();
-    await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    await saveProfileDraft(app, "org-test", profileBody);
 
     const response = await app.inject({
       method: "POST",
@@ -206,11 +199,7 @@ describe("vendors / providers API", () => {
 
   it("supports vendor CRUD", async () => {
     const app = await createTestApp();
-    const profileResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    const profileResponse = await saveProfileDraft(app, "org-test", profileBody);
     const serviceId = profileResponse.json().organization.services[0].id;
 
     const createResponse = await app.inject({
@@ -1059,11 +1048,7 @@ describe("vendors / providers API", () => {
 
   it("rejects vendor data processed outside organization data types", async () => {
     const app = await createTestApp();
-    const profileResponse = await app.inject({
-      method: "PUT",
-      url: "/organizations/org-test/security-profile",
-      payload: profileBody,
-    });
+    const profileResponse = await saveProfileDraft(app, "org-test", profileBody);
     const serviceId = profileResponse.json().organization.services[0].id;
 
     const response = await app.inject({

@@ -3,6 +3,12 @@ import {
   magicLinkRequestSchema,
   magicLinkResponseSchema,
   securityProgramSnapshotSchema,
+  accessProfileSchema,
+  companyProfileSchema,
+  dataHandlingProfileSchema,
+  infrastructureProfileSchema,
+  securityProfileSchema,
+  serviceProfileInputSchema,
   structuredErrorSchema,
   providerSchema,
   countrySchema,
@@ -49,6 +55,12 @@ import {
   type MagicLinkRequest,
   type MagicLinkResponse,
   type SecurityProgramSnapshot,
+  type AccessProfile,
+  type CompanyProfile,
+  type DataHandlingProfile,
+  type InfrastructureProfile,
+  type SecurityProfile,
+  type ServiceProfileInput,
   type Template,
   type TemplateCatalog,
   type TemplateInput,
@@ -75,8 +87,6 @@ import {
   type RecommendationsResponse,
 } from "@plyco/shared"
 import { z } from "zod"
-
-import { type ProfileDraft } from "@/features/company/types/company"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"
 
@@ -166,11 +176,11 @@ export const logout = async (): Promise<void> => {
   }
 }
 
-export const getOrganizationSecurityProfile = (
+export const getOrganizationSnapshot = (
   organizationId: string
 ): Promise<SecurityProgramSnapshot> =>
   apiRequest(
-    `/organizations/${organizationId}/security-profile`,
+    `/organizations/${organizationId}`,
     securityProgramSnapshotSchema
   )
 
@@ -388,16 +398,94 @@ export const getOrganizationDocuments = (
     z.array(documentSummarySchema)
   )
 
-export const saveSecurityProfile = (
+export const saveCompanyProfile = (
   organizationId: string,
-  profile: ProfileDraft
+  profile: CompanyProfile
 ): Promise<SecurityProgramSnapshot> =>
   apiRequest(
-    `/organizations/${organizationId}/security-profile`,
+    `/organizations/${organizationId}/profile`,
     securityProgramSnapshotSchema,
     {
       method: "PUT",
-      body: JSON.stringify(profile),
+      body: JSON.stringify(companyProfileSchema.parse(profile)),
+    }
+  )
+
+export const saveServicesProfile = (
+  organizationId: string,
+  services: ServiceProfileInput[]
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/services`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(z.array(serviceProfileInputSchema).parse(services)),
+    }
+  )
+
+export const saveDataProfile = (
+  organizationId: string,
+  profile: DataHandlingProfile
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/data`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(dataHandlingProfileSchema.parse(profile)),
+    }
+  )
+
+export const savePrivacyProfile = (
+  organizationId: string,
+  profile: PrivacyProfile
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/privacy`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(privacyProfileSchema.parse(profile)),
+    }
+  )
+
+export const saveInfrastructureProfile = (
+  organizationId: string,
+  profile: InfrastructureProfile
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/infrastructure`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(infrastructureProfileSchema.parse(profile)),
+    }
+  )
+
+export const saveSecurityProfileSection = (
+  organizationId: string,
+  profile: SecurityProfile
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/security`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(securityProfileSchema.parse(profile)),
+    }
+  )
+
+export const saveAccessProfile = (
+  organizationId: string,
+  profile: AccessProfile
+): Promise<SecurityProgramSnapshot> =>
+  apiRequest(
+    `/organizations/${organizationId}/access`,
+    securityProgramSnapshotSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(accessProfileSchema.parse(profile)),
     }
   )
 
