@@ -65,7 +65,7 @@ export const App = () => {
   useEffect(() => {
     if (user && !identifiedRef.current) {
       identifiedRef.current = true
-      posthog.identify(user.email, { name: user.name, email: user.email })
+      posthog.identify(user.email)
       posthog.capture(POSTHOG_EVENTS.USER_SIGNED_IN)
     }
     if (!user) {

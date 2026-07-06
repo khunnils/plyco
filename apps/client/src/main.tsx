@@ -15,7 +15,15 @@ const posthogProjectToken = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN
 if (posthogProjectToken) {
   posthog.init(posthogProjectToken, {
     api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+    autocapture: false,
+    capture_dead_clicks: false,
+    capture_exceptions: false,
+    capture_pageleave: false,
+    capture_pageview: false,
+    capture_performance: false,
     defaults: "2026-01-30",
+    disable_session_recording: true,
+    rageclick: false,
     ui_host: import.meta.env.VITE_UI_POSTHOG_HOST
   })
 }
