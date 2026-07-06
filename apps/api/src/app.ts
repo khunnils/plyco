@@ -84,6 +84,7 @@ import { InMemoryWaitlistRepository } from "./features/waitlist/in-memory-reposi
 import { PrismaWaitlistRepository } from "./features/waitlist/prisma-repository.js"
 import { type WaitlistRepository } from "./features/waitlist/repository.js"
 import { registerWaitlistRoutes } from "./features/waitlist/routes.js"
+import { registerOpenApi } from "./infrastructure/openapi.js"
 
 export type CreateAppOptions = {
   auth?: false | AuthConfig
@@ -111,6 +112,7 @@ export type CreateAppOptions = {
   waitlistRepository?: WaitlistRepository
   invitationEmailSender?: InvitationEmailSender
   magicLinkEmailSender?: MagicLinkEmailSender
+  apiDocs?: boolean
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -142,6 +144,7 @@ export async function createApp({
   waitlistRepository,
   invitationEmailSender,
   magicLinkEmailSender,
+  apiDocs = apiConfig.apiDocsEnabled(),
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -174,6 +177,10 @@ export async function createApp({
   })
 
   app.get("/health", async () => ({ status: "ok" }))
+
+  if (apiDocs) {
+    await registerOpenApi(app)
+  }
 
   await registerWaitlistRoutes(app, {
     waitlistRepository:

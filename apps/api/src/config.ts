@@ -56,6 +56,20 @@ export function readAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig
   }
 }
 
+export function readApiDocsEnabled(env: NodeJS.ProcessEnv = process.env) {
+  const explicit = env.API_DOCS_ENABLED?.toLowerCase()
+
+  if (explicit === "true" || explicit === "1") {
+    return true
+  }
+
+  if (explicit === "false" || explicit === "0") {
+    return false
+  }
+
+  return env.NODE_ENV !== "production"
+}
+
 export const apiConfig = {
   host: process.env.HOST ?? "0.0.0.0",
   port: readPort(process.env.PORT),
@@ -79,4 +93,5 @@ export const apiConfig = {
   resendApiKey: process.env.RESEND_API_KEY,
   invitationEmailFrom: process.env.INVITATION_EMAIL_FROM,
   auth: () => readAuthConfig(),
+  apiDocsEnabled: () => readApiDocsEnabled(),
 }

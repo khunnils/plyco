@@ -19,6 +19,43 @@ describe("security profile API", () => {
     expect(response.json()).toEqual({ status: "ok" });
   });
 
+  it("serves OpenAPI documentation when enabled", async () => {
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: false,
+      apiDocs: true,
+    });
+    const response = await app.inject({
+      method: "GET",
+      url: "/docs/json",
+    });
+
+    expect(response.statusCode).toBe(200);
+    const document = response.json();
+    expect(document.openapi).toBe("3.1.0");
+    expect(document.paths).toHaveProperty("/waitlist");
+    expect(document.paths).toHaveProperty("/organizations");
+    expect(document.paths).toHaveProperty(
+      "/organizations/{organizationId}/security-profile",
+    );
+    expect(document.paths).toHaveProperty("/providers/lookup");
+  });
+
+  it("does not register OpenAPI documentation by default in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("API_DOCS_ENABLED", "");
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: false,
+    });
+    const response = await app.inject({
+      method: "GET",
+      url: "/docs/json",
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
+
   it("rejects protected routes when authentication is enabled", async () => {
     const app = await createApp({
       ...createInMemoryRepositories(),

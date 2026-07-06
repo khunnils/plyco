@@ -226,6 +226,7 @@ export async function registerAuth(
       request.url === "/waitlist" ||
       request.url.startsWith("/auth/") ||
       request.url.startsWith("/codes/load") ||
+      request.url.startsWith("/docs") ||
       request.url.startsWith("/providers/lookup") ||
       request.url.startsWith("/providers/import")
     ) {
