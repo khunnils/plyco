@@ -692,6 +692,25 @@ export const deleteOrganizationResponseSchema = z.object({
   deleted: z.literal(true),
 });
 
+export const createOrganizationApiKeySchema = z.object({
+  name: z.string().trim().min(1, "API key name is required").max(100),
+});
+
+export const organizationApiKeySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1),
+  keyPrefix: z.string().min(1),
+  createdByUserId: z.string().min(1),
+  createdByName: z.string().trim().min(1),
+  createdAt: z.string().datetime(),
+});
+
+// The raw `key` is returned only once, at creation time; it is never persisted
+// in plaintext and cannot be retrieved again.
+export const createdOrganizationApiKeySchema = organizationApiKeySchema.extend({
+  key: z.string().min(1),
+});
+
 export const organizationLookupInputSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
   website: z.string().trim().url("Website must be a valid URL"),
@@ -875,6 +894,13 @@ export type AcceptOrganizationInvitation = z.infer<
 >;
 export type DeleteOrganizationResponse = z.infer<
   typeof deleteOrganizationResponseSchema
+>;
+export type CreateOrganizationApiKey = z.infer<
+  typeof createOrganizationApiKeySchema
+>;
+export type OrganizationApiKey = z.infer<typeof organizationApiKeySchema>;
+export type CreatedOrganizationApiKey = z.infer<
+  typeof createdOrganizationApiKeySchema
 >;
 export type OrganizationLookupInput = z.infer<
   typeof organizationLookupInputSchema

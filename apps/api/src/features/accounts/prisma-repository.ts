@@ -1,12 +1,14 @@
 import { Prisma, prisma, type PrismaClient } from "@plyco/db"
 import {
   authUserSchema,
+  organizationApiKeySchema,
   organizationInvitationSchema,
   organizationMemberSchema,
   organizationMembershipRoleSchema,
   organizationSummarySchema,
   type AuthUser,
   type CreateOrganization,
+  type OrganizationApiKey,
   type OrganizationInvitation,
   type OrganizationInvitationInput,
   type OrganizationMember,
@@ -551,6 +553,75 @@ export class PrismaAccountRepository implements AccountRepository {
     }
 
     return organizationMembershipRoleSchema.parse(membership.role)
+  }
+
+  async listOrganizationApiKeys(
+    organizationId: string,
+  ): Promise<OrganizationApiKey[]> {
+    const apiKeys = await this.client.organizationApiKey.findMany({
+      where: { organizationId },
+      include: { createdByUser: true },
+      orderBy: { createdAt: "asc" },
+    })
+
+    return apiKeys.map((apiKey) =>
+      organizationApiKeySchema.parse({
+        id: apiKey.id,
+        name: apiKey.name,
+        keyPrefix: apiKey.keyPrefix,
+        createdByUserId: apiKey.createdByUserId,
+        createdByName: apiKey.createdByUser.name,
+        createdAt: toIsoString(apiKey.createdAt),
+      }),
+    )
+  }
+
+  async createOrganizationApiKey(input: {
+    organizationId: string
+    createdByUserId: string
+    name: string
+    tokenHash: string
+    keyPrefix: string
+  }): Promise<OrganizationApiKey> {
+    const apiKey = await this.client.organizationApiKey.create({
+      data: {
+        organizationId: input.organizationId,
+        createdByUserId: input.createdByUserId,
+        name: input.name,
+        tokenHash: input.tokenHash,
+        keyPrefix: input.keyPrefix,
+      },
+      include: { createdByUser: true },
+    })
+
+    return organizationApiKeySchema.parse({
+      id: apiKey.id,
+      name: apiKey.name,
+      keyPrefix: apiKey.keyPrefix,
+      createdByUserId: apiKey.createdByUserId,
+      createdByName: apiKey.createdByUser.name,
+      createdAt: toIsoString(apiKey.createdAt),
+    })
+  }
+
+  async deleteOrganizationApiKey(
+    organizationId: string,
+    apiKeyId: string,
+  ): Promise<boolean> {
+    const result = await this.client.organizationApiKey.deleteMany({
+      where: { id: apiKeyId, organizationId },
+    })
+
+    return result.count > 0
+  }
+
+  async getApiKeyOrganizationId(tokenHash: string): Promise<string | null> {
+    const apiKey = await this.client.organizationApiKey.findUnique({
+      where: { tokenHash },
+      select: { organizationId: true },
+    })
+
+    return apiKey?.organizationId ?? null
   }
 }
 

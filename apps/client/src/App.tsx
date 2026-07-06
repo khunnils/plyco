@@ -42,6 +42,7 @@ import {
 } from "@/features/settings/pages/settings-route-page"
 import { TeamSettingsRoutePage } from "@/features/settings/pages/team-settings-route-page"
 import { VocabularySettingsRoutePage } from "@/features/settings/pages/vocabulary-settings-route-page"
+import { ApiKeysSettingsRoutePage } from "@/features/settings/pages/api-keys-settings-route-page"
 
 export const App = () => {
   const navigate = useNavigate()
@@ -182,6 +183,7 @@ export const App = () => {
           <Route index element={<SettingsIndexRoutePage />} />
           <Route path="team" element={<TeamSettingsRoutePage />} />
           <Route path="vocabulary" element={<VocabularySettingsRoutePage />} />
+          <Route path="api-keys" element={<ApiKeysSettingsRoutePage />} />
         </Route>
         <Route
           path="/vocabulary"

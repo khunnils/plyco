@@ -9,6 +9,10 @@ export async function requireOrganizationMembership(
   accountRepository: AccountRepository,
   organizationId: string,
 ) {
+  if (request.organizationApiKeyOrgId === organizationId) {
+    return
+  }
+
   const user = getSessionUser(request)
 
   if (!user) {

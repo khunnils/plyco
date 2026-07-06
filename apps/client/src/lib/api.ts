@@ -41,6 +41,9 @@ import {
   organizationSummarySchema,
   organizationMemberSchema,
   organizationMemberRoleUpdateSchema,
+  organizationApiKeySchema,
+  createdOrganizationApiKeySchema,
+  createOrganizationApiKeySchema,
   type Provider,
   type Country,
   type Vocabulary,
@@ -85,6 +88,9 @@ import {
   type AcceptOrganizationInvitation,
   type DeleteOrganizationResponse,
   type RecommendationsResponse,
+  type OrganizationApiKey,
+  type CreatedOrganizationApiKey,
+  type CreateOrganizationApiKey,
 } from "@plyco/shared"
 import { z } from "zod"
 
@@ -258,6 +264,35 @@ export const removeOrganizationMember = async (
   userId: string
 ): Promise<void> =>
   emptyApiRequest(`/organizations/${organizationId}/members/${userId}`, {
+    method: "DELETE",
+  })
+
+export const getOrganizationApiKeys = (
+  organizationId: string
+): Promise<OrganizationApiKey[]> =>
+  apiRequest(
+    `/organizations/${organizationId}/api-keys`,
+    z.array(organizationApiKeySchema)
+  )
+
+export const createOrganizationApiKey = (
+  organizationId: string,
+  input: CreateOrganizationApiKey
+): Promise<CreatedOrganizationApiKey> =>
+  apiRequest(
+    `/organizations/${organizationId}/api-keys`,
+    createdOrganizationApiKeySchema,
+    {
+      method: "POST",
+      body: JSON.stringify(createOrganizationApiKeySchema.parse(input)),
+    }
+  )
+
+export const revokeOrganizationApiKey = async (
+  organizationId: string,
+  keyId: string
+): Promise<void> =>
+  emptyApiRequest(`/organizations/${organizationId}/api-keys/${keyId}`, {
     method: "DELETE",
   })
 

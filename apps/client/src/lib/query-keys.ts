@@ -13,6 +13,9 @@ export const organizationMembersQueryKey = (organizationId: string) =>
 export const organizationInvitationsQueryKey = (organizationId: string) =>
   ["organization-invitations", organizationId] as const
 
+export const organizationApiKeysQueryKey = (organizationId: string) =>
+  ["organization-api-keys", organizationId] as const
+
 export const organizationSnapshotQueryKey = (organizationId: string) =>
   ["organization-snapshot", organizationId] as const
 

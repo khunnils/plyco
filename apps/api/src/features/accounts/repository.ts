@@ -1,6 +1,7 @@
 import {
   type AuthUser,
   type CreateOrganization,
+  type OrganizationApiKey,
   type OrganizationInvitation,
   type OrganizationInvitationInput,
   type OrganizationMember,
@@ -69,4 +70,19 @@ export interface AccountRepository {
     userId: string,
     organizationId: string,
   ): Promise<OrganizationMembershipRole | null>
+  listOrganizationApiKeys(
+    organizationId: string,
+  ): Promise<OrganizationApiKey[]>
+  createOrganizationApiKey(input: {
+    organizationId: string
+    createdByUserId: string
+    name: string
+    tokenHash: string
+    keyPrefix: string
+  }): Promise<OrganizationApiKey>
+  deleteOrganizationApiKey(
+    organizationId: string,
+    apiKeyId: string,
+  ): Promise<boolean>
+  getApiKeyOrganizationId(tokenHash: string): Promise<string | null>
 }

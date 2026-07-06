@@ -11,6 +11,11 @@ import { z } from "zod"
 
 import { type AuthConfig } from "../config.js"
 import { ApiError } from "./errors.js"
+import {
+  bearerTokenFromRequest,
+  hashOrganizationApiKey,
+  organizationIdFromUrl,
+} from "./organization-api-key.js"
 import { type AccountRepository } from "../features/accounts/repository.js"
 import { type MagicLinkEmailSender } from "../features/accounts/magic-link-email.js"
 
@@ -32,6 +37,11 @@ declare module "@fastify/secure-session" {
 declare module "fastify" {
   interface FastifyInstance {
     googleOAuth2: OAuth2Namespace
+  }
+  interface FastifyRequest {
+    // Set when a request is authenticated by an organization API key rather
+    // than a session; holds the organization the key grants access to.
+    organizationApiKeyOrgId: string | null
   }
 }
 
@@ -93,6 +103,8 @@ export async function registerAuth(
     secure: authConfig.cookieSecure,
     sameSite: authConfig.cookieSameSite,
   } as const
+
+  app.decorateRequest("organizationApiKeyOrgId", null)
 
   await app.register(secureSession, {
     secret: authConfig.sessionKey,
@@ -233,13 +245,37 @@ export async function registerAuth(
       return
     }
 
-    if (!(await getPersistedSessionUser(request, accountRepository))) {
-      throw new ApiError(
-        "AUTHENTICATION_REQUIRED",
-        "Authentication is required.",
-        401,
-      )
+    if (await getPersistedSessionUser(request, accountRepository)) {
+      return
     }
+
+    // Organization API keys grant read-only access to their own organization's
+    // routes. Only GET requests qualify; writes remain session-only. The binary
+    // PDF download stays session-only; API clients read the markdown document.
+    const isPdfDownload = /\/documents\/[^/]+\/pdf(?:\?|$)/.test(request.url)
+
+    if (request.method === "GET" && !isPdfDownload) {
+      const token = bearerTokenFromRequest(request)
+      const urlOrganizationId = organizationIdFromUrl(request.url)
+
+      if (token && urlOrganizationId) {
+        const keyOrganizationId =
+          await accountRepository.getApiKeyOrganizationId(
+            hashOrganizationApiKey(token),
+          )
+
+        if (keyOrganizationId && keyOrganizationId === urlOrganizationId) {
+          request.organizationApiKeyOrgId = keyOrganizationId
+          return
+        }
+      }
+    }
+
+    throw new ApiError(
+      "AUTHENTICATION_REQUIRED",
+      "Authentication is required.",
+      401,
+    )
   })
 }
 

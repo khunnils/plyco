@@ -1,10 +1,12 @@
 import {
   authUserSchema,
+  organizationApiKeySchema,
   organizationInvitationSchema,
   organizationMemberSchema,
   organizationSummarySchema,
   type AuthUser,
   type CreateOrganization,
+  type OrganizationApiKey,
   type OrganizationInvitation,
   type OrganizationInvitationInput,
   type OrganizationMember,
@@ -40,6 +42,10 @@ export class InMemoryAccountRepository implements AccountRepository {
       canceledAt: string | null
       acceptedByUserId: string | null
     }
+  >()
+  private apiKeys = new Map<
+    string,
+    OrganizationApiKey & { organizationId: string; tokenHash: string }
   >()
 
   async getUser(userId: string): Promise<AuthUser | null> {
@@ -388,6 +394,11 @@ export class InMemoryAccountRepository implements AccountRepository {
           this.invitations.delete(id)
         }
       }
+      for (const [id, apiKey] of this.apiKeys) {
+        if (apiKey.organizationId === organizationId) {
+          this.apiKeys.delete(id)
+        }
+      }
     }
 
     return deleted
@@ -417,6 +428,67 @@ export class InMemoryAccountRepository implements AccountRepository {
     organizationId: string,
   ): Promise<OrganizationMembershipRole | null> {
     return this.memberships.get(this.membershipKey(userId, organizationId)) ?? null
+  }
+
+  async listOrganizationApiKeys(
+    organizationId: string,
+  ): Promise<OrganizationApiKey[]> {
+    return Array.from(this.apiKeys.values())
+      .filter((apiKey) => apiKey.organizationId === organizationId)
+      .map(({ tokenHash: _tokenHash, ...apiKey }) =>
+        organizationApiKeySchema.parse(apiKey),
+      )
+  }
+
+  async createOrganizationApiKey(input: {
+    organizationId: string
+    createdByUserId: string
+    name: string
+    tokenHash: string
+    keyPrefix: string
+  }): Promise<OrganizationApiKey> {
+    const creator = this.users.get(input.createdByUserId)
+    if (!creator) {
+      throw new ApiError("USER_NOT_FOUND", "Creating user was not found.", 404)
+    }
+
+    const apiKey = organizationApiKeySchema.parse({
+      id: newId("apikey"),
+      name: input.name,
+      keyPrefix: input.keyPrefix,
+      createdByUserId: input.createdByUserId,
+      createdByName: creator.name,
+      createdAt: now(),
+    })
+
+    this.apiKeys.set(apiKey.id, {
+      ...apiKey,
+      organizationId: input.organizationId,
+      tokenHash: input.tokenHash,
+    })
+
+    return apiKey
+  }
+
+  async deleteOrganizationApiKey(
+    organizationId: string,
+    apiKeyId: string,
+  ): Promise<boolean> {
+    const apiKey = this.apiKeys.get(apiKeyId)
+
+    if (!apiKey || apiKey.organizationId !== organizationId) {
+      return false
+    }
+
+    return this.apiKeys.delete(apiKeyId)
+  }
+
+  async getApiKeyOrganizationId(tokenHash: string): Promise<string | null> {
+    const apiKey = Array.from(this.apiKeys.values()).find(
+      (current) => current.tokenHash === tokenHash,
+    )
+
+    return apiKey?.organizationId ?? null
   }
 
   addMembership(

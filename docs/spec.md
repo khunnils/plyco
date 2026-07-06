@@ -84,13 +84,21 @@ deactivating, and removing codes without leaving the current page. System code
 sets remain read-only.
 
 The workspace Settings area is opened from the settings button at the bottom of
-the sidebar. Settings contains Team and Vocabulary tabs. Team shows current
-members to all members. Owners can invite people by email as either member or
-owner, cancel pending invitations, change member roles, remove members, and
-delete the organization after confirming its name. Members can edit workspace
-data but cannot manage the team or delete the organization. Invitation links
-require Google or magic-link sign-in with the invited email before the user is
-added to the organization.
+the sidebar. Settings contains Team, Vocabulary, and API Keys tabs. Team shows
+current members to all members. Owners can invite people by email as either
+member or owner, cancel pending invitations, change member roles, remove
+members, and delete the organization after confirming its name. Members can edit
+workspace data but cannot manage the team or delete the organization. Invitation
+links require Google or magic-link sign-in with the invited email before the
+user is added to the organization.
+
+The API Keys tab is owner-only; non-owners see a notice instead of the
+management UI. Owners create a named key, and the full secret is shown exactly
+once at creation together with a ready-to-paste MCP configuration snippet
+prefilled with the API URL, key, and organization ID; afterwards only the name,
+a short prefix, the creator, and the creation date are shown. Keys grant
+read-only access to that organization's data and can be revoked at any time.
+They are intended for AI agents connecting through the Plyco MCP server.
 
 ## Product and Data Graph
 

@@ -48,6 +48,7 @@ model Organization {
   documents             Document[]
   memberships           OrganizationMembership[]
   invitations           OrganizationInvitation[]
+  apiKeys               OrganizationApiKey[]
   codeSets              OrganizationCodeSet[]
   createdAt             DateTime                 @default(now()) @map("created_at")
   updatedAt             DateTime                 @updatedAt @map("updated_at")
@@ -146,6 +147,7 @@ model User {
   memberships         OrganizationMembership[]
   sentInvitations     OrganizationInvitation[] @relation("OrganizationInvitationInviter")
   acceptedInvitations OrganizationInvitation[] @relation("OrganizationInvitationAcceptedUser")
+  createdApiKeys      OrganizationApiKey[]
   createdAt           DateTime                 @default(now()) @map("created_at")
   updatedAt           DateTime                 @updatedAt @map("updated_at")
 
@@ -201,6 +203,22 @@ model OrganizationInvitation {
   @@index([organizationId], map: "idx_organization_invitations_organization_id")
   @@index([email], map: "idx_organization_invitations_email")
   @@map("organization_invitations")
+}
+
+model OrganizationApiKey {
+  id              String       @id(map: "organization_api_keys_pkey") @default(cuid())
+  organizationId  String       @map("organization_id")
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_api_keys_organization_id_fkey")
+  name            String
+  tokenHash       String       @unique(map: "organization_api_keys_token_hash_key") @map("token_hash")
+  keyPrefix       String       @map("key_prefix")
+  createdByUserId String       @map("created_by_user_id")
+  createdByUser   User         @relation(fields: [createdByUserId], references: [id], onDelete: Cascade, map: "organization_api_keys_created_by_user_id_fkey")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@index([organizationId], map: "idx_organization_api_keys_organization_id")
+  @@map("organization_api_keys")
 }
 
 model ServiceProfile {

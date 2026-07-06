@@ -9,6 +9,8 @@ import {
   companyProfileSchema,
   countrySchema,
   createDocumentSchema,
+  createdOrganizationApiKeySchema,
+  createOrganizationApiKeySchema,
   createOrganizationSchema,
   createTemplateFromSystemSchema,
   dataHandlingProfileSchema,
@@ -18,6 +20,7 @@ import {
   infrastructureProfileSchema,
   magicLinkRequestSchema,
   magicLinkResponseSchema,
+  organizationApiKeySchema,
   organizationInvitationInputSchema,
   organizationInvitationSchema,
   organizationLookupResultSchema,
@@ -72,6 +75,9 @@ const userIdParamsSchema = organizationIdParamsSchema.extend({
 })
 const invitationIdParamsSchema = organizationIdParamsSchema.extend({
   invitationId: z.string().min(1),
+})
+const apiKeyIdParamsSchema = organizationIdParamsSchema.extend({
+  keyId: z.string().min(1),
 })
 const tokenParamsSchema = z.object({ token: z.string().min(20) })
 const magicLinkCallbackQuerySchema = z.object({
@@ -211,6 +217,11 @@ const publicRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
 const apiKeyRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
   route({ ...input, security: [{ bearerAuth: [] }] })
 
+// Organization-scoped GET routes accept either a session cookie or a
+// per-organization bearer API key.
+const orgReadRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
+  route({ ...input, security: [{ cookieAuth: [] }, { bearerAuth: [] }] })
+
 const paths: Record<string, PathItem> = {
   "/health": {
     get: publicRoute({
@@ -285,7 +296,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}": {
-    get: route({
+    get: orgReadRoute({
       summary: "Load the organization profile snapshot.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -301,7 +312,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/members": {
-    get: route({
+    get: orgReadRoute({
       summary: "List organization members.",
       tag: "Team",
       params: organizationIdParamsSchema,
@@ -359,6 +370,32 @@ const paths: Record<string, PathItem> = {
       successSchema: acceptOrganizationInvitationSchema,
     }),
   },
+  "/organizations/{organizationId}/api-keys": {
+    get: route({
+      summary: "List organization API keys (owner only).",
+      tag: "API Keys",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: z.array(organizationApiKeySchema),
+    }),
+    post: route({
+      summary:
+        "Create an organization API key (owner only). The raw key is returned once.",
+      tag: "API Keys",
+      params: organizationIdParamsSchema,
+      body: createOrganizationApiKeySchema,
+      success: 201,
+      successSchema: createdOrganizationApiKeySchema,
+    }),
+  },
+  "/organizations/{organizationId}/api-keys/{keyId}": {
+    delete: route({
+      summary: "Revoke an organization API key (owner only).",
+      tag: "API Keys",
+      params: apiKeyIdParamsSchema,
+      success: 204,
+    }),
+  },
   "/organization-lookup/website": {
     post: route({
       summary: "Generate editable organization defaults from a website.",
@@ -378,7 +415,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/profile": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization company profile section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -395,7 +432,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/services": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization services section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -412,7 +449,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/data": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization data section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -429,7 +466,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/privacy": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization privacy section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -446,7 +483,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/infrastructure": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization infrastructure section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -463,7 +500,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/security": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization security section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -480,7 +517,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/access": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get the organization access section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -541,7 +578,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/business-activities": {
-    get: route({
+    get: orgReadRoute({
       summary: "List business activities.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -583,7 +620,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/organization-providers": {
-    get: route({
+    get: orgReadRoute({
       summary: "List organization providers.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -626,7 +663,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/service-provider-usage": {
-    get: route({
+    get: orgReadRoute({
       summary: "List service provider usage records.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -667,7 +704,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/vocabulary": {
-    get: route({
+    get: orgReadRoute({
       summary: "List organization vocabulary.",
       tag: "Vocabulary",
       params: organizationIdParamsSchema,
@@ -702,7 +739,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/recommendations": {
-    get: route({
+    get: orgReadRoute({
       summary: "Evaluate advisor recommendations.",
       tag: "Recommendations",
       params: organizationIdParamsSchema,
@@ -711,7 +748,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/templates": {
-    get: route({
+    get: orgReadRoute({
       summary: "List system and organization document templates.",
       tag: "Documents",
       params: organizationIdParamsSchema,
@@ -728,7 +765,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/templates/schema": {
-    get: route({
+    get: orgReadRoute({
       summary: "Return the template variable catalog.",
       tag: "Documents",
       params: organizationIdParamsSchema,
@@ -763,7 +800,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/documents": {
-    get: route({
+    get: orgReadRoute({
       summary: "List generated document summaries.",
       tag: "Documents",
       params: organizationIdParamsSchema,
@@ -780,7 +817,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/documents/{id}": {
-    get: route({
+    get: orgReadRoute({
       summary: "Get a generated document.",
       tag: "Documents",
       params: idParamsSchema,
@@ -828,6 +865,7 @@ export const openApiDocument = {
     { name: "Auth" },
     { name: "Organizations" },
     { name: "Team" },
+    { name: "API Keys" },
     { name: "Organization Lookup" },
     { name: "Providers" },
     { name: "Vendors" },
@@ -846,6 +884,8 @@ export const openApiDocument = {
       bearerAuth: {
         type: "http",
         scheme: "bearer",
+        description:
+          "Bearer token. Operations routes use the global tool API key; organization-scoped GET routes accept a per-organization API key that grants read-only access to that organization.",
       },
     },
   },

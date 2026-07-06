@@ -1,5 +1,7 @@
 import {
   acceptOrganizationInvitationSchema,
+  createdOrganizationApiKeySchema,
+  createOrganizationApiKeySchema,
   createOrganizationSchema,
   deleteOrganizationResponseSchema,
   organizationInvitationInputSchema,
@@ -13,6 +15,7 @@ import { z } from "zod"
 
 import { getPersistedSessionUser } from "../../infrastructure/auth.js"
 import { ApiError } from "../../infrastructure/errors.js"
+import { hashOrganizationApiKey } from "../../infrastructure/organization-api-key.js"
 import { requireOrganizationMembership } from "../../infrastructure/organization-context.js"
 import { type AccountRepository } from "./repository.js"
 import { type VocabularyRepository } from "../vocabulary/repository.js"
@@ -154,6 +157,74 @@ export async function registerAccountRoutes(
     },
   )
 
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/api-keys",
+    async (request) => {
+      await requireOrganizationOwner(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      )
+
+      return accountRepository.listOrganizationApiKeys(
+        request.params.organizationId,
+      )
+    },
+  )
+
+  app.post<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/api-keys",
+    async (request, reply) => {
+      const user = await requireOrganizationOwner(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      )
+      const body = createOrganizationApiKeySchema.parse(request.body)
+      const key = generateApiKey()
+      const apiKey = await accountRepository.createOrganizationApiKey({
+        organizationId: request.params.organizationId,
+        createdByUserId: user.id,
+        name: body.name,
+        tokenHash: hashOrganizationApiKey(key),
+        keyPrefix: apiKeyPrefix(key),
+      })
+
+      // The raw key is only ever returned here; only its hash is persisted.
+      return reply
+        .status(201)
+        .send(createdOrganizationApiKeySchema.parse({ ...apiKey, key }))
+    },
+  )
+
+  app.delete<{
+    Params: { organizationId: string; keyId: string }
+  }>(
+    "/organizations/:organizationId/api-keys/:keyId",
+    async (request, reply) => {
+      await requireOrganizationOwner(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      )
+
+      const deleted = await accountRepository.deleteOrganizationApiKey(
+        request.params.organizationId,
+        request.params.keyId,
+      )
+
+      if (!deleted) {
+        throw new ApiError(
+          "ORGANIZATION_API_KEY_NOT_FOUND",
+          "API key not found.",
+          404,
+        )
+      }
+
+      return reply.status(204).send()
+    },
+  )
+
   app.patch<{
     Params: { organizationId: string; userId: string }
   }>(
@@ -261,6 +332,14 @@ export async function registerAccountRoutes(
 
 const hashInvitationToken = (token: string) =>
   createHash("sha256").update(token).digest("hex")
+
+const API_KEY_PREFIX = "plyco_org_"
+
+const generateApiKey = () =>
+  `${API_KEY_PREFIX}${randomBytes(32).toString("base64url")}`
+
+// Displayed alongside a key so owners can recognize it without the secret.
+const apiKeyPrefix = (key: string) => key.slice(0, API_KEY_PREFIX.length + 4)
 
 const requireOrganizationOwner = async (
   request: FastifyRequest,

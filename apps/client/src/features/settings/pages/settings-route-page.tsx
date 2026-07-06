@@ -18,6 +18,7 @@ export const SettingsRoutePage = () => (
       >
         <SettingsTab to="/settings/team">General</SettingsTab>
         <SettingsTab to="/settings/vocabulary">Vocabulary</SettingsTab>
+        <SettingsTab to="/settings/api-keys">API Keys</SettingsTab>
       </nav>
       <Outlet />
     </div>
