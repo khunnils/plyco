@@ -31,10 +31,19 @@ describe("plyco MCP server", () => {
     const { tools } = await client.listTools()
 
     expect(tools.map((tool) => tool.name).sort()).toEqual([
+      "get_access_profile",
+      "get_activities",
+      "get_company_profile",
+      "get_data_types",
       "get_document",
+      "get_infrastructure_profile",
       "get_organization_overview",
-      "get_profile_section",
+      "get_organization_providers",
+      "get_privacy_profile",
       "get_recommendations",
+      "get_security_profile",
+      "get_service_provider_usage",
+      "get_services",
       "get_vocabulary",
       "list_documents",
       "list_templates",
@@ -72,10 +81,20 @@ describe("plyco MCP server", () => {
     expect(JSON.parse(content[0]!.text)).toEqual(overview)
   })
 
-  it("maps the company profile section to the profile route", async () => {
+  it.each([
+    ["get_company_profile", "/profile"],
+    ["get_services", "/services"],
+    ["get_privacy_profile", "/privacy"],
+    ["get_infrastructure_profile", "/infrastructure"],
+    ["get_security_profile", "/security"],
+    ["get_access_profile", "/access"],
+    ["get_activities", "/business-activities"],
+    ["get_organization_providers", "/organization-providers"],
+    ["get_service_provider_usage", "/service-provider-usage"],
+  ])("maps %s to its organization route", async (toolName, suffix) => {
     const fetchFn = vi.fn(
       async () =>
-        new Response(JSON.stringify({ companyName: "Acme" }), {
+        new Response(JSON.stringify({ ok: true }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         }),
@@ -83,14 +102,40 @@ describe("plyco MCP server", () => {
     const client = await connectClient(fetchFn)
 
     await client.callTool({
-      name: "get_profile_section",
-      arguments: { section: "company" },
+      name: toolName,
+      arguments: {},
     })
 
     const requestUrl = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
       .calls[0]![0] as URL
     expect(requestUrl.toString()).toBe(
-      "https://api.plyco.example/organizations/org-123/profile",
+      `https://api.plyco.example/organizations/org-123${suffix}`,
     )
+  })
+
+  it("returns only stored data types from the data profile", async () => {
+    const dataTypes = [{ id: "data-1", name: "Email address" }]
+    const fetchFn = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ dataTypesStored: dataTypes }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    ) as unknown as typeof fetch
+    const client = await connectClient(fetchFn)
+
+    const result = await client.callTool({
+      name: "get_data_types",
+      arguments: {},
+    })
+
+    const requestUrl = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]![0] as URL
+    expect(requestUrl.toString()).toBe(
+      "https://api.plyco.example/organizations/org-123/data",
+    )
+
+    const content = result.content as Array<{ type: string; text: string }>
+    expect(JSON.parse(content[0]!.text)).toEqual(dataTypes)
   })
 })

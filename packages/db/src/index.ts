@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
   accessProfileSchema,
   businessActivitySchema,
@@ -19,8 +19,11 @@ import {
   type OrganizationProvider,
   templateSchema,
 } from "@plyco/shared";
+import { Prisma, PrismaClient } from "./generated/prisma/client.js";
 
-export const prisma = new PrismaClient();
+const adapter = new PrismaPg(process.env.DATABASE_URL ?? "");
+
+export const prisma = new PrismaClient({ adapter });
 
 function toIsoString(value: Date) {
   return value.toISOString();

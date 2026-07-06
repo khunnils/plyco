@@ -32,7 +32,16 @@ organization and mapped to organization GET routes:
 | Tool | Route |
 | --- | --- |
 | `get_organization_overview` | `GET /organizations/:id` |
-| `get_profile_section` (`section`) | `GET /organizations/:id/{profile\|services\|data\|privacy\|infrastructure\|security\|access}` |
+| `get_company_profile` | `GET /organizations/:id/profile` |
+| `get_services` | `GET /organizations/:id/services` |
+| `get_data_types` | `GET /organizations/:id/data`, returning `dataTypesStored` |
+| `get_activities` | `GET /organizations/:id/business-activities` |
+| `get_privacy_profile` | `GET /organizations/:id/privacy` |
+| `get_infrastructure_profile` | `GET /organizations/:id/infrastructure` |
+| `get_security_profile` | `GET /organizations/:id/security` |
+| `get_access_profile` | `GET /organizations/:id/access` |
+| `get_organization_providers` | `GET /organizations/:id/organization-providers` |
+| `get_service_provider_usage` | `GET /organizations/:id/service-provider-usage` |
 | `get_recommendations` | `GET /organizations/:id/recommendations` |
 | `get_vocabulary` | `GET /organizations/:id/vocabulary` |
 | `list_templates` | `GET /organizations/:id/templates` |

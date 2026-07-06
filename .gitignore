@@ -10,4 +10,5 @@ dist
 
 apps/*/dist
 packages/*/dist
+packages/db/src/generated
 gcp-key.json

@@ -61,8 +61,16 @@ To run directly from a checkout instead of a published package:
 All tools are read-only and scoped to the configured organization:
 
 - `get_organization_overview` — organization profile snapshot.
-- `get_profile_section` — a single profile section (`company`, `services`,
-  `data`, `privacy`, `infrastructure`, `security`, `access`).
+- `get_company_profile` — company profile.
+- `get_services` — services.
+- `get_data_types` — stored data types.
+- `get_activities` — business activities.
+- `get_privacy_profile` — privacy profile.
+- `get_infrastructure_profile` — infrastructure profile.
+- `get_security_profile` — security profile.
+- `get_access_profile` — access profile.
+- `get_organization_providers` — provider inventory.
+- `get_service_provider_usage` — service provider usage by service.
 - `get_recommendations` — advisor recommendations.
 - `get_vocabulary` — controlled vocabulary code sets.
 - `list_templates` — document templates.

@@ -4,19 +4,6 @@ import { z } from "zod"
 import { type ApiClient } from "./api.js"
 import { type McpConfig } from "./config.js"
 
-// Maps a friendly profile section name to its organization-scoped GET route.
-const PROFILE_SECTION_ROUTES = {
-  company: "profile",
-  services: "services",
-  data: "data",
-  privacy: "privacy",
-  infrastructure: "infrastructure",
-  security: "security",
-  access: "access",
-} as const
-
-type ProfileSection = keyof typeof PROFILE_SECTION_ROUTES
-
 const jsonResult = (data: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
 })
@@ -33,6 +20,22 @@ export function createMcpServer(
   const orgPath = (suffix = "") =>
     `/organizations/${encodeURIComponent(config.organizationId)}${suffix}`
 
+  const registerOrganizationGetTool = (
+    name: string,
+    title: string,
+    description: string,
+    suffix: string,
+  ) =>
+    server.registerTool(
+      name,
+      {
+        title,
+        description,
+        inputSchema: {},
+      },
+      async () => jsonResult(await api.getJson(orgPath(suffix))),
+    )
+
   server.registerTool(
     "get_organization_overview",
     {
@@ -44,27 +47,83 @@ export function createMcpServer(
     async () => jsonResult(await api.getJson(orgPath())),
   )
 
+  registerOrganizationGetTool(
+    "get_company_profile",
+    "Get company profile",
+    "Returns the organization's company profile.",
+    "/profile",
+  )
+
+  registerOrganizationGetTool(
+    "get_services",
+    "Get services",
+    "Returns the organization's services.",
+    "/services",
+  )
+
   server.registerTool(
-    "get_profile_section",
+    "get_data_types",
     {
-      title: "Get a profile section",
-      description:
-        "Returns a single compliance profile section for the organization.",
-      inputSchema: {
-        section: z
-          .enum(
-            Object.keys(PROFILE_SECTION_ROUTES) as [
-              ProfileSection,
-              ...ProfileSection[],
-            ],
-          )
-          .describe("Which profile section to fetch."),
-      },
+      title: "Get data types",
+      description: "Returns the organization's stored data types.",
+      inputSchema: {},
     },
-    async ({ section }) =>
-      jsonResult(
-        await api.getJson(orgPath(`/${PROFILE_SECTION_ROUTES[section]}`)),
-      ),
+    async () => {
+      const dataHandling = (await api.getJson(orgPath("/data"))) as {
+        dataTypesStored?: unknown
+      }
+
+      return jsonResult(dataHandling.dataTypesStored ?? [])
+    },
+  )
+
+  registerOrganizationGetTool(
+    "get_privacy_profile",
+    "Get privacy profile",
+    "Returns the organization's privacy profile.",
+    "/privacy",
+  )
+
+  registerOrganizationGetTool(
+    "get_infrastructure_profile",
+    "Get infrastructure profile",
+    "Returns the organization's infrastructure profile.",
+    "/infrastructure",
+  )
+
+  registerOrganizationGetTool(
+    "get_security_profile",
+    "Get security profile",
+    "Returns the organization's security profile.",
+    "/security",
+  )
+
+  registerOrganizationGetTool(
+    "get_access_profile",
+    "Get access profile",
+    "Returns the organization's access profile.",
+    "/access",
+  )
+
+  registerOrganizationGetTool(
+    "get_activities",
+    "Get activities",
+    "Returns the organization's business activities.",
+    "/business-activities",
+  )
+
+  registerOrganizationGetTool(
+    "get_organization_providers",
+    "Get organization providers",
+    "Returns the organization's provider inventory.",
+    "/organization-providers",
+  )
+
+  registerOrganizationGetTool(
+    "get_service_provider_usage",
+    "Get service provider usage",
+    "Returns the organization's service provider usage.",
+    "/service-provider-usage",
   )
 
   server.registerTool(

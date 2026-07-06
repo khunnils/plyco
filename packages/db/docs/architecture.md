@@ -1,6 +1,6 @@
 # Database Package Architecture
 
-`@plyco/db` owns Prisma and database mapping.
+`@plyco/db` owns Prisma and database mapping. Prisma CLI settings live in `prisma.config.ts`, and the generated Prisma 7 client is emitted to `src/generated/prisma` by the package build/typecheck scripts.
 
 Public beta interest is stored in `waitlist_entries`, independent of users and organizations. Normalized email is unique, and repeat submissions retain the latest optional blocker for that address.
 

@@ -27,27 +27,26 @@ import { ApiError } from "../../infrastructure/errors.js";
 const jsonValue = (value: string[] | null) =>
   value === null ? Prisma.DbNull : value;
 
-export const ORGANIZATION_INCLUDE =
-  Prisma.validator<Prisma.OrganizationInclude>()({
-    accessProfile: true,
-    dataTypes: {
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+export const ORGANIZATION_INCLUDE = {
+  accessProfile: true,
+  dataTypes: {
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+  },
+  infrastructureProfile: true,
+  securityProfile: true,
+  privacyProfile: true,
+  services: {
+    include: { businessActivities: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
+  },
+  organizationProviders: {
+    select: {
+      name: true,
+      providerId: true,
+      systemTypes: true,
     },
-    infrastructureProfile: true,
-    securityProfile: true,
-    privacyProfile: true,
-    services: {
-      include: { businessActivities: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }, { id: "asc" }],
-    },
-    organizationProviders: {
-      select: {
-        name: true,
-        providerId: true,
-        systemTypes: true,
-      },
-    },
-  });
+  },
+} as const satisfies Prisma.OrganizationInclude;
 
 export class PrismaOrganizationRepository implements OrganizationRepository {
   constructor(private readonly client: PrismaClient = prisma) {}
