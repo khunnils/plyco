@@ -398,6 +398,62 @@ export const getOrganizationDocuments = (
     z.array(documentSummarySchema)
   )
 
+export const getCompanyProfile = (
+  organizationId: string
+): Promise<CompanyProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/profile`,
+    companyProfileSchema
+  )
+
+export const getServicesProfile = (
+  organizationId: string
+): Promise<ServiceProfileInput[]> =>
+  apiRequest(
+    `/organizations/${organizationId}/services`,
+    z.array(serviceProfileInputSchema)
+  )
+
+export const getDataProfile = (
+  organizationId: string
+): Promise<DataHandlingProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/data`,
+    dataHandlingProfileSchema
+  )
+
+export const getPrivacyProfile = (
+  organizationId: string
+): Promise<PrivacyProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/privacy`,
+    privacyProfileSchema
+  )
+
+export const getInfrastructureProfile = (
+  organizationId: string
+): Promise<InfrastructureProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/infrastructure`,
+    infrastructureProfileSchema
+  )
+
+export const getSecurityProfileSection = (
+  organizationId: string
+): Promise<SecurityProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/security`,
+    securityProfileSchema
+  )
+
+export const getAccessProfile = (
+  organizationId: string
+): Promise<AccessProfile> =>
+  apiRequest(
+    `/organizations/${organizationId}/access`,
+    accessProfileSchema
+  )
+
 export const saveCompanyProfile = (
   organizationId: string,
   profile: CompanyProfile

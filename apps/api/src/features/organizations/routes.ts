@@ -75,6 +75,24 @@ export async function registerOrganizationRoutes(
     },
   );
 
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/profile",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.company;
+    },
+  );
+
   app.put<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/profile",
     async (request, reply) => {
@@ -99,6 +117,24 @@ export async function registerOrganizationRoutes(
           (current) => ({ ...current, company: body }),
         ),
       );
+    },
+  );
+
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/services",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.services;
     },
   );
 
@@ -134,6 +170,24 @@ export async function registerOrganizationRoutes(
     },
   );
 
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/data",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.dataHandling;
+    },
+  );
+
   app.put<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/data",
     async (request, reply) => {
@@ -158,6 +212,24 @@ export async function registerOrganizationRoutes(
           (current) => ({ ...current, dataHandling: body }),
         ),
       );
+    },
+  );
+
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/privacy",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.privacy;
     },
   );
 
@@ -188,6 +260,24 @@ export async function registerOrganizationRoutes(
     },
   );
 
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/infrastructure",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.infrastructure;
+    },
+  );
+
   app.put<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/infrastructure",
     async (request, reply) => {
@@ -215,6 +305,24 @@ export async function registerOrganizationRoutes(
     },
   );
 
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/security",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.security;
+    },
+  );
+
   app.put<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId/security",
     async (request, reply) => {
@@ -239,6 +347,24 @@ export async function registerOrganizationRoutes(
           (current) => ({ ...current, security: body }),
         ),
       );
+    },
+  );
+
+  app.get<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/access",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+
+      const organization = await organizationRepository.getOrganization(
+        request.params.organizationId,
+      );
+      const input = profileInputFromOrganization(organization);
+
+      return input.access;
     },
   );
 

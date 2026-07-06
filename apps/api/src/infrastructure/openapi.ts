@@ -287,7 +287,7 @@ const paths: Record<string, PathItem> = {
   "/organizations/{organizationId}": {
     get: route({
       summary: "Load the organization profile snapshot.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       success: 200,
       successSchema: securityProgramSnapshotSchema,
@@ -378,9 +378,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/profile": {
+    get: route({
+      summary: "Get the organization company profile section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: companyProfileSchema,
+    }),
     put: route({
       summary: "Save the organization company profile section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: companyProfileSchema,
       success: 200,
@@ -388,9 +395,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/services": {
+    get: route({
+      summary: "Get the organization services section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: servicesProfileBodySchema,
+    }),
     put: route({
       summary: "Save the organization services section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: servicesProfileBodySchema,
       success: 200,
@@ -398,9 +412,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/data": {
+    get: route({
+      summary: "Get the organization data section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: dataHandlingProfileSchema,
+    }),
     put: route({
       summary: "Save the organization data section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: dataHandlingProfileSchema,
       success: 200,
@@ -408,9 +429,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/privacy": {
+    get: route({
+      summary: "Get the organization privacy section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: privacyProfileSchema,
+    }),
     put: route({
       summary: "Save the organization privacy section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: privacyProfileSchema,
       success: 200,
@@ -418,9 +446,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/infrastructure": {
+    get: route({
+      summary: "Get the organization infrastructure section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: infrastructureProfileSchema,
+    }),
     put: route({
       summary: "Save the organization infrastructure section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: infrastructureProfileSchema,
       success: 200,
@@ -428,9 +463,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/security": {
+    get: route({
+      summary: "Get the organization security section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: securityProfileSchema,
+    }),
     put: route({
       summary: "Save the organization security section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: securityProfileSchema,
       success: 200,
@@ -438,9 +480,16 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/access": {
+    get: route({
+      summary: "Get the organization access section.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema,
+      success: 200,
+      successSchema: accessProfileSchema,
+    }),
     put: route({
       summary: "Save the organization access section.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: accessProfileSchema,
       success: 200,
@@ -450,7 +499,7 @@ const paths: Record<string, PathItem> = {
   "/organizations/{organizationId}/services/order": {
     put: route({
       summary: "Reorder organization services.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: reorderEntitiesSchema,
       success: 204,
@@ -459,7 +508,7 @@ const paths: Record<string, PathItem> = {
   "/organizations/{organizationId}/data-types/order": {
     put: route({
       summary: "Reorder organization data types.",
-      tag: "Security Profile",
+      tag: "Organizations",
       params: organizationIdParamsSchema,
       body: reorderEntitiesSchema,
       success: 204,
@@ -780,7 +829,6 @@ export const openApiDocument = {
     { name: "Organizations" },
     { name: "Team" },
     { name: "Organization Lookup" },
-    { name: "Security Profile" },
     { name: "Providers" },
     { name: "Vendors" },
     { name: "Vocabulary" },
