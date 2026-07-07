@@ -39,6 +39,7 @@ import {
   templateVariableCatalogSchema,
   countryCodeSchema,
   waitlistInputSchema,
+  waitlistRemoveInputSchema,
 } from "./index.js";
 
 describe("waitlist schemas", () => {
@@ -59,6 +60,12 @@ describe("waitlist schemas", () => {
     expect(
       waitlistInputSchema.safeParse({ email: "not-an-email" }).success,
     ).toBe(false);
+  });
+
+  it("normalizes waitlist removal emails", () => {
+    expect(
+      waitlistRemoveInputSchema.parse({ email: " Founder@Example.COM " }),
+    ).toEqual({ email: "founder@example.com" });
   });
 });
 

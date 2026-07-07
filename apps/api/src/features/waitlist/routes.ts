@@ -1,7 +1,14 @@
-import { waitlistInputSchema, waitlistResponseSchema } from "@plyco/shared"
+import {
+  waitlistInputSchema,
+  waitlistRemoveInputSchema,
+  waitlistRemoveResponseSchema,
+  waitlistResponseSchema,
+} from "@plyco/shared"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 
+import { requireApiKey } from "../../infrastructure/api-key-auth.js"
 import { ApiError } from "../../infrastructure/errors.js"
+import { type ServerAnalytics } from "../../infrastructure/server-analytics.js"
 import { type WaitlistContactSyncer } from "./contact-sync.js"
 import { type WaitlistRepository } from "./repository.js"
 
@@ -25,9 +32,13 @@ function clientAddress(request: FastifyRequest) {
 export async function registerWaitlistRoutes(
   app: FastifyInstance,
   {
+    serverAnalytics,
     waitlistContactSyncer,
     waitlistRepository,
+    toolApiKey,
   }: {
+    serverAnalytics: ServerAnalytics
+    toolApiKey?: string
     waitlistContactSyncer: WaitlistContactSyncer
     waitlistRepository: WaitlistRepository
   },
@@ -65,8 +76,48 @@ export async function registerWaitlistRoutes(
         email: input.email,
         blocker: input.blocker,
       })
+      try {
+        await serverAnalytics.capture({
+          event: "waitlist_signup_completed",
+          distinctId: input.email,
+          properties: {
+            source: "marketing_waitlist_form",
+            has_blocker: Boolean(input.blocker),
+          },
+        })
+      } catch (error) {
+        request.log.warn(
+          {
+            err: error,
+            event: "waitlist_signup_completed",
+          },
+          "server analytics capture failed",
+        )
+      }
     }
 
     return reply.status(202).send(waitlistResponseSchema.parse({ accepted: true }))
+  })
+
+  app.delete("/waitlist", async (request, reply) => {
+    requireApiKey(request, toolApiKey)
+    const input = waitlistRemoveInputSchema.parse(request.body)
+
+    await waitlistRepository.remove(input.email)
+    try {
+      await waitlistContactSyncer.remove(input.email)
+    } catch (error) {
+      request.log.warn(
+        {
+          err: error,
+          email: input.email,
+        },
+        "waitlist contact removal sync failed",
+      )
+    }
+
+    return reply
+      .status(200)
+      .send(waitlistRemoveResponseSchema.parse({ removed: true }))
   })
 }

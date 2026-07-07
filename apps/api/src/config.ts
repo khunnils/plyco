@@ -29,6 +29,15 @@ function readRequired(value: string | undefined, name: string) {
   return value
 }
 
+function readCommaSeparated(value: string | undefined) {
+  return (
+    value
+      ?.split(",")
+      .map((item) => item.trim())
+      .filter(Boolean) ?? []
+  )
+}
+
 export function readAuthConfig(env: NodeJS.ProcessEnv = process.env): AuthConfig {
   const sessionKey = readRequired(env.SESSION_KEY, "SESSION_KEY")
 
@@ -93,6 +102,9 @@ export const apiConfig = {
   resendApiKey: process.env.RESEND_API_KEY,
   waitlistResendSegmentId: process.env.WAITLIST_RESEND_SEGMENT_ID,
   invitationEmailFrom: process.env.INVITATION_EMAIL_FROM,
+  corsAllowedOrigins: readCommaSeparated(process.env.CORS_ALLOWED_ORIGINS),
+  posthogProjectToken: process.env.POSTHOG_PROJECT_TOKEN,
+  posthogHost: process.env.POSTHOG_HOST ?? "https://us.i.posthog.com",
   auth: () => readAuthConfig(),
   apiDocsEnabled: () => readApiDocsEnabled(),
 }

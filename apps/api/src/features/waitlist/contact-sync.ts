@@ -7,6 +7,7 @@ export type WaitlistContactSyncInput = {
 
 export interface WaitlistContactSyncer {
   sync(input: WaitlistContactSyncInput): Promise<void>
+  remove(email: string): Promise<void>
 }
 
 export class ResendWaitlistContactSyncer implements WaitlistContactSyncer {
@@ -19,19 +20,7 @@ export class ResendWaitlistContactSyncer implements WaitlistContactSyncer {
   ) {}
 
   async sync(input: WaitlistContactSyncInput): Promise<void> {
-    if (!this.config.apiKey || !this.config.segmentId) {
-      throw new ApiError(
-        "WAITLIST_CONTACT_SYNC_NOT_CONFIGURED",
-        "Waitlist contact sync is not configured.",
-        502,
-        {
-          missing: [
-            this.config.apiKey ? null : "RESEND_API_KEY",
-            this.config.segmentId ? null : "WAITLIST_RESEND_SEGMENT_ID",
-          ].filter(Boolean),
-        },
-      )
-    }
+    this.requireConfig()
 
     const properties = {
       source: "waitlist",
@@ -41,7 +30,9 @@ export class ResendWaitlistContactSyncer implements WaitlistContactSyncer {
     const contactPath = encodeURIComponent(input.email)
     const fetchFn = this.config.fetch ?? fetch
 
-    const updateResponse = await fetchFn(
+    const updateResponse = await this.fetchResponse(
+      fetchFn,
+      "update_contact",
       `https://api.resend.com/contacts/${contactPath}`,
       {
         method: "PATCH",
@@ -83,6 +74,40 @@ export class ResendWaitlistContactSyncer implements WaitlistContactSyncer {
     )
   }
 
+  async remove(email: string): Promise<void> {
+    this.requireConfig()
+
+    const segmentId = this.config.segmentId
+    const contactPath = encodeURIComponent(email)
+    const fetchFn = this.config.fetch ?? fetch
+
+    await this.request(
+      fetchFn,
+      "remove_contact_from_segment",
+      `https://api.resend.com/contacts/${contactPath}/segments/${segmentId}`,
+      {
+        method: "DELETE",
+        headers: this.headers(),
+      },
+    )
+  }
+
+  private requireConfig() {
+    if (!this.config.apiKey || !this.config.segmentId) {
+      throw new ApiError(
+        "WAITLIST_CONTACT_SYNC_NOT_CONFIGURED",
+        "Waitlist contact sync is not configured.",
+        502,
+        {
+          missing: [
+            this.config.apiKey ? null : "RESEND_API_KEY",
+            this.config.segmentId ? null : "WAITLIST_RESEND_SEGMENT_ID",
+          ].filter(Boolean),
+        },
+      )
+    }
+  }
+
   private headers() {
     return {
       Authorization: `Bearer ${this.config.apiKey}`,
@@ -96,15 +121,28 @@ export class ResendWaitlistContactSyncer implements WaitlistContactSyncer {
     url: string,
     init: RequestInit,
   ) {
-    const response = await fetchFn(url, init)
+    const response = await this.fetchResponse(fetchFn, operation, url, init)
 
     if (!response.ok) {
       throw resendSyncError(operation, response.status)
     }
   }
+
+  private async fetchResponse(
+    fetchFn: typeof fetch,
+    operation: string,
+    url: string,
+    init: RequestInit,
+  ) {
+    try {
+      return await fetchFn(url, init)
+    } catch {
+      throw resendSyncError(operation, "network_error")
+    }
+  }
 }
 
-function resendSyncError(operation: string, status: number) {
+function resendSyncError(operation: string, status: number | "network_error") {
   return new ApiError(
     "WAITLIST_CONTACT_SYNC_FAILED",
     "Waitlist contact could not be synced.",

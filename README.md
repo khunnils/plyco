@@ -61,6 +61,36 @@ Open the client URL printed by Vite, usually:
 http://localhost:4200
 ```
 
+## CLI
+
+The operations CLI reads `PLYCO_API_URL` and `PLYCO_API_KEY` from the shell or from `.plyco/<profile>.env`. The default profile is `local`.
+
+```bash
+mkdir -p .plyco
+cat > .plyco/local.env <<'EOF'
+PLYCO_API_URL=http://localhost:4100
+PLYCO_API_KEY=replace-with-api-key
+EOF
+```
+
+Run it from the workspace with pnpm:
+
+```bash
+pnpm plyco --help
+pnpm plyco codes load
+pnpm plyco providers lookup https://example.com
+pnpm plyco waitlist add founder@example.com --blocker "SOC 2 timeline"
+pnpm plyco waitlist remove founder@example.com
+```
+
+For a bare `plyco` command, link the CLI globally:
+
+```bash
+pnpm --filter @plyco/cli link --global
+```
+
+If your shell reports `permission denied: plyco`, it is resolving the `/Users/nils/src/plyco` repository directory instead of a CLI executable. Put the pnpm global bin directory earlier in `PATH` than `/Users/nils/src`, then restart the shell or run `hash -r` so zsh forgets any stale command lookup.
+
 ## Checks
 
 ```bash

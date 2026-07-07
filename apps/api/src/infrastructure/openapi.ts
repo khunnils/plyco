@@ -54,6 +54,8 @@ import {
   vocabularyCodeSchema,
   vocabularySchema,
   waitlistInputSchema,
+  waitlistRemoveInputSchema,
+  waitlistRemoveResponseSchema,
   waitlistResponseSchema,
 } from "@plyco/shared"
 import { type FastifyInstance } from "fastify"
@@ -238,6 +240,13 @@ const paths: Record<string, PathItem> = {
       body: waitlistInputSchema,
       success: 202,
       successSchema: waitlistResponseSchema,
+    }),
+    delete: apiKeyRoute({
+      summary: "Remove an email from the waitlist.",
+      tag: "Waitlist",
+      body: waitlistRemoveInputSchema,
+      success: 200,
+      successSchema: waitlistRemoveResponseSchema,
     }),
   },
   "/auth/google": {

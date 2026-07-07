@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createApp } from "../src/app.js";
+import { allowedCorsOrigins, createApp } from "../src/app.js";
 import { type MagicLinkEmailInput } from "../src/features/accounts/magic-link-email.js";
 import { createTestApp } from "./helpers.js";
 import { readAuthConfig } from "../src/config.js";
@@ -127,6 +127,37 @@ describe("security profile API", () => {
     expect(response.statusCode).toBe(204);
     expect(response.headers["access-control-allow-origin"]).toBe(
       authConfig.webUrl,
+    );
+  });
+
+  it("normalizes configured CORS origins", () => {
+    expect(
+      allowedCorsOrigins([
+        "http://localhost:4300/",
+        "http://localhost:4300/waitlist",
+        "not-a-url",
+      ]),
+    ).toEqual(["http://localhost:4300"]);
+  });
+
+  it("allows additional configured origins through CORS", async () => {
+    const app = await createApp({
+      ...createInMemoryRepositories(),
+      auth: authConfig,
+      corsAllowedOrigins: ["https://www.plyco.ai"],
+    });
+    const response = await app.inject({
+      method: "OPTIONS",
+      url: "/waitlist",
+      headers: {
+        origin: "https://www.plyco.ai",
+        "access-control-request-method": "POST",
+      },
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "https://www.plyco.ai",
     );
   });
 

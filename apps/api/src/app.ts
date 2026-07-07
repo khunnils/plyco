@@ -63,6 +63,10 @@ import { registerVocabularyRoutes } from "./features/vocabulary/routes.js"
 import { GeminiJsonClient, type LlmJsonClient } from "./infrastructure/llm-client.js"
 import { LangfusePromptClient, type PromptClient } from "./infrastructure/prompt-client.js"
 import {
+  createServerAnalytics,
+  type ServerAnalytics,
+} from "./infrastructure/server-analytics.js"
+import {
   AirtableProviderImportClient,
   AirtableProviderImportService,
   type ProviderImportService,
@@ -115,9 +119,11 @@ export type CreateAppOptions = {
   }
   waitlistRepository?: WaitlistRepository
   waitlistContactSyncer?: WaitlistContactSyncer
+  serverAnalytics?: ServerAnalytics
   invitationEmailSender?: InvitationEmailSender
   magicLinkEmailSender?: MagicLinkEmailSender
   apiDocs?: boolean
+  corsAllowedOrigins?: string[]
   logger?: FastifyServerOptions["logger"]
 }
 
@@ -148,9 +154,11 @@ export async function createApp({
   codeLoaderConfig,
   waitlistRepository,
   waitlistContactSyncer,
+  serverAnalytics,
   invitationEmailSender,
   magicLinkEmailSender,
   apiDocs = apiConfig.apiDocsEnabled(),
+  corsAllowedOrigins = apiConfig.corsAllowedOrigins,
   logger = false,
 }: CreateAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger })
@@ -166,7 +174,9 @@ export async function createApp({
   await app.register(cors, {
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    origin: auth ? [auth.clientUrl, auth.webUrl] : true,
+    origin: auth
+      ? allowedCorsOrigins([auth.clientUrl, auth.webUrl, ...corsAllowedOrigins])
+      : true,
   })
 
   app.setErrorHandler((error, request, reply) => {
@@ -189,6 +199,13 @@ export async function createApp({
   }
 
   await registerWaitlistRoutes(app, {
+    serverAnalytics:
+      serverAnalytics ??
+      createServerAnalytics({
+        posthogProjectToken: apiConfig.posthogProjectToken,
+        posthogHost: apiConfig.posthogHost,
+      }),
+    toolApiKey: providerLookupApiKey,
     waitlistContactSyncer:
       waitlistContactSyncer ??
       new ResendWaitlistContactSyncer({
@@ -411,6 +428,24 @@ function createDefaultProviderLookupService({
 
       return service.lookup(inputUrl)
     },
+  }
+}
+
+export function allowedCorsOrigins(origins: string[]) {
+  return Array.from(
+    new Set(
+      origins
+        .map((origin) => normalizeOrigin(origin))
+        .filter((origin): origin is string => Boolean(origin)),
+    ),
+  )
+}
+
+function normalizeOrigin(origin: string) {
+  try {
+    return new URL(origin).origin
+  } catch {
+    return undefined
   }
 }
 

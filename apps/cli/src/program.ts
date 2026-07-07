@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander"
 
-import { ApiResponseError, postJson } from "./api.js"
+import { ApiResponseError, deleteJson, postJson } from "./api.js"
 import { readCliConfig } from "./config.js"
 
 export type ProgramOptions = {
@@ -74,6 +74,48 @@ export function createProgram({
       })
     })
 
+  const waitlist = program
+    .command("waitlist")
+    .description("Manage waitlist entries")
+
+  waitlist
+    .command("add")
+    .description("Add an email to the waitlist")
+    .argument("[email]", "waitlist email")
+    .option("--email <email>", "waitlist email")
+    .option("--blocker <text>", "optional compliance blocker")
+    .action(async (email: string | undefined, options) => {
+      const inputEmail = requiredEmail(email, options.email, "add")
+      const config = commandConfig(program, { cwd, env })
+      const result = await postJson(
+        { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn },
+        "/waitlist",
+        {
+          email: inputEmail,
+          blocker: options.blocker,
+        },
+      )
+
+      writeJson(stdout, result)
+    })
+
+  waitlist
+    .command("remove")
+    .description("Remove an email from the waitlist")
+    .argument("[email]", "waitlist email")
+    .option("--email <email>", "waitlist email")
+    .action(async (email: string | undefined, options) => {
+      const inputEmail = requiredEmail(email, options.email, "remove")
+      const config = commandConfig(program, { cwd, env })
+      const result = await deleteJson(
+        { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn },
+        "/waitlist",
+        { email: inputEmail },
+      )
+
+      writeJson(stdout, result)
+    })
+
   program.configureOutput({
     writeErr: (message) => stderr.write(message),
     writeOut: (message) => stdout.write(message),
@@ -84,6 +126,22 @@ export function createProgram({
   }
 
   return program
+}
+
+function requiredEmail(
+  positionalEmail: string | undefined,
+  optionEmail: string | undefined,
+  action: "add" | "remove",
+) {
+  const email = optionEmail ?? positionalEmail
+
+  if (!email) {
+    throw new Error(
+      `A waitlist email is required. Pass --email <email> or a positional email to ${action}.`,
+    )
+  }
+
+  return email
 }
 
 function commandConfig(

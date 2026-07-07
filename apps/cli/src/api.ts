@@ -26,6 +26,28 @@ export async function postJson(
   return parsedBody
 }
 
+export async function deleteJson(
+  { apiKey, apiUrl, fetchFn = fetch }: ApiClientConfig,
+  path: string,
+  body: unknown = {},
+) {
+  const response = await fetchFn(new URL(path, apiUrl), {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  })
+  const parsedBody = await readJsonResponse(response)
+
+  if (!response.ok) {
+    throw new ApiResponseError(response.status, parsedBody)
+  }
+
+  return parsedBody
+}
+
 export class ApiResponseError extends Error {
   constructor(
     readonly status: number,

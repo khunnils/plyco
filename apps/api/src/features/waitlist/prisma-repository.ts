@@ -15,4 +15,8 @@ export class PrismaWaitlistRepository implements WaitlistRepository {
       },
     })
   }
+
+  async remove(email: string): Promise<void> {
+    await prisma.waitlistEntry.deleteMany({ where: { email } })
+  }
 }

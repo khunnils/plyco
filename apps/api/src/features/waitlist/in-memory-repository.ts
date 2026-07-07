@@ -6,4 +6,8 @@ export class InMemoryWaitlistRepository implements WaitlistRepository {
   async upsert(input: { email: string; blocker?: string }): Promise<void> {
     this.entries.set(input.email, input)
   }
+
+  async remove(email: string): Promise<void> {
+    this.entries.delete(email)
+  }
 }

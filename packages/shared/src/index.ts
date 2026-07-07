@@ -20,8 +20,23 @@ export const waitlistResponseSchema = z.object({
   accepted: z.literal(true),
 });
 
+export const waitlistRemoveInputSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .max(320)
+    .email()
+    .transform((email) => email.toLowerCase()),
+});
+
+export const waitlistRemoveResponseSchema = z.object({
+  removed: z.literal(true),
+});
+
 export type WaitlistInput = z.infer<typeof waitlistInputSchema>;
 export type WaitlistResponse = z.infer<typeof waitlistResponseSchema>;
+export type WaitlistRemoveInput = z.infer<typeof waitlistRemoveInputSchema>;
+export type WaitlistRemoveResponse = z.infer<typeof waitlistRemoveResponseSchema>;
 
 export const dpaStatusSchema = z.enum([
   "not_started",

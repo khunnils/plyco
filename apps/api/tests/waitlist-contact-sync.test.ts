@@ -136,6 +136,25 @@ describe("ResendWaitlistContactSyncer", () => {
     })
   })
 
+  it("converts update network failures to sanitized ApiError details", async () => {
+    const fetchMock = vi.fn(async () => {
+      throw new TypeError("fetch failed")
+    })
+    const syncer = new ResendWaitlistContactSyncer({
+      apiKey: "re_test",
+      segmentId: waitlistSegmentId,
+      fetch: fetchMock,
+    })
+
+    await expect(
+      syncer.sync({ email: "founder@example.com" }),
+    ).rejects.toMatchObject({
+      code: "WAITLIST_CONTACT_SYNC_FAILED",
+      statusCode: 502,
+      details: { operation: "update_contact", status: "network_error" },
+    })
+  })
+
   it("converts create failures to sanitized ApiError details", async () => {
     const fetchMock = vi
       .fn(async () => new Response(null, { status: 404 }))
@@ -154,6 +173,61 @@ describe("ResendWaitlistContactSyncer", () => {
     ).rejects.toMatchObject({
       code: "WAITLIST_CONTACT_SYNC_FAILED",
       details: { operation: "create_contact", status: 400 },
+    })
+  })
+
+  it("removes contacts from the waitlist segment by email", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ deleted: true })))
+    const syncer = new ResendWaitlistContactSyncer({
+      apiKey: "re_test",
+      segmentId: waitlistSegmentId,
+      fetch: fetchMock,
+    })
+
+    await syncer.remove("founder+tag@example.com")
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `https://api.resend.com/contacts/founder%2Btag%40example.com/segments/${waitlistSegmentId}`,
+      expect.objectContaining({
+        method: "DELETE",
+      }),
+    )
+  })
+
+  it("converts remove failures to sanitized ApiError details", async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ message: "secret" }), { status: 404 }),
+    )
+    const syncer = new ResendWaitlistContactSyncer({
+      apiKey: "re_test",
+      segmentId: waitlistSegmentId,
+      fetch: fetchMock,
+    })
+
+    await expect(syncer.remove("founder@example.com")).rejects.toMatchObject({
+      code: "WAITLIST_CONTACT_SYNC_FAILED",
+      details: { operation: "remove_contact_from_segment", status: 404 },
+    })
+  })
+
+  it("converts remove network failures to sanitized ApiError details", async () => {
+    const fetchMock = vi.fn(async () => {
+      throw new TypeError("fetch failed")
+    })
+    const syncer = new ResendWaitlistContactSyncer({
+      apiKey: "re_test",
+      segmentId: waitlistSegmentId,
+      fetch: fetchMock,
+    })
+
+    await expect(syncer.remove("founder@example.com")).rejects.toMatchObject({
+      code: "WAITLIST_CONTACT_SYNC_FAILED",
+      statusCode: 502,
+      details: {
+        operation: "remove_contact_from_segment",
+        status: "network_error",
+      },
     })
   })
 })
