@@ -2,7 +2,7 @@
 
 ## Marketing Site and Waitlist
 
-The public Astro site explains Plyco as a lightweight compliance-readiness workspace for early-stage startups. Its early-access form collects an email and an optional compliance blocker for the private-beta waitlist. Accepted submissions receive an inline confirmation; no confirmation email is sent.
+The public Astro site explains Plyco as a lightweight compliance-readiness workspace for early-stage startups. Its early-access form collects an email and an optional compliance blocker for the private-beta waitlist. Accepted submissions receive an inline confirmation; no confirmation email is sent. Legitimate submissions also create or update a Resend contact with `source=waitlist` and `notes` set to the submitted blocker, then add the contact to the `Plyco - Waitlist` segment.
 
 Public copy must stay concrete about website and policy analysis: imported values are editable starting points, not guaranteed compliance or legal conclusions.
 

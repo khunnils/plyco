@@ -38,7 +38,7 @@ If `DATABASE_URL` is blank or removed, the API starts with in-memory storage for
 Set the client API URL in `apps/client/.env`:
 
 ```dotenv
-VITE_API_URL=http://localhost:4000
+VITE_API_URL=http://localhost:4100
 ```
 
 ## Run Locally

@@ -1,7 +1,7 @@
 import "./infrastructure/env-loader.js"
 
 function readPort(value: string | undefined) {
-  const port = Number(value ?? 4000)
+  const port = Number(value ?? 4100)
 
   if (!Number.isInteger(port) || port <= 0) {
     throw new Error("PORT must be a positive integer")
@@ -79,7 +79,7 @@ export const apiConfig = {
   cliApiUrl:
     process.env.PLYCO_API_URL ??
     process.env.API_PUBLIC_URL ??
-    "http://localhost:4000",
+    "http://localhost:4100",
   geminiApiKey: process.env.GEMINI_API_KEY,
   geminiProviderLookupModel:
     process.env.GEMINI_PROVIDER_LOOKUP_MODEL ?? "gemini-2.5-flash",
@@ -91,6 +91,7 @@ export const apiConfig = {
   documentPdfBucket: process.env.DOCUMENT_PDF_BUCKET ?? "plyco-public",
   gcpProjectId: process.env.GCP_PROJECT_ID ?? "plyco-prod",
   resendApiKey: process.env.RESEND_API_KEY,
+  waitlistResendSegmentId: process.env.WAITLIST_RESEND_SEGMENT_ID,
   invitationEmailFrom: process.env.INVITATION_EMAIL_FROM,
   auth: () => readAuthConfig(),
   apiDocsEnabled: () => readApiDocsEnabled(),

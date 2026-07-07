@@ -381,7 +381,7 @@ export const noProcessingVendorUseBody = {
 };
 
 export const authConfig = {
-  apiPublicUrl: "http://localhost:4000",
+  apiPublicUrl: "http://localhost:4100",
   clientUrl: "http://localhost:4200",
   webUrl: "http://localhost:4300",
   googleClientId: "google-client-id",

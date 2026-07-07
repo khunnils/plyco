@@ -116,7 +116,7 @@ Activity-level AI governance answers live on `business_activities`: whether the 
 
 ## Public Waitlist
 
-The marketing site submits to public `POST /waitlist`. The API validates and normalizes the shared payload, applies a per-instance fixed-window IP limit, silently accepts honeypot submissions without persistence, and upserts legitimate entries by normalized email in `waitlist_entries`. Accepted requests return the opaque `202 { accepted: true }` response. Production CORS permits both the authenticated `CLIENT_URL` and public `WEB_URL` origins.
+The marketing site submits to public `POST /waitlist`. The API validates and normalizes the shared payload, applies a per-instance fixed-window IP limit, silently accepts honeypot submissions without persistence, upserts legitimate entries by normalized email in `waitlist_entries`, and syncs legitimate submissions to Resend contacts using `RESEND_API_KEY` and `WAITLIST_RESEND_SEGMENT_ID`. Resend contacts are tagged with `source=waitlist`, store the optional blocker in `notes`, and are added to the configured `Plyco - Waitlist` segment. Accepted requests return the opaque `202 { accepted: true }` response and no confirmation email is sent. Production CORS permits both the authenticated `CLIENT_URL` and public `WEB_URL` origins.
 
 ## Local Development
 
@@ -127,7 +127,7 @@ pnpm dev:api
 pnpm dev:client
 ```
 
-The client reads `VITE_API_URL` and defaults to `http://localhost:4000`. The API expects `DATABASE_URL` for Prisma-backed persistence and requires OAuth, session, and email settings when auth is enabled.
+The client reads `VITE_API_URL` and defaults to `http://localhost:4100`. The API expects `DATABASE_URL` for Prisma-backed persistence and requires OAuth, session, and email settings when auth is enabled.
 
 ## Deployment
 

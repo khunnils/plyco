@@ -80,6 +80,10 @@ import {
   FileSystemTemplateSource,
   type SystemTemplateSource,
 } from "./infrastructure/system-templates.js"
+import {
+  ResendWaitlistContactSyncer,
+  type WaitlistContactSyncer,
+} from "./features/waitlist/contact-sync.js"
 import { InMemoryWaitlistRepository } from "./features/waitlist/in-memory-repository.js"
 import { PrismaWaitlistRepository } from "./features/waitlist/prisma-repository.js"
 import { type WaitlistRepository } from "./features/waitlist/repository.js"
@@ -110,6 +114,7 @@ export type CreateAppOptions = {
     airtableBase?: string
   }
   waitlistRepository?: WaitlistRepository
+  waitlistContactSyncer?: WaitlistContactSyncer
   invitationEmailSender?: InvitationEmailSender
   magicLinkEmailSender?: MagicLinkEmailSender
   apiDocs?: boolean
@@ -142,6 +147,7 @@ export async function createApp({
   codeLoader,
   codeLoaderConfig,
   waitlistRepository,
+  waitlistContactSyncer,
   invitationEmailSender,
   magicLinkEmailSender,
   apiDocs = apiConfig.apiDocsEnabled(),
@@ -183,6 +189,12 @@ export async function createApp({
   }
 
   await registerWaitlistRoutes(app, {
+    waitlistContactSyncer:
+      waitlistContactSyncer ??
+      new ResendWaitlistContactSyncer({
+        apiKey: apiConfig.resendApiKey,
+        segmentId: apiConfig.waitlistResendSegmentId,
+      }),
     waitlistRepository:
       waitlistRepository ??
       (process.env.DATABASE_URL

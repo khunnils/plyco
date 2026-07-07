@@ -250,7 +250,7 @@ describe("security profile API", () => {
     expect(() =>
       readAuthConfig({
         SESSION_KEY: "short",
-        API_PUBLIC_URL: "http://localhost:4000",
+        API_PUBLIC_URL: "http://localhost:4100",
         CLIENT_URL: "http://localhost:4200",
         WEB_URL: "http://localhost:4300",
         GOOGLE_OAUTH_CLIENT_ID: "client",

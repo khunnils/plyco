@@ -2,6 +2,7 @@ import { waitlistInputSchema, waitlistResponseSchema } from "@plyco/shared"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 
 import { ApiError } from "../../infrastructure/errors.js"
+import { type WaitlistContactSyncer } from "./contact-sync.js"
 import { type WaitlistRepository } from "./repository.js"
 
 type RateLimitEntry = {
@@ -23,7 +24,13 @@ function clientAddress(request: FastifyRequest) {
 
 export async function registerWaitlistRoutes(
   app: FastifyInstance,
-  { waitlistRepository }: { waitlistRepository: WaitlistRepository },
+  {
+    waitlistContactSyncer,
+    waitlistRepository,
+  }: {
+    waitlistContactSyncer: WaitlistContactSyncer
+    waitlistRepository: WaitlistRepository
+  },
 ) {
   const rateLimits = new Map<string, RateLimitEntry>()
 
@@ -51,6 +58,10 @@ export async function registerWaitlistRoutes(
     // Silently accept honeypot submissions without persisting them.
     if (!input.website) {
       await waitlistRepository.upsert({
+        email: input.email,
+        blocker: input.blocker,
+      })
+      await waitlistContactSyncer.sync({
         email: input.email,
         blocker: input.blocker,
       })
