@@ -48,7 +48,10 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { DocumentContent } from "@/features/documents/components/document-content"
-import { PageHeader } from "@/features/shell/components/page-header"
+import {
+  PageHeader,
+  type PageHeaderCrumb,
+} from "@/features/shell/components/page-header"
 import {
   SIDEBAR_SECTION,
   sectionPageBreadcrumbs,
@@ -161,17 +164,13 @@ export const DocumentsRoutePage = () => {
   } as const
 
   // Setup header, breadcrumbs and action buttons based on mode
-  let breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
-    documentsNavItem,
-  ])
   const eyebrow = SIDEBAR_SECTION.documents
-  let pageTitle = "Policies & Documents"
-
-  let bannerTitle = "Documents & Policies"
-  let bannerSubtitle =
-    "Manage security policy templates and generate customized compliance documents."
-  let bannerButtons: React.ReactNode = null
-  let content: React.ReactNode = null
+  let breadcrumbs: PageHeaderCrumb[]
+  let pageTitle: string
+  let bannerTitle: string
+  let bannerSubtitle: string
+  let bannerButtons: React.ReactNode
+  let content: React.ReactNode
 
   if (mode === "add") {
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
