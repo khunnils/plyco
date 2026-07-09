@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js"
+import { type CallToolResult } from "@modelcontextprotocol/sdk/types.js"
 import { describe, expect, it, vi } from "vitest"
 
 import { createApiClient } from "./api.js"
@@ -12,9 +13,12 @@ const config: McpConfig = {
   organizationId: "org-123",
 }
 
-const connectClient = async (fetchFn: typeof fetch) => {
-  const api = createApiClient(config, fetchFn)
-  const server = createMcpServer(config, api)
+const connectClient = async (
+  fetchFn: typeof fetch,
+  currentConfig: McpConfig = config,
+) => {
+  const api = createApiClient(currentConfig, fetchFn)
+  const server = createMcpServer(currentConfig, api)
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair()
   await server.connect(serverTransport)
@@ -24,6 +28,19 @@ const connectClient = async (fetchFn: typeof fetch) => {
 
   return client
 }
+
+const getFirstFetchRequest = (fetchFn: typeof fetch) => {
+  const request = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+    .calls[0]!
+
+  return {
+    url: request[0] as URL,
+    init: request[1] as RequestInit,
+  }
+}
+
+const getTextContent = (result: CallToolResult) =>
+  result.content as Array<{ type: string; text: string }>
 
 describe("plyco MCP server", () => {
   it("exposes the read-only workspace tools", async () => {
@@ -76,8 +93,11 @@ describe("plyco MCP server", () => {
     expect(
       (requestInit.headers as Record<string, string>).Authorization,
     ).toBe("Bearer plyco_org_secret")
+    expect((requestInit.headers as Record<string, string>).Accept).toBe(
+      "application/json",
+    )
 
-    const content = result.content as Array<{ type: string; text: string }>
+    const content = getTextContent(result as CallToolResult)
     expect(JSON.parse(content[0]!.text)).toEqual(overview)
   })
 
@@ -135,7 +155,51 @@ describe("plyco MCP server", () => {
       "https://api.plyco.example/organizations/org-123/data",
     )
 
-    const content = result.content as Array<{ type: string; text: string }>
+    const content = getTextContent(result as CallToolResult)
     expect(JSON.parse(content[0]!.text)).toEqual(dataTypes)
+  })
+
+  it("encodes organization and document IDs in API paths", async () => {
+    const fetchFn = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ id: "doc/with spaces" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    ) as unknown as typeof fetch
+    const client = await connectClient(fetchFn, {
+      ...config,
+      organizationId: "org/with spaces",
+    })
+
+    await client.callTool({
+      name: "get_document",
+      arguments: { documentId: "doc/with spaces" },
+    })
+
+    const { url } = getFirstFetchRequest(fetchFn)
+    expect(url.toString()).toBe(
+      "https://api.plyco.example/organizations/org%2Fwith%20spaces/documents/doc%2Fwith%20spaces",
+    )
+  })
+
+  it("returns API failures as MCP tool errors", async () => {
+    const fetchFn = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ error: { code: "UNAUTHORIZED" } }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+    ) as unknown as typeof fetch
+    const client = await connectClient(fetchFn)
+
+    const result = (await client.callTool({
+      name: "get_organization_overview",
+      arguments: {},
+    })) as CallToolResult
+
+    expect(result.isError).toBe(true)
+    const content = getTextContent(result)
+    expect(content[0]!.text).toContain("Plyco API returned status 401")
   })
 })
