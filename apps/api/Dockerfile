@@ -20,6 +20,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/client/package.json apps/client/package.json
 COPY apps/cli/package.json apps/cli/package.json
+COPY apps/mcp/package.json apps/mcp/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/shared/package.json packages/shared/package.json
@@ -33,11 +34,7 @@ RUN pnpm --filter @plyco/shared build \
   && pnpm --filter @plyco/api build \
   && pnpm --filter @plyco/api --prod deploy --legacy /prod \
   && find /prod -type f -name '.env*' -delete \
-  && ROOT_PRISMA_CLIENT_DIR="$(find /app/node_modules/.pnpm -path '*/node_modules/.prisma/client' -type d -print -quit)" \
-  && PROD_PRISMA_CLIENT_DIR="$(find /prod/node_modules/.pnpm -path '*/node_modules/.prisma/client' -type d -print -quit)" \
-  && rm -rf "${PROD_PRISMA_CLIENT_DIR}" \
-  && cp -a "${ROOT_PRISMA_CLIENT_DIR}" "${PROD_PRISMA_CLIENT_DIR}" \
-  && test "$(wc -c < "${PROD_PRISMA_CLIENT_DIR}/index.js")" -gt 100000
+  && test -f /prod/node_modules/@plyco/db/dist/generated/prisma/client.js
 
 FROM base AS runtime
 
