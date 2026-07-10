@@ -25,8 +25,13 @@ export const CreateShell = ({
   const currentStep = stepNumber(step)
 
   return (
-    <main className="min-h-svh overflow-hidden bg-[#f7f8fa] text-slate-900">
-      <section className="flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
+    <main className="relative min-h-svh overflow-hidden bg-[#f7f8fa] text-slate-900">
+      {/* Subtle brand-tinted background per docs/design.md */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_-10%,rgba(59,130,246,0.08),transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-size-[26px_26px] opacity-[0.05] mask-[radial-gradient(ellipse_at_center,black_20%,transparent_75%)]" />
+      </div>
+      <section className="relative flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
         <header className="flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
             {currentStep > 1 ? (

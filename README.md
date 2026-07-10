@@ -100,6 +100,48 @@ pnpm test
 pnpm build
 ```
 
+## Publishing npm Packages
+
+Public npm packages:
+
+- `@plyco/shared`
+- `@plyco/mcp`
+
+Keep public package versions on the same minor baseline when starting a release.
+Because npm versions are immutable, bump versions before publishing if a version
+already exists. Publish `@plyco/shared` first so `@plyco/mcp` resolves the shared
+package version during publish.
+
+Verify the packages before publishing:
+
+```bash
+pnpm --filter @plyco/shared --filter @plyco/mcp build
+pnpm --filter @plyco/shared --filter @plyco/mcp typecheck
+pnpm --filter @plyco/shared --filter @plyco/mcp test
+pnpm --filter @plyco/shared pack --dry-run
+pnpm --filter @plyco/mcp pack --dry-run
+```
+
+Publish in dependency order:
+
+```bash
+pnpm --filter @plyco/shared publish --access public --no-git-checks
+pnpm --filter @plyco/mcp publish --access public --no-git-checks
+```
+
+If npm requires two-factor auth, use a current OTP or a granular access token
+with publish access to the `@plyco` scope and bypass 2FA enabled. For a one-off
+token without writing to the normal npm config, create a temporary config and
+remove it after publishing:
+
+```bash
+tmp_config=$(mktemp)
+printf '//registry.npmjs.org/:_authToken=%s\nregistry=https://registry.npmjs.org/\n' "$NPM_TOKEN" > "$tmp_config"
+NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/shared publish --access public --no-git-checks
+NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/mcp publish --access public --no-git-checks
+rm -f "$tmp_config"
+```
+
 ## Workspace Layout
 
 ```text

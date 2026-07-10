@@ -1,8 +1,16 @@
 {
   "name": "@plyco/mcp",
-  "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "plyco-mcp": "dist/index.js"
   },
