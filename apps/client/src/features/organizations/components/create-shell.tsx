@@ -11,6 +11,7 @@ export const CreateShell = ({
   title,
   titleAbove,
   description,
+  unframed = false,
 }: {
   children: ReactNode
   onBack?: () => void
@@ -18,15 +19,17 @@ export const CreateShell = ({
   title: string
   titleAbove?: boolean
   description?: string
+  unframed?: boolean
 }) => {
   const isLookup = step === "lookup-organization" || step === "lookup-privacy"
+  const currentStep = stepNumber(step)
 
   return (
-    <main className="min-h-svh bg-slate-50 text-slate-900">
+    <main className="min-h-svh overflow-hidden bg-[#f7f8fa] text-slate-900">
       <section className="flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
         <header className="flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
-            {stepNumber(step) > 1 ? (
+            {currentStep > 1 ? (
               <Button
                 aria-label="Back"
                 size="icon"
@@ -48,7 +51,7 @@ export const CreateShell = ({
           {titleAbove && title ? (
             <div className="mx-auto mb-8 max-w-2xl text-center">
               <p className="mb-2 text-xs font-semibold tracking-widest text-slate-500 uppercase">
-                STEP {stepNumber(step)} OF {stepOrder.length}
+                STEP {currentStep} OF {stepOrder.length}
               </p>
               <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                 {title}
@@ -61,8 +64,10 @@ export const CreateShell = ({
             </div>
           ) : null}
           <section
-            className={`w-full max-w-3xl px-5 py-8 sm:px-10 sm:py-10 ${
-              isLookup
+            className={`w-full px-5 py-8 sm:px-10 sm:py-10 ${
+              unframed ? "max-w-5xl" : "max-w-3xl"
+            } ${
+              isLookup || unframed
                 ? ""
                 : "rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
             }`}
@@ -78,14 +83,34 @@ export const CreateShell = ({
           </section>
         </div>
       </section>
-      {stepNumber(step) > 0 ? (
-        <div className="bg-primary-100 pointer-events-none fixed bottom-6 left-1/2 w-40 -translate-x-1/2 overflow-hidden rounded-full shadow-sm sm:w-56">
-          <div
-            className="h-2 rounded-full bg-primary transition-all duration-300"
-            style={{
-              width: `${(stepNumber(step) / stepOrder.length) * 100}%`,
-            }}
-          />
+      {currentStep > 0 ? (
+        <div
+          aria-label={`Onboarding progress: step ${currentStep} of ${stepOrder.length}`}
+          aria-valuemax={stepOrder.length}
+          aria-valuemin={1}
+          aria-valuenow={currentStep}
+          className="pointer-events-none fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-white/85 px-3 py-2.5 shadow-sm ring-1 ring-slate-200/80 backdrop-blur"
+          role="progressbar"
+        >
+          {stepOrder.map((stepName, index) => {
+            const dotStep = index + 1
+            const isCurrent = dotStep === currentStep
+            const isComplete = dotStep < currentStep
+
+            return (
+              <span
+                aria-hidden="true"
+                className={`size-2 rounded-full transition-colors duration-300 ${
+                  isCurrent
+                    ? "bg-primary ring-primary-100 ring-4"
+                    : isComplete
+                      ? "bg-primary"
+                      : "bg-slate-300"
+                }`}
+                key={stepName}
+              />
+            )
+          })}
         </div>
       ) : null}
     </main>

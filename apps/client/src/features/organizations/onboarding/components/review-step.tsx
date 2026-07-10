@@ -44,7 +44,7 @@ import {
 const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> =
   {
     global: {
-      description: "Cross-border operations spanning multiple continents.",
+      description: "US-based or broadly global operations.",
       icon: "globe",
     },
     us: {
@@ -84,6 +84,14 @@ const ENRICHED_COMPLIANCE: Record<
   gdpr: {
     description: "European standard for data protection and privacy rights.",
     icon: "gdpr",
+  },
+  ccpa: {
+    description: "California privacy rights and disclosure expectations.",
+    icon: "shield",
+  },
+  iso_27001: {
+    description: "Information security management system standard.",
+    icon: "shield-check",
   },
 }
 
@@ -161,7 +169,7 @@ export const ReviewStep = () => {
     }
   })
 
-  const allowedRegionValues = ["global", "us", "eu"]
+  const allowedRegionValues = ["global", "eu"]
   const vocabularyRegionOptions = codeOptions(vocabulary.data, "regions")
   const regionOptions = (
     vocabularyRegionOptions.length > 0
@@ -171,6 +179,7 @@ export const ReviewStep = () => {
     .filter((option) => allowedRegionValues.includes(option.value))
     .map((option) => ({
       ...option,
+      label: option.value === "global" ? "US / Global" : option.label,
       ...ENRICHED_REGIONS[option.value],
     }))
 

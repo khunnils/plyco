@@ -153,7 +153,7 @@ export const ProvidersStep = () => {
   }
 
   const handleBack = () => {
-    navigate("../compliance")
+    navigate("../markets")
   }
 
   const toggleProvider = (

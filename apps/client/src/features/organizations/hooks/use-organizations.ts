@@ -10,6 +10,7 @@ import {
   createOrganization,
   lookupOrganizationWebsite,
   lookupPrivacyPolicy,
+  validateOrganizationWebsiteReachability,
 } from "@/lib/api"
 import { authStateQueryKey } from "@/lib/query-keys"
 
@@ -37,6 +38,15 @@ export const useLookupOrganizationWebsite = () =>
         err.message ??
           "Could not pull details from the website. You can continue manually."
       )
+    },
+  })
+
+export const useValidateOrganizationWebsiteReachability = () =>
+  useMutation({
+    mutationFn: (input: OrganizationWebsiteLookupInput) =>
+      validateOrganizationWebsiteReachability(input),
+    onError: (err: Error) => {
+      toast.warning(err.message ?? "Could not reach that website.")
     },
   })
 

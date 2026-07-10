@@ -27,6 +27,7 @@ import {
   recommendationsResponseSchema,
   organizationLookupResultSchema,
   organizationPrivacyPolicyLookupInputSchema,
+  organizationWebsiteReachabilitySchema,
   organizationWebsiteLookupInputSchema,
   privacyProfileSchema,
   createDocumentSchema,
@@ -78,6 +79,7 @@ import {
   type ProviderLookupResult,
   type OrganizationLookupResult,
   type OrganizationPrivacyPolicyLookupInput,
+  type OrganizationWebsiteReachability,
   type OrganizationWebsiteLookupInput,
   type PrivacyProfile,
   type OrganizationSummary,
@@ -321,6 +323,18 @@ export const lookupOrganizationWebsite = (
     method: "POST",
     body: JSON.stringify(organizationWebsiteLookupInputSchema.parse(input)),
   })
+
+export const validateOrganizationWebsiteReachability = (
+  input: OrganizationWebsiteLookupInput
+): Promise<OrganizationWebsiteReachability> =>
+  apiRequest(
+    "/organization-lookup/website/reachability",
+    organizationWebsiteReachabilitySchema,
+    {
+      method: "POST",
+      body: JSON.stringify(organizationWebsiteLookupInputSchema.parse(input)),
+    }
+  )
 
 export const lookupPrivacyPolicy = (
   input: OrganizationPrivacyPolicyLookupInput

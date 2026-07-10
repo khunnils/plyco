@@ -24,6 +24,7 @@ import {
   organizationInvitationInputSchema,
   organizationInvitationSchema,
   organizationLookupResultSchema,
+  organizationWebsiteReachabilitySchema,
   organizationMemberRoleUpdateSchema,
   organizationMemberSchema,
   organizationPrivacyPolicyLookupInputSchema,
@@ -412,6 +413,15 @@ const paths: Record<string, PathItem> = {
       body: organizationWebsiteLookupInputSchema,
       success: 200,
       successSchema: organizationLookupResultSchema,
+    }),
+  },
+  "/organization-lookup/website/reachability": {
+    post: route({
+      summary: "Validate that an organization website is reachable.",
+      tag: "Organization Lookup",
+      body: organizationWebsiteLookupInputSchema,
+      success: 200,
+      successSchema: organizationWebsiteReachabilitySchema,
     }),
   },
   "/organization-lookup/privacy-policy": {

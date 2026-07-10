@@ -1,4 +1,11 @@
 #!/bin/sh
 set -e
 
+export PATH="$HOME/Library/pnpm:$HOME/.local/share/pnpm:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pnpm was not found in PATH. Install pnpm or make sure Git can see your pnpm install." >&2
+  exit 1
+fi
+
 pnpm --filter cf-app build

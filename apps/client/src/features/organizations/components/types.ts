@@ -20,7 +20,6 @@ export type WizardStep =
   | "lookup-privacy"
   | "identity"
   | "markets"
-  | "compliance"
   | "providers"
   | "setup-review"
 
@@ -40,7 +39,7 @@ export type WizardDraft = {
 export const stepOrder: WizardStep[] = [
   "identity",
   "markets",
-  "compliance",
+  "lookup-organization",
   "providers",
   "setup-review",
 ]
@@ -59,6 +58,8 @@ export const fallbackIndustryOptions = [
 export const fallbackComplianceGoalOptions = [
   { value: "soc_2", label: "SOC 2" },
   { value: "gdpr", label: "GDPR" },
+  { value: "ccpa", label: "CCPA" },
+  { value: "iso_27001", label: "ISO 27001" },
 ]
 
 export const onboardingComplianceGoalOptions = (
@@ -69,23 +70,28 @@ export const complianceGoalsForRegions = (
   regions: string[] | null | undefined
 ) => {
   const selectedRegions = regions ?? []
-  const goals = new Set<string>()
-
-  if (
-    selectedRegions.some((region) =>
-      ["us", "global", "apac", "latam", "mea"].includes(region)
-    )
-  ) {
-    goals.add("soc_2")
+  const goals: string[] = []
+  const addGoals = (nextGoals: string[]) => {
+    for (const goal of nextGoals) {
+      if (!goals.includes(goal)) {
+        goals.push(goal)
+      }
+    }
   }
 
-  if (
-    selectedRegions.some((region) => ["eu", "uk", "global"].includes(region))
-  ) {
-    goals.add("gdpr")
+  if (selectedRegions.includes("global")) {
+    addGoals(["iso_27001", "soc_2"])
   }
 
-  return Array.from(goals)
+  if (selectedRegions.includes("us")) {
+    addGoals(["soc_2", "iso_27001", "ccpa"])
+  }
+
+  if (selectedRegions.includes("eu")) {
+    addGoals(["gdpr", "iso_27001"])
+  }
+
+  return goals
 }
 
 export const defaultComplianceGoals = complianceGoalsForRegions([])
@@ -349,7 +355,8 @@ export const normalizeUrl = (value: string) => {
 }
 
 export const stepNumber = (step: WizardStep) => {
-  const index = stepOrder.indexOf(step)
+  const progressStep = step === "lookup-privacy" ? "lookup-organization" : step
+  const index = stepOrder.indexOf(progressStep)
 
   return index >= 0 ? index + 1 : 0
 }

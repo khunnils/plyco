@@ -197,12 +197,6 @@ const LookupLoadingView = ({
         status={privacyLookupStatus}
       />
     </div>
-    <div className="mt-8 flex items-center gap-2 text-xs font-semibold tracking-widest text-slate-700 uppercase">
-      <span className="size-2 rounded-full bg-slate-900" />
-      <span className="size-2 rounded-full bg-slate-700" />
-      <span className="size-2 rounded-full bg-slate-500" />
-      Discovery in progress
-    </div>
   </div>
 )
 
@@ -220,9 +214,16 @@ export const LookupStep = () => {
   const lookupOrganizationWebsite = useLookupOrganizationWebsite()
   const lookupPrivacyPolicy = useLookupPrivacyPolicy()
 
+  // Runs once per mounted lookup screen; navigation remounts this step with a fresh draft.
   useEffect(() => {
     if (!draft) {
       navigate("../identity", { replace: true })
+      return
+    }
+
+    if (!draft.company.website) {
+      setSubmitError(null)
+      navigate("../providers", { replace: true })
       return
     }
 
@@ -312,7 +313,8 @@ export const LookupStep = () => {
     return () => {
       isMounted = false
     }
-  }, []) // Empty dependency array means runs on mount
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const stepName =
     privacyLookupStatus === "active" ? "lookup-privacy" : "lookup-organization"

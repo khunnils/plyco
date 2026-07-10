@@ -9,6 +9,7 @@ import {
   MARKETING_WEBSITE_SERVICE_NAME,
   WEBSITE_ACTIVITY_NAME,
   WEBSITE_DATA_TYPE_NAME,
+  complianceGoalsForRegions,
   draftFromLookup,
   fallbackDraft,
   onboardingComplianceGoalOptions,
@@ -29,6 +30,28 @@ describe("onboarding profile helpers", () => {
       { value: "gdpr", label: "GDPR" },
       { value: "ccpa", label: "CCPA" },
       { value: "iso_27001", label: "ISO 27001" },
+    ])
+  })
+
+  it("defaults compliance goals from simplified onboarding regions", () => {
+    expect(complianceGoalsForRegions(["global"])).toEqual([
+      "iso_27001",
+      "soc_2",
+    ])
+    expect(complianceGoalsForRegions(["us"])).toEqual([
+      "soc_2",
+      "iso_27001",
+      "ccpa",
+    ])
+    expect(complianceGoalsForRegions(["eu"])).toEqual([
+      "gdpr",
+      "iso_27001",
+    ])
+    expect(complianceGoalsForRegions(["global", "us", "eu"])).toEqual([
+      "iso_27001",
+      "soc_2",
+      "ccpa",
+      "gdpr",
     ])
   })
 

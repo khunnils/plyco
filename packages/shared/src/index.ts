@@ -735,6 +735,10 @@ export const organizationWebsiteLookupInputSchema = z.object({
   website: z.string().trim().url("Website must be a valid URL"),
 });
 
+export const organizationWebsiteReachabilitySchema = z.object({
+  reachable: z.literal(true),
+});
+
 export const organizationPrivacyPolicyLookupInputSchema = z.object({
   privacyPolicyUrl: z
     .string()
@@ -922,6 +926,9 @@ export type OrganizationLookupInput = z.infer<
 >;
 export type OrganizationWebsiteLookupInput = z.infer<
   typeof organizationWebsiteLookupInputSchema
+>;
+export type OrganizationWebsiteReachability = z.infer<
+  typeof organizationWebsiteReachabilitySchema
 >;
 export type OrganizationPrivacyPolicyLookupInput = z.infer<
   typeof organizationPrivacyPolicyLookupInputSchema

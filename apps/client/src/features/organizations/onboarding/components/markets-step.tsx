@@ -6,63 +6,29 @@ import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { CreateShell } from "../../components/create-shell"
 import { OptionPicker } from "../../components/option-picker"
-import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
-import { codeOptions } from "@/features/vocabulary/lib/vocabulary"
 import {
-  fallbackRegionOptions,
   complianceGoalsForRegions,
 } from "../../components/types"
 
-const ENRICHED_REGIONS: Record<string, { description: string; icon: string }> =
+const regionOptions = [
   {
-    global: {
-      description: "Cross-border operations spanning multiple continents.",
-      icon: "globe",
-    },
-    us: {
-      description: "North American domestic market and regulatory compliance.",
-      icon: "us",
-    },
-    eu: {
-      description: "EMEA focus with GDPR and regional policy adherence.",
-      icon: "eu",
-    },
-    uk: {
-      description: "UK market presence and UK GDPR alignment.",
-      icon: "uk",
-    },
-    apac: {
-      description: "APAC fast-growing markets and local compliance needs.",
-      icon: "apac",
-    },
-    latam: {
-      description: "LATAM presence and emerging data protection frameworks.",
-      icon: "latam",
-    },
-    mea: {
-      description: "MEA operations and localized compliance standards.",
-      icon: "mea",
-    },
-  }
+    value: "global",
+    label: "US / Global",
+    description: "US-based or broadly global operations.",
+    icon: "globe",
+  },
+  {
+    value: "eu",
+    label: "Europe",
+    description: "European operations and GDPR-focused privacy expectations.",
+    icon: "eu",
+  },
+]
 
 export const MarketsStep = () => {
   const navigate = useNavigate()
   const { draft, updateDraft, submitError, setSubmitError } =
     useOnboardingStore()
-
-  const vocabulary = useVocabulary(Boolean(draft))
-  const allowedRegionValues = ["global", "us", "eu"]
-  const vocabularyRegionOptions = codeOptions(vocabulary.data, "regions")
-  const regionOptions = (
-    vocabularyRegionOptions.length > 0
-      ? vocabularyRegionOptions
-      : fallbackRegionOptions
-  )
-    .filter((option) => allowedRegionValues.includes(option.value))
-    .map((option) => ({
-      ...option,
-      ...ENRICHED_REGIONS[option.value],
-    }))
 
   useEffect(() => {
     if (!draft) {
@@ -80,7 +46,7 @@ export const MarketsStep = () => {
       return
     }
     setSubmitError(null)
-    navigate("../compliance")
+    navigate("../lookup")
   }
 
   const handleBack = () => {
@@ -124,16 +90,17 @@ export const MarketsStep = () => {
           label="Primary regions"
           options={regionOptions}
           value={draft.company.regions}
-          onChange={(value) =>
+          onChange={(value) => {
+            const nextValue = value.at(-1) ? [value.at(-1) as string] : []
             updateDraft((current) => ({
               ...current,
               company: {
                 ...current.company,
-                regions: value,
-                complianceGoals: complianceGoalsForRegions(value),
+                regions: nextValue,
+                complianceGoals: complianceGoalsForRegions(nextValue),
               },
             }))
-          }
+          }}
         />
 
         {submitError ? (
