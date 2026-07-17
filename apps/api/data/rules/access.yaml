@@ -1,0 +1,79 @@
+- id: access.authentication_baseline_gap
+  title: Authentication controls need strengthening
+  category: access
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    all:
+      - any:
+          - field: access.mfaRequired
+            equals: false
+          - field: access.passwordManagerRequired
+            equals: false
+          - field: access.offboardingProcessExists
+            equals: false
+  message: One or more core workforce authentication controls are not required.
+  recommendation: Require MFA and a password manager, and use a documented offboarding process that promptly removes access.
+  relatedFields:
+    - access.mfaRequired
+    - access.passwordManagerRequired
+    - access.offboardingProcessExists
+
+- id: access.authorization_controls_gap
+  title: Authorization controls need strengthening
+  category: access
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    any:
+      - field: access.leastPrivilege
+        equals: false
+      - field: access.roleBasedAccess
+        equals: false
+      - field: access.adminApprovalRequired
+        equals: false
+  message: One or more core authorization controls are not in place.
+  recommendation: Apply least privilege through role-based access and require approval before granting administrative access.
+  relatedFields:
+    - access.leastPrivilege
+    - access.roleBasedAccess
+    - access.adminApprovalRequired
+
+- id: access.access_reviews_missing
+  title: Access reviews are not performed
+  category: access
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: access.accessReviewsPerformed
+    equals: false
+  message: Periodic reviews of user and administrative access are not performed.
+  recommendation: Review access on a recurring schedule and remove permissions that are no longer needed.
+  relatedFields:
+    - access.accessReviewsPerformed
+    - access.accessReviewCadence
+
+- id: access.personnel_security_gap
+  title: Personnel security controls need strengthening
+  category: access
+  severity: medium
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    any:
+      - field: access.securityTrainingRequired
+        equals: false
+      - field: access.confidentialityAgreementsRequired
+        equals: false
+  message: Security training or confidentiality agreements are not required for personnel.
+  recommendation: Require recurring security awareness training and appropriate confidentiality agreements for workforce members.
+  relatedFields:
+    - access.securityTrainingRequired
+    - access.confidentialityAgreementsRequired

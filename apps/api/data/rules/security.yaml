@@ -1,5 +1,5 @@
-- id: security.mfa_required
-  title: MFA is not required
+- id: security.development_controls_gap
+  title: Development security controls need strengthening
   category: security
   severity: high
   frameworks: [soc_2, iso_27001]
@@ -7,15 +7,106 @@
     anyComplianceGoal: [soc_2, iso_27001]
   condition:
     any:
-      - field: security.authentication.mfaRequired
+      - field: securityProfile.codeReviewRequired
         equals: false
-      - field: infrastructure.mfaEnabled
+      - field: securityProfile.dependencySecurityMonitoring
         equals: false
-  message: Multi-factor authentication is not required.
-  recommendation: Require MFA for workforce and administrative access.
+      - field: securityProfile.secretScanning
+        equals: false
+      - field: securityProfile.automatedTestingBeforeDeployment
+        equals: false
+      - field: securityProfile.cicdDeploymentProcess
+        equals: false
+      - field: securityProfile.productionDeploymentApprovalRequired
+        equals: false
+  message: One or more core development security controls are not required.
+  recommendation: Require peer review, dependency and secret scanning, automated tests, controlled CI/CD, and approval for production deployments.
   relatedFields:
-    - security.authentication.mfaRequired
-    - infrastructure.mfaEnabled
+    - securityProfile.codeReviewRequired
+    - securityProfile.dependencySecurityMonitoring
+    - securityProfile.secretScanning
+    - securityProfile.automatedTestingBeforeDeployment
+    - securityProfile.cicdDeploymentProcess
+    - securityProfile.productionDeploymentApprovalRequired
+
+- id: security.vulnerability_scanning_missing
+  title: Vulnerability scanning is not configured
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: security.vulnerabilityManagement.scanningCadence
+    in: [none, not_defined, not_set]
+  message: Vulnerability scanning is not configured.
+  recommendation: Configure recurring vulnerability scanning for dependencies, application code, containers, or infrastructure.
+  relatedFields:
+    - security.vulnerabilityManagement.scanningCadence
+
+- id: security.penetration_testing_missing
+  title: Penetration testing is not configured
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: securityProfile.penetrationTestingStrategy
+    in: [none, not_defined, not_set]
+  message: No penetration testing strategy is configured.
+  recommendation: Establish a proportionate internal, external, or continuous penetration testing approach for production systems.
+  relatedFields:
+    - securityProfile.penetrationTestingStrategy
+    - securityProfile.penetrationTestingCadence
+
+- id: security.critical_patch_sla_missing
+  title: Critical vulnerability patch timeline is undefined
+  category: security
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: securityProfile.patchingSlaCriticalDaysStatus
+    in: [not_defined, not_set]
+  message: A fix timeline for critical vulnerabilities is explicitly not defined.
+  recommendation: Define and document a maximum remediation timeline for critical vulnerabilities.
+  relatedFields:
+    - securityProfile.patchingSlaCriticalDaysStatus
+    - securityProfile.patchingSlaCriticalDays
+
+- id: security.high_patch_sla_missing
+  title: High-severity vulnerability patch timeline is undefined
+  category: security
+  severity: medium
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: securityProfile.patchingSlaHighDaysStatus
+    in: [not_defined, not_set]
+  message: A fix timeline for high-severity vulnerabilities is explicitly not defined.
+  recommendation: Define and document a maximum remediation timeline for high-severity vulnerabilities.
+  relatedFields:
+    - securityProfile.patchingSlaHighDaysStatus
+    - securityProfile.patchingSlaHighDays
+
+- id: security.disclosure_program_missing
+  title: Responsible disclosure is not supported
+  category: security
+  severity: low
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: securityProfile.vulnerabilityDisclosureProgramExists
+    equals: false
+  message: The organization does not have a responsible vulnerability disclosure program.
+  recommendation: Publish a security contact or lightweight disclosure policy so researchers can report vulnerabilities safely.
+  relatedFields:
+    - securityProfile.vulnerabilityDisclosureProgramExists
+    - securityProfile.vulnerabilityDisclosureUrl
 
 - id: security.incident_response_plan_missing
   title: Incident response plan is missing
@@ -32,41 +123,31 @@
   relatedFields:
     - security.incidentResponse.planExists
 
-- id: security.backups_disabled
-  title: Backups are not enabled
+- id: security.incident_notification_gap
+  title: Incident notification process needs strengthening
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
+  frameworks: [gdpr, soc_2, iso_27001]
   appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
-    field: infrastructure.backupsEnabled
-    equals: false
-  message: Backups are not enabled.
-  recommendation: Enable backups for production systems and document backup cadence, retention, and restore testing.
+    all:
+      - field: security.incidentResponse.planExists
+        equals: true
+      - any:
+          - field: securityProfile.incidentNotificationTimeline
+            in: [none, not_defined, not_set]
+          - field: securityProfile.customerNotificationProcess
+            in: [none, not_defined, not_set]
+  message: The incident response plan lacks a defined notification timeline or customer notification process.
+  recommendation: Define when incidents must be escalated and how affected customers and regulators will be notified.
   relatedFields:
-    - infrastructure.backupsEnabled
-    - infrastructure.backupCadence
-    - infrastructure.backupRetentionDays
-
-- id: security.vulnerability_scanning_missing
-  title: Vulnerability scanning is not configured
-  category: security
-  severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
-  condition:
-    field: security.vulnerabilityManagement.scanningCadence
-    in: [null, none, not_defined]
-  message: Vulnerability scanning is not configured.
-  recommendation: Configure recurring vulnerability scanning for dependencies, application code, containers, or infrastructure.
-  relatedFields:
-    - security.vulnerabilityManagement.scanningCadence
+    - securityProfile.incidentNotificationTimeline
+    - securityProfile.customerNotificationProcess
 
 - id: security.shared_accounts_exist
   title: Shared accounts are in use
-  category: security
+  category: access
   severity: high
   frameworks: [soc_2, iso_27001]
   appliesWhen:

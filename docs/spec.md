@@ -147,3 +147,15 @@ no rules match, the page shows “No recommendations right now.”
 
 Recommendations are computed from static advisor rules and are not persisted,
 dismissed, or assigned in this version.
+
+Advisor findings cover privacy, services, access, infrastructure, security,
+processing activities, data consistency, and providers. Framework-specific
+findings appear only when the organization has selected a matching compliance
+goal; general consistency findings are not framework-gated.
+
+Rules only evaluate answered values. `null`, missing values, and empty strings
+are unanswered and cannot cause a recommendation. Explicit `false`, zero, code
+values, and lists—including an explicitly empty list—are answered values. A
+grouped rule waits until every scalar answer it uses is available. For
+collection rules, incomplete records are ignored while complete records remain
+eligible for evaluation.

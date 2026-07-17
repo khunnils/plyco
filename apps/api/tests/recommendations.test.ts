@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createApp } from "../src/app.js";
 import {
   evaluateAdvisorRules,
+  FileSystemAdvisorRuleSource,
   parseAdvisorRuleFile,
   StaticAdvisorRuleSource,
   type AdvisorRule,
@@ -83,6 +84,22 @@ describe("recommendation rules", () => {
 `);
 
     expect(rules).toEqual([mfaRule]);
+  });
+
+  it("rejects null comparison values in YAML rules", () => {
+    expect(() =>
+      parseAdvisorRuleFile(`
+- id: security.invalid_null_check
+  title: Invalid null check
+  category: security
+  severity: high
+  condition:
+    field: access.mfaRequired
+    in: [null, false]
+  message: Invalid rule.
+  recommendation: Invalid rule.
+`),
+    ).toThrowError(/invalid/i);
   });
 
   it("returns an MFA recommendation when MFA is false and SOC 2 is a goal", () => {
@@ -182,6 +199,118 @@ describe("recommendation rules", () => {
     expect(response.recommendations).toEqual([]);
   });
 
+  it("requires every alternative input to be answered before matching any", () => {
+    const response = evaluateAdvisorRules([mfaRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: false,
+      },
+      infrastructure: {
+        ...organization.infrastructure,
+        mfaEnabled: null,
+      },
+      company: {
+        ...organization.company,
+        complianceGoals: ["soc_2"],
+      },
+    });
+
+    expect(response.recommendations).toEqual([]);
+  });
+
+  it.each([null, undefined, ""])(
+    "does not match unset field value %s with field operators",
+    (unsetValue) => {
+      const conditions: AdvisorRule["condition"][] = [
+        { field: "securityProfile.scanningCadence", equals: false },
+        { field: "securityProfile.scanningCadence", in: ["none"] },
+        { field: "securityProfile.scanningCadence", notIn: ["weekly"] },
+        { field: "securityProfile.scanningCadence", empty: true },
+        {
+          field: "securityProfile.scanningCadence",
+          includesAny: ["none"],
+        },
+      ];
+      const rules = conditions.map(
+        (condition, index): AdvisorRule => ({
+          id: `security.unset_operator_${index}`,
+          title: "Scanning needs attention",
+          category: "security",
+          severity: "high",
+          frameworks: ["soc_2"],
+          condition,
+          message: "Scanning needs attention.",
+          recommendation: "Configure scanning.",
+          relatedFields: ["securityProfile.scanningCadence"],
+        }),
+      );
+      const profileWithUnsetValue = {
+        ...organization,
+        security: {
+          ...organization.security,
+          scanningCadence: unsetValue,
+        },
+      } as unknown as NonNullable<Parameters<typeof evaluateAdvisorRules>[1]>;
+      const response = evaluateAdvisorRules(rules, profileWithUnsetValue);
+
+      expect(response.recommendations).toEqual([]);
+    },
+  );
+
+  it("treats false, zero, and an explicit empty array as defined", () => {
+    const rules: AdvisorRule[] = [
+      {
+        id: "defined.false",
+        title: "False is defined",
+        category: "test",
+        severity: "low",
+        frameworks: [],
+        condition: { field: "access.mfaRequired", equals: false },
+        message: "False is defined.",
+        recommendation: "Review the answer.",
+        relatedFields: ["access.mfaRequired"],
+      },
+      {
+        id: "defined.zero",
+        title: "Zero is defined",
+        category: "test",
+        severity: "low",
+        frameworks: [],
+        condition: { field: "privacy.responseTimelineDays", equals: 0 },
+        message: "Zero is defined.",
+        recommendation: "Review the answer.",
+        relatedFields: ["privacy.responseTimelineDays"],
+      },
+      {
+        id: "defined.empty_array",
+        title: "An empty array is defined",
+        category: "test",
+        severity: "low",
+        frameworks: [],
+        condition: { field: "privacy.supportedRights", empty: true },
+        message: "An empty array is defined.",
+        recommendation: "Review the answer.",
+        relatedFields: ["privacy.supportedRights"],
+      },
+    ];
+    const response = evaluateAdvisorRules(rules, {
+      ...organization,
+      access: { ...organization.access, mfaRequired: false },
+      privacy: {
+        ...organization.privacy,
+        responseTimelineDays: 0,
+        supportedRights: [],
+      },
+    });
+
+    expect(response.recommendations.map(({ id }) => id)).toEqual([
+      "defined.false",
+      "defined.zero",
+      "defined.empty_array",
+    ]);
+  });
+
   it("supports in, empty, nested all, and appliesWhen predicates", () => {
     const response = evaluateAdvisorRules(
       [
@@ -219,7 +348,7 @@ describe("recommendation rules", () => {
           appliesWhen: { anyComplianceGoal: ["soc_2"] },
           condition: {
             field: "security.vulnerabilityManagement.scanningCadence",
-            in: [null, "none", "not_defined"],
+            in: ["none", "not_defined"],
           },
           message: "Vulnerability scanning is not configured.",
           recommendation: "Configure recurring vulnerability scanning.",
@@ -234,7 +363,7 @@ describe("recommendation rules", () => {
         },
         security: {
           ...organization.security,
-          scanningCadence: null,
+          scanningCadence: "none",
         },
         privacy: {
           ...organization.privacy,
@@ -312,11 +441,11 @@ describe("recommendation rules", () => {
                     any: [
                       {
                         field: "privacy.cookieConsentMechanism",
-                        in: [null, "none", "not_set"],
+                        in: ["none", "not_set"],
                       },
                       {
                         field: "privacy.nonEssentialCookiesBlockedUntilConsent",
-                        in: [null, false],
+                        equals: false,
                       },
                       {
                         field: "privacy.cookieConsentWithdrawalMethod",
@@ -324,7 +453,7 @@ describe("recommendation rules", () => {
                       },
                       {
                         field: "privacy.globalPrivacyControlSupported",
-                        in: [null, false],
+                        equals: false,
                       },
                     ],
                   },
@@ -358,10 +487,10 @@ describe("recommendation rules", () => {
                   requiresConsent: true,
                 },
               ],
-              cookieConsentMechanism: null,
-              nonEssentialCookiesBlockedUntilConsent: null,
-              cookieConsentWithdrawalMethod: null,
-              globalPrivacyControlSupported: null,
+              cookieConsentMechanism: "none",
+              nonEssentialCookiesBlockedUntilConsent: false,
+              cookieConsentWithdrawalMethod: "none",
+              globalPrivacyControlSupported: false,
             },
           },
         ],
@@ -428,11 +557,11 @@ describe("recommendation rules", () => {
                     any: [
                       {
                         field: "privacy.cookieConsentMechanism",
-                        in: [null, "none", "not_set"],
+                        in: ["none", "not_set"],
                       },
                       {
                         field: "privacy.nonEssentialCookiesBlockedUntilConsent",
-                        in: [null, false],
+                        equals: false,
                       },
                     ],
                   },
@@ -470,6 +599,170 @@ describe("recommendation rules", () => {
     );
 
     expect(response.recommendations).toEqual([]);
+  });
+
+  it("loads and can trigger every shipped rule with complete inputs", async () => {
+    const rules = await new FileSystemAdvisorRuleSource().listRules();
+    const completeRiskProfile = {
+      ...organization,
+      company: {
+        ...organization.company,
+        complianceGoals: ["gdpr", "ccpa", "soc_2", "iso_27001"],
+        handlesSensitiveData: false,
+      },
+      services: [
+        {
+          ...organization.services[0],
+          privacy: {
+            ...organization.services[0].privacy,
+            usesCookiesOrTrackingTechnologies: true,
+            cookieCategories: [
+              { category: "analytics" as const, requiresConsent: true },
+            ],
+            cookieConsentMechanism: "none",
+            nonEssentialCookiesBlockedUntilConsent: false,
+            cookieConsentWithdrawalMethod: "none",
+            globalPrivacyControlSupported: false,
+          },
+        },
+      ],
+      privacy: {
+        ...organization.privacy,
+        supportedRights: [],
+        requestMethods: [],
+        responseTimelineDaysStatus: "not_defined",
+        sendsMarketingEmails: true,
+        marketingOptOutMethod: "none",
+        crossBorderTransfers: true,
+        transferMechanisms: [],
+        productionDataInDevelopment: true,
+        retentionPolicyExists: false,
+      },
+      infrastructure: {
+        ...organization.infrastructure,
+        mfaEnabled: false,
+        encryptedDevicesRequired: false,
+        backupsEnabled: false,
+        centralizedLoggingEnabled: false,
+        securityMonitoring: "none",
+        vendorReviewRequired: false,
+        dpaRequiredForProcessors: false,
+        encryptionAtRest: false,
+        encryptionInTransit: false,
+      },
+      security: {
+        ...organization.security,
+        codeReviewRequired: false,
+        dependencySecurityMonitoring: false,
+        secretScanning: false,
+        automatedTestingBeforeDeployment: false,
+        cicdDeploymentProcess: false,
+        productionDeploymentApprovalRequired: false,
+        scanningCadence: "none",
+        penetrationTestingStrategy: "none",
+        patchingSlaCriticalDaysStatus: "not_defined",
+        patchingSlaHighDaysStatus: "not_defined",
+        vulnerabilityDisclosureProgramExists: false,
+        incidentResponsePlanExists: false,
+        incidentNotificationTimeline: "none",
+        customerNotificationProcess: "none",
+      },
+      access: {
+        ...organization.access,
+        mfaRequired: false,
+        sharedAccountsExist: true,
+        offboardingProcessExists: false,
+        accessReviewsPerformed: false,
+        leastPrivilege: false,
+        roleBasedAccess: false,
+        adminApprovalRequired: false,
+        passwordManagerRequired: false,
+        securityTrainingRequired: false,
+        confidentialityAgreementsRequired: false,
+      },
+    };
+    const businessActivities = [
+      {
+        id: "activity-ai",
+        sortOrder: 0,
+        name: "AI support",
+        purpose: "Support customers",
+        role: "controller",
+        legalBasis: ["contract"],
+        dataTypeIds: [],
+        retentionPolicy: "not_defined",
+        retentionDays: 0,
+        usesAi: true,
+        aiUseCases: "Draft support replies",
+        aiCustomerDataUsedForTraining: true,
+        aiCustomerDataSentToProviders: true,
+        aiHumanReviewOfOutputs: false,
+        aiUsersInformedWhenUsed: false,
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+      },
+    ];
+    const incompleteProviderUsage = {
+      id: "usage-incomplete",
+      serviceId: "service-platform",
+      serviceName: "Acme AI Platform",
+      organizationProviderId: "provider-incomplete",
+      providerName: "Incomplete processor",
+      systemType: null,
+      purpose: "Processing",
+      dataProcessingLevel: "limited" as const,
+      dataProcessed: ["Customer account data"],
+      dpaStatus: null,
+      dataRegions: ["us"],
+      notes: "",
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+    };
+    const completeProviderUsage = {
+      ...incompleteProviderUsage,
+      id: "usage-complete",
+      organizationProviderId: "provider-complete",
+      providerName: "Complete processor",
+      dpaStatus: "under_review" as const,
+    };
+    const first = evaluateAdvisorRules(rules, completeRiskProfile, {
+      businessActivities,
+      serviceProviderUsage: [
+        incompleteProviderUsage,
+        completeProviderUsage,
+      ],
+    });
+    const second = evaluateAdvisorRules(
+      rules,
+      {
+        ...completeRiskProfile,
+        services: [
+          {
+            ...completeRiskProfile.services[0],
+            privacy: {
+              ...completeRiskProfile.services[0].privacy,
+              cookieCategories: [],
+            },
+          },
+        ],
+        security: {
+          ...completeRiskProfile.security,
+          incidentResponsePlanExists: true,
+        },
+      },
+      { businessActivities, serviceProviderUsage: [completeProviderUsage] },
+    );
+    const triggeredIds = new Set(
+      [...first.recommendations, ...second.recommendations].map(({ id }) => id),
+    );
+
+    expect([...triggeredIds].sort()).toEqual(rules.map(({ id }) => id));
+    expect(
+      evaluateAdvisorRules(rules, completeRiskProfile, {
+        businessActivities,
+        serviceProviderUsage: [incompleteProviderUsage],
+      }).recommendations.some(({ id }) => id === "vendors.processor_dpa_missing"),
+    ).toBe(false);
   });
 });
 
@@ -517,16 +810,15 @@ describe("recommendations API", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({
-      recommendations: [
-        {
+    const body = response.json();
+    expect(body.recommendations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
           id: "security.mfa_required",
           severity: "high",
-        },
-      ],
-      countsBySeverity: {
-        high: 1,
-      },
-    });
+        }),
+      ]),
+    );
+    expect(body.countsBySeverity.high).toBe(4);
   });
 });

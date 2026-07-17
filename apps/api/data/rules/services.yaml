@@ -1,0 +1,21 @@
+- id: services.cookie_categories_missing
+  title: Cookie categories are not configured
+  category: services
+  severity: medium
+  frameworks: [gdpr, ccpa]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, ccpa]
+  condition:
+    any:
+      collection: services.all
+      where:
+        all:
+          - field: privacy.usesCookiesOrTrackingTechnologies
+            equals: true
+          - field: privacy.cookieCategories
+            empty: true
+  message: A service uses cookies or tracking technologies but has no enabled cookie categories.
+  recommendation: Record the cookie categories used by the service and identify which categories require consent.
+  relatedFields:
+    - services.all.privacy.usesCookiesOrTrackingTechnologies
+    - services.all.privacy.cookieCategories

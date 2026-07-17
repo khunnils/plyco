@@ -3,13 +3,67 @@
   category: activities
   severity: medium
   frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     any:
       collection: businessActivities
       where:
         field: retentionPolicy
-        in: [null, not_defined, not_set]
+        in: [not_defined, not_set]
   message: A processing activity does not have a defined retention policy.
   recommendation: Define how long data is retained for each processing activity, even if the answer is customer-defined or contract-defined.
   relatedFields:
     - businessActivities.retentionPolicy
+
+- id: activities.ai_human_oversight_gap
+  title: AI human oversight needs strengthening
+  category: activities
+  severity: medium
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      collection: businessActivities
+      where:
+        all:
+          - field: usesAi
+            equals: true
+          - any:
+              - field: aiHumanReviewOfOutputs
+                equals: false
+              - field: aiUsersInformedWhenUsed
+                equals: false
+  message: An AI-enabled activity lacks human review or user disclosure.
+  recommendation: Add proportionate human review for AI outputs and clearly tell affected users when AI is used.
+  relatedFields:
+    - businessActivities.usesAi
+    - businessActivities.aiHumanReviewOfOutputs
+    - businessActivities.aiUsersInformedWhenUsed
+
+- id: activities.ai_customer_data_exposure
+  title: AI use includes customer data exposure
+  category: activities
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      collection: businessActivities
+      where:
+        all:
+          - field: usesAi
+            equals: true
+          - any:
+              - field: aiCustomerDataUsedForTraining
+                equals: true
+              - field: aiCustomerDataSentToProviders
+                equals: true
+  message: An AI-enabled activity uses customer data for training or sends it to an AI provider.
+  recommendation: Confirm contractual, privacy, retention, and security safeguards for customer data used by AI systems and providers.
+  relatedFields:
+    - businessActivities.usesAi
+    - businessActivities.aiCustomerDataUsedForTraining
+    - businessActivities.aiCustomerDataSentToProviders

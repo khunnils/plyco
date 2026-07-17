@@ -13,6 +13,12 @@ API code is organized by feature area under `src/features`:
 - `features/documents` owns template routes, generated document routes, document persistence, and document-generation orchestration.
 - `features/waitlist` owns the public waitlist route, rate limiting, persistence contract, and Resend contact sync.
 
+Advisor rule inputs must be answered before evaluation: `null`, `undefined`,
+and `""` are unset, while booleans, zero, explicit codes, and arrays including
+`[]` are defined. All scalar inputs in a boolean condition must be defined;
+collection predicates skip incomplete items and continue evaluating complete
+items. Rule comparison values cannot contain `null`.
+
 Infrastructure, AI, and newsletter `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
 
 `POST /waitlist` is public. It validates the shared payload, applies a fixed-window IP limit, ignores populated honeypot submissions, idempotently upserts normalized emails, and syncs legitimate submissions to Resend contacts. Waitlist contact sync requires `RESEND_API_KEY` and `WAITLIST_RESEND_SEGMENT_ID`, sets Resend properties `source=waitlist` and `notes` to the submitted blocker or an empty string, and adds contacts to the configured `Plyco - Waitlist` segment. `DELETE /waitlist` is a machine-facing route protected by bearer `PLYCO_API_KEY`; it deletes the local waitlist entry by normalized email and best-effort removes the Resend contact from the waitlist segment. After persistence and Resend sync succeed, the public route best-effort captures `waitlist_signup_completed` through the server-side analytics client when `POSTHOG_PROJECT_TOKEN` is configured; analytics failures are logged and do not reject the signup. Production CORS allows configured `CLIENT_URL`, `WEB_URL`, and optional comma-separated `CORS_ALLOWED_ORIGINS`; other product routes remain protected by session authentication unless explicitly documented otherwise.

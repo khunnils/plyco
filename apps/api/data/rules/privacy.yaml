@@ -53,6 +53,8 @@
   category: privacy
   severity: high
   frameworks: [gdpr, ccpa]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, ccpa]
   condition:
     any:
       collection: services.all
@@ -67,13 +69,13 @@
                 equals: true
           - any:
               - field: privacy.cookieConsentMechanism
-                in: [null, none, not_set]
+                in: [none, not_defined, not_set]
               - field: privacy.nonEssentialCookiesBlockedUntilConsent
-                in: [null, false]
+                equals: false
               - field: privacy.cookieConsentWithdrawalMethod
-                empty: true
+                in: [none, not_defined, not_set]
               - field: privacy.globalPrivacyControlSupported
-                in: [null, false]
+                equals: false
   message: A service uses non-essential tracking cookies without complete consent transparency.
   recommendation: Confirm the service blocks consent-required cookies until consent, provides a consent mechanism and withdrawal method, and supports Global Privacy Control.
   relatedFields:
@@ -83,3 +85,68 @@
     - services.all.privacy.nonEssentialCookiesBlockedUntilConsent
     - services.all.privacy.cookieConsentWithdrawalMethod
     - services.all.privacy.globalPrivacyControlSupported
+
+- id: privacy.response_timeline_undefined
+  title: Privacy request timeline is undefined
+  category: privacy
+  severity: medium
+  frameworks: [gdpr, ccpa]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, ccpa]
+  condition:
+    field: privacy.responseTimelineDaysStatus
+    in: [not_defined, not_set]
+  message: The response timeline for privacy requests is explicitly not defined.
+  recommendation: Define a response target that supports the statutory timelines that apply to the organization.
+  relatedFields:
+    - privacy.responseTimelineDaysStatus
+    - privacy.responseTimelineDays
+
+- id: privacy.marketing_opt_out_missing
+  title: Marketing opt-out is not configured
+  category: privacy
+  severity: high
+  frameworks: [gdpr, ccpa]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, ccpa]
+  condition:
+    all:
+      - field: privacy.sendsMarketingEmails
+        equals: true
+      - field: privacy.marketingOptOutMethod
+        in: [none, not_defined, not_set]
+  message: Marketing emails are sent without a configured opt-out method.
+  recommendation: Provide a clear unsubscribe or equivalent opt-out method and honor requests promptly.
+  relatedFields:
+    - privacy.sendsMarketingEmails
+    - privacy.marketingOptOutMethod
+
+- id: privacy.production_data_in_development
+  title: Production data is used in development
+  category: privacy
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    field: privacy.productionDataInDevelopment
+    equals: true
+  message: Production customer data is used in development environments.
+  recommendation: Use synthetic or anonymized data in development, or apply production-equivalent access, masking, and retention controls.
+  relatedFields:
+    - privacy.productionDataInDevelopment
+
+- id: privacy.retention_policy_missing
+  title: Organization retention policy is missing
+  category: privacy
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    field: privacy.retentionPolicyExists
+    equals: false
+  message: The organization does not have a documented data retention policy.
+  recommendation: Document retention and deletion rules for customer, operational, security, and personnel data.
+  relatedFields:
+    - privacy.retentionPolicyExists

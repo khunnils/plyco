@@ -1,0 +1,105 @@
+- id: security.mfa_required
+  title: Infrastructure MFA is not enabled
+  category: infrastructure
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.mfaEnabled
+    equals: false
+  message: Multi-factor authentication is not enabled for infrastructure systems.
+  recommendation: Enable MFA for cloud, source control, and other infrastructure administration.
+  relatedFields:
+    - infrastructure.mfaEnabled
+
+- id: infrastructure.device_encryption_missing
+  title: Work device encryption is not required
+  category: infrastructure
+  severity: medium
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.encryptedDevicesRequired
+    equals: false
+  message: Workforce devices are not required to use full-disk encryption.
+  recommendation: Require managed work devices to use full-disk encryption and recovery-key controls.
+  relatedFields:
+    - infrastructure.encryptedDevicesRequired
+
+- id: security.backups_disabled
+  title: Backups are not enabled
+  category: infrastructure
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    field: infrastructure.backupsEnabled
+    equals: false
+  message: Backups are not enabled.
+  recommendation: Enable backups for production systems and document backup cadence, retention, and restore testing.
+  relatedFields:
+    - infrastructure.backupsEnabled
+    - infrastructure.backupCadence
+    - infrastructure.backupRetentionDays
+
+- id: infrastructure.logging_monitoring_gap
+  title: Logging and monitoring need strengthening
+  category: infrastructure
+  severity: high
+  frameworks: [soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [soc_2, iso_27001]
+  condition:
+    any:
+      - field: infrastructure.centralizedLoggingEnabled
+        equals: false
+      - field: infrastructure.securityMonitoring
+        in: [none, not_defined, not_set]
+  message: Centralized logging or active security monitoring is not in place.
+  recommendation: Centralize security-relevant logs and establish manual, outsourced, or automated monitoring with a clear response path.
+  relatedFields:
+    - infrastructure.centralizedLoggingEnabled
+    - infrastructure.securityMonitoring
+
+- id: infrastructure.encryption_gap
+  title: Data encryption controls need strengthening
+  category: infrastructure
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      - field: infrastructure.encryptionAtRest
+        equals: false
+      - field: infrastructure.encryptionInTransit
+        equals: false
+  message: Stored data or data in transit is not encrypted.
+  recommendation: Encrypt production data at rest and in transit using current, supported cryptographic standards.
+  relatedFields:
+    - infrastructure.encryptionAtRest
+    - infrastructure.encryptionInTransit
+    - infrastructure.atRestAlgorithm
+    - infrastructure.inTransitMinimumTlsVersion
+
+- id: infrastructure.vendor_governance_gap
+  title: Vendor governance controls need strengthening
+  category: infrastructure
+  severity: high
+  frameworks: [gdpr, soc_2, iso_27001]
+  appliesWhen:
+    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  condition:
+    any:
+      - field: infrastructure.vendorReviewRequired
+        equals: false
+      - field: infrastructure.dpaRequiredForProcessors
+        equals: false
+  message: Vendor reviews or processing agreements are not required.
+  recommendation: Review vendors before use and require appropriate data processing terms for providers that process personal data.
+  relatedFields:
+    - infrastructure.vendorReviewRequired
+    - infrastructure.dpaRequiredForProcessors

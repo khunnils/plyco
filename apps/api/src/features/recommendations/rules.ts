@@ -25,7 +25,6 @@ const conditionValueSchema = z.union([
   z.string(),
   z.number(),
   z.boolean(),
-  z.null(),
 ])
 
 type RuleCondition = {
@@ -271,6 +270,10 @@ const conditionMatches = (
   condition: RuleCondition,
   context: ReturnType<typeof recommendationContext> | unknown,
 ): boolean => {
+  if (!conditionInputsAreDefined(condition, context)) {
+    return false
+  }
+
   if (condition.all) {
     return condition.all.every((item) => conditionMatches(item, context))
   }
@@ -286,7 +289,11 @@ const conditionMatches = (
 
     return (
       Array.isArray(collection) &&
-      collection.some((item) => conditionMatches(anyCondition.where, item))
+      collection.some(
+        (item) =>
+          conditionInputsAreDefined(anyCondition.where, item) &&
+          conditionMatches(anyCondition.where, item),
+      )
     )
   }
 
@@ -333,11 +340,40 @@ const conditionMatches = (
   return false
 }
 
+const conditionInputsAreDefined = (
+  condition: RuleCondition,
+  context: ReturnType<typeof recommendationContext> | unknown,
+): boolean => {
+  if (condition.all) {
+    return condition.all.every((item) =>
+      conditionInputsAreDefined(item, context),
+    )
+  }
+
+  if (condition.any) {
+    if (Array.isArray(condition.any)) {
+      return condition.any.every((item) =>
+        conditionInputsAreDefined(item, context),
+      )
+    }
+
+    return isDefined(getByPath(context, condition.any.collection))
+  }
+
+  if (condition.anyComplianceGoal) {
+    return isDefined(getByPath(context, "company.complianceGoals"))
+  }
+
+  return condition.field
+    ? isDefined(getByPath(context, condition.field))
+    : false
+}
+
+const isDefined = (value: unknown) =>
+  value !== null && value !== undefined && value !== ""
+
 const isEmpty = (value: unknown) =>
-  value === null ||
-  value === undefined ||
-  value === "" ||
-  (Array.isArray(value) && value.length === 0)
+  value === "" || (Array.isArray(value) && value.length === 0)
 
 const getByPath = (value: unknown, path: string): unknown =>
   path.split(".").reduce<unknown>((current, key) => {
