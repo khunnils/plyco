@@ -413,13 +413,6 @@ export const validateServiceProfileCodes = async (
       service.availabilityRegions,
       `${fieldPrefix}.availabilityRegions`,
     ),
-    assertCodes(
-      vocabularyRepository,
-      organizationId,
-      "cookie_tracking_categories",
-      service.privacy.cookieTrackingCategories,
-      `${fieldPrefix}.privacy.cookieTrackingCategories`,
-    ),
     service.privacy.cookieConsentMechanism
       ? assertCode(
           vocabularyRepository,

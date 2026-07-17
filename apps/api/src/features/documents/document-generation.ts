@@ -4,6 +4,7 @@ import nunjucks from "nunjucks";
 import {
   type AccessProfile,
   type BusinessActivity,
+  cookieCategoryLabels,
   type DataHandlingProfile,
   type Document,
   type DocumentSourceFingerprint,
@@ -327,12 +328,16 @@ export class ReportContextBuilder {
       privacy: {
         usesCookiesOrTrackingTechnologies:
           service.privacy.usesCookiesOrTrackingTechnologies,
-        cookieTrackingCategories: service.privacy.cookieTrackingCategories,
-        cookieTrackingCategoryLabels: this.codeLabels(
-          vocabulary,
-          "cookie_tracking_categories",
-          service.privacy.cookieTrackingCategories,
+        cookieCategories: (service.privacy.cookieCategories ?? []).map(
+          (category) => ({
+            ...category,
+            label: cookieCategoryLabels[category.category],
+          }),
         ),
+        cookieConsentRequired:
+          service.privacy.cookieCategories?.some(
+            (category) => category.requiresConsent,
+          ) ?? false,
         cookieConsentMechanism: service.privacy.cookieConsentMechanism,
         cookieConsentMechanismLabel: service.privacy.cookieConsentMechanism
           ? this.codeLabels(vocabulary, "privacy_cookie_consent_mechanisms", [
@@ -341,8 +346,6 @@ export class ReportContextBuilder {
           : "",
         nonEssentialCookiesBlockedUntilConsent:
           service.privacy.nonEssentialCookiesBlockedUntilConsent,
-        cookieRejectAsEasyAsAccept:
-          service.privacy.cookieRejectAsEasyAsAccept,
         cookieConsentWithdrawalMethod:
           service.privacy.cookieConsentWithdrawalMethod,
         cookieConsentWithdrawalMethodLabel: service.privacy
@@ -353,9 +356,6 @@ export class ReportContextBuilder {
               [service.privacy.cookieConsentWithdrawalMethod],
             )[0]
           : "",
-        cookieConsentNoPretickedBoxes:
-          service.privacy.cookieConsentNoPretickedBoxes,
-        doNotTrackResponse: service.privacy.doNotTrackResponse,
         globalPrivacyControlSupported:
           service.privacy.globalPrivacyControlSupported,
         analyticsProviders: this.providerNames(analyticsProviders),

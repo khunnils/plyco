@@ -210,20 +210,44 @@
       "example": true
     },
     {
-      "key": "service.privacy.cookieTrackingCategories",
-      "label": "Cookie / tracking categories",
-      "type": "string[]",
+      "key": "service.privacy.cookieCategories",
+      "label": "Cookie categories",
+      "type": "object[]",
       "category": "Service",
-      "description": "Cookie and tracking category codes used by the primary service.",
-      "example": ["necessary", "analytics"]
+      "description": "Structured cookie categories used by the primary service, including label and consent requirement.",
+      "example": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }]
     },
     {
-      "key": "service.privacy.cookieTrackingCategoryLabels",
-      "label": "Cookie / tracking category labels",
-      "type": "string[]",
+      "key": "service.privacy.cookieCategories[].category",
+      "label": "Cookie category code",
+      "type": "string",
       "category": "Service",
-      "description": "Human-readable cookie and tracking category labels for the primary service.",
-      "example": ["Necessary", "Analytics"]
+      "description": "Fixed category code for an item in the primary service cookie category collection.",
+      "example": "necessary"
+    },
+    {
+      "key": "service.privacy.cookieCategories[].label",
+      "label": "Cookie category label",
+      "type": "string",
+      "category": "Service",
+      "description": "Human-readable label for an item in the primary service cookie category collection.",
+      "example": "Necessary"
+    },
+    {
+      "key": "service.privacy.cookieCategories[].requiresConsent",
+      "label": "Cookie category requires consent",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether an item in the primary service cookie category collection requires consent.",
+      "example": false
+    },
+    {
+      "key": "service.privacy.cookieConsentRequired",
+      "label": "Cookie consent required",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether any configured cookie category requires consent.",
+      "example": true
     },
     {
       "key": "service.privacy.cookieConsentMechanism",
@@ -250,14 +274,6 @@
       "example": true
     },
     {
-      "key": "service.privacy.cookieRejectAsEasyAsAccept",
-      "label": "Cookie reject as easy as accept",
-      "type": "boolean",
-      "category": "Service",
-      "description": "Whether rejecting non-essential cookies is as easy as accepting them.",
-      "example": true
-    },
-    {
       "key": "service.privacy.cookieConsentWithdrawalMethod",
       "label": "Cookie consent withdrawal method",
       "type": "string",
@@ -272,22 +288,6 @@
       "category": "Service",
       "description": "Human-readable cookie consent withdrawal method for the primary service.",
       "example": "Cookie preferences"
-    },
-    {
-      "key": "service.privacy.cookieConsentNoPretickedBoxes",
-      "label": "No pre-ticked cookie consent boxes",
-      "type": "boolean",
-      "category": "Service",
-      "description": "Whether the primary service avoids pre-ticked boxes for cookie consent.",
-      "example": true
-    },
-    {
-      "key": "service.privacy.doNotTrackResponse",
-      "label": "Do Not Track response",
-      "type": "boolean",
-      "category": "Service",
-      "description": "Whether the primary service responds to browser Do Not Track signals.",
-      "example": false
     },
     {
       "key": "service.privacy.globalPrivacyControlSupported",
@@ -327,9 +327,9 @@
           "url": "https://app.acme.example",
           "privacy": {
             "usesCookiesOrTrackingTechnologies": true,
-            "cookieTrackingCategories": ["necessary", "analytics"],
+            "cookieCategories": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }],
+            "cookieConsentRequired": false,
             "cookieConsentMechanism": "cookie_banner",
-            "doNotTrackResponse": false,
             "globalPrivacyControlSupported": true,
             "analyticsProviders": ["Google Analytics"],
             "advertisingProviders": ["Google Ads"],
@@ -450,18 +450,18 @@
           "example": true
         },
         {
-          "key": "privacy.cookieTrackingCategories",
-          "label": "Cookie / tracking categories",
-          "type": "string[]",
-          "description": "Cookie and tracking category codes used by this service.",
-          "example": ["necessary", "analytics"]
+          "key": "privacy.cookieCategories",
+          "label": "Cookie categories",
+          "type": "object[]",
+          "description": "Structured cookie categories used by this service, including label and consent requirement.",
+          "example": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }]
         },
         {
-          "key": "privacy.cookieTrackingCategoryLabels",
-          "label": "Cookie / tracking category labels",
-          "type": "string[]",
-          "description": "Human-readable cookie and tracking category labels for this service.",
-          "example": ["Necessary", "Analytics"]
+          "key": "privacy.cookieConsentRequired",
+          "label": "Cookie consent required",
+          "type": "boolean",
+          "description": "Whether any configured cookie category requires consent.",
+          "example": true
         },
         {
           "key": "privacy.cookieConsentMechanism",
@@ -485,13 +485,6 @@
           "example": true
         },
         {
-          "key": "privacy.cookieRejectAsEasyAsAccept",
-          "label": "Cookie reject as easy as accept",
-          "type": "boolean",
-          "description": "Whether rejecting non-essential cookies is as easy as accepting them.",
-          "example": true
-        },
-        {
           "key": "privacy.cookieConsentWithdrawalMethod",
           "label": "Cookie consent withdrawal method",
           "type": "string",
@@ -504,20 +497,6 @@
           "type": "string",
           "description": "Human-readable cookie consent withdrawal method for this service.",
           "example": "Cookie preferences"
-        },
-        {
-          "key": "privacy.cookieConsentNoPretickedBoxes",
-          "label": "No pre-ticked cookie consent boxes",
-          "type": "boolean",
-          "description": "Whether this service avoids pre-ticked boxes for cookie consent.",
-          "example": true
-        },
-        {
-          "key": "privacy.doNotTrackResponse",
-          "label": "Do Not Track response",
-          "type": "boolean",
-          "description": "Whether this service responds to browser Do Not Track signals.",
-          "example": false
         },
         {
           "key": "privacy.globalPrivacyControlSupported",

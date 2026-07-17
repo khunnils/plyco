@@ -115,7 +115,8 @@ export function createTestApp() {
         name: "Subprocessors",
         description:
           "A customer-facing subprocessor summary based on the organization's vendor data processors.",
-        content: "# {{ organization.name }} Data Processors and Subprocessors\n",
+        content:
+          "# {{ organization.name }} Data Processors and Subprocessors\n",
       },
       {
         slug: "privacy-policy",
@@ -139,13 +140,19 @@ export const serviceBody = {
   minimumUserAge: 13,
   privacy: {
     usesCookiesOrTrackingTechnologies: true,
-    cookieTrackingCategories: ["necessary", "analytics"],
+    cookieCategories: [
+      {
+        category: "necessary",
+        requiresConsent: false,
+      },
+      {
+        category: "analytics",
+        requiresConsent: true,
+      },
+    ],
     cookieConsentMechanism: "cookie_banner",
     nonEssentialCookiesBlockedUntilConsent: true,
-    cookieRejectAsEasyAsAccept: true,
     cookieConsentWithdrawalMethod: "cookie_preferences",
-    cookieConsentNoPretickedBoxes: true,
-    doNotTrackResponse: false,
     globalPrivacyControlSupported: true,
     primaryHostingRegion: "us",
   },

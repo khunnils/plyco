@@ -2,6 +2,8 @@
 
 Google OAuth or email magic-link authentication is required for workspace access. Signed-in profiles are persisted as users with email as the canonical unique identity, and organization access is enforced through memberships with `owner` and `member` roles. Google subjects are optional provider identities and are attached to an existing user when the verified Google email matches. Workspace routes include the organization id in the path, and each organization-scoped route verifies that the session user belongs to that organization before reading or mutating data. Owner-only account routes manage team invitations, member role changes, member removal, and organization deletion. External inputs are validated with `@plyco/shared` Zod schemas, and route handlers return structured JSON errors.
 
+Service cookie configuration is embedded in each service profile as up to four unique structured category records using the fixed `necessary`, `preferences`, `analytics`, and `marketing` enum. Each record stores an explicit consent requirement. The remaining consent answers are stored only when at least one category requires consent; cookie categories do not depend on organization vocabulary. The retired Do Not Track, equal-rejection, and no-pre-ticked-box controls are not part of the persistence or public API contract.
+
 API code is organized by feature area under `src/features`:
 
 - `features/accounts` owns persistent users, organization membership lookup, organization creation, team invitations, member management, and organization deletion.

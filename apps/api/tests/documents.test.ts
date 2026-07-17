@@ -145,7 +145,7 @@ describe("documents / templates API", () => {
             minimumUserAge: 0,
             privacy: {
               ...storedService.privacy,
-              cookieTrackingCategories: [],
+              cookieCategories: [],
               usesCookiesOrTrackingTechnologies: false,
             },
           },
@@ -172,10 +172,8 @@ describe("documents / templates API", () => {
     expect(context.service.userTypesAnswered).toBe(false);
     expect(context.service.minimumUserAgeAnswered).toBe(true);
     expect(context.service.minimumUserAgeHasValue).toBe(false);
-    expect(context.service.privacy.cookieTrackingCategoriesAnswered).toBe(true);
-    expect(context.service.privacy.cookieTrackingCategoriesHasValue).toBe(
-      false,
-    );
+    expect(context.service.privacy.cookieCategoriesAnswered).toBe(true);
+    expect(context.service.privacy.cookieCategoriesHasValue).toBe(false);
     expect(context.vendors.dataProcessorsHasValue).toBe(false);
   });
 
@@ -205,10 +203,13 @@ describe("documents / templates API", () => {
           key: "service.privacy.usesCookiesOrTrackingTechnologies",
         }),
         expect.objectContaining({
-          key: "service.privacy.cookieTrackingCategories",
+          key: "service.privacy.cookieCategories",
         }),
         expect.objectContaining({
-          key: "service.privacy.cookieTrackingCategoryLabels",
+          key: "service.privacy.cookieCategories[].requiresConsent",
+        }),
+        expect.objectContaining({
+          key: "service.privacy.cookieConsentRequired",
         }),
         expect.objectContaining({
           key: "service.privacy.cookieConsentMechanism",
@@ -220,18 +221,11 @@ describe("documents / templates API", () => {
           key: "service.privacy.nonEssentialCookiesBlockedUntilConsent",
         }),
         expect.objectContaining({
-          key: "service.privacy.cookieRejectAsEasyAsAccept",
-        }),
-        expect.objectContaining({
           key: "service.privacy.cookieConsentWithdrawalMethod",
         }),
         expect.objectContaining({
           key: "service.privacy.cookieConsentWithdrawalMethodLabel",
         }),
-        expect.objectContaining({
-          key: "service.privacy.cookieConsentNoPretickedBoxes",
-        }),
-        expect.objectContaining({ key: "service.privacy.doNotTrackResponse" }),
         expect.objectContaining({
           key: "service.privacy.globalPrivacyControlSupported",
         }),
@@ -340,16 +334,24 @@ describe("documents / templates API", () => {
       minimumUserAge: 13,
       privacy: {
         usesCookiesOrTrackingTechnologies: true,
-        cookieTrackingCategories: ["necessary", "analytics"],
-        cookieTrackingCategoryLabels: ["Necessary", "Analytics"],
+        cookieCategories: [
+          {
+            category: "necessary",
+            label: "Necessary",
+            requiresConsent: false,
+          },
+          {
+            category: "analytics",
+            label: "Analytics",
+            requiresConsent: true,
+          },
+        ],
+        cookieConsentRequired: true,
         cookieConsentMechanism: "cookie_banner",
         cookieConsentMechanismLabel: "Cookie banner",
         nonEssentialCookiesBlockedUntilConsent: true,
-        cookieRejectAsEasyAsAccept: true,
         cookieConsentWithdrawalMethod: "cookie_preferences",
         cookieConsentWithdrawalMethodLabel: "Cookie preferences",
-        cookieConsentNoPretickedBoxes: true,
-        doNotTrackResponse: false,
         globalPrivacyControlSupported: true,
         analyticsProviders: [],
         analyticsProviderIds: [],
@@ -511,12 +513,8 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain(
       "We do not set non-essential cookies or similar tracking technologies until you have given consent.",
     );
-    expect(renderedContent).toContain(
-      "You can reject non-essential cookies as easily as you can accept them.",
-    );
-    expect(renderedContent).toContain(
-      "We do not use pre-ticked boxes for cookie consent.",
-    );
+    expect(renderedContent).toContain("**Necessary**");
+    expect(renderedContent).toContain("**Analytics**");
     expect(renderedContent).toContain(
       "You can withdraw cookie consent through Cookie preferences.",
     );
@@ -851,9 +849,7 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain("Profile and billing contact details");
     expect(renderedContent).toContain("_(sensitive)_");
     expect(renderedContent).toContain("**Usage data**");
-    expect(renderedContent).not.toContain(
-      "_(sensitive)_\n\n- **Usage data**",
-    );
+    expect(renderedContent).not.toContain("_(sensitive)_\n\n- **Usage data**");
     expect(renderedContent).toContain("## Shared responsibility");
     expect(renderedContent).not.toContain("| Vendor |");
     expect(renderedContent).not.toContain("DPA status");
@@ -1079,7 +1075,9 @@ describe("documents / templates API", () => {
     );
     expect(renderedContent).not.toContain("managed using none");
     expect(renderedContent).not.toContain("managed using None");
-    expect(renderedContent).not.toContain("restoration is tested on a none basis");
+    expect(renderedContent).not.toContain(
+      "restoration is tested on a none basis",
+    );
   });
 
   it("previews draft templates without generating documents", async () => {
@@ -1498,16 +1496,18 @@ describe("documents / templates API", () => {
         ...profileBody,
         services: [
           {
-            ...serviceBody,
-            privacy: {
-              ...serviceBody.privacy,
-              cookieTrackingCategories: [
-                "necessary",
-                "analytics",
-                "preference",
-              ],
-            },
+          ...serviceBody,
+          privacy: {
+            ...serviceBody.privacy,
+            cookieCategories: [
+              ...serviceBody.privacy.cookieCategories,
+              {
+                category: "preferences",
+                requiresConsent: true,
+              },
+            ],
           },
+        },
         ],
       });
     const cookieUnchangedDocumentsResponse = await app.inject({
@@ -1565,7 +1565,11 @@ describe("documents / templates API", () => {
 
   it("reports named stale reasons when subprocessors change", async () => {
     const app = await createTestApp();
-    const profileResponse = await saveProfileDraft(app, "org-test", profileBody);
+    const profileResponse = await saveProfileDraft(
+      app,
+      "org-test",
+      profileBody,
+    );
     const serviceId = profileResponse.json().organization.services[0].id;
     const createTemplateResponse = await app.inject({
       method: "POST",

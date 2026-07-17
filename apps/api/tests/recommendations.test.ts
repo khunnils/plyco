@@ -1,18 +1,18 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest";
 
-import { createApp } from "../src/app.js"
+import { createApp } from "../src/app.js";
 import {
   evaluateAdvisorRules,
   parseAdvisorRuleFile,
   StaticAdvisorRuleSource,
   type AdvisorRule,
-} from "../src/features/recommendations/rules.js"
+} from "../src/features/recommendations/rules.js";
 import {
   createTestApp,
   profileBody,
   saveProfileDraft,
   serviceBody,
-} from "./helpers.js"
+} from "./helpers.js";
 
 const mfaRule: AdvisorRule = {
   id: "security.mfa_required",
@@ -41,9 +41,9 @@ const mfaRule: AdvisorRule = {
     "security.authentication.mfaRequired",
     "infrastructure.mfaEnabled",
   ],
-}
+};
 
-const organization = ({
+const organization = {
   id: "org-test",
   ...profileBody,
   services: [
@@ -57,7 +57,7 @@ const organization = ({
   ],
   createdAt: "2026-05-15T00:00:00.000Z",
   updatedAt: "2026-05-15T00:00:00.000Z",
-} as const)
+} as const;
 
 describe("recommendation rules", () => {
   it("parses YAML rule files", () => {
@@ -80,10 +80,10 @@ describe("recommendation rules", () => {
   relatedFields:
     - security.authentication.mfaRequired
     - infrastructure.mfaEnabled
-`)
+`);
 
-    expect(rules).toEqual([mfaRule])
-  })
+    expect(rules).toEqual([mfaRule]);
+  });
 
   it("returns an MFA recommendation when MFA is false and SOC 2 is a goal", () => {
     const response = evaluateAdvisorRules([mfaRule], {
@@ -96,21 +96,21 @@ describe("recommendation rules", () => {
         ...organization.company,
         complianceGoals: ["soc_2"],
       },
-    })
+    });
 
     expect(response.recommendations).toMatchObject([
       {
         id: "security.mfa_required",
         severity: "high",
       },
-    ])
+    ]);
     expect(response.countsBySeverity).toEqual({
       low: 0,
       medium: 0,
       high: 1,
       critical: 0,
-    })
-  })
+    });
+  });
 
   it("does not return the MFA recommendation when MFA is true", () => {
     const response = evaluateAdvisorRules([mfaRule], {
@@ -123,10 +123,10 @@ describe("recommendation rules", () => {
         ...organization.company,
         complianceGoals: ["soc_2"],
       },
-    })
+    });
 
-    expect(response.recommendations).toEqual([])
-  })
+    expect(response.recommendations).toEqual([]);
+  });
 
   it("returns an MFA recommendation when infrastructure MFA is disabled", () => {
     const response = evaluateAdvisorRules([mfaRule], {
@@ -143,12 +143,12 @@ describe("recommendation rules", () => {
         ...organization.company,
         complianceGoals: ["soc_2"],
       },
-    })
+    });
 
     expect(response.recommendations).toMatchObject([
       { id: "security.mfa_required", severity: "high" },
-    ])
-  })
+    ]);
+  });
 
   it("does not return the MFA recommendation when compliance goals do not match", () => {
     const response = evaluateAdvisorRules([mfaRule], {
@@ -161,10 +161,10 @@ describe("recommendation rules", () => {
         ...organization.company,
         complianceGoals: ["gdpr"],
       },
-    })
+    });
 
-    expect(response.recommendations).toEqual([])
-  })
+    expect(response.recommendations).toEqual([]);
+  });
 
   it("does not treat unanswered MFA as false", () => {
     const response = evaluateAdvisorRules([mfaRule], {
@@ -177,10 +177,10 @@ describe("recommendation rules", () => {
         ...organization.company,
         complianceGoals: ["soc_2"],
       },
-    })
+    });
 
-    expect(response.recommendations).toEqual([])
-  })
+    expect(response.recommendations).toEqual([]);
+  });
 
   it("supports in, empty, nested all, and appliesWhen predicates", () => {
     const response = evaluateAdvisorRules(
@@ -242,14 +242,15 @@ describe("recommendation rules", () => {
           transferMechanisms: [],
         },
       },
-    )
+    );
 
-    expect(response.recommendations.map((recommendation) => recommendation.id))
-      .toEqual([
-        "privacy.gdpr_transfer_mechanism_missing",
-        "security.vulnerability_scanning_missing",
-      ])
-  })
+    expect(
+      response.recommendations.map((recommendation) => recommendation.id),
+    ).toEqual([
+      "privacy.gdpr_transfer_mechanism_missing",
+      "security.vulnerability_scanning_missing",
+    ]);
+  });
 
   it("supports collection predicates and notIn", () => {
     const response = evaluateAdvisorRules(
@@ -284,7 +285,8 @@ describe("recommendation rules", () => {
         },
         {
           id: "privacy.cookies_tracking_without_consent",
-          title: "Non-essential tracking cookies need stronger consent transparency",
+          title:
+            "Non-essential tracking cookies need stronger consent transparency",
           category: "privacy",
           severity: "high",
           frameworks: ["gdpr"],
@@ -298,8 +300,13 @@ describe("recommendation rules", () => {
                     equals: true,
                   },
                   {
-                    field: "privacy.cookieTrackingCategories",
-                    includesAny: ["analytics", "marketing", "advertising"],
+                    any: {
+                      collection: "privacy.cookieCategories",
+                      where: {
+                        field: "requiresConsent",
+                        equals: true,
+                      },
+                    },
                   },
                   {
                     any: [
@@ -308,21 +315,16 @@ describe("recommendation rules", () => {
                         in: [null, "none", "not_set"],
                       },
                       {
-                        field:
-                          "privacy.nonEssentialCookiesBlockedUntilConsent",
-                        in: [null, false],
-                      },
-                      {
-                        field: "privacy.cookieRejectAsEasyAsAccept",
-                        in: [null, false],
-                      },
-                      {
-                        field: "privacy.cookieConsentNoPretickedBoxes",
+                        field: "privacy.nonEssentialCookiesBlockedUntilConsent",
                         in: [null, false],
                       },
                       {
                         field: "privacy.cookieConsentWithdrawalMethod",
                         empty: true,
+                      },
+                      {
+                        field: "privacy.globalPrivacyControlSupported",
+                        in: [null, false],
                       },
                     ],
                   },
@@ -333,13 +335,12 @@ describe("recommendation rules", () => {
           message:
             "A service uses non-essential tracking cookies without complete consent transparency.",
           recommendation:
-            "Confirm the service blocks non-essential cookies until consent, offers rejection as easily as acceptance, avoids pre-ticked boxes, and has a clear withdrawal method. Cookie purposes, providers, and durations should be available through the configured consent mechanism.",
+            "Confirm the service blocks consent-required cookies until consent, provides a consent mechanism and withdrawal method, and supports Global Privacy Control.",
           relatedFields: [
             "services.all.privacy.cookieConsentMechanism",
             "services.all.privacy.nonEssentialCookiesBlockedUntilConsent",
-            "services.all.privacy.cookieRejectAsEasyAsAccept",
-            "services.all.privacy.cookieConsentNoPretickedBoxes",
             "services.all.privacy.cookieConsentWithdrawalMethod",
+            "services.all.privacy.globalPrivacyControlSupported",
           ],
         },
       ],
@@ -351,12 +352,16 @@ describe("recommendation rules", () => {
             privacy: {
               ...organization.services[0].privacy,
               usesCookiesOrTrackingTechnologies: true,
-              cookieTrackingCategories: ["analytics"],
+              cookieCategories: [
+                {
+                  category: "analytics",
+                  requiresConsent: true,
+                },
+              ],
               cookieConsentMechanism: null,
               nonEssentialCookiesBlockedUntilConsent: null,
-              cookieRejectAsEasyAsAccept: null,
               cookieConsentWithdrawalMethod: null,
-              cookieConsentNoPretickedBoxes: null,
+              globalPrivacyControlSupported: null,
             },
           },
         ],
@@ -381,14 +386,15 @@ describe("recommendation rules", () => {
           },
         ],
       },
-    )
+    );
 
-    expect(response.recommendations.map((recommendation) => recommendation.id))
-      .toEqual([
-        "vendors.processor_dpa_missing",
-        "privacy.cookies_tracking_without_consent",
-      ])
-  })
+    expect(
+      response.recommendations.map((recommendation) => recommendation.id),
+    ).toEqual([
+      "vendors.processor_dpa_missing",
+      "privacy.cookies_tracking_without_consent",
+    ]);
+  });
 
   it("does not flag necessary-only cookies for non-essential consent transparency", () => {
     const response = evaluateAdvisorRules(
@@ -410,8 +416,13 @@ describe("recommendation rules", () => {
                     equals: true,
                   },
                   {
-                    field: "privacy.cookieTrackingCategories",
-                    includesAny: ["analytics", "marketing", "advertising"],
+                    any: {
+                      collection: "privacy.cookieCategories",
+                      where: {
+                        field: "requiresConsent",
+                        equals: true,
+                      },
+                    },
                   },
                   {
                     any: [
@@ -420,8 +431,7 @@ describe("recommendation rules", () => {
                         in: [null, "none", "not_set"],
                       },
                       {
-                        field:
-                          "privacy.nonEssentialCookiesBlockedUntilConsent",
+                        field: "privacy.nonEssentialCookiesBlockedUntilConsent",
                         in: [null, false],
                       },
                     ],
@@ -434,7 +444,7 @@ describe("recommendation rules", () => {
             "A service uses non-essential tracking cookies without complete consent transparency.",
           recommendation:
             "Confirm the service blocks non-essential cookies until consent.",
-          relatedFields: ["services.all.privacy.cookieTrackingCategories"],
+          relatedFields: ["services.all.privacy.cookieCategories"],
         },
       ],
       {
@@ -445,32 +455,37 @@ describe("recommendation rules", () => {
             privacy: {
               ...organization.services[0].privacy,
               usesCookiesOrTrackingTechnologies: true,
-              cookieTrackingCategories: ["necessary"],
+              cookieCategories: [
+                {
+                  category: "necessary",
+                  requiresConsent: false,
+                },
+              ],
               cookieConsentMechanism: null,
               nonEssentialCookiesBlockedUntilConsent: null,
             },
           },
         ],
       },
-    )
+    );
 
-    expect(response.recommendations).toEqual([])
-  })
-})
+    expect(response.recommendations).toEqual([]);
+  });
+});
 
 describe("recommendations API", () => {
   it("returns empty recommendations when the organization has no profile", async () => {
     const app = await createApp({
       auth: false,
       advisorRuleSource: new StaticAdvisorRuleSource([mfaRule]),
-    })
+    });
 
     const response = await app.inject({
       method: "GET",
       url: "/organizations/org-test/recommendations",
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       recommendations: [],
       countsBySeverity: {
@@ -479,29 +494,29 @@ describe("recommendations API", () => {
         high: 0,
         critical: 0,
       },
-    })
-  })
+    });
+  });
 
   it("evaluates recommendations for the current organization profile", async () => {
-    const app = await createTestApp()
+    const app = await createTestApp();
     await saveProfileDraft(app, "org-test", {
-        ...profileBody,
-        company: {
+      ...profileBody,
+      company: {
           ...profileBody.company,
           complianceGoals: ["soc_2"],
         },
         infrastructure: {
-          ...profileBody.infrastructure,
-          mfaEnabled: false,
-        },
-      })
+        ...profileBody.infrastructure,
+        mfaEnabled: false,
+      },
+    });
 
     const response = await app.inject({
       method: "GET",
       url: "/organizations/org-test/recommendations",
-    })
+    });
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       recommendations: [
         {
@@ -512,6 +527,6 @@ describe("recommendations API", () => {
       countsBySeverity: {
         high: 1,
       },
-    })
-  })
-})
+    });
+  });
+});

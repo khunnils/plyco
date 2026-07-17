@@ -74,11 +74,6 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
     ["not_appointed", "Not appointed"],
     ["not_required", "Not required"],
   ]),
-  codeSet("cookie_tracking_categories", "Cookie / tracking categories", false, [
-    ["necessary", "Necessary"],
-    ["analytics", "Analytics"],
-    ["preference", "Preference"],
-  ]),
   codeSet("privacy_cookie_consent_mechanisms", "Privacy cookie consent mechanisms", false, [
     ["cookie_banner", "Cookie banner"],
   ]),

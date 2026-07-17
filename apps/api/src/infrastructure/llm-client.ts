@@ -4,15 +4,15 @@ import {
   type GenerateContentResponseUsageMetadata,
   type SchemaUnion,
   type Tool,
-} from "@google/genai"
-import { startObservation } from "@langfuse/tracing"
+} from "@google/genai";
+import { startObservation } from "@langfuse/tracing";
 
-import { ApiError } from "./errors.js"
+import { ApiError } from "./errors.js";
 import {
   flushInstrumentation,
   isInstrumentationEnabled,
-} from "./instrumentation.js"
-import { type ResolvedPrompt } from "./prompt-client.js"
+} from "./instrumentation.js";
+import { type ResolvedPrompt } from "./prompt-client.js";
 
 export interface LlmJsonClient {
   generateJson({
@@ -21,16 +21,16 @@ export interface LlmJsonClient {
     responseSchema,
     tools,
   }: {
-    model: string
-    prompt: ResolvedPrompt
-    responseSchema: SchemaUnion
-    tools?: Tool[]
-  }): Promise<unknown>
+    model: string;
+    prompt: ResolvedPrompt;
+    responseSchema: SchemaUnion;
+    tools?: Tool[];
+  }): Promise<unknown>;
 }
 
 export type ProviderLookupResponseSchemaOptions = {
-  categories: string[]
-}
+  categories: string[];
+};
 
 export type OrganizationLookupCodeSetId =
   | "industries"
@@ -38,82 +38,100 @@ export type OrganizationLookupCodeSetId =
   | "compliance_goals"
   | "service_user_types"
   | "service_customer_types"
-  | "cookie_tracking_categories"
   | "privacy_cookie_consent_mechanisms"
   | "privacy_cookie_consent_withdrawal_methods"
   | "subject_types"
   | "collection_methods"
   | "activity_role"
   | "legal_basis"
-  | "activity_retention_policies"
+  | "activity_retention_policies";
 
 export type OrganizationLookupResponseSchemaOptions = Record<
   OrganizationLookupCodeSetId,
   string[]
->
+>;
 
-const nullableStringSchema = { type: Type.STRING, nullable: true } as const
-const nullableBooleanSchema = { type: Type.BOOLEAN, nullable: true } as const
-const nullableIntegerSchema = { type: Type.INTEGER, nullable: true } as const
-const codeIdArraySchema = (codes: string[]) => ({
-  type: Type.ARRAY,
-  items: { type: Type.STRING, enum: codes },
-  nullable: true,
-}) as const
+const nullableStringSchema = { type: Type.STRING, nullable: true } as const;
+const nullableBooleanSchema = { type: Type.BOOLEAN, nullable: true } as const;
+const nullableIntegerSchema = { type: Type.INTEGER, nullable: true } as const;
+const codeIdArraySchema = (codes: string[]) =>
+  ({
+    type: Type.ARRAY,
+    items: { type: Type.STRING, enum: codes },
+    nullable: true,
+  }) as const;
 
-const nullableCodeIdSchema = (codes: string[]) => ({
-  type: Type.STRING,
-  enum: codes,
-  nullable: true,
-}) as const
+const nullableCodeIdSchema = (codes: string[]) =>
+  ({
+    type: Type.STRING,
+    enum: codes,
+    nullable: true,
+  }) as const;
 
 const servicePrivacyResponseSchema = (
   codeSets: OrganizationLookupResponseSchemaOptions,
-) => ({
-  type: Type.OBJECT,
-  properties: {
-    usesCookiesOrTrackingTechnologies: nullableBooleanSchema,
-    cookieTrackingCategories: codeIdArraySchema(
-      codeSets.cookie_tracking_categories,
-    ),
-    cookieConsentMechanism: nullableCodeIdSchema(
-      codeSets.privacy_cookie_consent_mechanisms,
-    ),
-    cookieConsentWithdrawalMethod: nullableCodeIdSchema(
-      codeSets.privacy_cookie_consent_withdrawal_methods,
-    ),
-    doNotTrackResponse: nullableBooleanSchema,
-    globalPrivacyControlSupported: nullableBooleanSchema,
-    primaryHostingRegion: nullableCodeIdSchema(codeSets.regions),
-  },
-  required: [
-    "usesCookiesOrTrackingTechnologies",
-    "cookieTrackingCategories",
-    "cookieConsentMechanism",
-    "cookieConsentWithdrawalMethod",
-    "doNotTrackResponse",
-    "globalPrivacyControlSupported",
-    "primaryHostingRegion",
-  ],
-}) satisfies SchemaUnion
+) =>
+  ({
+    type: Type.OBJECT,
+    properties: {
+      usesCookiesOrTrackingTechnologies: nullableBooleanSchema,
+      cookieCategories: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            category: {
+              type: Type.STRING,
+              enum: ["necessary", "preferences", "analytics", "marketing"],
+            },
+            requiresConsent: {
+              type: Type.BOOLEAN,
+              description:
+                "Set false for necessary and true for preferences, analytics, and marketing.",
+            },
+          },
+          required: ["category", "requiresConsent"],
+        },
+        nullable: true,
+      },
+      cookieConsentMechanism: nullableCodeIdSchema(
+        codeSets.privacy_cookie_consent_mechanisms,
+      ),
+      nonEssentialCookiesBlockedUntilConsent: nullableBooleanSchema,
+      cookieConsentWithdrawalMethod: nullableCodeIdSchema(
+        codeSets.privacy_cookie_consent_withdrawal_methods,
+      ),
+      globalPrivacyControlSupported: nullableBooleanSchema,
+      primaryHostingRegion: nullableCodeIdSchema(codeSets.regions),
+    },
+    required: [
+      "usesCookiesOrTrackingTechnologies",
+      "cookieCategories",
+      "cookieConsentMechanism",
+      "nonEssentialCookiesBlockedUntilConsent",
+      "cookieConsentWithdrawalMethod",
+      "globalPrivacyControlSupported",
+      "primaryHostingRegion",
+    ],
+  }) satisfies SchemaUnion;
 
 const usageDetails = (
   usageMetadata: GenerateContentResponseUsageMetadata | undefined,
 ) => {
   if (!usageMetadata) {
-    return undefined
+    return undefined;
   }
 
   return {
     input: usageMetadata.promptTokenCount ?? 0,
     output: usageMetadata.candidatesTokenCount ?? 0,
     total: usageMetadata.totalTokenCount ?? 0,
-  }
-}
+  };
+};
 
 const llmErrorDetails = (error: unknown) => {
   if (!(error instanceof Error)) {
-    return undefined
+    return undefined;
   }
 
   return {
@@ -125,16 +143,16 @@ const llmErrorDetails = (error: unknown) => {
         : "statusCode" in error && typeof error.statusCode === "number"
           ? error.statusCode
           : undefined,
-  }
-}
+  };
+};
 
-const isValidTraceId = (traceId: string) => !/^0+$/.test(traceId)
+const isValidTraceId = (traceId: string) => !/^0+$/.test(traceId);
 
 export class GeminiJsonClient implements LlmJsonClient {
-  private readonly client: GoogleGenAI
+  private readonly client: GoogleGenAI;
 
   constructor(apiKey: string) {
-    this.client = new GoogleGenAI({ apiKey })
+    this.client = new GoogleGenAI({ apiKey });
   }
 
   async generateJson({
@@ -143,12 +161,12 @@ export class GeminiJsonClient implements LlmJsonClient {
     responseSchema,
     tools,
   }: {
-    model: string
-    prompt: ResolvedPrompt
-    responseSchema: SchemaUnion
-    tools?: Tool[]
+    model: string;
+    prompt: ResolvedPrompt;
+    responseSchema: SchemaUnion;
+    tools?: Tool[];
   }): Promise<unknown> {
-    const operationName = prompt.metadata.name
+    const operationName = prompt.metadata.name;
     const generation = startObservation(
       operationName,
       {
@@ -157,8 +175,8 @@ export class GeminiJsonClient implements LlmJsonClient {
         prompt: prompt.metadata,
       },
       { asType: "generation" },
-    )
-    const traceId = generation.traceId
+    );
+    const traceId = generation.traceId;
 
     try {
       const response = await this.client.models.generateContent({
@@ -169,22 +187,22 @@ export class GeminiJsonClient implements LlmJsonClient {
           responseSchema,
           tools,
         },
-      })
-      const text = response.text
+      });
+      const text = response.text;
 
       if (!text) {
         throw new ApiError(
           "LLM_EMPTY_RESPONSE",
           "LLM generation returned an empty response.",
           502,
-        )
+        );
       }
 
-      const parsed = JSON.parse(text) as unknown
+      const parsed = JSON.parse(text) as unknown;
       generation.update({
         output: parsed,
         usageDetails: usageDetails(response.usageMetadata),
-      })
+      });
       console.info(
         JSON.stringify({
           msg: "llm generation completed",
@@ -192,20 +210,20 @@ export class GeminiJsonClient implements LlmJsonClient {
           model,
           tracingEnabled: isInstrumentationEnabled(),
         }),
-      )
+      );
 
-      return parsed
+      return parsed;
     } catch (error) {
-      const details = llmErrorDetails(error)
+      const details = llmErrorDetails(error);
       generation.update({
         level: "ERROR",
         statusMessage:
           error instanceof Error ? error.message : "LLM generation failed.",
         output: details,
-      })
+      });
 
       if (error instanceof ApiError) {
-        throw error
+        throw error;
       }
 
       if (error instanceof SyntaxError) {
@@ -213,7 +231,7 @@ export class GeminiJsonClient implements LlmJsonClient {
           "LLM_INVALID_JSON",
           "LLM generation returned invalid JSON.",
           502,
-        )
+        );
       }
 
       throw new ApiError(
@@ -221,10 +239,10 @@ export class GeminiJsonClient implements LlmJsonClient {
         "LLM generation failed.",
         502,
         details,
-      )
+      );
     } finally {
-      generation.end()
-      await flushInstrumentation()
+      generation.end();
+      await flushInstrumentation();
       if (!isValidTraceId(traceId)) {
         console.warn(
           JSON.stringify({
@@ -232,7 +250,7 @@ export class GeminiJsonClient implements LlmJsonClient {
             generationName: operationName,
             tracingEnabled: isInstrumentationEnabled(),
           }),
-        )
+        );
       }
     }
   }
@@ -240,10 +258,11 @@ export class GeminiJsonClient implements LlmJsonClient {
 
 export const providerLookupResponseSchema = ({
   categories,
-}: ProviderLookupResponseSchemaOptions) => ({
-  type: Type.OBJECT,
-  properties: {
-    organization: {
+}: ProviderLookupResponseSchemaOptions) =>
+  ({
+    type: Type.OBJECT,
+    properties: {
+      organization: {
       type: Type.OBJECT,
       properties: {
         id: { type: Type.STRING },
@@ -282,10 +301,10 @@ export const providerLookupResponseSchema = ({
         "securityCriticality",
         "handlesCustomerData",
       ],
+      },
     },
-  },
-  required: ["organization", "provider"],
-}) satisfies SchemaUnion
+    required: ["organization", "provider"],
+  }) satisfies SchemaUnion;
 
 export const organizationLookupResponseSchema = (
   codeSets: OrganizationLookupResponseSchemaOptions,
@@ -458,4 +477,4 @@ export const organizationLookupResponseSchema = (
       "policyLinks",
       "warnings",
     ],
-  }) satisfies SchemaUnion
+  }) satisfies SchemaUnion;

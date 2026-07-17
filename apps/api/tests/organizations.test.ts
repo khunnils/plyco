@@ -660,7 +660,10 @@ describe("organizations API", () => {
       profileBody.security,
     );
 
-    const getResponse = await app.inject({ method: "GET", url: "/organizations/org-test" });
+    const getResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test",
+    });
 
     expect(getResponse.statusCode).toBe(200);
     expect(getResponse.json().organization.company.companyName).toBe("Acme AI");
@@ -715,7 +718,7 @@ describe("organizations API", () => {
           privacy: {
             ...profileBody.services[0].privacy,
             usesCookiesOrTrackingTechnologies: false,
-            cookieTrackingCategories: [],
+            cookieCategories: [],
             cookieConsentMechanism: "",
           },
         },
@@ -730,13 +733,25 @@ describe("organizations API", () => {
       },
     };
     const app = await createTestApp();
-    const saveResponse = await saveProfileDraft(app, "org-test", explicitEmptyProfile);
+    const saveResponse = await saveProfileDraft(
+      app,
+      "org-test",
+      explicitEmptyProfile,
+    );
 
     expect(saveResponse.statusCode).toBe(200);
     expect(saveResponse.json().organization.company.industries).toEqual([]);
     expect(saveResponse.json().organization.company.handlesPii).toBe(false);
     expect(saveResponse.json().organization.services[0].userTypes).toEqual([]);
     expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0);
+    expect(saveResponse.json().organization.services[0].privacy).toMatchObject({
+      usesCookiesOrTrackingTechnologies: false,
+      cookieCategories: null,
+      cookieConsentMechanism: null,
+      nonEssentialCookiesBlockedUntilConsent: null,
+      cookieConsentWithdrawalMethod: null,
+      globalPrivacyControlSupported: null,
+    });
     expect(saveResponse.json().organization.privacy.supportedRights).toEqual(
       [],
     );
@@ -861,35 +876,33 @@ describe("organizations API", () => {
     });
   });
 
-  it("rejects service cookie tracking codes that are not in organization vocabulary", async () => {
+  it("rejects unsupported cookie categories and invalid consent vocabulary", async () => {
     const app = await createTestApp();
     const invalidCookieTypeResponse = await saveProfileDraft(app, "org-test", {
-        ...profileBody,
+      ...profileBody,
         services: [
           {
-            ...serviceBody,
-            privacy: {
-              ...serviceBody.privacy,
-              cookieTrackingCategories: ["not_a_real_cookie_type"],
-            },
+          ...serviceBody,
+          privacy: {
+            ...serviceBody.privacy,
+            cookieCategories: [
+              {
+                category: "not_a_real_cookie_type",
+                requiresConsent: true,
+              },
+            ],
           },
-        ],
-      });
-
-    expect(invalidCookieTypeResponse.statusCode).toBe(400);
-    expect(invalidCookieTypeResponse.json()).toMatchObject({
-      error: {
-        code: "CODE_NOT_FOUND",
-        details: {
-          codeSetId: "cookie_tracking_categories",
-          field: "services.0.privacy.cookieTrackingCategories",
-          value: "not_a_real_cookie_type",
         },
-      },
+      ],
     });
 
+    expect(invalidCookieTypeResponse.statusCode).toBe(400);
+    expect(invalidCookieTypeResponse.json().error.code).toBe(
+      "VALIDATION_FAILED",
+    );
+
     const invalidConsentResponse = await saveProfileDraft(app, "org-test", {
-        ...profileBody,
+      ...profileBody,
         services: [
           {
             ...serviceBody,
@@ -1150,7 +1163,10 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidHostingRegionResponse = await saveProfileDraft(app, "org-test", {
+    const invalidHostingRegionResponse = await saveProfileDraft(
+      app,
+      "org-test",
+      {
         ...profileBody,
         services: [
           {
@@ -1161,7 +1177,8 @@ describe("organizations API", () => {
             },
           },
         ],
-      });
+      },
+    );
 
     expect(invalidHostingRegionResponse.statusCode).toBe(400);
     expect(invalidHostingRegionResponse.json()).toMatchObject({
@@ -1198,13 +1215,17 @@ describe("organizations API", () => {
       },
     });
 
-    const invalidInfrastructureResponse = await saveProfileDraft(app, "org-test", {
+    const invalidInfrastructureResponse = await saveProfileDraft(
+      app,
+      "org-test",
+      {
         ...profileBody,
         infrastructure: {
           ...profileBody.infrastructure,
           atRestAlgorithm: "aes_512",
         },
-      });
+      },
+    );
 
     expect(invalidInfrastructureResponse.statusCode).toBe(400);
     expect(invalidInfrastructureResponse.json()).toMatchObject({

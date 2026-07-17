@@ -9,9 +9,13 @@ import {
 } from "lucide-react"
 import {
   type BusinessActivity,
+  cookieCategoryCodes,
+  cookieCategoryLabels,
+  type CookieCategoryCode,
   emptyServiceProfile,
   serviceProfileInputSchema,
   servicePrivacyProfileSchema,
+  type ServiceCookieCategory,
   type ServiceProfileInput,
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
@@ -52,14 +56,23 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
+import {
+  cookieCategoryWithDefaultConsent,
+  hasCookieCategoriesRequiringConsent,
+  normalizeCookiePreferences,
+} from "@/features/company/services/lib/cookie-requirements"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { serviceHelperText } from "./service-helper-text"
 
-const serviceBasicsSchema = serviceProfileInputSchema.pick({
-  serviceName: true,
-  serviceDescription: true,
-  serviceUrl: true,
-})
+const serviceBasicsSchema = serviceProfileInputSchema
+  .pick({
+    serviceName: true,
+    serviceDescription: true,
+    serviceUrl: true,
+  })
+  .extend({
+    usesCookiesOrTrackingTechnologies: z.boolean().nullable(),
+  })
 const serviceAudienceSchema = serviceProfileInputSchema.pick({
   userTypes: true,
   customerTypes: true,
@@ -74,7 +87,6 @@ const servicePrivacyDraftSchema = z.object({
 type ServiceBasicsDraft = z.infer<typeof serviceBasicsSchema>
 type ServiceAudienceDraft = z.infer<typeof serviceAudienceSchema>
 type ServicePrivacyDraft = z.infer<typeof servicePrivacyDraftSchema>
-
 const basicsPath = (field: string) => field as FieldPath<ServiceBasicsDraft>
 const audiencePath = (field: string) => field as FieldPath<ServiceAudienceDraft>
 const privacyPath = (field: string) =>
@@ -98,6 +110,8 @@ const serviceBasicsDraft = (
   serviceName: service.serviceName,
   serviceDescription: service.serviceDescription,
   serviceUrl: service.serviceUrl,
+  usesCookiesOrTrackingTechnologies:
+    service.privacy.usesCookiesOrTrackingTechnologies,
 })
 
 const serviceAudienceDraft = (
@@ -120,12 +134,14 @@ const serviceProviderPurpose = (service: ServiceProfileInput) =>
   `Used by ${service.serviceName?.trim() || "this service"}`
 
 const ServiceBasicsFormFields = ({
+  control,
   descriptionName,
   errors,
   nameName,
   register,
   urlName,
 }: {
+  control: UseFormReturn<ServiceBasicsDraft>["control"]
   descriptionName: FieldPath<ServiceBasicsDraft>
   errors: UseFormReturn<ServiceBasicsDraft>["formState"]["errors"]
   nameName: FieldPath<ServiceBasicsDraft>
@@ -159,6 +175,14 @@ const ServiceBasicsFormFields = ({
         register={register}
       />
     </div>
+    <div className="md:col-span-2">
+      <ToggleField
+        control={control}
+        helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
+        label="Uses cookies or tracking technologies"
+        name={basicsPath("usesCookiesOrTrackingTechnologies")}
+      />
+    </div>
   </div>
 )
 
@@ -178,12 +202,18 @@ const AddServiceForm = ({
     resolver: zodResolver(serviceBasicsSchema) as Resolver<ServiceBasicsDraft>,
     values: draft,
   })
-  const submit = form.handleSubmit((basics) => {
-    onSubmit({
-      ...emptyServiceProfile,
-      ...basics,
-    })
-  })
+  const submit = form.handleSubmit(
+    ({ usesCookiesOrTrackingTechnologies, ...basics }) => {
+      onSubmit({
+        ...emptyServiceProfile,
+        ...basics,
+        privacy: normalizeCookiePreferences({
+          ...emptyServiceProfile.privacy,
+          usesCookiesOrTrackingTechnologies,
+        }),
+      })
+    }
+  )
 
   return (
     <ProfilePanelShell
@@ -201,6 +231,7 @@ const AddServiceForm = ({
       onSave={submit}
     >
       <ServiceBasicsFormFields
+        control={form.control}
         descriptionName={basicsPath("serviceDescription")}
         errors={form.formState.errors}
         nameName={basicsPath("serviceName")}
@@ -218,7 +249,7 @@ const ServiceBasicsPanel = ({
 }: {
   isMutationPending: boolean
   service: ServiceProfileInput
-  onSave: (patch: ServiceBasicsDraft, onSuccess?: () => void) => void
+  onSave: (patch: Partial<ServiceProfileInput>, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const draft = serviceBasicsDraft(service)
@@ -228,9 +259,20 @@ const ServiceBasicsPanel = ({
     resolver: zodResolver(serviceBasicsSchema) as Resolver<ServiceBasicsDraft>,
     values: draft,
   })
-  const submit = form.handleSubmit((next) => {
-    onSave(next, () => setIsEditing(false))
-  })
+  const submit = form.handleSubmit(
+    ({ usesCookiesOrTrackingTechnologies, ...basics }) => {
+      onSave(
+        {
+          ...basics,
+          privacy: normalizeCookiePreferences({
+            ...service.privacy,
+            usesCookiesOrTrackingTechnologies,
+          }),
+        },
+        () => setIsEditing(false)
+      )
+    }
+  )
   return (
     <ProfilePanelShell
       description="Core identification and public details of the service or product."
@@ -254,6 +296,11 @@ const ServiceBasicsPanel = ({
               service.serviceDescription || "Not set",
               serviceHelperText.serviceDescription,
             ],
+            [
+              "Uses cookies or tracking technologies",
+              boolText(service.privacy.usesCookiesOrTrackingTechnologies),
+              serviceHelperText.usesCookiesOrTrackingTechnologies,
+            ],
           ]}
         />
       }
@@ -267,6 +314,7 @@ const ServiceBasicsPanel = ({
       onSave={submit}
     >
       <ServiceBasicsFormFields
+        control={form.control}
         descriptionName={basicsPath("serviceDescription")}
         errors={form.formState.errors}
         nameName={basicsPath("serviceName")}
@@ -630,10 +678,167 @@ const ServiceAudiencePanel = ({
   )
 }
 
-const ServicePrivacyPanel = ({
+const CookieCategoryCard = ({
+  category,
+  configured,
+  isMutationPending,
+  onEnabledChange,
+  onRequiresConsentChange,
+}: {
+  category: CookieCategoryCode
+  configured: ServiceCookieCategory | undefined
+  isMutationPending: boolean
+  onEnabledChange: (enabled: boolean) => void
+  onRequiresConsentChange: (requiresConsent: boolean) => void
+}) => (
+  <article className="border border-slate-200 bg-white p-4">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="grid flex-1 gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h4 className="text-sm font-semibold text-slate-950">
+            {cookieCategoryLabels[category]}
+          </h4>
+          {configured ? <Badge variant="outline">Enabled</Badge> : null}
+        </div>
+        <p className="text-sm leading-5 text-slate-500">
+          {configured
+            ? "This cookie category is used by the service."
+            : "This cookie category is not enabled for the service."}
+        </p>
+        {configured ? (
+          <label className="mt-1 flex min-h-11 items-center gap-3 rounded-sm border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-800">
+            <input
+              checked={configured.requiresConsent}
+              className="size-4 shrink-0 accent-slate-900"
+              disabled={isMutationPending}
+              type="checkbox"
+              onChange={(event) =>
+                onRequiresConsentChange(event.target.checked)
+              }
+            />
+            Requires consent
+          </label>
+        ) : null}
+      </div>
+
+      <label className="flex shrink-0 cursor-pointer items-center gap-3 text-sm font-medium text-slate-700">
+        <span>{configured ? "Enabled" : "Disabled"}</span>
+        <input
+          checked={Boolean(configured)}
+          className="peer sr-only"
+          disabled={isMutationPending}
+          role="switch"
+          type="checkbox"
+          onChange={(event) => onEnabledChange(event.target.checked)}
+        />
+        <span className="relative h-6 w-11 rounded-full bg-slate-300 transition-colors peer-checked:bg-slate-900 peer-focus-visible:ring-3 peer-focus-visible:ring-slate-200 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 after:absolute after:top-0.5 after:left-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5" />
+      </label>
+    </div>
+  </article>
+)
+
+const ServiceCookieCategoriesPanel = ({
+  isMutationPending,
+  service,
+  onSave,
+}: {
+  isMutationPending: boolean
+  service: ServiceProfileInput
+  onSave: (patch: ServicePrivacyDraft, onSuccess?: () => void) => void
+}) => {
+  const saveCategories = (cookieCategories: ServiceCookieCategory[]) => {
+    onSave({
+      privacy: normalizeCookiePreferences({
+        ...service.privacy,
+        cookieCategories,
+      }),
+    })
+  }
+
+  const setCategoryEnabled = (
+    category: CookieCategoryCode,
+    enabled: boolean
+  ) => {
+    const currentCategories = service.privacy.cookieCategories ?? []
+
+    if (!enabled) {
+      saveCategories(
+        currentCategories.filter(
+          (configured) => configured.category !== category
+        )
+      )
+      return
+    }
+
+    saveCategories(
+      cookieCategoryCodes.flatMap((candidate) => {
+        const configured = currentCategories.find(
+          (existing) => existing.category === candidate
+        )
+
+        if (configured) {
+          return [configured]
+        }
+
+        return candidate === category
+          ? [cookieCategoryWithDefaultConsent(category)]
+          : []
+      })
+    )
+  }
+
+  const setCategoryRequiresConsent = (
+    category: CookieCategoryCode,
+    requiresConsent: boolean
+  ) => {
+    saveCategories(
+      (service.privacy.cookieCategories ?? []).map((configured) =>
+        configured.category === category
+          ? { ...configured, requiresConsent }
+          : configured
+      )
+    )
+  }
+
+  return (
+    <section>
+      <div className="mb-4 border-b border-slate-200 pb-2">
+        <h3 className="text-base font-semibold text-slate-950">
+          Cookie Categories
+        </h3>
+        <p className="mt-1 text-sm text-slate-500">
+          Enable the categories used by this service and choose whether each one
+          requires consent.
+        </p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {cookieCategoryCodes.map((category) => {
+          const configured = service.privacy.cookieCategories?.find(
+            (candidate) => candidate.category === category
+          )
+
+          return (
+            <CookieCategoryCard
+              category={category}
+              configured={configured}
+              isMutationPending={isMutationPending}
+              key={category}
+              onEnabledChange={(enabled) =>
+                setCategoryEnabled(category, enabled)
+              }
+              onRequiresConsentChange={(requiresConsent) =>
+                setCategoryRequiresConsent(category, requiresConsent)
+              }
+            />
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+const ServiceCookieConsentPanel = ({
   cookieConsentMechanismOptions,
   cookieConsentWithdrawalMethodOptions,
-  cookieTrackingCategoryOptions,
   isMutationPending,
   service,
   vocabulary,
@@ -641,7 +846,6 @@ const ServicePrivacyPanel = ({
 }: {
   cookieConsentMechanismOptions: Option[]
   cookieConsentWithdrawalMethodOptions: Option[]
-  cookieTrackingCategoryOptions: Option[]
   isMutationPending: boolean
   service: ServiceProfileInput
   vocabulary: Vocabulary | undefined
@@ -657,105 +861,73 @@ const ServicePrivacyPanel = ({
     ) as Resolver<ServicePrivacyDraft>,
     values: draft,
   })
-  const usesCookiesOrTrackingTechnologies = useWatch({
-    control: form.control,
-    name: privacyPath("usesCookiesOrTrackingTechnologies"),
-  })
-  const showCookieDetails = usesCookiesOrTrackingTechnologies === true
-
-  useEffect(() => {
-    if (usesCookiesOrTrackingTechnologies === false) {
-      form.setValue(privacyPath("cookieTrackingCategories"), null)
-      form.setValue(privacyPath("cookieConsentMechanism"), null)
-      form.setValue(privacyPath("nonEssentialCookiesBlockedUntilConsent"), null)
-      form.setValue(privacyPath("cookieRejectAsEasyAsAccept"), null)
-      form.setValue(privacyPath("cookieConsentWithdrawalMethod"), null)
-      form.setValue(privacyPath("cookieConsentNoPretickedBoxes"), null)
-      form.setValue(privacyPath("doNotTrackResponse"), null)
-      form.setValue(privacyPath("globalPrivacyControlSupported"), null)
-    }
-  }, [usesCookiesOrTrackingTechnologies, form])
-
   const submit = form.handleSubmit((next) => {
-    onSave(next, () => setIsEditing(false))
+    onSave({ privacy: normalizeCookiePreferences(next.privacy) }, () =>
+      setIsEditing(false)
+    )
   })
   const cookieRows: ProfilePanelDetailRow[] = [
     [
-      "Uses cookies or tracking technologies",
-      boolText(service.privacy.usesCookiesOrTrackingTechnologies),
-      serviceHelperText.usesCookiesOrTrackingTechnologies,
+      "Blocks non-essential cookies until consent",
+      boolText(service.privacy.nonEssentialCookiesBlockedUntilConsent),
+      serviceHelperText.nonEssentialCookiesBlockedUntilConsent,
+    ],
+    [
+      "Cookie consent mechanism",
+      service.privacy.cookieConsentMechanism
+        ? codeLabel(
+            vocabulary,
+            "privacy_cookie_consent_mechanisms",
+            service.privacy.cookieConsentMechanism
+          )
+        : "Not set",
+      serviceHelperText.cookieConsentMechanism,
+    ],
+    [
+      "Consent withdrawal",
+      service.privacy.cookieConsentWithdrawalMethod
+        ? codeLabel(
+            vocabulary,
+            "privacy_cookie_consent_withdrawal_methods",
+            service.privacy.cookieConsentWithdrawalMethod
+          )
+        : "Not set",
+      serviceHelperText.cookieConsentWithdrawalMethod,
+    ],
+    [
+      "Global Privacy Control",
+      boolText(service.privacy.globalPrivacyControlSupported),
+      serviceHelperText.globalPrivacyControlSupported,
     ],
   ]
 
-  if (service.privacy.usesCookiesOrTrackingTechnologies) {
-    cookieRows.push(
-      [
-        "Cookie / tracking categories",
-        codeValueList(
-          vocabulary,
-          "cookie_tracking_categories",
-          service.privacy.cookieTrackingCategories
-        ),
-        serviceHelperText.cookieTrackingCategories,
-      ],
-      [
-        "Cookie consent mechanism",
-        service.privacy.cookieConsentMechanism
-          ? codeLabel(
-              vocabulary,
-              "privacy_cookie_consent_mechanisms",
-              service.privacy.cookieConsentMechanism
-            )
-          : "Not set",
-        serviceHelperText.cookieConsentMechanism,
-      ],
-      [
-        "Blocks non-essential cookies until consent",
-        boolText(service.privacy.nonEssentialCookiesBlockedUntilConsent),
-        serviceHelperText.nonEssentialCookiesBlockedUntilConsent,
-      ],
-      [
-        "Reject is as easy as accept",
-        boolText(service.privacy.cookieRejectAsEasyAsAccept),
-        serviceHelperText.cookieRejectAsEasyAsAccept,
-      ],
-      [
-        "Consent withdrawal",
-        service.privacy.cookieConsentWithdrawalMethod
-          ? codeLabel(
-              vocabulary,
-              "privacy_cookie_consent_withdrawal_methods",
-              service.privacy.cookieConsentWithdrawalMethod
-            )
-          : "Not set",
-        serviceHelperText.cookieConsentWithdrawalMethod,
-      ],
-      [
-        "No pre-ticked boxes",
-        boolText(service.privacy.cookieConsentNoPretickedBoxes),
-        serviceHelperText.cookieConsentNoPretickedBoxes,
-      ],
-      [
-        "Do Not Track response",
-        boolText(service.privacy.doNotTrackResponse),
-        serviceHelperText.doNotTrackResponse,
-      ],
-      [
-        "Global Privacy Control",
-        boolText(service.privacy.globalPrivacyControlSupported),
-        serviceHelperText.globalPrivacyControlSupported,
-      ]
+  if (!hasCookieCategoriesRequiringConsent(service.privacy.cookieCategories)) {
+    return (
+      <section>
+        <div className="mb-4 border-b border-slate-200 pb-2">
+          <h3 className="text-base font-semibold text-slate-950">
+            Cookie Consent
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Consent controls for cookie categories that require permission.
+          </p>
+        </div>
+        <div className="border border-dashed border-slate-300 bg-white px-4 py-6 text-sm text-slate-500">
+          Consent settings will appear when at least one enabled cookie category
+          requires consent.
+        </div>
+      </section>
     )
   }
 
   return (
     <ProfilePanelShell
-      description="Cookie consent, browser signals, and visitor tracking options."
+      description="Describe how this service collects, manages, and honors cookie consent."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
       readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows} />}
       saveLabel="Save"
-      title="Cookie Preferences"
+      title="Cookie Consent"
       onCancel={() => {
         form.reset(draft)
         setIsEditing(false)
@@ -766,79 +938,38 @@ const ServicePrivacyPanel = ({
       <EditPanelGrid>
         <ToggleField
           control={form.control}
-          helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
-          label="Uses cookies or tracking technologies"
-          name={privacyPath("usesCookiesOrTrackingTechnologies")}
+          helperText={serviceHelperText.nonEssentialCookiesBlockedUntilConsent}
+          label="Blocks non-essential cookies until consent"
+          name={privacyPath("nonEssentialCookiesBlockedUntilConsent")}
         />
-        {showCookieDetails ? (
-          <>
-            <MultiSelectField
-              control={form.control}
-              error={
-                form.formState.errors.privacy?.cookieTrackingCategories?.root
-              }
-              helperText={serviceHelperText.cookieTrackingCategories}
-              label="Cookie / tracking categories"
-              name={privacyPath("cookieTrackingCategories")}
-              options={cookieTrackingCategoryOptions}
-              placeholder="Select cookie / tracking categories"
-            />
-            <SelectField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentMechanism}
-              label="Cookie consent mechanism"
-              name={privacyPath("cookieConsentMechanism")}
-              options={[
-                { value: "", label: "Not set" },
-                ...cookieConsentMechanismOptions,
-              ]}
-              placeholder="Not set"
-            />
-            <ToggleField
-              control={form.control}
-              helperText={
-                serviceHelperText.nonEssentialCookiesBlockedUntilConsent
-              }
-              label="Blocks non-essential cookies until consent"
-              name={privacyPath("nonEssentialCookiesBlockedUntilConsent")}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.cookieRejectAsEasyAsAccept}
-              label="Reject is as easy as accept"
-              name={privacyPath("cookieRejectAsEasyAsAccept")}
-            />
-            <SelectField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentWithdrawalMethod}
-              label="Consent withdrawal method"
-              name={privacyPath("cookieConsentWithdrawalMethod")}
-              options={[
-                { value: "", label: "Not set" },
-                ...cookieConsentWithdrawalMethodOptions,
-              ]}
-              placeholder="Not set"
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentNoPretickedBoxes}
-              label="No pre-ticked boxes"
-              name={privacyPath("cookieConsentNoPretickedBoxes")}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.doNotTrackResponse}
-              label="Responds to Do Not Track"
-              name={privacyPath("doNotTrackResponse")}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.globalPrivacyControlSupported}
-              label="Global Privacy Control supported"
-              name={privacyPath("globalPrivacyControlSupported")}
-            />
-          </>
-        ) : null}
+        <SelectField
+          control={form.control}
+          helperText={serviceHelperText.cookieConsentMechanism}
+          label="Cookie consent mechanism"
+          name={privacyPath("cookieConsentMechanism")}
+          options={[
+            { value: "", label: "Not set" },
+            ...cookieConsentMechanismOptions,
+          ]}
+          placeholder="Not set"
+        />
+        <SelectField
+          control={form.control}
+          helperText={serviceHelperText.cookieConsentWithdrawalMethod}
+          label="Consent withdrawal method"
+          name={privacyPath("cookieConsentWithdrawalMethod")}
+          options={[
+            { value: "", label: "Not set" },
+            ...cookieConsentWithdrawalMethodOptions,
+          ]}
+          placeholder="Not set"
+        />
+        <ToggleField
+          control={form.control}
+          helperText={serviceHelperText.globalPrivacyControlSupported}
+          label="Global Privacy Control supported"
+          name={privacyPath("globalPrivacyControlSupported")}
+        />
       </EditPanelGrid>
     </ProfilePanelShell>
   )
@@ -1375,7 +1506,6 @@ export const ServiceManager = ({
   businessActivityOptions,
   cookieConsentMechanismOptions,
   cookieConsentWithdrawalMethodOptions,
-  cookieTrackingCategoryOptions,
   customerTypeOptions,
   dataProcessingLevelOptions,
   dataRegionOptions,
@@ -1404,7 +1534,6 @@ export const ServiceManager = ({
   businessActivityOptions: Option[]
   cookieConsentMechanismOptions: Option[]
   cookieConsentWithdrawalMethodOptions: Option[]
-  cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   dataProcessingLevelOptions: Option[]
   dataRegionOptions: Option[]
@@ -1454,9 +1583,13 @@ export const ServiceManager = ({
       )
     : []
   const providersCount = selectedServiceUses.length
+  const cookieCategoriesCount =
+    selectedService.privacy.cookieCategories?.length ?? 0
+  const cookiesEnabled =
+    selectedService.privacy.usesCookiesOrTrackingTechnologies === true
 
   const [activeTab, setActiveTab] = useState<
-    "details" | "activities" | "providers"
+    "details" | "cookies" | "activities" | "providers"
   >("details")
   const [prevSelectedServiceId, setPrevSelectedServiceId] =
     useState(selectedServiceId)
@@ -1479,6 +1612,12 @@ export const ServiceManager = ({
       }
     }
   }, [isCreatingService, onSelectService, profile.services, selectedServiceId])
+
+  useEffect(() => {
+    if (!cookiesEnabled && activeTab === "cookies") {
+      setActiveTab("details")
+    }
+  }, [activeTab, cookiesEnabled])
 
   const saveServicePatch = (
     patch: Partial<ServiceProfileInput>,
@@ -1532,13 +1671,13 @@ export const ServiceManager = ({
     <Tabs
       value={activeTab}
       onValueChange={(val) =>
-        setActiveTab(val as "details" | "activities" | "providers")
+        setActiveTab(val as "details" | "cookies" | "activities" | "providers")
       }
       className="grid gap-6"
     >
       <TabsList
         variant="line"
-        className="h-auto w-full justify-start gap-6 rounded-none border-b border-slate-200 p-0 pb-0"
+        className="h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-slate-200 p-0 pb-0"
       >
         <TabsTrigger
           value="details"
@@ -1546,6 +1685,14 @@ export const ServiceManager = ({
         >
           Service details
         </TabsTrigger>
+        {cookiesEnabled ? (
+          <TabsTrigger
+            value="cookies"
+            className="mb-[-2px] h-auto rounded-none px-0 pt-0 pb-3 font-medium whitespace-nowrap text-slate-500 after:bottom-[-2px] data-active:font-semibold data-active:text-slate-900"
+          >
+            Cookies ({cookieCategoriesCount})
+          </TabsTrigger>
+        ) : null}
         <TabsTrigger
           value="activities"
           className="mb-[-2px] h-auto rounded-none px-0 pt-0 pb-3 font-medium text-slate-500 after:bottom-[-2px] data-active:font-semibold data-active:text-slate-900"
@@ -1576,17 +1723,6 @@ export const ServiceManager = ({
             vocabulary={vocabulary}
             onSave={saveServicePatch}
           />
-          <ServicePrivacyPanel
-            cookieConsentMechanismOptions={cookieConsentMechanismOptions}
-            cookieConsentWithdrawalMethodOptions={
-              cookieConsentWithdrawalMethodOptions
-            }
-            cookieTrackingCategoryOptions={cookieTrackingCategoryOptions}
-            isMutationPending={isProfileMutationPending}
-            service={selectedService}
-            vocabulary={vocabulary}
-            onSave={saveServicePatch}
-          />
           <ServiceHostingPanel
             isMutationPending={isProfileMutationPending}
             regionOptions={regionOptions}
@@ -1596,6 +1732,28 @@ export const ServiceManager = ({
           />
         </div>
       </TabsContent>
+
+      {cookiesEnabled ? (
+        <TabsContent value="cookies" className="mt-0">
+          <div className="grid gap-10">
+            <ServiceCookieCategoriesPanel
+              isMutationPending={isProfileMutationPending}
+              service={selectedService}
+              onSave={saveServicePatch}
+            />
+            <ServiceCookieConsentPanel
+              cookieConsentMechanismOptions={cookieConsentMechanismOptions}
+              cookieConsentWithdrawalMethodOptions={
+                cookieConsentWithdrawalMethodOptions
+              }
+              isMutationPending={isProfileMutationPending}
+              service={selectedService}
+              vocabulary={vocabulary}
+              onSave={saveServicePatch}
+            />
+          </div>
+        </TabsContent>
+      ) : null}
 
       <TabsContent value="activities" className="mt-0">
         <ServiceActivitiesPanel

@@ -47,9 +47,8 @@ describe("dashboard progress", () => {
         privacy: {
           ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: false,
-          cookieTrackingCategories: [],
+          cookieCategories: [],
           cookieConsentMechanism: null,
-          doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: "us",
         },
@@ -60,7 +59,7 @@ describe("dashboard progress", () => {
       (section) => section.title === "Audience and Availability"
     )
     const cookiePreferences = progress.sections.find(
-      (section) => section.title === "Cookie Preferences"
+      (section) => section.title === "Cookies"
     )
     const hosting = progress.sections.find(
       (section) => section.title === "Service Hosting"
@@ -97,7 +96,12 @@ describe("dashboard progress", () => {
         privacy: {
           ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: true,
-          cookieTrackingCategories: ["analytics"],
+          cookieCategories: [
+            {
+              category: "analytics",
+              requiresConsent: true,
+            },
+          ],
           cookieConsentMechanism: "cookie_banner",
           primaryHostingRegion: "us",
         },
@@ -105,12 +109,71 @@ describe("dashboard progress", () => {
       []
     )
     const cookiePreferences = progress.sections.find(
-      (section) => section.title === "Cookie Preferences"
+      (section) => section.title === "Cookies"
+    )
+
+    expect(cookiePreferences).toMatchObject({
+      completedFields: 4,
+      totalFields: 7,
+    })
+  })
+
+  it("requires only usage and category answers for necessary cookies", () => {
+    const progress = serviceProgress(
+      {
+        ...emptyServiceProfile,
+        id: "svc_1",
+        serviceName: "App",
+        privacy: {
+          ...emptyServiceProfile.privacy,
+          usesCookiesOrTrackingTechnologies: true,
+          cookieCategories: [
+            {
+              category: "necessary",
+              requiresConsent: false,
+            },
+          ],
+        },
+      },
+      []
+    )
+    const cookiePreferences = progress.sections.find(
+      (section) => section.title === "Cookies"
     )
 
     expect(cookiePreferences).toMatchObject({
       completedFields: 3,
-      totalFields: 9,
+      totalFields: 3,
+    })
+  })
+
+  it("requires the consent section when a category requires consent", () => {
+    const progress = serviceProgress(
+      {
+        ...emptyServiceProfile,
+        id: "svc_1",
+        serviceName: "App",
+        privacy: {
+          ...emptyServiceProfile.privacy,
+          usesCookiesOrTrackingTechnologies: true,
+          cookieCategories: [
+            {
+              category: "marketing",
+              requiresConsent: true,
+            },
+          ],
+          cookieConsentMechanism: "cookie_banner",
+        },
+      },
+      []
+    )
+    const cookiePreferences = progress.sections.find(
+      (section) => section.title === "Cookies"
+    )
+
+    expect(cookiePreferences).toMatchObject({
+      completedFields: 4,
+      totalFields: 7,
     })
   })
 
@@ -531,9 +594,8 @@ describe("dashboard progress", () => {
             privacy: {
               ...emptyServiceProfile.privacy,
               usesCookiesOrTrackingTechnologies: false,
-              cookieTrackingCategories: [],
+              cookieCategories: [],
               cookieConsentMechanism: null,
-              doNotTrackResponse: null,
               globalPrivacyControlSupported: null,
               primaryHostingRegion: "us",
             },

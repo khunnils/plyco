@@ -102,9 +102,8 @@ const snapshot = (
         privacy: {
           ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: null,
-          cookieTrackingCategories: null,
+          cookieCategories: null,
           cookieConsentMechanism: null,
-          doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
         },
@@ -126,9 +125,8 @@ const snapshot = (
         privacy: {
           ...emptyServiceProfile.privacy,
           usesCookiesOrTrackingTechnologies: null,
-          cookieTrackingCategories: null,
+          cookieCategories: null,
           cookieConsentMechanism: null,
-          doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
         },

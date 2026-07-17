@@ -24,7 +24,7 @@ import {
 } from "./repository.js";
 import { ApiError } from "../../infrastructure/errors.js";
 
-const jsonValue = (value: string[] | null) =>
+const jsonValue = (value: Prisma.InputJsonValue | null) =>
   value === null ? Prisma.DbNull : value;
 
 export const ORGANIZATION_INCLUDE = {
@@ -283,18 +283,12 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       minimumUserAge: input.minimumUserAge,
       usesCookiesOrTrackingTechnologies:
         input.privacy.usesCookiesOrTrackingTechnologies,
-      cookieTrackingCategories: jsonValue(
-        input.privacy.cookieTrackingCategories,
-      ),
+      cookieCategories: jsonValue(input.privacy.cookieCategories),
       cookieConsentMechanism: input.privacy.cookieConsentMechanism,
       nonEssentialCookiesBlockedUntilConsent:
         input.privacy.nonEssentialCookiesBlockedUntilConsent,
-      cookieRejectAsEasyAsAccept: input.privacy.cookieRejectAsEasyAsAccept,
       cookieConsentWithdrawalMethod:
         input.privacy.cookieConsentWithdrawalMethod,
-      cookieConsentNoPretickedBoxes:
-        input.privacy.cookieConsentNoPretickedBoxes,
-      doNotTrackResponse: input.privacy.doNotTrackResponse,
       globalPrivacyControlSupported:
         input.privacy.globalPrivacyControlSupported,
       primaryHostingRegion: input.privacy.primaryHostingRegion,

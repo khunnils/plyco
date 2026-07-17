@@ -83,6 +83,26 @@ offer an in-context editor for adding, renaming, describing, activating,
 deactivating, and removing codes without leaving the current page. System code
 sets remain read-only.
 
+## Service Cookies
+
+The General panel in Service details records whether the service uses cookies or
+similar tracking technologies. The dedicated Cookies tab is shown only when
+this answer is Yes.
+The category panel always presents the four fixed categories—Necessary,
+Preferences, Analytics, and Marketing—in a responsive two-column card layout.
+Each category has an autosaving enabled switch. Enabled cards also show an
+autosaving Requires consent checkbox. Necessary defaults to no consent; the
+other three categories default to requiring consent, and users may override the
+default.
+
+The Cookie Consent panel is always visible on the tab. Until a category requires
+consent it displays explanatory placeholder text instead of fields. When consent
+is required, the panel asks whether non-essential cookies are blocked until
+consent, which consent mechanism is used, how consent can be withdrawn, and
+whether Global Privacy Control is supported. These consent answers are cleared
+when cookies are disabled or no configured category requires consent. Do Not
+Track, equal-rejection, and pre-ticked-box questions are not collected.
+
 The workspace Settings area is opened from the settings button at the bottom of
 the sidebar. Settings contains Team, Vocabulary, and API Keys tabs. Team shows
 current members to all members. Owners can invite people by email as either

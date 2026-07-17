@@ -7,6 +7,7 @@ import {
 } from "@plyco/shared"
 
 import { type ProfileDraft } from "@/features/company/types/company"
+import { hasCookieCategoriesRequiringConsent } from "@/features/company/services/lib/cookie-requirements"
 
 export type ProgressMetric = {
   completedFields: number
@@ -209,14 +210,6 @@ const providersForType = (
   systemType: string
 ) => providers.filter((provider) => provider.systemType === systemType)
 
-const hasNonEssentialCookieCategories = (
-  categories: string[] | null | undefined
-) =>
-  Array.isArray(categories) &&
-  categories.some((category) =>
-    ["analytics", "marketing", "advertising"].includes(category)
-  )
-
 export const profileProgress = (profile: ProfileDraft) =>
   groupProgress([
     sectionProgress("Company details", [
@@ -343,10 +336,7 @@ export const infrastructureProgress = (profile: ProfileDraft) => {
       ),
       field(
         "Issue tracking",
-        providersForType(
-          infrastructure.organizationProviders,
-          "issue_tracking"
-        )
+        providersForType(infrastructure.organizationProviders, "issue_tracking")
       ),
       field(
         "Login provider",
@@ -563,9 +553,10 @@ export const providerUsageProgress = (usage: ServiceProviderUsage) =>
 export const serviceDetailsProgress = (
   service: ProfileDraft["services"][number]
 ) => {
-  const requiresCookieConsentTransparency = hasNonEssentialCookieCategories(
-    service.privacy.cookieTrackingCategories
+  const requiresCookieConsent = hasCookieCategoriesRequiringConsent(
+    service.privacy.cookieCategories
   )
+  const cookieCategories = service.privacy.cookieCategories ?? []
   const fields = [
     field("Service name", service.serviceName),
     field("Service URL", service.serviceUrl),
@@ -583,39 +574,33 @@ export const serviceDetailsProgress = (
     ),
     ...(service.privacy.usesCookiesOrTrackingTechnologies
       ? [
-          field(
-            "Cookie / tracking categories",
-            service.privacy.cookieTrackingCategories
+          field("Cookie categories", service.privacy.cookieCategories),
+          ...cookieCategories.map((category) =>
+            field(
+              `${category.category} requires consent`,
+              category.requiresConsent
+            )
           ),
-          field(
-            "Cookie consent mechanism",
-            service.privacy.cookieConsentMechanism
-          ),
-          ...(requiresCookieConsentTransparency
+          ...(requiresCookieConsent
             ? [
+                field(
+                  "Cookie consent mechanism",
+                  service.privacy.cookieConsentMechanism
+                ),
                 field(
                   "Blocks non-essential cookies until consent",
                   service.privacy.nonEssentialCookiesBlockedUntilConsent
-                ),
-                field(
-                  "Reject is as easy as accept",
-                  service.privacy.cookieRejectAsEasyAsAccept
                 ),
                 field(
                   "Consent withdrawal method",
                   service.privacy.cookieConsentWithdrawalMethod
                 ),
                 field(
-                  "No pre-ticked boxes",
-                  service.privacy.cookieConsentNoPretickedBoxes
+                  "Global Privacy Control supported",
+                  service.privacy.globalPrivacyControlSupported
                 ),
               ]
             : []),
-          field("Do Not Track response", service.privacy.doNotTrackResponse),
-          field(
-            "Global Privacy Control supported",
-            service.privacy.globalPrivacyControlSupported
-          ),
         ]
       : []),
     field("Primary hosting region", service.privacy.primaryHostingRegion),
@@ -641,9 +626,10 @@ export const serviceProgress = (
   const selectedServiceUses = service.id
     ? serviceProviderUsage.filter((usage) => usage.serviceId === service.id)
     : []
-  const requiresCookieConsentTransparency = hasNonEssentialCookieCategories(
-    service.privacy.cookieTrackingCategories
+  const requiresCookieConsent = hasCookieCategoriesRequiringConsent(
+    service.privacy.cookieCategories
   )
+  const cookieCategories = service.privacy.cookieCategories ?? []
 
   return {
     id: service.id ?? service.serviceName ?? "service",
@@ -665,49 +651,40 @@ export const serviceProgress = (
           ? [field("Minimum user age", service.minimumUserAge, true)]
           : []),
       ]),
-      sectionProgress("Cookie Preferences", [
+      sectionProgress("Cookies", [
         field(
           "Uses cookies or tracking technologies",
           service.privacy.usesCookiesOrTrackingTechnologies
         ),
         ...(service.privacy.usesCookiesOrTrackingTechnologies
           ? [
-              field(
-                "Cookie / tracking categories",
-                service.privacy.cookieTrackingCategories
+              field("Cookie categories", service.privacy.cookieCategories),
+              ...cookieCategories.map((category) =>
+                field(
+                  `${category.category} requires consent`,
+                  category.requiresConsent
+                )
               ),
-              field(
-                "Cookie consent mechanism",
-                service.privacy.cookieConsentMechanism
-              ),
-              ...(requiresCookieConsentTransparency
+              ...(requiresCookieConsent
                 ? [
+                    field(
+                      "Cookie consent mechanism",
+                      service.privacy.cookieConsentMechanism
+                    ),
                     field(
                       "Blocks non-essential cookies until consent",
                       service.privacy.nonEssentialCookiesBlockedUntilConsent
-                    ),
-                    field(
-                      "Reject is as easy as accept",
-                      service.privacy.cookieRejectAsEasyAsAccept
                     ),
                     field(
                       "Consent withdrawal method",
                       service.privacy.cookieConsentWithdrawalMethod
                     ),
                     field(
-                      "No pre-ticked boxes",
-                      service.privacy.cookieConsentNoPretickedBoxes
+                      "Global Privacy Control supported",
+                      service.privacy.globalPrivacyControlSupported
                     ),
                   ]
                 : []),
-              field(
-                "Do Not Track response",
-                service.privacy.doNotTrackResponse
-              ),
-              field(
-                "Global Privacy Control supported",
-                service.privacy.globalPrivacyControlSupported
-              ),
             ]
           : []),
       ]),

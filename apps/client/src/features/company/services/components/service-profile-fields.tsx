@@ -61,18 +61,12 @@ const MinimumAgeField = ({
 
 export const ServiceProfileFields = ({
   businessActivityOptions,
-  cookieConsentMechanismOptions,
-  cookieConsentWithdrawalMethodOptions,
-  cookieTrackingCategoryOptions,
   customerTypeOptions,
   form,
   regionOptions,
   userTypeOptions,
 }: {
   businessActivityOptions: Option[]
-  cookieConsentMechanismOptions: Option[]
-  cookieConsentWithdrawalMethodOptions: Option[]
-  cookieTrackingCategoryOptions: Option[]
   customerTypeOptions: Option[]
   form: UseFormReturn<ProfileDraft>
   regionOptions: Option[]
@@ -192,78 +186,6 @@ export const ServiceProfileFields = ({
                 index,
                 "usesCookiesOrTrackingTechnologies"
               )}
-            />
-            <MultiSelectField
-              control={form.control}
-              error={
-                form.formState.errors.services?.[index]?.privacy
-                  ?.cookieTrackingCategories?.root
-              }
-              helperText={serviceHelperText.cookieTrackingCategories}
-              label="Cookie / tracking categories"
-              name={servicePrivacyPath(index, "cookieTrackingCategories")}
-              options={cookieTrackingCategoryOptions}
-              placeholder="Select cookie / tracking categories"
-            />
-            <SelectField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentMechanism}
-              label="Cookie consent mechanism"
-              name={servicePrivacyPath(index, "cookieConsentMechanism")}
-              options={[
-                { value: "", label: "Not set" },
-                ...cookieConsentMechanismOptions,
-              ]}
-              placeholder="Not set"
-            />
-            <ToggleField
-              control={form.control}
-              helperText={
-                serviceHelperText.nonEssentialCookiesBlockedUntilConsent
-              }
-              label="Blocks non-essential cookies until consent"
-              name={servicePrivacyPath(
-                index,
-                "nonEssentialCookiesBlockedUntilConsent"
-              )}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.cookieRejectAsEasyAsAccept}
-              label="Reject is as easy as accept"
-              name={servicePrivacyPath(index, "cookieRejectAsEasyAsAccept")}
-            />
-            <SelectField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentWithdrawalMethod}
-              label="Consent withdrawal method"
-              name={servicePrivacyPath(
-                index,
-                "cookieConsentWithdrawalMethod"
-              )}
-              options={[
-                { value: "", label: "Not set" },
-                ...cookieConsentWithdrawalMethodOptions,
-              ]}
-              placeholder="Not set"
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.cookieConsentNoPretickedBoxes}
-              label="No pre-ticked boxes"
-              name={servicePrivacyPath(index, "cookieConsentNoPretickedBoxes")}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.doNotTrackResponse}
-              label="Responds to Do Not Track"
-              name={servicePrivacyPath(index, "doNotTrackResponse")}
-            />
-            <ToggleField
-              control={form.control}
-              helperText={serviceHelperText.globalPrivacyControlSupported}
-              label="Global Privacy Control supported"
-              name={servicePrivacyPath(index, "globalPrivacyControlSupported")}
             />
             <SelectField
               control={form.control}

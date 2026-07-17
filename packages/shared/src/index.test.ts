@@ -9,6 +9,7 @@ import {
   createOrganizationSchema,
   businessActivityInputSchema,
   dataHandlingProfileSchema,
+  defaultCookieCategoryRequiresConsent,
   documentSummarySchema,
   emptyAccessProfile,
   emptyInfrastructureProfile,
@@ -459,13 +460,10 @@ describe("shared security profile schemas", () => {
         minimumUserAge: null,
         privacy: {
           usesCookiesOrTrackingTechnologies: null,
-          cookieTrackingCategories: null,
+          cookieCategories: null,
           cookieConsentMechanism: null,
           nonEssentialCookiesBlockedUntilConsent: null,
-          cookieRejectAsEasyAsAccept: null,
           cookieConsentWithdrawalMethod: null,
-          cookieConsentNoPretickedBoxes: null,
-          doNotTrackResponse: null,
           globalPrivacyControlSupported: null,
           primaryHostingRegion: null,
         },
@@ -486,13 +484,19 @@ describe("shared security profile schemas", () => {
       minimumUserAge: 13,
       privacy: {
         usesCookiesOrTrackingTechnologies: true,
-        cookieTrackingCategories: ["necessary", "analytics"],
+        cookieCategories: [
+          {
+            category: "necessary",
+            requiresConsent: false,
+          },
+          {
+            category: "analytics",
+            requiresConsent: true,
+          },
+        ],
         cookieConsentMechanism: "cookie_banner",
         nonEssentialCookiesBlockedUntilConsent: true,
-        cookieRejectAsEasyAsAccept: true,
         cookieConsentWithdrawalMethod: "cookie_preferences",
-        cookieConsentNoPretickedBoxes: true,
-        doNotTrackResponse: false,
         globalPrivacyControlSupported: true,
         primaryHostingRegion: "us",
       },
@@ -738,16 +742,106 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects service privacy values that violate the code id format", () => {
+  it("rejects unsupported and duplicate cookie categories", () => {
     const result = serviceProfileInputSchema.safeParse({
       ...emptyServiceProfile,
       privacy: {
         ...emptyServiceProfile.privacy,
-        cookieTrackingCategories: ["Analytics Cookies"],
+        cookieCategories: [
+          { category: "custom", requiresConsent: true },
+          { category: "custom", requiresConsent: false },
+        ],
       },
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("rejects duplicate supported cookie categories", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        cookieCategories: [
+          { category: "analytics", requiresConsent: true },
+          { category: "analytics", requiresConsent: false },
+        ],
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts all four fixed cookie categories with editable consent", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        usesCookiesOrTrackingTechnologies: true,
+        cookieCategories: [
+          { category: "necessary", requiresConsent: true },
+          { category: "preferences", requiresConsent: false },
+          { category: "analytics", requiresConsent: false },
+          { category: "marketing", requiresConsent: true },
+        ],
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects more than four cookie category entries", () => {
+    const result = serviceProfileInputSchema.safeParse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        usesCookiesOrTrackingTechnologies: true,
+        cookieCategories: [
+          { category: "necessary", requiresConsent: false },
+          { category: "preferences", requiresConsent: true },
+          { category: "analytics", requiresConsent: true },
+          { category: "marketing", requiresConsent: true },
+          { category: "necessary", requiresConsent: false },
+        ],
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("clears cookie categories and consent values when cookie use is disabled", () => {
+    const result = serviceProfileInputSchema.parse({
+      ...emptyServiceProfile,
+      privacy: {
+        ...emptyServiceProfile.privacy,
+        usesCookiesOrTrackingTechnologies: false,
+        cookieCategories: [
+          {
+            category: "analytics",
+            requiresConsent: true,
+          },
+        ],
+        cookieConsentMechanism: "cookie_banner",
+        nonEssentialCookiesBlockedUntilConsent: true,
+        cookieConsentWithdrawalMethod: "cookie_preferences",
+        globalPrivacyControlSupported: true,
+      },
+    });
+
+    expect(result.privacy).toMatchObject({
+      cookieCategories: null,
+      cookieConsentMechanism: null,
+      nonEssentialCookiesBlockedUntilConsent: null,
+      cookieConsentWithdrawalMethod: null,
+      globalPrivacyControlSupported: null,
+    });
+  });
+
+  it("applies the fixed cookie category consent defaults", () => {
+    expect(defaultCookieCategoryRequiresConsent("necessary")).toBe(false);
+    expect(defaultCookieCategoryRequiresConsent("preferences")).toBe(true);
+    expect(defaultCookieCategoryRequiresConsent("analytics")).toBe(true);
+    expect(defaultCookieCategoryRequiresConsent("marketing")).toBe(true);
   });
 
   it("rejects service cookie consent mechanism values that violate the code id format", () => {

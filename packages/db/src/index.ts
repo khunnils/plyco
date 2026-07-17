@@ -65,13 +65,10 @@ export function mapOrganizationRecord(record: {
     childrenDirected: boolean | null;
     minimumUserAge: number | null;
     usesCookiesOrTrackingTechnologies: boolean | null;
-    cookieTrackingCategories: unknown;
+    cookieCategories: unknown;
     cookieConsentMechanism: string | null;
     nonEssentialCookiesBlockedUntilConsent: boolean | null;
-    cookieRejectAsEasyAsAccept: boolean | null;
     cookieConsentWithdrawalMethod: string | null;
-    cookieConsentNoPretickedBoxes: boolean | null;
-    doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
     businessActivities?: Array<{
@@ -92,13 +89,10 @@ export function mapOrganizationRecord(record: {
     childrenDirected: boolean | null;
     minimumUserAge: number | null;
     usesCookiesOrTrackingTechnologies: boolean | null;
-    cookieTrackingCategories: unknown;
+    cookieCategories: unknown;
     cookieConsentMechanism: string | null;
     nonEssentialCookiesBlockedUntilConsent: boolean | null;
-    cookieRejectAsEasyAsAccept: boolean | null;
     cookieConsentWithdrawalMethod: string | null;
-    cookieConsentNoPretickedBoxes: boolean | null;
-    doNotTrackResponse: boolean | null;
     globalPrivacyControlSupported: boolean | null;
     primaryHostingRegion: string | null;
     businessActivities?: Array<{
@@ -350,18 +344,12 @@ export function mapOrganizationRecord(record: {
             privacy: {
               usesCookiesOrTrackingTechnologies:
                 service.usesCookiesOrTrackingTechnologies,
-              cookieTrackingCategories: stringArray(
-                service.cookieTrackingCategories,
-              ),
+              cookieCategories: service.cookieCategories,
               cookieConsentMechanism: service.cookieConsentMechanism,
               nonEssentialCookiesBlockedUntilConsent:
                 service.nonEssentialCookiesBlockedUntilConsent,
-              cookieRejectAsEasyAsAccept: service.cookieRejectAsEasyAsAccept,
               cookieConsentWithdrawalMethod:
                 service.cookieConsentWithdrawalMethod,
-              cookieConsentNoPretickedBoxes:
-                service.cookieConsentNoPretickedBoxes,
-              doNotTrackResponse: service.doNotTrackResponse,
               globalPrivacyControlSupported:
                 service.globalPrivacyControlSupported,
               primaryHostingRegion: service.primaryHostingRegion,

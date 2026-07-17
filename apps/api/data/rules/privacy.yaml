@@ -60,26 +60,26 @@
         all:
           - field: privacy.usesCookiesOrTrackingTechnologies
             equals: true
-          - field: privacy.cookieTrackingCategories
-            includesAny: [analytics, marketing, advertising]
+          - any:
+              collection: privacy.cookieCategories
+              where:
+                field: requiresConsent
+                equals: true
           - any:
               - field: privacy.cookieConsentMechanism
                 in: [null, none, not_set]
               - field: privacy.nonEssentialCookiesBlockedUntilConsent
                 in: [null, false]
-              - field: privacy.cookieRejectAsEasyAsAccept
-                in: [null, false]
-              - field: privacy.cookieConsentNoPretickedBoxes
-                in: [null, false]
               - field: privacy.cookieConsentWithdrawalMethod
                 empty: true
+              - field: privacy.globalPrivacyControlSupported
+                in: [null, false]
   message: A service uses non-essential tracking cookies without complete consent transparency.
-  recommendation: Confirm the service blocks non-essential cookies until consent, offers rejection as easily as acceptance, avoids pre-ticked boxes, and has a clear withdrawal method. Cookie purposes, providers, and durations should be available through the configured consent mechanism.
+  recommendation: Confirm the service blocks consent-required cookies until consent, provides a consent mechanism and withdrawal method, and supports Global Privacy Control.
   relatedFields:
     - services.all.privacy.usesCookiesOrTrackingTechnologies
-    - services.all.privacy.cookieTrackingCategories
+    - services.all.privacy.cookieCategories
     - services.all.privacy.cookieConsentMechanism
     - services.all.privacy.nonEssentialCookiesBlockedUntilConsent
-    - services.all.privacy.cookieRejectAsEasyAsAccept
-    - services.all.privacy.cookieConsentNoPretickedBoxes
     - services.all.privacy.cookieConsentWithdrawalMethod
+    - services.all.privacy.globalPrivacyControlSupported

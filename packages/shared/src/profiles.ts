@@ -68,18 +68,94 @@ export const companyProfileSchema = z.object({
   complianceGoals: nullableCodeIdArraySchema,
 });
 
-export const servicePrivacyProfileSchema = z.object({
+export const cookieCategoryCodes = [
+  "necessary",
+  "preferences",
+  "analytics",
+  "marketing",
+] as const;
+
+export const cookieCategoryCodeSchema = z.enum(cookieCategoryCodes);
+export type CookieCategoryCode = z.infer<typeof cookieCategoryCodeSchema>;
+
+export const cookieCategoryLabels: Record<CookieCategoryCode, string> = {
+  necessary: "Necessary",
+  preferences: "Preferences",
+  analytics: "Analytics",
+  marketing: "Marketing",
+};
+
+export const defaultCookieCategoryRequiresConsent = (
+  category: CookieCategoryCode,
+) => category !== "necessary";
+
+export const serviceCookieCategorySchema = z.object({
+  category: cookieCategoryCodeSchema,
+  requiresConsent: z.boolean(),
+});
+
+const serviceCookieCategoriesSchema = z
+  .array(serviceCookieCategorySchema)
+  .max(cookieCategoryCodes.length)
+  .superRefine((categories, context) => {
+    const seen = new Set<CookieCategoryCode>();
+
+    categories.forEach((category, index) => {
+      if (seen.has(category.category)) {
+        context.addIssue({
+          code: "custom",
+          message: "Cookie categories must be unique",
+          path: [index, "category"],
+        });
+      }
+      seen.add(category.category);
+    });
+  })
+  .nullable()
+  .default(null);
+
+const servicePrivacyProfileBaseSchema = z.object({
   usesCookiesOrTrackingTechnologies: nullableBooleanSchema,
-  cookieTrackingCategories: nullableCodeIdArraySchema,
+  cookieCategories: serviceCookieCategoriesSchema,
   cookieConsentMechanism: nullableCodeIdSchema,
   nonEssentialCookiesBlockedUntilConsent: nullableBooleanSchema,
-  cookieRejectAsEasyAsAccept: nullableBooleanSchema,
   cookieConsentWithdrawalMethod: nullableCodeIdSchema,
-  cookieConsentNoPretickedBoxes: nullableBooleanSchema,
-  doNotTrackResponse: nullableBooleanSchema,
   globalPrivacyControlSupported: nullableBooleanSchema,
   primaryHostingRegion: nullableCodeIdSchema,
 });
+
+type ServicePrivacyProfileValue = z.infer<
+  typeof servicePrivacyProfileBaseSchema
+>;
+
+export const normalizeServicePrivacyProfile = (
+  privacy: ServicePrivacyProfileValue,
+): ServicePrivacyProfileValue => {
+  const usesCookies = privacy.usesCookiesOrTrackingTechnologies === true;
+  const cookieCategories = usesCookies ? privacy.cookieCategories : null;
+  const requiresConsent =
+    cookieCategories?.some((category) => category.requiresConsent) ?? false;
+
+  return {
+    ...privacy,
+    cookieCategories,
+    cookieConsentMechanism: requiresConsent
+      ? privacy.cookieConsentMechanism
+      : null,
+    nonEssentialCookiesBlockedUntilConsent: requiresConsent
+      ? privacy.nonEssentialCookiesBlockedUntilConsent
+      : null,
+    cookieConsentWithdrawalMethod: requiresConsent
+      ? privacy.cookieConsentWithdrawalMethod
+      : null,
+    globalPrivacyControlSupported: requiresConsent
+      ? privacy.globalPrivacyControlSupported
+      : null,
+  };
+};
+
+export const servicePrivacyProfileSchema =
+  servicePrivacyProfileBaseSchema.transform(normalizeServicePrivacyProfile);
 
 export const serviceProfileInputSchema = z.object({
   id: z.string().min(1).optional(),
@@ -217,6 +293,7 @@ export type BusinessActivityInput = z.infer<typeof businessActivityInputSchema>;
 export type BusinessActivity = z.infer<typeof businessActivitySchema>;
 export type CompanyProfile = z.infer<typeof companyProfileSchema>;
 export type ServicePrivacyProfile = z.infer<typeof servicePrivacyProfileSchema>;
+export type ServiceCookieCategory = z.infer<typeof serviceCookieCategorySchema>;
 export type ServiceProfileInput = z.infer<typeof serviceProfileInputSchema>;
 export type ServiceProfile = z.infer<typeof serviceProfileSchema>;
 export type PrivacyProfile = z.infer<typeof privacyProfileSchema>;
@@ -263,13 +340,10 @@ export const emptyServiceProfile: ServiceProfileInput = {
   minimumUserAge: null,
   privacy: {
     usesCookiesOrTrackingTechnologies: null,
-    cookieTrackingCategories: null,
+    cookieCategories: null,
     cookieConsentMechanism: null,
     nonEssentialCookiesBlockedUntilConsent: null,
-    cookieRejectAsEasyAsAccept: null,
     cookieConsentWithdrawalMethod: null,
-    cookieConsentNoPretickedBoxes: null,
-    doNotTrackResponse: null,
     globalPrivacyControlSupported: null,
     primaryHostingRegion: null,
   },
