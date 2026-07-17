@@ -85,6 +85,17 @@ export const cookieCategoryLabels: Record<CookieCategoryCode, string> = {
   marketing: "Marketing",
 };
 
+export const cookieCategoryDescriptions: Record<CookieCategoryCode, string> = {
+  necessary:
+    "Essential for the service to function, such as authentication, security, and load balancing.",
+  preferences:
+    "Remember settings like language, region, or display preferences.",
+  analytics:
+    "Help measure usage and improve the service through aggregated statistics.",
+  marketing:
+    "Support advertising, remarketing, and campaign measurement.",
+};
+
 export const defaultCookieCategoryRequiresConsent = (
   category: CookieCategoryCode,
 ) => category !== "necessary";

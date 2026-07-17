@@ -1,6 +1,9 @@
 ## Coding Conventions
  - Use arrow functions instead of function()
- - Each component in separate file
+ - Each component in separate files
+
+ ## UX Components
+  - Use ShadCN components where available instead of rolling our own
 
 ## Data handling
  - Use TanStack query for fetching, caching, invalidation, optimistic updates, and loading/error states.
