@@ -2,13 +2,13 @@
 const companyAttributes = ["Profile", "Privacy", "Infrastructure", "Security", "Access"];
 const productData = ["Data types", "Activities", "Services"];
 const providers = ["Hosting", "Auth", "Analytics", "AI", "Observability"];
-const policies = ["Privacy policy", "Security policy", "Subprocessors"];
+const outputs = ["Privacy policy", "Security policy", "DPA & RoPA", "Trust center", "Customer answers"];
 ---
 
 <div
 	class="mx-auto mt-12 max-w-5xl text-left"
 	role="img"
-	aria-label="Company attributes, product and data, and providers feed Plyco, which generates consistent policies. Services map to activities and providers."
+	aria-label="Company attributes, product and data, and providers feed one Plyco company model, which generates consistent documents and customer answers."
 >
 	<div class="grid items-stretch gap-4 lg:grid-cols-[1.6fr_auto_1fr]">
 		<div class="grid gap-3">
@@ -54,29 +54,25 @@ const policies = ["Privacy policy", "Security policy", "Subprocessors"];
 			<span class="h-0.5 w-10 bg-linear-to-r from-slate-200 to-lime-300 lg:h-16 lg:w-0.5 lg:bg-linear-to-b"></span>
 			<span class="flex flex-col items-center gap-1.5 rounded-2xl border border-lime-300 bg-white px-4 py-3 shadow-[0_16px_42px_rgba(54,83,20,0.11)]">
 				<img src="/logo.png" alt="" width="360" height="360" class="h-8 w-8 object-contain" />
-				<small class="text-[0.6rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">Generates</small>
+				<small class="text-[0.6rem] font-extrabold uppercase tracking-[0.12em] text-lime-700">One model</small>
 			</span>
 			<span class="h-0.5 w-10 bg-linear-to-r from-lime-300 to-slate-200 lg:h-16 lg:w-0.5 lg:bg-linear-to-b"></span>
 		</div>
 
 		<article class="flex flex-col rounded-2xl border border-lime-300 bg-white p-5 shadow-[0_16px_42px_rgba(54,83,20,0.11)] sm:p-6">
 			<p class="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-lime-700">Output</p>
-			<strong class="mt-2 block text-base text-slate-950">Policies</strong>
+			<strong class="mt-2 block text-base text-slate-950">Documents & answers</strong>
 			<div class="mt-4 grid gap-2">
-				{policies.map((policy) => (
+				{outputs.map((output) => (
 					<span class="grid grid-cols-[1.75rem_1fr] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
 						<i class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-lime-700">
 							<svg viewBox="0 0 20 20" fill="none" class="h-4 w-4" aria-hidden="true">
 								<path d="m5 10.5 3.2 3.2L15 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
 							</svg>
 						</i>
-						{policy}
+						{output}
 					</span>
 				))}
-				<span class="grid grid-cols-[1.75rem_1fr] items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-bold text-slate-400">
-					<i class="grid h-7 w-7 place-items-center rounded-lg border border-dashed border-slate-300 text-slate-400">+</i>
-					More templates
-				</span>
 			</div>
 		</article>
 	</div>

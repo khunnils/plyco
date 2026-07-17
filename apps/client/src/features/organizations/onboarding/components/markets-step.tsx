@@ -55,13 +55,15 @@ export const MarketsStep = () => {
 
   const footer = (
     <div className="flex items-center justify-between border-t border-slate-200 pt-5">
-      <Button type="button" variant="outline" onClick={handleBack}>
+      <Button size="lg" type="button" variant="outline" onClick={handleBack}>
         <ArrowLeft />
         Back
       </Button>
       <Button
         className="bg-slate-900 text-white hover:bg-slate-800 focus-visible:border-slate-950 focus-visible:ring-slate-100"
+        disabled={!draft.company.regions?.length}
         type="button"
+        size="lg"
         onClick={handleNext}
       >
         Next
@@ -91,13 +93,12 @@ export const MarketsStep = () => {
           options={regionOptions}
           value={draft.company.regions}
           onChange={(value) => {
-            const nextValue = value.at(-1) ? [value.at(-1) as string] : []
             updateDraft((current) => ({
               ...current,
               company: {
                 ...current.company,
-                regions: nextValue,
-                complianceGoals: complianceGoalsForRegions(nextValue),
+                regions: value,
+                complianceGoals: complianceGoalsForRegions(value),
               },
             }))
           }}

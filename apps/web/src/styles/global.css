@@ -43,11 +43,11 @@ h3,
 
 @layer components {
 	.heading-hero {
-		@apply text-xl tracking-wide text-neutral-950 sm:text-6xl lg:text-7xl;
+		@apply text-5xl leading-[0.98] tracking-[-0.035em] text-slate-950 sm:text-6xl lg:text-7xl;
 	}
 
 	.heading-section {
-		@apply text-3xl tracking-normal text-slate-950 md:text-4xl;
+		@apply text-4xl leading-[1.08] tracking-[-0.025em] text-slate-950 md:text-5xl;
 	}
 }
 

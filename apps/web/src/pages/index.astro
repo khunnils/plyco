@@ -1,21 +1,20 @@
 ---
 import DriftFeedbackIllustration from "../components/DriftFeedbackIllustration.astro";
 import FoundationFlowIllustration from "../components/FoundationFlowIllustration.astro";
+import McpReviewIllustration from "../components/McpReviewIllustration.astro";
 import PolicyMapIllustration from "../components/PolicyMapIllustration.astro";
 import PolicyPreviewsIllustration from "../components/PolicyPreviewsIllustration.astro";
-import QuestionnaireIllustration from "../components/QuestionnaireIllustration.astro";
 import "../styles/global.css";
 
 const apiUrl = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4100";
 
 const comparisonRows = [
-	["Built for", "Early-stage SaaS", "Audit-ready enterprises"],
-	["Primary goal", "Build trust & documentation", "Pass SOC 2 / ISO audits"],
-	["Starting point", "Your company", "Compliance frameworks"],
-	["Setup time", "Minutes", "Days or weeks"],
-	["Requires security expertise", "No", "Often yes"],
-	["Pricing", "Startup-friendly", "Enterprise pricing"],
-	["Best when", "Winning customers", "Preparing for certification"],
+	["Built for", "1–5 person SaaS teams", "Audit-ready enterprises"],
+	["What you maintain", "How your company operates", "Controls and framework evidence"],
+	["Primary goal", "Earn customer trust", "Pass formal audits"],
+	["Starting point", "Your company", "A compliance framework"],
+	["Setup", "Guided and lightweight", "Specialist-led implementation"],
+	["Best when", "Winning early B2B customers", "Preparing for certification"],
 ];
 ---
 
@@ -26,57 +25,57 @@ const comparisonRows = [
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Plyco — Compliance readiness for early-stage startups</title>
+		<title>Plyco — The compliance workspace for early-stage SaaS</title>
 		<meta
 			name="description"
-			content="A lightweight workspace that helps startups organize policies, vendors, evidence, and security basics before enterprise customers ask for SOC 2 or GDPR readiness."
+			content="Model how your company operates once, then generate and maintain the trust, privacy, security, and compliance documentation B2B customers expect."
 		/>
-		<meta property="og:title" content="Avoid Compliance Debt Early" />
+		<meta property="og:title" content="Maintain your company, not a pile of compliance docs" />
 		<meta
 			property="og:description"
-			content="Lightweight compliance readiness for startups moving toward enterprise customers."
+			content="A lightweight compliance workspace for early-stage SaaS companies selling to B2B customers."
 		/>
 		<meta property="og:type" content="website" />
 	</head>
 	<body class="page-enter bg-slate-50 text-slate-950 antialiased">
-		<header class="absolute inset-x-0 top-0 z-50">
-			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5" aria-label="Main navigation">
+		<header class="absolute inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white/90 px-4 py-3 shadow-[0_10px_35px_rgba(15,23,42,0.06)] backdrop-blur sm:px-5" aria-label="Main navigation">
 				<a href="#" class="flex items-center gap-3 text-lg font-bold tracking-tight text-slate-950" aria-label="Plyco home">
 					<img src="/logo.png" alt="" width="360" height="360" class="h-10 w-10 object-contain rounded-md" />
 					<span>Plyco</span>
 				</a>
-				<div class="hidden items-center gap-9 text-sm font-medium text-slate-700 md:flex">
-					<a class="transition hover:text-slate-950" href="#problem">All Pages</a>
-					<a class="transition hover:text-slate-950" href="#features">Features</a>
+				<div class="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex">
+					<a class="transition-colors hover:text-slate-950" href="#how-it-works">How it works</a>
+					<a class="transition-colors hover:text-slate-950" href="#documents">Documents</a>
+					<a class="transition-colors hover:text-slate-950" href="#mcp">MCP</a>
 					<a class="transition hover:text-slate-950" href="#pricing">Pricing</a>
-					<a class="transition hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
 				</div>
 				<a
 					href="#early-access"
-					class="inline-flex min-h-12 items-center gap-4 rounded-full bg-neutral-950 py-1.5 pl-6 pr-2 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800"
+					class="inline-flex min-h-11 items-center gap-3 rounded-full bg-slate-950 py-1 pl-5 pr-1.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-slate-800"
 				>
-					Get Started
-					<span class="flex h-9 w-9 items-center justify-center rounded-full bg-lime-200 text-xl leading-none text-neutral-950">→</span>
+					Join waitlist
+					<span class="flex h-8 w-8 items-center justify-center rounded-full bg-lime-200 text-lg leading-none text-slate-950">→</span>
 				</a>
 			</nav>
 		</header>
 
 		<main>
-			<section class="relative overflow-hidden bg-white px-6 pb-16 pt-32 md:pb-20 md:pt-36">
+			<section class="relative overflow-hidden bg-white px-6 pb-16 pt-36 md:pb-20 md:pt-44">
 				<div class="absolute inset-0 z-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:92px_92px]"></div>
 				<div class="absolute inset-x-0 top-0 z-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent"></div>
 				<div class="absolute inset-x-0 bottom-0 z-0 h-64 bg-linear-to-t from-slate-50 via-white/90 to-transparent"></div>
 
 				<div class="relative z-10 mx-auto max-w-6xl text-center">
-					<div class="mx-auto max-w-4xl">
+					<div class="mx-auto max-w-5xl">
 						<p class="mb-6 inline-flex rounded-full border border-lime-200 bg-lime-100 px-4 py-2 text-sm font-bold text-slate-900">
-							Compliance readiness for early-stage startups
+							The compliance workspace for early-stage SaaS
 						</p>
-						<h1 class="heading-hero">
-							Stop winging your policy docs
+						<h1 class="heading-hero text-slate-900">
+							Stop winging your policies
 						</h1>
 						<p class="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
-							A lightweight policy management platform for early-stage startups building toward enterprise customers.
+							A lightweight compliance platform for early-stage startups building toward enterprise customers.
 						</p>
 						<div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
 							<a
@@ -87,54 +86,54 @@ const comparisonRows = [
 								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-2xl leading-none text-neutral-950">→</span>
 							</a>
 							<a
-								href="#features"
+								href="#how-it-works"
 								class="inline-flex min-h-14 items-center gap-4 rounded-full border border-slate-200 bg-white py-1.5 pl-7 pr-2 text-base font-bold text-slate-900 shadow-sm transition hover:bg-slate-100"
 							>
-								See what it helps with
+								See how it works
 								<span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-2xl leading-none text-neutral-950">→</span>
 							</a>
+
+	
 						</div>
 						<p class="mx-auto mt-5 max-w-xl text-sm leading-6 text-slate-500">
 							For founders preparing for SOC 2, GDPR readiness, security reviews, and enterprise pilots.
 						</p>
-					</div>
+				</div>
 
 					<PolicyMapIllustration />
 				</div>
 			</section>
 
-			<section id="problem" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
+			<section id="how-it-works" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
 				<div class="mx-auto max-w-6xl text-center">
-						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Model the foundations</p>
-						<h2 class="text-5xl mt-4">Model the facts. </h2>
-						<h2 class="text-5xl mt-4">Your policies will follow. </h2>
-						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
-							<p class="font-semibold text-slate-950">Most policy tools start with templates. We start with your business.</p>
-							<p>
-								Define your company profile, privacy posture, infrastructure, security controls, access model, services, data, activities, and providers.
-								<br/>Plyco turns that information into structured documents that stay consistent.
-							</p>
-					</div>
-
+					<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Model the foundations</p>
+					<h2 class="text-5xl mt-4">Model the facts. <br /> <span class="text-slate-500">Your policies will follow.</span></h2>
+					<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
+						<p class="font-semibold text-slate-950">Most policy tools start with templates. We start with your business.</p>
+						<p>
+							Define your company profile, privacy posture, infrastructure, security controls, access model, services, data, activities, and providers.
+							<br/>Plyco turns that information into structured documents that stay consistent.
+						</p>
+				</div>
 					<FoundationFlowIllustration />
 				</div>
 			</section>
 
-			<section class="px-6 py-10 md:py-24">
+			<section id="documents" class="px-6 py-14 md:py-24">
 				<div class="mx-auto max-w-6xl">
 					<div class="mx-auto max-w-4xl text-center">
-						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">One-click policy creation</p>
-						<h2 class="mt-4 text-5xl">Generate policies from reality, <br/>not guesswork.</h2>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Documents grounded in reality</p>
+						<h2 class="heading-section mt-4">Generate the documents customers expect.</h2>
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
 							<p class="font-semibold text-slate-950">Your policies should reflect how your company actually operates.</p>
-							<p>Plyco generates customer-facing documentation directly from your source of truth using fully customizable templates.</p>
+							<p>Generate policies, DPAs, Privacy Policies, RoPAs, Security Policies, Trust Center pages, and more from customizable templates linked to your workspace.</p>
 						</div>
 					</div>
 
 					<div class="mx-auto mt-12 max-w-5xl">
 						<PolicyPreviewsIllustration />
 						<p class="mx-auto mt-3 max-w-2xl text-center text-base leading-7 text-slate-500">
-							We ship with privacy, security, GDPR, and more. Add any additional templates you need.
+							Start with privacy, security, subprocessors, incident response, and GDPR documentation. Add your own templates whenever you need them.
 						</p>
 					</div>
 				</div>
@@ -156,32 +155,34 @@ const comparisonRows = [
 				</div>
 			</section>
 
-			<section class="px-6 py-14 md:py-24">
+			<section id="mcp" class="px-6 py-14 md:py-24">
 				<div class="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
 					<div>
-						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Customer questionnaires in minutes, not days</p>
-						<h2 class="heading-section mt-4">Stop digging through docs for answers.</h2>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Plyco MCP server</p>
+						<h2 class="heading-section mt-4">Give Claude the company context it needs.</h2>
 						<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
-							<p class="font-semibold text-slate-950">Enterprise customers don’t just ask for policies.</p>
-							<p class="font-semibold text-slate-950">They send spreadsheets.</p>
-							<p class="font-semibold text-slate-950">Lots of spreadsheets.</p>
-							<p>Plyco keeps your privacy, security, vendor, and data handling information in one place, making customer questionnaires dramatically easier to complete.</p>
-							<p>Instead of hunting for answers across Slack, Notion, spreadsheets, and old documents, start with a source of truth that’s already organized.</p>
-							<p class="font-bold text-slate-950">Less scrambling. More shipping.</p>
+							<p class="font-semibold text-slate-950">Connect Plyco as a read-only MCP server, attach a customer questionnaire, and ask Claude to review it against how your company actually operates.</p>
+							<p>Claude can look up your privacy, security, access, service, and provider data to flag unsupported answers, contradictions, and missing details.</p>
+							<p class="font-bold text-slate-950">Your AI gets useful context. Your workspace remains the source of truth.</p>
+						</div>
+						<div class="mt-7 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+							<span class="rounded-full border border-slate-200 bg-white px-3 py-2">Read-only access</span>
+							<span class="rounded-full border border-slate-200 bg-white px-3 py-2">Organization-scoped key</span>
+							<span class="rounded-full border border-slate-200 bg-white px-3 py-2">Works with MCP clients</span>
 						</div>
 					</div>
 
-					<QuestionnaireIllustration />
+					<McpReviewIllustration />
 				</div>
 			</section>
 
 			<section class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
 				<div class="mx-auto max-w-6xl">
 					<div class="mx-auto max-w-3xl text-center">
-						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Take control of your policies</p>
-						<h2 class="heading-section mt-4">One dashboard for the work behind every security review.</h2>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">See what needs attention</p>
+						<h2 class="heading-section mt-4">One calm workspace for customer trust.</h2>
 						<p class="mt-6 text-lg leading-8 text-slate-600">
-							Track policy coverage, open recommendations, document status, and the operational details customers ask about before review season turns into a scramble.
+							Keep company facts, documents, and actionable recommendations together—so you know what is complete, what has drifted, and what to fix next.
 						</p>
 					</div>
 
@@ -202,10 +203,10 @@ const comparisonRows = [
 				<div class="absolute inset-x-0 top-0 h-44 bg-linear-to-b from-lime-50/80 to-white"></div>
 				<div class="mx-auto max-w-6xl">
 					<div class="relative mx-auto max-w-3xl text-center">
-						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Built for comparison</p>
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Right-sized by design</p>
 						<h2 class="heading-section mt-4">Built for customer trust before audit season.</h2>
 						<p class="mt-6 text-lg leading-8 text-slate-600">
-							Plyco helps early teams organize the facts customers ask for, without taking on an enterprise compliance platform before they need one.
+							Plyco gives small teams useful structure now, without forcing them into an audit platform built for a later stage.
 						</p>
 					</div>
 
@@ -253,7 +254,7 @@ const comparisonRows = [
 						<p class="mt-6 text-lg leading-8 text-slate-600">
 							Simple monthly plans for keeping your policies, vendors, evidence, and customer answers in sync.
 						</p>
-						<p class="mt-3 text-base font-bold text-slate-950">30-day free trial. No credit card required.</p>
+						<p class="mt-3 text-base font-bold text-slate-950">Join the waitlist for early access.</p>
 					</div>
 
 					<div class="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
@@ -274,9 +275,9 @@ const comparisonRows = [
 								<li class="flex gap-3"><span class="text-lime-700">✓</span><span>Readiness recommendations and drift checks</span></li>
 							</ul>
 							<a href="#early-access" class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-base font-bold text-slate-950 shadow-sm transition hover:bg-slate-100">
-								Start free trial
+								Join the waitlist
 							</a>
-							<p class="mt-3 text-center text-xs font-semibold text-slate-500">No credit card required</p>
+							<p class="mt-3 text-center text-xs font-semibold text-slate-500">Early access · no credit card</p>
 						</article>
 
 						<article class="rounded-2xl border border-slate-950 bg-slate-950 p-6 text-white shadow-[0_20px_60px_rgba(15,23,42,0.2)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_75px_rgba(15,23,42,0.28)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
@@ -296,9 +297,9 @@ const comparisonRows = [
 								<li class="flex gap-3"><span class="text-lime-300">✓</span><span>Team-ready customer questionnaire support</span></li>
 							</ul>
 							<a href="#early-access" class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-lime-300 px-5 text-base font-bold text-slate-950 shadow-sm transition hover:bg-lime-200">
-								Start free trial
+								Join the waitlist
 							</a>
-							<p class="mt-3 text-center text-xs font-semibold text-slate-400">No credit card required</p>
+							<p class="mt-3 text-center text-xs font-semibold text-slate-400">Early access · no credit card</p>
 						</article>
 					</div>
 				</div>
@@ -309,7 +310,7 @@ const comparisonRows = [
 					<div>
 						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-300">Join the waitlist</p>
 						<h2 class="mt-4 font-heading text-4xl leading-tight text-white md:text-5xl">Build your source of truth before customers start asking.</h2>
-						<p class="mt-5 text-lg leading-8 text-slate-300">Get early access to Plyco and help shape a simpler way to manage policies, drift, and customer questionnaires.</p>
+						<p class="mt-5 text-lg leading-8 text-slate-300">Get early access to Plyco and help shape a simpler way to maintain the company knowledge behind policies, trust, and customer reviews.</p>
 						<p class="mt-6 text-sm leading-6 text-slate-400">No spam. Occasional product updates and founder interviews.</p>
 					</div>
 					<form class="waitlist-form rounded-2xl border border-white/10 bg-white p-6 shadow-2xl sm:p-8" novalidate>
@@ -349,18 +350,33 @@ const comparisonRows = [
 			</section>
 		</main>
 
-		<footer class="px-6 py-10">
-			<div class="mx-auto flex max-w-6xl flex-col gap-6 border-t border-slate-200 pt-8 md:flex-row md:items-start md:justify-between">
-				<div>
-					<p class="font-semibold text-slate-950">plyco</p>
-					<p class="mt-2 max-w-md text-sm leading-6 text-slate-600">Lightweight compliance readiness for early-stage startups.</p>
-					<p class="mt-3 max-w-xl text-xs leading-5 text-slate-500">Readiness guidance only. Not legal advice, certification, or audit assurance.</p>
+		<footer class="border-t border-slate-200 bg-white px-6 py-12 md:py-16">
+			<div class="mx-auto max-w-6xl">
+				<div class="grid gap-10 md:grid-cols-[1.4fr_0.6fr_0.6fr]">
+					<div>
+						<a href="#" class="inline-flex items-center gap-3 font-bold text-slate-950" aria-label="Plyco home">
+							<img src="/logo.png" alt="" width="360" height="360" class="h-9 w-9 rounded-md object-contain" />
+							<span>Plyco</span>
+						</a>
+						<p class="mt-4 max-w-md text-sm leading-6 text-slate-600">The lightweight compliance workspace for early-stage SaaS teams earning their first B2B customers.</p>
+					</div>
+					<nav class="grid content-start gap-3 text-sm" aria-label="Product links">
+						<p class="mb-1 font-bold text-slate-950">Product</p>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="#how-it-works">How it works</a>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="#documents">Documents</a>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="#mcp">MCP server</a>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="#pricing">Pricing</a>
+					</nav>
+					<nav class="grid content-start gap-3 text-sm" aria-label="Company links">
+						<p class="mb-1 font-bold text-slate-950">Company</p>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="#early-access">Early access</a>
+						<a class="text-slate-600 transition-colors hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
+					</nav>
 				</div>
-				<nav class="flex flex-wrap gap-5 text-sm font-medium text-slate-600" aria-label="Footer navigation">
-					<a class="hover:text-slate-950" href="#early-access">Early access</a>
-					<a class="hover:text-slate-950" href="mailto:hello@compliancestarter.com">Contact</a>
-					<a class="hover:text-slate-950" href="#early-access">Privacy</a>
-				</nav>
+				<div class="mt-10 flex flex-col gap-3 border-t border-slate-200 pt-6 text-xs leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+					<p>© {new Date().getFullYear()} Plyco. All rights reserved.</p>
+					<p>Readiness guidance only. Not legal advice, certification, or audit assurance.</p>
+				</div>
 			</div>
 		</footer>
 		<script is:inline define:vars={{ apiUrl }}>

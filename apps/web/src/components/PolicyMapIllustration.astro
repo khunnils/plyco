@@ -1,11 +1,11 @@
 ---
 const policies = [
-	{ code: "AC", name: "Access control", position: "left-[2%] top-[8%] -rotate-4 md:left-[8%] md:top-[9%]" },
-	{ code: "IR", name: "Incident response", position: "right-[2%] top-[8%] rotate-4 md:right-[8%] md:top-[9%]" },
-	{ code: "DR", name: "Data retention", position: "left-0 top-[39%] rotate-2 md:left-[3%]" },
-	{ code: "VM", name: "Vendor management", position: "right-0 top-[39%] -rotate-2 md:right-[3%]" },
-	{ code: "AU", name: "Acceptable use", position: "bottom-[7%] left-[4%] rotate-3 md:left-[10%]" },
-	{ code: "IS", name: "Information security", position: "bottom-[7%] right-[4%] -rotate-3 md:right-[10%]" },
+	{ code: "PP", name: "Privacy policy", position: "left-[2%] top-[8%] -rotate-4 md:left-[8%] md:top-[9%]" },
+	{ code: "SP", name: "Security policy", position: "right-[2%] top-[8%] rotate-4 md:right-[8%] md:top-[9%]" },
+	{ code: "DP", name: "Data processing agreement", position: "left-0 top-[39%] rotate-2 md:left-[3%]" },
+	{ code: "TC", name: "Trust center", position: "right-0 top-[39%] -rotate-2 md:right-[3%]" },
+	{ code: "RA", name: "Records of processing", position: "bottom-[7%] left-[4%] rotate-3 md:left-[10%]" },
+	{ code: "QA", name: "Customer answers", position: "bottom-[7%] right-[4%] -rotate-3 md:right-[10%]" },
 ];
 
 const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-0", "rotate-[147deg]", "rotate-[33deg]"];
@@ -14,7 +14,7 @@ const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-
 <div
 	class="relative mx-auto mt-16 min-h-[380px] max-w-[360px] sm:min-h-[500px] sm:max-w-[560px] md:min-h-[620px] md:max-w-5xl"
 	role="img"
-	aria-label="Policy documents connected to one central source of truth"
+	aria-label="Trust, privacy, security, and compliance outputs connected to one company model"
 >
 	{connectors.map((rotation) => (
 		<div class:list={["absolute left-1/2 top-1/2 z-0 h-0.5 w-[112px] origin-left bg-linear-to-r from-lime-400 via-slate-300 to-transparent sm:w-[175px] md:w-[260px]", rotation]} aria-hidden="true">
@@ -27,7 +27,7 @@ const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-
 			<span class="h-3 w-1 rounded-full bg-lime-900"></span><span class="h-6 w-1 rounded-full bg-lime-900"></span><span class="h-4 w-1 rounded-full bg-lime-900"></span>
 		</div>
 		<p class="m-0 text-[0.55rem] font-extrabold uppercase tracking-[0.08em] text-lime-700 sm:text-[0.64rem] md:text-[0.72rem]">Single source of truth</p>
-		<strong class="mt-1 block text-base leading-tight text-slate-950 sm:text-xl md:text-[1.35rem]">Knowledge graph</strong>
+		<strong class="mt-1 block text-base leading-tight text-slate-950 sm:text-xl md:text-[1.35rem]">Your company model</strong>
 		<div class="mt-5 flex justify-between border-t border-slate-200 pt-3 text-[0.68rem] font-bold text-slate-500">
 		</div>
 	</div>
