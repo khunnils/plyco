@@ -21,6 +21,10 @@ import {
 
 import { type ProfileDraft } from "@/features/company/types/company"
 import { DashboardServiceCard } from "@/features/dashboard/components/dashboard-service-card"
+import {
+  OverallReadinessScore,
+  ReadinessScoreBreakdown,
+} from "@/features/dashboard/components/readiness-scores"
 import { SIDEBAR_SECTION } from "@/features/shell/lib/navigation"
 import {
   dashboardProgress,
@@ -208,18 +212,11 @@ export const DashboardPage = ({
   return (
     <div className="grid gap-8">
       <div className="grid gap-4 lg:grid-cols-3">
-        <section className="flex min-h-64 flex-col items-center justify-center gap-2 border border-slate-200 bg-white p-8 text-center">
-          <span className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-            Completed
-          </span>
-          <span className="mb-2 text-5xl font-extrabold text-slate-600">
-            {progress.overall.percent}%
-          </span>
-          <div className="inline-flex items-center rounded-full bg-slate-50 px-4 py-1.5 text-xs font-semibold text-slate-700">
-            {progress.overall.completedSections} of{" "}
-            {progress.overall.totalSections} areas complete
-          </div>
-        </section>
+        <OverallReadinessScore
+          isLoading={recommendationsLoading}
+          profileCompletion={progress.overall.percent}
+          scores={recommendations?.scores}
+        />
 
         <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -303,6 +300,11 @@ export const DashboardPage = ({
           </div>
         </section>
       </div>
+
+      <ReadinessScoreBreakdown
+        isLoading={recommendationsLoading}
+        scores={recommendations?.scores}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <CategoryCard

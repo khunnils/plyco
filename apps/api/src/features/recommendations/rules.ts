@@ -3,13 +3,19 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import {
+  recommendationAreaSchema,
   recommendationSeveritySchema,
   recommendationsResponseSchema,
   type BusinessActivity,
   type OrganizationSecurityProfile,
   type Recommendation,
+  type RecommendationArea,
   type RecommendationCountsBySeverity,
+  type RecommendationSeverity,
   type RecommendationsResponse,
+  type ReadinessScore,
+  type ReadinessScoreArea,
+  type ReadinessScores,
   type ServiceProviderUsage,
 } from "@plyco/shared"
 import { parse } from "yaml"
@@ -84,7 +90,7 @@ const ruleConditionSchema: z.ZodType<RuleCondition> = z.lazy(() =>
 const advisorRuleSchema = z.object({
   id: z.string().trim().min(1),
   title: z.string().trim().min(1),
-  category: z.string().trim().min(1),
+  category: recommendationAreaSchema,
   severity: recommendationSeveritySchema,
   frameworks: z.array(z.string().trim().min(1)).default([]),
   appliesWhen: ruleConditionSchema.optional(),
@@ -175,17 +181,21 @@ export const evaluateAdvisorRules = (
     return recommendationsResponseSchema.parse({
       recommendations: [],
       countsBySeverity: emptyCounts(),
+      scores: emptyScores(),
     })
   }
 
   const context = recommendationContext(organization, options)
-  const recommendations = rules
-    .filter((rule) => ruleApplies(rule, context))
+  const evaluations = rules.map((rule) => evaluateRule(rule, context))
+  const recommendations = evaluations
+    .filter((evaluation) => evaluation.failing)
+    .map((evaluation) => evaluation.rule)
     .map(ruleToRecommendation)
 
   return recommendationsResponseSchema.parse({
     recommendations,
     countsBySeverity: countBySeverity(recommendations),
+    scores: calculateScores(evaluations),
   })
 }
 
@@ -233,12 +243,31 @@ const recommendationContext = (
   },
 })
 
-const ruleApplies = (
+type RuleEvaluation = {
+  rule: AdvisorRule
+  applicable: boolean
+  assessed: boolean
+  failing: boolean
+}
+
+const evaluateRule = (
   rule: AdvisorRule,
   context: ReturnType<typeof recommendationContext>,
-) =>
-  (!rule.appliesWhen || conditionMatches(rule.appliesWhen, context)) &&
-  conditionMatches(rule.condition, context)
+): RuleEvaluation => {
+  const applicable =
+    !rule.appliesWhen ||
+    (conditionInputsAreDefined(rule.appliesWhen, context) &&
+      conditionMatches(rule.appliesWhen, context))
+  const assessed =
+    applicable && conditionInputsAreDefined(rule.condition, context)
+
+  return {
+    rule,
+    applicable,
+    assessed,
+    failing: assessed && conditionMatches(rule.condition, context),
+  }
+}
 
 const ruleToRecommendation = (rule: AdvisorRule): Recommendation => ({
   id: rule.id,
@@ -265,6 +294,92 @@ const countBySeverity = (
     counts[recommendation.severity] += 1
     return counts
   }, emptyCounts())
+
+const severityWeight: Record<RecommendationSeverity, number> = {
+  critical: 8,
+  high: 4,
+  medium: 2,
+  low: 1,
+}
+
+const scoreEvaluations = (evaluations: RuleEvaluation[]): ReadinessScore => {
+  const applicableRuleCount = evaluations.filter(
+    (evaluation) => evaluation.applicable,
+  ).length
+  const assessedEvaluations = evaluations.filter(
+    (evaluation) => evaluation.assessed,
+  )
+  const assessedWeight = assessedEvaluations.reduce(
+    (total, evaluation) => total + severityWeight[evaluation.rule.severity],
+    0,
+  )
+  const failingWeight = assessedEvaluations.reduce(
+    (total, evaluation) =>
+      total +
+      (evaluation.failing ? severityWeight[evaluation.rule.severity] : 0),
+    0,
+  )
+
+  return {
+    value:
+      assessedWeight === 0
+        ? null
+        : Math.round(
+            (100 * (assessedWeight - failingWeight)) / assessedWeight,
+          ),
+    assessedRuleCount: assessedEvaluations.length,
+    applicableRuleCount,
+  }
+}
+
+const scoreArea = (
+  evaluations: RuleEvaluation[],
+  area: ReadinessScoreArea,
+) =>
+  scoreEvaluations(
+    evaluations.filter(
+      (evaluation) => scoreAreaForCategory[evaluation.rule.category] === area,
+    ),
+  )
+
+const scoreAreaForCategory: Record<RecommendationArea, ReadinessScoreArea> = {
+  security: "security",
+  privacy: "privacy",
+  access: "access",
+  infrastructure: "infrastructure",
+  activities: "productAndData",
+  data: "productAndData",
+  services: "productAndData",
+  vendors: "productAndData",
+}
+
+const calculateScores = (evaluations: RuleEvaluation[]): ReadinessScores => ({
+  overall: scoreEvaluations(evaluations),
+  byArea: {
+    security: scoreArea(evaluations, "security"),
+    privacy: scoreArea(evaluations, "privacy"),
+    access: scoreArea(evaluations, "access"),
+    infrastructure: scoreArea(evaluations, "infrastructure"),
+    productAndData: scoreArea(evaluations, "productAndData"),
+  },
+})
+
+const emptyScore = (): ReadinessScore => ({
+  value: null,
+  assessedRuleCount: 0,
+  applicableRuleCount: 0,
+})
+
+const emptyScores = (): ReadinessScores => ({
+  overall: emptyScore(),
+  byArea: {
+    security: emptyScore(),
+    privacy: emptyScore(),
+    access: emptyScore(),
+    infrastructure: emptyScore(),
+    productAndData: emptyScore(),
+  },
+})
 
 const conditionMatches = (
   condition: RuleCondition,
@@ -351,13 +466,23 @@ const conditionInputsAreDefined = (
   }
 
   if (condition.any) {
-    if (Array.isArray(condition.any)) {
-      return condition.any.every((item) =>
+    const anyCondition = condition.any
+
+    if (Array.isArray(anyCondition)) {
+      return anyCondition.every((item) =>
         conditionInputsAreDefined(item, context),
       )
     }
 
-    return isDefined(getByPath(context, condition.any.collection))
+    const collection = getByPath(context, anyCondition.collection)
+
+    return (
+      Array.isArray(collection) &&
+      (collection.length === 0 ||
+        collection.some((item) =>
+          conditionInputsAreDefined(anyCondition.where, item),
+        ))
+    )
   }
 
   if (condition.anyComplianceGoal) {

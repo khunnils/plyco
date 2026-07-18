@@ -29,6 +29,8 @@ import {
   providerCriticalitySchema,
   providerSystemTypeSchema,
   recommendationsResponseSchema,
+  recommendationAreaSchema,
+  readinessScoreAreaSchema,
   recommendationSeveritySchema,
   serviceProfileInputSchema,
   serviceProfileSchema,
@@ -339,6 +341,40 @@ describe("shared security profile schemas", () => {
         high: 1,
         critical: 0,
       },
+      scores: {
+        overall: {
+          value: 0,
+          assessedRuleCount: 1,
+          applicableRuleCount: 1,
+        },
+        byArea: {
+          security: {
+            value: 0,
+            assessedRuleCount: 1,
+            applicableRuleCount: 1,
+          },
+          privacy: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          access: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          infrastructure: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          productAndData: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+        },
+      },
     });
 
     expect(result.success).toBe(true);
@@ -348,6 +384,17 @@ describe("shared security profile schemas", () => {
     expect(recommendationSeveritySchema.safeParse("urgent").success).toBe(
       false,
     );
+  });
+
+  it("limits readiness scores to the supported advisor areas", () => {
+    expect(recommendationAreaSchema.safeParse("security").success).toBe(true);
+    expect(recommendationAreaSchema.safeParse("operations").success).toBe(
+      false,
+    );
+    expect(readinessScoreAreaSchema.safeParse("productAndData").success).toBe(
+      true,
+    );
+    expect(readinessScoreAreaSchema.safeParse("vendors").success).toBe(false);
   });
 
   it("validates ISO alpha-2 country codes", () => {

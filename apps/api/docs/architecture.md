@@ -19,6 +19,14 @@ and `""` are unset, while booleans, zero, explicit codes, and arrays including
 collection predicates skip incomplete items and continue evaluating complete
 items. Rule comparison values cannot contain `null`.
 
+The same evaluation pass classifies rules as inapplicable, applicable but
+unanswered, passing, or failing and returns transient readiness scores with the
+recommendations. Scores use severity weights of 8/4/2/1 from critical through
+low, include assessed and applicable rule counts, and expose an overall result
+plus Security, Privacy, Access, Infrastructure, and Product & Data results. The
+Product & Data score pools Activities, Data, Services, and Vendors rules. No
+score is persisted.
+
 Infrastructure, AI, and newsletter `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
 
 `POST /waitlist` is public. It validates the shared payload, applies a fixed-window IP limit, ignores populated honeypot submissions, idempotently upserts normalized emails, and syncs legitimate submissions to Resend contacts. Waitlist contact sync requires `RESEND_API_KEY` and `WAITLIST_RESEND_SEGMENT_ID`, sets Resend properties `source=waitlist` and `notes` to the submitted blocker or an empty string, and adds contacts to the configured `Plyco - Waitlist` segment. `DELETE /waitlist` is a machine-facing route protected by bearer `PLYCO_API_KEY`; it deletes the local waitlist entry by normalized email and best-effort removes the Resend contact from the waitlist segment. After persistence and Resend sync succeed, the public route best-effort captures `waitlist_signup_completed` through the server-side analytics client when `POSTHOG_PROJECT_TOKEN` is configured; analytics failures are logged and do not reject the signup. Production CORS allows configured `CLIENT_URL`, `WEB_URL`, and optional comma-separated `CORS_ALLOWED_ORIGINS`; other product routes remain protected by session authentication unless explicitly documented otherwise.

@@ -159,3 +159,12 @@ values, and lists—including an explicitly empty list—are answered values. A
 grouped rule waits until every scalar answer it uses is available. For
 collection rules, incomplete records are ignored while complete records remain
 eligible for evaluation.
+
+The dashboard shows an overall rule-based readiness score and breakdowns for
+Security, Privacy, Access, Infrastructure, and Product & Data. Product & Data
+pools the Activities, Data, Services, and Vendors rule categories. Critical,
+high, medium, and low checks contribute weights of 8, 4, 2, and 1. Scores use
+assessed checks only and always show assessed-versus-applicable coverage; an
+area with no assessed checks shows “Not enough data.” The overall score pools
+all assessed rule weights. These scores are live readiness signals, not audit
+or certification results, and are not persisted or historically tracked.

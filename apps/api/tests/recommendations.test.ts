@@ -263,7 +263,7 @@ describe("recommendation rules", () => {
       {
         id: "defined.false",
         title: "False is defined",
-        category: "test",
+        category: "access",
         severity: "low",
         frameworks: [],
         condition: { field: "access.mfaRequired", equals: false },
@@ -274,7 +274,7 @@ describe("recommendation rules", () => {
       {
         id: "defined.zero",
         title: "Zero is defined",
-        category: "test",
+        category: "privacy",
         severity: "low",
         frameworks: [],
         condition: { field: "privacy.responseTimelineDays", equals: 0 },
@@ -285,7 +285,7 @@ describe("recommendation rules", () => {
       {
         id: "defined.empty_array",
         title: "An empty array is defined",
-        category: "test",
+        category: "privacy",
         severity: "low",
         frameworks: [],
         condition: { field: "privacy.supportedRights", empty: true },
@@ -309,6 +309,251 @@ describe("recommendation rules", () => {
       "defined.zero",
       "defined.empty_array",
     ]);
+  });
+
+  it("calculates severity-weighted overall and area scores", () => {
+    const rules: AdvisorRule[] = [
+      {
+        id: "score.critical_pass",
+        title: "Critical passing check",
+        category: "security",
+        severity: "critical",
+        frameworks: [],
+        condition: {
+          field: "securityProfile.codeReviewRequired",
+          equals: false,
+        },
+        message: "Critical passing check.",
+        recommendation: "Keep the control in place.",
+        relatedFields: ["securityProfile.codeReviewRequired"],
+      },
+      {
+        id: "score.high_fail",
+        title: "High failing check",
+        category: "security",
+        severity: "high",
+        frameworks: [],
+        condition: {
+          field: "security.authentication.mfaRequired",
+          equals: false,
+        },
+        message: "High failing check.",
+        recommendation: "Enable the control.",
+        relatedFields: ["security.authentication.mfaRequired"],
+      },
+      {
+        id: "score.medium_pass",
+        title: "Medium passing check",
+        category: "privacy",
+        severity: "medium",
+        frameworks: [],
+        condition: {
+          field: "privacy.retentionPolicyExists",
+          equals: true,
+        },
+        message: "Medium passing check.",
+        recommendation: "Keep the control in place.",
+        relatedFields: ["privacy.retentionPolicyExists"],
+      },
+      {
+        id: "score.low_fail",
+        title: "Low failing check",
+        category: "access",
+        severity: "low",
+        frameworks: [],
+        condition: {
+          field: "access.sharedAccountsExist",
+          equals: true,
+        },
+        message: "Low failing check.",
+        recommendation: "Remove shared accounts.",
+        relatedFields: ["access.sharedAccountsExist"],
+      },
+    ];
+    const response = evaluateAdvisorRules(rules, {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: false,
+        sharedAccountsExist: true,
+      },
+    });
+
+    expect(response.recommendations.map(({ id }) => id)).toEqual([
+      "score.high_fail",
+      "score.low_fail",
+    ]);
+    expect(response.scores.overall).toEqual({
+      value: 67,
+      assessedRuleCount: 4,
+      applicableRuleCount: 4,
+    });
+    expect(response.scores.byArea.security).toEqual({
+      value: 67,
+      assessedRuleCount: 2,
+      applicableRuleCount: 2,
+    });
+    expect(response.scores.byArea.privacy.value).toBe(100);
+    expect(response.scores.byArea.access.value).toBe(0);
+    expect(response.scores.byArea.productAndData.value).toBeNull();
+  });
+
+  it("pools product, data, service, and vendor rules into one score", () => {
+    const rules: AdvisorRule[] = [
+      {
+        id: "score.activity_fail",
+        title: "Activity check",
+        category: "activities",
+        severity: "high",
+        frameworks: [],
+        condition: { field: "company.handlesPii", equals: true },
+        message: "Activity check.",
+        recommendation: "Review activities.",
+        relatedFields: ["company.handlesPii"],
+      },
+      {
+        id: "score.data_pass",
+        title: "Data check",
+        category: "data",
+        severity: "medium",
+        frameworks: [],
+        condition: { field: "company.handlesSensitiveData", equals: false },
+        message: "Data check.",
+        recommendation: "Review data.",
+        relatedFields: ["company.handlesSensitiveData"],
+      },
+      {
+        id: "score.service_pass",
+        title: "Service check",
+        category: "services",
+        severity: "medium",
+        frameworks: [],
+        condition: { field: "company.storesPii", equals: false },
+        message: "Service check.",
+        recommendation: "Review services.",
+        relatedFields: ["company.storesPii"],
+      },
+      {
+        id: "score.vendor_fail",
+        title: "Vendor check",
+        category: "vendors",
+        severity: "high",
+        frameworks: [],
+        condition: { field: "company.storesHealthcareData", equals: false },
+        message: "Vendor check.",
+        recommendation: "Review vendors.",
+        relatedFields: ["company.storesHealthcareData"],
+      },
+    ];
+    const response = evaluateAdvisorRules(rules, organization);
+
+    expect(response.scores.byArea.productAndData).toEqual({
+      value: 33,
+      assessedRuleCount: 4,
+      applicableRuleCount: 4,
+    });
+    expect(response.scores.overall).toEqual(
+      response.scores.byArea.productAndData,
+    );
+  });
+
+  it("counts applicable unanswered rules as coverage without lowering scores", () => {
+    const passingRule: AdvisorRule = {
+      id: "score.passing",
+      title: "Passing check",
+      category: "access",
+      severity: "high",
+      frameworks: [],
+      condition: {
+        field: "access.mfaRequired",
+        equals: false,
+      },
+      message: "Passing check.",
+      recommendation: "Keep MFA enabled.",
+      relatedFields: ["access.mfaRequired"],
+    };
+    const incompleteRule: AdvisorRule = {
+      id: "score.incomplete",
+      title: "Incomplete check",
+      category: "access",
+      severity: "high",
+      frameworks: [],
+      condition: {
+        field: "access.securityTrainingRequired",
+        equals: false,
+      },
+      message: "Incomplete check.",
+      recommendation: "Answer the control.",
+      relatedFields: ["access.securityTrainingRequired"],
+    };
+    const response = evaluateAdvisorRules([passingRule, incompleteRule], {
+      ...organization,
+      access: {
+        ...organization.access,
+        mfaRequired: true,
+        securityTrainingRequired: null,
+      },
+    });
+
+    expect(response.recommendations).toEqual([]);
+    expect(response.scores.overall).toEqual({
+      value: 100,
+      assessedRuleCount: 1,
+      applicableRuleCount: 2,
+    });
+    expect(response.scores.byArea.access).toEqual(
+      response.scores.overall,
+    );
+  });
+
+  it("excludes rules whose applicability is false or unanswered", () => {
+    const gatedRule: AdvisorRule = {
+      ...mfaRule,
+      id: "score.gated",
+    };
+    const wrongGoal = evaluateAdvisorRules([gatedRule], {
+      ...organization,
+      company: { ...organization.company, complianceGoals: ["gdpr"] },
+      access: { ...organization.access, mfaRequired: false },
+    });
+    const unansweredGoal = evaluateAdvisorRules([gatedRule], {
+      ...organization,
+      company: { ...organization.company, complianceGoals: null },
+      access: { ...organization.access, mfaRequired: false },
+    });
+
+    expect(wrongGoal.scores.overall.applicableRuleCount).toBe(0);
+    expect(unansweredGoal.scores.overall.applicableRuleCount).toBe(0);
+    expect(wrongGoal.scores.overall.value).toBeNull();
+    expect(unansweredGoal.scores.overall.value).toBeNull();
+  });
+
+  it("returns 100 for a passing assessed rule and 0 for a failing one", () => {
+    const rule: AdvisorRule = {
+      id: "score.binary",
+      title: "Binary check",
+      category: "security",
+      severity: "high",
+      frameworks: [],
+      condition: {
+        field: "security.authentication.mfaRequired",
+        equals: false,
+      },
+      message: "Binary check.",
+      recommendation: "Enable MFA.",
+      relatedFields: ["security.authentication.mfaRequired"],
+    };
+    const passing = evaluateAdvisorRules([rule], {
+      ...organization,
+      access: { ...organization.access, mfaRequired: true },
+    });
+    const failing = evaluateAdvisorRules([rule], {
+      ...organization,
+      access: { ...organization.access, mfaRequired: false },
+    });
+
+    expect(passing.scores.overall.value).toBe(100);
+    expect(failing.scores.overall.value).toBe(0);
   });
 
   it("supports in, empty, nested all, and appliesWhen predicates", () => {
@@ -757,12 +1002,24 @@ describe("recommendation rules", () => {
     );
 
     expect([...triggeredIds].sort()).toEqual(rules.map(({ id }) => id));
-    expect(
-      evaluateAdvisorRules(rules, completeRiskProfile, {
+    const incompleteCollection = evaluateAdvisorRules(
+      rules.filter((rule) => rule.id === "vendors.processor_dpa_missing"),
+      completeRiskProfile,
+      {
         businessActivities,
         serviceProviderUsage: [incompleteProviderUsage],
-      }).recommendations.some(({ id }) => id === "vendors.processor_dpa_missing"),
+      },
+    );
+    expect(
+      incompleteCollection.recommendations.some(
+        ({ id }) => id === "vendors.processor_dpa_missing",
+      ),
     ).toBe(false);
+    expect(incompleteCollection.scores.byArea.productAndData).toEqual({
+      value: null,
+      assessedRuleCount: 0,
+      applicableRuleCount: 1,
+    });
   });
 });
 
@@ -786,6 +1043,40 @@ describe("recommendations API", () => {
         medium: 0,
         high: 0,
         critical: 0,
+      },
+      scores: {
+        overall: {
+          value: null,
+          assessedRuleCount: 0,
+          applicableRuleCount: 0,
+        },
+        byArea: {
+          security: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          privacy: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          access: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          infrastructure: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+          productAndData: {
+            value: null,
+            assessedRuleCount: 0,
+            applicableRuleCount: 0,
+          },
+        },
       },
     });
   });
