@@ -212,9 +212,13 @@ export const ProvidersStep = () => {
         ) : (
           <div className="flex flex-col gap-8">
             {CATEGORIES.map((category) => {
-              const categoryProviders = providers.filter((p) =>
-                p.systemTypes?.includes(category.systemType)
-              )
+              const categoryProviders = providers
+                .filter((p) => p.systemTypes?.includes(category.systemType))
+                .sort((first, second) =>
+                  first.name.localeCompare(second.name, undefined, {
+                    sensitivity: "base",
+                  })
+                )
 
               if (categoryProviders.length === 0) {
                 return null

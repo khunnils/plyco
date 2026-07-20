@@ -371,7 +371,7 @@ export const ReviewStep = () => {
       onBack={handleBack}
       step="setup-review"
       titleAbove
-      description="Review and adjust the details Plyco found before creating your workspace."
+      description="We've taken a first stab at defining a starting service with an initial set of datatypes and activities. You can add additional services later."
       title="Review workspace setup"
     >
       <section className="grid gap-6">

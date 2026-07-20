@@ -22,13 +22,16 @@ import {
 import { type ProfileDraft } from "@/features/company/types/company"
 import { DashboardServiceCard } from "@/features/dashboard/components/dashboard-service-card"
 import {
-  OverallReadinessScore,
-  ReadinessScoreBreakdown,
+  ReadinessBadge,
+  type ReadinessStatus,
+  WorkspaceSetupSummary,
 } from "@/features/dashboard/components/readiness-scores"
 import { SIDEBAR_SECTION } from "@/features/shell/lib/navigation"
 import {
   dashboardProgress,
+  completionText,
   groupProgress,
+  isProductAndDataComplete,
   isProgressComplete,
   isActivityComplete,
 } from "@/features/dashboard/lib/progress"
@@ -37,6 +40,7 @@ import {
   severityLabel,
   severityOrder,
 } from "@/features/recommendations/lib/recommendations"
+import { readinessStatusWhenComplete } from "@/features/recommendations/lib/readiness-scores"
 
 interface CategoryCardProps {
   title: string
@@ -44,6 +48,8 @@ interface CategoryCardProps {
   href: string
   isComplete: boolean
   statusText?: string
+  progressText?: string
+  readinessStatus?: ReadinessStatus | null
   icon: React.ComponentType<{ className?: string }>
   className?: string
 }
@@ -54,6 +60,8 @@ const CategoryCard = ({
   href,
   isComplete,
   statusText,
+  progressText,
+  readinessStatus,
   icon: Icon,
   className = "",
 }: CategoryCardProps) => {
@@ -81,15 +89,34 @@ const CategoryCard = ({
         <p className="mt-1 text-sm leading-normal text-slate-500">
           {statusText || description}
         </p>
+        {progressText ? (
+          <p className="mt-3 text-xs font-medium text-slate-600">
+            {progressText}
+          </p>
+        ) : null}
       </div>
+      {readinessStatus ? (
+        <div className="mt-4">
+          <ReadinessBadge status={readinessStatus} />
+        </div>
+      ) : null}
     </Link>
   )
 }
 
-const SectionHeading = ({ children }: { children: string }) => (
-  <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-    {children}
-  </span>
+const SectionHeading = ({
+  children,
+  readinessStatus,
+}: {
+  children: string
+  readinessStatus?: ReadinessStatus | null
+}) => (
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+      {children}
+    </span>
+    {readinessStatus ? <ReadinessBadge status={readinessStatus} /> : null}
+  </div>
 )
 
 const PolicyReasonsTooltip = ({
@@ -168,15 +195,31 @@ export const DashboardPage = ({
     high: 0,
     critical: 0,
   }
-  const recommendationTotal = severityOrder.reduce(
-    (total, severity) => total + recommendationCounts[severity],
-    0
-  )
   const currentDocuments = documents.filter(
     (summary) => summary.status === "current"
   )
   const outdatedDocuments = documents.filter(
     (summary) => summary.status === "stale"
+  )
+  const privacyReadiness = readinessStatusWhenComplete(
+    isProgressComplete(progress.privacy),
+    recommendations?.scores.byArea.privacy
+  )
+  const infrastructureReadiness = readinessStatusWhenComplete(
+    isProgressComplete(progress.infrastructure),
+    recommendations?.scores.byArea.infrastructure
+  )
+  const securityReadiness = readinessStatusWhenComplete(
+    isProgressComplete(progress.security),
+    recommendations?.scores.byArea.security
+  )
+  const accessReadiness = readinessStatusWhenComplete(
+    isProgressComplete(progress.access),
+    recommendations?.scores.byArea.access
+  )
+  const productAndDataReadiness = readinessStatusWhenComplete(
+    isProductAndDataComplete(progress),
+    recommendations?.scores.byArea.productAndData
   )
 
   // Calculate completeness for activities
@@ -212,32 +255,15 @@ export const DashboardPage = ({
   return (
     <div className="grid gap-8">
       <div className="grid gap-4 lg:grid-cols-3">
-        <OverallReadinessScore
-          isLoading={recommendationsLoading}
-          profileCompletion={progress.overall.percent}
-          scores={recommendations?.scores}
-        />
+        <WorkspaceSetupSummary progress={progress.overall} />
 
         <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div>
-                <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-                  {recommendationsLoading
-                    ? "Checking recommendations"
-                    : recommendationTotal === 0
-                      ? "No recommendations right now"
-                      : `${recommendationTotal} ${recommendationTotal === 1 ? "recommendation" : "recommendations"}`}
-                </h3>
-              </div>
-            </div>
-            <Link
-              className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
-              to="/recommendations"
-            >
-              View all
-            </Link>
-          </div>
+          <Link
+            className="mb-2 inline-flex text-xs font-bold tracking-wider text-slate-400 uppercase hover:text-slate-600 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+            to="/recommendations"
+          >
+            Recommendations
+          </Link>
           <div className="grid grid-cols-2 gap-3">
             {severityOrder.map((severity) => (
               <div
@@ -258,19 +284,12 @@ export const DashboardPage = ({
         </section>
 
         <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h3 className="mb-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
-                Policies
-              </h3>
-            </div>
-            <Link
-              className="text-sm font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
-              to="/documents"
-            >
-              View all
-            </Link>
-          </div>
+          <Link
+            className="mb-2 inline-flex text-xs font-bold tracking-wider text-slate-400 uppercase hover:text-slate-600 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+            to="/documents"
+          >
+            Policies
+          </Link>
           <div className="grid grid-cols-1 gap-3">
             <div className="rounded-sm border border-l-4 border-slate-200 border-l-emerald-500 px-4 py-3">
               <div className="flex items-center gap-2">
@@ -301,17 +320,13 @@ export const DashboardPage = ({
         </section>
       </div>
 
-      <ReadinessScoreBreakdown
-        isLoading={recommendationsLoading}
-        scores={recommendations?.scores}
-      />
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <CategoryCard
           title="Profile"
           description="Company identity, operating context, and contacts."
           href="/company/profile"
           isComplete={isProgressComplete(progress.profile)}
+          progressText={completionText(progress.profile)}
           icon={Building2}
         />
         <CategoryCard
@@ -319,6 +334,8 @@ export const DashboardPage = ({
           description="Rights handling, privacy preferences, and disclosures."
           href="/company/privacy"
           isComplete={isProgressComplete(progress.privacy)}
+          progressText={completionText(progress.privacy)}
+          readinessStatus={privacyReadiness}
           icon={ShieldCheck}
         />
         <CategoryCard
@@ -326,6 +343,8 @@ export const DashboardPage = ({
           description="Core systems, encryption, monitoring, and backups."
           href="/company/infrastructure"
           isComplete={isProgressComplete(progress.infrastructure)}
+          progressText={completionText(progress.infrastructure)}
+          readinessStatus={infrastructureReadiness}
           icon={Server}
         />
         <CategoryCard
@@ -333,6 +352,8 @@ export const DashboardPage = ({
           description="Development security, vulnerabilities, and incident response."
           href="/company/security"
           isComplete={isProgressComplete(progress.security)}
+          progressText={completionText(progress.security)}
+          readinessStatus={securityReadiness}
           icon={Shield}
         />
         <CategoryCard
@@ -340,12 +361,16 @@ export const DashboardPage = ({
           description="Access hygiene, authentication, and training."
           href="/company/access"
           isComplete={isProgressComplete(progress.access)}
+          progressText={completionText(progress.access)}
+          readinessStatus={accessReadiness}
           icon={KeyRound}
         />
       </div>
 
       <section className="grid gap-4">
-        <SectionHeading>{SIDEBAR_SECTION.productAndData}</SectionHeading>
+        <SectionHeading readinessStatus={productAndDataReadiness}>
+          {SIDEBAR_SECTION.productAndData}
+        </SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <CategoryCard
             title="Activities"

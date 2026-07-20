@@ -72,7 +72,7 @@ export const ReviewDataTypesTab = () => {
         <div>
           <p className="text-sm font-semibold text-slate-950">Data Types</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Review and edit the data categories that will be saved.
+            The data categories stored and processed by your service.
           </p>
         </div>
       </div>

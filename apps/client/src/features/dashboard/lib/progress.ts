@@ -18,6 +18,9 @@ export type ProgressMetric = {
 export const isProgressComplete = (metric: ProgressMetric) =>
   metric.totalFields > 0 && metric.completedFields === metric.totalFields
 
+export const completionText = (metric: ProgressMetric) =>
+  `${metric.completedFields} of ${metric.totalFields} facts captured`
+
 export type ProgressSection = ProgressMetric & {
   title: string
 }
@@ -51,6 +54,15 @@ export type DashboardProgress = {
   vendors: ProgressItem[]
   activities: ProgressSection[]
 }
+
+export const isProductAndDataComplete = (progress: DashboardProgress) =>
+  progress.services.length > 0 &&
+  progress.data.dataTypes.length > 0 &&
+  progress.activities.length > 0 &&
+  progress.services.every(isProgressComplete) &&
+  progress.data.dataTypes.every(isProgressComplete) &&
+  progress.activities.every(isProgressComplete) &&
+  progress.vendors.every(isProgressComplete)
 
 type ReadinessField = {
   label: string

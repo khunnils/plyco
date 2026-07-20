@@ -160,11 +160,24 @@ grouped rule waits until every scalar answer it uses is available. For
 collection rules, incomplete records are ignored while complete records remain
 eligible for evaluation.
 
-The dashboard shows an overall rule-based readiness score and breakdowns for
-Security, Privacy, Access, Infrastructure, and Product & Data. Product & Data
-pools the Activities, Data, Services, and Vendors rule categories. Critical,
-high, medium, and low checks contribute weights of 8, 4, 2, and 1. Scores use
-assessed checks only and always show assessed-versus-applicable coverage; an
-area with no assessed checks shows “Not enough data.” The overall score pools
-all assessed rule weights. These scores are live readiness signals, not audit
-or certification results, and are not persisted or historically tracked.
+The dashboard leads with workspace completion rather than a readiness score.
+It shows overall setup progress and completed-versus-total details for Profile,
+Privacy, Access, Infrastructure, and Security. Numeric readiness scores and
+score progress bars are not shown on the dashboard.
+
+Privacy, Access, Infrastructure, and Security show a qualitative readiness
+label only after the area is complete, at least one advisor check applies, and
+every applicable check has been assessed. Product & Data shows one pooled label
+only after at least one service, activity, and data type exists; all of those
+records and every existing vendor record are complete; and every applicable
+pooled check has been assessed. Having no vendors does not block this label.
+The dashboard recommendations card uses a static "Recommendations" header that
+links to the recommendations page. Severity counts still reflect the current
+recommendation set even when setup or advisor coverage is incomplete.
+
+Product & Data readiness pools the Activities, Data, Services, and Vendors rule
+categories. Critical, high, medium, and low checks contribute weights of 8, 4,
+2, and 1. Scores use assessed checks only and retain assessed-versus-applicable
+coverage in the recommendations API. The overall score pools all assessed rule
+weights. These scores are live readiness signals, not audit or certification
+results, and are not persisted or historically tracked.

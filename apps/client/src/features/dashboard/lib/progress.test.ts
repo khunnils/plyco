@@ -5,7 +5,9 @@ import { emptyProfileDraft } from "@/features/company/lib/profile"
 import {
   dashboardProgress,
   activityProgress,
+  completionText,
   infrastructureProgress,
+  isProductAndDataComplete,
   securityProgress,
   isActivityComplete,
   isAnswered,
@@ -559,6 +561,13 @@ describe("dashboard progress", () => {
     expect(progress.services).toEqual([])
     expect(progress.data.dataTypes).toEqual([])
     expect(progress.vendors).toEqual([])
+    expect(isProductAndDataComplete(progress)).toBe(false)
+  })
+
+  it("describes completion without presenting another score", () => {
+    expect(
+      completionText({ completedFields: 3, totalFields: 8, percent: 38 })
+    ).toBe("3 of 8 facts captured")
   })
 
   it("consolidates services, data types, and activities into single top level sections for overall progress", () => {
@@ -672,5 +681,50 @@ describe("dashboard progress", () => {
     // Because we filled all fields for our 1 service, 1 data type, and 1 activity
     // So completedSections should be at least 3
     expect(progress.overall.completedSections).toBe(3)
+    expect(isProductAndDataComplete(progress)).toBe(true)
+  })
+
+  it("requires every existing vendor to be complete for Product and Data", () => {
+    const incompleteVendor = {
+      id: "provider_1",
+      title: "Incomplete provider",
+      href: "/vendors",
+      completedFields: 1,
+      totalFields: 2,
+      percent: 50,
+      completedSections: 0,
+      totalSections: 1,
+      sections: [],
+    }
+    const completeItem = {
+      ...incompleteVendor,
+      completedFields: 2,
+      percent: 100,
+      completedSections: 1,
+    }
+    const progress = {
+      overall: {
+        completedFields: 0,
+        totalFields: 0,
+        percent: 0,
+        completedSections: 0,
+        totalSections: 0,
+      },
+      profile: completeItem,
+      privacy: completeItem,
+      infrastructure: completeItem,
+      security: completeItem,
+      access: completeItem,
+      services: [completeItem],
+      data: { dataTypes: [completeItem] },
+      vendors: [incompleteVendor],
+      activities: [completeItem],
+    }
+
+    expect(isProductAndDataComplete(progress)).toBe(false)
+    expect(
+      isProductAndDataComplete({ ...progress, vendors: [completeItem] })
+    ).toBe(true)
+    expect(isProductAndDataComplete({ ...progress, vendors: [] })).toBe(true)
   })
 })

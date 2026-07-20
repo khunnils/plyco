@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  readinessAreaDetails,
-  readinessAreaOrder,
-  readinessCoverageText,
+  isReadinessCoverageComplete,
+  recommendationSummaryText,
   readinessScoreStatus,
+  readinessStatusWhenComplete,
 } from "./readiness-scores"
 
 describe("readiness scores", () => {
@@ -22,39 +22,102 @@ describe("readiness scores", () => {
     expect(readinessScoreStatus(value).label).toBe(expected)
   })
 
-  it("describes assessed coverage", () => {
+  it("requires at least one fully assessed applicable check", () => {
     expect(
-      readinessCoverageText({
-        value: 75,
-        assessedRuleCount: 3,
-        applicableRuleCount: 5,
+      isReadinessCoverageComplete({
+        value: 100,
+        assessedRuleCount: 1,
+        applicableRuleCount: 2,
       })
-    ).toBe("3 of 5 applicable checks assessed")
+    ).toBe(false)
     expect(
-      readinessCoverageText({
+      isReadinessCoverageComplete({
         value: null,
         assessedRuleCount: 0,
         applicableRuleCount: 0,
       })
-    ).toBe("No applicable checks yet")
+    ).toBe(false)
+    expect(
+      isReadinessCoverageComplete({
+        value: 75,
+        assessedRuleCount: 2,
+        applicableRuleCount: 2,
+      })
+    ).toBe(true)
   })
 
-  it("keeps every readiness area in the intended dashboard order", () => {
-    expect(readinessAreaOrder).toEqual([
-      "security",
-      "privacy",
-      "access",
-      "infrastructure",
-      "productAndData",
-    ])
+  it("reveals qualitative readiness only after completion and full coverage", () => {
+    const completeScore = {
+      value: 80,
+      assessedRuleCount: 4,
+      applicableRuleCount: 4,
+    }
+
+    expect(readinessStatusWhenComplete(false, completeScore)).toBeNull()
     expect(
-      readinessAreaOrder.map((area) => readinessAreaDetails[area].href)
-    ).toEqual([
-      "/company/security",
-      "/company/privacy",
-      "/company/access",
-      "/company/infrastructure",
-      "/company/graph",
-    ])
+      readinessStatusWhenComplete(true, {
+        ...completeScore,
+        assessedRuleCount: 3,
+      })
+    ).toBeNull()
+    expect(
+      readinessStatusWhenComplete(true, {
+        value: null,
+        assessedRuleCount: 0,
+        applicableRuleCount: 0,
+      })
+    ).toBeNull()
+    expect(readinessStatusWhenComplete(true, completeScore)?.label).toBe(
+      "Strong foundation"
+    )
+  })
+
+  it.each([
+    [0, "Significant gaps"],
+    [40, "Needs attention"],
+    [60, "Progressing"],
+    [80, "Strong foundation"],
+  ] as const)("reveals %s as %s after the gates pass", (value, label) => {
+    expect(
+      readinessStatusWhenComplete(true, {
+        value,
+        assessedRuleCount: 3,
+        applicableRuleCount: 3,
+      })?.label
+    ).toBe(label)
+  })
+
+  it("does not imply a clean assessment while setup or coverage is incomplete", () => {
+    expect(
+      recommendationSummaryText({
+        assessmentComplete: false,
+        isLoading: false,
+        recommendationTotal: 0,
+      })
+    ).toBe("Complete setup for a fuller assessment")
+    expect(
+      recommendationSummaryText({
+        assessmentComplete: true,
+        isLoading: false,
+        recommendationTotal: 0,
+      })
+    ).toBe("No recommendations right now")
+  })
+
+  it("keeps loading and finding counts ahead of assessment copy", () => {
+    expect(
+      recommendationSummaryText({
+        assessmentComplete: false,
+        isLoading: true,
+        recommendationTotal: 0,
+      })
+    ).toBe("Checking recommendations")
+    expect(
+      recommendationSummaryText({
+        assessmentComplete: false,
+        isLoading: false,
+        recommendationTotal: 2,
+      })
+    ).toBe("2 recommendations")
   })
 })

@@ -72,7 +72,7 @@ export const ReviewActivitiesTab = () => {
         <div>
           <p className="text-sm font-semibold text-slate-950">Activities</p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Review and edit the business activities.
+            The business activities your service performs.
           </p>
         </div>
       </div>

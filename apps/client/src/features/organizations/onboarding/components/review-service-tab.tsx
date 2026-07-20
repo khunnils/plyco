@@ -1,6 +1,5 @@
-import { useOnboardingStore } from "../stores/onboarding-store"
-import { TextInput } from "../../components/text-input"
-import { MARKETING_WEBSITE_SERVICE_NAME } from "../../components/types"
+import { TextInput } from "../../components/text-input";
+import { useOnboardingStore } from "../stores/onboarding-store";
 
 interface ReviewServiceTabProps {
   regionOptions: Array<{ value: string; label: string }>
@@ -37,11 +36,11 @@ export const ReviewServiceTab = ({ regionOptions }: ReviewServiceTabProps) => {
   }
 
   return (
-    <div className="grid gap-3 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2">
       <div className="md:col-span-2">
         <p className="text-sm font-semibold text-slate-950">Primary Service</p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          Edit the primary product or service saved during setup.
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Your primary application or service. You can add additional services later.
         </p>
       </div>
       <TextInput
@@ -110,19 +109,6 @@ export const ReviewServiceTab = ({ regionOptions }: ReviewServiceTabProps) => {
           ))}
         </select>
       </label>
-      <div className="mt-2 rounded-md border border-slate-200 bg-white p-4 md:col-span-2">
-        <p className="text-sm font-semibold text-slate-950">
-          {draft.websiteService.serviceName ?? MARKETING_WEBSITE_SERVICE_NAME}
-        </p>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          {draft.websiteService.serviceDescription}
-        </p>
-        {draft.websiteService.serviceUrl ? (
-          <p className="mt-3 text-xs font-medium text-slate-600">
-            {draft.websiteService.serviceUrl}
-          </p>
-        ) : null}
-      </div>
     </div>
   )
 }
