@@ -6,6 +6,9 @@ import {
   recommendationAreaSchema,
   recommendationSeveritySchema,
   recommendationsResponseSchema,
+  type AdvisorRuleEvaluation,
+  type AdvisorRuleStatus,
+  type AdvisorRuleStatusCounts,
   type BusinessActivity,
   type OrganizationSecurityProfile,
   type Recommendation,
@@ -175,32 +178,34 @@ export const evaluateAdvisorRules = (
   options: {
     businessActivities?: BusinessActivity[]
     serviceProviderUsage?: ServiceProviderUsage[]
+    suppressedRuleIds?: Iterable<string>
   } = {},
 ): RecommendationsResponse => {
-  if (!organization) {
-    return recommendationsResponseSchema.parse({
-      recommendations: [],
-      countsBySeverity: emptyCounts(),
-      scores: emptyScores(),
-    })
-  }
-
   const context = recommendationContext(organization, options)
-  const evaluations = rules.map((rule) => evaluateRule(rule, context))
+  const suppressedRuleIds = new Set(options.suppressedRuleIds)
+  const evaluations = rules
+    .filter((rule) => ruleIsInScope(rule, context))
+    .map((rule) => evaluateRule(rule, context, suppressedRuleIds.has(rule.id)))
   const recommendations = evaluations
-    .filter((evaluation) => evaluation.failing)
+    .filter((evaluation) => evaluation.failing && !evaluation.suppressed)
     .map((evaluation) => evaluation.rule)
     .map(ruleToRecommendation)
+  const evaluatedRules = evaluations.map(ruleToEvaluation)
+  const activeEvaluations = evaluations.filter(
+    (evaluation) => !evaluation.suppressed,
+  )
 
   return recommendationsResponseSchema.parse({
     recommendations,
     countsBySeverity: countBySeverity(recommendations),
-    scores: calculateScores(evaluations),
+    scores: calculateScores(activeEvaluations),
+    rules: evaluatedRules,
+    countsByStatus: countByStatus(evaluatedRules),
   })
 }
 
 const recommendationContext = (
-  organization: OrganizationSecurityProfile,
+  organization: OrganizationSecurityProfile | null,
   {
     businessActivities = [],
     serviceProviderUsage = [],
@@ -209,16 +214,16 @@ const recommendationContext = (
     serviceProviderUsage?: ServiceProviderUsage[]
   },
 ) => ({
-  company: organization.company,
-  privacy: organization.privacy,
-  infrastructure: organization.infrastructure,
-  securityProfile: organization.security,
-  access: organization.access,
-  dataHandling: organization.dataHandling,
+  company: organization?.company,
+  privacy: organization?.privacy,
+  infrastructure: organization?.infrastructure,
+  securityProfile: organization?.security,
+  access: organization?.access,
+  dataHandling: organization?.dataHandling,
   businessActivities,
   serviceProviderUsage,
   services: {
-    all: organization.services,
+    all: organization?.services,
   },
   vendors: {
     dataProcessors: serviceProviderUsage.filter((usage) =>
@@ -227,18 +232,18 @@ const recommendationContext = (
   },
   security: {
     authentication: {
-      mfaRequired: organization.access.mfaRequired,
+      mfaRequired: organization?.access.mfaRequired,
     },
     incidentResponse: {
-      planExists: organization.security.incidentResponsePlanExists,
+      planExists: organization?.security.incidentResponsePlanExists,
     },
     backups: {
-      backupsEnabled: organization.infrastructure.backupsEnabled,
-      backupCadence: organization.infrastructure.backupCadence,
-      backupRetentionDays: organization.infrastructure.backupRetentionDays,
+      backupsEnabled: organization?.infrastructure.backupsEnabled,
+      backupCadence: organization?.infrastructure.backupCadence,
+      backupRetentionDays: organization?.infrastructure.backupRetentionDays,
     },
     vulnerabilityManagement: {
-      scanningCadence: organization.security.scanningCadence,
+      scanningCadence: organization?.security.scanningCadence,
     },
   },
 })
@@ -248,24 +253,58 @@ type RuleEvaluation = {
   applicable: boolean
   assessed: boolean
   failing: boolean
+  status: AdvisorRuleStatus
+  suppressed: boolean
+}
+
+const ruleIsInScope = (
+  rule: AdvisorRule,
+  context: ReturnType<typeof recommendationContext>,
+) => {
+  if (rule.frameworks.length === 0) {
+    return true
+  }
+
+  const complianceGoals = context.company?.complianceGoals
+
+  return (
+    Array.isArray(complianceGoals) &&
+    rule.frameworks.some((framework) => complianceGoals.includes(framework))
+  )
 }
 
 const evaluateRule = (
   rule: AdvisorRule,
   context: ReturnType<typeof recommendationContext>,
+  suppressed: boolean,
 ): RuleEvaluation => {
+  const applicabilityDefined =
+    !rule.appliesWhen || conditionInputsAreDefined(rule.appliesWhen, context)
   const applicable =
     !rule.appliesWhen ||
-    (conditionInputsAreDefined(rule.appliesWhen, context) &&
-      conditionMatches(rule.appliesWhen, context))
+    (applicabilityDefined && conditionMatches(rule.appliesWhen, context))
   const assessed =
     applicable && conditionInputsAreDefined(rule.condition, context)
+  const failing = assessed && conditionMatches(rule.condition, context)
+  const status: AdvisorRuleStatus = suppressed
+    ? "suppressed"
+    : !applicabilityDefined
+      ? "missing_data"
+      : !applicable
+        ? "not_applicable"
+        : !assessed
+          ? "missing_data"
+          : failing
+            ? "failing"
+            : "passing"
 
   return {
     rule,
     applicable,
     assessed,
-    failing: assessed && conditionMatches(rule.condition, context),
+    failing,
+    status,
+    suppressed,
   }
 }
 
@@ -279,6 +318,38 @@ const ruleToRecommendation = (rule: AdvisorRule): Recommendation => ({
   recommendation: rule.recommendation,
   relatedFields: rule.relatedFields,
 })
+
+const ruleToEvaluation = (
+  evaluation: RuleEvaluation,
+): AdvisorRuleEvaluation => ({
+  ...ruleToRecommendation(evaluation.rule),
+  status: evaluation.status,
+})
+
+const emptyStatusCounts = (): AdvisorRuleStatusCounts => ({
+  all: 0,
+  failing: 0,
+  missingData: 0,
+  passing: 0,
+  notApplicable: 0,
+  suppressed: 0,
+})
+
+const countByStatus = (
+  rules: AdvisorRuleEvaluation[],
+): AdvisorRuleStatusCounts =>
+  rules.reduce((counts, rule) => {
+    counts.all += 1
+    const key: Record<AdvisorRuleStatus, keyof AdvisorRuleStatusCounts> = {
+      failing: "failing",
+      missing_data: "missingData",
+      passing: "passing",
+      not_applicable: "notApplicable",
+      suppressed: "suppressed",
+    }
+    counts[key[rule.status]] += 1
+    return counts
+  }, emptyStatusCounts())
 
 const emptyCounts = (): RecommendationCountsBySeverity => ({
   low: 0,
@@ -361,23 +432,6 @@ const calculateScores = (evaluations: RuleEvaluation[]): ReadinessScores => ({
     access: scoreArea(evaluations, "access"),
     infrastructure: scoreArea(evaluations, "infrastructure"),
     productAndData: scoreArea(evaluations, "productAndData"),
-  },
-})
-
-const emptyScore = (): ReadinessScore => ({
-  value: null,
-  assessedRuleCount: 0,
-  applicableRuleCount: 0,
-})
-
-const emptyScores = (): ReadinessScores => ({
-  overall: emptyScore(),
-  byArea: {
-    security: emptyScore(),
-    privacy: emptyScore(),
-    access: emptyScore(),
-    infrastructure: emptyScore(),
-    productAndData: emptyScore(),
   },
 })
 

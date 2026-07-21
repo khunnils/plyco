@@ -1,4 +1,4 @@
-import { type RecommendationSeverity } from "@plyco/shared"
+import { type Recommendation, type RecommendationSeverity } from "@plyco/shared"
 
 export const severityOrder: RecommendationSeverity[] = [
   "critical",
@@ -35,3 +35,16 @@ export const severityBorderClass = (severity: RecommendationSeverity) => {
       return "border-l-blue-500"
   }
 }
+
+export const groupRecommendationsBySeverity = (
+  recommendations: Recommendation[]
+) =>
+  severityOrder.flatMap((severity) => {
+    const matchingRecommendations = recommendations.filter(
+      (recommendation) => recommendation.severity === severity
+    )
+
+    return matchingRecommendations.length > 0
+      ? [{ severity, recommendations: matchingRecommendations }]
+      : []
+  })

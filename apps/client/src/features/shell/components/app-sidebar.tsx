@@ -49,7 +49,10 @@ export const AppSidebar = () => {
             Dashboard
           </SidebarMenuButton>
           <SidebarMenuButton
-            active={pathname.startsWith("/recommendations")}
+            active={
+              pathname.startsWith("/rules") ||
+              pathname.startsWith("/recommendations")
+            }
             onClick={() => navigate("/recommendations")}
           >
             <Lightbulb className="size-4" />

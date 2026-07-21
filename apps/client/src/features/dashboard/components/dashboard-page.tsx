@@ -21,6 +21,7 @@ import {
 
 import { type ProfileDraft } from "@/features/company/types/company"
 import { DashboardServiceCard } from "@/features/dashboard/components/dashboard-service-card"
+import { ProgressDetailsPopover } from "@/features/dashboard/components/progress-details-popover"
 import {
   ReadinessBadge,
   type ReadinessStatus,
@@ -34,6 +35,7 @@ import {
   isProductAndDataComplete,
   isProgressComplete,
   isActivityComplete,
+  type ProgressSection,
 } from "@/features/dashboard/lib/progress"
 import {
   severityBorderClass,
@@ -47,6 +49,8 @@ interface CategoryCardProps {
   description: string
   href: string
   isComplete: boolean
+  progressSections: ProgressSection[]
+  emptyProgressMessage?: string
   statusText?: string
   progressText?: string
   readinessStatus?: ReadinessStatus | null
@@ -59,6 +63,8 @@ const CategoryCard = ({
   description,
   href,
   isComplete,
+  progressSections,
+  emptyProgressMessage,
   statusText,
   progressText,
   readinessStatus,
@@ -66,41 +72,47 @@ const CategoryCard = ({
   className = "",
 }: CategoryCardProps) => {
   return (
-    <Link
-      to={href}
-      className={`group relative flex flex-col justify-between border border-slate-200 bg-white p-4 hover:border-slate-300 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none ${className}`}
+    <div
+      className={`group relative flex flex-col justify-between border border-slate-200 bg-white hover:border-slate-300 ${className}`}
     >
-      <div>
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div className="flex size-10 items-center justify-center rounded-md bg-blue-50 text-slate-600">
-            <Icon className="h-5 w-5" />
-          </div>
-          {isComplete ? (
-            <CheckCircle2 className="h-6 w-6 shrink-0 fill-emerald-50 text-emerald-600" />
-          ) : (
-            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-slate-600">
-              <div className="h-2 w-2 rounded-full bg-slate-600"></div>
+      <Link
+        className="flex flex-1 flex-col justify-between p-4 pr-14 focus-visible:ring-3 focus-visible:ring-slate-200 focus-visible:outline-none"
+        to={href}
+      >
+        <div>
+          <div className="mb-4 flex items-center gap-4">
+            <div className="flex size-10 items-center justify-center rounded-md bg-blue-50 text-slate-600">
+              <Icon className="h-5 w-5" />
             </div>
-          )}
-        </div>
-        <h3 className="text-base font-semibold text-slate-950 transition-colors group-hover:text-slate-700">
-          {title}
-        </h3>
-        <p className="mt-1 text-sm leading-normal text-slate-500">
-          {statusText || description}
-        </p>
-        {progressText ? (
-          <p className="mt-3 text-xs font-medium text-slate-600">
-            {progressText}
+          </div>
+          <h3 className="text-base font-semibold text-slate-950 transition-colors group-hover:text-slate-700">
+            {title}
+          </h3>
+          <p className="mt-1 text-sm leading-normal text-slate-500">
+            {statusText || description}
           </p>
-        ) : null}
-      </div>
-      {readinessStatus ? (
-        <div className="mt-4">
-          <ReadinessBadge status={readinessStatus} />
+          {progressText ? (
+            <p className="mt-3 text-xs font-medium text-slate-600">
+              {progressText}
+            </p>
+          ) : null}
         </div>
-      ) : null}
-    </Link>
+        {readinessStatus ? (
+          <div className="mt-4">
+            <ReadinessBadge status={readinessStatus} />
+          </div>
+        ) : null}
+      </Link>
+      {isComplete ? (
+        <CheckCircle2 className="pointer-events-none absolute top-4 right-4 h-6 w-6 shrink-0 fill-emerald-50 text-emerald-600" />
+      ) : (
+        <ProgressDetailsPopover
+          emptyMessage={emptyProgressMessage}
+          sectionTitle={title}
+          sections={progressSections}
+        />
+      )}
+    </div>
   )
 }
 
@@ -326,6 +338,7 @@ export const DashboardPage = ({
           description="Company identity, operating context, and contacts."
           href="/company/profile"
           isComplete={isProgressComplete(progress.profile)}
+          progressSections={progress.profile.sections}
           progressText={completionText(progress.profile)}
           icon={Building2}
         />
@@ -334,6 +347,7 @@ export const DashboardPage = ({
           description="Rights handling, privacy preferences, and disclosures."
           href="/company/privacy"
           isComplete={isProgressComplete(progress.privacy)}
+          progressSections={progress.privacy.sections}
           progressText={completionText(progress.privacy)}
           readinessStatus={privacyReadiness}
           icon={ShieldCheck}
@@ -343,6 +357,7 @@ export const DashboardPage = ({
           description="Core systems, encryption, monitoring, and backups."
           href="/company/infrastructure"
           isComplete={isProgressComplete(progress.infrastructure)}
+          progressSections={progress.infrastructure.sections}
           progressText={completionText(progress.infrastructure)}
           readinessStatus={infrastructureReadiness}
           icon={Server}
@@ -352,6 +367,7 @@ export const DashboardPage = ({
           description="Development security, vulnerabilities, and incident response."
           href="/company/security"
           isComplete={isProgressComplete(progress.security)}
+          progressSections={progress.security.sections}
           progressText={completionText(progress.security)}
           readinessStatus={securityReadiness}
           icon={Shield}
@@ -361,6 +377,7 @@ export const DashboardPage = ({
           description="Access hygiene, authentication, and training."
           href="/company/access"
           isComplete={isProgressComplete(progress.access)}
+          progressSections={progress.access.sections}
           progressText={completionText(progress.access)}
           readinessStatus={accessReadiness}
           icon={KeyRound}
@@ -377,6 +394,8 @@ export const DashboardPage = ({
             description="Processing activities mapping."
             href="/company/activities"
             isComplete={isActivitiesComplete}
+            progressSections={progress.activities}
+            emptyProgressMessage="Add the first processing activity to begin this section."
             statusText={activitiesStatusText}
             icon={ClipboardList}
           />
@@ -385,6 +404,8 @@ export const DashboardPage = ({
             description="Data categories and protection rules."
             href="/company/data"
             isComplete={isDataComplete}
+            progressSections={progress.data.dataTypes}
+            emptyProgressMessage="Add the first data type to begin this section."
             statusText={dataTypesStatusText}
             icon={Database}
           />

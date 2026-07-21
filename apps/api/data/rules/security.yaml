@@ -2,9 +2,6 @@
   title: Development security controls need strengthening
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     any:
       - field: securityProfile.codeReviewRequired
@@ -33,9 +30,6 @@
   title: Vulnerability scanning is not configured
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: security.vulnerabilityManagement.scanningCadence
     in: [none, not_defined, not_set]
@@ -48,9 +42,6 @@
   title: Penetration testing is not configured
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: securityProfile.penetrationTestingStrategy
     in: [none, not_defined, not_set]
@@ -64,9 +55,6 @@
   title: Critical vulnerability patch timeline is undefined
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: securityProfile.patchingSlaCriticalDaysStatus
     in: [not_defined, not_set]
@@ -80,9 +68,6 @@
   title: High-severity vulnerability patch timeline is undefined
   category: security
   severity: medium
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: securityProfile.patchingSlaHighDaysStatus
     in: [not_defined, not_set]
@@ -96,9 +81,6 @@
   title: Responsible disclosure is not supported
   category: security
   severity: low
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: securityProfile.vulnerabilityDisclosureProgramExists
     equals: false
@@ -112,9 +94,6 @@
   title: Incident response plan is missing
   category: security
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: security.incidentResponse.planExists
     equals: false
@@ -127,9 +106,6 @@
   title: Incident notification process needs strengthening
   category: security
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     all:
       - field: security.incidentResponse.planExists
@@ -149,9 +125,6 @@
   title: Shared accounts are in use
   category: access
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: access.sharedAccountsExist
     equals: true

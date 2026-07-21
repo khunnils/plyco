@@ -25,6 +25,12 @@ export type ProgressSection = ProgressMetric & {
   title: string
 }
 
+export const pendingProgressSections = (sections: ProgressSection[]) =>
+  sections.filter(
+    (section) =>
+      section.totalFields === 0 || section.completedFields < section.totalFields
+  )
+
 export type ProgressGroup = ProgressMetric & {
   completedSections: number
   totalSections: number

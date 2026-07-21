@@ -43,6 +43,27 @@ export const recommendationSchema = z.object({
   relatedFields: z.array(z.string().trim().min(1)).default([]),
 });
 
+export const advisorRuleStatusSchema = z.enum([
+  "failing",
+  "missing_data",
+  "passing",
+  "not_applicable",
+  "suppressed",
+]);
+
+export const advisorRuleEvaluationSchema = recommendationSchema.extend({
+  status: advisorRuleStatusSchema,
+});
+
+export const advisorRuleStatusCountsSchema = z.object({
+  all: z.number().int().min(0).default(0),
+  failing: z.number().int().min(0).default(0),
+  missingData: z.number().int().min(0).default(0),
+  passing: z.number().int().min(0).default(0),
+  notApplicable: z.number().int().min(0).default(0),
+  suppressed: z.number().int().min(0).default(0),
+});
+
 export const recommendationCountsBySeveritySchema = z.object({
   low: z.number().int().min(0).default(0),
   medium: z.number().int().min(0).default(0),
@@ -89,6 +110,15 @@ export const recommendationsResponseSchema = z.object({
   recommendations: z.array(recommendationSchema),
   countsBySeverity: recommendationCountsBySeveritySchema,
   scores: readinessScoresSchema,
+  rules: z.array(advisorRuleEvaluationSchema).default([]),
+  countsByStatus: advisorRuleStatusCountsSchema.default({
+    all: 0,
+    failing: 0,
+    missingData: 0,
+    passing: 0,
+    notApplicable: 0,
+    suppressed: 0,
+  }),
 });
 
 export type RecommendationSeverity = z.infer<
@@ -97,6 +127,11 @@ export type RecommendationSeverity = z.infer<
 export type RecommendationArea = z.infer<typeof recommendationAreaSchema>;
 export type ReadinessScoreArea = z.infer<typeof readinessScoreAreaSchema>;
 export type Recommendation = z.infer<typeof recommendationSchema>;
+export type AdvisorRuleStatus = z.infer<typeof advisorRuleStatusSchema>;
+export type AdvisorRuleEvaluation = z.infer<typeof advisorRuleEvaluationSchema>;
+export type AdvisorRuleStatusCounts = z.infer<
+  typeof advisorRuleStatusCountsSchema
+>;
 export type RecommendationCountsBySeverity = z.infer<
   typeof recommendationCountsBySeveritySchema
 >;

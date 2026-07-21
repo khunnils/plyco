@@ -2,9 +2,7 @@
   title: Data processor is missing DPA status
   category: vendors
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
+  frameworks: [gdpr]
   condition:
     any:
       collection: vendors.dataProcessors

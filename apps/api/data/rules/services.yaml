@@ -2,9 +2,6 @@
   title: Cookie categories are not configured
   category: services
   severity: medium
-  frameworks: [gdpr, ccpa]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, ccpa]
   condition:
     any:
       collection: services.all

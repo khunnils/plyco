@@ -49,11 +49,25 @@ model Organization {
   memberships           OrganizationMembership[]
   invitations           OrganizationInvitation[]
   apiKeys               OrganizationApiKey[]
+  ruleSuppressions      OrganizationRuleSuppression[]
   codeSets              OrganizationCodeSet[]
   createdAt             DateTime                 @default(now()) @map("created_at")
   updatedAt             DateTime                 @updatedAt @map("updated_at")
 
   @@map("organizations")
+}
+
+model OrganizationRuleSuppression {
+  id             String       @id(map: "organization_rule_suppressions_pkey") @default(cuid())
+  organizationId String       @map("organization_id")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_rule_suppressions_organization_id_fkey")
+  ruleId         String       @map("rule_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@unique([organizationId, ruleId], map: "organization_rule_suppressions_organization_id_rule_id_key")
+  @@index([organizationId], map: "idx_organization_rule_suppressions_organization_id")
+  @@map("organization_rule_suppressions")
 }
 
 model Country {

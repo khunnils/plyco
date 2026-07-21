@@ -2,9 +2,6 @@
   title: Processing activity retention is not defined
   category: activities
   severity: medium
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     any:
       collection: businessActivities
@@ -20,9 +17,6 @@
   title: AI human oversight needs strengthening
   category: activities
   severity: medium
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     any:
       collection: businessActivities
@@ -46,9 +40,6 @@
   title: AI use includes customer data exposure
   category: activities
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     any:
       collection: businessActivities

@@ -2,23 +2,23 @@
 
 The wizard has completed a deep integration of PostHog analytics into the Plyco client application. `posthog-js` and `@posthog/react` were installed and initialised in `src/main.tsx` with `PostHogProvider` and `PostHogErrorBoundary` wrapping the entire app. User identification runs in `App.tsx` whenever the authenticated user first becomes available, and `posthog.reset()` is called on logout via `use-auth.ts`. Fifteen events covering the full product lifecycle — from sign-in through onboarding, vendor management, activity tracking, document publishing, and recommendation engagement — were instrumented across eleven files.
 
-| Event | Description | File |
-|-------|-------------|------|
-| `user_signed_in` | Fires when an authenticated user is first detected on the client, identifying them in PostHog. | `src/App.tsx` |
-| `magic_link_sent` | Fires when a user submits the email form to request a magic link sign-in. | `src/features/auth/components/login-screen.tsx` |
-| `organization_created` | Fires when the onboarding wizard finishes and a new organization is successfully created. | `src/features/organizations/onboarding/components/review-step.tsx` |
-| `onboarding_compliance_goals_selected` | Fires when the user advances past the compliance goals step during onboarding. | `src/features/organizations/onboarding/components/compliance-step.tsx` |
-| `vendor_added_from_catalog` | Fires when one or more providers are added from the provider catalog. | `src/features/vendors/pages/vendors-route-page.tsx` |
-| `vendor_added_manually` | Fires when a new vendor is manually created via the custom vendor form. | `src/features/vendors/pages/vendors-route-page.tsx` |
-| `vendor_updated` | Fires when an existing vendor's details are saved after editing. | `src/features/vendors/pages/vendors-route-page.tsx` |
-| `vendor_deleted` | Fires when a vendor is removed from the organisation. | `src/features/vendors/pages/vendors-route-page.tsx` |
-| `activity_created` | Fires when a new business activity is successfully created. | `src/features/company/activities/pages/activities-route-page.tsx` |
-| `activity_updated` | Fires when an existing business activity is updated and saved. | `src/features/company/activities/pages/activities-route-page.tsx` |
-| `activity_deleted` | Fires when a business activity is deleted. | `src/features/company/activities/pages/activities-route-page.tsx` |
-| `document_published` | Fires when a policy document is generated (published) from a template. | `src/features/documents/pages/documents-route-page.tsx` |
-| `document_pdf_downloaded` | Fires when a user downloads a generated policy document as a PDF. | `src/features/documents/pages/documents-route-page.tsx` |
-| `security_profile_saved` | Fires when the user saves their security profile during the legacy onboarding flow. | `src/features/shell/components/onboarding.tsx` |
-| `recommendation_expanded` | Fires when a user expands a recommendation card to read the full details. | `src/features/recommendations/components/recommendations-list.tsx` |
+| Event                                  | Description                                                                                    | File                                                                   |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `user_signed_in`                       | Fires when an authenticated user is first detected on the client, identifying them in PostHog. | `src/App.tsx`                                                          |
+| `magic_link_sent`                      | Fires when a user submits the email form to request a magic link sign-in.                      | `src/features/auth/components/login-screen.tsx`                        |
+| `organization_created`                 | Fires when the onboarding wizard finishes and a new organization is successfully created.      | `src/features/organizations/onboarding/components/review-step.tsx`     |
+| `onboarding_compliance_goals_selected` | Fires when the user advances past the compliance goals step during onboarding.                 | `src/features/organizations/onboarding/components/compliance-step.tsx` |
+| `vendor_added_from_catalog`            | Fires when one or more providers are added from the provider catalog.                          | `src/features/vendors/pages/vendors-route-page.tsx`                    |
+| `vendor_added_manually`                | Fires when a new vendor is manually created via the custom vendor form.                        | `src/features/vendors/pages/vendors-route-page.tsx`                    |
+| `vendor_updated`                       | Fires when an existing vendor's details are saved after editing.                               | `src/features/vendors/pages/vendors-route-page.tsx`                    |
+| `vendor_deleted`                       | Fires when a vendor is removed from the organisation.                                          | `src/features/vendors/pages/vendors-route-page.tsx`                    |
+| `activity_created`                     | Fires when a new business activity is successfully created.                                    | `src/features/company/activities/pages/activities-route-page.tsx`      |
+| `activity_updated`                     | Fires when an existing business activity is updated and saved.                                 | `src/features/company/activities/pages/activities-route-page.tsx`      |
+| `activity_deleted`                     | Fires when a business activity is deleted.                                                     | `src/features/company/activities/pages/activities-route-page.tsx`      |
+| `document_published`                   | Fires when a policy document is generated (published) from a template.                         | `src/features/documents/pages/documents-route-page.tsx`                |
+| `document_pdf_downloaded`              | Fires when a user downloads a generated policy document as a PDF.                              | `src/features/documents/pages/documents-route-page.tsx`                |
+| `security_profile_saved`               | Fires when the user saves their security profile during the legacy onboarding flow.            | `src/features/shell/components/onboarding.tsx`                         |
+| `recommendation_expanded`              | Fires when a user expands a recommendation to read its recommended action.                     | `src/features/recommendations/components/recommendations-list.tsx`     |
 
 ## Next steps
 

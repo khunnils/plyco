@@ -2,9 +2,6 @@
   title: Infrastructure MFA is not enabled
   category: infrastructure
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: infrastructure.mfaEnabled
     equals: false
@@ -17,9 +14,6 @@
   title: Work device encryption is not required
   category: infrastructure
   severity: medium
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: infrastructure.encryptedDevicesRequired
     equals: false
@@ -32,9 +26,6 @@
   title: Backups are not enabled
   category: infrastructure
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     field: infrastructure.backupsEnabled
     equals: false
@@ -49,9 +40,6 @@
   title: Logging and monitoring need strengthening
   category: infrastructure
   severity: high
-  frameworks: [soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [soc_2, iso_27001]
   condition:
     any:
       - field: infrastructure.centralizedLoggingEnabled
@@ -68,9 +56,6 @@
   title: Data encryption controls need strengthening
   category: infrastructure
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     any:
       - field: infrastructure.encryptionAtRest
@@ -86,20 +71,26 @@
     - infrastructure.inTransitMinimumTlsVersion
 
 - id: infrastructure.vendor_governance_gap
-  title: Vendor governance controls need strengthening
+  title: Vendor reviews are not required
   category: infrastructure
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
-    any:
-      - field: infrastructure.vendorReviewRequired
-        equals: false
-      - field: infrastructure.dpaRequiredForProcessors
-        equals: false
-  message: Vendor reviews or processing agreements are not required.
-  recommendation: Review vendors before use and require appropriate data processing terms for providers that process personal data.
+    field: infrastructure.vendorReviewRequired
+    equals: false
+  message: Vendors are not required to undergo review before use.
+  recommendation: Review vendors before use, with depth proportionate to the access, data, and operational risk involved.
   relatedFields:
     - infrastructure.vendorReviewRequired
+
+- id: infrastructure.gdpr_processor_dpa_requirement_missing
+  title: Processor agreements are not required
+  category: infrastructure
+  severity: high
+  frameworks: [gdpr]
+  condition:
+    field: infrastructure.dpaRequiredForProcessors
+    equals: false
+  message: Data processing agreements are not required for providers that process personal data.
+  recommendation: Require appropriate data processing terms for every provider that processes personal data on the organization's behalf.
+  relatedFields:
     - infrastructure.dpaRequiredForProcessors

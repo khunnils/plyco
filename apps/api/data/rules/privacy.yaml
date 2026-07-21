@@ -4,10 +4,8 @@
   severity: high
   frameworks: [gdpr]
   appliesWhen:
-    all:
-      - anyComplianceGoal: [gdpr]
-      - field: privacy.crossBorderTransfers
-        equals: true
+    field: privacy.crossBorderTransfers
+    equals: true
   condition:
     field: privacy.transferMechanisms
     empty: true
@@ -21,9 +19,6 @@
   title: Privacy rights are not configured
   category: privacy
   severity: medium
-  frameworks: [gdpr]
-  appliesWhen:
-    anyComplianceGoal: [gdpr]
   condition:
     field: privacy.supportedRights
     empty: true
@@ -36,9 +31,6 @@
   title: Privacy request method is missing
   category: privacy
   severity: high
-  frameworks: [gdpr, ccpa]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, ccpa]
   condition:
     field: privacy.requestMethods
     empty: true
@@ -52,9 +44,7 @@
   title: Non-essential tracking cookies need stronger consent transparency
   category: privacy
   severity: high
-  frameworks: [gdpr, ccpa]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, ccpa]
+  frameworks: [gdpr]
   condition:
     any:
       collection: services.all
@@ -74,8 +64,6 @@
                 equals: false
               - field: privacy.cookieConsentWithdrawalMethod
                 in: [none, not_defined, not_set]
-              - field: privacy.globalPrivacyControlSupported
-                equals: false
   message: A service uses non-essential tracking cookies without complete consent transparency.
   recommendation: Confirm the service blocks consent-required cookies until consent, provides a consent mechanism and withdrawal method, and supports Global Privacy Control.
   relatedFields:
@@ -84,15 +72,31 @@
     - services.all.privacy.cookieConsentMechanism
     - services.all.privacy.nonEssentialCookiesBlockedUntilConsent
     - services.all.privacy.cookieConsentWithdrawalMethod
+
+- id: privacy.ccpa_global_privacy_control_missing
+  title: Global Privacy Control is not supported
+  category: privacy
+  severity: high
+  frameworks: [ccpa]
+  condition:
+    any:
+      collection: services.all
+      where:
+        all:
+          - field: privacy.usesCookiesOrTrackingTechnologies
+            equals: true
+          - field: privacy.globalPrivacyControlSupported
+            equals: false
+  message: A service uses tracking technologies but does not support Global Privacy Control signals.
+  recommendation: Detect and honor Global Privacy Control signals for applicable opt-out rights.
+  relatedFields:
+    - services.all.privacy.usesCookiesOrTrackingTechnologies
     - services.all.privacy.globalPrivacyControlSupported
 
 - id: privacy.response_timeline_undefined
   title: Privacy request timeline is undefined
   category: privacy
   severity: medium
-  frameworks: [gdpr, ccpa]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, ccpa]
   condition:
     field: privacy.responseTimelineDaysStatus
     in: [not_defined, not_set]
@@ -106,9 +110,6 @@
   title: Marketing opt-out is not configured
   category: privacy
   severity: high
-  frameworks: [gdpr, ccpa]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, ccpa]
   condition:
     all:
       - field: privacy.sendsMarketingEmails
@@ -125,9 +126,6 @@
   title: Production data is used in development
   category: privacy
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     field: privacy.productionDataInDevelopment
     equals: true
@@ -140,9 +138,6 @@
   title: Organization retention policy is missing
   category: privacy
   severity: high
-  frameworks: [gdpr, soc_2, iso_27001]
-  appliesWhen:
-    anyComplianceGoal: [gdpr, soc_2, iso_27001]
   condition:
     field: privacy.retentionPolicyExists
     equals: false
@@ -150,3 +145,33 @@
   recommendation: Document retention and deletion rules for customer, operational, security, and personnel data.
   relatedFields:
     - privacy.retentionPolicyExists
+
+- id: privacy.gdpr_dpo_not_appointed
+  title: Data Protection Officer is not appointed
+  category: privacy
+  severity: medium
+  frameworks: [gdpr]
+  condition:
+    field: privacy.dpoStatus
+    equals: not_appointed
+  message: The organization's GDPR profile records that a Data Protection Officer has not been appointed.
+  recommendation: Confirm whether a Data Protection Officer is required and appoint one when the GDPR criteria apply; otherwise record that one is not required.
+  relatedFields:
+    - privacy.dpoStatus
+    - privacy.dpoName
+    - privacy.dpoEmail
+
+- id: privacy.gdpr_eu_representative_not_appointed
+  title: EU representative is not appointed
+  category: privacy
+  severity: medium
+  frameworks: [gdpr]
+  condition:
+    field: privacy.euRepresentativeStatus
+    equals: not_appointed
+  message: The organization's GDPR profile records that an EU representative has not been appointed.
+  recommendation: Confirm whether an EU representative is required and appoint one when the GDPR criteria apply; otherwise record that one is not required.
+  relatedFields:
+    - privacy.euRepresentativeStatus
+    - privacy.euRepresentativeName
+    - privacy.euRepresentativeAddress

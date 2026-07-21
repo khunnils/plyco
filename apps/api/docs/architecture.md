@@ -8,7 +8,7 @@ API code is organized by feature area under `src/features`:
 
 - `features/accounts` owns persistent users, organization membership lookup, organization creation, team invitations, member management, and organization deletion.
 - `features/organizations` owns organization-scoped security profile routes and the organization repository contract used by other features.
-- `features/recommendations` owns static advisor rule loading, rule evaluation, and the organization-scoped recommendations route.
+- `features/recommendations` owns static advisor rule loading, goal-based rule evaluation, organization rule-suppression persistence, and the organization-scoped recommendations routes.
 - `features/vendors` owns business activity CRUD, activity data-type mappings, vendor master CRUD, service-vendor-use CRUD, the provider catalog route, and vendor inventory persistence. Activity and service-vendor-use validation reads the current organization services, vendors, and data types so processing mappings cannot cross organization boundaries.
 - `features/documents` owns template routes, generated document routes, document persistence, and document-generation orchestration.
 - `features/waitlist` owns the public waitlist route, rate limiting, persistence contract, and Resend contact sync.
@@ -19,13 +19,20 @@ and `""` are unset, while booleans, zero, explicit codes, and arrays including
 collection predicates skip incomplete items and continue evaluating complete
 items. Rule comparison values cannot contain `null`.
 
-The same evaluation pass classifies rules as inapplicable, applicable but
-unanswered, passing, or failing and returns transient readiness scores with the
-recommendations. Scores use severity weights of 8/4/2/1 from critical through
+The same evaluation pass limits tagged rules to matching organization compliance
+goals, then classifies in-scope rules as contextually inapplicable, missing data,
+passing, failing, or suppressed. It returns those rules and transient readiness
+scores with the recommendations. Suppressed rules are excluded before findings,
+coverage, and scores are derived. Scores use severity weights of 8/4/2/1 from critical through
 low, include assessed and applicable rule counts, and expose an overall result
 plus Security, Privacy, Access, Infrastructure, and Product & Data results. The
 Product & Data score pools Activities, Data, Services, and Vendors rules. No
-score is persisted.
+score is persisted; suppressions are stored by organization and stable rule ID.
+
+`GET /organizations/:organizationId/recommendations` returns both evaluated
+in-scope rules and the unsuppressed failing subset used as recommendations.
+Organization members suppress and restore known static rule IDs through `PUT`
+and `DELETE /organizations/:organizationId/rule-suppressions/:ruleId`.
 
 Infrastructure, AI, and newsletter `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
 

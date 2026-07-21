@@ -3,6 +3,7 @@ import { type FastifyInstance } from "fastify";
 import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js";
 import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-repository.js";
 import { InMemoryOrganizationRepository } from "../src/features/organizations/in-memory-repository.js";
+import { InMemoryRuleSuppressionRepository } from "../src/features/recommendations/in-memory-repository.js";
 import { InMemoryVendorRepository } from "../src/features/vendors/in-memory-repository.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
 import { NullDocumentPdfStorage } from "../src/infrastructure/document-pdfs.js";
@@ -28,6 +29,7 @@ export function createTestApp() {
     documentRepository,
     documentPdfStorage: new NullDocumentPdfStorage(),
     organizationRepository,
+    ruleSuppressionRepository: new InMemoryRuleSuppressionRepository(),
     vendorRepository,
     vocabularyRepository,
     providerSource: new StaticProviderSource([

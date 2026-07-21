@@ -82,6 +82,9 @@ const invitationIdParamsSchema = organizationIdParamsSchema.extend({
 const apiKeyIdParamsSchema = organizationIdParamsSchema.extend({
   keyId: z.string().min(1),
 })
+const ruleSuppressionParamsSchema = organizationIdParamsSchema.extend({
+  ruleId: z.string().min(1),
+})
 const tokenParamsSchema = z.object({ token: z.string().min(20) })
 const magicLinkCallbackQuerySchema = z.object({
   token: z.string().min(20),
@@ -764,6 +767,20 @@ const paths: Record<string, PathItem> = {
       params: organizationIdParamsSchema,
       success: 200,
       successSchema: recommendationsResponseSchema,
+    }),
+  },
+  "/organizations/{organizationId}/rule-suppressions/{ruleId}": {
+    put: route({
+      summary: "Suppress an advisor rule for an organization.",
+      tag: "Recommendations",
+      params: ruleSuppressionParamsSchema,
+      success: 204,
+    }),
+    delete: route({
+      summary: "Restore a suppressed advisor rule for an organization.",
+      tag: "Recommendations",
+      params: ruleSuppressionParamsSchema,
+      success: 204,
     }),
   },
   "/organizations/{organizationId}/templates": {

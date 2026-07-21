@@ -200,6 +200,24 @@ export const getRecommendations = (
     recommendationsResponseSchema
   )
 
+export const suppressRule = (
+  organizationId: string,
+  ruleId: string
+): Promise<void> =>
+  emptyApiRequest(
+    `/organizations/${organizationId}/rule-suppressions/${encodeURIComponent(ruleId)}`,
+    { method: "PUT" }
+  )
+
+export const restoreRule = (
+  organizationId: string,
+  ruleId: string
+): Promise<void> =>
+  emptyApiRequest(
+    `/organizations/${organizationId}/rule-suppressions/${encodeURIComponent(ruleId)}`,
+    { method: "DELETE" }
+  )
+
 export const getProviders = (): Promise<Provider[]> =>
   apiRequest("/providers", z.array(providerSchema))
 

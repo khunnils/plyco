@@ -8,6 +8,7 @@ import {
   StaticAdvisorRuleSource,
   type AdvisorRule,
 } from "../src/features/recommendations/rules.js";
+import { InMemoryRuleSuppressionRepository } from "../src/features/recommendations/in-memory-repository.js";
 import {
   createTestApp,
   profileBody,
@@ -61,6 +62,69 @@ const organization = {
 } as const;
 
 describe("recommendation rules", () => {
+  it("returns baseline and selected-goal rules with every evaluation status", () => {
+    const makeRule = (
+      id: string,
+      overrides: Partial<AdvisorRule> = {},
+    ): AdvisorRule => ({
+      id,
+      title: id,
+      category: "access",
+      severity: "medium",
+      frameworks: [],
+      condition: { field: "access.sharedAccountsExist", equals: false },
+      message: `${id} message`,
+      recommendation: `${id} recommendation`,
+      relatedFields: [],
+      ...overrides,
+    });
+    const result = evaluateAdvisorRules(
+      [
+        makeRule("baseline.failing"),
+        makeRule("baseline.passing", {
+          condition: { field: "access.sharedAccountsExist", equals: true },
+        }),
+        makeRule("baseline.missing", {
+          condition: { field: "access.unknown", equals: true },
+        }),
+        makeRule("baseline.not_applicable", {
+          appliesWhen: {
+            field: "privacy.crossBorderTransfers",
+            equals: true,
+          },
+        }),
+        makeRule("gdpr.hidden", { frameworks: ["gdpr"] }),
+        makeRule("soc.visible", { frameworks: ["soc_2"] }),
+      ],
+      {
+        ...organization,
+        company: { ...organization.company, complianceGoals: ["soc_2"] },
+        privacy: { ...organization.privacy, crossBorderTransfers: false },
+      },
+      { suppressedRuleIds: ["baseline.passing"] },
+    );
+
+    expect(result.rules.map(({ id, status }) => [id, status])).toEqual([
+      ["baseline.failing", "failing"],
+      ["baseline.passing", "suppressed"],
+      ["baseline.missing", "missing_data"],
+      ["baseline.not_applicable", "not_applicable"],
+      ["soc.visible", "failing"],
+    ]);
+    expect(result.countsByStatus).toEqual({
+      all: 5,
+      failing: 2,
+      missingData: 1,
+      passing: 0,
+      notApplicable: 1,
+      suppressed: 1,
+    });
+    expect(result.recommendations.map(({ id }) => id)).toEqual([
+      "baseline.failing",
+      "soc.visible",
+    ]);
+  });
+
   it("parses YAML rule files", () => {
     const rules = parseAdvisorRuleFile(`
 - id: security.mfa_required
@@ -232,19 +296,17 @@ describe("recommendation rules", () => {
           includesAny: ["none"],
         },
       ];
-      const rules = conditions.map(
-        (condition, index): AdvisorRule => ({
-          id: `security.unset_operator_${index}`,
-          title: "Scanning needs attention",
-          category: "security",
-          severity: "high",
-          frameworks: ["soc_2"],
-          condition,
-          message: "Scanning needs attention.",
-          recommendation: "Configure scanning.",
-          relatedFields: ["securityProfile.scanningCadence"],
-        }),
-      );
+      const rules = conditions.map((condition, index): AdvisorRule => ({
+        id: `security.unset_operator_${index}`,
+        title: "Scanning needs attention",
+        category: "security",
+        severity: "high",
+        frameworks: ["soc_2"],
+        condition,
+        message: "Scanning needs attention.",
+        recommendation: "Configure scanning.",
+        relatedFields: ["securityProfile.scanningCadence"],
+      }));
       const profileWithUnsetValue = {
         ...organization,
         security: {
@@ -501,9 +563,7 @@ describe("recommendation rules", () => {
       assessedRuleCount: 1,
       applicableRuleCount: 2,
     });
-    expect(response.scores.byArea.access).toEqual(
-      response.scores.overall,
-    );
+    expect(response.scores.byArea.access).toEqual(response.scores.overall);
   });
 
   it("excludes rules whose applicability is false or unanswered", () => {
@@ -972,10 +1032,7 @@ describe("recommendation rules", () => {
     };
     const first = evaluateAdvisorRules(rules, completeRiskProfile, {
       businessActivities,
-      serviceProviderUsage: [
-        incompleteProviderUsage,
-        completeProviderUsage,
-      ],
+      serviceProviderUsage: [incompleteProviderUsage, completeProviderUsage],
     });
     const second = evaluateAdvisorRules(
       rules,
@@ -1028,6 +1085,7 @@ describe("recommendations API", () => {
     const app = await createApp({
       auth: false,
       advisorRuleSource: new StaticAdvisorRuleSource([mfaRule]),
+      ruleSuppressionRepository: new InMemoryRuleSuppressionRepository(),
     });
 
     const response = await app.inject({
@@ -1078,6 +1136,15 @@ describe("recommendations API", () => {
           },
         },
       },
+      rules: [],
+      countsByStatus: {
+        all: 0,
+        failing: 0,
+        missingData: 0,
+        passing: 0,
+        notApplicable: 0,
+        suppressed: 0,
+      },
     });
   });
 
@@ -1086,10 +1153,10 @@ describe("recommendations API", () => {
     await saveProfileDraft(app, "org-test", {
       ...profileBody,
       company: {
-          ...profileBody.company,
-          complianceGoals: ["soc_2"],
-        },
-        infrastructure: {
+        ...profileBody.company,
+        complianceGoals: ["soc_2"],
+      },
+      infrastructure: {
         ...profileBody.infrastructure,
         mfaEnabled: false,
       },
@@ -1111,5 +1178,56 @@ describe("recommendations API", () => {
       ]),
     );
     expect(body.countsBySeverity.high).toBe(4);
+  });
+
+  it("suppresses and restores a known rule idempotently", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app);
+
+    for (const method of ["PUT", "PUT"] as const) {
+      const response = await app.inject({
+        method,
+        url: "/organizations/org-test/rule-suppressions/security.mfa_required",
+      });
+      expect(response.statusCode).toBe(204);
+    }
+
+    const suppressed = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/recommendations",
+    });
+    expect(
+      suppressed
+        .json()
+        .rules.find(
+          (rule: { id: string }) => rule.id === "security.mfa_required",
+        ).status,
+    ).toBe("suppressed");
+
+    for (const method of ["DELETE", "DELETE"] as const) {
+      const response = await app.inject({
+        method,
+        url: "/organizations/org-test/rule-suppressions/security.mfa_required",
+      });
+      expect(response.statusCode).toBe(204);
+    }
+
+    const restored = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/recommendations",
+    });
+    expect(
+      restored
+        .json()
+        .rules.find(
+          (rule: { id: string }) => rule.id === "security.mfa_required",
+        ).status,
+    ).not.toBe("suppressed");
+
+    const unknown = await app.inject({
+      method: "PUT",
+      url: "/organizations/org-test/rule-suppressions/unknown.rule",
+    });
+    expect(unknown.statusCode).toBe(404);
   });
 });

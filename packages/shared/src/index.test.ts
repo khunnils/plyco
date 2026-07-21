@@ -341,6 +341,28 @@ describe("shared security profile schemas", () => {
         high: 1,
         critical: 0,
       },
+      rules: [
+        {
+          id: "security.mfa_required",
+          title: "MFA is not required",
+          category: "security",
+          severity: "high",
+          frameworks: [],
+          message: "Multi-factor authentication is not required.",
+          recommendation:
+            "Require MFA for workforce and administrative access.",
+          relatedFields: ["security.authentication.mfaRequired"],
+          status: "failing",
+        },
+      ],
+      countsByStatus: {
+        all: 1,
+        failing: 1,
+        missingData: 0,
+        passing: 0,
+        notApplicable: 0,
+        suppressed: 0,
+      },
       scores: {
         overall: {
           value: 0,

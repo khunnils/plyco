@@ -11,11 +11,30 @@ import {
   securityProgress,
   isActivityComplete,
   isAnswered,
+  pendingProgressSections,
   privacyProgress,
   serviceProgress,
 } from "@/features/dashboard/lib/progress"
 
 describe("dashboard progress", () => {
+  it("summarizes pending subsections without exposing individual fields", () => {
+    const pending = pendingProgressSections([
+      {
+        title: "Company details",
+        completedFields: 3,
+        totalFields: 5,
+        percent: 60,
+      },
+      { title: "Contacts", completedFields: 3, totalFields: 3, percent: 100 },
+      { title: "Data profile", completedFields: 0, totalFields: 4, percent: 0 },
+    ])
+
+    expect(pending.map(({ title }) => title)).toEqual([
+      "Company details",
+      "Data profile",
+    ])
+  })
+
   it("counts false as answered", () => {
     expect(isAnswered(false)).toBe(true)
   })

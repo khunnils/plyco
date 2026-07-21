@@ -137,21 +137,27 @@ failed updates restore the prior order and show an error.
 ## Smart Advisor Recommendations
 
 The dashboard includes a Recommendations section with counts by severity and a
-link to the full recommendations page. The sidebar shows Recommendations
-directly below Dashboard.
+link to the Recommendations page. The sidebar shows Recommendations directly
+below Dashboard.
 
-The recommendations page at `/recommendations` lists current advisor findings
-from the saved organization profile. Each item shows severity, category,
-message, recommendation text, framework codes, and related profile fields. When
-no rules match, the page shows “No recommendations right now.”
+The Recommendations page at `/recommendations` shows only active, unsuppressed
+failing rules, grouped from critical to low severity. Passing rules, rules with
+missing data, contextually not-applicable rules, and suppressed rules are not
+shown in the prioritized list. Each recommendation presents the finding,
+category, applicable framework codes, and an expandable recommended action.
+Suppressed rules can be restored from a compact management popover. `/rules`
+redirects to `/recommendations`.
 
-Recommendations are computed from static advisor rules and are not persisted,
-dismissed, or assigned in this version.
+Any organization member can suppress a recommendation when its underlying rule
+is irrelevant to the organization. Suppressions are persisted and exclude the
+rule from recommendations, severity counts, readiness coverage, and readiness
+scores.
 
 Advisor findings cover privacy, services, access, infrastructure, security,
-processing activities, data consistency, and providers. Framework-specific
-findings appear only when the organization has selected a matching compliance
-goal; general consistency findings are not framework-gated.
+processing activities, data consistency, and providers. Rules with no framework
+are baseline checks. Framework-specific rules appear only when the organization
+has selected a matching compliance goal; contextual applicability is evaluated
+separately inside that goal scope.
 
 Rules only evaluate answered values. `null`, missing values, and empty strings
 are unanswered and cannot cause a recommendation. Explicit `false`, zero, code
@@ -165,6 +171,11 @@ It shows overall setup progress and completed-versus-total details for Profile,
 Privacy, Access, Infrastructure, and Security. Numeric readiness scores and
 score progress bars are not shown on the dashboard.
 
+In-progress dashboard section cards expose a shadcn popover from their status
+indicator on hover or activation. The popover summarizes incomplete subsections
+and their captured-fact counts without listing individual fields or advisor
+findings.
+
 Privacy, Access, Infrastructure, and Security show a qualitative readiness
 label only after the area is complete, at least one advisor check applies, and
 every applicable check has been assessed. Product & Data shows one pooled label
@@ -172,7 +183,7 @@ only after at least one service, activity, and data type exists; all of those
 records and every existing vendor record are complete; and every applicable
 pooled check has been assessed. Having no vendors does not block this label.
 The dashboard recommendations card uses a static "Recommendations" header that
-links to the recommendations page. Severity counts still reflect the current
+links to the Recommendations page. Severity counts still reflect the current
 recommendation set even when setup or advisor coverage is incomplete.
 
 Product & Data readiness pools the Activities, Data, Services, and Vendors rule

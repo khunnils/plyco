@@ -2,7 +2,6 @@
   title: Sensitive data flag may be inconsistent
   category: data
   severity: medium
-  frameworks: [gdpr, soc_2, iso_27001]
   condition:
     all:
       - field: company.handlesSensitiveData

@@ -156,6 +156,10 @@ export const App = () => {
       <Route element={<WorkspaceLayout user={user} />}>
         <Route path="/" element={<DashboardRoutePage />} />
         <Route path="/recommendations" element={<RecommendationsRoutePage />} />
+        <Route
+          path="/rules"
+          element={<Navigate replace to="/recommendations" />}
+        />
         <Route path="/company/profile" element={<CompanyProfileRoutePage />} />
         <Route path="/company/services" element={<ServicesRoutePage />} />
         <Route

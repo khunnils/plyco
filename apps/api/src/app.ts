@@ -48,6 +48,9 @@ import {
 } from "./features/organization-lookup/service.js"
 import { registerOrganizationLookupRoutes } from "./features/organization-lookup/routes.js"
 import { registerRecommendationRoutes } from "./features/recommendations/routes.js"
+import { InMemoryRuleSuppressionRepository } from "./features/recommendations/in-memory-repository.js"
+import { PrismaRuleSuppressionRepository } from "./features/recommendations/prisma-repository.js"
+import { type RuleSuppressionRepository } from "./features/recommendations/repository.js"
 import {
   FileSystemAdvisorRuleSource,
   type AdvisorRuleSource,
@@ -109,6 +112,7 @@ export type CreateAppOptions = {
   providerImportService?: ProviderImportService
   organizationLookupService?: OrganizationLookupService
   advisorRuleSource?: AdvisorRuleSource
+  ruleSuppressionRepository?: RuleSuppressionRepository
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
   systemTemplateSource?: SystemTemplateSource
@@ -147,6 +151,7 @@ export async function createApp({
   providerImportService,
   organizationLookupService,
   advisorRuleSource = new FileSystemAdvisorRuleSource(),
+  ruleSuppressionRepository,
   promptClient,
   llmClient,
   systemTemplateSource = new FileSystemTemplateSource(),
@@ -167,6 +172,7 @@ export async function createApp({
     accountRepository,
     documentRepository,
     organizationRepository,
+    ruleSuppressionRepository,
     vendorRepository,
     vocabularyRepository,
   })
@@ -290,6 +296,7 @@ export async function createApp({
     accountRepository: repositories.accountRepository,
     advisorRuleSource,
     organizationRepository: repositories.organizationRepository,
+    ruleSuppressionRepository: repositories.ruleSuppressionRepository,
     vendorRepository: repositories.vendorRepository,
   })
   await registerVocabularyRoutes(app, {
@@ -453,12 +460,14 @@ function createRepositories({
   accountRepository,
   documentRepository,
   organizationRepository,
+  ruleSuppressionRepository,
   vendorRepository,
   vocabularyRepository,
 }: {
   accountRepository?: AccountRepository
   documentRepository?: DocumentRepository
   organizationRepository?: OrganizationRepository
+  ruleSuppressionRepository?: RuleSuppressionRepository
   vendorRepository?: ProviderRepository
   vocabularyRepository?: VocabularyRepository
 }) {
@@ -487,11 +496,17 @@ function createRepositories({
     (process.env.DATABASE_URL
       ? new PrismaDocumentRepository(resolvedOrganizationRepository)
       : new InMemoryDocumentRepository(resolvedOrganizationRepository))
+  const resolvedRuleSuppressionRepository =
+    ruleSuppressionRepository ??
+    (process.env.DATABASE_URL
+      ? new PrismaRuleSuppressionRepository()
+      : new InMemoryRuleSuppressionRepository())
 
   return {
     accountRepository: resolvedAccountRepository,
     documentRepository: resolvedDocumentRepository,
     organizationRepository: resolvedOrganizationRepository,
+    ruleSuppressionRepository: resolvedRuleSuppressionRepository,
     vendorRepository: resolvedVendorRepository,
     vocabularyRepository: resolvedVocabularyRepository,
   }
