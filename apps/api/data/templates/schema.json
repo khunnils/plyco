@@ -1091,12 +1091,12 @@
       "example": "Within 72 hours"
     },
     {
-      "key": "security.incidentResponse.customerNotificationProcessLabel",
-      "label": "Customer notification process label",
-      "type": "string",
+      "key": "security.incidentResponse.customerNotificationProcessLabels",
+      "label": "Customer notification process labels",
+      "type": "array",
       "category": "Security",
-      "description": "Human-readable customer notification process label.",
-      "example": "Email notice"
+      "description": "Human-readable customer notification process labels.",
+      "example": ["Email notice", "Status page"]
     },
     {
       "key": "security.incidentResponse.lastTestedDate",
@@ -1221,10 +1221,10 @@
     {
       "key": "security.incidentResponse.customerNotificationProcess",
       "label": "Customer notification process",
-      "type": "string",
+      "type": "array",
       "category": "Security",
-      "description": "Customer notification process code.",
-      "example": "email_notice"
+      "description": "Customer notification process codes.",
+      "example": ["email_notice", "status_page"]
     },
     {
       "key": "security.backups.backupCadence",

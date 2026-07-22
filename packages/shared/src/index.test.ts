@@ -741,7 +741,7 @@ describe("shared security profile schemas", () => {
         patchingSlaHighDays: 30,
         incidentResponsePlanExists: true,
         incidentNotificationTimeline: "within_72_hours",
-        customerNotificationProcess: "email_notice",
+        customerNotificationProcess: ["email_notice", "status_page"],
         incidentResponseLastTestedDate: "2026-05-21",
       }).success,
     ).toBe(true);
@@ -764,6 +764,12 @@ describe("shared security profile schemas", () => {
       securityProfileSchema.safeParse({
         ...emptySecurityProfile,
         patchingSlaCriticalDays: -1,
+      }).success,
+    ).toBe(false);
+    expect(
+      securityProfileSchema.safeParse({
+        ...emptySecurityProfile,
+        customerNotificationProcess: "email_notice",
       }).success,
     ).toBe(false);
   });

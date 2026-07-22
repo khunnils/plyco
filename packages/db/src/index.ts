@@ -165,7 +165,7 @@ export function mapOrganizationRecord(record: {
     vulnerabilityDisclosureUrl: string | null;
     incidentResponsePlanExists: boolean | null;
     incidentNotificationTimeline: string | null;
-    customerNotificationProcess: string | null;
+    customerNotificationProcess: unknown;
     incidentResponseLastTestedDate: string | null;
   } | null;
   organizationProviders: Array<{
@@ -316,8 +316,9 @@ export function mapOrganizationRecord(record: {
       record.securityProfile?.incidentResponsePlanExists ?? null,
     incidentNotificationTimeline:
       record.securityProfile?.incidentNotificationTimeline ?? null,
-    customerNotificationProcess:
-      record.securityProfile?.customerNotificationProcess ?? null,
+    customerNotificationProcess: stringArray(
+      record.securityProfile?.customerNotificationProcess,
+    ),
     incidentResponseLastTestedDate:
       record.securityProfile?.incidentResponseLastTestedDate ?? null,
   });

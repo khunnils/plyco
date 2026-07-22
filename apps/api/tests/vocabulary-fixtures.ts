@@ -165,6 +165,7 @@ export const testVocabularyCodeSets: VocabularyCodeSet[] = [
   ]),
   codeSet("security_customer_notification_processes", "Security customer notification processes", false, [
     ["email_notice", "Email notice"],
+    ["status_page", "Status page"],
   ]),
   codeSet("security_penetration_testing_strategies", "Security penetration testing strategies", false, [
     ["none", "None"],

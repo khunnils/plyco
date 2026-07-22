@@ -439,8 +439,8 @@ describe("documents / templates API", () => {
         planExists: true,
         notificationTimeline: "within_72_hours",
         notificationTimelineLabel: "Within 72 hours",
-        customerNotificationProcess: "email_notice",
-        customerNotificationProcessLabel: "Email notice",
+        customerNotificationProcess: ["email_notice", "status_page"],
+        customerNotificationProcessLabels: ["Email notice", "Status page"],
         lastTestedDate: "2026-05-21",
       },
       backups: {

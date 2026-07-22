@@ -269,7 +269,7 @@ export const profileBody = {
     vulnerabilityDisclosureUrl: "https://acme.example/security",
     incidentResponsePlanExists: true,
     incidentNotificationTimeline: "within_72_hours",
-    customerNotificationProcess: "email_notice",
+    customerNotificationProcess: ["email_notice", "status_page"],
     incidentResponseLastTestedDate: "2026-05-21",
   },
   dataHandling: {

@@ -4,7 +4,10 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { usePostHog } from "@posthog/react"
-import { type OrganizationProviderInput } from "@plyco/shared"
+import {
+  type AuthState,
+  type OrganizationProviderInput,
+} from "@plyco/shared"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
@@ -146,7 +149,6 @@ export const ReviewStep = () => {
     setSubmitError,
     isSubmitting,
     setIsSubmitting,
-    onComplete,
   } = useOnboardingStore()
 
   const [setupTab, setSetupTab] = useState<SetupTab>("company")
@@ -317,9 +319,25 @@ export const ReviewStep = () => {
         organizationSnapshotQueryKey(organization.id),
         snapshot
       )
-      await queryClient.invalidateQueries({ queryKey: authStateQueryKey })
-      await queryClient.invalidateQueries({
-        queryKey: organizationSnapshotQueryKey(organization.id),
+      // Auth must include the new org before leaving onboarding, otherwise App
+      // stays on the no-organization tree and redirects "/" back to identity.
+      queryClient.setQueryData<AuthState>(authStateQueryKey, (current) => {
+        if (!current?.user) {
+          return current
+        }
+
+        if (
+          current.organizations.some(
+            (existing) => existing.id === organization.id
+          )
+        ) {
+          return current
+        }
+
+        return {
+          ...current,
+          organizations: [...current.organizations, organization],
+        }
       })
       posthog.capture(POSTHOG_EVENTS.ORGANIZATION_CREATED, {
         organization_id: organization.id,
@@ -327,14 +345,20 @@ export const ReviewStep = () => {
         compliance_goals: draft.company.complianceGoals,
         regions: draft.company.regions,
       })
-      onComplete?.()
       toast.success("Organization created")
+      // Read from the store at completion time — a render-time onComplete can
+      // stay undefined for first-time onboarding even after auth refreshes.
+      useOnboardingStore.getState().onComplete?.()
+      navigate("/", { replace: true })
+      void queryClient.invalidateQueries({ queryKey: authStateQueryKey })
+      void queryClient.invalidateQueries({
+        queryKey: organizationSnapshotQueryKey(organization.id),
+      })
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Could not create organization"
       )
       toast.error("Could not create organization")
-    } finally {
       setIsSubmitting(false)
     }
   }

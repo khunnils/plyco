@@ -169,7 +169,7 @@ We process the following categories of data:
 We maintain a documented process for identifying, containing, investigating, remediating, and learning from security incidents.
 {% if security.incidentResponse.notificationTimelineLabel %}When an incident requires customer notification, affected customers are notified {{ security.incidentResponse.notificationTimelineLabel | lower }}.
 {% endif %}
-{% if security.incidentResponse.customerNotificationProcessLabel %}Customer notifications are delivered via {{ security.incidentResponse.customerNotificationProcessLabel | lower }}.
+{% if security.incidentResponse.customerNotificationProcessLabels.length %}Customer notifications are delivered via {{ security.incidentResponse.customerNotificationProcessLabels | join(", ") | lower }}.
 {% endif %}
 {% if security.incidentResponse.lastTestedDate %}Our incident response process was last tested on {{ security.incidentResponse.lastTestedDate }}.
 {% endif %}

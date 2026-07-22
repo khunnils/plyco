@@ -636,7 +636,7 @@ export class ReportContextBuilder {
           security.incidentNotificationTimeline,
         ),
         customerNotificationProcess: security.customerNotificationProcess,
-        customerNotificationProcessLabel: this.codeLabel(
+        customerNotificationProcessLabels: this.codeLabels(
           vocabulary,
           "security_customer_notification_processes",
           security.customerNotificationProcess,

@@ -970,7 +970,7 @@ describe("recommendation rules", () => {
         vulnerabilityDisclosureProgramExists: false,
         incidentResponsePlanExists: false,
         incidentNotificationTimeline: "none",
-        customerNotificationProcess: "none",
+        customerNotificationProcess: ["none"],
       },
       access: {
         ...organization.access,

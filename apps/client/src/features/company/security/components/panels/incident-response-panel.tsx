@@ -8,6 +8,7 @@ import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"
 
+import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
 import { TextField } from "@/components/form/text-field"
 import { ToggleField } from "@/components/form/toggle-field"
@@ -18,7 +19,11 @@ import {
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { boolText } from "@/features/company/lib/display"
-import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeLabel,
+  codeValueList,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
 import { securityHelperText as infrastructureHelperText } from "../security-helper-text"
 
 const incidentSchema = securityProfileSchema.pick({
@@ -60,13 +65,11 @@ const incidentRows = (
     ],
     [
       "Customer notification process",
-      draft.customerNotificationProcess
-        ? codeLabel(
-            vocabulary,
-            "security_customer_notification_processes",
-            draft.customerNotificationProcess
-          )
-        : "Not set",
+      codeValueList(
+        vocabulary,
+        "security_customer_notification_processes",
+        draft.customerNotificationProcess
+      ),
       infrastructureHelperText.customerNotificationProcess,
     ],
   ]
@@ -157,16 +160,14 @@ export const IncidentResponsePanel = ({
           ]}
           placeholder="Not set"
         />
-        <SelectField
+        <MultiSelectField
           control={form.control}
+          error={form.formState.errors.customerNotificationProcess?.root}
           helperText={infrastructureHelperText.customerNotificationProcess}
           label="Customer notification process"
           name="customerNotificationProcess"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityCustomerNotificationProcessOptions,
-          ]}
-          placeholder="Not set"
+          options={securityCustomerNotificationProcessOptions}
+          placeholder="Select notification methods"
         />
         {incidentResponsePlanExists && (
           <TextField

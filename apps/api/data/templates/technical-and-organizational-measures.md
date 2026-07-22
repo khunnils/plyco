@@ -122,7 +122,7 @@ The categories of personal data in scope include:
 
 - A documented process is maintained for identifying, containing, investigating, remediating, and learning from security incidents.
 {% if security.incidentResponse.notificationTimelineLabel %}- When an incident requires customer notification, affected customers are notified {{ security.incidentResponse.notificationTimelineLabel | lower }}.
-{% endif %}{% if security.incidentResponse.customerNotificationProcessLabel %}- Customer notifications are delivered via {{ security.incidentResponse.customerNotificationProcessLabel | lower }}.
+{% endif %}{% if security.incidentResponse.customerNotificationProcessLabels.length %}- Customer notifications are delivered via {{ security.incidentResponse.customerNotificationProcessLabels | join(", ") | lower }}.
 {% endif %}{% if security.incidentResponse.lastTestedDate %}- The incident response process was last tested on {{ security.incidentResponse.lastTestedDate }}.
 {% endif %}
 {% endif %}

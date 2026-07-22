@@ -126,6 +126,7 @@ export const App = () => {
           element={
             <OnboardingWizardPage
               user={user}
+              onComplete={() => navigate("/", { replace: true })}
               onLogout={() => logout.mutate()}
             />
           }
@@ -143,10 +144,10 @@ export const App = () => {
       <Route
         path="/onboarding/organization/*"
         element={
-          <OnboardingWizardPage
+            <OnboardingWizardPage
             user={user}
-            onCancel={() => navigate("/")}
-            onComplete={() => navigate("/")}
+            onCancel={() => navigate("/", { replace: true })}
+            onComplete={() => navigate("/", { replace: true })}
           />
         }
       />

@@ -494,9 +494,6 @@ export const securityProgress = (profile: ProfileDraft) => {
         "Customer notification process",
         security.customerNotificationProcess
       ),
-      ...(security.incidentResponsePlanExists === true
-        ? [field("Last tested date", security.incidentResponseLastTestedDate)]
-        : []),
     ]),
   ])
 }

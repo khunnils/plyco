@@ -334,14 +334,14 @@ describe("dashboard progress", () => {
     ).toBeUndefined()
   })
 
-  it("skips incident response last tested date when no plan exists", () => {
+  it("does not include the optional incident response last tested date", () => {
     const progressNoPlan = securityProgress({
       ...emptyProfileDraft,
       security: {
         ...emptyProfileDraft.security,
         incidentResponsePlanExists: false,
         incidentNotificationTimeline: "none",
-        customerNotificationProcess: "none",
+        customerNotificationProcess: ["none"],
         incidentResponseLastTestedDate: null,
       },
     })
@@ -359,7 +359,7 @@ describe("dashboard progress", () => {
         ...emptyProfileDraft.security,
         incidentResponsePlanExists: true,
         incidentNotificationTimeline: "none",
-        customerNotificationProcess: "none",
+        customerNotificationProcess: ["none"],
         incidentResponseLastTestedDate: null,
       },
     })
@@ -368,7 +368,7 @@ describe("dashboard progress", () => {
     )
     expect(irWithPlan).toMatchObject({
       completedFields: 3,
-      totalFields: 4,
+      totalFields: 3,
     })
   })
 

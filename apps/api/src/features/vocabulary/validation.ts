@@ -337,15 +337,13 @@ export const validateSecurityProfileCodes = async (
           "security.incidentNotificationTimeline",
         )
       : Promise.resolve(),
-    security.customerNotificationProcess
-      ? assertCode(
-          vocabularyRepository,
-          organizationId,
-          "security_customer_notification_processes",
-          security.customerNotificationProcess,
-          "security.customerNotificationProcess",
-        )
-      : Promise.resolve(),
+    assertCodes(
+      vocabularyRepository,
+      organizationId,
+      "security_customer_notification_processes",
+      security.customerNotificationProcess,
+      "security.customerNotificationProcess",
+    ),
     security.penetrationTestingCadence
       ? assertCode(
           vocabularyRepository,

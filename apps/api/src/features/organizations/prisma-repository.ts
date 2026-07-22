@@ -266,7 +266,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vulnerabilityDisclosureUrl: input.vulnerabilityDisclosureUrl,
       incidentResponsePlanExists: input.incidentResponsePlanExists,
       incidentNotificationTimeline: input.incidentNotificationTimeline,
-      customerNotificationProcess: input.customerNotificationProcess,
+      customerNotificationProcess: jsonValue(
+        input.customerNotificationProcess,
+      ),
       incidentResponseLastTestedDate: input.incidentResponseLastTestedDate,
     };
   }

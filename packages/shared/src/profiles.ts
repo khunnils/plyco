@@ -256,7 +256,7 @@ export const securityProfileSchema = z.object({
   vulnerabilityDisclosureUrl: nullableStringSchema,
   incidentResponsePlanExists: nullableBooleanSchema,
   incidentNotificationTimeline: nullableCodeIdSchema,
-  customerNotificationProcess: nullableCodeIdSchema,
+  customerNotificationProcess: nullableCodeIdArraySchema,
   incidentResponseLastTestedDate: nullableStringSchema,
 });
 

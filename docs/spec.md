@@ -14,6 +14,10 @@ Remediation, and Incident Response. Development Security records whether code
 review, dependency monitoring, secret scanning, automated pre-deployment tests,
 CI/CD deployments, and production deployment approval are required.
 
+Incident Response allows multiple customer notification methods, such as email
+and a public status page. The last-tested date remains optional and does not
+affect workspace completion or the needs-attention state.
+
 Infrastructure contains Monitoring & Detection. It records whether centralized
 logging is enabled and whether security monitoring is none, manual, or
 automated; log-retention duration and monitoring-owner fields are not collected.

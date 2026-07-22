@@ -114,7 +114,9 @@
           - field: securityProfile.incidentNotificationTimeline
             in: [none, not_defined, not_set]
           - field: securityProfile.customerNotificationProcess
-            in: [none, not_defined, not_set]
+            empty: true
+          - field: securityProfile.customerNotificationProcess
+            includesAny: [none, not_defined, not_set]
   message: The incident response plan lacks a defined notification timeline or customer notification process.
   recommendation: Define when incidents must be escalated and how affected customers and regulators will be notified.
   relatedFields:

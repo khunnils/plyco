@@ -348,7 +348,7 @@ model SecurityProfile {
   vulnerabilityDisclosureUrl           String?      @map("vulnerability_disclosure_url")
   incidentResponsePlanExists           Boolean?     @map("incident_response_plan_exists")
   incidentNotificationTimeline         String?      @map("incident_notification_timeline")
-  customerNotificationProcess          String?      @map("customer_notification_process")
+  customerNotificationProcess          Json?        @map("customer_notification_process")
   incidentResponseLastTestedDate       String?      @map("incident_response_last_tested_date")
   createdAt                            DateTime     @default(now()) @map("created_at")
   updatedAt                            DateTime     @updatedAt @map("updated_at")

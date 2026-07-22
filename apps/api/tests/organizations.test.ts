@@ -1258,6 +1258,30 @@ describe("organizations API", () => {
         },
       },
     });
+
+    const invalidNotificationProcessResponse = await saveProfileDraft(
+      app,
+      "org-test",
+      {
+        ...profileBody,
+        security: {
+          ...profileBody.security,
+          customerNotificationProcess: ["carrier_pigeon"],
+        },
+      },
+    );
+
+    expect(invalidNotificationProcessResponse.statusCode).toBe(400);
+    expect(invalidNotificationProcessResponse.json()).toMatchObject({
+      error: {
+        code: "CODE_NOT_FOUND",
+        details: {
+          codeSetId: "security_customer_notification_processes",
+          field: "security.customerNotificationProcess",
+          value: "carrier_pigeon",
+        },
+      },
+    });
   });
 
   it("returns structured validation errors", async () => {
