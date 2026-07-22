@@ -112,6 +112,17 @@ export const DocumentSummaryCard = ({
             size="icon-sm"
             type="button"
             variant="outline"
+            onClick={() =>
+              navigate(`/documents/preview/${summary.template.id}`)
+            }
+            title="Preview current version"
+          >
+            <Eye />
+          </Button>
+          <Button
+            size="icon-sm"
+            type="button"
+            variant="outline"
             onClick={() => navigate(`/documents/edit/${summary.template.id}`)}
             title="Edit template"
           >

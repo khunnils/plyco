@@ -19,6 +19,7 @@ import {
   useUpdateTemplate,
 } from "@/features/documents/hooks/use-templates"
 import { Button } from "@/components/ui/button"
+import { DocumentPreview } from "@/features/documents/components/document-preview"
 import { DocumentView } from "@/features/documents/components/document-view"
 import { DocumentsList } from "@/features/documents/components/documents-list"
 import { DocumentsPageBanner } from "@/features/documents/components/documents-page-banner"
@@ -67,19 +68,19 @@ export const DocumentsRoutePage = () => {
     organizationTemplates: [],
   }
   const documentsList: DocumentSummary[] = documents.data ?? []
-  const editingTemplate = templatesData.organizationTemplates.find(
+  const selectedTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === id
   )
   const [prevEditingTemplateName, setPrevEditingTemplateName] = useState<
     string | undefined
-  >(editingTemplate?.name)
+  >(selectedTemplate?.name)
 
   if (mode !== prevMode || id !== prevId) {
     setPrevMode(mode)
     setPrevId(id)
-    if (mode === "edit" && editingTemplate) {
-      setTemplateName(editingTemplate.name)
-      setPrevEditingTemplateName(editingTemplate.name)
+    if (mode === "edit" && selectedTemplate) {
+      setTemplateName(selectedTemplate.name)
+      setPrevEditingTemplateName(selectedTemplate.name)
     } else if (mode === "new") {
       setTemplateName("Untitled Template")
       setPrevEditingTemplateName(undefined)
@@ -88,11 +89,11 @@ export const DocumentsRoutePage = () => {
 
   if (
     mode === "edit" &&
-    editingTemplate &&
-    editingTemplate.name !== prevEditingTemplateName
+    selectedTemplate &&
+    selectedTemplate.name !== prevEditingTemplateName
   ) {
-    setPrevEditingTemplateName(editingTemplate.name)
-    setTemplateName(editingTemplate.name)
+    setPrevEditingTemplateName(selectedTemplate.name)
+    setTemplateName(selectedTemplate.name)
   }
 
   const viewedDocumentSummary = documentsList.find(
@@ -159,7 +160,7 @@ export const DocumentsRoutePage = () => {
     bannerSubtitle =
       mode === "new"
         ? "Draft a new policy template using markdown and schema variables."
-        : `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}.`
+        : `Edit template version ${selectedTemplate ? `v${selectedTemplate.versionMajor}.${selectedTemplate.versionMinor}` : "1.0"}.`
     showRename = true
     bannerButtons = (
       <>
@@ -189,7 +190,7 @@ export const DocumentsRoutePage = () => {
       <TemplateEditor
         mode={mode}
         templateName={templateName}
-        editingTemplate={editingTemplate}
+        editingTemplate={selectedTemplate}
         onCreate={(template) =>
           createTemplate.mutate(template, {
             onSuccess: (createdTemplate) => {
@@ -201,9 +202,9 @@ export const DocumentsRoutePage = () => {
           })
         }
         onUpdate={(template) => {
-          if (!editingTemplate) return
+          if (!selectedTemplate) return
           updateTemplate.mutate(
-            { id: editingTemplate.id, template },
+            { id: selectedTemplate.id, template },
             {
               onSuccess: (updatedTemplate) => {
                 posthog.capture(POSTHOG_EVENTS.TEMPLATE_UPDATED, {
@@ -214,6 +215,31 @@ export const DocumentsRoutePage = () => {
             }
           )
         }}
+      />
+    )
+  } else if (mode === "preview" && id) {
+    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
+      documentsNavItem,
+      { label: selectedTemplate?.name ?? "Preview" },
+    ])
+    pageTitle = selectedTemplate?.name ?? "Preview"
+    bannerTitle = selectedTemplate?.name ?? "Preview"
+    bannerSubtitle = selectedTemplate
+      ? `Preview of current template version v${selectedTemplate.versionMajor}.${selectedTemplate.versionMinor}.`
+      : "Preview the current template version with live organization data."
+    bannerButtons = (
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => navigate("/documents")}
+      >
+        Close
+      </Button>
+    )
+    content = (
+      <DocumentPreview
+        isLoadingTemplate={templates.isLoading}
+        template={selectedTemplate ?? null}
       />
     )
   } else if (mode === "view" && id) {
