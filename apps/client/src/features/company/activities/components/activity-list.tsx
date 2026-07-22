@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react"
+import { AlertCircle, ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react"
 import { type BusinessActivity, type Vocabulary } from "@plyco/shared"
 import { useState } from "react"
 
@@ -9,6 +9,7 @@ import {
 } from "@/features/company/components/profile-panel-shell"
 import { activityHelperText } from "@/features/company/activities/components/activity-helper-text"
 import { boolText } from "@/features/company/lib/display"
+import { isActivityComplete } from "@/features/dashboard/lib/progress"
 import { codeLabel } from "@/features/vocabulary/lib/vocabulary"
 import {
   activityRetentionLabel,
@@ -82,9 +83,16 @@ export const ActivityList = ({
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="grid flex-1 gap-3">
-                  <h3 className="font-semibold text-slate-950">
-                    {activity.name}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-950">
+                      {activity.name}
+                    </h3>
+                    {!isActivityComplete(activity, showLegalBasis) ? (
+                      <span title="Needs attention">
+                        <AlertCircle className="h-4 w-4 shrink-0 text-amber-500" />
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="text-sm text-slate-600">
                     {activity.purpose.trim() || "No purpose"}
                   </p>

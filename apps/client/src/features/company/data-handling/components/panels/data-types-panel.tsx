@@ -1,5 +1,6 @@
 import { type StoredDataType, type Vocabulary } from "@plyco/shared"
 import {
+  AlertCircle,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -18,12 +19,19 @@ import {
   emptyDataTypeDraft,
   normalizeDataType,
 } from "@/features/company/data-handling/lib/data-type"
+import {
+  dataTypeProgress,
+  isProgressComplete,
+} from "@/features/dashboard/lib/progress"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import {
   ProfilePanelDetailGrid,
   type ProfilePanelDetailRow,
 } from "@/features/company/components/profile-panel-shell"
 import { dataHelperText } from "../data-helper-text"
+
+const needsAttention = (dataType: StoredDataType, index: number) =>
+  !isProgressComplete(dataTypeProgress(dataType, index))
 
 const codeValueList = (
   vocabulary: Vocabulary | undefined,
@@ -246,6 +254,11 @@ export const DataTypesPanel = ({
                           <h4 className="text-sm font-semibold text-slate-950">
                             {title}
                           </h4>
+                          {needsAttention(dataType, index) ? (
+                            <span title="Needs attention">
+                              <AlertCircle className="h-4 w-4 shrink-0 text-amber-500" />
+                            </span>
+                          ) : null}
                           {dataType.isSensitive ? <SensitiveTooltip /> : null}
                           {dataType.isRequired ? (
                             <span className="text-xs text-muted-foreground">
