@@ -1,44 +1,95 @@
 ---
-const policies = [
-	{ code: "PP", name: "Privacy policy", position: "left-[2%] top-[8%] -rotate-4 md:left-[8%] md:top-[9%]" },
-	{ code: "SP", name: "Security policy", position: "right-[2%] top-[8%] rotate-4 md:right-[8%] md:top-[9%]" },
-	{ code: "DP", name: "Data processing agreement", position: "left-0 top-[39%] rotate-2 md:left-[3%]" },
-	{ code: "TC", name: "Trust center", position: "right-0 top-[39%] -rotate-2 md:right-[3%]" },
-	{ code: "RA", name: "Records of processing", position: "bottom-[7%] left-[4%] rotate-3 md:left-[10%]" },
-	{ code: "QA", name: "Customer answers", position: "bottom-[7%] right-[4%] -rotate-3 md:right-[10%]" },
+const reports = [
+	{ code: "PP", title: "Privacy policy", position: "left-[3%] top-[3%]" },
+	{ code: "SP", title: "Security policy", position: "left-0 top-[22%]" },
+	{ code: "DPA", title: "Data processing agreement", position: "left-[2%] top-[41%]" },
+	{ code: "TC", title: "Trust center", position: "left-0 top-[60%]" },
+	{ code: "RoPA", title: "Records of processing", position: "left-[7%] top-[79%]" },
 ];
 
-const connectors = ["rotate-[213deg]", "rotate-[327deg]", "rotate-180", "rotate-0", "rotate-[147deg]", "rotate-[33deg]"];
+const aiClients = [
+	{ name: "Claude", logo: "/claude.svg", position: "right-[3%] top-[11%]" },
+	{ name: "ChatGPT", logo: "/chatgpt.svg", position: "right-0 top-[39%]" },
+	{ name: "Gemini", logo: "/gemini.svg", position: "right-[2%] top-[67%]" },
+];
 ---
 
 <div
-	class="relative mx-auto mt-16 min-h-[380px] max-w-[360px] sm:min-h-[500px] sm:max-w-[560px] md:min-h-[620px] md:max-w-5xl"
+	class="relative mx-auto mt-16 min-h-[470px] max-w-[400px] sm:min-h-[540px] sm:max-w-[720px] md:min-h-[600px] md:max-w-5xl"
 	role="img"
-	aria-label="Trust, privacy, security, and compliance outputs connected to one company model"
+	aria-label="Privacy, security, data processing, trust center, and records of processing templates connect to one company source of truth, alongside connections to Claude, ChatGPT, and Gemini."
 >
-	{connectors.map((rotation) => (
-		<div class:list={["absolute left-1/2 top-1/2 z-0 h-0.5 w-[112px] origin-left bg-linear-to-r from-lime-400 via-slate-300 to-transparent sm:w-[175px] md:w-[260px]", rotation]} aria-hidden="true">
-			<span class="absolute -left-1 top-[-3px] h-2 w-2 rounded-full bg-lime-500"></span>
+	<svg
+		viewBox="0 0 1000 600"
+		preserveAspectRatio="none"
+		class="absolute inset-0 z-0 h-full w-full"
+		aria-hidden="true"
+	>
+		<g fill="none" stroke="#cbd5e1" stroke-width="1.5" vector-effect="non-scaling-stroke">
+			<path d="M350 250 L250 48" />
+			<path d="M350 275 L220 162" />
+			<path d="M350 300 L240 276" />
+			<path d="M350 325 L220 390" />
+			<path d="M350 350 L285 504" />
+			<path d="M650 255 L755 96" />
+			<path d="M650 300 L780 264" />
+			<path d="M650 345 L765 432" />
+		</g>
+		<g fill="#84cc16">
+			<circle cx="350" cy="250" r="3" />
+			<circle cx="350" cy="275" r="3" />
+			<circle cx="350" cy="300" r="3" />
+			<circle cx="350" cy="325" r="3" />
+			<circle cx="350" cy="350" r="3" />
+			<circle cx="650" cy="255" r="3" />
+			<circle cx="650" cy="300" r="3" />
+			<circle cx="650" cy="345" r="3" />
+		</g>
+	</svg>
+
+	<div class="absolute left-1/2 top-1/2 z-20 w-full max-w-[150px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-lime-400 bg-white p-4 text-left shadow-[0_24px_70px_rgba(54,83,20,0.17)] sm:max-w-[245px] sm:p-6 md:max-w-[300px] md:rounded-3xl md:p-7" aria-hidden="true">
+		<div class="flex h-9 w-9 items-end justify-center gap-1 rounded-xl bg-lime-200 p-2.5 sm:h-11 sm:w-11 md:h-12 md:w-12 md:p-3">
+			<span class="h-2.5 w-1 rounded-full bg-lime-900 md:h-3"></span>
+			<span class="h-5 w-1 rounded-full bg-lime-900 md:h-6"></span>
+			<span class="h-3.5 w-1 rounded-full bg-lime-900 md:h-4"></span>
+		</div>
+		<p class="mb-0 mt-4 text-[0.5rem] font-extrabold uppercase tracking-[0.09em] text-lime-700 sm:text-[0.64rem] md:text-[0.72rem]">Single source of truth</p>
+		<strong class="mt-1 block text-sm leading-tight text-slate-950 sm:text-xl md:text-2xl">Your company model</strong>
+		<div class="mt-4 h-1 w-[72%] rounded-full bg-slate-100 sm:mt-5"></div>
+	</div>
+
+	{reports.map((report) => (
+		<div
+			class:list={[
+				"absolute z-10 grid w-[118px] grid-cols-[1.65rem_1fr] items-center gap-2 rounded-xl border border-slate-200 bg-white/95 p-2.5 text-left shadow-[0_14px_38px_rgba(15,23,42,0.09)] backdrop-blur sm:w-[190px] sm:grid-cols-[2rem_1fr] sm:p-3 md:w-[240px] md:grid-cols-[2.5rem_1fr] md:gap-3 md:rounded-2xl md:p-4",
+				report.position,
+			]}
+			aria-hidden="true"
+		>
+			<span class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-[0.43rem] font-extrabold text-lime-900 sm:h-8 sm:w-8 sm:text-[0.52rem] md:h-10 md:w-10 md:text-[0.58rem]">{report.code}</span>
+			<div class="min-w-0">
+				<strong class="block text-[0.55rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{report.title}</strong>
+				<span class="mt-1.5 block h-1 w-[82%] rounded-full bg-slate-200 md:mt-2"></span>
+			</div>
 		</div>
 	))}
 
-	<div class="absolute left-1/2 top-1/2 z-20 w-full max-w-[170px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-lime-400 bg-white p-4 text-left shadow-[0_24px_70px_rgba(54,83,20,0.17)] sm:max-w-[220px] sm:p-5 md:max-w-[270px] md:rounded-3xl md:p-6" aria-hidden="true">
-		<div class="mb-3 flex h-10 w-10 items-end justify-center gap-1 rounded-xl bg-lime-200 p-2.5 md:mb-4 md:h-12 md:w-12 md:p-3">
-			<span class="h-3 w-1 rounded-full bg-lime-900"></span><span class="h-6 w-1 rounded-full bg-lime-900"></span><span class="h-4 w-1 rounded-full bg-lime-900"></span>
-		</div>
-		<p class="m-0 text-[0.55rem] font-extrabold uppercase tracking-[0.08em] text-lime-700 sm:text-[0.64rem] md:text-[0.72rem]">Single source of truth</p>
-		<strong class="mt-1 block text-base leading-tight text-slate-950 sm:text-xl md:text-[1.35rem]">Your company model</strong>
-		<div class="mt-5 flex justify-between border-t border-slate-200 pt-3 text-[0.68rem] font-bold text-slate-500">
-		</div>
-	</div>
-
-	{policies.map((policy) => (
-		<div class:list={["absolute z-10 grid w-[118px] grid-cols-[1.65rem_1fr] gap-x-2 gap-y-1.5 rounded-xl border border-slate-200 bg-white/95 p-2.5 text-left shadow-[0_18px_50px_rgba(15,23,42,0.1)] sm:w-[150px] sm:grid-cols-[2rem_1fr] sm:p-3 md:w-[220px] md:grid-cols-[2.25rem_1fr] md:gap-x-3 md:gap-y-2 md:rounded-2xl md:p-4", policy.position]} aria-hidden="true">
-			<span class="row-span-2 grid h-8 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-[0.55rem] font-extrabold text-lime-900 sm:h-10 sm:w-8 md:h-11 md:w-9 md:text-[0.65rem]">{policy.code}</span>
-			<strong class="self-end text-[0.62rem] leading-tight text-slate-950 sm:text-[0.72rem] md:text-[0.82rem]">{policy.name}</strong>
-			<span class="h-1 w-[90%] rounded-full bg-slate-200"></span>
-			<span class="col-span-full h-1 w-[56%] rounded-full bg-slate-200"></span>
-			<span class="col-span-full justify-self-start rounded-full bg-slate-100 px-2 py-1 text-[0.52rem] font-bold text-slate-500 sm:text-[0.58rem] md:text-[0.65rem]">Current</span>
+	{aiClients.map((client) => (
+		<div
+			class:list={[
+				"absolute z-10 grid w-[118px] grid-cols-[1.65rem_1fr] gap-x-2 gap-y-2 rounded-xl border border-slate-200 bg-white/95 p-2.5 text-left shadow-[0_14px_38px_rgba(15,23,42,0.09)] backdrop-blur sm:w-[180px] sm:grid-cols-[2.25rem_1fr] sm:p-3 md:w-[220px] md:grid-cols-[2.75rem_1fr] md:gap-x-3 md:rounded-2xl md:p-4",
+				client.position,
+			]}
+			aria-hidden="true"
+		>
+			<span class="row-span-2 grid h-7 w-7 place-items-center rounded-lg border border-slate-200 bg-slate-50 sm:h-9 sm:w-9 md:h-11 md:w-11 md:rounded-xl">
+				<img src={client.logo} alt="" class="h-4 w-4 object-contain sm:h-5 sm:w-5 md:h-6 md:w-6" />
+			</span>
+			<div class="min-w-0 self-end">
+				<strong class="block text-[0.58rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{client.name}</strong>
+				<span class="mt-1.5 block h-1 w-[86%] rounded-full bg-slate-200 md:mt-2"></span>
+			</div>
+			<span class="col-start-2 w-max rounded-full bg-slate-100 px-2 py-1 text-[0.44rem] font-bold text-slate-500 sm:text-[0.52rem] md:text-[0.6rem]">Connected</span>
 		</div>
 	))}
 </div>
