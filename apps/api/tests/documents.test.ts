@@ -547,6 +547,70 @@ describe("documents / templates API", () => {
     );
   });
 
+  it("renders the cookie policy from service cookie settings", async () => {
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/cookie-policy.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "cookie-policy.md",
+    );
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const template = {
+      id: "template-cookie-policy",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        organizationProviders: [],
+        serviceProviderUsage: [],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(systemTemplate).toMatchObject({
+      slug: "cookie-policy",
+      name: "Cookie Policy",
+    });
+    expect(renderedContent).toContain("# Acme AI Cookie Policy");
+    expect(renderedContent).toContain(
+      "| Necessary | Operate core service features such as authentication, security, and load balancing. | No |",
+    );
+    expect(renderedContent).toContain(
+      "| Analytics | Measure service usage and help us improve the service through statistics. | Yes |",
+    );
+    expect(renderedContent).toContain(
+      "We do not set non-essential cookies or similar technologies until you give consent.",
+    );
+    expect(renderedContent).toContain(
+      "You can change your choices or withdraw consent through Cookie preferences.",
+    );
+    expect(renderedContent).toContain(
+      "We honor Global Privacy Control signals.",
+    );
+    expect(renderedContent).toContain("privacy@acme.example");
+  });
+
   it("renders the subprocessors system template with data processors", async () => {
     const templatePath = fileURLToPath(
       new URL("../data/templates/subprocessors.md", import.meta.url),

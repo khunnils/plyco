@@ -175,7 +175,7 @@ export const DocumentsRoutePage = () => {
             mode === "new" ? createTemplate.isPending : updateTemplate.isPending
           )
             ? "Saving..."
-            : "Save template"}
+            : "Save"}
         </Button>
         <Button
           type="button"

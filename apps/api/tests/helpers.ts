@@ -100,6 +100,13 @@ export function createTestApp() {
     ]),
     systemTemplateSource: new StaticSystemTemplateSource([
       {
+        slug: "cookie-policy",
+        name: "Cookie Policy",
+        description:
+          "A customer-facing cookie policy based on each service's cookie categories, consent controls, and analytics and advertising providers.",
+        content: "# {{ company.name }} Cookie Policy\n",
+      },
+      {
         slug: "data-security-policy",
         name: "Data Security Policy",
         description:
