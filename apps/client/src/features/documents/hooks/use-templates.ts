@@ -12,7 +12,6 @@ import {
   createTemplate,
   createTemplateFromSystem,
   deleteTemplate,
-  getOrganizationMembers,
   getOrganizationTemplates,
   getTemplateVariableCatalog,
   previewTemplate,
@@ -20,7 +19,6 @@ import {
 } from "@/lib/api"
 import {
   documentsQueryKey,
-  organizationMembersQueryKey,
   templatePreviewQueryKey,
   templateSchemaQueryKey,
   templatesQueryKey,
@@ -35,18 +33,6 @@ export const useTemplates = (enabled = true) => {
     enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
     queryKey: templatesQueryKey(selectedOrganizationId ?? ""),
     queryFn: () => getOrganizationTemplates(selectedOrganizationId ?? ""),
-  })
-}
-
-export const useOrganizationMembers = (enabled = true) => {
-  const { data: auth } = useAuthState()
-  const user = auth?.user ?? null
-  const { selectedOrganizationId } = useSelectedOrganization()
-
-  return useQuery({
-    enabled: enabled && Boolean(user) && Boolean(selectedOrganizationId),
-    queryKey: organizationMembersQueryKey(selectedOrganizationId ?? ""),
-    queryFn: () => getOrganizationMembers(selectedOrganizationId ?? ""),
   })
 }
 

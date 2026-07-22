@@ -1,26 +1,10 @@
-import { useState } from "react"
-import {
-  ChevronDown,
-  ChevronUp,
-  Download,
-  Eye,
-  FileText,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { useState, type ReactNode } from "react"
 import { usePostHog } from "@posthog/react"
-
-import { POSTHOG_EVENTS } from "@/lib/posthog-events"
-import {
-  type DocumentSummary,
-  type TemplateCatalog,
-  type TemplateInput,
-} from "@plyco/shared"
+import { type DocumentSummary, type TemplateCatalog } from "@plyco/shared"
 import { Link, useNavigate, useParams } from "react-router-dom"
 
+import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
-import { cn } from "@/lib/utils"
-
 import {
   useCreateDocument,
   useDocument,
@@ -31,21 +15,16 @@ import {
   useCreateTemplate,
   useCreateTemplateFromSystem,
   useDeleteTemplate,
-  useOrganizationMembers,
   useTemplates,
   useUpdateTemplate,
-} from "@/features/templates/hooks/use-templates"
-import { Badge } from "@/components/ui/badge"
+} from "@/features/documents/hooks/use-templates"
 import { Button } from "@/components/ui/button"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { DocumentContent } from "@/features/documents/components/document-content"
+import { DocumentView } from "@/features/documents/components/document-view"
+import { DocumentsList } from "@/features/documents/components/documents-list"
+import { DocumentsPageBanner } from "@/features/documents/components/documents-page-banner"
+import { RenameTemplateDialog } from "@/features/documents/components/rename-template-dialog"
+import { TemplateEditor } from "@/features/documents/components/template-editor"
+import { TemplateSelector } from "@/features/documents/components/template-selector"
 import {
   PageHeader,
   type PageHeaderCrumb,
@@ -54,38 +33,11 @@ import {
   SIDEBAR_SECTION,
   sectionPageBreadcrumbs,
 } from "@/features/shell/lib/navigation"
-import { TemplateForm } from "@/features/templates/components/template-form"
-import { TemplateSelector } from "@/features/templates/components/template-selector"
-import { getTemplateIcon } from "@/features/templates/lib/template-icons"
-import { documentStatusLabel } from "@/features/documents/lib/document-status"
 
-const blankTemplate: TemplateInput = {
-  name: "Untitled Template",
-  content: "",
-}
-
-const generatedText = (summary: DocumentSummary) =>
-  summary.document
-    ? `Last generated on ${new Date(summary.document.generatedAt).toLocaleString()}`
-    : "Never generated"
-
-const getFileName = (orgName: string, slug: string, version: string) => {
-  const o = orgName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-  const s = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-  let v = version.trim().toLowerCase()
-  if (!v) {
-    v = "v1.0"
-  } else if (!v.startsWith("v")) {
-    v = `v${v}`
-  }
-  return `${o}_${s}_${v}.pdf`
-}
+const documentsNavItem = {
+  label: "Policies & Documents",
+  href: "/documents",
+} as const
 
 export const DocumentsRoutePage = () => {
   const { mode, id } = useParams()
@@ -109,14 +61,12 @@ export const DocumentsRoutePage = () => {
   const createDocument = useCreateDocument()
   const document = useDocument(mode === "view" ? (id ?? null) : null)
   const downloadDocumentPdf = useDownloadDocumentPdf()
-  const organizationMembers = useOrganizationMembers()
 
   const templatesData: TemplateCatalog = templates.data ?? {
     systemTemplates: [],
     organizationTemplates: [],
   }
   const documentsList: DocumentSummary[] = documents.data ?? []
-  const organizationMembersData = organizationMembers.data ?? []
   const editingTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === id
   )
@@ -124,7 +74,6 @@ export const DocumentsRoutePage = () => {
     string | undefined
   >(editingTemplate?.name)
 
-  // Sync state during render when route params change
   if (mode !== prevMode || id !== prevId) {
     setPrevMode(mode)
     setPrevId(id)
@@ -137,7 +86,6 @@ export const DocumentsRoutePage = () => {
     }
   }
 
-  // Sync state during render when editingTemplate loads asynchronously
   if (
     mode === "edit" &&
     editingTemplate &&
@@ -158,19 +106,14 @@ export const DocumentsRoutePage = () => {
   )
   const isLoading = templates.isLoading || documents.isLoading
 
-  const documentsNavItem = {
-    label: "Policies & Documents",
-    href: "/documents",
-  } as const
-
-  // Setup header, breadcrumbs and action buttons based on mode
   const eyebrow = SIDEBAR_SECTION.documents
   let breadcrumbs: PageHeaderCrumb[]
   let pageTitle: string
-  let bannerTitle: string
-  let bannerSubtitle: string
-  let bannerButtons: React.ReactNode
-  let content: React.ReactNode
+  let bannerTitle = ""
+  let bannerSubtitle = ""
+  let bannerButtons: ReactNode = null
+  let showRename = false
+  let content: ReactNode
 
   if (mode === "add") {
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
@@ -178,10 +121,6 @@ export const DocumentsRoutePage = () => {
       { label: "Add" },
     ])
     pageTitle = "Add"
-    bannerTitle = ""
-    bannerSubtitle = ""
-    bannerButtons = null
-
     content = (
       <TemplateSelector
         addedSystemTemplateSlugs={addedSystemTemplateSlugs}
@@ -210,7 +149,7 @@ export const DocumentsRoutePage = () => {
         }}
       />
     )
-  } else if (mode === "new") {
+  } else if (mode === "new" || mode === "edit") {
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
       documentsNavItem,
       { label: templateName },
@@ -218,15 +157,24 @@ export const DocumentsRoutePage = () => {
     pageTitle = templateName
     bannerTitle = templateName
     bannerSubtitle =
-      "Draft a new policy template using markdown and schema variables."
+      mode === "new"
+        ? "Draft a new policy template using markdown and schema variables."
+        : `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}.`
+    showRename = true
     bannerButtons = (
       <>
         <Button
-          disabled={createTemplate.isPending}
+          disabled={
+            mode === "new" ? createTemplate.isPending : updateTemplate.isPending
+          }
           type="submit"
           form="template-form"
         >
-          {createTemplate.isPending ? "Saving..." : "Save template"}
+          {(
+            mode === "new" ? createTemplate.isPending : updateTemplate.isPending
+          )
+            ? "Saving..."
+            : "Save template"}
         </Button>
         <Button
           type="button"
@@ -237,13 +185,12 @@ export const DocumentsRoutePage = () => {
         </Button>
       </>
     )
-
     content = (
-      <TemplateForm
-        name={templateName}
-        defaultValues={blankTemplate}
-        members={organizationMembersData}
-        onSubmit={(template) =>
+      <TemplateEditor
+        mode={mode}
+        templateName={templateName}
+        editingTemplate={editingTemplate}
+        onCreate={(template) =>
           createTemplate.mutate(template, {
             onSuccess: (createdTemplate) => {
               posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
@@ -253,41 +200,8 @@ export const DocumentsRoutePage = () => {
             },
           })
         }
-      />
-    )
-  } else if (mode === "edit") {
-    breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
-      documentsNavItem,
-      { label: templateName },
-    ])
-    pageTitle = templateName
-    bannerTitle = templateName
-    bannerSubtitle = `Edit template version ${editingTemplate ? `v${editingTemplate.versionMajor}.${editingTemplate.versionMinor}` : "1.0"}.`
-    bannerButtons = (
-      <>
-        <Button
-          disabled={updateTemplate.isPending}
-          type="submit"
-          form="template-form"
-        >
-          {updateTemplate.isPending ? "Saving..." : "Save template"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate("/documents")}
-        >
-          Cancel
-        </Button>
-      </>
-    )
-
-    content = editingTemplate ? (
-      <TemplateForm
-        name={templateName}
-        defaultValues={editingTemplate}
-        members={organizationMembersData}
-        onSubmit={(template) =>
+        onUpdate={(template) => {
+          if (!editingTemplate) return
           updateTemplate.mutate(
             { id: editingTemplate.id, template },
             {
@@ -299,10 +213,8 @@ export const DocumentsRoutePage = () => {
               },
             }
           )
-        }
+        }}
       />
-    ) : (
-      <p className="text-sm text-slate-500">Template was not found.</p>
     )
   } else if (mode === "view" && id) {
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
@@ -344,16 +256,10 @@ export const DocumentsRoutePage = () => {
         </Button>
       </>
     )
-
-    content = document.isLoading ? (
-      <p className="text-sm text-slate-500">Loading document...</p>
-    ) : documentRecord ? (
-      <DocumentContent document={documentRecord} />
-    ) : (
-      <p className="text-sm text-slate-500">Document was not found.</p>
+    content = (
+      <DocumentView isLoading={document.isLoading} document={documentRecord} />
     )
   } else {
-    // List view
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
       { label: "Policies & Documents" },
     ])
@@ -367,292 +273,59 @@ export const DocumentsRoutePage = () => {
           <Link to="/documents/add">Add</Link>
         </Button>
       ) : null
-
-    content = isLoading ? (
-      <p className="text-sm text-slate-500">
-        Loading policies and documents...
-      </p>
-    ) : templatesData.organizationTemplates.length === 0 ? (
-      <Empty className="min-h-[420px] border-slate-200 bg-white">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <FileText />
-          </EmptyMedia>
-          <EmptyTitle>No policy templates yet</EmptyTitle>
-          <EmptyDescription>
-            Add a system template or create a policy template from scratch
-            before generating documents.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button asChild type="button">
-            <Link to="/documents/add">Add</Link>
-          </Button>
-        </EmptyContent>
-      </Empty>
-    ) : (
-      <div className="grid gap-4">
-        {documentsList.map((summary) => {
-          const isExpanded = expandedTemplateIds.includes(summary.template.id)
-          const toggleExpand = () => {
-            setExpandedTemplateIds((prev) =>
-              prev.includes(summary.template.id)
-                ? prev.filter((id) => id !== summary.template.id)
-                : [...prev, summary.template.id]
-            )
-          }
-
-          const TemplateIcon = getTemplateIcon(
-            summary.template.sourceSystemTemplateSlug ?? summary.template.slug
+    content = (
+      <DocumentsList
+        isLoading={isLoading}
+        documents={documentsList}
+        organizationName={selectedOrganization?.name ?? "organization"}
+        hasTemplates={templatesData.organizationTemplates.length > 0}
+        expandedTemplateIds={expandedTemplateIds}
+        documentFilters={documentFilters}
+        isPublishPending={createDocument.isPending}
+        isDownloadPending={downloadDocumentPdf.isPending}
+        onToggleExpand={(templateId) => {
+          setExpandedTemplateIds((prev) =>
+            prev.includes(templateId)
+              ? prev.filter((currentId) => currentId !== templateId)
+              : [...prev, templateId]
           )
-
-          return (
-            <article
-              className="border border-slate-200 bg-white p-4"
-              key={summary.template.id}
-            >
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div
-                  className={cn(
-                    "flex min-w-0 flex-1 items-start gap-3",
-                    summary.document ? "cursor-pointer select-none" : ""
-                  )}
-                  onClick={summary.document ? toggleExpand : undefined}
-                >
-                  <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600">
-                    <TemplateIcon className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-semibold text-slate-950">
-                        {summary.template.name}
-                        <span className="ml-2 text-xs font-normal text-slate-500">
-                          v{summary.template.versionMajor}.
-                          {summary.template.versionMinor}
-                        </span>
-                      </h2>
-                      <Badge
-                        title={
-                          summary.staleReasons.length
-                            ? summary.staleReasons.join("\n")
-                            : undefined
-                        }
-                        variant={
-                          summary.status === "stale"
-                            ? "warning"
-                            : summary.status === "current"
-                              ? "secondary"
-                              : "outline"
-                        }
-                      >
-                        {documentStatusLabel(summary.status)}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {generatedText(summary)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  {summary.document ? (
-                    <Button
-                      aria-label={
-                        isExpanded ? "Collapse document" : "Expand document"
-                      }
-                      size="icon-sm"
-                      type="button"
-                      variant="outline"
-                      onClick={toggleExpand}
-                    >
-                      {isExpanded ? <ChevronUp /> : <ChevronDown />}
-                    </Button>
-                  ) : null}
-                  <Button
-                    size="icon-sm"
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      navigate(`/documents/edit/${summary.template.id}`)
-                    }
-                    title="Edit template"
-                  >
-                    <Pencil />
-                  </Button>
-                  <Button
-                    size="icon-sm"
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      deleteTemplate.mutate(summary.template.id, {
-                        onSuccess: () =>
-                          posthog.capture(POSTHOG_EVENTS.TEMPLATE_DELETED, {
-                            template_id: summary.template.id,
-                          }),
-                      })
-                    }
-                    title="Delete template"
-                  >
-                    <Trash2 />
-                  </Button>
-                  <Button
-                    disabled={createDocument.isPending}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      createDocument.mutate(
-                        { templateId: summary.template.id },
-                        {
-                          onSuccess: (doc) => {
-                            posthog.capture(POSTHOG_EVENTS.DOCUMENT_PUBLISHED, {
-                              template_id: summary.template.id,
-                              template_name: summary.template.name,
-                              document_id: doc.id,
-                            })
-                          },
-                        }
-                      )
-                    }
-                  >
-                    Publish
-                  </Button>
-                </div>
-              </div>
-
-              {isExpanded && summary.document && (
-                <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-3">
-                  {summary.documents && summary.documents.length > 1 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-500">
-                        Document Versions
-                      </span>
-                      <div className="flex items-center rounded-md border border-slate-200 bg-white p-0.5">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDocumentFilters((prev) => ({
-                              ...prev,
-                              [summary.template.id]: "current",
-                            }))
-                          }
-                          className={`cursor-pointer rounded-sm px-2 py-1 text-xs font-medium ${
-                            (documentFilters[summary.template.id] ??
-                              "current") === "current"
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          Current
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDocumentFilters((prev) => ({
-                              ...prev,
-                              [summary.template.id]: "all",
-                            }))
-                          }
-                          className={`cursor-pointer rounded-sm px-2 py-1 text-xs font-medium ${
-                            documentFilters[summary.template.id] === "all"
-                              ? "bg-slate-900 text-white"
-                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                          }`}
-                        >
-                          All ({summary.documents.length})
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-2">
-                    {((documentFilters[summary.template.id] ?? "current") ===
-                    "current"
-                      ? [summary.document]
-                      : summary.documents || []
-                    ).map((doc) => {
-                      if (!doc) return null
-                      const isCurrentVersion =
-                        doc.templateVersionMajor ===
-                          summary.template.versionMajor &&
-                        doc.templateVersionMinor ===
-                          summary.template.versionMinor
-
-                      return (
-                        <div
-                          key={doc.id}
-                          className="flex items-center justify-between gap-4 rounded-md border border-slate-100 bg-white px-3 py-2"
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <FileText className="size-5 shrink-0 text-slate-500" />
-                            <div className="min-w-0">
-                              <p className="flex items-center gap-2 truncate text-sm font-medium text-slate-900">
-                                <span>
-                                  {getFileName(
-                                    selectedOrganization?.name ??
-                                      "organization",
-                                    summary.template.slug,
-                                    `${doc.templateVersionMajor}.${doc.templateVersionMinor}`
-                                  )}
-                                </span>
-                                {isCurrentVersion && (
-                                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset">
-                                    Current
-                                  </span>
-                                )}
-                              </p>
-                              <p className="mt-0.5 text-xs text-slate-500">
-                                Published on{" "}
-                                {new Date(doc.generatedAt).toLocaleString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <Button
-                              size="icon-sm"
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                navigate(`/documents/view/${doc.id}`)
-                              }
-                              title="Preview document"
-                            >
-                              <Eye />
-                            </Button>
-                            {doc.hasPdf && (
-                              <Button
-                                disabled={downloadDocumentPdf.isPending}
-                                size="icon-sm"
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  posthog.capture(
-                                    POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED,
-                                    {
-                                      document_id: doc.id,
-                                      document_title: doc.title,
-                                    }
-                                  )
-                                  downloadDocumentPdf.mutate({
-                                    id: doc.id,
-                                    title: doc.title,
-                                  })
-                                }}
-                                title="Download PDF"
-                              >
-                                <Download />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </article>
+        }}
+        onDocumentFilterChange={(templateId, filter) => {
+          setDocumentFilters((prev) => ({
+            ...prev,
+            [templateId]: filter,
+          }))
+        }}
+        onDeleteTemplate={(templateId) => {
+          deleteTemplate.mutate(templateId, {
+            onSuccess: () =>
+              posthog.capture(POSTHOG_EVENTS.TEMPLATE_DELETED, {
+                template_id: templateId,
+              }),
+          })
+        }}
+        onPublish={(templateId, templateNameValue) => {
+          createDocument.mutate(
+            { templateId },
+            {
+              onSuccess: (doc) => {
+                posthog.capture(POSTHOG_EVENTS.DOCUMENT_PUBLISHED, {
+                  template_id: templateId,
+                  template_name: templateNameValue,
+                  document_id: doc.id,
+                })
+              },
+            }
           )
-        })}
-      </div>
+        }}
+        onDownloadPdf={(doc) => {
+          posthog.capture(POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED, {
+            document_id: doc.id,
+            document_title: doc.title,
+          })
+          downloadDocumentPdf.mutate(doc)
+        }}
+      />
     )
   }
 
@@ -665,78 +338,24 @@ export const DocumentsRoutePage = () => {
       />
       <div className="grid gap-5">
         {mode !== "add" ? (
-          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
-                <span>{bannerTitle}</span>
-                {(mode === "new" || mode === "edit") && (
-                  <button
-                    type="button"
-                    onClick={() => setIsRenameOpen(true)}
-                    className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                    title="Rename template"
-                  >
-                    <Pencil className="size-3.5" />
-                  </button>
-                )}
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
-            </div>
-            {bannerButtons ? (
-              <div className="flex shrink-0 flex-wrap gap-2">
-                {bannerButtons}
-              </div>
-            ) : null}
-          </div>
+          <DocumentsPageBanner
+            title={bannerTitle}
+            subtitle={bannerSubtitle}
+            showRename={showRename}
+            actions={bannerButtons}
+            onRenameClick={() => setIsRenameOpen(true)}
+          />
         ) : null}
         {content}
       </div>
 
-      {isRenameOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="animate-in fade-in zoom-in-95 w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl duration-150">
-            <h3 className="text-lg font-semibold text-slate-950">
-              Rename template
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Enter a new name for this policy template.
-            </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                const formData = new FormData(e.currentTarget)
-                const newName = (formData.get("name") as string)?.trim()
-                if (newName) {
-                  setTemplateName(newName)
-                }
-                setIsRenameOpen(false)
-              }}
-              className="mt-4 grid gap-4"
-            >
-              <input
-                autoComplete="new-password"
-                name="name"
-                type="text"
-                defaultValue={templateName}
-                required
-                autoFocus
-                className="field-focus-compact h-11 w-full rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition outline-none"
-                placeholder="Template name"
-              />
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsRenameOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Rename</Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {isRenameOpen ? (
+        <RenameTemplateDialog
+          templateName={templateName}
+          onClose={() => setIsRenameOpen(false)}
+          onRename={setTemplateName}
+        />
+      ) : null}
     </>
   )
 }

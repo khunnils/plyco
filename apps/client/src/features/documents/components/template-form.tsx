@@ -1,5 +1,4 @@
 import {
-  type OrganizationMember,
   type Template,
   type TemplateInput,
   type TemplateVariable,
@@ -31,13 +30,13 @@ import { Button } from "@/components/ui/button"
 import {
   useTemplatePreview,
   useTemplateVariableCatalog,
-} from "../hooks/use-templates"
+} from "@/features/documents/hooks/use-templates"
 import {
   isCursorInsideCollectionLoop,
   itemFieldPlaceholderSnippet,
   itemFieldSnippet,
   variableSnippet,
-} from "@/features/templates/lib/template-snippets"
+} from "@/features/documents/lib/template-snippets"
 
 const useDebouncedTemplate = (draft: TemplateInput, delayMs = 450) => {
   const [debouncedDraft, setDebouncedDraft] = useState(draft)
@@ -65,7 +64,6 @@ export const TemplateForm = ({
 }: {
   name: string
   defaultValues: Template | TemplateInput
-  members?: OrganizationMember[]
   onSubmit: (template: TemplateInput) => void
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)

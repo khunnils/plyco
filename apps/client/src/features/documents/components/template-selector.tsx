@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { getTemplateIcon } from "@/features/templates/lib/template-icons"
+import { getTemplateIcon } from "@/features/documents/lib/template-icons"
 import { cn } from "@/lib/utils"
 
 export const TemplateSelector = ({
