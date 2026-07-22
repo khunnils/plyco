@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from "react"
-
 import { CircleDashed } from "lucide-react"
 
 import {
@@ -11,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { CircularProgress } from "@/features/dashboard/components/circular-progress"
+import { useHoverPopover } from "@/features/dashboard/hooks/use-hover-popover"
 import {
   pendingProgressSections,
   type ProgressSection,
@@ -27,43 +26,18 @@ export const ProgressDetailsPopover = ({
   sectionTitle: string
   sections: ProgressSection[]
 }) => {
-  const [open, setOpen] = useState(false)
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const {
+    leavePopover,
+    onOpenChange,
+    open,
+    openPopover,
+    scheduleClose,
+    triggerRef,
+  } = useHoverPopover()
   const pendingSections = pendingProgressSections(sections)
 
-  const cancelClose = () => {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current)
-      closeTimer.current = null
-    }
-  }
-
-  const openPopover = () => {
-    cancelClose()
-    setOpen(true)
-  }
-
-  const scheduleClose = () => {
-    cancelClose()
-    closeTimer.current = setTimeout(() => {
-      if (document.activeElement !== triggerRef.current) {
-        setOpen(false)
-      }
-    }, 120)
-  }
-
-  useEffect(
-    () => () => {
-      if (closeTimer.current) {
-        clearTimeout(closeTimer.current)
-      }
-    },
-    []
-  )
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <button
           aria-label={`${percent}% complete. View pending subsections for ${sectionTitle}`}
@@ -72,7 +46,7 @@ export const ProgressDetailsPopover = ({
           type="button"
           onBlur={scheduleClose}
           onPointerEnter={openPopover}
-          onPointerLeave={scheduleClose}
+          onPointerLeave={leavePopover}
         >
           <CircularProgress percent={percent} size={22} />
         </button>
@@ -82,8 +56,10 @@ export const ProgressDetailsPopover = ({
         className="w-80 gap-3 rounded-md border border-slate-200 bg-white p-4 text-slate-950 shadow-lg ring-0 motion-reduce:animate-none"
         side="bottom"
         sideOffset={8}
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
         onPointerEnter={openPopover}
-        onPointerLeave={scheduleClose}
+        onPointerLeave={leavePopover}
       >
         <PopoverHeader>
           <PopoverTitle className="text-sm font-semibold">

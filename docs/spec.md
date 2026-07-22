@@ -182,6 +182,10 @@ every applicable check has been assessed. Product & Data shows one pooled label
 only after at least one service, activity, and data type exists; all of those
 records and every existing vendor record are complete; and every applicable
 pooled check has been assessed. Having no vendors does not block this label.
+Hovering or activating a readiness label opens a popover with non-zero
+recommendation counts by severity for that area in a single column. Selecting a
+severity count drills into that severity's failing advisor checks.
+
 The dashboard recommendations card uses a static "Recommendations" header that
 links to the Recommendations page. Severity counts still reflect the current
 recommendation set even when setup or advisor coverage is incomplete.

@@ -1,8 +1,28 @@
-import { type ReadinessScore } from "@plyco/shared"
+import {
+  type Recommendation,
+  type RecommendationArea,
+  type ReadinessScore,
+  type ReadinessScoreArea,
+} from "@plyco/shared"
 
 import { type BadgeProps } from "@/components/ui/badge"
+import { severityOrder } from "@/features/recommendations/lib/recommendations"
 
 type BadgeVariant = NonNullable<BadgeProps["variant"]>
+
+const readinessAreaForCategory: Record<
+  RecommendationArea,
+  ReadinessScoreArea
+> = {
+  security: "security",
+  privacy: "privacy",
+  access: "access",
+  infrastructure: "infrastructure",
+  activities: "productAndData",
+  data: "productAndData",
+  services: "productAndData",
+  vendors: "productAndData",
+}
 
 export const readinessScoreStatus = (
   value: number | null
@@ -39,6 +59,26 @@ export const readinessScoreStatus = (
     label: "Significant gaps",
     badgeVariant: "warning",
   }
+}
+
+export const failingRecommendationsForArea = (
+  recommendations: Recommendation[],
+  area: ReadinessScoreArea
+) => {
+  const severityRank = new Map(
+    severityOrder.map((severity, index) => [severity, index])
+  )
+
+  return recommendations
+    .filter(
+      (recommendation) =>
+        readinessAreaForCategory[recommendation.category] === area
+    )
+    .sort(
+      (left, right) =>
+        (severityRank.get(left.severity) ?? severityOrder.length) -
+        (severityRank.get(right.severity) ?? severityOrder.length)
+    )
 }
 
 export const isReadinessCoverageComplete = (

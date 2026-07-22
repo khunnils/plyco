@@ -7,10 +7,6 @@ import { readinessScoreStatus } from "@/features/recommendations/lib/readiness-s
 
 export type ReadinessStatus = ReturnType<typeof readinessScoreStatus>
 
-export const ReadinessBadge = ({ status }: { status: ReadinessStatus }) => (
-  <Badge variant={status.badgeVariant}>{status.label}</Badge>
-)
-
 export const WorkspaceSetupSummary = ({
   progress,
 }: {

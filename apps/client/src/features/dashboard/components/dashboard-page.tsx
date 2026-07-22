@@ -22,8 +22,8 @@ import {
 import { type ProfileDraft } from "@/features/company/types/company"
 import { DashboardServiceCard } from "@/features/dashboard/components/dashboard-service-card"
 import { ProgressDetailsPopover } from "@/features/dashboard/components/progress-details-popover"
+import { ReadinessBadge } from "@/features/dashboard/components/readiness-badge"
 import {
-  ReadinessBadge,
   type ReadinessStatus,
   WorkspaceSetupSummary,
 } from "@/features/dashboard/components/readiness-scores"
@@ -41,7 +41,10 @@ import {
   severityLabel,
   severityOrder,
 } from "@/features/recommendations/lib/recommendations"
-import { readinessStatusWhenComplete } from "@/features/recommendations/lib/readiness-scores"
+import {
+  failingRecommendationsForArea,
+  readinessStatusWhenComplete,
+} from "@/features/recommendations/lib/readiness-scores"
 
 interface CategoryCardProps {
   title: string
@@ -53,6 +56,7 @@ interface CategoryCardProps {
   emptyProgressMessage?: string
   statusText?: string
   readinessStatus?: ReadinessStatus | null
+  failingRecommendations?: RecommendationsResponse["recommendations"]
   icon: React.ComponentType<{ className?: string }>
   className?: string
 }
@@ -67,6 +71,7 @@ const CategoryCard = ({
   emptyProgressMessage,
   statusText,
   readinessStatus,
+  failingRecommendations = [],
   icon: Icon,
   className = "",
 }: CategoryCardProps) => {
@@ -95,7 +100,13 @@ const CategoryCard = ({
         </p>
       </Link>
       <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        {readinessStatus ? <ReadinessBadge status={readinessStatus} /> : null}
+        {readinessStatus ? (
+          <ReadinessBadge
+            failingRecommendations={failingRecommendations}
+            sectionTitle={title}
+            status={readinessStatus}
+          />
+        ) : null}
         {isComplete ? (
           <CheckCircle2 className="pointer-events-none h-6 w-6 shrink-0 fill-emerald-50 text-emerald-600" />
         ) : (
@@ -113,16 +124,24 @@ const CategoryCard = ({
 
 const SectionHeading = ({
   children,
+  failingRecommendations = [],
   readinessStatus,
 }: {
   children: string
+  failingRecommendations?: RecommendationsResponse["recommendations"]
   readinessStatus?: ReadinessStatus | null
 }) => (
   <div className="flex flex-wrap items-center justify-between gap-3">
     <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
       {children}
     </span>
-    {readinessStatus ? <ReadinessBadge status={readinessStatus} /> : null}
+    {readinessStatus ? (
+      <ReadinessBadge
+        failingRecommendations={failingRecommendations}
+        sectionTitle={children}
+        status={readinessStatus}
+      />
+    ) : null}
   </div>
 )
 
@@ -208,25 +227,46 @@ export const DashboardPage = ({
   const outdatedDocuments = documents.filter(
     (summary) => summary.status === "stale"
   )
+  const activeRecommendations = recommendations?.recommendations ?? []
   const privacyReadiness = readinessStatusWhenComplete(
     isProgressComplete(progress.privacy),
     recommendations?.scores.byArea.privacy
+  )
+  const privacyFailingRecommendations = failingRecommendationsForArea(
+    activeRecommendations,
+    "privacy"
   )
   const infrastructureReadiness = readinessStatusWhenComplete(
     isProgressComplete(progress.infrastructure),
     recommendations?.scores.byArea.infrastructure
   )
+  const infrastructureFailingRecommendations = failingRecommendationsForArea(
+    activeRecommendations,
+    "infrastructure"
+  )
   const securityReadiness = readinessStatusWhenComplete(
     isProgressComplete(progress.security),
     recommendations?.scores.byArea.security
+  )
+  const securityFailingRecommendations = failingRecommendationsForArea(
+    activeRecommendations,
+    "security"
   )
   const accessReadiness = readinessStatusWhenComplete(
     isProgressComplete(progress.access),
     recommendations?.scores.byArea.access
   )
+  const accessFailingRecommendations = failingRecommendationsForArea(
+    activeRecommendations,
+    "access"
+  )
   const productAndDataReadiness = readinessStatusWhenComplete(
     isProductAndDataComplete(progress),
     recommendations?.scores.byArea.productAndData
+  )
+  const productAndDataFailingRecommendations = failingRecommendationsForArea(
+    activeRecommendations,
+    "productAndData"
   )
 
   // Calculate completeness for activities
@@ -346,6 +386,7 @@ export const DashboardPage = ({
           percent={progress.privacy.percent}
           progressSections={progress.privacy.sections}
           readinessStatus={privacyReadiness}
+          failingRecommendations={privacyFailingRecommendations}
           icon={ShieldCheck}
         />
         <CategoryCard
@@ -356,6 +397,7 @@ export const DashboardPage = ({
           percent={progress.infrastructure.percent}
           progressSections={progress.infrastructure.sections}
           readinessStatus={infrastructureReadiness}
+          failingRecommendations={infrastructureFailingRecommendations}
           icon={Server}
         />
         <CategoryCard
@@ -366,6 +408,7 @@ export const DashboardPage = ({
           percent={progress.security.percent}
           progressSections={progress.security.sections}
           readinessStatus={securityReadiness}
+          failingRecommendations={securityFailingRecommendations}
           icon={Shield}
         />
         <CategoryCard
@@ -376,12 +419,16 @@ export const DashboardPage = ({
           percent={progress.access.percent}
           progressSections={progress.access.sections}
           readinessStatus={accessReadiness}
+          failingRecommendations={accessFailingRecommendations}
           icon={KeyRound}
         />
       </div>
 
       <section className="grid gap-4">
-        <SectionHeading readinessStatus={productAndDataReadiness}>
+        <SectionHeading
+          failingRecommendations={productAndDataFailingRecommendations}
+          readinessStatus={productAndDataReadiness}
+        >
           {SIDEBAR_SECTION.productAndData}
         </SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

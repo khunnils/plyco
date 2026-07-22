@@ -1,11 +1,30 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  failingRecommendationsForArea,
   isReadinessCoverageComplete,
   recommendationSummaryText,
   readinessScoreStatus,
   readinessStatusWhenComplete,
 } from "./readiness-scores"
+
+const recommendation = (
+  overrides: Partial<{
+    id: string
+    title: string
+    category: "security" | "privacy" | "access" | "activities" | "vendors"
+    severity: "critical" | "high" | "medium" | "low"
+  }> = {}
+) => ({
+  id: overrides.id ?? "rule-1",
+  title: overrides.title ?? "Example rule",
+  category: overrides.category ?? "security",
+  severity: overrides.severity ?? "medium",
+  frameworks: [],
+  message: "Example message",
+  recommendation: "Example recommendation",
+  relatedFields: [],
+})
 
 describe("readiness scores", () => {
   it.each([
@@ -119,5 +138,71 @@ describe("readiness scores", () => {
         recommendationTotal: 2,
       })
     ).toBe("2 recommendations")
+  })
+
+  it("filters and severity-sorts failing recommendations for a readiness area", () => {
+    expect(
+      failingRecommendationsForArea(
+        [
+          recommendation({
+            id: "privacy-low",
+            category: "privacy",
+            severity: "low",
+            title: "Privacy low",
+          }),
+          recommendation({
+            id: "security-medium",
+            category: "security",
+            severity: "medium",
+            title: "Security medium",
+          }),
+          recommendation({
+            id: "security-critical",
+            category: "security",
+            severity: "critical",
+            title: "Security critical",
+          }),
+          recommendation({
+            id: "vendor-high",
+            category: "vendors",
+            severity: "high",
+            title: "Vendor high",
+          }),
+          recommendation({
+            id: "activity-medium",
+            category: "activities",
+            severity: "medium",
+            title: "Activity medium",
+          }),
+        ],
+        "security"
+      ).map((item) => item.id)
+    ).toEqual(["security-critical", "security-medium"])
+
+    expect(
+      failingRecommendationsForArea(
+        [
+          recommendation({
+            id: "vendor-high",
+            category: "vendors",
+            severity: "high",
+            title: "Vendor high",
+          }),
+          recommendation({
+            id: "activity-critical",
+            category: "activities",
+            severity: "critical",
+            title: "Activity critical",
+          }),
+          recommendation({
+            id: "security-low",
+            category: "security",
+            severity: "low",
+            title: "Security low",
+          }),
+        ],
+        "productAndData"
+      ).map((item) => item.id)
+    ).toEqual(["activity-critical", "vendor-high"])
   })
 })
