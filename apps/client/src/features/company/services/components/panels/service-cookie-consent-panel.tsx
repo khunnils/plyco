@@ -26,6 +26,7 @@ export const ServiceCookieConsentPanel = ({
   cookieConsentMechanismOptions,
   cookieConsentWithdrawalMethodOptions,
   isMutationPending,
+  needsAttention,
   service,
   vocabulary,
   onSave,
@@ -33,6 +34,7 @@ export const ServiceCookieConsentPanel = ({
   cookieConsentMechanismOptions: Option[]
   cookieConsentWithdrawalMethodOptions: Option[]
   isMutationPending: boolean
+  needsAttention?: boolean
   service: ServiceProfileInput
   vocabulary: Vocabulary | undefined
   onSave: (patch: ServicePrivacyDraft, onSuccess?: () => void) => void
@@ -92,6 +94,7 @@ export const ServiceCookieConsentPanel = ({
       description="Describe how this service collects, manages, and honors cookie consent."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows} />}
       saveLabel="Save"
       title="Cookie Consent"

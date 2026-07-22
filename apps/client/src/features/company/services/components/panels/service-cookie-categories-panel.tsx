@@ -75,10 +75,12 @@ const CategoryCards = ({
 
 export const ServiceCookieCategoriesPanel = ({
   isMutationPending,
+  needsAttention,
   service,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   service: ServiceProfileInput
   onSave: (patch: ServicePrivacyDraft, onSuccess?: () => void) => void
 }) => {
@@ -140,6 +142,7 @@ export const ServiceCookieCategoriesPanel = ({
       description="Types of cookie categories used by this service."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <CategoryCards categories={savedCategories} isEditing={false} />
       }

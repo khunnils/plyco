@@ -20,12 +20,14 @@ import { serviceHelperText } from "../service-helper-text"
 
 export const ServiceHostingPanel = ({
   isMutationPending,
+  needsAttention,
   regionOptions,
   service,
   vocabulary,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   regionOptions: Option[]
   service: ServiceProfileInput
   vocabulary: Vocabulary | undefined
@@ -50,6 +52,7 @@ export const ServiceHostingPanel = ({
       description="Primary hosting region for this service."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[

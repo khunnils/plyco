@@ -20,10 +20,12 @@ import { serviceHelperText } from "../service-helper-text"
 
 export const ServiceBasicsPanel = ({
   isMutationPending,
+  needsAttention,
   service,
   onSave,
 }: {
   isMutationPending: boolean
+  needsAttention?: boolean
   service: ServiceProfileInput
   onSave: (patch: Partial<ServiceProfileInput>, onSuccess?: () => void) => void
 }) => {
@@ -54,6 +56,7 @@ export const ServiceBasicsPanel = ({
       description="Core identification and public details of the service or product."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[

@@ -26,6 +26,7 @@ import { serviceHelperText } from "../service-helper-text"
 export const ServiceAudiencePanel = ({
   customerTypeOptions,
   isMutationPending,
+  needsAttention,
   regionOptions,
   service,
   userTypeOptions,
@@ -34,6 +35,7 @@ export const ServiceAudiencePanel = ({
 }: {
   customerTypeOptions: Option[]
   isMutationPending: boolean
+  needsAttention?: boolean
   regionOptions: Option[]
   service: ServiceProfileInput
   userTypeOptions: Option[]
@@ -70,6 +72,7 @@ export const ServiceAudiencePanel = ({
       description="Target user types, customer industries, availability regions, and age restrictions."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid
           rows={[

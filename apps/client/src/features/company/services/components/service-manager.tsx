@@ -15,6 +15,10 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
+import {
+  isAnswered,
+  serviceProgress,
+} from "@/features/dashboard/lib/progress"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { AddServiceForm } from "./add-service-form"
 import { ServiceActivitiesPanel } from "./panels/service-activities-panel"
@@ -109,6 +113,42 @@ export const ServiceManager = ({
   const providersCount = selectedServiceUses.length
   const cookiesEnabled =
     selectedService.privacy.usesCookiesOrTrackingTechnologies === true
+  const cookieCategories = selectedService.privacy.cookieCategories ?? []
+  const progress = serviceProgress(selectedService, serviceProviderUsage)
+
+  const getNeedsAttention = (sectionTitle: string) => {
+    const section = progress.sections.find((s) => s.title === sectionTitle)
+    if (!section) return false
+    return (
+      section.totalFields > 0 && section.completedFields < section.totalFields
+    )
+  }
+
+  // General progress omits the cookies toggle, which lives on the Basics panel.
+  const basicsNeedsAttention =
+    getNeedsAttention("General") ||
+    !isAnswered(selectedService.privacy.usesCookiesOrTrackingTechnologies)
+
+  // Audience progress includes business activities (Activities tab); exclude them here.
+  const audienceNeedsAttention =
+    !isAnswered(selectedService.userTypes) ||
+    !isAnswered(selectedService.customerTypes) ||
+    !isAnswered(selectedService.availabilityRegions) ||
+    !isAnswered(selectedService.childrenDirected) ||
+    (selectedService.childrenDirected === true &&
+      !isAnswered(selectedService.minimumUserAge, { zeroMeansUnset: true }))
+
+  const cookieCategoriesNeedsAttention =
+    cookieCategories.length === 0 ||
+    cookieCategories.some((category) => !isAnswered(category.requiresConsent))
+
+  const cookieConsentNeedsAttention =
+    !isAnswered(selectedService.privacy.cookieConsentMechanism) ||
+    !isAnswered(
+      selectedService.privacy.nonEssentialCookiesBlockedUntilConsent
+    ) ||
+    !isAnswered(selectedService.privacy.cookieConsentWithdrawalMethod) ||
+    !isAnswered(selectedService.privacy.globalPrivacyControlSupported)
 
   const [activeTab, setActiveTab] = useState<
     "details" | "activities" | "providers"
@@ -219,12 +259,14 @@ export const ServiceManager = ({
         <div className="grid gap-10">
           <ServiceBasicsPanel
             isMutationPending={isProfileMutationPending}
+            needsAttention={basicsNeedsAttention}
             service={selectedService}
             onSave={saveServicePatch}
           />
           <ServiceAudiencePanel
             customerTypeOptions={customerTypeOptions}
             isMutationPending={isProfileMutationPending}
+            needsAttention={audienceNeedsAttention}
             regionOptions={regionOptions}
             service={selectedService}
             userTypeOptions={userTypeOptions}
@@ -233,6 +275,7 @@ export const ServiceManager = ({
           />
           <ServiceHostingPanel
             isMutationPending={isProfileMutationPending}
+            needsAttention={getNeedsAttention("Service Hosting")}
             regionOptions={regionOptions}
             service={selectedService}
             vocabulary={vocabulary}
@@ -242,6 +285,7 @@ export const ServiceManager = ({
             <>
               <ServiceCookieCategoriesPanel
                 isMutationPending={isProfileMutationPending}
+                needsAttention={cookieCategoriesNeedsAttention}
                 service={selectedService}
                 onSave={saveServicePatch}
               />
@@ -254,6 +298,7 @@ export const ServiceManager = ({
                     cookieConsentWithdrawalMethodOptions
                   }
                   isMutationPending={isProfileMutationPending}
+                  needsAttention={cookieConsentNeedsAttention}
                   service={selectedService}
                   vocabulary={vocabulary}
                   onSave={saveServicePatch}
