@@ -140,7 +140,7 @@ export const RecommendationsList = ({
 
               return (
                 <article
-                  className={`grid gap-4 rounded-sm border border-l-4 border-slate-200 bg-white p-5 shadow-xs transition-shadow duration-200 hover:shadow-sm motion-reduce:transition-none ${severityBorderClass(recommendation.severity)}`}
+                  className={`grid gap-4 rounded-sm border border-l-4 border-slate-200 bg-white px-4 py-3 shadow-xs transition-shadow duration-200 hover:shadow-sm motion-reduce:transition-none ${severityBorderClass(recommendation.severity)}`}
                   key={recommendation.id}
                 >
                   <div className="flex items-start gap-3">
@@ -176,27 +176,34 @@ export const RecommendationsList = ({
                       </div>
                     </button>
 
-                    <Button
-                      aria-label={`Suppress ${recommendation.title}`}
-                      className="cursor-pointer"
-                      disabled={isPending}
-                      size="sm"
-                      type="button"
-                      variant="ghost"
-                      onClick={() =>
-                        suppression.mutate({
-                          ruleId: recommendation.id,
-                          suppress: true,
-                        })
-                      }
-                    >
-                      {isPending ? (
-                        <LoaderCircle className="animate-spin motion-reduce:animate-none" />
-                      ) : (
-                        <EyeOff />
-                      )}
-                      Suppress
-                    </Button>
+                    <span className="group relative inline-flex items-center">
+                      <Button
+                        aria-label={`Suppress ${recommendation.title}`}
+                        className="size-5 cursor-pointer text-slate-400 hover:text-slate-700"
+                        disabled={isPending}
+                        size="icon-xs"
+                        type="button"
+                        variant="ghost"
+                        onClick={() =>
+                          suppression.mutate({
+                            ruleId: recommendation.id,
+                            suppress: true,
+                          })
+                        }
+                      >
+                        {isPending ? (
+                          <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" />
+                        ) : (
+                          <EyeOff className="size-5" />
+                        )}
+                      </Button>
+                      <span
+                        className="pointer-events-none absolute top-6 right-0 z-20 hidden whitespace-nowrap rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 shadow-lg group-focus-within:block group-hover:block"
+                        role="tooltip"
+                      >
+                        Suppress
+                      </span>
+                    </span>
                   </div>
 
                   {isExpanded ? (
