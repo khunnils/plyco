@@ -16,7 +16,7 @@ import {
 import { useRuleSuppression } from "@/features/recommendations/hooks/use-recommendations"
 import {
   groupRecommendationsBySeverity,
-  severityBadgeClass,
+  severityBadgeVariant,
   severityBorderClass,
   severityLabel,
 } from "@/features/recommendations/lib/recommendations"
@@ -121,7 +121,7 @@ export const RecommendationsList = ({
                 <h2 className="text-lg font-semibold text-slate-950">
                   {severityLabel(severity)} priority
                 </h2>
-                <Badge className={severityBadgeClass(severity)}>
+                <Badge variant={severityBadgeVariant(severity)}>
                   {items.length}
                 </Badge>
               </div>

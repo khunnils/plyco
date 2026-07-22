@@ -10,16 +10,16 @@ export const severityOrder: RecommendationSeverity[] = [
 export const severityLabel = (severity: RecommendationSeverity) =>
   severity[0].toUpperCase() + severity.slice(1)
 
-export const severityBadgeClass = (severity: RecommendationSeverity) => {
+export const severityBadgeVariant = (severity: RecommendationSeverity) => {
   switch (severity) {
     case "critical":
-      return "bg-red-50 text-red-800 ring-1 ring-red-100"
+      return "destructive" as const
     case "high":
-      return "bg-orange-50 text-orange-800 ring-1 ring-orange-100"
+      return "warning" as const
     case "medium":
-      return "bg-amber-50 text-amber-800 ring-1 ring-amber-100"
+      return "caution" as const
     case "low":
-      return "bg-blue-50 text-blue-700 ring-1 ring-blue-100"
+      return "info" as const
   }
 }
 

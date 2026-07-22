@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge"
 import {
   completionText,
   type ProgressMetric,
@@ -7,11 +8,7 @@ import { readinessScoreStatus } from "@/features/recommendations/lib/readiness-s
 export type ReadinessStatus = ReturnType<typeof readinessScoreStatus>
 
 export const ReadinessBadge = ({ status }: { status: ReadinessStatus }) => (
-  <span
-    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.badgeClass}`}
-  >
-    {status.label}
-  </span>
+  <Badge variant={status.badgeVariant}>{status.label}</Badge>
 )
 
 export const WorkspaceSetupSummary = ({
@@ -32,15 +29,9 @@ export const WorkspaceSetupSummary = ({
         {progress.percent}
         <span className="ml-1 text-xl font-semibold text-slate-400">%</span>
       </div>
-      <div
-        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-          isComplete
-            ? "bg-emerald-50 text-emerald-800"
-            : "bg-blue-50 text-blue-800"
-        }`}
-      >
+      <Badge variant={isComplete ? "success" : "info"}>
         {isComplete ? "Setup complete" : "In progress"}
-      </div>
+      </Badge>
       <p className="text-xs font-medium text-slate-600">
         {completionText(progress)}
       </p>

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { ChevronDown, ChevronUp } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ProgressBar } from "@/features/dashboard/components/progress-bar"
 import { ProgressStatusBadge } from "@/features/dashboard/components/progress-status-badge"
@@ -86,15 +87,9 @@ export const ProgressPanel = ({
                   <span className="font-medium text-slate-700">
                     {section.title}
                   </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      isComplete
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
+                  <Badge variant={isComplete ? "success" : "secondary"}>
                     {isComplete ? "Yes" : "No"}
-                  </span>
+                  </Badge>
                 </div>
               )
             })}
@@ -161,15 +156,9 @@ export const ProgressItemPanel = ({ item }: { item: ProgressItem }) => {
                 <span className="font-medium text-slate-600">
                   {section.title}
                 </span>
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                    isComplete
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-slate-100 text-slate-400"
-                  }`}
-                >
+                <Badge variant={isComplete ? "success" : "secondary"}>
                   {isComplete ? "Yes" : "No"}
-                </span>
+                </Badge>
               </div>
             )
           })}

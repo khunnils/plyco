@@ -1,37 +1,43 @@
 import { type ReadinessScore } from "@plyco/shared"
 
-export const readinessScoreStatus = (value: number | null) => {
+import { type BadgeProps } from "@/components/ui/badge"
+
+type BadgeVariant = NonNullable<BadgeProps["variant"]>
+
+export const readinessScoreStatus = (
+  value: number | null
+): { label: string; badgeVariant: BadgeVariant } => {
   if (value === null) {
     return {
       label: "Not enough data",
-      badgeClass: "bg-slate-100 text-slate-700",
+      badgeVariant: "secondary",
     }
   }
 
   if (value >= 80) {
     return {
       label: "Strong foundation",
-      badgeClass: "bg-emerald-50 text-emerald-800",
+      badgeVariant: "success",
     }
   }
 
   if (value >= 60) {
     return {
       label: "Progressing",
-      badgeClass: "bg-slate-100 text-slate-800",
+      badgeVariant: "secondary",
     }
   }
 
   if (value >= 40) {
     return {
       label: "Needs attention",
-      badgeClass: "bg-amber-50 text-amber-800",
+      badgeVariant: "caution",
     }
   }
 
   return {
     label: "Significant gaps",
-    badgeClass: "bg-orange-50 text-orange-800",
+    badgeVariant: "warning",
   }
 }
 

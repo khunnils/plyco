@@ -210,9 +210,7 @@ export const DocumentSummaryCard = ({
                           )}
                         </span>
                         {isCurrentVersion ? (
-                          <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset">
-                            Current
-                          </span>
+                          <Badge variant="info">Current</Badge>
                         ) : null}
                       </p>
                       <p className="mt-0.5 text-xs text-slate-500">
