@@ -104,9 +104,10 @@ when cookies are disabled or no configured category requires consent. Do Not
 Track, equal-rejection, and pre-ticked-box questions are not collected.
 
 The workspace Settings area is opened from the settings button at the bottom of
-the sidebar. Settings contains Team, Vocabulary, and API Keys tabs. Team shows
-current members to all members. Owners can invite people by email as either
-member or owner, cancel pending invitations, change member roles, remove
+the sidebar. Settings contains General, Vocabulary, API Keys, and MCP Server
+tabs. General shows current members to all members. Owners can invite people by
+email as either member or owner, cancel pending invitations, change member
+roles, remove
 members, and delete the organization after confirming its name. Members can edit
 workspace data but cannot manage the team or delete the organization. Invitation
 links require Google or magic-link sign-in with the invited email before the
@@ -114,11 +115,14 @@ user is added to the organization.
 
 The API Keys tab is owner-only; non-owners see a notice instead of the
 management UI. Owners create a named key, and the full secret is shown exactly
-once at creation together with a ready-to-paste MCP configuration snippet
-prefilled with the API URL, key, and organization ID; afterwards only the name,
-a short prefix, the creator, and the creation date are shown. Keys grant
-read-only access to that organization's data and can be revoked at any time.
-They are intended for AI agents connecting through the Plyco MCP server.
+once at creation; afterwards only the name, a short prefix, the creator, and the
+creation date are shown. Keys grant read-only access to that organization's data
+and can be revoked at any time. They are intended for AI agents connecting
+through the Plyco MCP server.
+
+The MCP Server tab shows a ready-to-paste configuration snippet prefilled with
+the API URL and organization ID. Its API key remains an explicit placeholder
+because raw keys are not persisted and cannot be retrieved after creation.
 
 ## Product and Data Graph
 

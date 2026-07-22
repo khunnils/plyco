@@ -43,6 +43,7 @@ import {
 import { TeamSettingsRoutePage } from "@/features/settings/pages/team-settings-route-page"
 import { VocabularySettingsRoutePage } from "@/features/settings/pages/vocabulary-settings-route-page"
 import { ApiKeysSettingsRoutePage } from "@/features/settings/pages/api-keys-settings-route-page"
+import { McpServerSettingsRoutePage } from "@/features/settings/pages/mcp-server-settings-route-page"
 
 export const App = () => {
   const navigate = useNavigate()
@@ -188,6 +189,7 @@ export const App = () => {
           <Route path="team" element={<TeamSettingsRoutePage />} />
           <Route path="vocabulary" element={<VocabularySettingsRoutePage />} />
           <Route path="api-keys" element={<ApiKeysSettingsRoutePage />} />
+          <Route path="mcp-server" element={<McpServerSettingsRoutePage />} />
         </Route>
         <Route
           path="/vocabulary"

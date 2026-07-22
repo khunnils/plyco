@@ -14,11 +14,12 @@ export const SettingsRoutePage = () => (
     <div className="grid gap-6">
       <nav
         aria-label="Settings"
-        className="flex w-fit gap-1 border-b border-slate-200"
+        className="flex w-full gap-1 overflow-x-auto border-b border-slate-200"
       >
         <SettingsTab to="/settings/team">General</SettingsTab>
         <SettingsTab to="/settings/vocabulary">Vocabulary</SettingsTab>
         <SettingsTab to="/settings/api-keys">API Keys</SettingsTab>
+        <SettingsTab to="/settings/mcp-server">MCP Server</SettingsTab>
       </nav>
       <Outlet />
     </div>
@@ -33,7 +34,7 @@ const SettingsTab = ({ children, to }: { children: string; to: string }) => (
   <NavLink
     className={({ isActive }) =>
       cn(
-        "border-b-2 px-3 py-2 text-sm font-medium transition",
+        "border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition",
         isActive
           ? "border-slate-900 text-slate-950"
           : "border-transparent text-slate-500 hover:text-slate-900"

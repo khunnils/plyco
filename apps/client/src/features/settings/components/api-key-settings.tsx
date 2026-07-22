@@ -23,27 +23,6 @@ import {
   useRevokeOrganizationApiKey,
 } from "@/features/settings/hooks/use-api-keys"
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4100"
-
-const buildMcpConfig = (organizationId: string, key: string) =>
-  JSON.stringify(
-    {
-      mcpServers: {
-        plyco: {
-          command: "npx",
-          args: ["-y", "@plyco/mcp"],
-          env: {
-            PLYCO_API_URL: API_URL,
-            PLYCO_API_KEY: key,
-            PLYCO_ORGANIZATION_ID: organizationId,
-          },
-        },
-      },
-    },
-    null,
-    2
-  )
-
 const copyToClipboard = async (value: string, label: string) => {
   try {
     await navigator.clipboard.writeText(value)
@@ -64,9 +43,8 @@ export const ApiKeySettings = ({
   const revokeApiKey = useRevokeOrganizationApiKey(organization.id)
   const [name, setName] = useState("")
   const [nameError, setNameError] = useState<string | null>(null)
-  const [createdKey, setCreatedKey] = useState<CreatedOrganizationApiKey | null>(
-    null
-  )
+  const [createdKey, setCreatedKey] =
+    useState<CreatedOrganizationApiKey | null>(null)
 
   if (!isOwner) {
     return (
@@ -154,30 +132,6 @@ export const ApiKeySettings = ({
                 <Copy />
                 Copy
               </Button>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-emerald-900">
-                  MCP configuration
-                </span>
-                <Button
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                  onClick={() =>
-                    copyToClipboard(
-                      buildMcpConfig(organization.id, createdKey.key),
-                      "MCP config"
-                    )
-                  }
-                >
-                  <Copy />
-                  Copy config
-                </Button>
-              </div>
-              <pre className="overflow-x-auto rounded-sm border border-emerald-200 bg-white px-3 py-2 font-mono text-xs text-slate-900">
-                {buildMcpConfig(organization.id, createdKey.key)}
-              </pre>
             </div>
             <div>
               <Button
