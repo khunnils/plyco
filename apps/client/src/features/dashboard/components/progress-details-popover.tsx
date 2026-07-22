@@ -10,6 +10,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { CircularProgress } from "@/features/dashboard/components/circular-progress"
 import {
   pendingProgressSections,
   type ProgressSection,
@@ -17,10 +18,12 @@ import {
 
 export const ProgressDetailsPopover = ({
   emptyMessage,
+  percent,
   sectionTitle,
   sections,
 }: {
   emptyMessage?: string
+  percent: number
   sectionTitle: string
   sections: ProgressSection[]
 }) => {
@@ -63,17 +66,15 @@ export const ProgressDetailsPopover = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          aria-label={`View pending subsections for ${sectionTitle}`}
-          className="absolute top-4 right-4 z-10 flex size-7 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 hover:bg-blue-50 focus-visible:ring-3 focus-visible:ring-blue-100 focus-visible:outline-none"
+          aria-label={`${percent}% complete. View pending subsections for ${sectionTitle}`}
+          className="flex size-7 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 hover:bg-blue-50 focus-visible:ring-3 focus-visible:ring-blue-100 focus-visible:outline-none"
           ref={triggerRef}
           type="button"
           onBlur={scheduleClose}
           onPointerEnter={openPopover}
           onPointerLeave={scheduleClose}
         >
-          <span className="flex size-5 items-center justify-center rounded-full border-2 border-slate-600">
-            <span className="size-2 rounded-full bg-slate-600" />
-          </span>
+          <CircularProgress percent={percent} size={22} />
         </button>
       </PopoverTrigger>
       <PopoverContent

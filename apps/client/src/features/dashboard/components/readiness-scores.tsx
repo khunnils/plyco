@@ -10,7 +10,7 @@ export const ReadinessBadge = ({ status }: { status: ReadinessStatus }) => (
   <span
     className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${status.badgeClass}`}
   >
-    Readiness: {status.label}
+    {status.label}
   </span>
 )
 
