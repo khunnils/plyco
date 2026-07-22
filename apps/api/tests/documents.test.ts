@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import { createTestApp } from "./helpers.js";
 import {
+  documentSourceFingerprint,
   Jinja2Renderer,
   ReportContextBuilder,
 } from "../src/features/documents/document-generation.js";
@@ -854,6 +855,103 @@ describe("documents / templates API", () => {
     expect(renderedContent).not.toContain("| Vendor |");
     expect(renderedContent).not.toContain("DPA status");
     expect(renderedContent).not.toContain("Stripe");
+  });
+
+  it("renders the TOMs annex from current security controls", async () => {
+    const templatePath = fileURLToPath(
+      new URL(
+        "../data/templates/technical-and-organizational-measures.md",
+        import.meta.url,
+      ),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "technical-and-organizational-measures.md",
+    );
+    const template = {
+      id: "template-technical-and-organizational-measures",
+      organizationId: "org-test",
+      sourceSystemTemplateSlug: systemTemplate.slug,
+      versionMajor: 1,
+      versionMinor: 0,
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+      ...systemTemplate,
+    };
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [
+          {
+            id: "vendor-subprocessor",
+            ...subprocessorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        serviceVendorUses: [
+          {
+            id: "vendor-use-subprocessor",
+            ...subprocessorUseBody,
+            vendorName: "Stripe",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+    const sourceFingerprint = documentSourceFingerprint(template, context);
+
+    expect(systemTemplate).toMatchObject({
+      slug: "technical-and-organizational-measures",
+      name: "Technical and Organizational Measures (TOMs) Annex",
+    });
+    expect(renderedContent).toContain(
+      "# Annex: Technical and Organizational Measures",
+    );
+    expect(renderedContent).toContain("**Organization:** Acme AI, Inc.");
+    expect(renderedContent).toContain(
+      "The measures apply to Acme AI Platform",
+    );
+    expect(renderedContent).toContain("## 3. Access control and authentication");
+    expect(renderedContent).toContain("least-privilege principles");
+    expect(renderedContent).toContain("## 4. Data protection and encryption");
+    expect(renderedContent).toContain("AES-256");
+    expect(renderedContent).toContain("TLS 1.2");
+    expect(renderedContent).toContain(
+      "## 6. Secure development and vulnerability management",
+    );
+    expect(renderedContent).toContain("target remediation period of 7 days");
+    expect(renderedContent).toContain(
+      "## 8. Availability, resilience, and recovery",
+    );
+    expect(renderedContent).toContain("## 9. Security incident management");
+    expect(renderedContent).toContain("## 10. Supplier and subprocessor security");
+    expect(renderedContent).not.toContain("Stripe");
+    expect(sourceFingerprint.entries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "organization.legalEntityName" }),
+        expect.objectContaining({
+          path: "security.accessControl.leastPrivilegeHasValue",
+        }),
+      ]),
+    );
   });
 
   it("does not render stale encryption details when encryption is disabled", async () => {

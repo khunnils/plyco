@@ -1045,6 +1045,10 @@ export function referencedTemplatePaths(content: string): string[] {
 }
 
 function stableStringify(value: unknown): string {
+  if (value === undefined) {
+    return "undefined";
+  }
+
   if (Array.isArray(value)) {
     return `[${value.map(stableStringify).join(",")}]`;
   }

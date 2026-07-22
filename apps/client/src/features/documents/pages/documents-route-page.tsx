@@ -4,10 +4,8 @@ import {
   ChevronUp,
   Download,
   Eye,
-  FilePlus2,
   FileText,
   Pencil,
-  Plus,
   Trash2,
 } from "lucide-react"
 import { usePostHog } from "@posthog/react"
@@ -57,6 +55,8 @@ import {
   sectionPageBreadcrumbs,
 } from "@/features/shell/lib/navigation"
 import { TemplateForm } from "@/features/templates/components/template-form"
+import { TemplateSelector } from "@/features/templates/components/template-selector"
+import { getTemplateIcon } from "@/features/templates/lib/template-icons"
 import { documentStatusLabel } from "@/features/documents/lib/document-status"
 
 const blankTemplate: TemplateInput = {
@@ -154,7 +154,7 @@ export const DocumentsRoutePage = () => {
   const addedSystemTemplateSlugs = new Set(
     templatesData.organizationTemplates
       .map((template) => template.sourceSystemTemplateSlug)
-      .filter(Boolean)
+      .filter((slug): slug is string => Boolean(slug))
   )
   const isLoading = templates.isLoading || documents.isLoading
 
@@ -178,83 +178,37 @@ export const DocumentsRoutePage = () => {
       { label: "Add" },
     ])
     pageTitle = "Add"
-    bannerTitle = "Add template"
-    bannerSubtitle =
-      "Choose a pre-defined system template or start from scratch."
-    bannerButtons = (
-      <Button asChild type="button" variant="outline">
-        <Link to="/documents">Cancel</Link>
-      </Button>
-    )
+    bannerTitle = ""
+    bannerSubtitle = ""
+    bannerButtons = null
 
     content = (
-      <div className="grid gap-4">
-        <article className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-center">
-          <div>
-            <div className="flex items-center gap-2">
-              <FilePlus2 className="size-5 text-slate-500" />
-              <h2 className="font-semibold text-slate-950">
-                Create from scratch
-              </h2>
-            </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Start with a blank policy template and write your own content.
-            </p>
-          </div>
-          <Button asChild className="w-fit" type="button">
-            <Link to="/documents/new">Create</Link>
-          </Button>
-        </article>
-
-        {templatesData.systemTemplates.map((template) => {
-          const isAdded = addedSystemTemplateSlugs.has(template.slug)
-
-          return (
-            <article
-              className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_auto] md:items-start"
-              key={template.slug}
-            >
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-semibold text-slate-950">
-                    {template.name}
-                  </h2>
-                  {isAdded ? <Badge variant="secondary">Added</Badge> : null}
-                </div>
-                <p className="mt-2 text-sm text-slate-500">
-                  {template.description}
-                </p>
-              </div>
-              <Button
-                className="w-fit"
-                disabled={isAdded || createTemplateFromSystem.isPending}
-                type="button"
-                variant={isAdded ? "outline" : "default"}
-                onClick={() =>
-                  createTemplateFromSystem.mutate(
-                    { sourceSystemTemplateSlug: template.slug },
-                    {
-                      onSuccess: (createdTemplate) => {
-                        posthog.capture(
-                          POSTHOG_EVENTS.TEMPLATE_ADDED_FROM_SYSTEM,
-                          {
-                            template_id: createdTemplate.id,
-                            source_system_template_slug: template.slug,
-                          }
-                        )
-                        navigate("/documents")
-                      },
-                    }
-                  )
-                }
-              >
-                <Plus />
-                {isAdded ? "Added" : "Add"}
-              </Button>
-            </article>
+      <TemplateSelector
+        addedSystemTemplateSlugs={addedSystemTemplateSlugs}
+        isLoading={templates.isLoading}
+        submitDisabled={createTemplateFromSystem.isPending}
+        systemTemplates={templatesData.systemTemplates}
+        onCancel={() => navigate("/documents")}
+        onChooseTemplates={(selectedTemplates) => {
+          createTemplateFromSystem.mutate(
+            selectedTemplates.map((template) => ({
+              sourceSystemTemplateSlug: template.slug,
+            })),
+            {
+              onSuccess: (createdTemplates) => {
+                createdTemplates.forEach((createdTemplate, index) => {
+                  const sourceSlug = selectedTemplates[index]?.slug
+                  posthog.capture(POSTHOG_EVENTS.TEMPLATE_ADDED_FROM_SYSTEM, {
+                    template_id: createdTemplate.id,
+                    source_system_template_slug: sourceSlug,
+                  })
+                })
+                navigate("/documents")
+              },
+            }
           )
-        })}
-      </div>
+        }}
+      />
     )
   } else if (mode === "new") {
     breadcrumbs = sectionPageBreadcrumbs(SIDEBAR_SECTION.documents, [
@@ -407,11 +361,12 @@ export const DocumentsRoutePage = () => {
     bannerTitle = "Documents & Policies"
     bannerSubtitle =
       "Manage security policy templates and generate customized compliance documents."
-    bannerButtons = (
-      <Button asChild className="w-fit" type="button">
-        <Link to="/documents/add">Add</Link>
-      </Button>
-    )
+    bannerButtons =
+      !isLoading && templatesData.organizationTemplates.length > 0 ? (
+        <Button asChild className="w-fit" type="button">
+          <Link to="/documents/add">Add</Link>
+        </Button>
+      ) : null
 
     content = isLoading ? (
       <p className="text-sm text-slate-500">
@@ -447,37 +402,27 @@ export const DocumentsRoutePage = () => {
             )
           }
 
+          const TemplateIcon = getTemplateIcon(
+            summary.template.sourceSystemTemplateSlug ?? summary.template.slug
+          )
+
           return (
             <article
-              className="overflow-hidden rounded-md border border-slate-200 bg-white"
+              className="border border-slate-200 bg-white p-4"
               key={summary.template.id}
             >
-              <div className="grid gap-4 p-4 md:grid-cols-[1fr_auto] md:items-start">
-                <div className="flex min-w-0 items-start gap-2.5">
-                  {summary.document ? (
-                    <Button
-                      size="icon-xs"
-                      type="button"
-                      variant="ghost"
-                      onClick={toggleExpand}
-                      className="mt-0.5 shrink-0 text-slate-500 hover:text-slate-900"
-                    >
-                      {isExpanded ? (
-                        <ChevronUp className="size-4" />
-                      ) : (
-                        <ChevronDown className="size-4" />
-                      )}
-                    </Button>
-                  ) : (
-                    <div className="size-6 shrink-0" />
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div
+                  className={cn(
+                    "flex min-w-0 flex-1 items-start gap-3",
+                    summary.document ? "cursor-pointer select-none" : ""
                   )}
-                  <div
-                    className={cn(
-                      "min-w-0 flex-1",
-                      summary.document ? "cursor-pointer select-none" : ""
-                    )}
-                    onClick={summary.document ? toggleExpand : undefined}
-                  >
+                  onClick={summary.document ? toggleExpand : undefined}
+                >
+                  <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+                    <TemplateIcon className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-semibold text-slate-950">
                         {summary.template.name}
@@ -508,9 +453,22 @@ export const DocumentsRoutePage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-start gap-2 md:justify-end">
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {summary.document ? (
+                    <Button
+                      aria-label={
+                        isExpanded ? "Collapse document" : "Expand document"
+                      }
+                      size="icon-sm"
+                      type="button"
+                      variant="outline"
+                      onClick={toggleExpand}
+                    >
+                      {isExpanded ? <ChevronUp /> : <ChevronDown />}
+                    </Button>
+                  ) : null}
                   <Button
-                    size="icon"
+                    size="icon-sm"
                     type="button"
                     variant="outline"
                     onClick={() =>
@@ -521,9 +479,9 @@ export const DocumentsRoutePage = () => {
                     <Pencil />
                   </Button>
                   <Button
-                    size="icon"
+                    size="icon-sm"
                     type="button"
-                    variant="destructive"
+                    variant="outline"
                     onClick={() =>
                       deleteTemplate.mutate(summary.template.id, {
                         onSuccess: () =>
@@ -538,6 +496,7 @@ export const DocumentsRoutePage = () => {
                   </Button>
                   <Button
                     disabled={createDocument.isPending}
+                    size="sm"
                     type="button"
                     variant="outline"
                     onClick={() =>
@@ -561,7 +520,7 @@ export const DocumentsRoutePage = () => {
               </div>
 
               {isExpanded && summary.document && (
-                <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 p-4 pl-12">
+                <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-3">
                   {summary.documents && summary.documents.length > 1 && (
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-slate-500">
@@ -649,7 +608,7 @@ export const DocumentsRoutePage = () => {
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
                             <Button
-                              size="icon"
+                              size="icon-sm"
                               type="button"
                               variant="outline"
                               onClick={() =>
@@ -662,7 +621,7 @@ export const DocumentsRoutePage = () => {
                             {doc.hasPdf && (
                               <Button
                                 disabled={downloadDocumentPdf.isPending}
-                                size="icon"
+                                size="icon-sm"
                                 type="button"
                                 variant="outline"
                                 onClick={() => {
@@ -705,27 +664,31 @@ export const DocumentsRoutePage = () => {
         title={pageTitle}
       />
       <div className="grid gap-5">
-        <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
-              <span>{bannerTitle}</span>
-              {(mode === "new" || mode === "edit") && (
-                <button
-                  type="button"
-                  onClick={() => setIsRenameOpen(true)}
-                  className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-                  title="Rename template"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
-              )}
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
+        {mode !== "add" ? (
+          <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950">
+                <span>{bannerTitle}</span>
+                {(mode === "new" || mode === "edit") && (
+                  <button
+                    type="button"
+                    onClick={() => setIsRenameOpen(true)}
+                    className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                    title="Rename template"
+                  >
+                    <Pencil className="size-3.5" />
+                  </button>
+                )}
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">{bannerSubtitle}</p>
+            </div>
+            {bannerButtons ? (
+              <div className="flex shrink-0 flex-wrap gap-2">
+                {bannerButtons}
+              </div>
+            ) : null}
           </div>
-          {bannerButtons ? (
-            <div className="flex shrink-0 flex-wrap gap-2">{bannerButtons}</div>
-          ) : null}
-        </div>
+        ) : null}
         {content}
       </div>
 

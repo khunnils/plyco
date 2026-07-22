@@ -90,16 +90,23 @@ export const useCreateTemplateFromSystem = () => {
   const organizationId = selectedOrganizationId ?? ""
 
   return useMutation({
-    mutationFn: (input: CreateTemplateFromSystem) =>
-      createTemplateFromSystem(organizationId, input),
-    onSuccess: () => {
+    mutationFn: async (
+      input: CreateTemplateFromSystem | CreateTemplateFromSystem[]
+    ) => {
+      const inputs = Array.isArray(input) ? input : [input]
+      return Promise.all(
+        inputs.map((item) => createTemplateFromSystem(organizationId, item))
+      )
+    },
+    onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({
         queryKey: templatesQueryKey(organizationId),
       })
       void queryClient.invalidateQueries({
         queryKey: documentsQueryKey(organizationId),
       })
-      toast.success("Template added")
+      const count = Array.isArray(variables) ? variables.length : 1
+      toast.success(count === 1 ? "Template added" : `${count} templates added`)
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Could not add template")
