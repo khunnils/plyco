@@ -3,6 +3,7 @@ import { z } from "zod"
 import { ApiError } from "./errors.js"
 
 const AIRTABLE_API_URL = "https://api.airtable.com/v0"
+const AIRTABLE_READ_ATTEMPTS = 2
 
 const airtableRecordSchema = z.object({
   id: z.string().min(1),
@@ -19,6 +20,57 @@ const airtableMutationResponseSchema = z.object({
 })
 
 export type AirtableRecord = z.infer<typeof airtableRecordSchema>
+
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "Unknown Airtable network error."
+
+const fetchAirtableRecordsPage = async ({
+  errorCode,
+  tableName,
+  url,
+  apiKey,
+}: {
+  errorCode: string
+  tableName: string
+  url: URL
+  apiKey: string
+}) => {
+  for (let attempt = 1; attempt <= AIRTABLE_READ_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      })
+      const retryable =
+        response.status === 429 || response.status >= 500
+
+      if (retryable && attempt < AIRTABLE_READ_ATTEMPTS) {
+        await response.body?.cancel()
+        continue
+      }
+
+      return response
+    } catch (error) {
+      if (attempt === AIRTABLE_READ_ATTEMPTS) {
+        throw new ApiError(
+          errorCode,
+          `Unable to load Airtable table ${tableName}.`,
+          502,
+          {
+            reason: "network_error",
+            attempts: AIRTABLE_READ_ATTEMPTS,
+            message: errorMessage(error),
+          },
+        )
+      }
+    }
+  }
+
+  throw new ApiError(
+    errorCode,
+    `Unable to load Airtable table ${tableName}.`,
+    502,
+  )
+}
 
 export const stringField = (
   fields: Record<string, unknown>,
@@ -149,8 +201,11 @@ export async function listAirtableRecords({
       url.searchParams.set("offset", offset)
     }
 
-    const response = await fetch(url, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+    const response = await fetchAirtableRecordsPage({
+      apiKey,
+      errorCode,
+      tableName,
+      url,
     })
 
     if (!response.ok) {
