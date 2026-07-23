@@ -1,6 +1,11 @@
 import { useState } from "react"
+import { createPortal } from "react-dom"
 import { Ellipsis, Pencil, Plus, Trash2, X } from "lucide-react"
-import { type VocabularyCode, type VocabularyCodeInput } from "@plyco/shared"
+import {
+  codeIdFromName,
+  type VocabularyCode,
+  type VocabularyCodeInput,
+} from "@plyco/shared"
 import { usePostHog } from "@posthog/react"
 
 import { Badge } from "@/components/ui/badge"
@@ -80,10 +85,10 @@ export const CodeSetEditorDialog = ({
     onClose()
   }
 
-  return (
+  return createPortal(
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs"
       role="dialog"
     >
       <div className="flex h-[42rem] max-h-[calc(100svh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl">
@@ -129,12 +134,10 @@ export const CodeSetEditorDialog = ({
             <Input
               autoComplete="new-password"
               aria-label="Code ID"
-              className="bg-white font-mono"
+              className="bg-slate-100 font-mono text-slate-600"
               placeholder="code_id"
+              readOnly
               value={draft.codeId}
-              onChange={(event) =>
-                setDraft({ ...draft, codeId: event.target.value })
-              }
             />
             <Input
               autoComplete="new-password"
@@ -142,15 +145,21 @@ export const CodeSetEditorDialog = ({
               className="bg-white"
               placeholder="Display name"
               value={draft.name}
-              onChange={(event) =>
-                setDraft({ ...draft, name: event.target.value })
-              }
+              onChange={(event) => {
+                const name = event.target.value
+                setDraft({ ...draft, name, codeId: codeIdFromName(name) })
+              }}
             />
             <Input
               autoComplete="new-password"
               aria-label="Description"
-              className="bg-white"
+              className={
+                codeSet.usesHints
+                  ? "bg-white"
+                  : "bg-slate-100 text-slate-600"
+              }
               placeholder="Description"
+              readOnly={!codeSet.usesHints}
               value={draft.description}
               onChange={(event) =>
                 setDraft({ ...draft, description: event.target.value })
@@ -294,6 +303,7 @@ export const CodeSetEditorDialog = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -1,4 +1,5 @@
 export {
+  codeIdFromName,
   codeIdSchema,
   countryCodeSchema,
   countrySchema,

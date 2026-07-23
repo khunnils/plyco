@@ -9,6 +9,15 @@ export const codeIdSchema = z
     "Code IDs must use lowercase letters, numbers, underscores, or hyphens",
   );
 
+/** Derive a code ID from a display name (e.g. "Artificial Intelligence" → "artificial_intelligence"). */
+export const codeIdFromName = (name: string): string =>
+  name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+
 export const countryCodeSchema = z
   .string()
   .trim()
