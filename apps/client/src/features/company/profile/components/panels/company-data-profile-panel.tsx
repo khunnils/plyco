@@ -53,10 +53,12 @@ const dataProfileRows = (draft: DataProfileDraft) =>
 export const CompanyDataProfilePanel = ({
   company,
   isMutationPending,
+  needsAttention,
   onSave,
 }: {
   company: CompanyProfile
   isMutationPending: boolean
+  needsAttention?: boolean
   onSave: (patch: DataProfileDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -78,6 +80,7 @@ export const CompanyDataProfilePanel = ({
       description="High-level data handling posture for questionnaires and documents."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={<ProfilePanelDetailGrid rows={dataProfileRows(draft)} />}
       saveLabel="Save"
       title="Data profile"

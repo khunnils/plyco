@@ -48,10 +48,12 @@ const contactsRows = (draft: ContactsDraft) =>
 export const CompanyContactsPanel = ({
   company,
   isMutationPending,
+  needsAttention,
   onSave,
 }: {
   company: CompanyProfile
   isMutationPending: boolean
+  needsAttention?: boolean
   onSave: (patch: ContactsDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -73,6 +75,7 @@ export const CompanyContactsPanel = ({
       description="Primary points of contact for customers and regulators."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={<ProfilePanelDetailGrid rows={contactsRows(draft)} />}
       saveLabel="Save"
       title="Contacts"

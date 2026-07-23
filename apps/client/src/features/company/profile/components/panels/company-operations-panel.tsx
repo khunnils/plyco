@@ -69,6 +69,7 @@ export const CompanyOperationsPanel = ({
   complianceGoalOptions,
   industryOptions,
   isMutationPending,
+  needsAttention,
   regionOptions,
   vocabulary,
   onSave,
@@ -77,6 +78,7 @@ export const CompanyOperationsPanel = ({
   complianceGoalOptions: Option[]
   industryOptions: Option[]
   isMutationPending: boolean
+  needsAttention?: boolean
   regionOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (patch: OperationsDraft, onSuccess?: () => void) => void
@@ -100,6 +102,7 @@ export const CompanyOperationsPanel = ({
       description="Scale, industry context, and compliance targets."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={operationsRows(draft, vocabulary)} />
       }

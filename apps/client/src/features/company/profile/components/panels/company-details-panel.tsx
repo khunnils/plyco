@@ -61,12 +61,14 @@ export const CompanyDetailsPanel = ({
   countries,
   countryOptionList,
   isMutationPending,
+  needsAttention,
   onSave,
 }: {
   company: CompanyProfile
   countries: Country[] | undefined
   countryOptionList: Option[]
   isMutationPending: boolean
+  needsAttention?: boolean
   onSave: (patch: DetailsDraft, onSuccess?: () => void) => void
 }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -88,6 +90,7 @@ export const CompanyDetailsPanel = ({
       description="Legal identity and primary location."
       isEditing={isEditing}
       isMutationPending={isMutationPending}
+      needsAttention={needsAttention}
       readOnlyContent={
         <ProfilePanelDetailGrid rows={detailsRows(draft, countries)} />
       }

@@ -12,6 +12,7 @@ import {
   type ProfileDraft,
   type SaveProfile,
 } from "@/features/company/types/company"
+import { profileProgress } from "@/features/dashboard/lib/progress"
 import {
   codeOptions,
   countryOptions,
@@ -30,6 +31,16 @@ export const CompanyManager = ({
   vocabulary: Vocabulary | undefined
   onSaveProfile: SaveProfile
 }) => {
+  const progress = profileProgress(profile)
+
+  const getNeedsAttention = (sectionTitle: string) => {
+    const section = progress.sections.find((s) => s.title === sectionTitle)
+    if (!section) return false
+    return (
+      section.totalFields > 0 && section.completedFields < section.totalFields
+    )
+  }
+
   const saveCompany = (
     patch: Partial<CompanyProfile>,
     onSuccess?: () => void
@@ -53,6 +64,7 @@ export const CompanyManager = ({
         countries={countries}
         countryOptionList={countryOptions(countries)}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Company details")}
         onSave={saveCompany}
       />
       <CompanyOperationsPanel
@@ -60,6 +72,7 @@ export const CompanyManager = ({
         complianceGoalOptions={codeOptions(vocabulary, "compliance_goals")}
         industryOptions={codeOptions(vocabulary, "industries")}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Operations")}
         regionOptions={codeOptions(vocabulary, "regions")}
         vocabulary={vocabulary}
         onSave={saveCompany}
@@ -67,11 +80,13 @@ export const CompanyManager = ({
       <CompanyContactsPanel
         company={profile.company}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Contacts")}
         onSave={saveCompany}
       />
       <CompanyDataProfilePanel
         company={profile.company}
         isMutationPending={isMutationPending}
+        needsAttention={getNeedsAttention("Data profile")}
         onSave={saveCompany}
       />
     </div>
