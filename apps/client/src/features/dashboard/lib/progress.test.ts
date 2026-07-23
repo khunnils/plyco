@@ -586,7 +586,7 @@ describe("dashboard progress", () => {
   it("describes completion without presenting another score", () => {
     expect(
       completionText({ completedFields: 3, totalFields: 8, percent: 38 })
-    ).toBe("3 of 8 facts captured")
+    ).toBe("3 of 8 facts")
   })
 
   it("consolidates services, data types, and activities into single top level sections for overall progress", () => {

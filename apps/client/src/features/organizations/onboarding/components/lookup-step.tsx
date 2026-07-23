@@ -23,13 +23,38 @@ const websiteLookupWarning =
   "Website details could not be enriched. You can continue manually."
 
 const organizationDetailsDurationMs = 4000
+const activeProgressCapPercent = 88
+const fakeProgressIncrements = [14, 12, 11, 10, 9, 8, 7, 6]
 
 type LookupPanelStatus = "pending" | "active" | "complete" | "skipped"
+
+type FakeProgressStepInterval = {
+  minMs: number
+  maxMs: number
+}
+
+const organizationDetailsStepInterval: FakeProgressStepInterval = {
+  minMs: 1000,
+  maxMs: 2000,
+}
+
+const organizationLookupStepInterval: FakeProgressStepInterval = {
+  minMs: 5000,
+  maxMs: 6000,
+}
+
+const privacyLookupStepInterval: FakeProgressStepInterval = {
+  minMs: 2000,
+  maxMs: 3000,
+}
 
 const wait = (durationMs: number) =>
   new Promise<void>((resolve) => {
     window.setTimeout(resolve, durationMs)
   })
+
+const randomBetween = (min: number, max: number) =>
+  min + Math.random() * (max - min)
 
 const lookupPanelTone = (status: LookupPanelStatus) => {
   if (status === "complete") {
@@ -67,16 +92,73 @@ const lookupPanelTone = (status: LookupPanelStatus) => {
   }
 }
 
+const useLookupPanelProgress = (
+  status: LookupPanelStatus,
+  stepInterval?: FakeProgressStepInterval
+) => {
+  const [percent, setPercent] = useState(0)
+
+  useEffect(() => {
+    if (status === "complete" || status === "skipped") {
+      setPercent(100)
+      return
+    }
+
+    if (status !== "active") {
+      setPercent(0)
+      return
+    }
+
+    setPercent(0)
+
+    if (!stepInterval) {
+      return
+    }
+
+    let timeoutId = 0
+    let stepIndex = 0
+
+    const scheduleNextStep = () => {
+      if (stepIndex >= fakeProgressIncrements.length) {
+        return
+      }
+
+      timeoutId = window.setTimeout(
+        () => {
+          const increment = fakeProgressIncrements[stepIndex] ?? 0
+          stepIndex += 1
+          setPercent((current) =>
+            Math.min(activeProgressCapPercent, current + increment)
+          )
+          scheduleNextStep()
+        },
+        randomBetween(stepInterval.minMs, stepInterval.maxMs)
+      )
+    }
+
+    scheduleNextStep()
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [status, stepInterval])
+
+  return percent
+}
+
 const LookupStatusPanel = ({
   icon,
   label,
   status,
+  stepInterval,
 }: {
   icon: React.ReactNode
   label: string
   status: LookupPanelStatus
+  stepInterval?: FakeProgressStepInterval
 }) => {
   const tone = lookupPanelTone(status)
+  const progressPercent = useLookupPanelProgress(status, stepInterval)
   const statusLabel =
     status === "complete"
       ? "Complete"
@@ -102,16 +184,7 @@ const LookupStatusPanel = ({
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full transition-all duration-700 ${tone.bar}`}
-            style={{
-              width:
-                status === "complete"
-                  ? "100%"
-                  : status === "active"
-                    ? "72%"
-                    : status === "skipped"
-                      ? "100%"
-                      : "0%",
-            }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
@@ -185,16 +258,19 @@ const LookupLoadingView = ({
         icon={<Building2 className="size-5" />}
         label="Resolving organization details"
         status={organizationDetailsStatus}
+        stepInterval={organizationDetailsStepInterval}
       />
       <LookupStatusPanel
         icon={<ClipboardList className="size-5" />}
         label="Building initial activities"
         status={organizationLookupStatus}
+        stepInterval={organizationLookupStepInterval}
       />
       <LookupStatusPanel
         icon={<FileSearch className="size-5" />}
         label="Analyzing existing policies"
         status={privacyLookupStatus}
+        stepInterval={privacyLookupStepInterval}
       />
     </div>
   </div>
