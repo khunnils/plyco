@@ -303,7 +303,10 @@ export const DashboardPage = ({
   return (
     <div className="grid gap-8">
       <div className="grid gap-4 lg:grid-cols-3">
-        <WorkspaceSetupSummary progress={progress.overall} />
+        <WorkspaceSetupSummary
+          progress={progress.overall}
+          readiness={recommendations?.scores.overall}
+        />
 
         <section className="grid min-h-64 gap-5 border border-slate-200 bg-white p-6">
           <Link

@@ -124,13 +124,20 @@ contextually not applicable, or suppressed. Organization rule suppressions are
 stored by stable static rule ID. Suppressed rules remain visible but are removed
 before recommendations, severity counts, coverage, and readiness are derived.
 
-The client keeps those numeric scores out of the dashboard and leads with its
-field-based workspace completion model. It reveals only the qualitative score
-tier for a completed area with at least one applicable rule and full assessed
-coverage. Product & Data additionally requires at least one service, activity,
-and data type, complete records in those collections, and complete records for
-all existing vendors; an empty vendor collection is valid. This presentation
-gate does not change the recommendations API contract or score calculation.
+The client leads with its field-based workspace completion model until 75% of
+workspace facts are captured. It then makes overall readiness primary once at
+least 75% of applicable advisor checks are assessed, displaying the API's
+severity-weighted overall score on a 1–10 scale. Scores shown before full
+advisor coverage are marked preliminary and capped at 8/10. Workspace
+completion remains visible as secondary context; advisor coverage is used only
+as an internal presentation gate.
+
+Completed areas reveal qualitative readiness labels with at least one
+applicable rule and full assessed coverage. Product & Data additionally requires
+at least one service, activity, and data type, complete records in those
+collections, and complete records for all existing vendors; an empty vendor
+collection is valid. These presentation gates do not change the recommendations
+API contract or score calculation.
 
 Advisor rules remain static YAML definitions. The API evaluates framework scope,
 contextual applicability, and rule conditions at request time; only organization

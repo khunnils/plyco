@@ -305,7 +305,7 @@ Readiness scores are okay, but should be framed as internal readiness, not offic
 Example:
 
 ```text
-SOC 2 readiness: 62%
+Overall readiness: 7/10 — Solid foundation
 ```
 
 Add helper text:

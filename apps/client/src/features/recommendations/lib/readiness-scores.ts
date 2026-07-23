@@ -10,54 +10,119 @@ import { severityOrder } from "@/features/recommendations/lib/recommendations"
 
 type BadgeVariant = NonNullable<BadgeProps["variant"]>
 
-const readinessAreaForCategory: Record<
-  RecommendationArea,
-  ReadinessScoreArea
-> = {
-  security: "security",
-  privacy: "privacy",
-  access: "access",
-  infrastructure: "infrastructure",
-  activities: "productAndData",
-  data: "productAndData",
-  services: "productAndData",
-  vendors: "productAndData",
-}
+const READINESS_HANDOFF_PERCENT = 75
+const MINIMUM_READINESS_COVERAGE = 0.75
+const MAX_PRELIMINARY_SCORE = 8
+
+export type DashboardReadinessPresentation =
+  | { kind: "setup" }
+  | { kind: "assessment" }
+  | {
+      kind: "readiness"
+      score: number
+      label: string
+      badgeVariant: BadgeVariant
+      preliminary: boolean
+    }
+
+const readinessAreaForCategory: Record<RecommendationArea, ReadinessScoreArea> =
+  {
+    security: "security",
+    privacy: "privacy",
+    access: "access",
+    infrastructure: "infrastructure",
+    activities: "productAndData",
+    data: "productAndData",
+    services: "productAndData",
+    vendors: "productAndData",
+  }
 
 export const readinessScoreStatus = (
   value: number | null
-): { label: string; badgeVariant: BadgeVariant } => {
+): { label: string; badgeVariant: BadgeVariant; score: number | null } => {
   if (value === null) {
     return {
       label: "Not enough data",
       badgeVariant: "secondary",
+      score: null,
     }
   }
 
-  if (value >= 80) {
+  const score = readinessScoreFromValue(value)
+
+  return readinessScoreStatusFromScore(score)
+}
+
+export const readinessScoreFromValue = (value: number) =>
+  Math.min(10, Math.floor(value / 10) + 1)
+
+export const readinessScoreStatusFromScore = (
+  score: number
+): { label: string; badgeVariant: BadgeVariant; score: number } => {
+  if (score >= 9) {
     return {
       label: "Strong foundation",
       badgeVariant: "success",
+      score,
     }
   }
 
-  if (value >= 60) {
+  if (score >= 7) {
     return {
-      label: "Progressing",
+      label: "Solid foundation",
       badgeVariant: "secondary",
+      score,
     }
   }
 
-  if (value >= 40) {
+  if (score >= 5) {
     return {
-      label: "Needs attention",
+      label: "Needs strengthening",
       badgeVariant: "caution",
+      score,
     }
   }
 
   return {
-    label: "Significant gaps",
+    label: "Major gaps",
     badgeVariant: "warning",
+    score,
+  }
+}
+
+export const dashboardReadinessPresentation = (
+  workspaceCompletionPercent: number,
+  readiness: ReadinessScore | undefined
+): DashboardReadinessPresentation => {
+  if (workspaceCompletionPercent < READINESS_HANDOFF_PERCENT) {
+    return { kind: "setup" }
+  }
+
+  const coverage = readiness?.applicableRuleCount
+    ? readiness.assessedRuleCount / readiness.applicableRuleCount
+    : 0
+
+  if (
+    !readiness ||
+    readiness.value === null ||
+    coverage < MINIMUM_READINESS_COVERAGE
+  ) {
+    return { kind: "assessment" }
+  }
+
+  const preliminary = coverage < 1
+  const uncappedScore = readinessScoreFromValue(readiness.value)
+  const score = preliminary
+    ? Math.min(uncappedScore, MAX_PRELIMINARY_SCORE)
+    : uncappedScore
+  const status = readinessScoreStatusFromScore(score)
+
+  return {
+    kind: "readiness",
+    score,
+    label: status.label,
+    badgeVariant: status.badgeVariant,
+    preliminary,
   }
 }
 

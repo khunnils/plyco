@@ -174,10 +174,19 @@ grouped rule waits until every scalar answer it uses is available. For
 collection rules, incomplete records are ignored while complete records remain
 eligible for evaluation.
 
-The dashboard leads with workspace completion rather than a readiness score.
-It shows overall setup progress and completed-versus-total details for Profile,
-Privacy, Access, Infrastructure, and Security. Numeric readiness scores and
-score progress bars are not shown on the dashboard.
+The dashboard leads with workspace completion until 75% of workspace facts are
+captured. From that point, overall readiness becomes the primary indicator once
+at least 75% of applicable advisor checks are assessed. The dashboard converts
+the internal 0–100 result to a 1–10 score using
+`min(10, floor(score / 10) + 1)` and keeps workspace completion visible as
+secondary context. Advisor coverage is not
+displayed on the summary card. If it remains below 75%, the primary card says
+that the readiness assessment is underway instead of showing a score.
+
+Scores shown before full advisor coverage are marked Preliminary and capped at
+8/10. The labels are Major gaps for 1–4, Needs strengthening for 5–6, Solid
+foundation for 7–8, and Strong foundation for 9–10. These are internal
+readiness estimates, not certification or guaranteed compliance.
 
 In-progress dashboard section cards expose a shadcn popover from their status
 indicator on hover or activation. The popover summarizes incomplete subsections
