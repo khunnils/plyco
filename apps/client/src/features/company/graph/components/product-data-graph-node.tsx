@@ -24,8 +24,11 @@ export const ProductDataGraphNodeComponent = ({
 }: NodeProps<ProductDataGraphNode>) => (
   <div
     className={cn(
-      "w-56 rounded-md border px-4 py-3 text-left shadow-sm ring-1 ring-black/[0.02]",
-      KIND_STYLES[data.kind]
+      "w-56 cursor-pointer rounded-md border px-4 py-3 text-left shadow-sm ring-1 ring-black/2 transition-[opacity,box-shadow] duration-150",
+      KIND_STYLES[data.kind],
+      data.emphasis === "focused" && "z-10 shadow-md ring-2 ring-slate-900/25",
+      data.emphasis === "related" && "z-10 shadow-md",
+      data.emphasis === "dimmed" && "opacity-25"
     )}
   >
     <Handle

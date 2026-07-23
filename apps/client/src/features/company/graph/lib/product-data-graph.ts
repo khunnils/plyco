@@ -8,10 +8,16 @@ export type ProductDataGraphNodeKind =
   | "data"
   | "provider"
 
+export type ProductDataGraphNodeEmphasis =
+  | "focused"
+  | "related"
+  | "dimmed"
+
 export type ProductDataGraphNodeData = {
   label: string
   kind: ProductDataGraphNodeKind
   detail?: string
+  emphasis?: ProductDataGraphNodeEmphasis
 }
 
 export type ProductDataGraphNode = Node<ProductDataGraphNodeData, "entity">
@@ -249,4 +255,59 @@ export const buildProductDataGraph = (
     nodes: Array.from(nodes.values()),
     edges: Array.from(edges.values()),
   }
+}
+
+/** Ancestors + descendants of a node (directed), for focus highlighting. */
+export const getRelatedGraphElements = (
+  nodeId: string,
+  edges: ProductDataGraphEdge[]
+): { nodeIds: Set<string>; edgeIds: Set<string> } => {
+  const outgoing = new Map<string, string[]>()
+  const incoming = new Map<string, string[]>()
+
+  for (const graphEdge of edges) {
+    const outs = outgoing.get(graphEdge.source) ?? []
+    outs.push(graphEdge.target)
+    outgoing.set(graphEdge.source, outs)
+
+    const ins = incoming.get(graphEdge.target) ?? []
+    ins.push(graphEdge.source)
+    incoming.set(graphEdge.target, ins)
+  }
+
+  const walk = (start: string, adjacency: Map<string, string[]>) => {
+    const visited = new Set<string>()
+    const stack = [start]
+
+    while (stack.length > 0) {
+      const current = stack.pop()!
+
+      for (const next of adjacency.get(current) ?? []) {
+        if (visited.has(next)) {
+          continue
+        }
+        visited.add(next)
+        stack.push(next)
+      }
+    }
+
+    return visited
+  }
+
+  const nodeIds = new Set<string>([
+    nodeId,
+    ...walk(nodeId, outgoing),
+    ...walk(nodeId, incoming),
+  ])
+
+  const edgeIds = new Set(
+    edges
+      .filter(
+        (graphEdge) =>
+          nodeIds.has(graphEdge.source) && nodeIds.has(graphEdge.target)
+      )
+      .map((graphEdge) => graphEdge.id)
+  )
+
+  return { nodeIds, edgeIds }
 }

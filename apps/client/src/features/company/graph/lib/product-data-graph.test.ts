@@ -14,7 +14,10 @@ import {
 } from "@plyco/shared"
 import { describe, expect, it } from "vitest"
 
-import { buildProductDataGraph } from "@/features/company/graph/lib/product-data-graph"
+import {
+  buildProductDataGraph,
+  getRelatedGraphElements,
+} from "@/features/company/graph/lib/product-data-graph"
 
 const now = "2026-01-01T00:00:00.000Z"
 
@@ -292,5 +295,26 @@ describe("buildProductDataGraph", () => {
       label: "usage",
     })
     expect(directEdge?.style).toMatchObject({ strokeDasharray: "5 5" })
+  })
+})
+
+describe("getRelatedGraphElements", () => {
+  it("highlights a service lineage without sibling services", () => {
+    const graph = buildProductDataGraph(snapshot())
+    const related = getRelatedGraphElements("service:svc_1", graph.edges)
+
+    expect([...related.nodeIds].sort()).toEqual(
+      [
+        "activity:act_1",
+        "company",
+        "data:email-address",
+        "provider:prov_1",
+        "service:svc_1",
+      ].sort()
+    )
+    expect(related.nodeIds.has("service:svc_2")).toBe(false)
+    expect(related.edgeIds.has("company-to-svc_1")).toBe(true)
+    expect(related.edgeIds.has("company-to-svc_2")).toBe(false)
+    expect(related.edgeIds.has("service-svc_1-to-activity-act_1")).toBe(true)
   })
 })
