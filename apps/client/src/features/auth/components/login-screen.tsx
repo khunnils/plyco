@@ -1,11 +1,41 @@
 import { ArrowRight } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import { useState, type CSSProperties, type FormEvent } from "react"
 import { usePostHog } from "@posthog/react"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useSendMagicLink } from "@/features/auth/hooks/use-auth"
+
+/** Soft cool hues (teal → sky → slate) so the page stays calm and readable. */
+const LOGIN_GRADIENT_HUES = [165, 185, 200, 215, 225] as const
+
+const softColor = (hue: number) => {
+  const h = hue + (Math.random() - 0.5) * 20
+  const s = 14 + Math.random() * 18
+  const l = 92 + Math.random() * 5
+  return `hsl(${Math.round(h)} ${Math.round(s)}% ${Math.round(l)}%)`
+}
+
+const pickHue = () =>
+  LOGIN_GRADIENT_HUES[Math.floor(Math.random() * LOGIN_GRADIENT_HUES.length)]!
+
+const createLoginGradientStyle = (): CSSProperties => {
+  const angle = Math.floor(Math.random() * 360)
+  const c1 = softColor(pickHue())
+  const c2 = softColor(pickHue())
+  const c3 = softColor(pickHue())
+  const blobX = 20 + Math.random() * 60
+  const blobY = 15 + Math.random() * 50
+
+  return {
+    backgroundColor: "#f8fafc",
+    backgroundImage: [
+      `radial-gradient(ellipse 80% 60% at ${blobX}% ${blobY}%, ${c1}, transparent 70%)`,
+      `linear-gradient(${angle}deg, ${c2}, ${c3})`,
+    ].join(", "),
+  }
+}
 
 const GoogleLogo = () => (
   <svg aria-hidden="true" className="size-5" viewBox="0 0 18 18">
@@ -37,6 +67,7 @@ export const LoginScreen = ({
 }) => {
   const [email, setEmail] = useState("")
   const [magicLinkSent, setMagicLinkSent] = useState(false)
+  const [gradientStyle] = useState(createLoginGradientStyle)
   const sendMagicLinkMutation = useSendMagicLink()
   const posthog = usePostHog()
 
@@ -55,7 +86,10 @@ export const LoginScreen = ({
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-slate-50 px-4 py-10 text-slate-900">
+    <main
+      className="flex min-h-svh items-center justify-center px-4 py-10 text-slate-900"
+      style={gradientStyle}
+    >
       <section className="w-full max-w-md rounded-sm border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
         <div className="mb-8 text-center">
           <img
