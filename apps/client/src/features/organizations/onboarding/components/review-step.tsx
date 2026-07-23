@@ -320,7 +320,7 @@ export const ReviewStep = () => {
         snapshot
       )
       // Auth must include the new org before leaving onboarding, otherwise App
-      // stays on the no-organization tree and redirects "/" back to identity.
+      // stays on the no-organization tree and shows the activate placeholder.
       queryClient.setQueryData<AuthState>(authStateQueryKey, (current) => {
         if (!current?.user) {
           return current

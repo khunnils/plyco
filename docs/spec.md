@@ -24,9 +24,11 @@ automated; log-retention duration and monitoring-owner fields are not collected.
 
 ## Create Organization Flow
 
-New users create an organization from a split-panel setup flow. The left panel
-contains the active form step and the right panel provides a calm branded
-background effect.
+Signed-in users with no organizations see an activate placeholder with options
+to start organization setup or log out. Choosing create opens the organization
+setup wizard. New users create an organization from a split-panel setup flow.
+The left panel contains the active form step and the right panel provides a calm
+branded background effect.
 
 The first step asks for organization name and website URL. The next steps ask
 for primary regions and compliance goals before any public-page lookup runs.

@@ -12,6 +12,7 @@ import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useAuthState, useLogout } from "@/features/auth/hooks/use-auth"
 import { LoginScreen } from "@/features/auth/components/login-screen"
 import { OnboardingWizardPage } from "@/features/organizations/onboarding/pages/onboarding-wizard-page"
+import { NoOrganizationPage } from "@/features/organizations/pages/no-organization-page"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
 import { startGoogleLogin } from "@/lib/api"
@@ -126,15 +127,27 @@ export const App = () => {
           element={
             <OnboardingWizardPage
               user={user}
+              onCancel={() => navigate("/", { replace: true })}
               onComplete={() => navigate("/", { replace: true })}
               onLogout={() => logout.mutate()}
             />
           }
         />
         <Route
-          path="*"
-          element={<Navigate to="/onboarding/organization/identity" replace />}
+          path="/"
+          element={
+            <NoOrganizationPage
+              isLoggingOut={logout.isPending}
+              onCreate={() =>
+                navigate("/onboarding/organization/identity", {
+                  replace: true,
+                })
+              }
+              onLogout={() => logout.mutate()}
+            />
+          }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     )
   }
