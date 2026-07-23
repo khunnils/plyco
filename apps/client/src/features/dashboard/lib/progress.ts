@@ -19,7 +19,7 @@ export const isProgressComplete = (metric: ProgressMetric) =>
   metric.totalFields > 0 && metric.completedFields === metric.totalFields
 
 export const completionText = (metric: ProgressMetric) =>
-  `${metric.completedFields} of ${metric.totalFields} facts captured`
+  `${metric.completedFields} of ${metric.totalFields} facts`
 
 export type ProgressSection = ProgressMetric & {
   title: string
