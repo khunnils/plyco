@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import {
   createDocumentSchema,
   createTemplateFromSystemSchema,
+  editTemplateWithPromptInputSchema,
+  generateTemplateInputSchema,
   templateInputSchema,
   templatePreviewInputSchema,
   templateVariableCatalogSchema,
@@ -27,6 +29,8 @@ import { type OrganizationRepository } from "../organizations/repository.js";
 import { type ProviderRepository } from "../vendors/repository.js";
 import { type VocabularyRepository } from "../vocabulary/repository.js";
 import { type DocumentRepository } from "./repository.js";
+import { type TemplateCreatorService } from "./template-creator.js";
+import { type TemplateEditorService } from "./template-editor.js";
 
 export async function registerDocumentRoutes(
   app: FastifyInstance,
@@ -38,6 +42,8 @@ export async function registerDocumentRoutes(
     vendorRepository,
     vocabularyRepository,
     accountRepository,
+    templateCreatorService,
+    templateEditorService,
   }: {
     accountRepository: AccountRepository;
     documentRepository: DocumentRepository;
@@ -46,6 +52,8 @@ export async function registerDocumentRoutes(
     systemTemplateSource: SystemTemplateSource;
     vendorRepository: ProviderRepository;
     vocabularyRepository: VocabularyRepository;
+    templateCreatorService: TemplateCreatorService;
+    templateEditorService: TemplateEditorService;
   },
 ) {
   const contextBuilder = new ReportContextBuilder();
@@ -85,6 +93,41 @@ export async function registerDocumentRoutes(
       );
 
       return templateVariableCatalogSchema.parse(schema);
+    },
+  );
+
+  app.post<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/templates/generate",
+    async (request, reply) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = generateTemplateInputSchema.parse(request.body);
+      const generatedTemplate = await templateCreatorService.generate(
+        body.prompt,
+      );
+      const template = await documentRepository.createTemplate(
+        request.params.organizationId,
+        generatedTemplate,
+      );
+
+      return reply.status(201).send(template);
+    },
+  );
+
+  app.post<{ Params: { organizationId: string } }>(
+    "/organizations/:organizationId/templates/edit",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = editTemplateWithPromptInputSchema.parse(request.body);
+
+      return templateEditorService.edit(body);
     },
   );
 

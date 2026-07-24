@@ -33,6 +33,7 @@ import {
   createDocumentSchema,
   documentSchema,
   documentSummarySchema,
+  templateInputSchema,
   templateSchema,
   createOrganizationSchema,
   acceptOrganizationInvitationSchema,
@@ -53,6 +54,8 @@ import {
   type CreateDocument,
   type CreateOrganization,
   type CreateTemplateFromSystem,
+  type EditTemplateWithPromptInput,
+  type GenerateTemplateInput,
   type Document,
   type DocumentSummary,
   type AuthState,
@@ -738,6 +741,32 @@ export const createTemplate = (
     method: "POST",
     body: JSON.stringify(template),
   })
+
+export const generateTemplate = (
+  organizationId: string,
+  input: GenerateTemplateInput
+): Promise<Template> =>
+  apiRequest(
+    `/organizations/${organizationId}/templates/generate`,
+    templateSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  )
+
+export const editTemplateWithPrompt = (
+  organizationId: string,
+  input: EditTemplateWithPromptInput
+): Promise<TemplateInput> =>
+  apiRequest(
+    `/organizations/${organizationId}/templates/edit`,
+    templateInputSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  )
 
 export const updateTemplate = ({
   organizationId,

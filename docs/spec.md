@@ -144,6 +144,22 @@ and the persisted order is reused by selectors, graphs, generated documents, and
 other downstream views. Dragging is disabled while an order update is pending;
 failed updates restore the prior order and show an error.
 
+## Natural-language Template Creation
+
+Choosing “Need something else?” from the template catalog opens a focused,
+full-page prompt screen. The user describes the document they need, and the API
+compiles the Langfuse `template_creator` prompt with that request and the
+complete canonical template-variable schema. Gemini returns a template name and
+Markdown/Nunjucks content through structured JSON output. The API validates the
+response shape, template syntax, and every referenced variable against the
+canonical schema before storing the template. The generated result opens in the
+existing template editor so the user can review and change it before publishing.
+The template editor also provides a natural-language revision field below the
+draft workspace. It sends the current unsaved draft, the requested change, and
+the complete variable schema through the Langfuse `template_editor` prompt.
+Gemini returns a complete revised draft, which replaces the editor contents but
+is not persisted until the user selects Save.
+
 ## Smart Advisor Recommendations
 
 The dashboard includes a Recommendations section with counts by severity and a

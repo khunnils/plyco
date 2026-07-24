@@ -1,4 +1,4 @@
-import { createApp } from "../src/app.js";
+import { createApp, type CreateAppOptions } from "../src/app.js";
 import { type FastifyInstance } from "fastify";
 import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js";
 import { InMemoryDocumentRepository } from "../src/features/documents/in-memory-repository.js";
@@ -12,7 +12,7 @@ import { StaticSystemTemplateSource } from "../src/infrastructure/system-templat
 
 import { testVocabularyCodeSets } from "./vocabulary-fixtures.js";
 
-export function createTestApp() {
+export function createTestApp(options: Partial<CreateAppOptions> = {}) {
   const accountRepository = new InMemoryAccountRepository();
   const organizationRepository = new InMemoryOrganizationRepository();
   const vendorRepository = new InMemoryVendorRepository(organizationRepository);
@@ -135,6 +135,7 @@ export function createTestApp() {
         content: "# {{ company.name }} Privacy Policy\n",
       },
     ]),
+    ...options,
   });
 }
 

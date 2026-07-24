@@ -34,6 +34,19 @@ export const templateInputSchema = z.object({
   content: z.string(),
 });
 
+export const generateTemplateInputSchema = z.object({
+  prompt: z
+    .string()
+    .trim()
+    .min(10, "Enter at least 10 characters")
+    .max(4000, "Description must be 4,000 characters or fewer"),
+});
+
+export const editTemplateWithPromptInputSchema = z.object({
+  prompt: z.string().trim().min(1).max(4000),
+  template: templateInputSchema,
+});
+
 export const templatePreviewInputSchema = templateInputSchema;
 
 export const templatePreviewSchema = z.object({
@@ -86,6 +99,10 @@ export const templateCatalogSchema = z.object({
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>;
 export type Template = z.infer<typeof templateSchema>;
 export type TemplateInput = z.infer<typeof templateInputSchema>;
+export type GenerateTemplateInput = z.infer<typeof generateTemplateInputSchema>;
+export type EditTemplateWithPromptInput = z.infer<
+  typeof editTemplateWithPromptInputSchema
+>;
 export type TemplatePreviewInput = z.infer<typeof templatePreviewInputSchema>;
 export type TemplatePreview = z.infer<typeof templatePreviewSchema>;
 export type TemplateVariable = z.infer<typeof templateVariableSchema>;

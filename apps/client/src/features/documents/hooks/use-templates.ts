@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   type CreateTemplateFromSystem,
+  type EditTemplateWithPromptInput,
+  type GenerateTemplateInput,
   type Template,
   type TemplateInput,
 } from "@plyco/shared"
@@ -12,6 +14,8 @@ import {
   createTemplate,
   createTemplateFromSystem,
   deleteTemplate,
+  editTemplateWithPrompt,
+  generateTemplate,
   getOrganizationTemplates,
   getTemplateVariableCatalog,
   previewTemplate,
@@ -118,6 +122,45 @@ export const useCreateTemplate = () => {
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Could not create template")
+    },
+  })
+}
+
+export const useGenerateTemplate = () => {
+  const queryClient = useQueryClient()
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+
+  return useMutation({
+    mutationFn: (input: GenerateTemplateInput) =>
+      generateTemplate(organizationId, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: templatesQueryKey(organizationId),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: documentsQueryKey(organizationId),
+      })
+      toast.success("Template created")
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Could not create template")
+    },
+  })
+}
+
+export const useEditTemplateWithPrompt = () => {
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+
+  return useMutation({
+    mutationFn: (input: EditTemplateWithPromptInput) =>
+      editTemplateWithPrompt(organizationId, input),
+    onSuccess: () => {
+      toast.success("Draft revised")
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Could not revise template")
     },
   })
 }

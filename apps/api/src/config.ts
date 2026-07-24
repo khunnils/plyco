@@ -94,6 +94,10 @@ export const apiConfig = {
     process.env.GEMINI_PROVIDER_LOOKUP_MODEL ?? "gemini-2.5-flash",
   organizationLookupModel:
     process.env.ORGANIZATION_LOOKUP_MODEL ?? "gemini-3.6-flash",
+  templateCreatorModel:
+    process.env.TEMPLATE_CREATOR_MODEL ?? "gemini-3.6-flash",
+  templateEditorModel:
+    process.env.TEMPLATE_EDITOR_MODEL ?? "gemini-3.6-flash",
   langfusePublicKey: process.env.LANGFUSE_PUBLIC_KEY,
   langfuseSecretKey: process.env.LANGFUSE_SECRET_KEY,
   langfuseBaseUrl: process.env.LANGFUSE_BASE_URL,

@@ -10,6 +10,10 @@ import {
   Jinja2Renderer,
   ReportContextBuilder,
 } from "../src/features/documents/document-generation.js";
+import { LlmTemplateCreatorService } from "../src/features/documents/template-creator.js";
+import { LlmTemplateEditorService } from "../src/features/documents/template-editor.js";
+import { type LlmJsonClient } from "../src/infrastructure/llm-client.js";
+import { type PromptClient } from "../src/infrastructure/prompt-client.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
 import { parseSystemTemplate } from "../src/infrastructure/system-templates.js";
 
@@ -1266,6 +1270,213 @@ describe("documents / templates API", () => {
       url: "/organizations/org-test/documents",
     });
     expect(documentsResponse.json()).toEqual([]);
+  });
+
+  it("creates a generated template from a natural-language request", async () => {
+    const app = await createTestApp({
+      templateCreatorService: {
+        async generate(userInput) {
+          expect(userInput).toBe(
+            "A short vendor security policy for prospective customers",
+          );
+          return {
+            name: "Vendor Security Policy",
+            content: "# {{ organization.name }} Vendor Security Policy\n",
+          };
+        },
+      },
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates/generate",
+      payload: {
+        prompt: "A short vendor security policy for prospective customers",
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      name: "Vendor Security Policy",
+      slug: "vendor-security-policy",
+      sourceSystemTemplateSlug: null,
+      content: "# {{ organization.name }} Vendor Security Policy\n",
+    });
+
+    const templatesResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/templates",
+    });
+    expect(templatesResponse.json().organizationTemplates).toEqual([
+      expect.objectContaining({ id: response.json().id }),
+    ]);
+  });
+
+  it("passes the complete variable schema to the template creator prompt", async () => {
+    let promptVariables: Record<string, unknown> | undefined;
+    let generationRequest:
+      | Parameters<LlmJsonClient["generateJson"]>[0]
+      | undefined;
+    const promptClient: PromptClient = {
+      async compilePrompt(name, variables) {
+        expect(name).toBe("template_creator");
+        promptVariables = variables;
+        return {
+          content: "compiled prompt",
+          inputVariables: variables,
+          metadata: { name, version: 1, isFallback: false },
+        };
+      },
+    };
+    const llmClient: LlmJsonClient = {
+      async generateJson(request) {
+        generationRequest = request;
+        return {
+          name: "Security Overview",
+          content: "# {{ organization.name }} Security Overview\n",
+        };
+      },
+    };
+    const service = new LlmTemplateCreatorService(
+      promptClient,
+      llmClient,
+      "gemini-test",
+    );
+
+    const template = await service.generate(
+      "Create a customer-facing security overview",
+    );
+    const suppliedSchema = JSON.parse(String(promptVariables?.schema));
+
+    expect(template.name).toBe("Security Overview");
+    expect(promptVariables?.userInput).toBe(
+      "Create a customer-facing security overview",
+    );
+    expect(suppliedSchema.version).toBe(1);
+    expect(suppliedSchema.variables.length).toBeGreaterThan(100);
+    expect(generationRequest).toMatchObject({
+      model: "gemini-test",
+      prompt: { metadata: { name: "template_creator" } },
+    });
+    expect(generationRequest?.responseSchema).toBeDefined();
+  });
+
+  it("rejects generated variables outside the canonical schema", async () => {
+    const service = new LlmTemplateCreatorService(
+      {
+        async compilePrompt(name, variables) {
+          return {
+            content: "compiled prompt",
+            inputVariables: variables,
+            metadata: { name, version: 1, isFallback: false },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return {
+            name: "Invented Policy",
+            content: "# {{ organization.inventedField }} Policy\n",
+          };
+        },
+      },
+      "gemini-test",
+    );
+
+    await expect(
+      service.generate("Create a policy with an invented variable"),
+    ).rejects.toMatchObject({
+      code: "TEMPLATE_LLM_UNKNOWN_VARIABLES",
+    });
+  });
+
+  it("revises a draft from natural language without persisting it", async () => {
+    const app = await createTestApp({
+      templateEditorService: {
+        async edit(input) {
+          expect(input).toEqual({
+            prompt: "Make the introduction more concise",
+            template: {
+              name: "Security Policy",
+              content: "# Security Policy\n\nA long introduction.\n",
+            },
+          });
+          return {
+            name: "Security Policy",
+            content: "# Security Policy\n\nA concise introduction.\n",
+          };
+        },
+      },
+    });
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates/edit",
+      payload: {
+        prompt: "Make the introduction more concise",
+        template: {
+          name: "Security Policy",
+          content: "# Security Policy\n\nA long introduction.\n",
+        },
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      name: "Security Policy",
+      content: "# Security Policy\n\nA concise introduction.\n",
+    });
+
+    const templatesResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/templates",
+    });
+    expect(templatesResponse.json().organizationTemplates).toEqual([]);
+  });
+
+  it("passes the current draft and complete schema to template_editor", async () => {
+    let promptVariables: Record<string, unknown> | undefined;
+    const service = new LlmTemplateEditorService(
+      {
+        async compilePrompt(name, variables) {
+          expect(name).toBe("template_editor");
+          promptVariables = variables;
+          return {
+            content: "compiled prompt",
+            inputVariables: variables,
+            metadata: { name, version: 1, isFallback: false },
+          };
+        },
+      },
+      {
+        async generateJson() {
+          return {
+            name: "Customer Security Overview",
+            content: "# {{ organization.name }} Security Overview\n",
+          };
+        },
+      },
+      "gemini-test",
+    );
+    const currentTemplate = {
+      name: "Security Overview",
+      content: "# {{ organization.name }} Overview\n",
+    };
+
+    const edited = await service.edit({
+      prompt: "Make the title customer-facing",
+      template: currentTemplate,
+    });
+    const suppliedSchema = JSON.parse(String(promptVariables?.schema));
+
+    expect(edited.name).toBe("Customer Security Overview");
+    expect(promptVariables?.userInput).toBe(
+      "Make the title customer-facing",
+    );
+    expect(JSON.parse(String(promptVariables?.template))).toEqual(
+      currentTemplate,
+    );
+    expect(suppliedSchema.variables.length).toBeGreaterThan(100);
   });
 
   it("returns structured errors for invalid template previews", async () => {

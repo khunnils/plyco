@@ -1,4 +1,5 @@
 import {
+  editTemplateWithPromptInputSchema,
   type Template,
   type TemplateInput,
   type TemplateVariable,
@@ -27,7 +28,9 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
 import { Button } from "@/components/ui/button"
+import { TemplateEditorPrompt } from "@/features/documents/components/template-editor-prompt"
 import {
+  useEditTemplateWithPrompt,
   useTemplatePreview,
   useTemplateVariableCatalog,
 } from "@/features/documents/hooks/use-templates"
@@ -68,6 +71,7 @@ export const TemplateForm = ({
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [schemaSearch, setSchemaSearch] = useState("")
+  const [editInstruction, setEditInstruction] = useState("")
   const [prevName, setPrevName] = useState(name)
   const [draft, setDraft] = useState<TemplateInput>({
     name,
@@ -81,6 +85,7 @@ export const TemplateForm = ({
   const debouncedDraft = useDebouncedTemplate(draft)
   const schema = useTemplateVariableCatalog()
   const preview = useTemplatePreview(debouncedDraft)
+  const editTemplate = useEditTemplateWithPrompt()
   const filteredVariables = useMemo(() => {
     const query = schemaSearch.trim().toLowerCase()
     const variables = schema.data?.variables ?? []
@@ -197,6 +202,24 @@ export const TemplateForm = ({
       : itemFieldSnippet(variable, field)
 
     insertSnippet(snippet)
+  }
+
+  const applyEditInstruction = () => {
+    const input = editTemplateWithPromptInputSchema.safeParse({
+      prompt: editInstruction,
+      template: draft,
+    })
+
+    if (!input.success) {
+      return
+    }
+
+    editTemplate.mutate(input.data, {
+      onSuccess: (editedTemplate) => {
+        setDraft(editedTemplate)
+        setEditInstruction("")
+      },
+    })
   }
 
   return (
@@ -450,6 +473,13 @@ export const TemplateForm = ({
           </div>
         </section>
       </div>
+
+      <TemplateEditorPrompt
+        isPending={editTemplate.isPending}
+        value={editInstruction}
+        onApply={applyEditInstruction}
+        onChange={setEditInstruction}
+      />
     </form>
   )
 }

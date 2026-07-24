@@ -15,6 +15,7 @@ import {
   useCreateTemplate,
   useCreateTemplateFromSystem,
   useDeleteTemplate,
+  useGenerateTemplate,
   useTemplates,
   useUpdateTemplate,
 } from "@/features/documents/hooks/use-templates"
@@ -25,6 +26,7 @@ import { DocumentsList } from "@/features/documents/components/documents-list"
 import { DocumentsPageBanner } from "@/features/documents/components/documents-page-banner"
 import { RenameTemplateDialog } from "@/features/documents/components/rename-template-dialog"
 import { TemplateEditor } from "@/features/documents/components/template-editor"
+import { TemplateCreator } from "@/features/documents/components/template-creator"
 import { TemplateSelector } from "@/features/documents/components/template-selector"
 import {
   PageHeader,
@@ -56,6 +58,7 @@ export const DocumentsRoutePage = () => {
   const templates = useTemplates()
   const documents = useDocuments()
   const createTemplate = useCreateTemplate()
+  const generateTemplate = useGenerateTemplate()
   const createTemplateFromSystem = useCreateTemplateFromSystem()
   const updateTemplate = useUpdateTemplate()
   const deleteTemplate = useDeleteTemplate()
@@ -106,6 +109,26 @@ export const DocumentsRoutePage = () => {
       .filter((slug): slug is string => Boolean(slug))
   )
   const isLoading = templates.isLoading || documents.isLoading
+
+  if (mode === "create") {
+    return (
+      <TemplateCreator
+        isPending={generateTemplate.isPending}
+        onCancel={() => navigate("/documents/add")}
+        onSubmit={(input) =>
+          generateTemplate.mutate(input, {
+            onSuccess: (createdTemplate) => {
+              posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
+                template_id: createdTemplate.id,
+                creation_method: "natural_language",
+              })
+              navigate(`/documents/edit/${createdTemplate.id}`)
+            },
+          })
+        }
+      />
+    )
+  }
 
   const eyebrow = SIDEBAR_SECTION.documents
   let breadcrumbs: PageHeaderCrumb[]

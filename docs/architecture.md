@@ -92,6 +92,8 @@ organization-scoped workspace routes:
 - workspace API paths include `/organizations/:organizationId`
 - provider inventory is scoped to the route organization, providers are defined once, and service-specific provider processing is stored as service provider usage managed from each service view
 - organization document templates are scoped to the route organization and can be copied from system templates or created from scratch
+- organization document templates can also be generated from natural language through the Langfuse `template_creator` prompt; the API supplies the complete canonical variable schema and validates generated syntax and variable references before persistence
+- unsaved template drafts can be revised through the sibling Langfuse `template_editor` prompt; the API supplies the current draft and complete schema, validates the result, and returns it without persistence
 - generated documents scoped to templates
 - advisor recommendations are computed from static YAML rules against answered saved-profile values and returned from an organization-scoped endpoint
 - controlled vocabulary values are stored as stable code IDs, with labels and optional descriptions resolved from organization vocabulary or system code sets

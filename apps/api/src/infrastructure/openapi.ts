@@ -13,6 +13,8 @@ import {
   createOrganizationApiKeySchema,
   createOrganizationSchema,
   createTemplateFromSystemSchema,
+  editTemplateWithPromptInputSchema,
+  generateTemplateInputSchema,
   dataHandlingProfileSchema,
   deleteOrganizationResponseSchema,
   documentSchema,
@@ -807,6 +809,26 @@ const paths: Record<string, PathItem> = {
       params: organizationIdParamsSchema,
       success: 200,
       successSchema: templateVariableCatalogSchema,
+    }),
+  },
+  "/organizations/{organizationId}/templates/generate": {
+    post: route({
+      summary: "Generate and create a template from a natural-language prompt.",
+      tag: "Documents",
+      params: organizationIdParamsSchema,
+      body: generateTemplateInputSchema,
+      success: 201,
+      successSchema: templateSchema,
+    }),
+  },
+  "/organizations/{organizationId}/templates/edit": {
+    post: route({
+      summary: "Revise an unsaved template draft from a natural-language prompt.",
+      tag: "Documents",
+      params: organizationIdParamsSchema,
+      body: editTemplateWithPromptInputSchema,
+      success: 200,
+      successSchema: templateInputSchema,
     }),
   },
   "/organizations/{organizationId}/templates/preview": {

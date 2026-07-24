@@ -38,6 +38,14 @@ import { InMemoryDocumentRepository } from "./features/documents/in-memory-repos
 import { PrismaDocumentRepository } from "./features/documents/prisma-repository.js"
 import { type DocumentRepository } from "./features/documents/repository.js"
 import { registerDocumentRoutes } from "./features/documents/routes.js"
+import {
+  LlmTemplateCreatorService,
+  type TemplateCreatorService,
+} from "./features/documents/template-creator.js"
+import {
+  LlmTemplateEditorService,
+  type TemplateEditorService,
+} from "./features/documents/template-editor.js"
 import { InMemoryOrganizationRepository } from "./features/organizations/in-memory-repository.js"
 import { PrismaOrganizationRepository } from "./features/organizations/prisma-repository.js"
 import { type OrganizationRepository } from "./features/organizations/repository.js"
@@ -115,6 +123,8 @@ export type CreateAppOptions = {
   ruleSuppressionRepository?: RuleSuppressionRepository
   promptClient?: PromptClient
   llmClient?: LlmJsonClient
+  templateCreatorService?: TemplateCreatorService
+  templateEditorService?: TemplateEditorService
   systemTemplateSource?: SystemTemplateSource
   codeLoader?: CodeLoader
   codeLoaderConfig?: {
@@ -154,6 +164,8 @@ export async function createApp({
   ruleSuppressionRepository,
   promptClient,
   llmClient,
+  templateCreatorService,
+  templateEditorService,
   systemTemplateSource = new FileSystemTemplateSource(),
   codeLoader,
   codeLoaderConfig,
@@ -316,11 +328,118 @@ export async function createApp({
         : new NullDocumentPdfStorage()),
     organizationRepository: repositories.organizationRepository,
     systemTemplateSource,
+    templateCreatorService:
+      templateCreatorService ??
+      createDefaultTemplateCreatorService({ promptClient, llmClient }),
+    templateEditorService:
+      templateEditorService ??
+      createDefaultTemplateEditorService({ promptClient, llmClient }),
     vendorRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
 
   return app
+}
+
+function createDefaultTemplateCreatorService({
+  promptClient,
+  llmClient,
+}: {
+  promptClient?: PromptClient
+  llmClient?: LlmJsonClient
+}): TemplateCreatorService {
+  let service: TemplateCreatorService | null = null
+
+  return {
+    async generate(userInput) {
+      if (!service) {
+        const dependencies = resolveTemplateLlmDependencies({
+          errorCode: "TEMPLATE_CREATOR_NOT_CONFIGURED",
+          errorMessage: "Template creator is not configured.",
+          llmClient,
+          promptClient,
+        })
+        service = new LlmTemplateCreatorService(
+          dependencies.promptClient,
+          dependencies.llmClient,
+          apiConfig.templateCreatorModel,
+        )
+      }
+
+      return service.generate(userInput)
+    },
+  }
+}
+
+function createDefaultTemplateEditorService({
+  promptClient,
+  llmClient,
+}: {
+  promptClient?: PromptClient
+  llmClient?: LlmJsonClient
+}): TemplateEditorService {
+  let service: TemplateEditorService | null = null
+
+  return {
+    async edit(input) {
+      if (!service) {
+        const dependencies = resolveTemplateLlmDependencies({
+          errorCode: "TEMPLATE_EDITOR_NOT_CONFIGURED",
+          errorMessage: "Template editor is not configured.",
+          llmClient,
+          promptClient,
+        })
+        service = new LlmTemplateEditorService(
+          dependencies.promptClient,
+          dependencies.llmClient,
+          apiConfig.templateEditorModel,
+        )
+      }
+
+      return service.edit(input)
+    },
+  }
+}
+
+function resolveTemplateLlmDependencies({
+  errorCode,
+  errorMessage,
+  llmClient,
+  promptClient,
+}: {
+  errorCode: string
+  errorMessage: string
+  llmClient?: LlmJsonClient
+  promptClient?: PromptClient
+}) {
+  const geminiApiKey = apiConfig.geminiApiKey
+  const missing = [
+    geminiApiKey || llmClient ? null : "GEMINI_API_KEY",
+    promptClient || apiConfig.langfusePublicKey ? null : "LANGFUSE_PUBLIC_KEY",
+    promptClient || apiConfig.langfuseSecretKey ? null : "LANGFUSE_SECRET_KEY",
+  ].filter((name): name is string => Boolean(name))
+
+  if (missing.length > 0) {
+    throw new ApiError(errorCode, errorMessage, 500, { missing })
+  }
+
+  const resolvedLlmClient =
+    llmClient ?? (geminiApiKey ? new GeminiJsonClient(geminiApiKey) : null)
+
+  if (!resolvedLlmClient) {
+    throw new ApiError(errorCode, errorMessage, 500)
+  }
+
+  return {
+    llmClient: resolvedLlmClient,
+    promptClient:
+      promptClient ??
+      LangfusePromptClient.fromConfig({
+        publicKey: apiConfig.langfusePublicKey,
+        secretKey: apiConfig.langfuseSecretKey,
+        baseUrl: apiConfig.langfuseBaseUrl,
+      }),
+  }
 }
 
 function createDefaultProviderImportService(

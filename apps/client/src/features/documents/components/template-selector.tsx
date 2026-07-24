@@ -127,7 +127,7 @@ export const TemplateSelector = ({
       ) : null}
 
       <Link
-        to="/documents/new"
+        to="/documents/create"
         className="mt-4 flex w-full flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition hover:border-slate-300 hover:bg-slate-100/70 focus:outline-none focus-visible:ring-1 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
       >
         <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
@@ -137,8 +137,7 @@ export const TemplateSelector = ({
           Need something else?
         </h4>
         <p className="mt-1 max-w-sm text-xs text-slate-500">
-          Create a blank policy template and write your own content from
-          scratch.
+          Describe what you need and create a tailored starting point.
         </p>
       </Link>
     </div>
