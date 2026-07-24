@@ -267,9 +267,32 @@ describe("buildProductDataGraph", () => {
     expect(graph.nodes.map((node) => node.id)).not.toContain(
       "data:unknown-data"
     )
+    expect(graph.nodes.map((node) => node.id)).not.toContain("provider:prov_1")
     expect(graph.edges.map((edge) => edge.id)).not.toContain(
       "service-svc_1-to-data-unknown-data"
     )
+  })
+
+  it("omits providers that have no service usage connections", () => {
+    const graph = buildProductDataGraph(
+      snapshot({
+        organizationProviders: [
+          provider("prov_1", "Stripe"),
+          provider("prov_2", "Unused Vendor"),
+        ],
+        serviceProviderUsage: [
+          usage({
+            id: "use_1",
+            serviceId: "svc_1",
+            organizationProviderId: "prov_1",
+            dataProcessed: ["Email Address"],
+          }),
+        ],
+      })
+    )
+
+    expect(graph.nodes.map((node) => node.id)).toContain("provider:prov_1")
+    expect(graph.nodes.map((node) => node.id)).not.toContain("provider:prov_2")
   })
 
   it("adds a subdued direct service-provider edge when usage has no data", () => {

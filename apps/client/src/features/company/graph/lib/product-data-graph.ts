@@ -189,10 +189,43 @@ export const buildProductDataGraph = (
     })
   })
 
+  const providersById = new Map(
+    snapshot.organizationProviders.map((provider) => [provider.id, provider])
+  )
+
+  // Only show providers that participate in at least one graph connection
+  // (direct service usage or a data type that matches inventory).
+  const connectedProviderIds = new Set<string>()
+  snapshot.serviceProviderUsage.forEach((usage) => {
+    if (
+      !nodes.has(`service:${usage.serviceId}`) ||
+      !providersById.has(usage.organizationProviderId)
+    ) {
+      return
+    }
+
+    if (usage.dataProcessed.length === 0) {
+      connectedProviderIds.add(usage.organizationProviderId)
+      return
+    }
+
+    const hasMatchingData = usage.dataProcessed.some((dataName) =>
+      dataTypeNames.has(normalizeDataTypeName(dataName))
+    )
+    if (hasMatchingData) {
+      connectedProviderIds.add(usage.organizationProviderId)
+    }
+  })
+
   const providerRows = new Map<string, number>()
-  snapshot.organizationProviders.forEach((provider, index) => {
-    providerRows.set(provider.id, index)
-    addNode(`provider:${provider.id}`, 4, index, {
+  snapshot.organizationProviders.forEach((provider) => {
+    if (!connectedProviderIds.has(provider.id)) {
+      return
+    }
+
+    const row = providerRows.size
+    providerRows.set(provider.id, row)
+    addNode(`provider:${provider.id}`, 4, row, {
       kind: "provider",
       label: provider.name,
       detail: provider.purpose || provider.category || undefined,
