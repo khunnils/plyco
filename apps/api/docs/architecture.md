@@ -1,51 +1,158 @@
 # API Architecture
 
-Google OAuth or email magic-link authentication is required for workspace access. Signed-in profiles are persisted as users with email as the canonical unique identity, and organization access is enforced through memberships with `owner` and `member` roles. Google subjects are optional provider identities and are attached to an existing user when the verified Google email matches. Workspace routes include the organization id in the path, and each organization-scoped route verifies that the session user belongs to that organization before reading or mutating data. Owner-only account routes manage team invitations, member role changes, member removal, and organization deletion. External inputs are validated with `@plyco/shared` Zod schemas, and route handlers return structured JSON errors.
+## Purpose
 
-Service cookie configuration is embedded in each service profile as up to four unique structured category records using the fixed `necessary`, `preferences`, `analytics`, and `marketing` enum. Each record stores an explicit consent requirement. The remaining consent answers are stored only when at least one category requires consent; cookie categories do not depend on organization vocabulary. The retired Do Not Track, equal-rejection, and no-pre-ticked-box controls are not part of the persistence or public API contract.
+`@plyco/api` is the authoritative HTTP and application-service boundary for
+Plyco. It exposes public, session-authenticated, and machine-authenticated
+interfaces while keeping persistence and third-party provider details behind
+internal abstractions.
 
-API code is organized by feature area under `src/features`:
+This document describes API structure and design constraints. Endpoint behavior
+belongs in the OpenAPI document and product behavior belongs in
+`docs/spec.md`.
 
-- `features/accounts` owns persistent users, organization membership lookup, organization creation, team invitations, member management, and organization deletion.
-- `features/organizations` owns organization-scoped security profile routes and the organization repository contract used by other features.
-- `features/recommendations` owns static advisor rule loading, goal-based rule evaluation, organization rule-suppression persistence, and the organization-scoped recommendations routes.
-- `features/vendors` owns business activity CRUD, activity data-type mappings, vendor master CRUD, service-vendor-use CRUD, the provider catalog route, and vendor inventory persistence. Activity and service-vendor-use validation reads the current organization services, vendors, and data types so processing mappings cannot cross organization boundaries.
-- `features/documents` owns template routes, generated document routes, document persistence, and document-generation orchestration.
-- `features/waitlist` owns the public waitlist route, rate limiting, persistence contract, and Resend contact sync.
+## Runtime Shape
 
-Advisor rule inputs must be answered before evaluation: `null`, `undefined`,
-and `""` are unset, while booleans, zero, explicit codes, and arrays including
-`[]` are defined. All scalar inputs in a boolean condition must be defined;
-collection predicates skip incomplete items and continue evaluating complete
-items. Rule comparison values cannot contain `null`.
+The API is a Node.js application built on Fastify.
 
-The same evaluation pass limits tagged rules to matching organization compliance
-goals, then classifies in-scope rules as contextually inapplicable, missing data,
-passing, failing, or suppressed. It returns those rules and transient readiness
-scores with the recommendations. Suppressed rules are excluded before findings,
-coverage, and scores are derived. Scores use severity weights of 8/4/2/1 from critical through
-low, include assessed and applicable rule counts, and expose an overall result
-plus Security, Privacy, Access, Infrastructure, and Product & Data results. The
-Product & Data score pools Activities, Data, Services, and Vendors rules. No
-score is persisted; suppressions are stored by organization and stable rule ID.
+```text
+HTTP request
+    │
+    ▼
+Fastify plugins and cross-cutting middleware
+    │  CORS, authentication, logging, error handling, documentation
+    ▼
+Feature route
+    │  input validation, authorization, response mapping
+    ▼
+Application/domain service
+    │  orchestration and business rules
+    ├──────────────> Repository interface ──> Prisma ──> PostgreSQL
+    └──────────────> Integration interface ──> External provider
+```
 
-`GET /organizations/:organizationId/recommendations` returns both evaluated
-in-scope rules and the unsuppressed failing subset used as recommendations.
-Organization members suppress and restore known static rule IDs through `PUT`
-and `DELETE /organizations/:organizationId/rule-suppressions/:ruleId`.
+`src/app.ts` is the composition root. It creates the Fastify application,
+selects production adapters, installs cross-cutting concerns, and registers
+feature routes. `src/server.ts` owns process startup and graceful shutdown.
 
-Infrastructure, AI, and newsletter `providerId: "none"` selections round-trip as explicit profile answers through `infrastructure_profiles.explicit_no_provider_system_types` and are excluded from organization-provider inventory and document provider lists.
+## Code Organization
 
-`POST /waitlist` is public. It validates the shared payload, applies a fixed-window IP limit, ignores populated honeypot submissions, idempotently upserts normalized emails, and syncs legitimate submissions to Resend contacts. Waitlist contact sync requires `RESEND_API_KEY` and `WAITLIST_RESEND_SEGMENT_ID`, sets Resend properties `source=waitlist` and `notes` to the submitted blocker or an empty string, and adds contacts to the configured `Plyco - Waitlist` segment. `DELETE /waitlist` is a machine-facing route protected by bearer `PLYCO_API_KEY`; it deletes the local waitlist entry by normalized email and best-effort removes the Resend contact from the waitlist segment. After persistence and Resend sync succeed, the public route best-effort captures `waitlist_signup_completed` through the server-side analytics client when `POSTHOG_PROJECT_TOKEN` is configured; analytics failures are logged and do not reject the signup. Production CORS allows configured `CLIENT_URL`, `WEB_URL`, and optional comma-separated `CORS_ALLOWED_ORIGINS`; other product routes remain protected by session authentication unless explicitly documented otherwise.
+```text
+src/
+  app.ts              dependency composition and route registration
+  server.ts           process lifecycle
+  config.ts           environment-backed runtime configuration
+  features/           vertically owned HTTP and application modules
+  infrastructure/     framework, persistence-adjacent, and provider adapters
+data/                  version-controlled runtime definitions
+tests/                 API-level integration tests
+```
 
-OpenAPI documentation is served from the API process when documentation is enabled. Local and non-production environments enable it by default; production disables it unless `API_DOCS_ENABLED=true` is set. The Scalar API reference is available at `/docs`, with machine-readable OpenAPI output at `/docs/json` and `/docs/yaml`. The OpenAPI document is built from an explicit route catalog in `src/infrastructure/openapi.ts` and converts shared Zod DTO schemas with Zod's native JSON Schema conversion. Route handlers still perform their existing manual validation, so API route additions, removals, or request/response contract changes must update the OpenAPI catalog in the same change.
+Feature modules are vertical slices. A feature owns its routes, application
+logic, repository contract, and persistence implementation when applicable.
+Code shared by several features belongs in infrastructure only when it is truly
+cross-cutting; domain ownership should otherwise remain explicit.
 
-`GET /organizations/:organizationId` returns the aggregate organization profile snapshot used by the client, document generation, recommendations, vendors, and graph views. Section writes are granular under the organization route: `/profile`, `/services`, `/data`, `/privacy`, `/infrastructure`, `/security`, and `/access` each validate the changed shared Zod schema and return the refreshed aggregate snapshot. The old combined `security-profile` route is not exposed.
+## Layer Responsibilities
 
-`src/app.ts` is the composition root. It configures Fastify, CORS, Sentry Fastify error capture when `SENTRY_DSN` is set, the central structured error handler, `/health`, OAuth/session auth, feature repositories, the server-side PostHog analytics client, the Resend-backed invitation and magic-link email senders, and feature route registration. Public auth paths are `/auth/google`, `/auth/google/callback`, `/auth/magic-link`, `/auth/magic-link/callback`, `/auth/me`, and `/auth/logout`; workspace paths are scoped under `/organizations/:organizationId`, while `/codes/load` and `/providers/*` are machine-facing global routes protected with bearer `PLYCO_API_KEY`. Team invitation emails require `RESEND_API_KEY` and `INVITATION_EMAIL_FROM`; invitation tokens expire after 30 days, are stored only as SHA-256 hashes, and are accepted through `POST /invitations/:token/accept` by the matching signed-in email. Magic-link tokens expire after 15 minutes, are single-use, and are stored only as SHA-256 hashes. `GET /organizations/:organizationId/recommendations` reads category YAML rules from `apps/api/data/rules`, validates each rule file with Zod, evaluates field predicates, boolean groups, compliance-goal gates, and collection predicates against normalized saved profile, business-activity, and service-provider-usage data, and returns matching recommendations plus severity counts without persisting findings. `POST /organization-lookup/website` is an authenticated pre-organization helper route that accepts a website URL, loads lookup code IDs from Airtable master data, compiles the Langfuse `website_parser` prompt with `websiteUrl` and plain-text code-set IDs, and executes Gemini with Google Search, URL Context, and a structured JSON response schema before anything is persisted. When that response includes a privacy policy URL, the client can call `POST /organization-lookup/privacy-policy`; this route loads privacy code IDs from Airtable, compiles `privacy_policy_parser` with `privacyPolicyUrl` and those code sets, uses the same Gemini tools, and returns organization-level privacy profile defaults. Both routes validate generated output with shared Zod schemas and return editable defaults plus bounded warnings; if Airtable, Gemini, or Langfuse is not configured in local development, the default service returns a manual website fallback and an empty privacy profile. `GET /providers` reads the Airtable-backed provider catalog when configured, including the `System Types` array field and optional `Logo` attachment URL. `POST /codes/load` loads Airtable `Code Sets` and `Codes` into system vocabulary tables using server-side Airtable config. `POST /providers/lookup` resolves provider details from a URL by compiling the Langfuse `resolve_provider` prompt with category IDs from `Provider Categories.Code` and system type IDs from the `provider_system_types` code set only, then executing a Gemini Flash structured JSON request whose category and system type fields are constrained to those same code IDs. `POST /providers/import` upserts the resolved provider organization and provider into Airtable and fails if the resolved provider category does not already exist in the linked provider category table. `src/infrastructure/instrumentation.ts` starts the Langfuse OpenTelemetry span processor before server startup when Langfuse credentials are configured, initializes Sentry when `SENTRY_DSN` is configured, and flushes instrumentation during shutdown. Infrastructure, AI, newsletter, and service-scoped analytics/advertising provider selections resolve selected provider IDs through the Airtable-backed provider catalog before syncing system providers.
+### HTTP layer
 
-The templates endpoint combines system templates read from versioned markdown files in `apps/api/data/templates` with organization-owned templates from the repository. System template files use a simple metadata header followed by markdown content with Jinja-style placeholders. Adding a system template creates an editable organization template with a source system slug; creating from scratch stores an organization template with no source system slug. `POST /organizations/:organizationId/templates/generate` compiles the Langfuse `template_creator` prompt with the user's natural-language request and the complete canonical template-variable schema, requests structured JSON from Gemini, then validates the returned template shape, Nunjucks syntax, and referenced variable paths before persistence. `POST /organizations/:organizationId/templates/edit` compiles the sibling `template_editor` prompt with the requested change, current unsaved draft, and complete schema. It applies the same structured-output and template validation but returns the revision without persisting it. The API also exposes read-only template helper routes: one returns the canonical template variable schema from `apps/api/data/templates/schema.json`, and one renders an unsaved draft against the current organization context for editor preview. Preview rendering does not mutate templates, create generated documents, or create PDF exports. The API does not mutate system template files at runtime.
+Routes translate HTTP requests into typed application calls. They validate
+external input with `@plyco/shared` Zod schemas, apply the appropriate access
+policy, and return DTOs or structured errors. Route handlers should not expose
+Prisma records or provider response shapes.
 
-Document generation builds a normalized context from the current organization profile, all service profiles, organization-level privacy profile, access, infrastructure, and security-control detail, business activities, vendor masters, service-vendor uses, and the template policy metadata, renders template markdown with Nunjucks, creates a PDF export, uploads the PDF as a private object to the Google Cloud Storage bucket configured by `DOCUMENT_PDF_BUCKET`, and stores the generated markdown and PDF object path in `documents`. Generated documents also store a source hash plus a required JSON source fingerprint built from the template content and the normalized context paths referenced by that template. Document summaries recompute the current fingerprint to report `current` or `stale` and return human-readable stale reasons. Service code-backed fields expose both code IDs and resolved labels from organization vocabulary under `services.all`; `services.primary` and the legacy `service.*` alias point to the oldest enriched service for existing templates. Each `services.all[]` item includes service privacy, performed activities with mapped data types, matching vendor uses, matching subprocessors, and data types derived from activity mappings and service vendor data links. Nullable profile fields keep raw values for compatibility and also expose generated `Answered` and `HasValue` flags so templates can distinguish unanswered, intentionally empty, and populated states without raw null checks. Aggregate `services.hasActivities`, `services.cookiesAnswered`, and `services.hasHostingRegion` flags let multi-service template sections be guarded without per-row inspection. Policy metadata exposes `policy.effectiveDate` (editable `organizations.policy_effective_date`) and `policy.lastUpdatedDate`, derived date-only from `organization.updatedAt` so source hashes stay deterministic. Code-backed `security.vulnerabilityManagement.penetrationTestingCadence` resolves a `penetrationTestingCadenceLabel` from the `security_cadences` set; development-security controls, penetration testing, vulnerability disclosure, incident response, and personnel-security fields feed the customer-facing data security policy. That policy renders only substantiated controls, covers all organization services, and refers readers to the subprocessors document instead of embedding named processor or DPA-status details. `vendors.all` contains unique vendor masters, while `vendors.uses`, `vendors.dataProcessors`, and `vendors.subprocessors` contain service-specific processing records plus collection helper flags. Organization privacy fields expose shared request, consent, marketing, newsletter, transfer, officer, production-data-use, and retention-policy details. Security code-backed fields expose both code IDs and resolved labels under `security.*`, while `access.*` and remaining `infrastructure.*` context stays available. Service analytics and advertising providers expose selected provider names plus provider IDs from service-scoped `organization_providers` rows; newsletter providers remain organization-level. PDF downloads are served by an authenticated organization-scoped API route instead of public bucket URLs.
+### Application and domain layer
 
-The privacy-policy system template includes a layered plain-language summary, short explanations for dense legal terms, and static GDPR transparency notices for EU/EEA data-subject rights, consent withdrawal, and supervisory-authority complaints. These notices do not require persisted profile fields because the disclosure language is standard; profile data only controls organization-specific request methods, contacts, response timelines, and consent mechanisms. The Technical and Organizational Measures (TOMs) Annex presents the recorded security controls in a contract-oriented structure and omits unsupported conditional measures rather than implying they are in place.
+Services coordinate business rules and workflows. They depend on interfaces
+for persistence and external capabilities, which keeps domain behavior
+testable and independent of Fastify, Prisma, and vendor SDKs.
+
+### Persistence layer
+
+Repository interfaces are owned by the feature that consumes them. Prisma
+implementations map between the relational model in `@plyco/db` and API-facing
+domain values. In-memory implementations support focused tests and local
+composition without creating a second production architecture.
+
+### Infrastructure layer
+
+Infrastructure adapters encapsulate authentication, object storage, external
+data sources, AI and prompt providers, email, analytics, observability, and API
+documentation. Adapters translate provider failures and payloads before they
+reach feature logic.
+
+## API Boundaries
+
+The API has three deliberate access classes:
+
+- Public routes are individually declared and protected with endpoint-specific
+  validation and abuse controls.
+- Browser workspace routes use encrypted HTTP-only sessions and authorize
+  access through organization membership and role.
+- Machine routes use purpose-specific bearer keys. Organization keys are
+  tenant-scoped and read-only; operational keys are limited to administrative
+  operations.
+
+Organization identity in a path or payload is never sufficient authorization.
+Every organization-scoped operation resolves the caller and verifies access
+before reading or writing organization data.
+
+## Contracts and Errors
+
+`@plyco/shared` is the source of truth for cross-boundary request and response
+schemas. The API may use richer internal types, but it maps them to shared DTOs
+at the HTTP boundary. Database-only fields stay in `@plyco/db` and API internals.
+
+All expected failures use the central structured error format. Unexpected
+errors are logged and reported through observability hooks without leaking
+secrets or internal provider details to callers.
+
+The OpenAPI description is served by the API when enabled. It is maintained
+alongside route changes and describes the externally supported HTTP contract;
+it is not a substitute for runtime validation.
+
+## Data and Consistency
+
+PostgreSQL is the source of truth for persistent application state. Mutations
+that maintain ordering, membership, or relationship invariants must be atomic.
+Tenant identifiers are carried through repository operations so isolation is
+enforced below the route layer as well as at authorization time.
+
+Static, version-controlled definitions may be loaded from `data/`. They remain
+separate from organization-owned state and are validated before use. Private
+binary artifacts live in object storage, with database records retaining their
+metadata and object references.
+
+## External Integrations
+
+External systems are optional capabilities selected in the composition root.
+Feature code consumes narrow interfaces rather than SDK clients. Configuration,
+credentials, retries, telemetry, and provider-specific mapping stay inside the
+adapter boundary.
+
+Operations that are explicitly best-effort, such as analytics or telemetry,
+must not determine the success of the primary transaction. Integrations that
+are required for an operation return structured failures when unavailable.
+
+## Operability
+
+The service provides a health endpoint, structured logging, centralized error
+handling, graceful shutdown, and optional tracing and error reporting. CORS is
+configured from trusted browser origins. API documentation is normally enabled
+outside production and opt-in in production.
+
+The runtime is stateless. Durable state belongs in PostgreSQL or object storage,
+which allows multiple API instances without process-local coordination.
+
+## Testing and Evolution
+
+- Test domain behavior through injected repositories and provider interfaces.
+- Use API-level tests for routing, validation, authentication, authorization,
+  error mapping, and adapter composition.
+- Keep feature boundaries intact when adding routes; do not put business logic
+  in `app.ts` or generic infrastructure helpers.
+- Update shared schemas, OpenAPI metadata, and consumers together when the HTTP
+  contract changes.
+- Update this document only when API layering, trust boundaries, composition,
+  persistence strategy, or integration architecture changes.

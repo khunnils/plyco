@@ -6,7 +6,9 @@ import { describe, expect, it } from "vitest";
 
 import { createTestApp } from "./helpers.js";
 import {
+  documentStaleReasons,
   documentSourceFingerprint,
+  evaluateDocumentFreshness,
   Jinja2Renderer,
   ReportContextBuilder,
 } from "../src/features/documents/document-generation.js";
@@ -32,6 +34,77 @@ import {
 import { testVocabularyCodeSets } from "./vocabulary-fixtures.js";
 
 describe("documents / templates API", () => {
+  it("only fingerprints referenced user-data fields", () => {
+    const content =
+      "{% if policy.effectiveDate %}{{ policy.effectiveDate }}{% endif %}" +
+      "{% if policy.lastUpdatedDate %}{{ policy.lastUpdatedDate }}{% endif %}" +
+      "{% for service in services.all %}{{ service.name }}{% endfor %}";
+    const sourceTemplate = { content };
+    const previousContext = {
+      policy: {
+        effectiveDate: "2026-05-15",
+        lastUpdatedDate: "2026-05-15",
+      },
+      services: { all: [{ name: "Acme App" }] },
+    };
+    const currentContext = {
+      policy: {
+        effectiveDate: "2026-05-16",
+        lastUpdatedDate: "2026-05-16",
+      },
+      services: { all: [{ name: "Acme Cloud" }] },
+    };
+    const previousFingerprint = documentSourceFingerprint(
+      sourceTemplate,
+      previousContext,
+    );
+    const currentFingerprint = documentSourceFingerprint(
+      sourceTemplate,
+      currentContext,
+    );
+
+    expect(currentFingerprint.entries.map(({ path }) => path)).toEqual([
+      "services.all.name",
+    ]);
+    expect(
+      documentStaleReasons(previousFingerprint, currentFingerprint),
+    ).toEqual(["Name changed."]);
+  });
+
+  it("keeps legacy fingerprints current when only derived policy fields differ", () => {
+    const sourceTemplate = {
+      content: "{{ policy.effectiveDate }} {{ company.name }}",
+    };
+    const context = {
+      policy: { effectiveDate: "2026-05-16" },
+      company: { name: "Acme" },
+    };
+    const currentFingerprint = documentSourceFingerprint(sourceTemplate, context);
+    const legacyFingerprint = {
+      ...currentFingerprint,
+      entries: [
+        ...currentFingerprint.entries,
+        {
+          path: "policy.effectiveDate",
+          label: "Effective date",
+          valueHash: "legacy-date-hash",
+          summary: { display: "2026-05-15", names: ["2026-05-15"] },
+        },
+      ],
+    };
+
+    expect(
+      evaluateDocumentFreshness({
+        context,
+        document: {
+          sourceHash: "legacy-source-hash",
+          sourceFingerprint: legacyFingerprint,
+        },
+        template: sourceTemplate,
+      }),
+    ).toEqual({ status: "current", staleReasons: [] });
+  });
+
   it("builds report context with organization aliases and vendor collections", () => {
     const snapshot: SecurityProgramSnapshot = {
       organization: {

@@ -1016,16 +1016,14 @@ export function evaluateDocumentFreshness({
 }) {
   const currentFingerprint = documentSourceFingerprint(template, context);
   const currentSourceHash = sourceHashFromFingerprint(currentFingerprint);
+  const staleReasons =
+    document.sourceHash === currentSourceHash
+      ? []
+      : documentStaleReasons(document.sourceFingerprint, currentFingerprint);
 
   return {
-    status:
-      document.sourceHash === currentSourceHash
-        ? ("current" as const)
-        : ("stale" as const),
-    staleReasons:
-      document.sourceHash === currentSourceHash
-        ? []
-        : documentStaleReasons(document.sourceFingerprint, currentFingerprint),
+    status: staleReasons.length === 0 ? ("current" as const) : ("stale" as const),
+    staleReasons,
   };
 }
 
@@ -1040,9 +1038,23 @@ export function referencedTemplatePaths(content: string): string[] {
   collectReferencedPaths(ast, new Map(), paths);
 
   return Array.from(paths)
-    .filter((path) => !path.startsWith("loop."))
+    .filter(
+      (path) =>
+        !path.startsWith("loop.") &&
+        !NON_SOURCE_POLICY_PATHS.has(path) &&
+        !Array.from(paths).some(
+          (candidate) =>
+            candidate !== path && candidate.startsWith(`${path}.`),
+        ),
+    )
     .sort();
 }
+
+const NON_SOURCE_POLICY_PATHS = new Set([
+  "policy.effectiveDate",
+  "policy.lastUpdatedDate",
+  "policy.version",
+]);
 
 function stableStringify(value: unknown): string {
   if (value === undefined) {
@@ -1240,15 +1252,8 @@ function collectNamesInto(
   }
 
   if (Array.isArray(value)) {
-    const primitiveStringArray = value.every(
-      (item) => typeof item === "string",
-    );
     for (const item of value) {
-      collectNamesInto(
-        item,
-        names,
-        includePrimitiveStrings && primitiveStringArray,
-      );
+      collectNamesInto(item, names, includePrimitiveStrings);
     }
     return;
   }
