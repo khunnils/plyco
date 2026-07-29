@@ -712,6 +712,7 @@ describe("organizations API", () => {
       services: [
         {
           ...profileBody.services[0],
+          processesCustomerData: false,
           userTypes: [],
           childrenDirected: false,
           minimumUserAge: 0,
@@ -744,6 +745,9 @@ describe("organizations API", () => {
     expect(saveResponse.json().organization.company.handlesPii).toBe(false);
     expect(saveResponse.json().organization.services[0].userTypes).toEqual([]);
     expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0);
+    expect(
+      saveResponse.json().organization.services[0].processesCustomerData,
+    ).toBe(false);
     expect(saveResponse.json().organization.services[0].privacy).toMatchObject({
       usesCookiesOrTrackingTechnologies: false,
       cookieCategories: null,

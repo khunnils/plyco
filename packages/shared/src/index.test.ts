@@ -518,6 +518,7 @@ describe("shared security profile schemas", () => {
     if (result.success) {
       expect(result.data).toEqual({
         sortOrder: 0,
+        processesCustomerData: true,
         serviceName: null,
         serviceDescription: null,
         serviceUrl: null,
@@ -538,6 +539,21 @@ describe("shared security profile schemas", () => {
         },
       });
     }
+  });
+
+  it("defaults legacy services to processing customer data and accepts false", () => {
+    const { processesCustomerData: _processesCustomerData, ...legacyService } =
+      emptyServiceProfile;
+
+    expect(
+      serviceProfileInputSchema.parse(legacyService).processesCustomerData,
+    ).toBe(true);
+    expect(
+      serviceProfileInputSchema.parse({
+        ...emptyServiceProfile,
+        processesCustomerData: false,
+      }).processesCustomerData,
+    ).toBe(false);
   });
 
   it("accepts a populated service profile with code-array fields", () => {

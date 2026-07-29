@@ -93,6 +93,7 @@ const snapshot = (
       {
         id: "svc_1",
         sortOrder: 0,
+        processesCustomerData: true,
         serviceName: "App",
         serviceDescription: "Customer app",
         serviceUrl: "https://app.example",
@@ -116,6 +117,7 @@ const snapshot = (
       {
         id: "svc_2",
         sortOrder: 1,
+        processesCustomerData: true,
         serviceName: "Admin",
         serviceDescription: null,
         serviceUrl: null,

@@ -171,6 +171,7 @@ export const servicePrivacyProfileSchema =
 export const serviceProfileInputSchema = z.object({
   id: z.string().min(1).optional(),
   sortOrder: z.number().int().min(0).default(0),
+  processesCustomerData: z.boolean().default(true),
   serviceName: nullableStringSchema,
   serviceDescription: nullableStringSchema,
   serviceUrl: nullableStringSchema,
@@ -340,6 +341,7 @@ export const emptyCompanyProfile: CompanyProfile = {
 
 export const emptyServiceProfile: ServiceProfileInput = {
   sortOrder: 0,
+  processesCustomerData: true,
   serviceName: null,
   serviceDescription: null,
   serviceUrl: null,

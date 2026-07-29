@@ -8,6 +8,7 @@ import { z } from "zod"
 
 export const serviceBasicsSchema = serviceProfileInputSchema
   .pick({
+    processesCustomerData: true,
     serviceName: true,
     serviceDescription: true,
     serviceUrl: true,
@@ -42,6 +43,7 @@ export const privacyPath = (field: string) =>
 export const serviceBasicsDraft = (
   service: ServiceProfileInput
 ): ServiceBasicsDraft => ({
+  processesCustomerData: service.processesCustomerData,
   serviceName: service.serviceName,
   serviceDescription: service.serviceDescription,
   serviceUrl: service.serviceUrl,

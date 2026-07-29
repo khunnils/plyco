@@ -54,7 +54,8 @@ activities to the primary service, links the fixed Operate marketing website
 activity to the Marketing website service, saves all onboarding data types in
 the seeded security profile, adds selected providers to organization inventory,
 and then opens the workspace. The Marketing website service includes a fixed
-Website visitor data type for basic visitor, analytics, and inquiry data.
+Website visitor data type for basic visitor, analytics, and inquiry data and is
+marked as not processing customer data.
 Provider selections do not create service-specific provider usage during setup.
 Compliance goal choices shown during onboarding come from the configured
 vocabulary, including CCPA and ISO 27001 when present. Technology provider
@@ -91,9 +92,11 @@ sets remain read-only.
 
 ## Service Cookies
 
-The General panel in Service details records whether the service uses cookies or
-similar tracking technologies. The dedicated Cookies tab is shown only when
-this answer is Yes.
+The General panel in Service details records whether the service processes
+customer data and whether it uses cookies or similar tracking technologies.
+Services that do not process customer data remain part of the workspace but are
+excluded from customer-facing processor and subprocessor disclosures. The
+dedicated Cookies tab is shown only when the cookies answer is Yes.
 The category panel always presents the four fixed categories—Necessary,
 Preferences, Analytics, and Marketing—in a responsive two-column card layout.
 Each category has an autosaving enabled switch. Enabled cards also show an

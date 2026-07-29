@@ -275,6 +275,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private serviceData(input: ServiceProfileInput) {
     return {
+      processesCustomerData: input.processesCustomerData,
       serviceName: input.serviceName,
       serviceDescription: input.serviceDescription,
       serviceUrl: input.serviceUrl,

@@ -171,22 +171,31 @@ export class ReportContextBuilder {
     providers: Array<Record<string, unknown>>,
     providerUsage: Array<Record<string, unknown>>,
   ) {
+    const customerDataServiceIds = new Set(
+      services
+        .filter((service) => service.processesCustomerData === true)
+        .map((service) => service.id),
+    );
+    const customerDataProviderUsage = providerUsage.filter((usage) =>
+      customerDataServiceIds.has(usage.serviceId),
+    );
+
     return {
       all: providers,
       uses: providerUsage,
-      dataProcessors: providerUsage.filter((usage) =>
+      dataProcessors: customerDataProviderUsage.filter((usage) =>
         ["limited", "subprocessor"].includes(String(usage.dataProcessingLevel)),
       ),
-      subprocessors: providerUsage.filter(
+      subprocessors: customerDataProviderUsage.filter(
         (usage) => usage.dataProcessingLevel === "subprocessor",
       ),
-      byService: this.providersByService(services, providerUsage),
+      byService: this.providersByService(services, customerDataProviderUsage),
       dataProcessorsAnswered: true,
-      dataProcessorsHasValue: providerUsage.some((usage) =>
+      dataProcessorsHasValue: customerDataProviderUsage.some((usage) =>
         ["limited", "subprocessor"].includes(String(usage.dataProcessingLevel)),
       ),
       subprocessorsAnswered: true,
-      subprocessorsHasValue: providerUsage.some(
+      subprocessorsHasValue: customerDataProviderUsage.some(
         (usage) => usage.dataProcessingLevel === "subprocessor",
       ),
     };
@@ -268,8 +277,9 @@ export class ReportContextBuilder {
     const advertisingProviders = serviceProviderUsage.filter(
       (usage) => usage.systemType === "advertising",
     );
-    const allSubprocessorsDataRegion =
-      this.allSubprocessorsDataRegion(serviceProviderUsage);
+    const allSubprocessorsDataRegion = service.processesCustomerData
+      ? this.allSubprocessorsDataRegion(serviceProviderUsage)
+      : "";
     const serviceActivities = activities
       .filter((activity) => service.businessActivityIds.includes(activity.id))
       .map((activity) =>
@@ -290,6 +300,7 @@ export class ReportContextBuilder {
 
     return {
       id: service.id,
+      processesCustomerData: service.processesCustomerData,
       name: service.serviceName,
       description: service.serviceDescription,
       url: service.serviceUrl,
@@ -380,9 +391,11 @@ export class ReportContextBuilder {
       vendorUses: serviceProviderUsage,
       providers: serviceProviderUsage,
       vendors: serviceProviderUsage,
-      subprocessors: serviceProviderUsage.filter(
-        (usage) => usage.dataProcessingLevel === "subprocessor",
-      ),
+      subprocessors: service.processesCustomerData
+        ? serviceProviderUsage.filter(
+            (usage) => usage.dataProcessingLevel === "subprocessor",
+          )
+        : [],
       dataTypes: dataTypes.filter(
         (dataType) =>
           dataTypeNames.has(String(dataType.name)) ||
@@ -899,19 +912,21 @@ export class ReportContextBuilder {
     services: Array<Record<string, unknown>>,
     providers: Array<Record<string, unknown>>,
   ) {
-    return services.map((service) => {
-      const activeProviders = providers.filter(
-        (provider) =>
-          provider.serviceId === service.id &&
-          provider.dataProcessingLevel !== "none",
-      );
-      return {
-        serviceId: service.id,
-        serviceName: service.name,
-        providers: activeProviders,
-        vendors: activeProviders,
-      };
-    });
+    return services
+      .filter((service) => service.processesCustomerData === true)
+      .map((service) => {
+        const activeProviders = providers.filter(
+          (provider) =>
+            provider.serviceId === service.id &&
+            provider.dataProcessingLevel !== "none",
+        );
+        return {
+          serviceId: service.id,
+          serviceName: service.name,
+          providers: activeProviders,
+          vendors: activeProviders,
+        };
+      });
   }
 }
 

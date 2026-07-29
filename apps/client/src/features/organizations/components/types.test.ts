@@ -62,6 +62,7 @@ describe("onboarding profile helpers", () => {
     })
 
     expect(draft.websiteService).toMatchObject({
+      processesCustomerData: false,
       serviceName: MARKETING_WEBSITE_SERVICE_NAME,
       serviceUrl: "https://acme.example",
     })
@@ -146,10 +147,12 @@ describe("onboarding profile helpers", () => {
 
     expect(profile.services).toEqual([
       expect.objectContaining({
+        processesCustomerData: true,
         serviceName: "Acme",
         businessActivityIds: ["activity_primary"],
       }),
       expect.objectContaining({
+        processesCustomerData: false,
         serviceName: MARKETING_WEBSITE_SERVICE_NAME,
         businessActivityIds: ["activity_website"],
       }),

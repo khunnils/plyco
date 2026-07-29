@@ -4,6 +4,8 @@ export const serviceHelperText = {
   serviceUrl: "The main URL where users access this service, if it has one.",
   serviceDescription:
     "A short summary of what the service does and who uses it.",
+  processesCustomerData:
+    "Whether this service processes customer data.",
   businessActivityIds:
     "The business activities this service supports, such as account management or billing.",
   userTypes: "The kinds of people who use the service directly or indirectly.",

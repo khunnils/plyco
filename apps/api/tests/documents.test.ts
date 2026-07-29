@@ -223,6 +223,7 @@ describe("documents / templates API", () => {
       }),
     ]);
     expect(context.services.all[0]).toMatchObject({
+      processesCustomerData: true,
       vendors: expect.arrayContaining([
         expect.objectContaining({ name: "GitHub" }),
         expect.objectContaining({ name: "Stripe" }),
@@ -230,6 +231,121 @@ describe("documents / templates API", () => {
       subprocessors: [expect.objectContaining({ name: "Stripe" })],
       dataTypes: [expect.objectContaining({ name: "Customer account data" })],
     });
+  });
+
+  it("excludes non-customer-data services from processor disclosures", async () => {
+    const marketingService = {
+      ...storedService,
+      id: "service-marketing",
+      processesCustomerData: false,
+      serviceName: "Marketing website",
+    };
+    const marketingUsage = {
+      id: "vendor-use-marketing",
+      ...subprocessorUseBody,
+      serviceId: marketingService.id,
+      serviceName: marketingService.serviceName,
+      vendorName: "Stripe",
+      createdAt: "2026-05-15T00:00:00.000Z",
+      updatedAt: "2026-05-15T00:00:00.000Z",
+    };
+    const context = new ReportContextBuilder().build({
+      organization: {
+        id: "org-test",
+        ...profileBody,
+        services: [marketingService],
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+      },
+      businessActivities: [],
+      vendors: [
+        {
+          id: "vendor-subprocessor",
+          ...subprocessorBody,
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+      ],
+      serviceVendorUses: [marketingUsage],
+    });
+
+    expect(context.services.all).toEqual([
+      expect.objectContaining({
+        name: "Marketing website",
+        processesCustomerData: false,
+        vendors: [expect.objectContaining({ name: "Stripe" })],
+        subprocessors: [],
+        privacy: expect.objectContaining({
+          allSubprocessorsDataRegion: "",
+          allSubprocessorsDataRegionLabel: "",
+        }),
+      }),
+    ]);
+    expect(context.vendors.uses).toEqual([
+      expect.objectContaining({ name: "Stripe" }),
+    ]);
+    expect(context.vendors.dataProcessors).toEqual([]);
+    expect(context.vendors.subprocessors).toEqual([]);
+    expect(context.vendors.byService).toEqual([]);
+    expect(context.vendors.dataProcessorsHasValue).toBe(false);
+    expect(context.vendors.subprocessorsHasValue).toBe(false);
+
+    const includedContext = new ReportContextBuilder().build({
+      organization: {
+        id: "org-test",
+        ...profileBody,
+        services: [{ ...marketingService, processesCustomerData: true }],
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+      },
+      businessActivities: [],
+      vendors: [
+        {
+          id: "vendor-subprocessor",
+          ...subprocessorBody,
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+      ],
+      serviceVendorUses: [marketingUsage],
+    });
+    const sourceTemplate = {
+      content:
+        "{% for group in vendors.byService %}{{ group.serviceName }}{% endfor %}",
+    };
+
+    expect(
+      documentStaleReasons(
+        documentSourceFingerprint(sourceTemplate, context),
+        documentSourceFingerprint(sourceTemplate, includedContext),
+      ),
+    ).toEqual(["Marketing website added to subprocessor list."]);
+
+    const templatePath = fileURLToPath(
+      new URL("../data/templates/subprocessors.md", import.meta.url),
+    );
+    const systemTemplate = parseSystemTemplate(
+      await readFile(templatePath, "utf8"),
+      "subprocessors.md",
+    );
+    const renderedContent = new Jinja2Renderer().render(
+      {
+        id: "template-subprocessors",
+        organizationId: "org-test",
+        sourceSystemTemplateSlug: systemTemplate.slug,
+        versionMajor: 1,
+        versionMinor: 0,
+        createdAt: "2026-05-15T00:00:00.000Z",
+        updatedAt: "2026-05-15T00:00:00.000Z",
+        ...systemTemplate,
+      },
+      context,
+    );
+
+    expect(renderedContent).toContain(
+      "Acme AI does not currently list any vendors that process organization or customer data.",
+    );
+    expect(renderedContent).not.toContain("## Marketing website");
   });
 
   it("adds answered and hasValue helper flags to report context fields", () => {
@@ -779,7 +895,7 @@ describe("documents / templates API", () => {
     );
 
     expect(renderedContent).toContain(
-      "# Acme AI Data Processors and Subprocessors",
+      "# Acme AI Subprocessors",
     );
     expect(renderedContent).toContain("## Acme AI Platform");
     expect(renderedContent).toContain(

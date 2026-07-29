@@ -122,6 +122,14 @@
       "example": "Acme AI Platform"
     },
     {
+      "key": "service.processesCustomerData",
+      "label": "Processes customer data",
+      "type": "boolean",
+      "category": "Service",
+      "description": "Whether the primary service processes customer data and is included in processor and subprocessor disclosures.",
+      "example": true
+    },
+    {
       "key": "service.description",
       "label": "Service description",
       "type": "string",
@@ -322,6 +330,7 @@
       "example": [
         {
           "id": "service_1",
+          "processesCustomerData": true,
           "name": "Acme AI Platform",
           "description": "Cloud software for managing customer security reviews",
           "url": "https://app.acme.example",
@@ -371,6 +380,13 @@
           "type": "string",
           "description": "Service name.",
           "example": "Acme AI Platform"
+        },
+        {
+          "key": "processesCustomerData",
+          "label": "Processes customer data",
+          "type": "boolean",
+          "description": "Whether this service is included in processor and subprocessor disclosures.",
+          "example": true
         },
         {
           "key": "description",
@@ -606,6 +622,7 @@
       "description": "The oldest service profile, also exposed through service.* for existing templates.",
       "example": {
         "id": "service_1",
+        "processesCustomerData": true,
         "name": "Acme AI Platform",
         "url": "https://app.acme.example"
       }
@@ -1863,7 +1880,7 @@
       "label": "Data processors",
       "type": "collection",
       "category": "Vendors",
-      "description": "Vendors whose data processing level is limited or subprocessor.",
+      "description": "Vendors used by customer-data-processing services whose data processing level is limited or subprocessor.",
       "example": [
         {
           "name": "GitHub",
@@ -1973,7 +1990,7 @@
       "label": "Subprocessors",
       "type": "collection",
       "category": "Vendors",
-      "description": "Vendors whose data processing level is subprocessor.",
+      "description": "Vendors used by customer-data-processing services whose data processing level is subprocessor.",
       "example": [
         {
           "name": "Stripe",
@@ -2098,7 +2115,7 @@
       "label": "Vendors by service",
       "type": "collection",
       "category": "Vendors",
-      "description": "Vendor inventory grouped by the service each vendor supports.",
+      "description": "Processing vendors grouped by customer-data-processing service.",
       "example": [
         {
           "serviceId": "service_1",

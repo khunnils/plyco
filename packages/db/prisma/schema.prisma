@@ -241,6 +241,7 @@ model ServiceProfile {
   organization                           Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
   serviceProviderUsage                   ServiceProviderUsage[]
   businessActivities                     ServiceBusinessActivity[]
+  processesCustomerData                  Boolean                   @default(true) @map("processes_customer_data")
   serviceName                            String?                   @map("service_name")
   serviceDescription                     String?                   @map("service_description")
   serviceUrl                             String?                   @map("service_url")

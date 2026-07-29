@@ -485,6 +485,7 @@ const profileInputFromOrganization = (
       ? organization.services.map((service) => ({
           id: service.id,
           sortOrder: service.sortOrder,
+          processesCustomerData: service.processesCustomerData,
           serviceName: service.serviceName,
           serviceDescription: service.serviceDescription,
           serviceUrl: service.serviceUrl,

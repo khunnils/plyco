@@ -610,6 +610,7 @@ describe("dashboard progress", () => {
           {
             id: "svc_1",
             sortOrder: 0,
+            processesCustomerData: true,
             serviceName: "App",
             serviceDescription: "Customer app",
             serviceUrl: "https://app.example",

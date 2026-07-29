@@ -76,6 +76,11 @@ export const ServiceBasicsPanel = ({
               serviceHelperText.serviceDescription,
             ],
             [
+              "Processes customer data",
+              boolText(service.processesCustomerData),
+              serviceHelperText.processesCustomerData,
+            ],
+            [
               "Uses cookies or tracking technologies",
               boolText(service.privacy.usesCookiesOrTrackingTechnologies),
               serviceHelperText.usesCookiesOrTrackingTechnologies,

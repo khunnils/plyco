@@ -54,6 +54,14 @@ export const ServiceBasicsFormFields = ({
     <div className="md:col-span-2">
       <ToggleField
         control={control}
+        helperText={serviceHelperText.processesCustomerData}
+        label="Processes customer data"
+        name={basicsPath("processesCustomerData")}
+      />
+    </div>
+    <div className="md:col-span-2">
+      <ToggleField
+        control={control}
         helperText={serviceHelperText.usesCookiesOrTrackingTechnologies}
         label="Uses cookies or tracking technologies"
         name={basicsPath("usesCookiesOrTrackingTechnologies")}

@@ -140,6 +140,7 @@ export function createTestApp(options: Partial<CreateAppOptions> = {}) {
 }
 
 export const serviceBody = {
+  processesCustomerData: true,
   serviceName: "Acme AI Platform",
   serviceDescription: "Cloud software for managing customer security reviews",
   serviceUrl: "https://app.acme.example",

@@ -168,6 +168,7 @@ export const defaultWebsiteService = (
   website: string | null
 ): ServiceProfileInput => ({
   ...emptyServiceProfile,
+  processesCustomerData: false,
   serviceName: MARKETING_WEBSITE_SERVICE_NAME,
   serviceDescription: "Public website for marketing and inbound inquiries.",
   serviceUrl: website,

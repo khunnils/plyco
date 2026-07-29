@@ -56,6 +56,7 @@ export function mapOrganizationRecord(record: {
   serviceProfile?: {
     id: string;
     sortOrder: number;
+    processesCustomerData: boolean;
     serviceName: string | null;
     serviceDescription: string | null;
     serviceUrl: string | null;
@@ -80,6 +81,7 @@ export function mapOrganizationRecord(record: {
   services?: Array<{
     id: string;
     sortOrder: number;
+    processesCustomerData: boolean;
     serviceName: string | null;
     serviceDescription: string | null;
     serviceUrl: string | null;
@@ -330,6 +332,7 @@ export function mapOrganizationRecord(record: {
           serviceProfileSchema.parse({
             id: service.id,
             sortOrder: service.sortOrder,
+            processesCustomerData: service.processesCustomerData,
             serviceName: service.serviceName,
             serviceDescription: service.serviceDescription,
             serviceUrl: service.serviceUrl,
