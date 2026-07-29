@@ -17,7 +17,10 @@ import { LlmTemplateEditorService } from "../src/features/documents/template-edi
 import { type LlmJsonClient } from "../src/infrastructure/llm-client.js";
 import { type PromptClient } from "../src/infrastructure/prompt-client.js";
 import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js";
-import { parseSystemTemplate } from "../src/infrastructure/system-templates.js";
+import {
+  FileSystemTemplateSource,
+  parseSystemTemplate,
+} from "../src/infrastructure/system-templates.js";
 
 import {
   noProcessingVendorBody,
@@ -32,6 +35,29 @@ import {
   vendorUseBody,
 } from "./helpers.js";
 import { testVocabularyCodeSets } from "./vocabulary-fixtures.js";
+
+const loadDataSecuritySummaryTemplate = async () => {
+  const systemTemplate = (
+    await new FileSystemTemplateSource().listSystemTemplates()
+  ).find(
+    (template) => template.slug === "data-security-summary",
+  );
+
+  if (!systemTemplate) {
+    throw new Error("Data Security Summary system template not found.");
+  }
+
+  return {
+    id: "template-data-security-summary",
+    organizationId: "org-test",
+    sourceSystemTemplateSlug: systemTemplate.slug,
+    versionMajor: 1,
+    versionMinor: 0,
+    createdAt: "2026-05-15T00:00:00.000Z",
+    updatedAt: "2026-05-15T00:00:00.000Z",
+    ...systemTemplate,
+  };
+};
 
 describe("documents / templates API", () => {
   it("only fingerprints referenced user-data fields", () => {
@@ -878,6 +904,213 @@ describe("documents / templates API", () => {
     );
     expect(renderedContent).toContain("SCCs, Data Privacy Framework");
     expect(renderedContent).toContain("Encryption at rest using AES-256");
+  });
+
+  it("renders a concise data security summary without internal details", async () => {
+    const template = await loadDataSecuritySummaryTemplate();
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [
+            storedService,
+            {
+              id: "service-admin",
+              ...serviceBody,
+              serviceName: "Acme Admin",
+              privacy: {
+                ...serviceBody.privacy,
+                primaryHostingRegion: "eu",
+              },
+              createdAt: "2026-05-16T00:00:00.000Z",
+              updatedAt: "2026-05-16T00:00:00.000Z",
+            },
+          ],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [
+          {
+            id: "vendor-subprocessor",
+            ...subprocessorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        serviceVendorUses: [
+          {
+            id: "vendor-use-subprocessor",
+            ...subprocessorUseBody,
+            vendorName: "Stripe",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(template).toMatchObject({
+      slug: "data-security-summary",
+      name: "Data Security Summary",
+      description: expect.stringContaining("early customer security"),
+    });
+    expect(renderedContent).toContain("# Acme AI Data Security Summary");
+    expect(renderedContent).toContain(
+      "- **Acme AI Platform**: Cloud software for managing customer security reviews — primarily hosted in United States.",
+    );
+    expect(renderedContent).toContain(
+      "- **Acme Admin**: Cloud software for managing customer security reviews — primarily hosted in European Union.",
+    );
+    expect(renderedContent).toContain("**Customer account data**");
+    expect(renderedContent).toContain("Profile and billing contact details");
+    expect(renderedContent).toContain("## Access and identity");
+    expect(renderedContent).toContain(
+      "Multi-factor authentication is required for workforce access",
+    );
+    expect(renderedContent).toContain("Data at rest is encrypted using AES-256");
+    expect(renderedContent).toContain(
+      "Data in transit is protected using TLS 1.2 or higher",
+    );
+    expect(renderedContent).toContain("## Secure development and monitoring");
+    expect(renderedContent).toContain("known vulnerabilities weekly");
+    expect(renderedContent).toContain(
+      "Independent third parties perform penetration testing annually.",
+    );
+    expect(renderedContent).toContain("## Resilience and incident management");
+    expect(renderedContent).toContain("backed up daily");
+    expect(renderedContent).toContain(
+      "Backup restoration is tested quarterly",
+    );
+    expect(renderedContent).toContain(
+      "affected customers are notified within 72 hours",
+    );
+    expect(renderedContent).toContain(
+      "Customer notifications are delivered via email notice, status page",
+    );
+    expect(renderedContent).toContain("## Supplier safeguards");
+    expect(renderedContent).toContain("reviewed annually");
+    expect(renderedContent).toContain("security@acme.example");
+    expect(renderedContent).toContain("not a substitute for contractual terms");
+    expect(renderedContent).not.toContain("Stripe");
+    expect(renderedContent).not.toContain("GitHub");
+    expect(renderedContent).not.toContain("AWS KMS");
+    expect(renderedContent).not.toContain("within 7 days");
+    expect(renderedContent).not.toContain("within 30 days");
+    expect(renderedContent).not.toContain("2026-05-20");
+    expect(renderedContent).not.toContain("2026-05-21");
+  });
+
+  it("omits disabled and none-valued controls from the data security summary", async () => {
+    const template = await loadDataSecuritySummaryTemplate();
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          privacy: {
+            ...profileBody.privacy,
+            productionDataInDevelopment: true,
+            retentionPolicyExists: false,
+          },
+          infrastructure: {
+            ...profileBody.infrastructure,
+            organizationProviders: [],
+            encryptedDevicesRequired: false,
+            backupsEnabled: false,
+            centralizedLoggingEnabled: false,
+            securityMonitoring: "none",
+            atRestAlgorithm: "none",
+            inTransitMinimumTlsVersion: "none",
+            keyManagementProvider: "none",
+            backupCadence: "none",
+            restoreTestingCadence: "none",
+            vendorReviewRequired: false,
+            vendorReviewCadence: "none",
+            dpaRequiredForProcessors: false,
+            encryptionAtRest: false,
+            encryptionInTransit: false,
+          },
+          security: {
+            ...profileBody.security,
+            codeReviewRequired: false,
+            dependencySecurityMonitoring: false,
+            secretScanning: false,
+            automatedTestingBeforeDeployment: false,
+            cicdDeploymentProcess: false,
+            productionDeploymentApprovalRequired: false,
+            scanningCadence: "none",
+            penetrationTestingStrategy: "none",
+            penetrationTestingCadence: "none",
+            penetrationTestLastDate: null,
+            patchingSlaCriticalDays: null,
+            patchingSlaCriticalDaysStatus: null,
+            patchingSlaHighDays: null,
+            patchingSlaHighDaysStatus: null,
+            vulnerabilityDisclosureProgramExists: false,
+            vulnerabilityDisclosureUrl: null,
+            incidentResponsePlanExists: false,
+            incidentNotificationTimeline: null,
+            customerNotificationProcess: [],
+            incidentResponseLastTestedDate: null,
+          },
+          dataHandling: { dataTypesStored: [] },
+          access: {
+            ...profileBody.access,
+            mfaRequired: false,
+            ssoEnabled: false,
+            sharedAccountsExist: true,
+            offboardingProcessExists: false,
+            accessReviewsPerformed: false,
+            leastPrivilege: false,
+            roleBasedAccess: false,
+            accessReviewCadence: "none",
+            adminApprovalRequired: false,
+            passwordManagerRequired: false,
+          },
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [],
+        serviceVendorUses: [],
+      },
+      template,
+      [],
+      vocabulary,
+    );
+    const renderedContent = new Jinja2Renderer().render(template, context);
+
+    expect(renderedContent).toContain("# Acme AI Data Security Summary");
+    expect(renderedContent).toContain("primarily hosted in United States");
+    expect(renderedContent).toContain("security@acme.example");
+    expect(renderedContent).not.toContain("## Access and identity");
+    expect(renderedContent).not.toContain("## Encryption and data handling");
+    expect(renderedContent).not.toContain(
+      "## Secure development and monitoring",
+    );
+    expect(renderedContent).not.toContain(
+      "## Resilience and incident management",
+    );
+    expect(renderedContent).not.toContain("## Supplier safeguards");
+    expect(renderedContent).not.toContain("Production customer data is not used");
+    expect(renderedContent).not.toContain("None");
+    expect(renderedContent).not.toContain("none basis");
   });
 
   it("renders the data security policy from current profile fields", async () => {

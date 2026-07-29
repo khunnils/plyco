@@ -1,43 +1,101 @@
 ---
-const reports = [
-	{ code: "PP", title: "Privacy policy", position: "left-[3%] top-[3%]" },
-	{ code: "SP", title: "Security policy", position: "left-0 top-[22%]" },
-	{ code: "DPA", title: "Data processing agreement", position: "left-[2%] top-[41%]" },
-	{ code: "TC", title: "Trust center", position: "left-0 top-[60%]" },
-	{ code: "RoPA", title: "Records of processing", position: "left-[7%] top-[79%]" },
+const icons = {
+	activities: `
+		<rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+		<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+		<path d="M12 11h4"></path>
+		<path d="M12 16h4"></path>
+		<path d="M8 11h.01"></path>
+		<path d="M8 16h.01"></path>
+	`,
+	dataCategories: `
+		<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+		<path d="M3 5V19A9 3 0 0 0 21 19V5"></path>
+		<path d="M3 12A9 3 0 0 0 21 12"></path>
+	`,
+	services: `
+		<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+		<path d="m3.3 7 8.7 5 8.7-5"></path>
+		<path d="M12 22V12"></path>
+	`,
+	access: `
+		<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
+		<circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
+	`,
+	infrastructure: `
+		<rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect>
+		<rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect>
+		<line x1="6" x2="6.01" y1="6" y2="6"></line>
+		<line x1="6" x2="6.01" y1="18" y2="18"></line>
+	`,
+	privacy: `
+		<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+		<path d="m9 12 2 2 4-4"></path>
+	`,
+	security: `
+		<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+	`,
+};
+
+const inputs = [
+	{ title: "Activities", icon: icons.activities, position: "left-[3%] top-0" },
+	{ title: "Data categories", icon: icons.dataCategories, position: "left-0 top-[14.5%]" },
+	{ title: "Services", icon: icons.services, position: "left-[2%] top-[29%]" },
+	{ title: "Access profile", icon: icons.access, position: "left-0 top-[43.5%]" },
+	{ title: "Infrastructure", icon: icons.infrastructure, position: "left-[2%] top-[58%]" },
+	{ title: "Privacy profile", icon: icons.privacy, position: "left-0 top-[72.5%]" },
+	{ title: "Security profile", icon: icons.security, position: "left-[3%] top-[87%]" },
+];
+
+const policies = [
+	{ code: "PP", title: "Privacy policy", position: "right-[3%] top-0" },
+	{ code: "SP", title: "Security policy", position: "right-0 top-[12%]" },
+	{ code: "DPA", title: "Data processing agreement", position: "right-[2%] top-[24%]" },
+	{ code: "TC", title: "Trust center", position: "right-0 top-[36%]" },
+	{ code: "RoPA", title: "Records of processing", position: "right-[3%] top-[48%]" },
 ];
 
 const aiClients = [
-	{ name: "Claude", logo: "/claude.svg", position: "right-[3%] top-[11%]" },
-	{ name: "ChatGPT", logo: "/chatgpt.svg", position: "right-0 top-[39%]" },
-	{ name: "Gemini", logo: "/gemini.svg", position: "right-[2%] top-[67%]" },
+	{ name: "Claude", logo: "/claude.svg", position: "right-0 top-[61%]" },
+	{ name: "ChatGPT", logo: "/chatgpt.svg", position: "right-[2%] top-[74%]" },
+	{ name: "Gemini", logo: "/gemini.svg", position: "right-0 top-[87%]" },
 ];
 ---
 
 <div
-	class="relative mx-auto mt-16 min-h-[470px] max-w-[400px] sm:min-h-[540px] sm:max-w-[720px] md:min-h-[600px] md:max-w-5xl"
+	class="relative mx-auto mt-16 min-h-162.5 max-w-100 sm:min-h-172.5 sm:max-w-180 md:min-h-180 md:max-w-5xl"
 	role="img"
-	aria-label="Privacy, security, data processing, trust center, and records of processing templates connect to one company source of truth, alongside connections to Claude, ChatGPT, and Gemini."
+	aria-label="Activities, data categories, services, access, infrastructure, privacy, and security profiles feed one company model. The model produces policies and connects grounded company context to Claude, ChatGPT, and Gemini."
 >
+
 	<svg
-		viewBox="0 0 1000 600"
+		viewBox="0 0 1000 720"
 		preserveAspectRatio="none"
 		class="absolute inset-0 z-0 h-full w-full"
+		width="1000"
+		height="720"
 		aria-hidden="true"
 	>
-		<g fill="none" stroke="#cbd5e1" stroke-width="1.5" vector-effect="non-scaling-stroke">
-			<path d="M350 250 L250 48" />
-			<path d="M350 275 L220 162" />
-			<path d="M350 300 L240 276" />
-			<path d="M350 325 L220 390" />
-			<path d="M350 350 L285 504" />
-			<path d="M650 255 L755 96" />
-			<path d="M650 300 L780 264" />
-			<path d="M650 345 L765 432" />
+		<g fill="none" stroke="#cbd5e1" stroke-width="1.5" vector-effect="non-scaling-stroke" marker-end="url(#flow-arrow)">
+			<path d="M245 32 L350 270" />
+			<path d="M245 136 L350 295" />
+			<path d="M245 240 L350 320" />
+			<path d="M245 344 L350 360" />
+			<path d="M245 448 L350 400" />
+			<path d="M245 552 L350 425" />
+			<path d="M245 656 L350 450" />
+			<path d="M650 270 L755 32" />
+			<path d="M650 295 L755 118" />
+			<path d="M650 320 L755 205" />
+			<path d="M650 345 L755 291" />
+			<path d="M650 370 L755 378" />
+			<path d="M650 400 L755 472" />
+			<path d="M650 425 L755 565" />
+			<path d="M650 450 L755 659" />
 		</g>
 	</svg>
 
-	<div class="absolute left-1/2 top-1/2 z-20 w-full max-w-[150px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-lime-400 bg-white p-4 text-left shadow-[0_24px_70px_rgba(54,83,20,0.17)] sm:max-w-[245px] sm:p-6 md:max-w-[300px] md:rounded-3xl md:p-7" aria-hidden="true">
+	<div class="absolute left-1/2 top-1/2 z-20 w-full max-w-[140px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-lime-400 bg-white p-4 text-left shadow-[0_24px_70px_rgba(54,83,20,0.17)] sm:max-w-[245px] sm:p-6 md:max-w-[300px] md:rounded-3xl md:p-7" aria-hidden="true">
 		<div class="flex h-9 w-9 items-end justify-center gap-1 rounded-xl bg-lime-200 p-2.5 sm:h-11 sm:w-11 md:h-12 md:w-12 md:p-3">
 			<span class="h-2.5 w-1 rounded-full bg-lime-900 md:h-3"></span>
 			<span class="h-5 w-1 rounded-full bg-lime-900 md:h-6"></span>
@@ -48,17 +106,46 @@ const aiClients = [
 		<div class="mt-4 h-1 w-[72%] rounded-full bg-slate-100 sm:mt-5"></div>
 	</div>
 
-	{reports.map((report) => (
+	{inputs.map((input) => (
 		<div
 			class:list={[
 				"absolute z-10 grid w-[118px] grid-cols-[1.65rem_1fr] items-center gap-2 rounded-xl border border-slate-200 bg-white/95 p-2.5 text-left shadow-[0_14px_38px_rgba(15,23,42,0.09)] backdrop-blur sm:w-[190px] sm:grid-cols-[2rem_1fr] sm:p-3 md:w-[240px] md:grid-cols-[2.5rem_1fr] md:gap-3 md:rounded-2xl md:p-4",
-				report.position,
+				input.position,
 			]}
 			aria-hidden="true"
 		>
-			<span class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-[0.43rem] font-extrabold text-lime-900 sm:h-8 sm:w-8 sm:text-[0.52rem] md:h-10 md:w-10 md:text-[0.58rem]">{report.code}</span>
+			<span class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-lime-800 sm:h-8 sm:w-8 md:h-10 md:w-10">
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5"
+					width="24"
+					height="24"
+					set:html={input.icon}
+				></svg>
+			</span>
 			<div class="min-w-0">
-				<strong class="block text-[0.55rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{report.title}</strong>
+				<strong class="block text-[0.55rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{input.title}</strong>
+				<span class="mt-1.5 block h-1 w-[82%] rounded-full bg-slate-200 md:mt-2"></span>
+			</div>
+		</div>
+	))}
+
+	{policies.map((policy) => (
+		<div
+			class:list={[
+				"absolute z-10 grid w-[118px] grid-cols-[1.65rem_1fr] items-center gap-2 rounded-xl border border-lime-300 bg-white/95 p-2.5 text-left shadow-[0_14px_38px_rgba(54,83,20,0.11)] backdrop-blur sm:w-[190px] sm:grid-cols-[2rem_1fr] sm:p-3 md:w-[240px] md:grid-cols-[2.5rem_1fr] md:gap-3 md:rounded-2xl md:p-4",
+				policy.position,
+			]}
+			aria-hidden="true"
+		>
+			<span class="grid h-7 w-7 place-items-center rounded-lg border border-lime-300 bg-lime-100 text-[0.43rem] font-extrabold text-lime-900 sm:h-8 sm:w-8 sm:text-[0.52rem] md:h-10 md:w-10 md:text-[0.58rem]">{policy.code}</span>
+			<div class="min-w-0">
+				<strong class="block text-[0.55rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{policy.title}</strong>
 				<span class="mt-1.5 block h-1 w-[82%] rounded-full bg-slate-200 md:mt-2"></span>
 			</div>
 		</div>
@@ -73,13 +160,12 @@ const aiClients = [
 			aria-hidden="true"
 		>
 			<span class="row-span-2 grid h-7 w-7 place-items-center rounded-lg border border-slate-200 bg-slate-50 sm:h-9 sm:w-9 md:h-11 md:w-11 md:rounded-xl">
-				<img src={client.logo} alt="" class="h-4 w-4 object-contain sm:h-5 sm:w-5 md:h-6 md:w-6" />
+				<img src={client.logo} alt="" width="24" height="24" class="h-4 w-4 object-contain sm:h-5 sm:w-5 md:h-6 md:w-6" />
 			</span>
 			<div class="min-w-0 self-end">
 				<strong class="block text-[0.58rem] leading-tight text-slate-950 sm:text-xs md:text-sm">{client.name}</strong>
 				<span class="mt-1.5 block h-1 w-[86%] rounded-full bg-slate-200 md:mt-2"></span>
 			</div>
-			<span class="col-start-2 w-max rounded-full bg-slate-100 px-2 py-1 text-[0.44rem] font-bold text-slate-500 sm:text-[0.52rem] md:text-[0.6rem]">Connected</span>
 		</div>
 	))}
 </div>

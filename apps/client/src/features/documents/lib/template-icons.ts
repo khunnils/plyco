@@ -6,12 +6,14 @@ import {
   Network,
   Settings2,
   Shield,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react"
 
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   "privacy-policy": Shield,
   "data-security-policy": Lock,
+  "data-security-summary": ShieldCheck,
   "incident-response-plan": AlertTriangle,
   "record-of-processing-activities": ClipboardList,
   subprocessors: Network,
