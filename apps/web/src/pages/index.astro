@@ -1,6 +1,5 @@
 ---
 import DriftFeedbackIllustration from "../components/DriftFeedbackIllustration.astro";
-import FoundationFlowIllustration from "../components/FoundationFlowIllustration.astro";
 import McpReviewIllustration from "../components/McpReviewIllustration.astro";
 import PolicyMapIllustration from "../components/PolicyMapIllustration.astro";
 import PolicyPreviewsIllustration from "../components/PolicyPreviewsIllustration.astro";
@@ -104,18 +103,61 @@ const comparisonRows = [
 				</div>
 			</section>
 
-			<section id="how-it-works" class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
+			<section class="border-y border-slate-200 bg-white px-6 py-14 md:py-24">
 				<div class="mx-auto max-w-6xl text-center">
 					<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">Model the foundations</p>
-					<h2 class="text-5xl mt-4">Model the facts. <br /> <span class="text-slate-500">The rest will follow.</span></h2>
+					<h2 class="heading-section mt-4">Model the facts. <br /> <span class="text-slate-500">The rest will follow.</span></h2>
 					<div class="mt-6 space-y-4 text-lg leading-8 text-slate-600">
 						<p class="font-semibold text-slate-950">Most policy tools start with templates. We start with your business.</p>
 						<p>
 							Define your company profile, privacy posture, infrastructure, security controls, access model, services, data, activities, and providers.
 							<br/>Plyco turns that information into structured documents that stay consistent.
 						</p>
+					</div>
+					<div class="mx-auto mt-12 max-w-4xl rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-[0_24px_70px_rgba(15,23,42,0.1)]">
+						<video
+							class="model-video aspect-[149/120] w-full rounded-xl border border-slate-200 bg-white object-cover"
+							muted
+							loop
+							playsinline
+							controls
+							preload="metadata"
+							aria-label="Plyco company model walkthrough"
+						>
+							<source src="/model.mov" />
+							Your browser does not support embedded video.
+						</video>
+					</div>
 				</div>
-					<FoundationFlowIllustration />
+			</section>
+
+			<section id="how-it-works" class="px-6 py-14 md:py-24">
+				<div class="mx-auto max-w-6xl">
+					<div class="mx-auto max-w-3xl text-center">
+						<p class="text-sm font-bold uppercase tracking-[0.16em] text-lime-700">How it works</p>
+						<h2 class="heading-section mt-4">From company facts to customer-ready answers.</h2>
+						<p class="mt-6 text-lg leading-8 text-slate-600">
+							Build one practical source of truth, then reuse it wherever trust questions show up.
+						</p>
+					</div>
+
+					<ol class="mt-12 grid gap-5 md:grid-cols-3">
+						<li class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_14px_35px_rgba(15,23,42,0.06)]">
+							<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-sm font-black text-slate-950">01</span>
+							<h3 class="mt-6 text-2xl text-slate-950">Capture how you operate</h3>
+							<p class="mt-3 leading-7 text-slate-600">Add your services, data, providers, security practices, and privacy posture through a guided workspace.</p>
+						</li>
+						<li class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_14px_35px_rgba(15,23,42,0.06)]">
+							<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-sm font-black text-slate-950">02</span>
+							<h3 class="mt-6 text-2xl text-slate-950">Generate what you need</h3>
+							<p class="mt-3 leading-7 text-slate-600">Turn those facts into policies, privacy documents, trust pages, and grounded customer answers.</p>
+						</li>
+						<li class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_14px_35px_rgba(15,23,42,0.06)]">
+							<span class="flex h-10 w-10 items-center justify-center rounded-full bg-lime-200 text-sm font-black text-slate-950">03</span>
+							<h3 class="mt-6 text-2xl text-slate-950">Keep everything aligned</h3>
+							<p class="mt-3 leading-7 text-slate-600">Update the source once. Plyco flags gaps and drift before they become questions in a customer review.</p>
+						</li>
+					</ol>
 				</div>
 			</section>
 
@@ -379,8 +421,22 @@ const comparisonRows = [
 				</div>
 			</div>
 		</footer>
-		<script is:inline define:vars={{ apiUrl }}>
-			const form = document.querySelector(".waitlist-form");
+			<script is:inline define:vars={{ apiUrl }}>
+				const modelVideo = document.querySelector(".model-video");
+				const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+				const syncModelVideoPlayback = () => {
+					if (!modelVideo) return;
+					if (reducedMotion.matches) {
+						modelVideo.pause();
+						return;
+					}
+					modelVideo.play().catch(() => {});
+				};
+
+				syncModelVideoPlayback();
+				reducedMotion.addEventListener("change", syncModelVideoPlayback);
+
+				const form = document.querySelector(".waitlist-form");
 
 			form?.addEventListener("submit", async (event) => {
 				event.preventDefault();
