@@ -56,16 +56,16 @@ const policies = [
 ];
 
 const aiClients = [
-	{ name: "Claude", logo: "/claude.svg", position: "right-0 top-[61%]" },
-	{ name: "ChatGPT", logo: "/chatgpt.svg", position: "right-[2%] top-[74%]" },
-	{ name: "Gemini", logo: "/gemini.svg", position: "right-0 top-[87%]" },
+	{ name: "Claude", logo: "/ai-claude.webp", position: "right-0 top-[61%]" },
+	{ name: "ChatGPT", logo: "/ai-chatgpt.webp", position: "right-[2%] top-[74%]" },
+	{ name: "Cursor", logo: "/ai-cursor.webp", position: "right-0 top-[87%]" },
 ];
 ---
 
 <div
 	class="relative mx-auto mt-16 min-h-162.5 max-w-100 sm:min-h-172.5 sm:max-w-180 md:min-h-180 md:max-w-5xl"
 	role="img"
-	aria-label="Activities, data categories, services, access, infrastructure, privacy, and security profiles feed one company model. The model produces policies and connects grounded company context to Claude, ChatGPT, and Gemini."
+	aria-label="Activities, data categories, services, access, infrastructure, privacy, and security profiles feed one company model. The model produces policies and connects grounded company context to Claude, ChatGPT, and Cursor."
 >
 
 	<svg
@@ -161,9 +161,13 @@ const aiClients = [
 			]}
 			aria-hidden="true"
 		>
-			<span class="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.1)] sm:h-12 sm:w-12 md:h-14 md:w-14">
-				<img src={client.logo} alt="" width="24" height="24" class="h-5 w-5 object-contain sm:h-6 sm:w-6 md:h-7 md:w-7" />
-			</span>
+			<img
+				src={client.logo}
+				alt=""
+				width="56"
+				height="56"
+				class="h-10 w-10 rounded-xl object-cover shadow-[0_8px_20px_rgba(15,23,42,0.12)] sm:h-12 sm:w-12 sm:rounded-2xl md:h-14 md:w-14"
+			/>
 		</div>
 	))}
 </div>
