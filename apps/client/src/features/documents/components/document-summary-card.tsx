@@ -48,17 +48,33 @@ export const DocumentSummaryCard = ({
   const publishedDocument = summary.document
 
   return (
-    <article className="group relative flex min-h-80 overflow-hidden border border-slate-200 bg-white shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:border-slate-300 focus-within:shadow-md hover:border-slate-300 hover:shadow-md">
+    <article className="group relative flex min-h-50 overflow-hidden border border-slate-200 bg-white shadow-sm transition-[border-color,box-shadow] duration-200 focus-within:border-slate-300 focus-within:shadow-md hover:border-slate-300 hover:shadow-md">
       <Link
         aria-label={`Edit ${summary.template.name}`}
         className="flex min-w-0 flex-1 cursor-pointer flex-col p-5 outline-none focus-visible:ring-3 focus-visible:ring-slate-100 focus-visible:ring-inset"
         to={`/documents/edit/${summary.template.id}`}
       >
-        <div className="flex items-start justify-between gap-3 pr-8">
+        <div className="flex items-start pr-8">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-slate-100 text-slate-700">
             <TemplateIcon className="size-4" />
           </span>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+        </div>
+
+        <div className="mt-6">
+          <h2 className="text-base font-semibold text-slate-950">
+            {summary.template.name}
+          </h2>
+          {publishedDocument ? (
+            <p className="mt-1 text-xs text-slate-500">
+              Version {summary.template.versionMajor}.
+              {summary.template.versionMinor}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-4 text-xs text-slate-500">
+          <span>{generatedText(summary)}</span>
+          <span className="flex shrink-0 items-center justify-end gap-2">
             {summary.status === "not_generated" ? (
               <Badge variant="outline">Draft</Badge>
             ) : null}
@@ -76,27 +92,7 @@ export const DocumentSummaryCard = ({
                 <AlertTriangle aria-hidden="true" className="size-4" />
               </span>
             ) : null}
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-base font-semibold text-slate-950">
-            {summary.template.name}
-          </h2>
-          {publishedDocument ? (
-            <p className="mt-1 text-xs text-slate-500">
-              Version {summary.template.versionMajor}.
-              {summary.template.versionMinor}
-            </p>
-          ) : null}
-        </div>
-
-        <p className="mt-6 line-clamp-6 text-xs leading-5 whitespace-pre-wrap text-slate-400">
-          {summary.template.content || "Empty template"}
-        </p>
-
-        <div className="mt-auto border-t border-slate-100 pt-4 text-xs text-slate-500">
-          {generatedText(summary)}
+          </span>
         </div>
       </Link>
 
@@ -113,15 +109,19 @@ export const DocumentSummaryCard = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={() =>
+                navigate(
+                  publishedDocument
+                    ? `/documents/view/${publishedDocument.id}`
+                    : `/documents/preview/${summary.template.id}`
+                )
+              }
+            >
+              <Eye /> Preview
+            </DropdownMenuItem>
             {publishedDocument ? (
               <>
-                <DropdownMenuItem
-                  onSelect={() =>
-                    navigate(`/documents/view/${publishedDocument.id}`)
-                  }
-                >
-                  <Eye /> Preview
-                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setIsHistoryOpen(true)}>
                   <History /> History
                 </DropdownMenuItem>
@@ -138,9 +138,9 @@ export const DocumentSummaryCard = ({
                     <Download /> Download PDF
                   </DropdownMenuItem>
                 ) : null}
-                <DropdownMenuSeparator />
               </>
             ) : null}
+            <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onSelect={onDeleteTemplate}>
               <Trash2 /> Delete
             </DropdownMenuItem>

@@ -169,12 +169,12 @@ the editor after both operations succeed.
 Templates appear as paper-like cards that open the template editor when
 selected. A card overflow menu appears on hover or keyboard focus and contains
 the available document actions, including preview, PDF download, history, and
-template deletion. Preview is available only when a published snapshot exists.
-The editor keeps Publish as its primary visible action, provides a subtle back
-control, and groups Save draft, Rename, and Delete in an overflow menu. Drafts
-do not show version information, published documents do not carry a Published
-badge, and an alert icon identifies a published snapshot that is outdated
-relative to its template or source data.
+template deletion. Preview renders the live template for drafts and opens the
+latest stored snapshot for published documents. The editor keeps Publish as its
+primary visible action, provides a subtle back control, and groups Save draft,
+Rename, and Delete in an overflow menu. Drafts do not show version information,
+published documents do not carry a Published badge, and an alert icon identifies
+a published snapshot that is outdated relative to its template or source data.
 
 ## Smart Advisor Recommendations
 
