@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react"
 import { usePostHog } from "@posthog/react"
 import { type DocumentSummary, type TemplateCatalog } from "@plyco/shared"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Ellipsis, Pencil, Save, Trash2 } from "lucide-react"
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
@@ -20,6 +21,13 @@ import {
   useUpdateTemplate,
 } from "@/features/documents/hooks/use-templates"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { DocumentPreview } from "@/features/documents/components/document-preview"
 import { DocumentView } from "@/features/documents/components/document-view"
 import { DocumentsList } from "@/features/documents/components/documents-list"
@@ -47,10 +55,9 @@ export const DocumentsRoutePage = () => {
   const navigate = useNavigate()
   const posthog = usePostHog()
   const { selectedOrganization } = useSelectedOrganization()
-  const [expandedTemplateIds, setExpandedTemplateIds] = useState<string[]>([])
-  const [documentFilters, setDocumentFilters] = useState<
-    Record<string, "current" | "all">
-  >({})
+  const [templateSubmitIntent, setTemplateSubmitIntent] = useState<
+    "save" | "publish" | null
+  >(null)
   const [prevMode, setPrevMode] = useState(mode)
   const [prevId, setPrevId] = useState(id)
   const [templateName, setTemplateName] = useState("Untitled Template")
@@ -73,6 +80,9 @@ export const DocumentsRoutePage = () => {
   const documentsList: DocumentSummary[] = documents.data ?? []
   const selectedTemplate = templatesData.organizationTemplates.find(
     (template) => template.id === id
+  )
+  const selectedTemplateSummary = documentsList.find(
+    (summary) => summary.template.id === id
   )
   const [prevEditingTemplateName, setPrevEditingTemplateName] = useState<
     string | undefined
@@ -110,6 +120,19 @@ export const DocumentsRoutePage = () => {
   )
   const isLoading = templates.isLoading || documents.isLoading
 
+  if (
+    mode === "preview" &&
+    selectedTemplateSummary?.document &&
+    !documents.isLoading
+  ) {
+    return (
+      <Navigate
+        replace
+        to={`/documents/view/${selectedTemplateSummary.document.id}`}
+      />
+    )
+  }
+
   if (mode === "create") {
     return (
       <TemplateCreator
@@ -136,7 +159,7 @@ export const DocumentsRoutePage = () => {
   let bannerTitle = ""
   let bannerSubtitle = ""
   let bannerButtons: ReactNode = null
-  let showRename = false
+  let showBack = false
   let content: ReactNode
 
   if (mode === "add") {
@@ -183,30 +206,79 @@ export const DocumentsRoutePage = () => {
     bannerSubtitle =
       mode === "new"
         ? "Draft a new policy template using markdown and schema variables."
-        : `Edit template version ${selectedTemplate ? `v${selectedTemplate.versionMajor}.${selectedTemplate.versionMinor}` : "1.0"}.`
-    showRename = true
+        : selectedTemplate && selectedTemplateSummary?.document
+          ? `Edit template version v${selectedTemplate.versionMajor}.${selectedTemplate.versionMinor}.`
+          : "Edit this policy template draft."
+    showBack = true
+    const isTemplateMutationPending =
+      createTemplate.isPending ||
+      updateTemplate.isPending ||
+      createDocument.isPending
     bannerButtons = (
       <>
         <Button
-          disabled={
-            mode === "new" ? createTemplate.isPending : updateTemplate.isPending
-          }
+          disabled={isTemplateMutationPending}
           type="submit"
           form="template-form"
+          name="intent"
+          value="publish"
         >
-          {(
-            mode === "new" ? createTemplate.isPending : updateTemplate.isPending
-          )
-            ? "Saving..."
-            : "Save"}
+          {templateSubmitIntent === "publish" && isTemplateMutationPending
+            ? "Publishing..."
+            : "Publish"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => navigate("/documents")}
-        >
-          Cancel
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              aria-label="Template actions"
+              disabled={isTemplateMutationPending || deleteTemplate.isPending}
+              size="icon"
+              type="button"
+              variant="outline"
+            >
+              <Ellipsis />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={() => {
+                const form = window.document.getElementById(
+                  "template-form"
+                ) as HTMLFormElement | null
+                form?.requestSubmit()
+              }}
+            >
+              <Save />
+              {templateSubmitIntent === "save" && isTemplateMutationPending
+                ? "Saving..."
+                : "Save draft"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setIsRenameOpen(true)}>
+              <Pencil /> Rename
+            </DropdownMenuItem>
+            {mode === "edit" && selectedTemplate ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    deleteTemplate.mutate(selectedTemplate.id, {
+                      onSuccess: () => {
+                        posthog.capture(POSTHOG_EVENTS.TEMPLATE_DELETED, {
+                          template_id: selectedTemplate.id,
+                        })
+                        navigate("/documents")
+                      },
+                    })
+                  }}
+                >
+                  <Trash2 />
+                  {deleteTemplate.isPending ? "Deleting..." : "Delete"}
+                </DropdownMenuItem>
+              </>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </>
     )
     content = (
@@ -214,18 +286,28 @@ export const DocumentsRoutePage = () => {
         mode={mode}
         templateName={templateName}
         editingTemplate={selectedTemplate}
-        onCreate={(template) =>
-          createTemplate.mutate(template, {
-            onSuccess: (createdTemplate) => {
-              posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
-                template_id: createdTemplate.id,
-              })
-              navigate("/documents")
-            },
-          })
-        }
-        onUpdate={(template) => {
-          if (!selectedTemplate) return
+        onSaveDraft={(template) => {
+          setTemplateSubmitIntent("save")
+
+          if (mode === "new") {
+            createTemplate.mutate(template, {
+              onSuccess: (createdTemplate) => {
+                posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
+                  template_id: createdTemplate.id,
+                })
+                setTemplateSubmitIntent(null)
+                navigate("/documents")
+              },
+              onError: () => setTemplateSubmitIntent(null),
+            })
+            return
+          }
+
+          if (!selectedTemplate) {
+            setTemplateSubmitIntent(null)
+            return
+          }
+
           updateTemplate.mutate(
             { id: selectedTemplate.id, template },
             {
@@ -233,8 +315,67 @@ export const DocumentsRoutePage = () => {
                 posthog.capture(POSTHOG_EVENTS.TEMPLATE_UPDATED, {
                   template_id: updatedTemplate.id,
                 })
+                setTemplateSubmitIntent(null)
                 navigate("/documents")
               },
+              onError: () => setTemplateSubmitIntent(null),
+            }
+          )
+        }}
+        onPublish={(template) => {
+          setTemplateSubmitIntent("publish")
+
+          const publishTemplate = (templateId: string, name: string) => {
+            createDocument.mutate(
+              { templateId },
+              {
+                onSuccess: (doc) => {
+                  posthog.capture(POSTHOG_EVENTS.DOCUMENT_PUBLISHED, {
+                    template_id: templateId,
+                    template_name: name,
+                    document_id: doc.id,
+                  })
+                  setTemplateSubmitIntent(null)
+                  navigate("/documents")
+                },
+                onError: () => {
+                  setTemplateSubmitIntent(null)
+                  if (mode === "new") {
+                    navigate(`/documents/edit/${templateId}`, { replace: true })
+                  }
+                },
+              }
+            )
+          }
+
+          if (mode === "new") {
+            createTemplate.mutate(template, {
+              onSuccess: (createdTemplate) => {
+                posthog.capture(POSTHOG_EVENTS.TEMPLATE_CREATED, {
+                  template_id: createdTemplate.id,
+                })
+                publishTemplate(createdTemplate.id, createdTemplate.name)
+              },
+              onError: () => setTemplateSubmitIntent(null),
+            })
+            return
+          }
+
+          if (!selectedTemplate) {
+            setTemplateSubmitIntent(null)
+            return
+          }
+
+          updateTemplate.mutate(
+            { id: selectedTemplate.id, template },
+            {
+              onSuccess: (updatedTemplate) => {
+                posthog.capture(POSTHOG_EVENTS.TEMPLATE_UPDATED, {
+                  template_id: updatedTemplate.id,
+                })
+                publishTemplate(updatedTemplate.id, updatedTemplate.name)
+              },
+              onError: () => setTemplateSubmitIntent(null),
             }
           )
         }}
@@ -259,7 +400,9 @@ export const DocumentsRoutePage = () => {
         Close
       </Button>
     )
-    content = (
+    content = documents.isLoading ? (
+      <p className="text-sm text-slate-500">Loading preview...</p>
+    ) : (
       <DocumentPreview
         isLoadingTemplate={templates.isLoading}
         template={selectedTemplate ?? null}
@@ -328,23 +471,7 @@ export const DocumentsRoutePage = () => {
         documents={documentsList}
         organizationName={selectedOrganization?.name ?? "organization"}
         hasTemplates={templatesData.organizationTemplates.length > 0}
-        expandedTemplateIds={expandedTemplateIds}
-        documentFilters={documentFilters}
-        isPublishPending={createDocument.isPending}
         isDownloadPending={downloadDocumentPdf.isPending}
-        onToggleExpand={(templateId) => {
-          setExpandedTemplateIds((prev) =>
-            prev.includes(templateId)
-              ? prev.filter((currentId) => currentId !== templateId)
-              : [...prev, templateId]
-          )
-        }}
-        onDocumentFilterChange={(templateId, filter) => {
-          setDocumentFilters((prev) => ({
-            ...prev,
-            [templateId]: filter,
-          }))
-        }}
         onDeleteTemplate={(templateId) => {
           deleteTemplate.mutate(templateId, {
             onSuccess: () =>
@@ -352,20 +479,6 @@ export const DocumentsRoutePage = () => {
                 template_id: templateId,
               }),
           })
-        }}
-        onPublish={(templateId, templateNameValue) => {
-          createDocument.mutate(
-            { templateId },
-            {
-              onSuccess: (doc) => {
-                posthog.capture(POSTHOG_EVENTS.DOCUMENT_PUBLISHED, {
-                  template_id: templateId,
-                  template_name: templateNameValue,
-                  document_id: doc.id,
-                })
-              },
-            }
-          )
         }}
         onDownloadPdf={(doc) => {
           posthog.capture(POSTHOG_EVENTS.DOCUMENT_PDF_DOWNLOADED, {
@@ -390,9 +503,8 @@ export const DocumentsRoutePage = () => {
           <DocumentsPageBanner
             title={bannerTitle}
             subtitle={bannerSubtitle}
-            showRename={showRename}
             actions={bannerButtons}
-            onRenameClick={() => setIsRenameOpen(true)}
+            onBack={showBack ? () => navigate("/documents") : undefined}
           />
         ) : null}
         {content}

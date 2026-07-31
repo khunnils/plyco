@@ -11,21 +11,30 @@ export const TemplateEditor = ({
   mode,
   templateName,
   editingTemplate,
-  onCreate,
-  onUpdate,
+  onSaveDraft,
+  onPublish,
 }: {
   mode: "new" | "edit"
   templateName: string
   editingTemplate?: Template
-  onCreate: (template: TemplateInput) => void
-  onUpdate: (template: TemplateInput) => void
+  onSaveDraft: (template: TemplateInput) => void
+  onPublish: (template: TemplateInput) => void
 }) => {
+  const onSubmit = (template: TemplateInput, intent: "save" | "publish") => {
+    if (intent === "publish") {
+      onPublish(template)
+      return
+    }
+
+    onSaveDraft(template)
+  }
+
   if (mode === "new") {
     return (
       <TemplateForm
         name={templateName}
         defaultValues={blankTemplate}
-        onSubmit={onCreate}
+        onSubmit={onSubmit}
       />
     )
   }
@@ -38,7 +47,7 @@ export const TemplateEditor = ({
     <TemplateForm
       name={templateName}
       defaultValues={editingTemplate}
-      onSubmit={onUpdate}
+      onSubmit={onSubmit}
     />
   )
 }

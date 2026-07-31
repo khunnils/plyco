@@ -161,7 +161,20 @@ The template editor also provides a natural-language revision field below the
 draft workspace. It sends the current unsaved draft, the requested change, and
 the complete variable schema through the Langfuse `template_editor` prompt.
 Gemini returns a complete revised draft, which replaces the editor contents but
-is not persisted until the user selects Save.
+is not persisted until the user selects Save draft or Publish. Save draft
+persists the template without generating a document. Publish first persists the
+current editor content, then generates a published document snapshot and closes
+the editor after both operations succeed.
+
+Templates appear as paper-like cards that open the template editor when
+selected. A card overflow menu appears on hover or keyboard focus and contains
+the available document actions, including preview, PDF download, history, and
+template deletion. Preview is available only when a published snapshot exists.
+The editor keeps Publish as its primary visible action, provides a subtle back
+control, and groups Save draft, Rename, and Delete in an overflow menu. Drafts
+do not show version information, published documents do not carry a Published
+badge, and an alert icon identifies a published snapshot that is outdated
+relative to its template or source data.
 
 ## Smart Advisor Recommendations
 

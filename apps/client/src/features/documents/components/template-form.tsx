@@ -67,7 +67,7 @@ export const TemplateForm = ({
 }: {
   name: string
   defaultValues: Template | TemplateInput
-  onSubmit: (template: TemplateInput) => void
+  onSubmit: (template: TemplateInput, intent: "save" | "publish") => void
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [schemaSearch, setSchemaSearch] = useState("")
@@ -169,7 +169,11 @@ export const TemplateForm = ({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    onSubmit(draft)
+    const submitter = (event.nativeEvent as SubmitEvent)
+      .submitter as HTMLButtonElement | null
+    const intent = submitter?.value === "publish" ? "publish" : "save"
+
+    onSubmit(draft, intent)
   }
 
   const handleDragStart =
