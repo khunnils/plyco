@@ -30,10 +30,9 @@ model Organization {
   employeeCount         Int?                     @map("employee_count")
   industries            Json?
   regions               Json?
-  handlesPii            Boolean?                 @map("handles_pii")
   handlesSensitiveData  Boolean?                 @map("handles_sensitive_data")
-  storesPii             Boolean?                 @map("stores_pii")
-  storesHealthcareData  Boolean?                 @map("stores_healthcare_data")
+  handlesPersonalData   Boolean?                 @map("handles_personal_data")
+  handlesHealthData     Boolean?                 @map("handles_health_data")
   complianceGoals       Json?                    @map("compliance_goals")
   services              ServiceProfile[]
   privacyProfile        PrivacyProfile?

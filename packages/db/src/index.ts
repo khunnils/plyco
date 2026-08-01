@@ -48,10 +48,9 @@ export function mapOrganizationRecord(record: {
   employeeCount: number | null;
   industries: unknown;
   regions: unknown;
-  handlesPii: boolean | null;
   handlesSensitiveData: boolean | null;
-  storesPii: boolean | null;
-  storesHealthcareData: boolean | null;
+  handlesPersonalData: boolean | null;
+  handlesHealthData: boolean | null;
   complianceGoals: unknown;
   serviceProfile?: {
     id: string;
@@ -222,10 +221,9 @@ export function mapOrganizationRecord(record: {
     employeeCount: record.employeeCount,
     industries: stringArray(record.industries),
     regions: stringArray(record.regions),
-    handlesPii: record.handlesPii,
     handlesSensitiveData: record.handlesSensitiveData,
-    storesPii: record.storesPii,
-    storesHealthcareData: record.storesHealthcareData,
+    handlesPersonalData: record.handlesPersonalData,
+    handlesHealthData: record.handlesHealthData,
     complianceGoals: stringArray(record.complianceGoals),
   });
   const infrastructure = infrastructureProfileSchema.parse({

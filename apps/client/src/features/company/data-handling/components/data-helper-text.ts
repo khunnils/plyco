@@ -1,8 +1,8 @@
 export const dataHelperText = {
-  storesPii:
-    "Whether you store personal data like names, emails, IP addresses, or account details.",
-  storesHealthcareData:
-    "Whether you store health, medical, or wellness-related information.",
+  handlesPersonalData:
+    "Whether you handle personal data like names, emails, IP addresses, or account details.",
+  handlesHealthData:
+    "Whether you handle health, medical, or wellness-related information.",
   encryptionAtRest:
     "Whether stored data is encrypted in databases, disks, backups, or object storage.",
   encryptionInTransit:

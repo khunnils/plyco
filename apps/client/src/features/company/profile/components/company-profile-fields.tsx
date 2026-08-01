@@ -124,12 +124,6 @@ export const CompanyProfileFields = ({
     <div className="grid gap-3">
       <ToggleField
         control={form.control}
-        helperText={companyHelperText.handlesPii}
-        label="Handles PII"
-        name="company.handlesPii"
-      />
-      <ToggleField
-        control={form.control}
         helperText={companyHelperText.handlesSensitiveData}
         label="Handles sensitive data"
         name="company.handlesSensitiveData"

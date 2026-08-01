@@ -86,7 +86,6 @@ describe("shared security profile schemas", () => {
       employeeCount: 0,
       industries: [],
       regions: [],
-      handlesPii: false,
       handlesSensitiveData: false,
       complianceGoals: [],
     });
@@ -184,10 +183,9 @@ describe("shared security profile schemas", () => {
         employeeCount: null,
         industries: [],
         regions: ["us"],
-        handlesPii: true,
         handlesSensitiveData: false,
-        storesPii: true,
-        storesHealthcareData: false,
+        handlesPersonalData: true,
+        handlesHealthData: false,
         complianceGoals: ["soc_2"],
       },
       primaryService: {

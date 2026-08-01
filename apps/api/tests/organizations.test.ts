@@ -72,7 +72,6 @@ const validWebsiteLookupGenerated = {
   address: "1 Market St, San Francisco, CA",
   industries: ["technology_saas"],
   regions: ["us"],
-  handlesPii: true,
   handlesSensitiveData: false,
   handlesHealthData: false,
   handlesPersonalData: true,
@@ -705,7 +704,7 @@ describe("organizations API", () => {
       company: {
         ...profileBody.company,
         industries: [],
-        handlesPii: false,
+        handlesPersonalData: false,
         employeeCount: 1,
         complianceGoals: [],
       },
@@ -742,7 +741,9 @@ describe("organizations API", () => {
 
     expect(saveResponse.statusCode).toBe(200);
     expect(saveResponse.json().organization.company.industries).toEqual([]);
-    expect(saveResponse.json().organization.company.handlesPii).toBe(false);
+    expect(saveResponse.json().organization.company.handlesPersonalData).toBe(
+      false,
+    );
     expect(saveResponse.json().organization.services[0].userTypes).toEqual([]);
     expect(saveResponse.json().organization.services[0].minimumUserAge).toBe(0);
     expect(

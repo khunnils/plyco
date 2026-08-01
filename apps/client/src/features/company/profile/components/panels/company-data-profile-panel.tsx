@@ -15,38 +15,35 @@ import { companyHelperText } from "../company-helper-text"
 import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const dataProfileSchema = companyProfileSchema.pick({
-  handlesPii: true,
   handlesSensitiveData: true,
-  storesPii: true,
-  storesHealthcareData: true,
+  handlesPersonalData: true,
+  handlesHealthData: true,
 })
 
 type DataProfileDraft = z.infer<typeof dataProfileSchema>
 
 const toDataProfileDraft = (company: CompanyProfile): DataProfileDraft => ({
-  handlesPii: company.handlesPii,
   handlesSensitiveData: company.handlesSensitiveData,
-  storesPii: company.storesPii,
-  storesHealthcareData: company.storesHealthcareData,
+  handlesPersonalData: company.handlesPersonalData,
+  handlesHealthData: company.handlesHealthData,
 })
 
 const dataProfileRows = (draft: DataProfileDraft) =>
   [
-    ["Handles PII", boolText(draft.handlesPii), companyHelperText.handlesPii],
     [
       "Sensitive data",
       boolText(draft.handlesSensitiveData),
       companyHelperText.handlesSensitiveData,
     ],
     [
-      "Stores personal data",
-      boolText(draft.storesPii),
-      dataHelperText.storesPii,
+      "Handles personal data",
+      boolText(draft.handlesPersonalData),
+      dataHelperText.handlesPersonalData,
     ],
     [
-      "Stores health data",
-      boolText(draft.storesHealthcareData),
-      dataHelperText.storesHealthcareData,
+      "Handles health data",
+      boolText(draft.handlesHealthData),
+      dataHelperText.handlesHealthData,
     ],
   ] as const
 
@@ -94,27 +91,21 @@ export const CompanyDataProfilePanel = ({
       <EditPanelGrid>
         <ToggleField
           control={form.control}
-          helperText={companyHelperText.handlesPii}
-          label="Handles PII"
-          name="handlesPii"
-        />
-        <ToggleField
-          control={form.control}
           helperText={companyHelperText.handlesSensitiveData}
           label="Handles sensitive data"
           name="handlesSensitiveData"
         />
         <ToggleField
           control={form.control}
-          helperText={dataHelperText.storesPii}
-          label="Stores personal data"
-          name="storesPii"
+          helperText={dataHelperText.handlesPersonalData}
+          label="Handles personal data"
+          name="handlesPersonalData"
         />
         <ToggleField
           control={form.control}
-          helperText={dataHelperText.storesHealthcareData}
-          label="Stores health data"
-          name="storesHealthcareData"
+          helperText={dataHelperText.handlesHealthData}
+          label="Handles health data"
+          name="handlesHealthData"
         />
       </EditPanelGrid>
     </ProfilePanelShell>

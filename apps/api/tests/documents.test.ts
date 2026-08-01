@@ -356,7 +356,7 @@ describe("documents / templates API", () => {
         company: {
           ...profileBody.company,
           industries: [],
-          handlesPii: false,
+          handlesPersonalData: false,
         },
         services: [
           {

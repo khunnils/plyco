@@ -17,7 +17,7 @@ This response pack summarizes security and privacy practices recorded by {{ orga
 | Headquarters or primary country | {{ organization.country or "Not recorded" }} |
 | Employee count | {{ organization.employeeCount or "Not recorded" }} |
 | Compliance goals | {{ organization.complianceGoals | join(", ") or "Not recorded" }} |
-| Handles personally identifiable information | {% if organization.handlesPii == true %}Yes{% elif organization.handlesPii == false %}No{% else %}Not recorded{% endif %} |
+| Handles personal data | {% if organization.handlesPersonalData == true %}Yes{% elif organization.handlesPersonalData == false %}No{% else %}Not recorded{% endif %} |
 | Handles sensitive data | {% if organization.handlesSensitiveData == true %}Yes{% elif organization.handlesSensitiveData == false %}No{% else %}Not recorded{% endif %} |
 
 {% if services.all.length %}
@@ -102,4 +102,3 @@ Recorded processors and subprocessors are available in the organization’s Subp
 ## Contact
 
 Security questions may be sent to {% if organization.securityContactEmail %}{{ organization.securityContactEmail }}{% elif organization.contactEmail %}{{ organization.contactEmail }}{% else %}the organization’s security contact{% endif %}.
-

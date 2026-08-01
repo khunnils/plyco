@@ -44,13 +44,13 @@ export const ProfileDataHandlingFields = ({
     />
     <ToggleField
       control={form.control}
-      label="Stores PII"
-      name="company.storesPii"
+      label="Handles personal data"
+      name="company.handlesPersonalData"
     />
     <ToggleField
       control={form.control}
-      label="Stores healthcare data"
-      name="company.storesHealthcareData"
+      label="Handles health data"
+      name="company.handlesHealthData"
     />
     <ToggleField
       control={form.control}

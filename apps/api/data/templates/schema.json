@@ -90,14 +90,6 @@
       "example": ["US", "EU"]
     },
     {
-      "key": "organization.handlesPii",
-      "label": "Handles PII",
-      "type": "boolean",
-      "category": "Organization",
-      "description": "Whether the organization handles personally identifiable information.",
-      "example": true
-    },
-    {
       "key": "organization.handlesSensitiveData",
       "label": "Handles sensitive data",
       "type": "boolean",
@@ -1656,19 +1648,19 @@
       ]
     },
     {
-      "key": "organization.storesPii",
-      "label": "Stores PII",
+      "key": "organization.handlesPersonalData",
+      "label": "Handles personal data",
       "type": "boolean",
       "category": "Data Handling",
-      "description": "Whether the organization stores personally identifiable information.",
+      "description": "Whether the organization handles personal data.",
       "example": true
     },
     {
-      "key": "organization.storesHealthcareData",
-      "label": "Stores healthcare data",
+      "key": "organization.handlesHealthData",
+      "label": "Handles health data",
       "type": "boolean",
       "category": "Data Handling",
-      "description": "Whether the organization stores healthcare or health-related data.",
+      "description": "Whether the organization handles health or health-related data.",
       "example": false
     },
     {

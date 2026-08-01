@@ -61,10 +61,9 @@ export const companyProfileSchema = z.object({
   employeeCount: nullableNumberSchema(z.number().int().min(1).max(100000)),
   industries: nullableCodeIdArraySchema,
   regions: nullableCodeIdArraySchema,
-  handlesPii: nullableBooleanSchema,
   handlesSensitiveData: nullableBooleanSchema,
-  storesPii: nullableBooleanSchema,
-  storesHealthcareData: nullableBooleanSchema,
+  handlesPersonalData: nullableBooleanSchema,
+  handlesHealthData: nullableBooleanSchema,
   complianceGoals: nullableCodeIdArraySchema,
 });
 
@@ -332,10 +331,9 @@ export const emptyCompanyProfile: CompanyProfile = {
   employeeCount: null,
   industries: null,
   regions: null,
-  handlesPii: null,
   handlesSensitiveData: null,
-  storesPii: null,
-  storesHealthcareData: null,
+  handlesPersonalData: null,
+  handlesHealthData: null,
   complianceGoals: null,
 };
 

@@ -204,10 +204,9 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       employeeCount: input.employeeCount,
       industries: jsonValue(input.industries),
       regions: jsonValue(input.regions),
-      handlesPii: input.handlesPii,
       handlesSensitiveData: input.handlesSensitiveData,
-      storesPii: input.storesPii,
-      storesHealthcareData: input.storesHealthcareData,
+      handlesPersonalData: input.handlesPersonalData,
+      handlesHealthData: input.handlesHealthData,
       complianceGoals: jsonValue(input.complianceGoals),
     };
   }

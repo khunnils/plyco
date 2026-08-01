@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { createApp } from "../src/app.js";
 import {
   evaluateAdvisorRules,
   FileSystemAdvisorRuleSource,
@@ -468,10 +467,10 @@ describe("recommendation rules", () => {
         category: "activities",
         severity: "high",
         frameworks: [],
-        condition: { field: "company.handlesPii", equals: true },
+        condition: { field: "company.handlesPersonalData", equals: true },
         message: "Activity check.",
         recommendation: "Review activities.",
-        relatedFields: ["company.handlesPii"],
+        relatedFields: ["company.handlesPersonalData"],
       },
       {
         id: "score.data_pass",
@@ -490,10 +489,10 @@ describe("recommendation rules", () => {
         category: "services",
         severity: "medium",
         frameworks: [],
-        condition: { field: "company.storesPii", equals: false },
+        condition: { field: "company.handlesPersonalData", equals: false },
         message: "Service check.",
         recommendation: "Review services.",
-        relatedFields: ["company.storesPii"],
+        relatedFields: ["company.handlesPersonalData"],
       },
       {
         id: "score.vendor_fail",
@@ -501,10 +500,10 @@ describe("recommendation rules", () => {
         category: "vendors",
         severity: "high",
         frameworks: [],
-        condition: { field: "company.storesHealthcareData", equals: false },
+        condition: { field: "company.handlesHealthData", equals: false },
         message: "Vendor check.",
         recommendation: "Review vendors.",
-        relatedFields: ["company.storesHealthcareData"],
+        relatedFields: ["company.handlesHealthData"],
       },
     ];
     const response = evaluateAdvisorRules(rules, organization);
@@ -1082,8 +1081,7 @@ describe("recommendation rules", () => {
 
 describe("recommendations API", () => {
   it("returns empty recommendations when the organization has no profile", async () => {
-    const app = await createApp({
-      auth: false,
+    const app = await createTestApp({
       advisorRuleSource: new StaticAdvisorRuleSource([mfaRule]),
       ruleSuppressionRepository: new InMemoryRuleSuppressionRepository(),
     });

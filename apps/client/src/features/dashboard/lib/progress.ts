@@ -249,10 +249,9 @@ export const profileProgress = (profile: ProfileDraft) =>
       field("Privacy contact", profile.company.privacyContactEmail),
     ]),
     sectionProgress("Data profile", [
-      field("Handles PII", profile.company.handlesPii),
       field("Sensitive data", profile.company.handlesSensitiveData),
-      field("Stores personal data", profile.company.storesPii),
-      field("Stores health data", profile.company.storesHealthcareData),
+      field("Handles personal data", profile.company.handlesPersonalData),
+      field("Handles health data", profile.company.handlesHealthData),
     ]),
   ])
 

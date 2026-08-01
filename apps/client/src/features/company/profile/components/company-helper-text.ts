@@ -20,8 +20,6 @@ export const companyHelperText = {
     "Where customers or researchers can report security issues.",
   privacyContactEmail:
     "Where people can send privacy requests or data protection questions.",
-  handlesPii:
-    "Whether you handle personal data such as names, emails, identifiers, or account details.",
   handlesSensitiveData:
     "Whether you handle higher-risk data such as health, financial, biometric, or government ID data.",
 } as const
