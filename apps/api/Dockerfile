@@ -19,10 +19,12 @@ FROM base AS build
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/client/package.json apps/client/package.json
+COPY apps/admin-cli/package.json apps/admin-cli/package.json
 COPY apps/cli/package.json apps/cli/package.json
 COPY apps/mcp/package.json apps/mcp/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/db/package.json packages/db/package.json
+COPY packages/org-client/package.json packages/org-client/package.json
 COPY packages/shared/package.json packages/shared/package.json
 
 RUN pnpm install --frozen-lockfile

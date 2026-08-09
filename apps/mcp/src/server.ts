@@ -1,30 +1,22 @@
+import { type OrgClient } from "@plyco/org-client"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
-
-import { type ApiClient } from "./api.js"
-import { type McpConfig } from "./config.js"
 
 const jsonResult = (data: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
 })
 
-export function createMcpServer(
-  config: McpConfig,
-  api: ApiClient,
-): McpServer {
+export function createMcpServer(org: OrgClient): McpServer {
   const server = new McpServer({
     name: "plyco-mcp",
     version: "0.0.1",
   })
 
-  const orgPath = (suffix = "") =>
-    `/organizations/${encodeURIComponent(config.organizationId)}${suffix}`
-
-  const registerOrganizationGetTool = (
+  const registerGetTool = (
     name: string,
     title: string,
     description: string,
-    suffix: string,
+    invoke: () => Promise<unknown>,
   ) =>
     server.registerTool(
       name,
@@ -33,139 +25,112 @@ export function createMcpServer(
         description,
         inputSchema: {},
       },
-      async () => jsonResult(await api.getJson(orgPath(suffix))),
+      async () => jsonResult(await invoke()),
     )
 
-  server.registerTool(
+  registerGetTool(
     "get_organization_overview",
-    {
-      title: "Get organization overview",
-      description:
-        "Returns the organization profile snapshot: company profile, services, business activities, provider inventory, and service provider usage.",
-      inputSchema: {},
-    },
-    async () => jsonResult(await api.getJson(orgPath())),
+    "Get organization overview",
+    "Returns the organization profile snapshot: company profile, services, business activities, provider inventory, and service provider usage.",
+    () => org.getOverview(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_company_profile",
     "Get company profile",
     "Returns the organization's company profile.",
-    "/profile",
+    () => org.getProfile(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_services",
     "Get services",
     "Returns the organization's services.",
-    "/services",
+    () => org.getServices(),
   )
 
-  server.registerTool(
+  registerGetTool(
     "get_data_types",
-    {
-      title: "Get data types",
-      description: "Returns the organization's stored data types.",
-      inputSchema: {},
-    },
-    async () => {
-      const dataHandling = (await api.getJson(orgPath("/data"))) as {
-        dataTypesStored?: unknown
-      }
-
-      return jsonResult(dataHandling.dataTypesStored ?? [])
-    },
+    "Get data types",
+    "Returns the organization's stored data types.",
+    () => org.getDataTypes(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_privacy_profile",
     "Get privacy profile",
     "Returns the organization's privacy profile.",
-    "/privacy",
+    () => org.getPrivacyProfile(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_infrastructure_profile",
     "Get infrastructure profile",
     "Returns the organization's infrastructure profile.",
-    "/infrastructure",
+    () => org.getInfrastructureProfile(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_security_profile",
     "Get security profile",
     "Returns the organization's security profile.",
-    "/security",
+    () => org.getSecurityProfile(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_access_profile",
     "Get access profile",
     "Returns the organization's access profile.",
-    "/access",
+    () => org.getAccessProfile(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_activities",
     "Get activities",
     "Returns the organization's business activities.",
-    "/business-activities",
+    () => org.getActivities(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_organization_providers",
     "Get organization providers",
     "Returns the organization's provider inventory.",
-    "/organization-providers",
+    () => org.getOrganizationProviders(),
   )
 
-  registerOrganizationGetTool(
+  registerGetTool(
     "get_service_provider_usage",
     "Get service provider usage",
     "Returns the organization's service provider usage.",
-    "/service-provider-usage",
+    () => org.getServiceProviderUsage(),
   )
 
-  server.registerTool(
+  registerGetTool(
     "get_recommendations",
-    {
-      title: "Get advisor recommendations",
-      description:
-        "Returns the current advisor recommendations computed from the organization profile.",
-      inputSchema: {},
-    },
-    async () => jsonResult(await api.getJson(orgPath("/recommendations"))),
+    "Get advisor recommendations",
+    "Returns the current advisor recommendations computed from the organization profile.",
+    () => org.getRecommendations(),
   )
 
-  server.registerTool(
+  registerGetTool(
     "get_vocabulary",
-    {
-      title: "Get controlled vocabulary",
-      description:
-        "Returns the organization's controlled vocabulary code sets and codes.",
-      inputSchema: {},
-    },
-    async () => jsonResult(await api.getJson(orgPath("/vocabulary"))),
+    "Get controlled vocabulary",
+    "Returns the organization's controlled vocabulary code sets and codes.",
+    () => org.getVocabulary(),
   )
 
-  server.registerTool(
+  registerGetTool(
     "list_templates",
-    {
-      title: "List document templates",
-      description: "Returns the organization's document templates.",
-      inputSchema: {},
-    },
-    async () => jsonResult(await api.getJson(orgPath("/templates"))),
+    "List document templates",
+    "Returns the organization's document templates.",
+    () => org.listTemplates(),
   )
 
-  server.registerTool(
+  registerGetTool(
     "list_documents",
-    {
-      title: "List generated documents",
-      description: "Returns summaries of the organization's generated documents.",
-      inputSchema: {},
-    },
-    async () => jsonResult(await api.getJson(orgPath("/documents"))),
+    "List generated documents",
+    "Returns summaries of the organization's generated documents.",
+    () => org.listDocuments(),
   )
 
   server.registerTool(
@@ -178,10 +143,7 @@ export function createMcpServer(
         documentId: z.string().min(1).describe("The document ID."),
       },
     },
-    async ({ documentId }) =>
-      jsonResult(
-        await api.getJson(orgPath(`/documents/${encodeURIComponent(documentId)}`)),
-      ),
+    async ({ documentId }) => jsonResult(await org.getDocument(documentId)),
   )
 
   return server

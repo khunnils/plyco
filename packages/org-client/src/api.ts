@@ -1,6 +1,6 @@
-import { type McpConfig } from "./config.js"
+import { type OrgClientConfig } from "./config.js"
 
-export type ApiClient = {
+export type FetchJsonClient = {
   getJson: (path: string) => Promise<unknown>
 }
 
@@ -14,10 +14,10 @@ export class ApiResponseError extends Error {
   }
 }
 
-export function createApiClient(
-  config: McpConfig,
+export function createFetchJsonClient(
+  config: Pick<OrgClientConfig, "apiUrl" | "apiKey">,
   fetchFn: typeof fetch = fetch,
-): ApiClient {
+): FetchJsonClient {
   return {
     async getJson(path: string) {
       const response = await fetchFn(new URL(path, config.apiUrl), {

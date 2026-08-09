@@ -61,9 +61,11 @@ Open the client URL printed by Vite, usually:
 http://localhost:4200
 ```
 
-## CLI
+## Admin CLI
 
-The operations CLI reads `PLYCO_API_URL` and `PLYCO_API_KEY` from the shell or from `.plyco/<profile>.env`. The default profile is `local`.
+The internal operations CLI (`plyco-admin`) reads `PLYCO_API_URL` and
+`PLYCO_API_KEY` from the shell or from `.plyco/<profile>.env`. The default
+profile is `local`.
 
 ```bash
 mkdir -p .plyco
@@ -76,20 +78,34 @@ EOF
 Run it from the workspace with pnpm:
 
 ```bash
-pnpm plyco --help
-pnpm plyco codes load
-pnpm plyco providers lookup https://example.com
-pnpm plyco waitlist add founder@example.com --blocker "SOC 2 timeline"
-pnpm plyco waitlist remove founder@example.com
+pnpm plyco-admin --help
+pnpm plyco-admin codes load
+pnpm plyco-admin providers lookup https://example.com
+pnpm plyco-admin waitlist add founder@example.com --blocker "SOC 2 timeline"
+pnpm plyco-admin waitlist remove founder@example.com
 ```
 
-For a bare `plyco` command, link the CLI globally:
+For a bare `plyco-admin` command, link the CLI globally:
 
 ```bash
-pnpm --filter @plyco/cli link --global
+pnpm --filter @plyco/admin-cli link --global
 ```
 
-If your shell reports `permission denied: plyco`, it is resolving the `/Users/nils/src/plyco` repository directory instead of a CLI executable. Put the pnpm global bin directory earlier in `PATH` than `/Users/nils/src`, then restart the shell or run `hash -r` so zsh forgets any stale command lookup.
+## Customer CLI
+
+The customer CLI (`plyco`) is a read-only client for organization-scoped data.
+It uses the same credentials as `@plyco/mcp`:
+
+```bash
+export PLYCO_API_URL=http://localhost:4100
+export PLYCO_API_KEY=plyco_org_your_key_here
+export PLYCO_ORGANIZATION_ID=your_organization_id
+
+pnpm plyco overview
+pnpm plyco documents list
+```
+
+See [apps/cli/README.md](apps/cli/README.md) for the full command list.
 
 ## Checks
 
@@ -105,27 +121,30 @@ pnpm build
 Public npm packages:
 
 - `@plyco/shared`
+- `@plyco/org-client`
+- `@plyco/cli`
 - `@plyco/mcp`
 
 Keep public package versions on the same minor baseline when starting a release.
 Because npm versions are immutable, bump versions before publishing if a version
-already exists. Publish `@plyco/shared` first so `@plyco/mcp` resolves the shared
-package version during publish.
+already exists. Publish dependencies first (`@plyco/shared`, then
+`@plyco/org-client`) so consumers resolve published versions during publish.
 
 Verify the packages before publishing:
 
 ```bash
-pnpm --filter @plyco/shared --filter @plyco/mcp build
-pnpm --filter @plyco/shared --filter @plyco/mcp typecheck
-pnpm --filter @plyco/shared --filter @plyco/mcp test
-pnpm --filter @plyco/shared pack --dry-run
-pnpm --filter @plyco/mcp pack --dry-run
+pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp build
+pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp typecheck
+pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp test
+pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp pack --dry-run
 ```
 
 Publish in dependency order:
 
 ```bash
 pnpm --filter @plyco/shared publish --access public --no-git-checks
+pnpm --filter @plyco/org-client publish --access public --no-git-checks
+pnpm --filter @plyco/cli publish --access public --no-git-checks
 pnpm --filter @plyco/mcp publish --access public --no-git-checks
 ```
 
@@ -138,6 +157,8 @@ remove it after publishing:
 tmp_config=$(mktemp)
 printf '//registry.npmjs.org/:_authToken=%s\nregistry=https://registry.npmjs.org/\n' "$NPM_TOKEN" > "$tmp_config"
 NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/shared publish --access public --no-git-checks
+NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/org-client publish --access public --no-git-checks
+NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/cli publish --access public --no-git-checks
 NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/mcp publish --access public --no-git-checks
 rm -f "$tmp_config"
 ```
@@ -148,7 +169,11 @@ rm -f "$tmp_config"
 apps/client       React + Vite app
 apps/api          Fastify API
 apps/web          Astro marketing site
+apps/admin-cli    Internal operations CLI
+apps/cli          Customer organization data CLI
+apps/mcp          Read-only MCP server
 packages/shared   Zod schemas, DTOs, enums
 packages/db       Prisma schema and DB mapping
+packages/org-client Shared org-scoped read client
 docs              Architecture and product docs
 ```

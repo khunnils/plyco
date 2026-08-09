@@ -1,0 +1,25 @@
+{
+  "name": "@plyco/admin-cli",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "plyco-admin": "bin/plyco-admin.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "typescript": "~7.0.2",
+    "vitest": "^4.1.10"
+  }
+}

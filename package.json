@@ -11,6 +11,7 @@
     "test": "pnpm -r test",
     "prepare": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "plyco": "pnpm --filter @plyco/cli exec tsx src/index.ts",
+    "plyco-admin": "pnpm --filter @plyco/admin-cli exec tsx src/index.ts",
     "dev:api": "pnpm --filter @plyco/shared build && pnpm --filter @plyco/db build && pnpm --filter @plyco/api dev",
     "dev:client": "pnpm --filter @plyco/shared build && pnpm --filter cf-app dev",
     "dev:web": "pnpm --filter @plyco/shared build && pnpm --filter cf-web dev",

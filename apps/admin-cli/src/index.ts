@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { createProgram, isCliHelpExit, printCliError } from "./program.js"
 
 try {

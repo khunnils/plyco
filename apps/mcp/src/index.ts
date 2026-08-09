@@ -1,14 +1,13 @@
 #!/usr/bin/env node
+import { createOrgClient, readOrgClientConfig } from "@plyco/org-client"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
-import { createApiClient } from "./api.js"
-import { readMcpConfig } from "./config.js"
 import { createMcpServer } from "./server.js"
 
 const main = async () => {
-  const config = readMcpConfig()
-  const api = createApiClient(config)
-  const server = createMcpServer(config, api)
+  const config = readOrgClientConfig()
+  const org = createOrgClient(config)
+  const server = createMcpServer(org)
   const transport = new StdioServerTransport()
 
   await server.connect(transport)

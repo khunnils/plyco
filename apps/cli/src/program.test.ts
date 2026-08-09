@@ -1,232 +1,147 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { createProgram, isCliHelpExit } from "./program.js"
+import { createProgram } from "./program.js"
 
-describe("createProgram", () => {
-  it("posts codes load to the configured API", async () => {
-    const calls: Array<{ body: string | null; headers: HeadersInit; url: string }> = []
-    const stdout = createWritable()
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch(calls, { codeSetCount: 1, codeCount: 2, countryCount: 3 }),
-      stdout,
-    })
+const env = {
+  PLYCO_API_URL: "https://api.plyco.example",
+  PLYCO_API_KEY: "plyco_org_secret",
+  PLYCO_ORGANIZATION_ID: "org-123",
+} as NodeJS.ProcessEnv
 
-    await program.parseAsync(["codes", "load"], { from: "user" })
+const createWritable = () => {
+  let output = ""
 
-    expect(calls).toEqual([
-      {
-        body: "{}",
-        headers: {
-          Authorization: "Bearer test-key",
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        url: "https://api.example.com/codes/load",
-      },
-    ])
-    expect(stdout.output).toContain('"codeSetCount": 1')
-  })
-
-  it("parses profile and provider positional URLs", async () => {
-    const calls: Array<{ body: string | null; headers: HeadersInit; url: string }> = []
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch(calls, { name: "Example" }),
-      stdout: createWritable(),
-    })
-
-    await program.parseAsync(
-      ["--profile", "production", "providers", "lookup", "https://example.com"],
-      { from: "user" },
-    )
-
-    expect(calls[0]).toMatchObject({
-      body: JSON.stringify({ inputUrl: "https://example.com" }),
-      url: "https://api.example.com/providers/lookup",
-    })
-  })
-
-  it("parses provider --url options", async () => {
-    const calls: Array<{ body: string | null; headers: HeadersInit; url: string }> = []
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch(calls, { imported: true }),
-      stdout: createWritable(),
-    })
-
-    await program.parseAsync(
-      ["providers", "import", "--url", "https://example.com"],
-      { from: "user" },
-    )
-
-    expect(calls[0]).toMatchObject({
-      body: JSON.stringify({ inputUrl: "https://example.com" }),
-      url: "https://api.example.com/providers/import",
-    })
-  })
-
-  it("adds waitlist entries", async () => {
-    const calls: Array<{
-      body: string | null
-      headers: HeadersInit
-      method: string | undefined
-      url: string
-    }> = []
-    const stdout = createWritable()
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch(calls, { accepted: true }),
-      stdout,
-    })
-
-    await program.parseAsync(
-      ["waitlist", "add", "founder@example.com", "--blocker", "SOC 2"],
-      { from: "user" },
-    )
-
-    expect(calls[0]).toEqual({
-      body: JSON.stringify({
-        email: "founder@example.com",
-        blocker: "SOC 2",
-      }),
-      headers: {
-        Authorization: "Bearer test-key",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      url: "https://api.example.com/waitlist",
-    })
-    expect(stdout.output).toContain('"accepted": true')
-  })
-
-  it("removes waitlist entries", async () => {
-    const calls: Array<{
-      body: string | null
-      headers: HeadersInit
-      method: string | undefined
-      url: string
-    }> = []
-    const stdout = createWritable()
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch(calls, { removed: true }),
-      stdout,
-    })
-
-    await program.parseAsync(
-      ["waitlist", "remove", "--email", "founder@example.com"],
-      { from: "user" },
-    )
-
-    expect(calls[0]).toEqual({
-      body: JSON.stringify({ email: "founder@example.com" }),
-      headers: {
-        Authorization: "Bearer test-key",
-        "Content-Type": "application/json",
-      },
-      method: "DELETE",
-      url: "https://api.example.com/waitlist",
-    })
-    expect(stdout.output).toContain('"removed": true')
-  })
-
-  it("fails clearly when provider URL is missing", async () => {
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch([], {}),
-      stderr: createWritable(),
-      stdout: createWritable(),
-    })
-
-    await expect(
-      program.parseAsync(["providers", "lookup"], { from: "user" }),
-    ).rejects.toThrow(/provider URL is required/)
-  })
-
-  it("fails clearly when waitlist email is missing", async () => {
-    const program = createProgram({
-      env: {
-        PLYCO_API_KEY: "test-key",
-        PLYCO_API_URL: "https://api.example.com",
-      },
-      fetchFn: createFetch([], {}),
-      stderr: createWritable(),
-      stdout: createWritable(),
-    })
-
-    await expect(
-      program.parseAsync(["waitlist", "remove"], { from: "user" }),
-    ).rejects.toThrow(/waitlist email is required/)
-  })
-
-  it("treats no-command help as a CLI help exit", async () => {
-    const stdout = createWritable()
-    const program = createProgram({
-      exitOverride: true,
-      stderr: createWritable(),
-      stdout,
-    })
-    let caughtError: unknown
-
-    try {
-      await program.parseAsync(["node", "plyco"])
-    } catch (error) {
-      caughtError = error
-    }
-
-    expect(isCliHelpExit(caughtError)).toBe(true)
-  })
-})
-
-function createFetch(
-  calls: Array<{
-    body: string | null
-    headers: HeadersInit
-    method?: string
-    url: string
-  }>,
-  body: unknown,
-) {
-  return vi.fn(async (input: URL | RequestInfo, init?: RequestInit) => {
-    calls.push({
-      body: init?.body?.toString() ?? null,
-      headers: init?.headers ?? {},
-      method: init?.method,
-      url: input.toString(),
-    })
-
-    return new Response(JSON.stringify(body), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    })
-  }) as unknown as typeof fetch
-}
-
-function createWritable() {
   return {
-    output: "",
-    write(message: string) {
-      this.output += message
+    get output() {
+      return output
+    },
+    write(chunk: string) {
+      output += chunk
       return true
     },
   }
 }
+
+const jsonFetch = (body: unknown) =>
+  vi.fn(
+    async () =>
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+  ) as unknown as typeof fetch
+
+describe("createProgram", () => {
+  it("fetches the organization overview", async () => {
+    const overview = { organization: { id: "org-123" } }
+    const fetchFn = jsonFetch(overview)
+    const stdout = createWritable()
+    const program = createProgram({ env, fetchFn, stdout, exitOverride: true })
+
+    await program.parseAsync(["overview"], { from: "user" })
+
+    const request = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]!
+    expect((request[0] as URL).toString()).toBe(
+      "https://api.plyco.example/organizations/org-123",
+    )
+    expect(stdout.output).toContain('"id": "org-123"')
+  })
+
+  it("allows flags to override environment configuration", async () => {
+    const fetchFn = jsonFetch({ ok: true })
+    const program = createProgram({
+      env,
+      fetchFn,
+      stdout: createWritable(),
+      exitOverride: true,
+    })
+
+    await program.parseAsync(
+      [
+        "--api-url",
+        "https://override.example",
+        "--api-key",
+        "override-key",
+        "--org",
+        "org-override",
+        "profile",
+      ],
+      { from: "user" },
+    )
+
+    const request = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]!
+    expect((request[0] as URL).toString()).toBe(
+      "https://override.example/organizations/org-override/profile",
+    )
+    expect((request[1] as RequestInit).headers).toMatchObject({
+      Authorization: "Bearer override-key",
+    })
+  })
+
+  it.each([
+    ["services", "/services"],
+    ["data-types", "/data"],
+    ["activities", "/business-activities"],
+    ["privacy", "/privacy"],
+    ["infrastructure", "/infrastructure"],
+    ["security", "/security"],
+    ["access", "/access"],
+    ["providers", "/organization-providers"],
+    ["service-provider-usage", "/service-provider-usage"],
+    ["recommendations", "/recommendations"],
+    ["vocabulary", "/vocabulary"],
+  ])("maps %s to its organization route", async (command, suffix) => {
+    const fetchFn = jsonFetch(
+      command === "data-types" ? { dataTypesStored: [] } : { ok: true },
+    )
+    const program = createProgram({
+      env,
+      fetchFn,
+      stdout: createWritable(),
+      exitOverride: true,
+    })
+
+    await program.parseAsync([command], { from: "user" })
+
+    const requestUrl = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]![0] as URL
+    expect(requestUrl.toString()).toBe(
+      `https://api.plyco.example/organizations/org-123${suffix}`,
+    )
+  })
+
+  it("lists templates and documents", async () => {
+    const fetchFn = jsonFetch([{ id: "t1" }])
+    const stdout = createWritable()
+    const program = createProgram({ env, fetchFn, stdout, exitOverride: true })
+
+    await program.parseAsync(["templates", "list"], { from: "user" })
+    expect(
+      ((fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0] as URL)
+        .toString(),
+    ).toBe("https://api.plyco.example/organizations/org-123/templates")
+
+    await program.parseAsync(["documents", "list"], { from: "user" })
+    expect(
+      ((fetchFn as unknown as ReturnType<typeof vi.fn>).mock.calls[1]![0] as URL)
+        .toString(),
+    ).toBe("https://api.plyco.example/organizations/org-123/documents")
+  })
+
+  it("gets a document by id", async () => {
+    const fetchFn = jsonFetch({ id: "doc-1" })
+    const stdout = createWritable()
+    const program = createProgram({ env, fetchFn, stdout, exitOverride: true })
+
+    await program.parseAsync(["documents", "get", "doc-1"], { from: "user" })
+
+    const requestUrl = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]![0] as URL
+    expect(requestUrl.toString()).toBe(
+      "https://api.plyco.example/organizations/org-123/documents/doc-1",
+    )
+    expect(stdout.output).toContain('"id": "doc-1"')
+  })
+})

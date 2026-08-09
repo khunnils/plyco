@@ -1,13 +1,12 @@
+import { createOrgClient, type OrgClientConfig } from "@plyco/org-client"
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js"
 import { type CallToolResult } from "@modelcontextprotocol/sdk/types.js"
 import { describe, expect, it, vi } from "vitest"
 
-import { createApiClient } from "./api.js"
-import { type McpConfig } from "./config.js"
 import { createMcpServer } from "./server.js"
 
-const config: McpConfig = {
+const config: OrgClientConfig = {
   apiUrl: "https://api.plyco.example",
   apiKey: "plyco_org_secret",
   organizationId: "org-123",
@@ -15,10 +14,10 @@ const config: McpConfig = {
 
 const connectClient = async (
   fetchFn: typeof fetch,
-  currentConfig: McpConfig = config,
+  currentConfig: OrgClientConfig = config,
 ) => {
-  const api = createApiClient(currentConfig, fetchFn)
-  const server = createMcpServer(currentConfig, api)
+  const org = createOrgClient(currentConfig, { fetchFn })
+  const server = createMcpServer(org)
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair()
   await server.connect(serverTransport)

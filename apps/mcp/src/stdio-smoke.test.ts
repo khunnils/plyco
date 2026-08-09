@@ -79,7 +79,7 @@ describe("MCP stdio entrypoint", () => {
     expect(code).not.toBe(0)
     expect(stdout).toBe("")
     expect(stderr).toContain("Plyco MCP server failed to start")
-    expect(stderr).toContain("Invalid Plyco MCP configuration")
+    expect(stderr).toContain("Invalid Plyco organization client configuration")
   })
 
   it("initializes, lists tools, and calls the local API over stdio", async () => {

@@ -1,22 +1,31 @@
+import {
+  ApiResponseError,
+  createOrgClient,
+  readOrgClientConfig,
+  type OrgClient,
+} from "@plyco/org-client"
 import { Command, CommanderError } from "commander"
 
-import { ApiResponseError, deleteJson, postJson } from "./api.js"
-import { readCliConfig } from "./config.js"
-
 export type ProgramOptions = {
-  cwd?: string
   env?: NodeJS.ProcessEnv
   exitOverride?: boolean
   fetchFn?: typeof fetch
+  orgClient?: OrgClient
   stderr?: Pick<NodeJS.WriteStream, "write">
   stdout?: Pick<NodeJS.WriteStream, "write">
 }
 
+type RootOptions = {
+  apiUrl?: string
+  apiKey?: string
+  org?: string
+}
+
 export function createProgram({
-  cwd,
   env = process.env,
   exitOverride = false,
   fetchFn,
+  orgClient,
   stderr = process.stderr,
   stdout = process.stdout,
 }: ProgramOptions = {}) {
@@ -24,96 +33,137 @@ export function createProgram({
 
   program
     .name("plyco")
-    .description("Plyco operations tool")
-    .option("--profile <name>", "CLI profile from .plyco/<name>.env", "local")
+    .description("Plyco customer CLI for organization data access")
+    .option("--api-url <url>", "Plyco API base URL (overrides PLYCO_API_URL)")
+    .option("--api-key <key>", "Organization API key (overrides PLYCO_API_KEY)")
+    .option(
+      "--org <id>",
+      "Organization ID (overrides PLYCO_ORGANIZATION_ID)",
+    )
 
-  program
-    .command("codes")
-    .description("Manage vocabulary codes")
-    .command("load")
-    .description("Load system code sets from the configured API environment")
+  const resolveClient = () => {
+    if (orgClient) {
+      return orgClient
+    }
+
+    const options = program.opts<RootOptions>()
+    const config = readOrgClientConfig({
+      apiUrl: options.apiUrl,
+      apiKey: options.apiKey,
+      organizationId: options.org,
+      env,
+    })
+
+    return createOrgClient(config, { fetchFn })
+  }
+
+  const registerGetCommand = (
+    name: string,
+    description: string,
+    invoke: (client: OrgClient) => Promise<unknown>,
+  ) => {
+    program
+      .command(name)
+      .description(description)
+      .action(async () => {
+        writeJson(stdout, await invoke(resolveClient()))
+      })
+  }
+
+  registerGetCommand(
+    "overview",
+    "Get the organization profile overview",
+    (client) => client.getOverview(),
+  )
+  registerGetCommand(
+    "profile",
+    "Get the company profile",
+    (client) => client.getProfile(),
+  )
+  registerGetCommand(
+    "services",
+    "Get organization services",
+    (client) => client.getServices(),
+  )
+  registerGetCommand(
+    "data-types",
+    "Get stored data types",
+    (client) => client.getDataTypes(),
+  )
+  registerGetCommand(
+    "activities",
+    "Get business activities",
+    (client) => client.getActivities(),
+  )
+  registerGetCommand(
+    "privacy",
+    "Get the privacy profile",
+    (client) => client.getPrivacyProfile(),
+  )
+  registerGetCommand(
+    "infrastructure",
+    "Get the infrastructure profile",
+    (client) => client.getInfrastructureProfile(),
+  )
+  registerGetCommand(
+    "security",
+    "Get the security profile",
+    (client) => client.getSecurityProfile(),
+  )
+  registerGetCommand(
+    "access",
+    "Get the access profile",
+    (client) => client.getAccessProfile(),
+  )
+  registerGetCommand(
+    "providers",
+    "Get the organization provider inventory",
+    (client) => client.getOrganizationProviders(),
+  )
+  registerGetCommand(
+    "service-provider-usage",
+    "Get service provider usage",
+    (client) => client.getServiceProviderUsage(),
+  )
+  registerGetCommand(
+    "recommendations",
+    "Get advisor recommendations",
+    (client) => client.getRecommendations(),
+  )
+  registerGetCommand(
+    "vocabulary",
+    "Get controlled vocabulary code sets",
+    (client) => client.getVocabulary(),
+  )
+
+  const templates = program
+    .command("templates")
+    .description("Document templates")
+
+  templates
+    .command("list")
+    .description("List document templates")
     .action(async () => {
-      const config = commandConfig(program, { cwd, env })
-      const result = await postJson(
-        { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn },
-        "/codes/load",
-      )
-
-      writeJson(stdout, result)
+      writeJson(stdout, await resolveClient().listTemplates())
     })
 
-  const providers = program
-    .command("providers")
-    .description("Provider lookup and import tools")
+  const documents = program
+    .command("documents")
+    .description("Generated documents")
 
-  providers
-    .command("lookup")
-    .description("Resolve provider details for a URL")
-    .argument("[url]", "provider URL")
-    .option("--url <url>", "provider URL")
-    .action(async (url: string | undefined, options) => {
-      await runProviderCommand("lookup", url, options.url, program, {
-        cwd,
-        env,
-        fetchFn,
-        stdout,
-      })
+  documents
+    .command("list")
+    .description("List generated documents")
+    .action(async () => {
+      writeJson(stdout, await resolveClient().listDocuments())
     })
 
-  providers
-    .command("import")
-    .description("Resolve and import provider details for a URL")
-    .argument("[url]", "provider URL")
-    .option("--url <url>", "provider URL")
-    .action(async (url: string | undefined, options) => {
-      await runProviderCommand("import", url, options.url, program, {
-        cwd,
-        env,
-        fetchFn,
-        stdout,
-      })
-    })
-
-  const waitlist = program
-    .command("waitlist")
-    .description("Manage waitlist entries")
-
-  waitlist
-    .command("add")
-    .description("Add an email to the waitlist")
-    .argument("[email]", "waitlist email")
-    .option("--email <email>", "waitlist email")
-    .option("--blocker <text>", "optional compliance blocker")
-    .action(async (email: string | undefined, options) => {
-      const inputEmail = requiredEmail(email, options.email, "add")
-      const config = commandConfig(program, { cwd, env })
-      const result = await postJson(
-        { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn },
-        "/waitlist",
-        {
-          email: inputEmail,
-          blocker: options.blocker,
-        },
-      )
-
-      writeJson(stdout, result)
-    })
-
-  waitlist
-    .command("remove")
-    .description("Remove an email from the waitlist")
-    .argument("[email]", "waitlist email")
-    .option("--email <email>", "waitlist email")
-    .action(async (email: string | undefined, options) => {
-      const inputEmail = requiredEmail(email, options.email, "remove")
-      const config = commandConfig(program, { cwd, env })
-      const result = await deleteJson(
-        { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn },
-        "/waitlist",
-        { email: inputEmail },
-      )
-
-      writeJson(stdout, result)
+  documents
+    .command("get")
+    .description("Get a generated document by ID")
+    .argument("<documentId>", "document ID")
+    .action(async (documentId: string) => {
+      writeJson(stdout, await resolveClient().getDocument(documentId))
     })
 
   program.configureOutput({
@@ -126,63 +176,6 @@ export function createProgram({
   }
 
   return program
-}
-
-function requiredEmail(
-  positionalEmail: string | undefined,
-  optionEmail: string | undefined,
-  action: "add" | "remove",
-) {
-  const email = optionEmail ?? positionalEmail
-
-  if (!email) {
-    throw new Error(
-      `A waitlist email is required. Pass --email <email> or a positional email to ${action}.`,
-    )
-  }
-
-  return email
-}
-
-function commandConfig(
-  program: Command,
-  options: { cwd?: string; env: NodeJS.ProcessEnv },
-) {
-  const rootOptions = program.opts<{ profile: string }>()
-
-  return readCliConfig({
-    cwd: options.cwd,
-    env: options.env,
-    profile: rootOptions.profile,
-  })
-}
-
-async function runProviderCommand(
-  subcommand: "lookup" | "import",
-  positionalUrl: string | undefined,
-  optionUrl: string | undefined,
-  command: Command,
-  options: {
-    cwd?: string
-    env: NodeJS.ProcessEnv
-    fetchFn?: typeof fetch
-    stdout: Pick<NodeJS.WriteStream, "write">
-  },
-) {
-  const inputUrl = optionUrl ?? positionalUrl
-
-  if (!inputUrl) {
-    throw new Error("A provider URL is required. Pass --url <url> or a positional URL.")
-  }
-
-  const config = commandConfig(command, options)
-  const result = await postJson(
-    { apiKey: config.apiKey, apiUrl: config.apiUrl, fetchFn: options.fetchFn },
-    `/providers/${subcommand}`,
-    { inputUrl },
-  )
-
-  writeJson(options.stdout, result)
 }
 
 function writeJson(stdout: Pick<NodeJS.WriteStream, "write">, value: unknown) {

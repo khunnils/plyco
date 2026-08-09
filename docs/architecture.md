@@ -14,14 +14,15 @@ Browser users ──> Client application ──> API ──> PostgreSQL
                         │                 │
 Public visitors ──> Marketing site       ├──> Object storage
                                           ├──> AI and prompt services
-Operators ───────> CLI ──────────────────┤
-                                          └──> External data, email,
-AI agents ───────> MCP server ───────────────> and observability services
+Operators ───────> Admin CLI ────────────┤
+Customers/agents ─> Customer CLI ────────┤
+AI agents ───────> MCP server ───────────┴──> External data, email,
+                                              and observability services
 ```
 
 The API is the authoritative boundary for application data and business rules.
-Browser applications, the CLI, and the MCP server do not access the database or
-third-party services on its behalf directly.
+Browser applications, both CLIs, and the MCP server do not access the database
+or third-party services on its behalf directly.
 
 ## Repository Structure
 
@@ -29,15 +30,17 @@ Plyco is a TypeScript pnpm workspace monorepo.
 
 ```text
 apps/
-  api/       Fastify HTTP API and application services
-  client/    React and Vite authenticated application
-  web/       Astro public website
-  cli/       Administrative command-line client
-  mcp/       Read-only Model Context Protocol adapter
+  api/        Fastify HTTP API and application services
+  client/     React and Vite authenticated application
+  web/        Astro public website
+  admin-cli/  Internal operations command-line client
+  cli/        Customer read-only organization data CLI
+  mcp/        Read-only Model Context Protocol adapter
 packages/
-  shared/    Cross-boundary DTOs, Zod schemas, enums, and reference data
-  db/        Prisma schema, migrations, generated client, and DB mapping
-docs/        Repository-wide product, design, and architecture documents
+  shared/     Cross-boundary DTOs, Zod schemas, enums, and reference data
+  db/         Prisma schema, migrations, generated client, and DB mapping
+  org-client/ Shared org-credential read client for CLI and MCP
+docs/         Repository-wide product, design, and architecture documents
 ```
 
 Module-specific architecture documents live beside their modules. The root
@@ -65,33 +68,43 @@ callers, authorizes organization access, validates inputs, coordinates domain
 services, persists state, and isolates external integrations. Its internal
 architecture is documented in `apps/api/docs/architecture.md`.
 
-### CLI
+### Admin CLI
 
-The CLI is a thin operational client for machine-authorized API operations. It
+The admin CLI (`plyco-admin`) is a thin operational client for
+machine-authorized internal API operations such as loading system code sets. It
 is configured with an API URL and credential and must not depend on server-only
 configuration or connect directly to persistence and integration providers.
+
+### Customer CLI
+
+The customer CLI (`plyco`) is a read-only, organization-scoped client for
+scripts and AI agents. It uses a per-organization API credential and shares its
+API surface with the MCP server through `@plyco/org-client`.
 
 ### MCP server
 
 The MCP server adapts organization-scoped API reads into tools for AI agents.
-It is intentionally read-only and uses an organization API credential; it does
-not duplicate API business logic.
+It is intentionally read-only and uses an organization API credential via
+`@plyco/org-client`; it does not duplicate API business logic.
 
 ### Shared packages
 
 `@plyco/shared` owns transport-facing contracts shared across applications.
 `@plyco/db` owns the relational schema and Prisma implementation. Database-only
-types must not leak into public contracts.
+types must not leak into public contracts. `@plyco/org-client` owns the shared
+customer-credential read path used by the customer CLI and MCP server.
 
 ## Dependency Rules
 
 ```text
-client ─┐
-mcp ────┼──> shared
-api ────┼──> shared
-api ────┴──> db ──> shared
+client ─────┐
+api ────────┼──> shared
+api ────────┴──> db ──> shared
 
-web and cli communicate with the API over HTTP.
+cli ──┐
+mcp ──┴──> org-client ──> API over HTTP
+
+web and admin-cli communicate with the API over HTTP.
 ```
 
 - Applications may depend on shared packages, but shared packages do not
