@@ -24,11 +24,9 @@ automated; log-retention duration and monitoring-owner fields are not collected.
 
 ## Create Organization Flow
 
-Signed-in users with no organizations see an activate placeholder with options
-to start organization setup or log out. Choosing create opens the organization
-setup wizard. New users create an organization from a split-panel setup flow.
-The left panel contains the active form step and the right panel provides a calm
-branded background effect.
+Signed-in users with no organizations go straight into the organization setup
+wizard. The wizard header includes a log-out action for first-time setup. New
+users create an organization from a centered setup flow.
 
 The first step asks for organization name and website URL. The next steps ask
 for primary regions and compliance goals before any public-page lookup runs.
@@ -116,11 +114,11 @@ The workspace Settings area is opened from the settings button at the bottom of
 the sidebar. Settings contains General, Vocabulary, API Keys, and MCP Server
 tabs. General shows current members to all members. Owners can invite people by
 email as either member or owner, cancel pending invitations, change member
-roles, remove
-members, and delete the organization after confirming its name. Members can edit
-workspace data but cannot manage the team or delete the organization. Invitation
-links require Google or magic-link sign-in with the invited email before the
-user is added to the organization.
+roles, remove members, and delete an organization after confirming its name when
+they belong to more than one organization. Users cannot delete their last
+organization. Members can edit workspace data but cannot manage the team or
+delete the organization. Invitation links require Google or magic-link sign-in
+with the invited email before the user is added to the organization.
 
 The API Keys tab is owner-only; non-owners see a notice instead of the
 management UI. Owners create a named key, and the full secret is shown exactly

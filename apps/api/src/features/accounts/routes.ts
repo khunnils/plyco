@@ -286,11 +286,21 @@ export async function registerAccountRoutes(
   app.delete<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId",
     async (request) => {
-      await requireOrganizationOwner(
+      const user = await requireOrganizationOwner(
         request,
         accountRepository,
         request.params.organizationId,
       )
+
+      // Keep at least one org so users never land on an empty-workspace dead end.
+      const organizations = await accountRepository.listOrganizations(user.id)
+      if (organizations.length <= 1) {
+        throw new ApiError(
+          "ORGANIZATION_LAST_REQUIRED",
+          "You cannot delete your last organization.",
+          409,
+        )
+      }
 
       const deleted = await accountRepository.deleteOrganization(
         request.params.organizationId,

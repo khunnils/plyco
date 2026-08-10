@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"
 import {
   useCancelOrganizationInvitation,
   useDeleteOrganization,
@@ -45,7 +46,9 @@ export const TeamSettings = ({
   user: AuthUser
 }) => {
   const posthog = usePostHog()
+  const { organizations } = useSelectedOrganization()
   const isOwner = organization.role === "owner"
+  const hasMultipleOrganizations = organizations.length > 1
   const members = useOrganizationMembers(organization.id)
   const invitations = useOrganizationInvitations(organization.id, isOwner)
   const inviteMember = useInviteOrganizationMember(organization.id)
@@ -99,8 +102,8 @@ export const TeamSettings = ({
           <div>
             <h2 className="text-xl font-semibold text-slate-950">Team</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Members can edit workspace data. Owners can manage members and
-              delete the organization.
+              Members can edit workspace data. Owners can manage members
+              {hasMultipleOrganizations ? " and delete organizations." : "."}
             </p>
           </div>
           {isOwner && !isInvitePanelOpen ? (
@@ -385,7 +388,7 @@ export const TeamSettings = ({
         </section>
       ) : null}
 
-      {isOwner ? (
+      {isOwner && hasMultipleOrganizations ? (
         <section className="grid gap-4 border-t border-slate-200 pt-6">
           <div>
             <h2 className="text-lg font-semibold text-slate-950">

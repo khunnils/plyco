@@ -2,6 +2,7 @@ import { type ReactNode } from "react"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useOnboardingStore } from "../onboarding/stores/onboarding-store"
 import { type WizardStep, stepNumber, stepOrder } from "./types"
 
 export const CreateShell = ({
@@ -23,6 +24,7 @@ export const CreateShell = ({
 }) => {
   const isLookup = step === "lookup-organization" || step === "lookup-privacy"
   const currentStep = stepNumber(step)
+  const onLogout = useOnboardingStore((state) => state.onLogout)
 
   return (
     <main className="relative min-h-svh overflow-hidden bg-[#f7f8fa] text-slate-900">
@@ -32,7 +34,7 @@ export const CreateShell = ({
         <div className="absolute inset-0 bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-size-[26px_26px] opacity-[0.05] mask-[radial-gradient(ellipse_at_center,black_20%,transparent_75%)]" />
       </div>
       <section className="relative flex min-h-[calc(100svh-1.5rem)] flex-col overflow-hidden rounded-lg">
-        <header className="flex items-center gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
+        <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-8">
           <div className="flex min-w-0 items-center gap-4">
             {currentStep > 1 ? (
               <Button
@@ -51,6 +53,11 @@ export const CreateShell = ({
               className="h-8 w-auto rounded-md object-contain"
             />
           </div>
+          {onLogout ? (
+            <Button type="button" variant="ghost" onClick={onLogout}>
+              Log out
+            </Button>
+          ) : null}
         </header>
         <div className="onboarding-page-transition flex flex-1 flex-col items-center justify-center px-4 pt-10 pb-20 sm:px-8">
           {titleAbove && title ? (

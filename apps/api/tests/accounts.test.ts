@@ -1,7 +1,12 @@
-import { describe, expect, it } from "vitest"
+import { type FastifyInstance } from "fastify"
+import { beforeEach, describe, expect, it } from "vitest"
 
+import { createApp } from "../src/app.js"
 import { InMemoryAccountRepository } from "../src/features/accounts/in-memory-repository.js"
+import { type MagicLinkEmailInput } from "../src/features/accounts/magic-link-email.js"
 import { ApiError } from "../src/infrastructure/errors.js"
+import { InMemoryVocabularyRepository } from "../src/features/vocabulary/in-memory-repository.js"
+import { authConfig, createInMemoryRepositories } from "./helpers.js"
 
 const expiresAt = () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
 
@@ -262,5 +267,126 @@ describe("account repository invitations", () => {
     })
 
     expect(accepted).toMatchObject({ id: organization.id, role: "member" })
+  })
+})
+
+class CapturingMagicLinkEmailSender {
+  readonly sent: MagicLinkEmailInput[] = []
+
+  async sendMagicLink(input: MagicLinkEmailInput) {
+    this.sent.push(input)
+  }
+}
+
+const createAuthedApp = () => {
+  const magicLinkEmailSender = new CapturingMagicLinkEmailSender()
+
+  return {
+    magicLinkEmailSender,
+    app: createApp({
+      ...createInMemoryRepositories(),
+      vocabularyRepository: new InMemoryVocabularyRepository(),
+      auth: authConfig,
+      magicLinkEmailSender,
+    }),
+  }
+}
+
+const login = async (
+  app: FastifyInstance,
+  magicLinkEmailSender: CapturingMagicLinkEmailSender,
+  email: string,
+) => {
+  await app.inject({
+    method: "POST",
+    url: "/auth/magic-link",
+    payload: { email },
+  })
+  const loginUrl = new URL(magicLinkEmailSender.sent.at(-1)!.loginUrl)
+  const callback = await app.inject({
+    method: "GET",
+    url: `${loginUrl.pathname}${loginUrl.search}`,
+  })
+  const cookie = callback.cookies.find(
+    (current) => current.name === "cf_session",
+  )!
+
+  return { cf_session: cookie.value }
+}
+
+const createOrganization = async (
+  app: FastifyInstance,
+  session: Record<string, string>,
+  name: string,
+) => {
+  const response = await app.inject({
+    method: "POST",
+    url: "/organizations",
+    cookies: session,
+    payload: { name },
+  })
+
+  expect(response.statusCode).toBe(201)
+
+  return response.json().id as string
+}
+
+describe("organization deletion", () => {
+  let app: FastifyInstance
+  let magicLinkEmailSender: CapturingMagicLinkEmailSender
+
+  beforeEach(async () => {
+    const created = createAuthedApp()
+    magicLinkEmailSender = created.magicLinkEmailSender
+    app = await created.app
+  })
+
+  it("rejects deleting the user's last organization", async () => {
+    const session = await login(app, magicLinkEmailSender, "owner@example.com")
+    const organizationId = await createOrganization(app, session, "Acme AI")
+
+    const response = await app.inject({
+      method: "DELETE",
+      url: `/organizations/${organizationId}`,
+      cookies: session,
+    })
+
+    expect(response.statusCode).toBe(409)
+    expect(response.json()).toMatchObject({
+      error: { code: "ORGANIZATION_LAST_REQUIRED" },
+    })
+  })
+
+  it("allows deleting an organization when the user has another", async () => {
+    const session = await login(app, magicLinkEmailSender, "owner@example.com")
+    const firstOrganizationId = await createOrganization(
+      app,
+      session,
+      "Acme AI",
+    )
+    const secondOrganizationId = await createOrganization(
+      app,
+      session,
+      "Beta Corp",
+    )
+
+    const response = await app.inject({
+      method: "DELETE",
+      url: `/organizations/${firstOrganizationId}`,
+      cookies: session,
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({ deleted: true })
+
+    const remaining = await app.inject({
+      method: "GET",
+      url: "/auth/me",
+      cookies: session,
+    })
+    expect(remaining.statusCode).toBe(200)
+    expect(remaining.json().organizations).toEqual([
+      expect.objectContaining({ id: secondOrganizationId }),
+    ])
   })
 })
