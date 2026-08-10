@@ -46,9 +46,9 @@ jobs:
 
       - name: Verify packages
         run: |
+          pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp build
           pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp typecheck
           pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp test
-          pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp build
 
       - name: Publish contracts
         if: inputs.package == 'all' || inputs.package == 'contracts'
