@@ -51,7 +51,10 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
 }
 
 function ComboboxInput({
-  autoComplete = "new-password",
+  // Chrome ignores autocomplete=off/new-password on text inputs and overlays
+  // its form-history popup on our list; type=search disables that heuristic.
+  autoComplete = "off",
+  type = "search",
   className,
   children,
   disabled = false,
@@ -68,7 +71,17 @@ function ComboboxInput({
     <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
         autoComplete={autoComplete}
-        render={<InputGroupInput disabled={disabled} />}
+        type={type}
+        // Password managers also key off field heuristics; keep them off comboboxes.
+        data-1p-ignore=""
+        data-lpignore="true"
+        data-form-type="other"
+        render={
+          <InputGroupInput
+            disabled={disabled}
+            className="[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+          />
+        }
         {...props}
       />
       <InputGroupAddon align="inline-end">
@@ -272,15 +285,23 @@ function ComboboxChip({
 }
 
 function ComboboxChipsInput({
-  autoComplete = "new-password",
+  autoComplete = "off",
+  type = "search",
   className,
   ...props
 }: ComboboxPrimitive.Input.Props) {
   return (
     <ComboboxPrimitive.Input
       autoComplete={autoComplete}
+      type={type}
+      data-1p-ignore=""
+      data-lpignore="true"
+      data-form-type="other"
       data-slot="combobox-chip-input"
-      className={cn("min-w-16 flex-1 outline-none", className)}
+      className={cn(
+        "min-w-16 flex-1 outline-none [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none",
+        className
+      )}
       {...props}
     />
   )
