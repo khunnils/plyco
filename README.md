@@ -39,6 +39,7 @@ Set the client API URL in `apps/client/.env`:
 
 ```dotenv
 VITE_API_URL=http://localhost:4100
+VITE_MCP_URL=http://localhost:4300
 ```
 
 ## Run Locally
@@ -54,6 +55,14 @@ Start the client in another terminal:
 ```bash
 pnpm dev:client
 ```
+
+Start the hosted MCP server when testing remote AI connections:
+
+```bash
+PLYCO_API_URL=http://localhost:4100 pnpm dev:mcp
+```
+
+The hosted MCP health check is available at `http://localhost:4300/health`.
 
 Open the client URL printed by Vite, usually:
 

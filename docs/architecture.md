@@ -84,8 +84,11 @@ API surface with the MCP server through `@plyco/api-client`.
 ### MCP server
 
 The MCP server adapts organization-scoped API reads into tools for AI agents.
-It is intentionally read-only and uses an organization API credential via
-`@plyco/api-client`; it does not duplicate API business logic.
+It supports a hosted Streamable HTTP endpoint and a local stdio package. Both
+are intentionally read-only and use an organization API credential via
+`@plyco/api-client`; neither duplicates API business logic. Hosted connections
+are stateless and bind the request credential to the organization in the MCP
+endpoint URL, with final tenant authorization enforced by the API.
 
 ### Shared packages
 

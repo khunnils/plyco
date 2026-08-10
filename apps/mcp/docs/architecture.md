@@ -1,15 +1,16 @@
 # @plyco/mcp — Module Architecture
 
-A stdio [Model Context Protocol](https://modelcontextprotocol.io) server that
-gives AI agents read-only access to a single Plyco organization.
+A [Model Context Protocol](https://modelcontextprotocol.io) adapter that gives
+AI agents read-only access to a single Plyco organization. It supports hosted
+Streamable HTTP and local stdio transports.
 
 ## Configuration and API access
 
 Organization credential config and org-scoped reads are owned by
-`@plyco/api-client`. The MCP server reads config with `readOrgClientConfig` and
-invokes `createOrgClient` methods from tool handlers.
+`@plyco/api-client`. Tool handlers invoke `createOrgClient` methods rather than
+duplicating API behavior.
 
-Required environment variables:
+The local stdio entrypoint reads these environment variables:
 
 - `PLYCO_API_URL` — base URL of the Plyco API.
 - `PLYCO_API_KEY` — a per-organization API key created in the client Settings →
@@ -20,6 +21,16 @@ Required environment variables:
 
 `src/index.ts` connects an `McpServer` to a `StdioServerTransport`. stdout is
 reserved for the MCP protocol; all diagnostics go to stderr.
+
+`src/hosted.ts` starts the public HTTP process. Each
+`/organizations/:organizationId/mcp` request creates a stateless Streamable
+HTTP transport and an organization client from the request's bearer API key.
+The API verifies that the key grants read-only access to the organization; the
+MCP service does not access persistence or infer authorization itself.
+
+The hosted process requires `PLYCO_API_URL` and accepts optional `MCP_HOST`,
+`MCP_PORT`, and `MCP_ALLOWED_HOSTS` configuration. `GET /health` is the only
+unauthenticated route.
 
 ## Tools
 

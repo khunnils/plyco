@@ -135,7 +135,7 @@ describe("MCP stdio entrypoint", () => {
 
       expect(client.getServerVersion()).toMatchObject({
         name: "plyco-mcp",
-        version: "0.0.1",
+        version: "0.1.0",
       })
 
       const { tools } = await client.listTools()

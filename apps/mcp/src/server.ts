@@ -3,14 +3,27 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 
 const jsonResult = (data: unknown) => ({
+  structuredContent: { data },
   content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
 })
 
+const readOnlyAnnotations = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  openWorldHint: false,
+} as const
+
 export function createMcpServer(org: OrgClient): McpServer {
-  const server = new McpServer({
-    name: "plyco-mcp",
-    version: "0.0.1",
-  })
+  const server = new McpServer(
+    {
+      name: "plyco-mcp",
+      version: "0.1.0",
+    },
+    {
+      instructions:
+        "Use Plyco as the authoritative record of how the connected organization currently operates. All tools are read-only. Plyco data supports compliance readiness work but is not certification or legal advice.",
+    },
+  )
 
   const registerGetTool = (
     name: string,
@@ -24,6 +37,8 @@ export function createMcpServer(org: OrgClient): McpServer {
         title,
         description,
         inputSchema: {},
+        outputSchema: { data: z.unknown() },
+        annotations: readOnlyAnnotations,
       },
       async () => jsonResult(await invoke()),
     )
@@ -142,6 +157,8 @@ export function createMcpServer(org: OrgClient): McpServer {
       inputSchema: {
         documentId: z.string().min(1).describe("The document ID."),
       },
+      outputSchema: { data: z.unknown() },
+      annotations: readOnlyAnnotations,
     },
     async ({ documentId }) => jsonResult(await org.getDocument(documentId)),
   )

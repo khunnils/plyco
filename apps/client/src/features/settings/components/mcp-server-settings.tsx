@@ -4,7 +4,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4100"
+const MCP_URL = import.meta.env.VITE_MCP_URL ?? "http://localhost:4300"
 const API_KEY_PLACEHOLDER = "YOUR_PLYCO_API_KEY"
 
 const buildMcpConfig = (organizationId: string) =>
@@ -12,12 +12,9 @@ const buildMcpConfig = (organizationId: string) =>
     {
       mcpServers: {
         plyco: {
-          command: "npx",
-          args: ["-y", "@plyco/mcp"],
-          env: {
-            PLYCO_API_URL: API_URL,
-            PLYCO_API_KEY: API_KEY_PLACEHOLDER,
-            PLYCO_ORGANIZATION_ID: organizationId,
+          url: `${MCP_URL}/organizations/${encodeURIComponent(organizationId)}/mcp`,
+          headers: {
+            Authorization: `Bearer ${API_KEY_PLACEHOLDER}`,
           },
         },
       },
@@ -47,8 +44,8 @@ export const McpServerSettings = ({
       <div>
         <h2 className="text-xl font-semibold text-slate-950">MCP server</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Connect an AI agent to this organization&apos;s workspace with
-          read-only access.
+          Connect an AI agent directly to this organization&apos;s workspace with
+          read-only access. Nothing needs to run on your computer.
         </p>
       </div>
 
@@ -61,7 +58,7 @@ export const McpServerSettings = ({
             <p className="mt-1 max-w-2xl text-xs text-slate-500">
               Replace {API_KEY_PLACEHOLDER} with a key copied when it was
               created in the API Keys tab. Existing key values cannot be shown
-              again.
+              again. Your AI client must support Streamable HTTP MCP servers.
             </p>
           </div>
           <Button

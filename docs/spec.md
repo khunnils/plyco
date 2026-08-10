@@ -129,9 +129,11 @@ creation date are shown. Keys grant read-only access to that organization's data
 and can be revoked at any time. They are intended for AI agents connecting
 through the Plyco MCP server.
 
-The MCP Server tab shows a ready-to-paste configuration snippet prefilled with
-the API URL and organization ID. Its API key remains an explicit placeholder
-because raw keys are not persisted and cannot be retrieved after creation.
+The MCP Server tab shows a ready-to-paste Streamable HTTP configuration snippet
+prefilled with the hosted MCP URL and organization ID. Its API key remains an
+explicit placeholder because raw keys are not persisted and cannot be
+retrieved after creation. The hosted connection does not require users to
+install or run a local package.
 
 ## Product and Data Graph
 

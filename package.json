@@ -14,6 +14,7 @@
     "plyco-admin": "pnpm --filter @plyco/admin-cli exec tsx src/index.ts",
     "dev:api": "pnpm --filter @plyco/contracts build && pnpm --filter @plyco/db build && pnpm --filter @plyco/api dev",
     "dev:client": "pnpm --filter @plyco/contracts build && pnpm --filter cf-app dev",
+    "dev:mcp": "pnpm --filter @plyco/api-client build && pnpm --filter @plyco/mcp dev:hosted",
     "dev:web": "pnpm --filter @plyco/contracts build && pnpm --filter cf-web dev",
     "db:generate": "pnpm --filter @plyco/db prisma:generate",
     "db:migrate": "pnpm --filter @plyco/db exec prisma migrate deploy"

@@ -12,14 +12,17 @@
     "access": "public"
   },
   "bin": {
-    "plyco-mcp": "dist/index.js"
+    "plyco-mcp": "dist/index.js",
+    "plyco-mcp-hosted": "dist/hosted.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
+    "start:hosted": "node dist/hosted.js",
     "dev": "tsx src/index.ts",
+    "dev:hosted": "tsx src/hosted.ts",
     "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {

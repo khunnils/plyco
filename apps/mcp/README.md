@@ -1,17 +1,65 @@
 # @plyco/mcp
 
-A stdio [Model Context Protocol](https://modelcontextprotocol.io) server that
-gives AI agents read-only access to a single Plyco organization's workspace
-data. Organization reads go through `@plyco/api-client`, shared with `@plyco/cli`.
+A [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI
+agents read-only access to a single Plyco organization's workspace data. It can
+run as a hosted Streamable HTTP service or as a local stdio process.
+Organization reads go through `@plyco/api-client`, shared with `@plyco/cli`.
 
-## Setup
+## Hosted Streamable HTTP
+
+The hosted server accepts organization-scoped connections at:
+
+```text
+https://mcp.plyco.example/organizations/<organization-id>/mcp
+```
+
+Requests must send an organization API key as a bearer credential. The Plyco
+API independently verifies that the key belongs to the organization in the
+endpoint URL.
+
+Required environment variables:
+
+| Variable | Description |
+| --- | --- |
+| `PLYCO_API_URL` | Base URL of the Plyco API. |
+| `MCP_HOST` | Listen host; defaults to `0.0.0.0`. |
+| `MCP_PORT` | Listen port; defaults to `4300`; `PORT` is also accepted for Cloud Run. |
+| `MCP_ALLOWED_HOSTS` | Optional comma-separated hostname allowlist. |
+
+Run it locally with:
+
+```bash
+PLYCO_API_URL=http://localhost:4100 pnpm --filter @plyco/mcp dev:hosted
+```
+
+Example client configuration:
+
+```json
+{
+  "mcpServers": {
+    "plyco": {
+      "url": "https://mcp.plyco.example/organizations/your-organization-id/mcp",
+      "headers": {
+        "Authorization": "Bearer plyco_org_your_key_here"
+      }
+    }
+  }
+}
+```
+
+`GET /health` provides an unauthenticated health check. MCP connections are
+stateless so the service can run across multiple Cloud Run instances.
+
+## Local stdio
+
+### Setup
 
 1. In the Plyco client, open **Settings → API Keys** (owner only) and create a
    key. Copy the raw key — it is shown only once.
 2. Configure your MCP client with the API URL, that key, and your organization
    ID.
 
-## Configuration
+### Configuration
 
 The server is configured through environment variables:
 
@@ -21,7 +69,7 @@ The server is configured through environment variables:
 | `PLYCO_API_KEY` | A per-organization API key (`plyco_org_…`). |
 | `PLYCO_ORGANIZATION_ID` | The organization the key belongs to. |
 
-## Example `mcp.json`
+### Example `mcp.json`
 
 ```json
 {
