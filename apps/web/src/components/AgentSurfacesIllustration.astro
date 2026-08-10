@@ -1,0 +1,142 @@
+---
+const mcpTools = ["get_security_profile", "get_organization_providers"];
+
+const workspaceDomains = [
+	"Company profile",
+	"Services",
+	"Data",
+	"Privacy",
+	"Security",
+	"Access",
+	"Providers",
+	"Documents",
+];
+---
+
+<div
+	class="rounded-3xl border border-slate-200 bg-white p-4 text-left shadow-[0_28px_80px_rgba(15,23,42,0.12)] sm:p-6"
+	role="img"
+	aria-label="Diagram of AI agents and automations reaching the Plyco workspace through the MCP server, the CLI, and the read-only REST API"
+>
+	<p class="px-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Your agents &amp; automations</p>
+
+	<div class="mt-3 grid gap-3 sm:grid-cols-3">
+		<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+			<div class="flex items-center justify-between gap-2">
+				<strong class="text-sm text-slate-950">MCP server</strong>
+				<span class="rounded-full bg-lime-100 px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-[0.08em] text-lime-800">Assistants</span>
+			</div>
+			<p class="mt-2 text-xs leading-5 text-slate-600">Any MCP client calls workspace tools directly.</p>
+			<div class="mt-3 flex flex-wrap gap-1.5">
+				{mcpTools.map((tool) => (
+					<code class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.62rem] font-bold text-slate-600">{tool}()</code>
+				))}
+			</div>
+		</div>
+
+		<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+			<div class="flex items-center justify-between gap-2">
+				<strong class="text-sm text-slate-950">CLI</strong>
+				<span class="rounded-full bg-lime-100 px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-[0.08em] text-lime-800">Terminals</span>
+			</div>
+			<p class="mt-2 text-xs leading-5 text-slate-600">The same data as shell commands, for scripts and coding agents.</p>
+			<div class="mt-3 grid gap-1.5">
+				<code class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.62rem] font-bold text-slate-600">$ plyco security</code>
+				<code class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.62rem] font-bold text-slate-600">$ plyco providers</code>
+			</div>
+		</div>
+
+		<div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+			<div class="flex items-center justify-between gap-2">
+				<strong class="text-sm text-slate-950">REST API</strong>
+				<span class="rounded-full bg-lime-100 px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-[0.08em] text-lime-800">Custom</span>
+			</div>
+			<p class="mt-2 text-xs leading-5 text-slate-600">Plain GET endpoints returning structured JSON.</p>
+			<div class="mt-3 grid gap-1.5">
+				<code class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.62rem] font-bold text-slate-600">GET /organizations/:id/security</code>
+				<code class="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.62rem] font-bold text-slate-600">GET /organizations/:id/documents</code>
+			</div>
+		</div>
+	</div>
+
+	<svg class="hidden w-full sm:block" viewBox="0 0 600 72" fill="none" aria-hidden="true">
+		<path class="rail" d="M100 4 C100 44, 300 28, 300 68" />
+		<path class="rail" d="M300 4 L300 68" />
+		<path class="rail" d="M500 4 C500 44, 300 28, 300 68" />
+		<path class="beam" d="M100 4 C100 44, 300 28, 300 68" />
+		<path class="beam beam-2" d="M300 4 L300 68" />
+		<path class="beam beam-3" d="M500 4 C500 44, 300 28, 300 68" />
+	</svg>
+	<div class="flex justify-center py-2 sm:hidden" aria-hidden="true">
+		<span class="h-10 border-l-2 border-dashed border-slate-300"></span>
+	</div>
+
+	<div class="mx-auto max-w-2xl rounded-2xl border border-slate-800 bg-slate-950 p-4 text-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] sm:p-5">
+		<div class="flex flex-wrap items-center gap-3">
+			<span class="hub-dot h-2.5 w-2.5 rounded-full bg-lime-400" aria-hidden="true"></span>
+			<strong class="text-sm">Plyco workspace</strong>
+			<span class="ml-auto rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.08em] text-slate-300">Read-only · org-scoped key</span>
+		</div>
+		<div class="mt-4 flex flex-wrap gap-1.5">
+			{workspaceDomains.map((domain) => (
+				<span class="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[0.65rem] font-bold text-slate-200">{domain}</span>
+			))}
+		</div>
+	</div>
+</div>
+
+<style>
+	.rail {
+		stroke: #e2e8f0;
+		stroke-width: 1.5;
+		vector-effect: non-scaling-stroke;
+	}
+
+	/* Dashed lime overlay drifting along the rails reads as requests flowing into the workspace. */
+	.beam {
+		stroke: #84cc16;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-dasharray: 4 18;
+		vector-effect: non-scaling-stroke;
+		animation: beam-flow 1.8s linear infinite;
+	}
+
+	.beam-2 {
+		animation-delay: 0.35s;
+	}
+
+	.beam-3 {
+		animation-delay: 0.7s;
+	}
+
+	@keyframes beam-flow {
+		from {
+			stroke-dashoffset: 0;
+		}
+		to {
+			stroke-dashoffset: -22;
+		}
+	}
+
+	.hub-dot {
+		animation: hub-pulse 2.4s ease-in-out infinite;
+	}
+
+	@keyframes hub-pulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 rgba(163, 230, 53, 0.55);
+		}
+		50% {
+			box-shadow: 0 0 0 6px rgba(163, 230, 53, 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.beam,
+		.hub-dot {
+			animation: none;
+		}
+	}
+</style>
