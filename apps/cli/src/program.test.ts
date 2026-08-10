@@ -207,4 +207,64 @@ describe("createProgram", () => {
 
     expect(removeVocabularyCode).toHaveBeenCalledWith("set-1", "code-1")
   })
+
+  it("installs the skill into the default cursor home directory", async () => {
+    const { mkdtemp, readFile } = await import("node:fs/promises")
+    const { tmpdir } = await import("node:os")
+    const { join } = await import("node:path")
+    const homeDir = await mkdtemp(join(tmpdir(), "plyco-home-"))
+    const stdout = createWritable()
+    const program = createProgram({ env, homeDir, stdout, exitOverride: true })
+
+    await program.parseAsync(["skill", "install"], { from: "user" })
+
+    const target = join(homeDir, ".cursor", "skills", "plyco", "SKILL.md")
+    const contents = await readFile(target, "utf8")
+    expect(contents).toContain("name: plyco")
+    expect(stdout.output).toContain(target)
+  })
+
+  it("installs the skill for multiple agents", async () => {
+    const { mkdtemp, readFile } = await import("node:fs/promises")
+    const { tmpdir } = await import("node:os")
+    const { join } = await import("node:path")
+    const homeDir = await mkdtemp(join(tmpdir(), "plyco-home-"))
+    const stdout = createWritable()
+    const program = createProgram({ env, homeDir, stdout, exitOverride: true })
+
+    await program.parseAsync(
+      ["skill", "install", "--agent", "claude", "--agent", "codex"],
+      { from: "user" },
+    )
+
+    const claudeTarget = join(
+      homeDir,
+      ".claude",
+      "skills",
+      "plyco",
+      "SKILL.md",
+    )
+    const codexTarget = join(homeDir, ".codex", "skills", "plyco", "SKILL.md")
+    expect(await readFile(claudeTarget, "utf8")).toContain("name: plyco")
+    expect(await readFile(codexTarget, "utf8")).toContain("name: plyco")
+  })
+
+  it("rejects an unknown agent", async () => {
+    const { mkdtemp } = await import("node:fs/promises")
+    const { tmpdir } = await import("node:os")
+    const { join } = await import("node:path")
+    const homeDir = await mkdtemp(join(tmpdir(), "plyco-home-"))
+    const program = createProgram({
+      env,
+      homeDir,
+      stdout: createWritable(),
+      exitOverride: true,
+    })
+
+    await expect(
+      program.parseAsync(["skill", "install", "--agent", "bogus"], {
+        from: "user",
+      }),
+    ).rejects.toThrow(/Unknown agent/)
+  })
 })

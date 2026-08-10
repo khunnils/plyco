@@ -75,6 +75,23 @@ stdin.
 - `activities add|update <id>|remove <id>`
 - `vocabulary codes add <codeSetId>|update <codeSetId> <codeId>|remove <codeSetId> <codeId>`
 
+## Agent skill
+
+Install a bundled agent skill that teaches a coding agent how to use this CLI:
+
+```bash
+npx -y @plyco/cli skill install
+```
+
+By default it installs into `~/.cursor/skills/plyco/`. Target other agents with
+`--agent` (repeatable; `cursor`, `claude`, or `codex`), or install into the
+current project with `--project`:
+
+```bash
+npx -y @plyco/cli skill install --agent claude --agent codex
+npx -y @plyco/cli skill install --project
+```
+
 ## Agent usage
 
 Point a coding agent at the binary and the same env vars used by `@plyco/mcp`.

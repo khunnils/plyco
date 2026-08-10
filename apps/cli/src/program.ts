@@ -5,13 +5,17 @@ import {
   type OrgClient,
 } from "@plyco/api-client"
 import { Command, CommanderError } from "commander"
-import { readFile } from "node:fs/promises"
+import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { homedir } from "node:os"
+import { dirname, join } from "node:path"
 import { stdin as stdinStream } from "node:process"
+import { fileURLToPath } from "node:url"
 
 export type ProgramOptions = {
   env?: NodeJS.ProcessEnv
   exitOverride?: boolean
   fetchFn?: typeof fetch
+  homeDir?: string
   orgClient?: OrgClient
   stderr?: Pick<NodeJS.WriteStream, "write">
   stdout?: Pick<NodeJS.WriteStream, "write">
@@ -28,10 +32,24 @@ type JsonInputOptions = {
   file?: string
 }
 
+type SkillInstallOptions = {
+  agent?: string[]
+  project?: boolean
+}
+
+const SKILL_AGENTS = {
+  cursor: ".cursor/skills",
+  claude: ".claude/skills",
+  codex: ".codex/skills",
+} as const
+
+type SkillAgent = keyof typeof SKILL_AGENTS
+
 export function createProgram({
   env = process.env,
   exitOverride = false,
   fetchFn,
+  homeDir = homedir(),
   orgClient,
   stderr = process.stderr,
   stdout = process.stdout,
@@ -387,6 +405,40 @@ export function createProgram({
       writeJson(stdout, await resolveClient().getDocument(documentId))
     })
 
+  const skill = program.command("skill").description("Plyco agent skill")
+
+  skill
+    .command("install")
+    .description("Install the Plyco agent skill into a coding agent")
+    .option(
+      "--agent <name>",
+      `Target agent (${Object.keys(SKILL_AGENTS).join("|")}); repeatable`,
+      collectAgent,
+      [] as string[],
+    )
+    .option(
+      "--project",
+      "Install into the current project instead of the home directory",
+    )
+    .action(async (options: SkillInstallOptions) => {
+      const agents = resolveSkillAgents(options.agent)
+      const baseDir = options.project ? process.cwd() : homeDir
+      const source = fileURLToPath(
+        new URL("../skills/plyco/SKILL.md", import.meta.url),
+      )
+      const contents = await readFile(source, "utf8")
+
+      const installed: string[] = []
+      for (const agent of agents) {
+        const target = join(baseDir, SKILL_AGENTS[agent], "plyco", "SKILL.md")
+        await mkdir(dirname(target), { recursive: true })
+        await writeFile(target, contents)
+        installed.push(target)
+      }
+
+      writeJson(stdout, { installed })
+    })
+
   program.configureOutput({
     writeErr: (message) => stderr.write(message),
     writeOut: (message) => stdout.write(message),
@@ -397,6 +449,30 @@ export function createProgram({
   }
 
   return program
+}
+
+function collectAgent(value: string, previous: string[]): string[] {
+  return [...previous, value]
+}
+
+function resolveSkillAgents(agents: string[] | undefined): SkillAgent[] {
+  const requested = agents && agents.length > 0 ? agents : ["cursor"]
+  const resolved: SkillAgent[] = []
+
+  for (const agent of requested) {
+    if (!(agent in SKILL_AGENTS)) {
+      throw new Error(
+        `Unknown agent "${agent}". Expected one of: ${Object.keys(
+          SKILL_AGENTS,
+        ).join(", ")}.`,
+      )
+    }
+    if (!resolved.includes(agent as SkillAgent)) {
+      resolved.push(agent as SkillAgent)
+    }
+  }
+
+  return resolved
 }
 
 async function readJsonInput(

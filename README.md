@@ -114,6 +114,9 @@ pnpm plyco overview
 pnpm plyco documents list
 ```
 
+Install the bundled agent skill for a coding agent with
+`npx -y @plyco/cli skill install`.
+
 See [apps/cli/README.md](apps/cli/README.md) for the full command list.
 
 ## Checks
