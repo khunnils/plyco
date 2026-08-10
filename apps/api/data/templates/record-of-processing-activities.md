@@ -15,7 +15,7 @@ This record documents the personal-data processing activities carried out by {{ 
 | --- | --- |
 | Organization | {{ organization.legalEntityName or organization.name }} |
 | Address | {{ organization.address or "Not recorded" }} |
-| Country | {{ organization.country or "Not recorded" }} |
+| Country | {{ organization.countryLabel or "Not recorded" }} |
 | Privacy contact | {{ organization.privacyContactEmail or organization.contactEmail or "Not recorded" }} |
 | Data Protection Officer | {% if privacy.dpoName %}{{ privacy.dpoName }}{% if privacy.dpoEmail %} ({{ privacy.dpoEmail }}){% endif %}{% elif privacy.dpoStatusLabel %}{{ privacy.dpoStatusLabel }}{% else %}Not recorded{% endif %} |
 | EU representative | {% if privacy.euRepresentativeName %}{{ privacy.euRepresentativeName }}{% if privacy.euRepresentativeAddress %}, {{ privacy.euRepresentativeAddress }}{% endif %}{% elif privacy.euRepresentativeStatusLabel %}{{ privacy.euRepresentativeStatusLabel }}{% else %}Not recorded{% endif %} |
@@ -35,7 +35,7 @@ This record documents the personal-data processing activities carried out by {{ 
 | Field | Details |
 | --- | --- |
 | Purpose of processing | {{ activity.purpose or "Not recorded" }} |
-| GDPR role | {{ activity.roleLabel or activity.role or "Not recorded" }} |
+| GDPR role | {{ activity.roleLabel or "Not recorded" }} |
 | Legal basis | {{ activity.legalBasisLabels | join(", ") or "Not recorded" }} |
 | Retention period | {{ activity.retentionLabel or "Not recorded" }} |
 | Primary hosting region | {{ service.privacy.primaryHostingRegionLabel or "Not recorded" }} |
@@ -46,7 +46,7 @@ This record documents the personal-data processing activities carried out by {{ 
 | Personal data category | Data subjects | Sensitive | Collection method |
 | --- | --- | --- | --- |
 {% for dataType in activity.dataTypes -%}
-| {{ dataType.name }}{% if dataType.description %}: {{ dataType.description }}{% endif %} | {{ dataType.subjectTypes | join(", ") or "Not recorded" }} | {% if dataType.isSensitive %}Yes{% elif dataType.isSensitive == false %}No{% else %}Not recorded{% endif %} | {{ dataType.collectionMethods | join(", ") or "Not recorded" }} |
+| {{ dataType.name }}{% if dataType.description %}: {{ dataType.description }}{% endif %} | {{ dataType.subjectTypeLabels | join(", ") or "Not recorded" }} | {% if dataType.isSensitive %}Yes{% elif dataType.isSensitive == false %}No{% else %}Not recorded{% endif %} | {{ dataType.collectionMethodLabels | join(", ") or "Not recorded" }} |
 {% endfor %}
 {% else %}
 No personal data categories are mapped to this activity.
@@ -58,7 +58,7 @@ No personal data categories are mapped to this activity.
 | Recipient / processor | Processing role | Purpose | Data processed | Processing regions |
 | --- | --- | --- | --- | --- |
 {% for vendor in service.vendors -%}
-| {{ vendor.name or "Not recorded" }} | {{ vendor.dataProcessingLevel or "Not recorded" }} | {{ vendor.purpose or "Not recorded" }} | {{ vendor.dataProcessed | join(", ") or "Not recorded" }} | {{ vendor.dataRegions | join(", ") or "Not recorded" }} |
+| {{ vendor.name or "Not recorded" }} | {{ vendor.dataProcessingLevelLabel or "Not recorded" }} | {{ vendor.purpose or "Not recorded" }} | {{ vendor.dataProcessed | join(", ") or "Not recorded" }} | {{ vendor.dataRegionLabels | join(", ") or "Not recorded" }} |
 {% endfor %}
 {% else %}
 No recipients or processors are recorded for this service.

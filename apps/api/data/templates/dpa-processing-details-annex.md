@@ -5,7 +5,7 @@
 # Data Processing Details Annex
 
 **Processor:** {{ organization.legalEntityName or organization.name }}  
-{% if organization.address %}**Address:** {{ organization.address }}{% if organization.country %}, {{ organization.country }}{% endif %}  
+{% if organization.address %}**Address:** {{ organization.address }}{% if organization.countryLabel %}, {{ organization.countryLabel }}{% endif %}  
 {% endif %}{% if policy.version %}**Version:** {{ policy.version }}  
 {% endif %}{% if policy.effectiveDate %}**Effective date:** {{ policy.effectiveDate }}
 {% endif %}
@@ -56,7 +56,7 @@ No personal data categories are currently recorded.
 | Subprocessor or recipient | Purpose | Data processed | Processing regions | DPA status |
 | --- | --- | --- | --- | --- |
 {% for vendor in serviceGroup.vendors -%}
-| {{ vendor.name or "Not recorded" }} | {{ vendor.purpose or "Not recorded" }} | {{ vendor.dataProcessed | join(", ") or "Not recorded" }} | {{ vendor.dataRegions | join(", ") or "Not recorded" }} | {{ vendor.dpaStatus or "Not recorded" }} |
+| {{ vendor.name or "Not recorded" }} | {{ vendor.purpose or "Not recorded" }} | {{ vendor.dataProcessed | join(", ") or "Not recorded" }} | {{ vendor.dataRegionLabels | join(", ") or "Not recorded" }} | {{ vendor.dpaStatusLabel or "Not recorded" }} |
 {% endfor %}
 
 {% endif %}

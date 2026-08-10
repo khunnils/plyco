@@ -838,48 +838,57 @@ describe("documents / templates API", () => {
       await readFile(templatePath, "utf8"),
       "subprocessors.md",
     );
-    const context = new ReportContextBuilder().build({
-      organization: {
-        id: "org-test",
-        ...profileBody,
-        services: [storedService],
-        createdAt: "2026-05-15T00:00:00.000Z",
-        updatedAt: "2026-05-15T00:00:00.000Z",
+    const vocabularyRepository = new InMemoryVocabularyRepository(
+      testVocabularyCodeSets,
+    );
+    const vocabulary = await vocabularyRepository.listVocabulary("org-test");
+    const context = new ReportContextBuilder().build(
+      {
+        organization: {
+          id: "org-test",
+          ...profileBody,
+          services: [storedService],
+          createdAt: "2026-05-15T00:00:00.000Z",
+          updatedAt: "2026-05-15T00:00:00.000Z",
+        },
+        businessActivities: [],
+        vendors: [
+          {
+            id: "vendor-limited",
+            ...vendorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+          {
+            id: "vendor-subprocessor",
+            ...subprocessorBody,
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
+        serviceVendorUses: [
+          {
+            id: "vendor-use-limited",
+            ...vendorUseBody,
+            vendorName: "GitHub",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+          {
+            id: "vendor-use-subprocessor",
+            ...subprocessorUseBody,
+            vendorName: "Stripe",
+            serviceName: "Acme AI Platform",
+            createdAt: "2026-05-15T00:00:00.000Z",
+            updatedAt: "2026-05-15T00:00:00.000Z",
+          },
+        ],
       },
-      businessActivities: [],
-      vendors: [
-        {
-          id: "vendor-limited",
-          ...vendorBody,
-          createdAt: "2026-05-15T00:00:00.000Z",
-          updatedAt: "2026-05-15T00:00:00.000Z",
-        },
-        {
-          id: "vendor-subprocessor",
-          ...subprocessorBody,
-          createdAt: "2026-05-15T00:00:00.000Z",
-          updatedAt: "2026-05-15T00:00:00.000Z",
-        },
-      ],
-      serviceVendorUses: [
-        {
-          id: "vendor-use-limited",
-          ...vendorUseBody,
-          vendorName: "GitHub",
-          serviceName: "Acme AI Platform",
-          createdAt: "2026-05-15T00:00:00.000Z",
-          updatedAt: "2026-05-15T00:00:00.000Z",
-        },
-        {
-          id: "vendor-use-subprocessor",
-          ...subprocessorUseBody,
-          vendorName: "Stripe",
-          serviceName: "Acme AI Platform",
-          createdAt: "2026-05-15T00:00:00.000Z",
-          updatedAt: "2026-05-15T00:00:00.000Z",
-        },
-      ],
-    });
+      undefined,
+      [],
+      vocabulary,
+    );
     const renderedContent = new Jinja2Renderer().render(
       {
         id: "template-subprocessors",
@@ -899,10 +908,10 @@ describe("documents / templates API", () => {
     );
     expect(renderedContent).toContain("## Acme AI Platform");
     expect(renderedContent).toContain(
-      "| GitHub |  | Code hosting and pull requests | Customer account data | US |",
+      "| GitHub |  | Code hosting and pull requests | Customer account data | United States |",
     );
     expect(renderedContent).toContain(
-      "| Stripe |  | Payment processing | Customer account data | US, EU |",
+      "| Stripe |  | Payment processing | Customer account data | United States, European Union |",
     );
   });
 
@@ -1013,10 +1022,10 @@ describe("documents / templates API", () => {
     expect(renderedContent).toContain("Contract");
     expect(renderedContent).toContain("365 days");
     expect(renderedContent).toContain(
-      "| Customer account data: Profile and billing contact details | customer, administrator | Yes | account_signup |",
+      "| Customer account data: Profile and billing contact details | Customer, Administrator | Yes | Account signup |",
     );
     expect(renderedContent).toContain(
-      "| Stripe | subprocessor | Payment processing | Customer account data | us, eu |",
+      "| Stripe | Subprocessor | Payment processing | Customer account data | United States, European Union |",
     );
     expect(renderedContent).toContain("SCCs, Data Privacy Framework");
     expect(renderedContent).toContain("Encryption at rest using AES-256");

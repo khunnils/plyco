@@ -4,6 +4,7 @@ import nunjucks from "nunjucks";
 import {
   type AccessProfile,
   type BusinessActivity,
+  type Country,
   cookieCategoryLabels,
   type DataHandlingProfile,
   type Document,
@@ -21,6 +22,7 @@ import {
   type OrganizationProvider,
   type Vocabulary,
 } from "@plyco/contracts";
+import { countries as systemCountries } from "../vocabulary/reference-data.js";
 
 type ProviderContextGroup = {
   all: Array<Record<string, unknown>>;
@@ -63,35 +65,62 @@ export class ReportContextBuilder {
     template?: Template,
     members: OrganizationMember[] = [],
     vocabulary?: Vocabulary,
+    countries: Country[] = systemCountries,
   ): NormalizedTemplateContext {
     const organization = snapshot.organization;
     const organizationContext = organization
       ? {
           ...organization.company,
           name: organization.company.companyName,
+          countryLabel: this.countryLabel(
+            countries,
+            organization.company.country,
+          ),
+          industryLabels: this.codeLabels(
+            vocabulary,
+            "industries",
+            organization.company.industries,
+          ),
+          regionLabels: this.codeLabels(
+            vocabulary,
+            "regions",
+            organization.company.regions,
+          ),
+          complianceGoalLabels: this.codeLabels(
+            vocabulary,
+            "compliance_goals",
+            organization.company.complianceGoals,
+          ),
         }
       : {};
     const legacySnapshot = snapshot as SecurityProgramSnapshot & {
       vendors?: SecurityProgramSnapshot["organizationProviders"];
       serviceVendorUses?: SecurityProgramSnapshot["serviceProviderUsage"];
     };
+    const dataTypes = organization
+      ? organization.dataHandling.dataTypesStored.map((dataType) =>
+          this.dataTypeContext(dataType, vocabulary),
+        )
+      : [];
     const providers = (
       legacySnapshot.organizationProviders ??
       legacySnapshot.vendors ??
       []
-    ).map((provider) => this.providerContext(provider));
+    ).map((provider) => this.providerContext(provider, vocabulary, countries));
     const providerUsage = (
       legacySnapshot.serviceProviderUsage ??
       legacySnapshot.serviceVendorUses ??
       []
-    ).map((usage) => this.providerUsageContext(usage, providers));
+    ).map((usage) =>
+      this.providerUsageContext(usage, providers, vocabulary),
+    );
     const services = organization
       ? organization.services.map((service) =>
           this.serviceContext(
             service,
             snapshot.businessActivities,
             providerUsage,
-            organization.dataHandling.dataTypesStored,
+            dataTypes,
             vocabulary,
           ),
         )
@@ -245,19 +274,25 @@ export class ReportContextBuilder {
   ) {
     return {
       ...this.withAnswerFlags(dataHandling),
-      dataTypesStored: dataHandling.dataTypesStored.map((dataType) => ({
-        ...dataType,
-        subjectTypeLabels: this.codeLabels(
-          vocabulary,
-          "subject_types",
-          dataType.subjectTypes,
-        ),
-        collectionMethodLabels: this.codeLabels(
-          vocabulary,
-          "collection_methods",
-          dataType.collectionMethods,
-        ),
-      })),
+      dataTypesStored: dataHandling.dataTypesStored.map((dataType) =>
+        this.dataTypeContext(dataType, vocabulary),
+      ),
+    };
+  }
+
+  private dataTypeContext(dataType: StoredDataType, vocabulary?: Vocabulary) {
+    return {
+      ...dataType,
+      subjectTypeLabels: this.codeLabels(
+        vocabulary,
+        "subject_types",
+        dataType.subjectTypes,
+      ),
+      collectionMethodLabels: this.codeLabels(
+        vocabulary,
+        "collection_methods",
+        dataType.collectionMethods,
+      ),
     };
   }
 
@@ -265,7 +300,7 @@ export class ReportContextBuilder {
     service: ServiceProfile,
     activities: BusinessActivity[],
     providerUsage: Array<Record<string, unknown>>,
-    dataTypes: StoredDataType[],
+    dataTypes: Array<ReturnType<ReportContextBuilder["dataTypeContext"]>>,
     vocabulary?: Vocabulary,
   ) {
     const serviceProviderUsage = providerUsage.filter(
@@ -729,7 +764,7 @@ export class ReportContextBuilder {
   private codeLabel(
     vocabulary: Vocabulary | undefined,
     codeSetId: string,
-    value: string | null,
+    value: string | null | undefined,
   ) {
     return value ? this.codeLabels(vocabulary, codeSetId, [value])[0] : "";
   }
@@ -780,16 +815,39 @@ export class ReportContextBuilder {
     return true;
   }
 
-  private providerContext(provider: OrganizationProvider) {
+  private providerContext(
+    provider: OrganizationProvider,
+    vocabulary?: Vocabulary,
+    countries: Country[] = systemCountries,
+  ) {
     return {
       id: provider.id,
       providerId: provider.providerId,
       systemTypes: provider.systemTypes,
+      systemTypeLabels: this.codeLabels(
+        vocabulary,
+        "provider_system_types",
+        provider.systemTypes,
+      ),
       name: provider.name,
       legalName: provider.legalName,
       category: provider.category,
+      categoryLabel: this.codeLabel(
+        vocabulary,
+        "provider_categories",
+        provider.category,
+      ),
       countryOfRegistration: provider.countryOfRegistration,
+      countryOfRegistrationLabel: this.countryLabel(
+        countries,
+        provider.countryOfRegistration,
+      ),
       criticality: provider.criticality,
+      criticalityLabel: this.codeLabel(
+        vocabulary,
+        "vendor_criticality",
+        provider.criticality,
+      ),
       notes: provider.notes,
     };
   }
@@ -797,6 +855,7 @@ export class ReportContextBuilder {
   private providerUsageContext(
     providerUsage: ServiceProviderUsage,
     providers: Array<Record<string, unknown>>,
+    vocabulary?: Vocabulary,
   ) {
     const legacyUsage = providerUsage as ServiceProviderUsage & {
       vendorName?: string;
@@ -817,12 +876,32 @@ export class ReportContextBuilder {
       providerName: providerUsage.providerName || legacyUsage.vendorName || "",
       vendorName: providerUsage.providerName || legacyUsage.vendorName || "",
       systemType: providerUsage.systemType,
+      systemTypeLabel: this.codeLabel(
+        vocabulary,
+        "provider_system_types",
+        providerUsage.systemType,
+      ),
       name: providerUsage.providerName || legacyUsage.vendorName || "",
       purpose: providerUsage.purpose,
       dataProcessingLevel: providerUsage.dataProcessingLevel,
+      dataProcessingLevelLabel: this.codeLabel(
+        vocabulary,
+        "data_processing_level",
+        providerUsage.dataProcessingLevel,
+      ),
       dataProcessed: providerUsage.dataProcessed,
       dpaStatus: providerUsage.dpaStatus,
+      dpaStatusLabel: this.codeLabel(
+        vocabulary,
+        "dpa_status",
+        providerUsage.dpaStatus,
+      ),
       dataRegions: providerUsage.dataRegions,
+      dataRegionLabels: this.codeLabels(
+        vocabulary,
+        "regions",
+        providerUsage.dataRegions,
+      ),
       notes: providerUsage.notes || provider.notes,
     };
   }
@@ -847,9 +926,22 @@ export class ReportContextBuilder {
     return uniqueRegions.size === 1 ? [...uniqueRegions][0] : "";
   }
 
+  private countryLabel(
+    countries: Country[] | undefined,
+    value: string | null | undefined,
+  ) {
+    if (!value) {
+      return "";
+    }
+
+    return (
+      countries?.find((country) => country.code === value)?.name ?? value
+    );
+  }
+
   private businessActivityContext(
     activity: BusinessActivity,
-    dataTypes: StoredDataType[],
+    dataTypes: Array<ReturnType<ReportContextBuilder["dataTypeContext"]>>,
     vocabulary?: Vocabulary,
   ) {
     const activityDataTypes = dataTypes.filter((dataType) =>

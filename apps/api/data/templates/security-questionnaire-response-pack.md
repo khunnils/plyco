@@ -14,9 +14,9 @@ This response pack summarizes security and privacy practices recorded by {{ orga
 | Question | Response |
 | --- | --- |
 | Legal entity | {{ organization.legalEntityName or organization.name }} |
-| Headquarters or primary country | {{ organization.country or "Not recorded" }} |
+| Headquarters or primary country | {{ organization.countryLabel or "Not recorded" }} |
 | Employee count | {{ organization.employeeCount or "Not recorded" }} |
-| Compliance goals | {{ organization.complianceGoals | join(", ") or "Not recorded" }} |
+| Compliance goals | {{ organization.complianceGoalLabels | join(", ") or "Not recorded" }} |
 | Handles personal data | {% if organization.handlesPersonalData == true %}Yes{% elif organization.handlesPersonalData == false %}No{% else %}Not recorded{% endif %} |
 | Handles sensitive data | {% if organization.handlesSensitiveData == true %}Yes{% elif organization.handlesSensitiveData == false %}No{% else %}Not recorded{% endif %} |
 

@@ -211,7 +211,7 @@ We do not sell your personal data, and we do not share it for targeted advertisi
 | Subprocessor | Service | Purpose | Data processed | Data regions |
 | --- | --- | --- | --- | --- |
 {% for vendor in vendors.subprocessors -%}
-| {{ vendor.name }} | {{ vendor.serviceName or "—" }} | {{ vendor.purpose or "—" }} | {{ vendor.dataProcessed | join(", ") or "—" }} | {{ vendor.dataRegions | join(", ") or "—" }} |
+| {{ vendor.name }} | {{ vendor.serviceName or "—" }} | {{ vendor.purpose or "—" }} | {{ vendor.dataProcessed | join(", ") or "—" }} | {{ vendor.dataRegionLabels | join(", ") or "—" }} |
 {% endfor %}
 {% endif %}
 
@@ -242,8 +242,8 @@ We may update this Privacy Policy from time to time. When we make material chang
 {% if organization.contactEmail %}For general inquiries, contact {{ organization.contactEmail }}.{% endif %}
 {% if organization.address %}You can also write to us at {{ organization.address }}.{% endif %}
 
-{% if organization.country %}
+{% if organization.countryLabel %}
 ## Governing law
 
-This policy is governed by the laws that apply to {{ organization.legalEntityName or organization.name }} in {{ organization.country }}.
+This policy is governed by the laws that apply to {{ organization.legalEntityName or organization.name }} in {{ organization.countryLabel }}.
 {% endif %}

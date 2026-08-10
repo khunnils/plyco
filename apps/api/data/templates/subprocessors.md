@@ -14,7 +14,7 @@
 | Vendor | Legal name | Purpose | Data processed | Data regions |
 | --- | --- | --- | --- | --- |
 {% for vendor in serviceGroup.vendors -%}
-| {{ vendor.name }} | {{ vendor.legalName }} | {{ vendor.purpose }} | {{ vendor.dataProcessed | join(", ") }} | {{ vendor.dataRegions | join(", ") | upper }} |
+| {{ vendor.name }} | {{ vendor.legalName }} | {{ vendor.purpose }} | {{ vendor.dataProcessed | join(", ") }} | {{ vendor.dataRegionLabels | join(", ") }} |
 {% endfor %}
 
 {% endif %}

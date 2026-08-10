@@ -54,7 +54,15 @@
       "label": "Country",
       "type": "string",
       "category": "Organization",
-      "description": "Primary country for the organization.",
+      "description": "Primary country code for the organization.",
+      "example": "US"
+    },
+    {
+      "key": "organization.countryLabel",
+      "label": "Country label",
+      "type": "string",
+      "category": "Organization",
+      "description": "Human-readable primary country for the organization.",
       "example": "United States"
     },
     {
@@ -78,16 +86,32 @@
       "label": "Industries",
       "type": "string[]",
       "category": "Organization",
-      "description": "Industries the organization operates in.",
-      "example": ["SaaS", "AI"]
+      "description": "Industry codes the organization operates in.",
+      "example": ["technology_saas", "artificial_intelligence"]
+    },
+    {
+      "key": "organization.industryLabels",
+      "label": "Industry labels",
+      "type": "string[]",
+      "category": "Organization",
+      "description": "Human-readable industries the organization operates in.",
+      "example": ["Technology / SaaS", "Artificial Intelligence"]
     },
     {
       "key": "organization.regions",
       "label": "Operating regions",
       "type": "string[]",
       "category": "Organization",
-      "description": "Geographic regions where the organization operates.",
-      "example": ["US", "EU"]
+      "description": "Geographic region codes where the organization operates.",
+      "example": ["us", "eu"]
+    },
+    {
+      "key": "organization.regionLabels",
+      "label": "Operating region labels",
+      "type": "string[]",
+      "category": "Organization",
+      "description": "Human-readable geographic regions where the organization operates.",
+      "example": ["United States", "European Union"]
     },
     {
       "key": "organization.handlesSensitiveData",
@@ -102,7 +126,15 @@
       "label": "Compliance goals",
       "type": "string[]",
       "category": "Organization",
-      "description": "Compliance programs or customer security goals the organization is working toward.",
+      "description": "Compliance program codes or customer security goals the organization is working toward.",
+      "example": ["soc_2", "gdpr"]
+    },
+    {
+      "key": "organization.complianceGoalLabels",
+      "label": "Compliance goal labels",
+      "type": "string[]",
+      "category": "Organization",
+      "description": "Human-readable compliance programs or customer security goals the organization is working toward.",
       "example": ["SOC 2", "GDPR"]
     },
     {
@@ -1792,7 +1824,14 @@
           "key": "category",
           "label": "Category",
           "type": "string",
-          "description": "Vendor category or business function.",
+          "description": "Vendor category code or business function.",
+          "example": "source_control"
+        },
+        {
+          "key": "categoryLabel",
+          "label": "Category label",
+          "type": "string",
+          "description": "Human-readable vendor category or business function.",
           "example": "Source control"
         },
         {
@@ -1806,7 +1845,14 @@
           "key": "countryOfRegistration",
           "label": "Country of registration",
           "type": "string",
-          "description": "Country where the vendor legal entity is registered.",
+          "description": "Country code where the vendor legal entity is registered.",
+          "example": "US"
+        },
+        {
+          "key": "countryOfRegistrationLabel",
+          "label": "Country of registration label",
+          "type": "string",
+          "description": "Human-readable country where the vendor legal entity is registered.",
           "example": "United States"
         },
         {
@@ -1824,6 +1870,13 @@
           "example": "limited"
         },
         {
+          "key": "dataProcessingLevelLabel",
+          "label": "Data processing level label",
+          "type": "string",
+          "description": "Human-readable data processing level for the vendor.",
+          "example": "Limited"
+        },
+        {
           "key": "dataProcessed",
           "label": "Data processed",
           "type": "string[]",
@@ -1834,22 +1887,43 @@
           "key": "dpaStatus",
           "label": "DPA status",
           "type": "string",
-          "description": "Status of the vendor data processing agreement.",
+          "description": "Status code of the vendor data processing agreement.",
           "example": "signed"
+        },
+        {
+          "key": "dpaStatusLabel",
+          "label": "DPA status label",
+          "type": "string",
+          "description": "Human-readable status of the vendor data processing agreement.",
+          "example": "Signed"
         },
         {
           "key": "dataRegions",
           "label": "Data regions",
           "type": "string[]",
-          "description": "Regions where the vendor processes or stores data.",
-          "example": ["US"]
+          "description": "Region codes where the vendor processes or stores data.",
+          "example": ["us"]
+        },
+        {
+          "key": "dataRegionLabels",
+          "label": "Data region labels",
+          "type": "string[]",
+          "description": "Human-readable regions where the vendor processes or stores data.",
+          "example": ["United States"]
         },
         {
           "key": "criticality",
           "label": "Criticality",
           "type": "string",
-          "description": "Operational criticality of the vendor.",
+          "description": "Operational criticality code of the vendor.",
           "example": "high"
+        },
+        {
+          "key": "criticalityLabel",
+          "label": "Criticality label",
+          "type": "string",
+          "description": "Human-readable operational criticality of the vendor.",
+          "example": "High"
         },
         {
           "key": "owner",
@@ -1876,11 +1950,15 @@
       "example": [
         {
           "name": "GitHub",
-          "countryOfRegistration": "United States",
+          "countryOfRegistration": "US",
+          "countryOfRegistrationLabel": "United States",
           "dataProcessingLevel": "limited",
+          "dataProcessingLevelLabel": "Limited",
           "dataProcessed": ["customer account data"],
           "dpaStatus": "signed",
-          "dataRegions": ["US"]
+          "dpaStatusLabel": "Signed",
+          "dataRegions": ["us"],
+          "dataRegionLabels": ["United States"]
         }
       ],
       "itemFields": [
@@ -1902,7 +1980,14 @@
           "key": "category",
           "label": "Category",
           "type": "string",
-          "description": "Vendor category or business function.",
+          "description": "Vendor category code or business function.",
+          "example": "source_control"
+        },
+        {
+          "key": "categoryLabel",
+          "label": "Category label",
+          "type": "string",
+          "description": "Human-readable vendor category or business function.",
           "example": "Source control"
         },
         {
@@ -1916,7 +2001,14 @@
           "key": "countryOfRegistration",
           "label": "Country of registration",
           "type": "string",
-          "description": "Country where the vendor legal entity is registered.",
+          "description": "Country code where the vendor legal entity is registered.",
+          "example": "US"
+        },
+        {
+          "key": "countryOfRegistrationLabel",
+          "label": "Country of registration label",
+          "type": "string",
+          "description": "Human-readable country where the vendor legal entity is registered.",
           "example": "United States"
         },
         {
@@ -1934,6 +2026,13 @@
           "example": "limited"
         },
         {
+          "key": "dataProcessingLevelLabel",
+          "label": "Data processing level label",
+          "type": "string",
+          "description": "Human-readable data processing level for the vendor.",
+          "example": "Limited"
+        },
+        {
           "key": "dataProcessed",
           "label": "Data processed",
           "type": "string[]",
@@ -1944,22 +2043,43 @@
           "key": "dpaStatus",
           "label": "DPA status",
           "type": "string",
-          "description": "Status of the vendor data processing agreement.",
+          "description": "Status code of the vendor data processing agreement.",
           "example": "signed"
+        },
+        {
+          "key": "dpaStatusLabel",
+          "label": "DPA status label",
+          "type": "string",
+          "description": "Human-readable status of the vendor data processing agreement.",
+          "example": "Signed"
         },
         {
           "key": "dataRegions",
           "label": "Data regions",
           "type": "string[]",
-          "description": "Regions where the vendor processes or stores data.",
-          "example": ["US"]
+          "description": "Region codes where the vendor processes or stores data.",
+          "example": ["us"]
+        },
+        {
+          "key": "dataRegionLabels",
+          "label": "Data region labels",
+          "type": "string[]",
+          "description": "Human-readable regions where the vendor processes or stores data.",
+          "example": ["United States"]
         },
         {
           "key": "criticality",
           "label": "Criticality",
           "type": "string",
-          "description": "Operational criticality of the vendor.",
+          "description": "Operational criticality code of the vendor.",
           "example": "high"
+        },
+        {
+          "key": "criticalityLabel",
+          "label": "Criticality label",
+          "type": "string",
+          "description": "Human-readable operational criticality of the vendor.",
+          "example": "High"
         },
         {
           "key": "owner",
@@ -1987,9 +2107,12 @@
         {
           "name": "Stripe",
           "purpose": "Payment processing",
-          "countryOfRegistration": "United States",
-          "dataRegions": ["US", "EU"],
-          "dpaStatus": "signed"
+          "countryOfRegistration": "US",
+          "countryOfRegistrationLabel": "United States",
+          "dataRegions": ["us", "eu"],
+          "dataRegionLabels": ["United States", "European Union"],
+          "dpaStatus": "signed",
+          "dpaStatusLabel": "Signed"
         }
       ],
       "itemFields": [
@@ -2011,7 +2134,14 @@
           "key": "category",
           "label": "Category",
           "type": "string",
-          "description": "Vendor category or business function.",
+          "description": "Vendor category code or business function.",
+          "example": "source_control"
+        },
+        {
+          "key": "categoryLabel",
+          "label": "Category label",
+          "type": "string",
+          "description": "Human-readable vendor category or business function.",
           "example": "Source control"
         },
         {
@@ -2025,7 +2155,14 @@
           "key": "countryOfRegistration",
           "label": "Country of registration",
           "type": "string",
-          "description": "Country where the vendor legal entity is registered.",
+          "description": "Country code where the vendor legal entity is registered.",
+          "example": "US"
+        },
+        {
+          "key": "countryOfRegistrationLabel",
+          "label": "Country of registration label",
+          "type": "string",
+          "description": "Human-readable country where the vendor legal entity is registered.",
           "example": "United States"
         },
         {
@@ -2043,6 +2180,13 @@
           "example": "limited"
         },
         {
+          "key": "dataProcessingLevelLabel",
+          "label": "Data processing level label",
+          "type": "string",
+          "description": "Human-readable data processing level for the vendor.",
+          "example": "Limited"
+        },
+        {
           "key": "dataProcessed",
           "label": "Data processed",
           "type": "string[]",
@@ -2053,22 +2197,43 @@
           "key": "dpaStatus",
           "label": "DPA status",
           "type": "string",
-          "description": "Status of the vendor data processing agreement.",
+          "description": "Status code of the vendor data processing agreement.",
           "example": "signed"
+        },
+        {
+          "key": "dpaStatusLabel",
+          "label": "DPA status label",
+          "type": "string",
+          "description": "Human-readable status of the vendor data processing agreement.",
+          "example": "Signed"
         },
         {
           "key": "dataRegions",
           "label": "Data regions",
           "type": "string[]",
-          "description": "Regions where the vendor processes or stores data.",
-          "example": ["US"]
+          "description": "Region codes where the vendor processes or stores data.",
+          "example": ["us"]
+        },
+        {
+          "key": "dataRegionLabels",
+          "label": "Data region labels",
+          "type": "string[]",
+          "description": "Human-readable regions where the vendor processes or stores data.",
+          "example": ["United States"]
         },
         {
           "key": "criticality",
           "label": "Criticality",
           "type": "string",
-          "description": "Operational criticality of the vendor.",
+          "description": "Operational criticality code of the vendor.",
           "example": "high"
+        },
+        {
+          "key": "criticalityLabel",
+          "label": "Criticality label",
+          "type": "string",
+          "description": "Human-readable operational criticality of the vendor.",
+          "example": "High"
         },
         {
           "key": "owner",
