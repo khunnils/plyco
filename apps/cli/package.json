@@ -1,6 +1,11 @@
 {
   "name": "@plyco/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khunnils/plyco.git",
+    "directory": "apps/cli"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

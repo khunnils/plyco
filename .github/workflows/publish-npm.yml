@@ -12,6 +12,8 @@ on:
           - all
           - contracts
           - api-client
+          - cli
+          - mcp
 
 permissions:
   contents: read
@@ -44,9 +46,9 @@ jobs:
 
       - name: Verify packages
         run: |
-          pnpm --filter @plyco/contracts --filter @plyco/api-client typecheck
-          pnpm --filter @plyco/contracts --filter @plyco/api-client test
-          pnpm --filter @plyco/contracts --filter @plyco/api-client build
+          pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp typecheck
+          pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp test
+          pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp build
 
       - name: Publish contracts
         if: inputs.package == 'all' || inputs.package == 'contracts'
@@ -57,3 +59,17 @@ jobs:
         if: inputs.package == 'all' || inputs.package == 'api-client'
         working-directory: packages/api-client
         run: npm publish --access public
+
+      - name: Publish MCP
+        if: inputs.package == 'all' || inputs.package == 'mcp'
+        working-directory: apps/mcp
+        run: |
+          tarball=$(pnpm pack --pack-destination "$RUNNER_TEMP" --json | jq -r '.filename')
+          npm publish "$tarball" --access public
+
+      - name: Publish CLI
+        if: inputs.package == 'all' || inputs.package == 'cli'
+        working-directory: apps/cli
+        run: |
+          tarball=$(pnpm pack --pack-destination "$RUNNER_TEMP" --json | jq -r '.filename')
+          npm publish "$tarball" --access public

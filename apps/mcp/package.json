@@ -1,6 +1,11 @@
 {
   "name": "@plyco/mcp",
   "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khunnils/plyco.git",
+    "directory": "apps/mcp"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
