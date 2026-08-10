@@ -97,6 +97,43 @@ describe("documents / templates API", () => {
     ).toEqual(["Name changed."]);
   });
 
+  it("does not flag infrastructure providers as changed when only their order differs", () => {
+    const sourceTemplate = {
+      content: [
+        "{% for provider in infrastructure.organizationProviders -%}",
+        "- {{ provider.name or provider.providerId }} ({{ provider.systemType }})",
+        "{% endfor %}",
+        "{{ security.backups.backupRetentionDays }}",
+      ].join("\n"),
+    };
+    const providers = [
+      {
+        systemType: "source_control",
+        providerId: "prov-github",
+        name: "GitHub",
+      },
+      {
+        systemType: "cloud",
+        providerId: "prov-aws",
+        name: "AWS",
+      },
+    ];
+    const previousFingerprint = documentSourceFingerprint(sourceTemplate, {
+      infrastructure: { organizationProviders: providers },
+      security: { backups: { backupRetentionDays: 30 } },
+    });
+    const currentFingerprint = documentSourceFingerprint(sourceTemplate, {
+      infrastructure: {
+        organizationProviders: [...providers].reverse(),
+      },
+      security: { backups: { backupRetentionDays: 90 } },
+    });
+
+    expect(
+      documentStaleReasons(previousFingerprint, currentFingerprint),
+    ).toEqual(["Backup Retention Days changed."]);
+  });
+
   it("keeps legacy fingerprints current when only derived policy fields differ", () => {
     const sourceTemplate = {
       content: "{{ policy.effectiveDate }} {{ company.name }}",

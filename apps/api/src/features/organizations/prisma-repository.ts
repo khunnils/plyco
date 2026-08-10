@@ -45,6 +45,7 @@ export const ORGANIZATION_INCLUDE = {
       providerId: true,
       systemTypes: true,
     },
+    orderBy: [{ name: "asc" }, { providerId: "asc" }, { id: "asc" }],
   },
 } as const satisfies Prisma.OrganizationInclude;
 
@@ -504,7 +505,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             (systemType) => !managedSystemTypes.includes(systemType),
           ),
           ...(selectedSystemTypes ? Array.from(selectedSystemTypes) : []),
-        ];
+        ].sort((left, right) => left.localeCompare(right));
 
         return this.client.organizationProvider.update({
           where: { id: provider.id },
@@ -544,7 +545,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
             providerId: provider.id,
             systemTypes: Array.from(
               selectedByProviderId.get(provider.id) ?? [],
-            ),
+            ).sort((left, right) => left.localeCompare(right)),
             ...this.organizationProviderData(provider),
           },
         });

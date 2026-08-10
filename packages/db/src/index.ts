@@ -35,6 +35,25 @@ function stringArray(value: unknown): string[] | null {
     : null;
 }
 
+function compareProviderSelections(
+  left: { systemType: string; providerId?: string | null; name?: string | null },
+  right: { systemType: string; providerId?: string | null; name?: string | null },
+) {
+  const bySystemType = left.systemType.localeCompare(right.systemType);
+  if (bySystemType !== 0) {
+    return bySystemType;
+  }
+
+  const byProviderId = (left.providerId ?? "").localeCompare(
+    right.providerId ?? "",
+  );
+  if (byProviderId !== 0) {
+    return byProviderId;
+  }
+
+  return (left.name ?? "").localeCompare(right.name ?? "");
+}
+
 export function mapOrganizationRecord(record: {
   id: string;
   companyName: string;
@@ -230,17 +249,19 @@ export function mapOrganizationRecord(record: {
     organizationProviders: [
       ...record.organizationProviders.flatMap((provider) =>
         provider.providerId
-          ? provider.systemTypes.flatMap((systemType) =>
-              infrastructureProviderSystemTypes.includes(systemType)
-                ? [
-                    {
-                      providerId: provider.providerId,
-                      systemType,
-                      name: provider.name,
-                    },
-                  ]
-                : [],
-            )
+          ? [...provider.systemTypes]
+              .sort((left, right) => left.localeCompare(right))
+              .flatMap((systemType) =>
+                infrastructureProviderSystemTypes.includes(systemType)
+                  ? [
+                      {
+                        providerId: provider.providerId,
+                        systemType,
+                        name: provider.name,
+                      },
+                    ]
+                  : [],
+              )
           : [],
       ),
       ...(record.infrastructureProfile?.explicitNoProviderSystemTypes ?? [])
@@ -252,7 +273,7 @@ export function mapOrganizationRecord(record: {
           systemType,
           name: "None",
         })),
-    ],
+    ].sort(compareProviderSelections),
     mfaEnabled: record.infrastructureProfile?.mfaEnabled ?? null,
     encryptedDevicesRequired:
       record.infrastructureProfile?.encryptedDevicesRequired ?? null,
@@ -396,7 +417,7 @@ export function mapOrganizationRecord(record: {
             },
           ]
         : []),
-    ],
+    ].sort(compareProviderSelections),
     sendsMarketingEmails: record.privacyProfile?.sendsMarketingEmails ?? null,
     marketingOptOutMethod: record.privacyProfile?.marketingOptOutMethod ?? null,
     transactionalEmailsSent:

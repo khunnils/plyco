@@ -260,11 +260,28 @@ export class ReportContextBuilder {
   }
 
   private infrastructureContext(infrastructure: InfrastructureProfile) {
+    // Stable order so fingerprint diffs ignore incidental provider reordering
+    // from unordered DB reads / sync rewrites.
+    const organizationProviders = infrastructure.organizationProviders
+      .filter((provider) => provider.providerId !== "none")
+      .slice()
+      .sort((left, right) => {
+        const bySystemType = left.systemType.localeCompare(right.systemType);
+        if (bySystemType !== 0) {
+          return bySystemType;
+        }
+
+        const byProviderId = left.providerId.localeCompare(right.providerId);
+        if (byProviderId !== 0) {
+          return byProviderId;
+        }
+
+        return (left.name ?? "").localeCompare(right.name ?? "");
+      });
+
     return this.withAnswerFlags({
       ...infrastructure,
-      organizationProviders: infrastructure.organizationProviders.filter(
-        (provider) => provider.providerId !== "none",
-      ),
+      organizationProviders,
     });
   }
 
@@ -1095,6 +1112,12 @@ export function documentStaleReasons(
       continue;
     }
 
+    // Collection projections hash in encounter order, but summaries are
+    // order-insensitive. Ignore reorder-only diffs (e.g. providers).
+    if (summariesEquivalent(previousEntry.summary, entry.summary)) {
+      continue;
+    }
+
     reasons.push(...reasonForChangedEntry(previousEntry, entry));
   }
 
@@ -1184,7 +1207,49 @@ function stableStringify(value: unknown): string {
 }
 
 function hashValue(value: unknown) {
-  return createHash("sha256").update(stableStringify(value)).digest("hex");
+  return createHash("sha256")
+    .update(stableStringify(normalizeForHash(value)))
+    .digest("hex");
+}
+
+function normalizeForHash(value: unknown): unknown {
+  if (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        item === null ||
+        item === undefined ||
+        typeof item === "string" ||
+        typeof item === "number" ||
+        typeof item === "boolean",
+    )
+  ) {
+    return [...value].sort((left, right) => {
+      const leftKey = stableStringify(left);
+      const rightKey = stableStringify(right);
+      return leftKey.localeCompare(rightKey);
+    });
+  }
+
+  return value;
+}
+
+function summariesEquivalent(
+  previous: DocumentSourceFingerprint["entries"][number]["summary"],
+  current: DocumentSourceFingerprint["entries"][number]["summary"],
+) {
+  // Only trust named summaries; "Updated" / "N items" can collide across
+  // materially different object values.
+  if (
+    previous.names.length === 0 ||
+    current.names.length === 0 ||
+    previous.names.length !== current.names.length ||
+    previous.display !== current.display
+  ) {
+    return false;
+  }
+
+  return previous.names.every((name, index) => name === current.names[index]);
 }
 
 type TemplateAstNode = {
