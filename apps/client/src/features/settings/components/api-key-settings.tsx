@@ -95,7 +95,7 @@ export const ApiKeySettings = ({
         </div>
 
         <form
-          className="grid gap-3 border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_auto]"
+          className="grid items-start gap-3 border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_auto]"
           onSubmit={handleCreate}
         >
           <label className="grid gap-2 text-sm font-medium text-slate-800">
@@ -112,7 +112,7 @@ export const ApiKeySettings = ({
           <label className="grid gap-2 text-sm font-medium text-slate-800">
             <span>Scope</span>
             <select
-              className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+              className="h-11 rounded-sm border border-slate-300 bg-white px-4 py-2.5 text-sm font-normal text-slate-900 outline-none"
               value={scope}
               onChange={(event) =>
                 setScope(event.target.value as OrganizationApiKeyScope)
@@ -122,7 +122,10 @@ export const ApiKeySettings = ({
               <option value="read_write">Read &amp; write</option>
             </select>
           </label>
-          <div className="flex items-end">
+          <div className="grid gap-2">
+            <span className="invisible text-sm font-medium" aria-hidden="true">
+              Create
+            </span>
             <Button disabled={createApiKey.isPending} type="submit">
               <KeyRound />
               Create key
