@@ -5,6 +5,8 @@ import {
   type OrgClient,
 } from "@plyco/api-client"
 import { Command, CommanderError } from "commander"
+import { readFile } from "node:fs/promises"
+import { stdin as stdinStream } from "node:process"
 
 export type ProgramOptions = {
   env?: NodeJS.ProcessEnv
@@ -13,12 +15,17 @@ export type ProgramOptions = {
   orgClient?: OrgClient
   stderr?: Pick<NodeJS.WriteStream, "write">
   stdout?: Pick<NodeJS.WriteStream, "write">
+  stdin?: NodeJS.ReadableStream
 }
 
 type RootOptions = {
   apiUrl?: string
   apiKey?: string
   org?: string
+}
+
+type JsonInputOptions = {
+  file?: string
 }
 
 export function createProgram({
@@ -28,12 +35,15 @@ export function createProgram({
   orgClient,
   stderr = process.stderr,
   stdout = process.stdout,
+  stdin = stdinStream,
 }: ProgramOptions = {}) {
   const program = new Command()
 
   program
     .name("plyco")
-    .description("Plyco customer CLI for organization data access")
+    .description(
+      "Plyco customer CLI for organization data access and updates",
+    )
     .option("--api-url <url>", "Plyco API base URL (overrides PLYCO_API_URL)")
     .option("--api-key <key>", "Organization API key (overrides PLYCO_API_KEY)")
     .option(
@@ -62,79 +72,290 @@ export function createProgram({
     description: string,
     invoke: (client: OrgClient) => Promise<unknown>,
   ) => {
-    program
-      .command(name)
+    const command = program.command(name).description(description)
+    command.action(async () => {
+      writeJson(stdout, await invoke(resolveClient()))
+    })
+    return command
+  }
+
+  const addJsonUpdateCommand = (
+    parent: Command,
+    description: string,
+    invoke: (client: OrgClient, body: unknown) => Promise<unknown>,
+  ) => {
+    parent
+      .command("update")
       .description(description)
-      .action(async () => {
-        writeJson(stdout, await invoke(resolveClient()))
+      .option(
+        "--file <path>",
+        "JSON file to send (defaults to stdin when omitted)",
+      )
+      .action(async (options: JsonInputOptions) => {
+        const body = await readJsonInput(options.file, stdin)
+        writeJson(stdout, await invoke(resolveClient(), body))
       })
   }
+
+  const addJsonBodyCommand = (
+    parent: Command,
+    name: string,
+    description: string,
+    invoke: (client: OrgClient, body: unknown) => Promise<unknown>,
+  ) => {
+    parent
+      .command(name)
+      .description(description)
+      .option(
+        "--file <path>",
+        "JSON file to send (defaults to stdin when omitted)",
+      )
+      .action(async (options: JsonInputOptions) => {
+        const body = await readJsonInput(options.file, stdin)
+        writeJson(stdout, await invoke(resolveClient(), body))
+      })
+  }
+
+  const profile = registerGetCommand(
+    "profile",
+    "Get the company profile",
+    (client) => client.getProfile(),
+  )
+  addJsonUpdateCommand(profile, "Update the company profile", (client, body) =>
+    client.updateProfile(body),
+  )
+
+  const services = registerGetCommand(
+    "services",
+    "Get organization services",
+    (client) => client.getServices(),
+  )
+  addJsonUpdateCommand(services, "Update organization services", (client, body) =>
+    client.updateServices(body),
+  )
+
+  registerGetCommand(
+    "data-types",
+    "Get stored data types",
+    (client) => client.getDataTypes(),
+  )
+
+  const data = program.command("data").description("Organization data handling")
+  addJsonUpdateCommand(
+    data,
+    "Update the data handling profile",
+    (client, body) => client.updateDataHandling(body),
+  )
+
+  const activities = registerGetCommand(
+    "activities",
+    "Get business activities",
+    (client) => client.getActivities(),
+  )
+  addJsonBodyCommand(
+    activities,
+    "add",
+    "Create a business activity",
+    (client, body) => client.addActivity(body),
+  )
+  activities
+    .command("update")
+    .description("Update a business activity")
+    .argument("<id>", "activity ID")
+    .option(
+      "--file <path>",
+      "JSON file to send (defaults to stdin when omitted)",
+    )
+    .action(async (id: string, options: JsonInputOptions) => {
+      const body = await readJsonInput(options.file, stdin)
+      writeJson(stdout, await resolveClient().updateActivity(id, body))
+    })
+  activities
+    .command("remove")
+    .description("Delete a business activity")
+    .argument("<id>", "activity ID")
+    .action(async (id: string) => {
+      writeJson(stdout, await resolveClient().removeActivity(id))
+    })
+
+  const privacy = registerGetCommand(
+    "privacy",
+    "Get the privacy profile",
+    (client) => client.getPrivacyProfile(),
+  )
+  addJsonUpdateCommand(privacy, "Update the privacy profile", (client, body) =>
+    client.updatePrivacyProfile(body),
+  )
+
+  const infrastructure = registerGetCommand(
+    "infrastructure",
+    "Get the infrastructure profile",
+    (client) => client.getInfrastructureProfile(),
+  )
+  addJsonUpdateCommand(
+    infrastructure,
+    "Update the infrastructure profile",
+    (client, body) => client.updateInfrastructureProfile(body),
+  )
+
+  const security = registerGetCommand(
+    "security",
+    "Get the security profile",
+    (client) => client.getSecurityProfile(),
+  )
+  addJsonUpdateCommand(
+    security,
+    "Update the security profile",
+    (client, body) => client.updateSecurityProfile(body),
+  )
+
+  const access = registerGetCommand(
+    "access",
+    "Get the access profile",
+    (client) => client.getAccessProfile(),
+  )
+  addJsonUpdateCommand(access, "Update the access profile", (client, body) =>
+    client.updateAccessProfile(body),
+  )
 
   registerGetCommand(
     "overview",
     "Get the organization profile overview",
     (client) => client.getOverview(),
   )
-  registerGetCommand(
-    "profile",
-    "Get the company profile",
-    (client) => client.getProfile(),
-  )
-  registerGetCommand(
-    "services",
-    "Get organization services",
-    (client) => client.getServices(),
-  )
-  registerGetCommand(
-    "data-types",
-    "Get stored data types",
-    (client) => client.getDataTypes(),
-  )
-  registerGetCommand(
-    "activities",
-    "Get business activities",
-    (client) => client.getActivities(),
-  )
-  registerGetCommand(
-    "privacy",
-    "Get the privacy profile",
-    (client) => client.getPrivacyProfile(),
-  )
-  registerGetCommand(
-    "infrastructure",
-    "Get the infrastructure profile",
-    (client) => client.getInfrastructureProfile(),
-  )
-  registerGetCommand(
-    "security",
-    "Get the security profile",
-    (client) => client.getSecurityProfile(),
-  )
-  registerGetCommand(
-    "access",
-    "Get the access profile",
-    (client) => client.getAccessProfile(),
-  )
-  registerGetCommand(
+
+  const providers = registerGetCommand(
     "providers",
     "Get the organization provider inventory",
     (client) => client.getOrganizationProviders(),
   )
-  registerGetCommand(
+  addJsonBodyCommand(
+    providers,
+    "add",
+    "Add an organization provider",
+    (client, body) => client.addOrganizationProvider(body),
+  )
+  providers
+    .command("update")
+    .description("Update an organization provider")
+    .argument("<id>", "provider inventory ID")
+    .option(
+      "--file <path>",
+      "JSON file to send (defaults to stdin when omitted)",
+    )
+    .action(async (id: string, options: JsonInputOptions) => {
+      const body = await readJsonInput(options.file, stdin)
+      writeJson(
+        stdout,
+        await resolveClient().updateOrganizationProvider(id, body),
+      )
+    })
+  providers
+    .command("remove")
+    .description("Remove an organization provider")
+    .argument("<id>", "provider inventory ID")
+    .action(async (id: string) => {
+      writeJson(stdout, await resolveClient().removeOrganizationProvider(id))
+    })
+  addJsonBodyCommand(
+    providers,
+    "resolve",
+    "Resolve provider details from a URL",
+    (client, body) => client.resolveProvider(body),
+  )
+
+  const usage = registerGetCommand(
     "service-provider-usage",
     "Get service provider usage",
     (client) => client.getServiceProviderUsage(),
   )
+  addJsonBodyCommand(
+    usage,
+    "add",
+    "Create a service provider usage record",
+    (client, body) => client.addServiceProviderUsage(body),
+  )
+  usage
+    .command("update")
+    .description("Update a service provider usage record")
+    .argument("<id>", "usage ID")
+    .option(
+      "--file <path>",
+      "JSON file to send (defaults to stdin when omitted)",
+    )
+    .action(async (id: string, options: JsonInputOptions) => {
+      const body = await readJsonInput(options.file, stdin)
+      writeJson(
+        stdout,
+        await resolveClient().updateServiceProviderUsage(id, body),
+      )
+    })
+  usage
+    .command("remove")
+    .description("Delete a service provider usage record")
+    .argument("<id>", "usage ID")
+    .action(async (id: string) => {
+      writeJson(stdout, await resolveClient().removeServiceProviderUsage(id))
+    })
+
   registerGetCommand(
     "recommendations",
     "Get advisor recommendations",
     (client) => client.getRecommendations(),
   )
-  registerGetCommand(
+
+  const vocabulary = registerGetCommand(
     "vocabulary",
     "Get controlled vocabulary code sets",
     (client) => client.getVocabulary(),
   )
+  const vocabularyCodes = vocabulary
+    .command("codes")
+    .description("Manage vocabulary codes")
+  vocabularyCodes
+    .command("add")
+    .description("Create a vocabulary code")
+    .argument("<codeSetId>", "code set ID")
+    .option(
+      "--file <path>",
+      "JSON file to send (defaults to stdin when omitted)",
+    )
+    .action(async (codeSetId: string, options: JsonInputOptions) => {
+      const body = await readJsonInput(options.file, stdin)
+      writeJson(
+        stdout,
+        await resolveClient().addVocabularyCode(codeSetId, body),
+      )
+    })
+  vocabularyCodes
+    .command("update")
+    .description("Update a vocabulary code")
+    .argument("<codeSetId>", "code set ID")
+    .argument("<codeId>", "code ID")
+    .option(
+      "--file <path>",
+      "JSON file to send (defaults to stdin when omitted)",
+    )
+    .action(
+      async (codeSetId: string, codeId: string, options: JsonInputOptions) => {
+        const body = await readJsonInput(options.file, stdin)
+        writeJson(
+          stdout,
+          await resolveClient().updateVocabularyCode(codeSetId, codeId, body),
+        )
+      },
+    )
+  vocabularyCodes
+    .command("remove")
+    .description("Delete a vocabulary code")
+    .argument("<codeSetId>", "code set ID")
+    .argument("<codeId>", "code ID")
+    .action(async (codeSetId: string, codeId: string) => {
+      writeJson(
+        stdout,
+        await resolveClient().removeVocabularyCode(codeSetId, codeId),
+      )
+    })
 
   const templates = program
     .command("templates")
@@ -176,6 +397,38 @@ export function createProgram({
   }
 
   return program
+}
+
+async function readJsonInput(
+  filePath: string | undefined,
+  stdin: NodeJS.ReadableStream,
+): Promise<unknown> {
+  const raw =
+    filePath === undefined
+      ? await readStream(stdin)
+      : await readFile(filePath, "utf8")
+
+  if (!raw.trim()) {
+    throw new Error(
+      "JSON input is required. Pass --file <path> or pipe JSON on stdin.",
+    )
+  }
+
+  try {
+    return JSON.parse(raw) as unknown
+  } catch {
+    throw new Error("Input is not valid JSON.")
+  }
+}
+
+async function readStream(stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = []
+
+  for await (const chunk of stream) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk)
+  }
+
+  return Buffer.concat(chunks).toString("utf8")
 }
 
 function writeJson(stdout: Pick<NodeJS.WriteStream, "write">, value: unknown) {

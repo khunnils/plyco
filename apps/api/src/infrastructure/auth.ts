@@ -249,23 +249,25 @@ export async function registerAuth(
       return
     }
 
-    // Organization API keys grant read-only access to their own organization's
-    // routes. Only GET requests qualify; writes remain session-only. The binary
+    // Organization API keys grant access to their own organization's routes.
+    // Scope "read" allows GET only; "read_write" also allows writes. The binary
     // PDF download stays session-only; API clients read the markdown document.
+    // Owner-only routes still require a session via requireOrganizationOwner.
     const isPdfDownload = /\/documents\/[^/]+\/pdf(?:\?|$)/.test(request.url)
+    const token = bearerTokenFromRequest(request)
+    const urlOrganizationId = organizationIdFromUrl(request.url)
 
-    if (request.method === "GET" && !isPdfDownload) {
-      const token = bearerTokenFromRequest(request)
-      const urlOrganizationId = organizationIdFromUrl(request.url)
+    if (token && urlOrganizationId && !isPdfDownload) {
+      const keyAccess = await accountRepository.getApiKeyAccess(
+        hashOrganizationApiKey(token),
+      )
 
-      if (token && urlOrganizationId) {
-        const keyOrganizationId =
-          await accountRepository.getApiKeyOrganizationId(
-            hashOrganizationApiKey(token),
-          )
+      if (keyAccess && keyAccess.organizationId === urlOrganizationId) {
+        const canWrite = keyAccess.scope === "read_write"
+        const isReadRequest = request.method === "GET"
 
-        if (keyOrganizationId && keyOrganizationId === urlOrganizationId) {
-          request.organizationApiKeyOrgId = keyOrganizationId
+        if (isReadRequest || canWrite) {
+          request.organizationApiKeyOrgId = keyAccess.organizationId
           return
         }
       }

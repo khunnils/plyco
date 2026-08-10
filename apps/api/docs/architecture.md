@@ -91,8 +91,10 @@ The API has three deliberate access classes:
 - Browser workspace routes use encrypted HTTP-only sessions and authorize
   access through organization membership and role.
 - Machine routes use purpose-specific bearer keys. Organization keys are
-  tenant-scoped and read-only; operational keys are limited to administrative
-  operations.
+  tenant-scoped with an explicit scope (`read` for GET-only access, or
+  `read_write` for member-equivalent writes on the key's organization).
+  Operational keys are limited to administrative operations. Owner-only routes
+  (API keys, invitations, members, org delete) remain session-only.
 
 Organization identity in a path or payload is never sufficient authorization.
 Every organization-scoped operation resolves the caller and verifies access

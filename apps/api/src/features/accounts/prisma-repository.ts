@@ -21,6 +21,7 @@ import { ApiError } from "../../infrastructure/errors.js"
 import {
   type AccountRepository,
   type GoogleAccountUserInput,
+  type OrganizationApiKeyAccess,
 } from "./repository.js"
 
 const toIsoString = (value: Date) => value.toISOString()
@@ -568,6 +569,7 @@ export class PrismaAccountRepository implements AccountRepository {
       organizationApiKeySchema.parse({
         id: apiKey.id,
         name: apiKey.name,
+        scope: apiKey.scope,
         keyPrefix: apiKey.keyPrefix,
         createdByUserId: apiKey.createdByUserId,
         createdByName: apiKey.createdByUser.name,
@@ -580,6 +582,7 @@ export class PrismaAccountRepository implements AccountRepository {
     organizationId: string
     createdByUserId: string
     name: string
+    scope: OrganizationApiKey["scope"]
     tokenHash: string
     keyPrefix: string
   }): Promise<OrganizationApiKey> {
@@ -588,6 +591,7 @@ export class PrismaAccountRepository implements AccountRepository {
         organizationId: input.organizationId,
         createdByUserId: input.createdByUserId,
         name: input.name,
+        scope: input.scope,
         tokenHash: input.tokenHash,
         keyPrefix: input.keyPrefix,
       },
@@ -597,6 +601,7 @@ export class PrismaAccountRepository implements AccountRepository {
     return organizationApiKeySchema.parse({
       id: apiKey.id,
       name: apiKey.name,
+      scope: apiKey.scope,
       keyPrefix: apiKey.keyPrefix,
       createdByUserId: apiKey.createdByUserId,
       createdByName: apiKey.createdByUser.name,
@@ -615,13 +620,22 @@ export class PrismaAccountRepository implements AccountRepository {
     return result.count > 0
   }
 
-  async getApiKeyOrganizationId(tokenHash: string): Promise<string | null> {
+  async getApiKeyAccess(
+    tokenHash: string,
+  ): Promise<OrganizationApiKeyAccess | null> {
     const apiKey = await this.client.organizationApiKey.findUnique({
       where: { tokenHash },
-      select: { organizationId: true },
+      select: { organizationId: true, scope: true },
     })
 
-    return apiKey?.organizationId ?? null
+    if (!apiKey) {
+      return null
+    }
+
+    return {
+      organizationId: apiKey.organizationId,
+      scope: organizationApiKeySchema.shape.scope.parse(apiKey.scope),
+    }
   }
 }
 

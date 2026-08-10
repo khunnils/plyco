@@ -34,8 +34,8 @@ apps/
   client/     React and Vite authenticated application
   web/        Astro public website
   admin-cli/  Internal operations command-line client
-  cli/        Customer read-only organization data CLI
-  mcp/        Read-only Model Context Protocol adapter
+  cli/        Customer organization data CLI (read and scoped write)
+  mcp/        Model Context Protocol adapter (read and scoped write)
 packages/
   contracts/  Cross-boundary DTOs, Zod schemas, enums, and reference data
   db/         Prisma schema, migrations, generated client, and DB mapping
@@ -77,18 +77,20 @@ configuration or connect directly to persistence and integration providers.
 
 ### Customer CLI
 
-The customer CLI (`plyco`) is a read-only, organization-scoped client for
-scripts and AI agents. It uses a per-organization API credential and shares its
-API surface with the MCP server through `@plyco/api-client`.
+The customer CLI (`plyco`) is an organization-scoped client for scripts and AI
+agents. It uses a per-organization API credential (scope `read` or
+`read_write`) and shares its API surface with the MCP server through
+`@plyco/api-client`.
 
 ### MCP server
 
-The MCP server adapts organization-scoped API reads into tools for AI agents.
-It supports a hosted Streamable HTTP endpoint and a local stdio package. Both
-are intentionally read-only and use an organization API credential via
-`@plyco/api-client`; neither duplicates API business logic. Hosted connections
-are stateless and bind the request credential to the organization in the MCP
-endpoint URL, with final tenant authorization enforced by the API.
+The MCP server adapts organization-scoped API reads and writes into tools for
+AI agents. It supports a hosted Streamable HTTP endpoint and a local stdio
+package. Both use an organization API credential via `@plyco/api-client`;
+neither duplicates API business logic. Write tools require a key with scope
+`read_write`. Hosted connections are stateless and bind the request credential
+to the organization in the MCP endpoint URL, with final tenant authorization
+enforced by the API.
 
 ### Shared packages
 

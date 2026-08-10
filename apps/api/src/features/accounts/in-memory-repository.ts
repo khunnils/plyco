@@ -444,6 +444,7 @@ export class InMemoryAccountRepository implements AccountRepository {
     organizationId: string
     createdByUserId: string
     name: string
+    scope: OrganizationApiKey["scope"]
     tokenHash: string
     keyPrefix: string
   }): Promise<OrganizationApiKey> {
@@ -455,6 +456,7 @@ export class InMemoryAccountRepository implements AccountRepository {
     const apiKey = organizationApiKeySchema.parse({
       id: newId("apikey"),
       name: input.name,
+      scope: input.scope,
       keyPrefix: input.keyPrefix,
       createdByUserId: input.createdByUserId,
       createdByName: creator.name,
@@ -483,12 +485,19 @@ export class InMemoryAccountRepository implements AccountRepository {
     return this.apiKeys.delete(apiKeyId)
   }
 
-  async getApiKeyOrganizationId(tokenHash: string): Promise<string | null> {
+  async getApiKeyAccess(tokenHash: string) {
     const apiKey = Array.from(this.apiKeys.values()).find(
       (current) => current.tokenHash === tokenHash,
     )
 
-    return apiKey?.organizationId ?? null
+    if (!apiKey) {
+      return null
+    }
+
+    return {
+      organizationId: apiKey.organizationId,
+      scope: apiKey.scope,
+    }
   }
 
   addMembership(

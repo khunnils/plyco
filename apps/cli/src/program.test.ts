@@ -144,4 +144,67 @@ describe("createProgram", () => {
     )
     expect(stdout.output).toContain('"id": "doc-1"')
   })
+
+  it("updates a profile from stdin JSON", async () => {
+    const updateProfile = vi.fn(async () => ({ ok: true }))
+    const stdout = createWritable()
+    const { Readable } = await import("node:stream")
+    const stdin = Readable.from(['{"name":"Acme"}'])
+    const program = createProgram({
+      env,
+      orgClient: { updateProfile } as never,
+      stdout,
+      stdin,
+      exitOverride: true,
+    })
+
+    await program.parseAsync(["profile", "update"], { from: "user" })
+
+    expect(updateProfile).toHaveBeenCalledWith({ name: "Acme" })
+    expect(stdout.output).toContain('"ok": true')
+  })
+
+  it("adds a provider from a JSON file", async () => {
+    const addOrganizationProvider = vi.fn(async () => ({ id: "prov-1" }))
+    const stdout = createWritable()
+    const { mkdtemp, writeFile } = await import("node:fs/promises")
+    const { tmpdir } = await import("node:os")
+    const { join } = await import("node:path")
+    const dir = await mkdtemp(join(tmpdir(), "plyco-cli-"))
+    const filePath = join(dir, "provider.json")
+    await writeFile(filePath, JSON.stringify({ name: "Stripe" }))
+
+    const program = createProgram({
+      env,
+      orgClient: { addOrganizationProvider } as never,
+      stdout,
+      exitOverride: true,
+    })
+
+    await program.parseAsync(
+      ["providers", "add", "--file", filePath],
+      { from: "user" },
+    )
+
+    expect(addOrganizationProvider).toHaveBeenCalledWith({ name: "Stripe" })
+    expect(stdout.output).toContain('"id": "prov-1"')
+  })
+
+  it("removes a vocabulary code", async () => {
+    const removeVocabularyCode = vi.fn(async () => null)
+    const stdout = createWritable()
+    const program = createProgram({
+      env,
+      orgClient: { removeVocabularyCode } as never,
+      stdout,
+      exitOverride: true,
+    })
+
+    await program.parseAsync(
+      ["vocabulary", "codes", "remove", "set-1", "code-1"],
+      { from: "user" },
+    )
+
+    expect(removeVocabularyCode).toHaveBeenCalledWith("set-1", "code-1")
+  })
 })

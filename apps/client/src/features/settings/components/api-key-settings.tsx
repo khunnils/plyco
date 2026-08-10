@@ -1,6 +1,7 @@
 import {
   createOrganizationApiKeySchema,
   type CreatedOrganizationApiKey,
+  type OrganizationApiKeyScope,
   type OrganizationSummary,
 } from "@plyco/contracts"
 import { Copy, KeyRound, Trash2 } from "lucide-react"
@@ -23,6 +24,11 @@ import {
   useRevokeOrganizationApiKey,
 } from "@/features/settings/hooks/use-api-keys"
 
+const scopeLabels: Record<OrganizationApiKeyScope, string> = {
+  read: "Read-only",
+  read_write: "Read & write",
+}
+
 const copyToClipboard = async (value: string, label: string) => {
   try {
     await navigator.clipboard.writeText(value)
@@ -42,6 +48,7 @@ export const ApiKeySettings = ({
   const createApiKey = useCreateOrganizationApiKey(organization.id)
   const revokeApiKey = useRevokeOrganizationApiKey(organization.id)
   const [name, setName] = useState("")
+  const [scope, setScope] = useState<OrganizationApiKeyScope>("read")
   const [nameError, setNameError] = useState<string | null>(null)
   const [createdKey, setCreatedKey] =
     useState<CreatedOrganizationApiKey | null>(null)
@@ -56,7 +63,7 @@ export const ApiKeySettings = ({
 
   const handleCreate = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const parsed = createOrganizationApiKeySchema.safeParse({ name })
+    const parsed = createOrganizationApiKeySchema.safeParse({ name, scope })
 
     if (!parsed.success) {
       setNameError("Enter a name for this key.")
@@ -68,6 +75,7 @@ export const ApiKeySettings = ({
       onSuccess: (apiKey) => {
         setCreatedKey(apiKey)
         setName("")
+        setScope("read")
       },
     })
   }
@@ -80,14 +88,14 @@ export const ApiKeySettings = ({
         <div>
           <h2 className="text-xl font-semibold text-slate-950">API keys</h2>
           <p className="mt-1 text-sm text-slate-500">
-            API keys grant read-only access to this organization&apos;s
-            workspace data, for tools like the Plyco MCP server. Treat them like
-            passwords.
+            API keys grant access to this organization&apos;s workspace data for
+            tools like the Plyco CLI and MCP server. Choose read-only or read
+            &amp; write when creating a key. Treat them like passwords.
           </p>
         </div>
 
         <form
-          className="grid gap-3 border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_auto]"
+          className="grid gap-3 border border-slate-200 bg-white p-4 md:grid-cols-[minmax(0,1fr)_minmax(0,12rem)_auto]"
           onSubmit={handleCreate}
         >
           <label className="grid gap-2 text-sm font-medium text-slate-800">
@@ -100,6 +108,19 @@ export const ApiKeySettings = ({
             {nameError ? (
               <span className="text-xs text-red-700">{nameError}</span>
             ) : null}
+          </label>
+          <label className="grid gap-2 text-sm font-medium text-slate-800">
+            <span>Scope</span>
+            <select
+              className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900"
+              value={scope}
+              onChange={(event) =>
+                setScope(event.target.value as OrganizationApiKeyScope)
+              }
+            >
+              <option value="read">Read-only</option>
+              <option value="read_write">Read &amp; write</option>
+            </select>
           </label>
           <div className="flex items-end">
             <Button disabled={createApiKey.isPending} type="submit">
@@ -117,6 +138,7 @@ export const ApiKeySettings = ({
               </h3>
               <p className="mt-1 text-xs text-emerald-800">
                 This is the only time the full key is shown. Store it securely.
+                Scope: {scopeLabels[createdKey.scope]}.
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -151,6 +173,7 @@ export const ApiKeySettings = ({
             <TableHeader className="bg-slate-50">
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Scope</TableHead>
                 <TableHead>Key</TableHead>
                 <TableHead>Created by</TableHead>
                 <TableHead>Created</TableHead>
@@ -160,13 +183,13 @@ export const ApiKeySettings = ({
             <TableBody>
               {apiKeys.isLoading ? (
                 <TableRow>
-                  <TableCell className="text-slate-500" colSpan={5}>
+                  <TableCell className="text-slate-500" colSpan={6}>
                     Loading API keys...
                   </TableCell>
                 </TableRow>
               ) : keys.length === 0 ? (
                 <TableRow>
-                  <TableCell className="text-slate-500" colSpan={5}>
+                  <TableCell className="text-slate-500" colSpan={6}>
                     No API keys yet.
                   </TableCell>
                 </TableRow>
@@ -175,6 +198,9 @@ export const ApiKeySettings = ({
                   <TableRow key={apiKey.id}>
                     <TableCell className="font-medium text-slate-900">
                       {apiKey.name}
+                    </TableCell>
+                    <TableCell className="text-slate-600">
+                      {scopeLabels[apiKey.scope]}
                     </TableCell>
                     <TableCell className="font-mono text-slate-600">
                       {apiKey.keyPrefix}…

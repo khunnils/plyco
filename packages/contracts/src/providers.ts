@@ -63,7 +63,7 @@ export const organizationProviderInventorySchema =
     updatedAt: z.string().datetime(),
   });
 
-const serviceProviderUsageInputBaseSchema = z.object({
+export const serviceProviderUsageFieldsSchema = z.object({
   serviceId: z.string().trim().min(1, "Service is required"),
   organizationProviderId: z.string().trim().min(1, "Provider is required"),
   systemType: providerSystemTypeSchema.nullable().default(null),
@@ -74,6 +74,8 @@ const serviceProviderUsageInputBaseSchema = z.object({
   dataRegions: z.array(codeIdSchema).default([]),
   notes: z.string().trim().optional().or(z.literal("")),
 });
+
+const serviceProviderUsageInputBaseSchema = serviceProviderUsageFieldsSchema
 
 const normalizeProviderDataProcessingNone = <
   T extends z.infer<typeof serviceProviderUsageInputBaseSchema>,

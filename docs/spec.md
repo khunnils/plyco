@@ -121,11 +121,13 @@ delete the organization. Invitation links require Google or magic-link sign-in
 with the invited email before the user is added to the organization.
 
 The API Keys tab is owner-only; non-owners see a notice instead of the
-management UI. Owners create a named key, and the full secret is shown exactly
-once at creation; afterwards only the name, a short prefix, the creator, and the
-creation date are shown. Keys grant read-only access to that organization's data
-and can be revoked at any time. They are intended for AI agents connecting
-through the Plyco MCP server.
+management UI. Owners create a named key and choose a scope (`read` or
+`read_write`); the full secret is shown exactly once at creation; afterwards
+only the name, scope, a short prefix, the creator, and the creation date are
+shown. Keys with scope `read` grant read-only access to that organization's
+data; keys with scope `read_write` also allow member-equivalent writes. Keys
+can be revoked at any time. They are intended for AI agents connecting through
+the Plyco CLI or MCP server.
 
 The MCP Server tab shows a ready-to-paste Streamable HTTP configuration snippet
 prefilled with the hosted MCP URL and organization ID. Its API key remains an

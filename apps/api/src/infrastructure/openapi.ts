@@ -225,10 +225,13 @@ const publicRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
 const apiKeyRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
   route({ ...input, security: [{ bearerAuth: [] }] })
 
-// Organization-scoped GET routes accept either a session cookie or a
-// per-organization bearer API key.
-const orgReadRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
+// Organization-scoped member routes accept either a session cookie or a
+// per-organization bearer API key. Read keys may only call GET; read_write
+// keys may call writes. Owner-only routes stay session-only via `route()`.
+const orgMemberRoute = (input: Omit<Parameters<typeof route>[0], "security">) =>
   route({ ...input, security: [{ cookieAuth: [] }, { bearerAuth: [] }] })
+
+const orgReadRoute = orgMemberRoute
 
 const paths: Record<string, PathItem> = {
   "/health": {
@@ -446,7 +449,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: companyProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization company profile section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -463,7 +466,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: servicesProfileBodySchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization services section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -480,7 +483,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: dataHandlingProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization data section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -497,7 +500,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: privacyProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization privacy section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -514,7 +517,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: infrastructureProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization infrastructure section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -531,7 +534,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: securityProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization security section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -548,7 +551,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: accessProfileSchema,
     }),
-    put: route({
+    put: orgMemberRoute({
       summary: "Save the organization access section.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -558,7 +561,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/services/order": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Reorder organization services.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -567,7 +570,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/data-types/order": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Reorder organization data types.",
       tag: "Organizations",
       params: organizationIdParamsSchema,
@@ -609,7 +612,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: z.array(businessActivitySchema),
     }),
-    post: route({
+    post: orgMemberRoute({
       summary: "Create a business activity.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -619,7 +622,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/business-activities/{id}": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Update a business activity.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -627,7 +630,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: businessActivitySchema,
     }),
-    delete: route({
+    delete: orgMemberRoute({
       summary: "Delete a business activity.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -635,7 +638,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/business-activities/order": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Reorder business activities.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -651,7 +654,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: z.array(organizationProviderInventorySchema),
     }),
-    post: route({
+    post: orgMemberRoute({
       summary: "Create an organization provider.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -661,7 +664,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/organization-providers/resolve": {
-    post: route({
+    post: orgMemberRoute({
       summary: "Resolve provider details for organization provider creation.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -671,7 +674,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/organization-providers/{id}": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Update an organization provider.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -679,7 +682,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: organizationProviderInventorySchema,
     }),
-    delete: route({
+    delete: orgMemberRoute({
       summary: "Delete an organization provider.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -694,7 +697,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: z.array(serviceProviderUsageSchema),
     }),
-    post: route({
+    post: orgMemberRoute({
       summary: "Create a service provider usage record.",
       tag: "Vendors",
       params: organizationIdParamsSchema,
@@ -704,7 +707,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/service-provider-usage/{id}": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Update a service provider usage record.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -712,7 +715,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: serviceProviderUsageSchema,
     }),
-    delete: route({
+    delete: orgMemberRoute({
       summary: "Delete a service provider usage record.",
       tag: "Vendors",
       params: idParamsSchema,
@@ -737,7 +740,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/vocabulary/{codeSetId}/codes": {
-    post: route({
+    post: orgMemberRoute({
       summary: "Create an organization vocabulary code.",
       tag: "Vocabulary",
       params: vocabularyCodeSetParamsSchema,
@@ -747,7 +750,7 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/vocabulary/{codeSetId}/codes/{codeId}": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Update an organization vocabulary code.",
       tag: "Vocabulary",
       params: vocabularyCodeParamsSchema,
@@ -755,7 +758,7 @@ const paths: Record<string, PathItem> = {
       success: 200,
       successSchema: vocabularyCodeSchema,
     }),
-    delete: route({
+    delete: orgMemberRoute({
       summary: "Delete an organization vocabulary code.",
       tag: "Vocabulary",
       params: vocabularyCodeParamsSchema,
@@ -772,13 +775,13 @@ const paths: Record<string, PathItem> = {
     }),
   },
   "/organizations/{organizationId}/rule-suppressions/{ruleId}": {
-    put: route({
+    put: orgMemberRoute({
       summary: "Suppress an advisor rule for an organization.",
       tag: "Recommendations",
       params: ruleSuppressionParamsSchema,
       success: 204,
     }),
-    delete: route({
+    delete: orgMemberRoute({
       summary: "Restore a suppressed advisor rule for an organization.",
       tag: "Recommendations",
       params: ruleSuppressionParamsSchema,
@@ -943,7 +946,7 @@ export const openApiDocument = {
         type: "http",
         scheme: "bearer",
         description:
-          "Bearer token. Operations routes use the global tool API key; organization-scoped GET routes accept a per-organization API key that grants read-only access to that organization.",
+          "Bearer token. Operations routes use the global tool API key; organization-scoped routes accept a per-organization API key. Keys with scope `read` may only GET; keys with scope `read_write` may also write member-accessible organization data. Owner-only routes (API keys, invitations, members, org delete) remain session-only.",
       },
     },
   },

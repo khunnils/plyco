@@ -1,3 +1,4 @@
+import { emptyCompanyProfile } from "@plyco/contracts"
 import { type FastifyInstance } from "fastify"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -92,6 +93,7 @@ describe("organization API keys", () => {
     expect(created.statusCode).toBe(201)
     const createdBody = created.json()
     expect(createdBody.name).toBe("MCP server")
+    expect(createdBody.scope).toBe("read")
     expect(createdBody.key).toMatch(/^plyco_org_/)
     expect(createdBody.keyPrefix).toBe(createdBody.key.slice(0, "plyco_org_".length + 4))
     expect(createdBody.createdByName).toBe("owner@example.com")
@@ -107,6 +109,7 @@ describe("organization API keys", () => {
     expect(list.json()[0]).toMatchObject({
       id: createdBody.id,
       name: "MCP server",
+      scope: "read",
       keyPrefix: createdBody.keyPrefix,
     })
     expect(list.json()[0]).not.toHaveProperty("key")
@@ -134,7 +137,41 @@ describe("organization API keys", () => {
     expect(read.json().organization).toBeDefined()
   })
 
-  it("rejects invalid keys, writes, and cross-organization access", async () => {
+  it("allows writes with a read_write key on its own organization", async () => {
+    const session = await login(app, magicLinkEmailSender, "owner@example.com")
+    const organizationId = await createOrganization(app, session, "Acme AI")
+    const key = (
+      await app.inject({
+        method: "POST",
+        url: `/organizations/${organizationId}/api-keys`,
+        cookies: session,
+        payload: { name: "Agent writer", scope: "read_write" },
+      })
+    ).json().key as string
+
+    const write = await app.inject({
+      method: "PUT",
+      url: `/organizations/${organizationId}/profile`,
+      headers: { authorization: `Bearer ${key}` },
+      payload: {
+        ...emptyCompanyProfile,
+        companyName: "Renamed by key",
+      },
+    })
+
+    expect(write.statusCode).toBe(200)
+    expect(write.json().organization.company.companyName).toBe("Renamed by key")
+
+    // Owner-only routes remain session-only even with a read_write key.
+    const listWithKey = await app.inject({
+      method: "GET",
+      url: `/organizations/${organizationId}/api-keys`,
+      headers: { authorization: `Bearer ${key}` },
+    })
+    expect(listWithKey.statusCode).toBe(401)
+  })
+
+  it("rejects invalid keys, read-key writes, and cross-organization access", async () => {
     const session = await login(app, magicLinkEmailSender, "owner@example.com")
     const organizationId = await createOrganization(app, session, "Acme AI")
     const otherOrganizationId = await createOrganization(

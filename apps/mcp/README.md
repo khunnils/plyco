@@ -1,9 +1,11 @@
 # @plyco/mcp
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI
-agents read-only access to a single Plyco organization's workspace data. It can
-run as a hosted Streamable HTTP service or as a local stdio process.
-Organization reads go through `@plyco/api-client`, shared with `@plyco/cli`.
+agents access to a single Plyco organization's workspace data. It can run as a
+hosted Streamable HTTP service or as a local stdio process. Organization reads
+and writes go through `@plyco/api-client`, shared with `@plyco/cli`.
+
+Write tools require an organization API key with scope `read_write`.
 
 ## Hosted Streamable HTTP
 
@@ -15,7 +17,7 @@ https://mcp.plyco.example/organizations/<organization-id>/mcp
 
 Requests must send an organization API key as a bearer credential. The Plyco
 API independently verifies that the key belongs to the organization in the
-endpoint URL.
+endpoint URL and enforces the key's scope.
 
 Required environment variables:
 
@@ -84,7 +86,8 @@ allows the client to be rebuilt after the first MCP deployment or domain map.
 ### Setup
 
 1. In the Plyco client, open **Settings → API Keys** (owner only) and create a
-   key. Copy the raw key — it is shown only once.
+   key. Choose **Read-only** or **Read & write**. Copy the raw key — it is shown
+   only once.
 2. Configure your MCP client with the API URL, that key, and your organization
    ID.
 
@@ -136,7 +139,10 @@ To run directly from a checkout instead of a published package:
 
 ## Tools
 
-All tools are read-only and scoped to the configured organization:
+All tools are scoped to the configured organization. Write tools require a
+`read_write` key.
+
+### Read
 
 - `get_organization_overview` — organization profile snapshot.
 - `get_company_profile` — company profile.
@@ -154,6 +160,18 @@ All tools are read-only and scoped to the configured organization:
 - `list_templates` — document templates.
 - `list_documents` — generated document summaries.
 - `get_document` — a generated document, including its rendered markdown.
+
+### Write
+
+- `update_company_profile` / `update_services` / `update_data_handling`
+- `update_privacy_profile` / `update_infrastructure_profile` /
+  `update_security_profile` / `update_access_profile`
+- `add_organization_provider` / `update_organization_provider` /
+  `remove_organization_provider` / `resolve_provider`
+- `add_service_provider_usage` / `update_service_provider_usage` /
+  `remove_service_provider_usage`
+- `add_activity` / `update_activity` / `remove_activity`
+- `add_vocabulary_code` / `update_vocabulary_code` / `remove_vocabulary_code`
 
 ## Development
 

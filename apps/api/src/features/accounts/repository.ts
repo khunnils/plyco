@@ -2,6 +2,7 @@ import {
   type AuthUser,
   type CreateOrganization,
   type OrganizationApiKey,
+  type OrganizationApiKeyScope,
   type OrganizationInvitation,
   type OrganizationInvitationInput,
   type OrganizationMember,
@@ -9,6 +10,11 @@ import {
   type OrganizationMembershipRole,
   type OrganizationSummary,
 } from "@plyco/contracts"
+
+export type OrganizationApiKeyAccess = {
+  organizationId: string
+  scope: OrganizationApiKeyScope
+}
 
 export type GoogleAccountUserInput = {
   googleSubject: string
@@ -77,6 +83,7 @@ export interface AccountRepository {
     organizationId: string
     createdByUserId: string
     name: string
+    scope: OrganizationApiKeyScope
     tokenHash: string
     keyPrefix: string
   }): Promise<OrganizationApiKey>
@@ -84,5 +91,5 @@ export interface AccountRepository {
     organizationId: string,
     apiKeyId: string,
   ): Promise<boolean>
-  getApiKeyOrganizationId(tokenHash: string): Promise<string | null>
+  getApiKeyAccess(tokenHash: string): Promise<OrganizationApiKeyAccess | null>
 }

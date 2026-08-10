@@ -273,6 +273,9 @@ importers:
       '@plyco/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@plyco/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       zod:
         specifier: ^4.4.3
         version: 4.4.3

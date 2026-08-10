@@ -223,6 +223,8 @@ model OrganizationApiKey {
   organizationId  String       @map("organization_id")
   organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_api_keys_organization_id_fkey")
   name            String
+  // "read" (default) or "read_write". Existing keys remain read-only.
+  scope           String       @default("read")
   tokenHash       String       @unique(map: "organization_api_keys_token_hash_key") @map("token_hash")
   keyPrefix       String       @map("key_prefix")
   createdByUserId String       @map("created_by_user_id")

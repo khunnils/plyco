@@ -104,4 +104,44 @@ describe("createOrgClient", () => {
 
     await expect(client.getOverview()).rejects.toBeInstanceOf(ApiResponseError)
   })
+
+  it("sends PUT profile updates with a JSON body", async () => {
+    const fetchFn = vi.fn(async () =>
+      jsonResponse({ ok: true }),
+    ) as unknown as typeof fetch
+    const client = createOrgClient(config, { fetchFn })
+    const body = { companyName: "Acme" }
+
+    await expect(client.updateProfile(body)).resolves.toEqual({ ok: true })
+
+    const request = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]!
+    expect((request[0] as URL).toString()).toBe(
+      "https://api.plyco.example/organizations/org-123/profile",
+    )
+    expect(request[1] as RequestInit).toMatchObject({
+      method: "PUT",
+      body: JSON.stringify(body),
+    })
+    expect((request[1] as RequestInit).headers).toMatchObject({
+      Authorization: "Bearer plyco_org_secret",
+      "Content-Type": "application/json",
+    })
+  })
+
+  it("sends DELETE for provider removal and returns null on empty bodies", async () => {
+    const fetchFn = vi.fn(
+      async () => new Response(null, { status: 204 }),
+    ) as unknown as typeof fetch
+    const client = createOrgClient(config, { fetchFn })
+
+    await expect(client.removeOrganizationProvider("prov-1")).resolves.toBeNull()
+
+    const request = (fetchFn as unknown as ReturnType<typeof vi.fn>).mock
+      .calls[0]!
+    expect((request[0] as URL).toString()).toBe(
+      "https://api.plyco.example/organizations/org-123/organization-providers/prov-1",
+    )
+    expect((request[1] as RequestInit).method).toBe("DELETE")
+  })
 })

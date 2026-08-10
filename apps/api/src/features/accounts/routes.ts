@@ -186,6 +186,7 @@ export async function registerAccountRoutes(
         organizationId: request.params.organizationId,
         createdByUserId: user.id,
         name: body.name,
+        scope: body.scope,
         tokenHash: hashOrganizationApiKey(key),
         keyPrefix: apiKeyPrefix(key),
       })

@@ -42,11 +42,15 @@ const getTextContent = (result: CallToolResult) =>
   result.content as Array<{ type: string; text: string }>
 
 describe("plyco MCP server", () => {
-  it("exposes the read-only workspace tools", async () => {
+  it("exposes the workspace tools", async () => {
     const client = await connectClient(vi.fn())
     const { tools } = await client.listTools()
 
     expect(tools.map((tool) => tool.name).sort()).toEqual([
+      "add_activity",
+      "add_organization_provider",
+      "add_service_provider_usage",
+      "add_vocabulary_code",
       "get_access_profile",
       "get_activities",
       "get_company_profile",
@@ -63,6 +67,22 @@ describe("plyco MCP server", () => {
       "get_vocabulary",
       "list_documents",
       "list_templates",
+      "remove_activity",
+      "remove_organization_provider",
+      "remove_service_provider_usage",
+      "remove_vocabulary_code",
+      "resolve_provider",
+      "update_access_profile",
+      "update_activity",
+      "update_company_profile",
+      "update_data_handling",
+      "update_infrastructure_profile",
+      "update_organization_provider",
+      "update_privacy_profile",
+      "update_security_profile",
+      "update_service_provider_usage",
+      "update_services",
+      "update_vocabulary_code",
     ])
   })
 

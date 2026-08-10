@@ -1,12 +1,15 @@
 # @plyco/cli
 
-Read-only command-line client for querying a Plyco organization's workspace
+Command-line client for querying and updating a Plyco organization's workspace
 data. Designed for scripts and AI agents that prefer shell commands over MCP.
+
+Write commands require an organization API key with scope `read_write`.
 
 ## Setup
 
 1. In the Plyco client, open **Settings → API Keys** (owner only) and create a
-   key. Copy the raw key — it is shown only once.
+   key. Choose **Read-only** or **Read & write**. Copy the raw key — it is shown
+   only once.
 2. Set the API URL, that key, and your organization ID.
 
 ## Configuration
@@ -42,13 +45,18 @@ export PLYCO_ORGANIZATION_ID=your_organization_id
 
 plyco overview
 plyco profile
+plyco profile update --file ./company-profile.json
+cat ./provider.json | plyco providers add
 plyco documents list
 plyco documents get <documentId>
 ```
 
-All commands write JSON to stdout.
+All commands write JSON to stdout. Write commands accept JSON from `--file` or
+stdin.
 
 ## Commands
+
+### Read
 
 - `overview` — organization profile snapshot
 - `profile` / `services` / `data-types` / `activities`
@@ -57,6 +65,15 @@ All commands write JSON to stdout.
 - `recommendations` / `vocabulary`
 - `templates list`
 - `documents list` / `documents get <documentId>`
+
+### Write (requires `read_write` key)
+
+- `profile update` / `services update` / `data update`
+- `privacy update` / `infrastructure update` / `security update` / `access update`
+- `providers add|update <id>|remove <id>|resolve`
+- `service-provider-usage add|update <id>|remove <id>`
+- `activities add|update <id>|remove <id>`
+- `vocabulary codes add <codeSetId>|update <codeSetId> <codeId>|remove <codeSetId> <codeId>`
 
 ## Agent usage
 

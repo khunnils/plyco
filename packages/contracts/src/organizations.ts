@@ -62,13 +62,17 @@ export const deleteOrganizationResponseSchema = z.object({
   deleted: z.literal(true),
 });
 
+export const organizationApiKeyScopeSchema = z.enum(["read", "read_write"]);
+
 export const createOrganizationApiKeySchema = z.object({
   name: z.string().trim().min(1, "API key name is required").max(100),
+  scope: organizationApiKeyScopeSchema.default("read"),
 });
 
 export const organizationApiKeySchema = z.object({
   id: z.string().min(1),
   name: z.string().trim().min(1),
+  scope: organizationApiKeyScopeSchema,
   keyPrefix: z.string().min(1),
   createdByUserId: z.string().min(1),
   createdByName: z.string().trim().min(1),
@@ -155,6 +159,9 @@ export type AcceptOrganizationInvitation = z.infer<
 >;
 export type DeleteOrganizationResponse = z.infer<
   typeof deleteOrganizationResponseSchema
+>;
+export type OrganizationApiKeyScope = z.infer<
+  typeof organizationApiKeyScopeSchema
 >;
 export type CreateOrganizationApiKey = z.infer<
   typeof createOrganizationApiKeySchema
