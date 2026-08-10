@@ -3,7 +3,7 @@ import {
   type AuthUser,
   type OrganizationMembershipRole,
   type OrganizationSummary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 import { MoreHorizontal, Trash2 } from "lucide-react"
 import { useMemo, useState, type FormEvent } from "react"

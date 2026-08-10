@@ -1,4 +1,4 @@
-import { type AdvisorRuleEvaluation } from "@plyco/shared"
+import { type AdvisorRuleEvaluation } from "@plyco/contracts"
 import { EyeOff, LoaderCircle, RotateCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

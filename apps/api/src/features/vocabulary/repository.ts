@@ -3,7 +3,7 @@ import {
   type Vocabulary,
   type VocabularyCode,
   type VocabularyCodeInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export type CodeSetScope = "system" | "organization"
 

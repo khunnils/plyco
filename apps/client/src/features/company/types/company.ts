@@ -7,7 +7,7 @@ import {
   type PrivacyProfile,
   type SecurityProgramSnapshot,
   type ServiceProfileInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export type ProfileDraft = {
   company: CompanyProfile

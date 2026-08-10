@@ -1,4 +1,4 @@
-import { type OrganizationProvider } from "@plyco/shared"
+import { type OrganizationProvider } from "@plyco/contracts"
 
 import { Badge } from "@/components/ui/badge"
 

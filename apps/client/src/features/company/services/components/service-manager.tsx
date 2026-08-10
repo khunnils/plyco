@@ -6,7 +6,7 @@ import {
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useEffect, useState } from "react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

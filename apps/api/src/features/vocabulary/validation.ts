@@ -9,7 +9,7 @@ import {
   type ServiceProfileInput,
   type ServiceProviderUsageInput,
   type OrganizationProviderInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import { ApiError } from "../../infrastructure/errors.js";
 import { type VocabularyRepository } from "./repository.js";

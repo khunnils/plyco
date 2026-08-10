@@ -1,5 +1,5 @@
 import { MarkerType, type Edge, type Node } from "@xyflow/react"
-import type { SecurityProgramSnapshot } from "@plyco/shared"
+import type { SecurityProgramSnapshot } from "@plyco/contracts"
 
 export type ProductDataGraphNodeKind =
   | "company"

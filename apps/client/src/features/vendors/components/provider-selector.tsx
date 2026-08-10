@@ -1,5 +1,5 @@
 import { ExternalLink, Plus, Search } from "lucide-react"
-import { type Provider } from "@plyco/shared"
+import { type Provider } from "@plyco/contracts"
 import { useMemo, useState } from "react"
 
 import { Badge } from "@/components/ui/badge"

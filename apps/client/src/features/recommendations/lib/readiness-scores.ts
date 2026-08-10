@@ -3,7 +3,7 @@ import {
   type RecommendationArea,
   type ReadinessScore,
   type ReadinessScoreArea,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { type BadgeProps } from "@/components/ui/badge"
 import { severityOrder } from "@/features/recommendations/lib/recommendations"

@@ -1,4 +1,4 @@
-import { type OrganizationSummary } from "@plyco/shared"
+import { type OrganizationSummary } from "@plyco/contracts"
 import { Copy } from "lucide-react"
 import { toast } from "sonner"
 

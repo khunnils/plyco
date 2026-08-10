@@ -1,7 +1,7 @@
 import {
   type TemplateVariable,
   type TemplateVariableField,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 const singularOverrides: Record<string, string> = {
   all: "item",

@@ -1,7 +1,7 @@
 import {
   type BusinessActivity,
   type BusinessActivityInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export const emptyActivityDraft: BusinessActivityInput = {
   name: "",

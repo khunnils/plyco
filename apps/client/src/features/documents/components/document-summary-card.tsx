@@ -6,7 +6,7 @@ import {
   History,
   Trash2,
 } from "lucide-react"
-import { type DocumentSummary } from "@plyco/shared"
+import { type DocumentSummary } from "@plyco/contracts"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 

@@ -1,6 +1,6 @@
 import { Pencil, Search } from "lucide-react"
 import { useMemo, useState } from "react"
-import { type Vocabulary } from "@plyco/shared"
+import { type Vocabulary } from "@plyco/contracts"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

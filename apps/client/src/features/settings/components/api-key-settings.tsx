@@ -2,7 +2,7 @@ import {
   createOrganizationApiKeySchema,
   type CreatedOrganizationApiKey,
   type OrganizationSummary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { Copy, KeyRound, Trash2 } from "lucide-react"
 import { useState, type FormEvent } from "react"
 import { toast } from "sonner"

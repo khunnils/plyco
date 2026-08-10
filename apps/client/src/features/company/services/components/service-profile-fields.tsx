@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Plus, Trash2 } from "lucide-react"
-import { emptyServiceProfile } from "@plyco/shared"
+import { emptyServiceProfile } from "@plyco/contracts"
 import {
   type FieldPath,
   type UseFormReturn,

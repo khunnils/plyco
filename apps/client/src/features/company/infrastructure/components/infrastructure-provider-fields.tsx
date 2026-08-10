@@ -2,7 +2,7 @@ import {
   type ProviderSelection,
   type Provider,
   type ProviderSystemType,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type UseFormReturn } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"

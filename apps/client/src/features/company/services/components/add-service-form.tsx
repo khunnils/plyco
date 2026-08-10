@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { emptyServiceProfile, type ServiceProfileInput } from "@plyco/shared"
+import { emptyServiceProfile, type ServiceProfileInput } from "@plyco/contracts"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { ProfilePanelShell } from "@/features/company/components/profile-panel-shell"

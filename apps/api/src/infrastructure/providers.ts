@@ -3,7 +3,7 @@ import {
   providerSystemTypeSchema,
   type Provider,
   type ProviderSystemType,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { z } from "zod"
 
 // Maps arbitrary category codes/names to valid provider_categories vocabulary codes

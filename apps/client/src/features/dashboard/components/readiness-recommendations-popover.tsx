@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import {
   type Recommendation,
   type RecommendationSeverity,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import {
   PopoverContent,

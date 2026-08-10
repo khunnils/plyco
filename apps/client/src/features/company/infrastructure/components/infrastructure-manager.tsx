@@ -1,4 +1,4 @@
-import { type Provider, type Vocabulary } from "@plyco/shared"
+import { type Provider, type Vocabulary } from "@plyco/contracts"
 
 import { BackupsPanel } from "@/features/company/infrastructure/components/panels/backups-panel"
 import { EncryptionPanel } from "@/features/company/infrastructure/components/panels/encryption-panel"

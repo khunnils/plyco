@@ -37,9 +37,9 @@ apps/
   cli/        Customer read-only organization data CLI
   mcp/        Read-only Model Context Protocol adapter
 packages/
-  shared/     Cross-boundary DTOs, Zod schemas, enums, and reference data
+  contracts/  Cross-boundary DTOs, Zod schemas, enums, and reference data
   db/         Prisma schema, migrations, generated client, and DB mapping
-  org-client/ Shared org-credential read client for CLI and MCP
+  api-client/ Organization-scoped API client shared by the CLI and MCP server
 docs/         Repository-wide product, design, and architecture documents
 ```
 
@@ -79,30 +79,30 @@ configuration or connect directly to persistence and integration providers.
 
 The customer CLI (`plyco`) is a read-only, organization-scoped client for
 scripts and AI agents. It uses a per-organization API credential and shares its
-API surface with the MCP server through `@plyco/org-client`.
+API surface with the MCP server through `@plyco/api-client`.
 
 ### MCP server
 
 The MCP server adapts organization-scoped API reads into tools for AI agents.
 It is intentionally read-only and uses an organization API credential via
-`@plyco/org-client`; it does not duplicate API business logic.
+`@plyco/api-client`; it does not duplicate API business logic.
 
 ### Shared packages
 
-`@plyco/shared` owns transport-facing contracts shared across applications.
+`@plyco/contracts` owns transport-facing contracts shared across applications.
 `@plyco/db` owns the relational schema and Prisma implementation. Database-only
-types must not leak into public contracts. `@plyco/org-client` owns the shared
+types must not leak into public contracts. `@plyco/api-client` owns the shared
 customer-credential read path used by the customer CLI and MCP server.
 
 ## Dependency Rules
 
 ```text
 client ─────┐
-api ────────┼──> shared
-api ────────┴──> db ──> shared
+api ────────┼──> contracts
+api ────────┴──> db ──> contracts
 
 cli ──┐
-mcp ──┴──> org-client ──> API over HTTP
+mcp ──┴──> api-client ──> API over HTTP
 
 web and admin-cli communicate with the API over HTTP.
 ```

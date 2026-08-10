@@ -1,4 +1,4 @@
-import { vocabularyCodeInputSchema } from "@plyco/shared"
+import { vocabularyCodeInputSchema } from "@plyco/contracts"
 import { type FastifyInstance } from "fastify"
 
 import { ApiError } from "../../infrastructure/errors.js"

@@ -1,7 +1,7 @@
 import {
   type Recommendation,
   type RecommendationSeverity,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { ChevronRight } from "lucide-react"
 
 import {

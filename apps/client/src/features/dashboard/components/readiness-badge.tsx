@@ -1,4 +1,4 @@
-import { type Recommendation } from "@plyco/shared"
+import { type Recommendation } from "@plyco/contracts"
 
 import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"

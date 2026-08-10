@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type CreateOrganizationApiKey } from "@plyco/shared"
+import { type CreateOrganizationApiKey } from "@plyco/contracts"
 import { toast } from "sonner"
 
 import {

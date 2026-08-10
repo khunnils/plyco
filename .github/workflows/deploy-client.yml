@@ -9,7 +9,7 @@ on:
       - ".firebaserc"
       - "firebase.json"
       - "apps/client/**"
-      - "packages/shared/**"
+      - "packages/contracts/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -46,14 +46,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build shared package
-        run: pnpm --filter @plyco/shared build
+      - name: Build contracts package
+        run: pnpm --filter @plyco/contracts build
 
-      - name: Typecheck shared package
-        run: pnpm --filter @plyco/shared typecheck
+      - name: Typecheck contracts package
+        run: pnpm --filter @plyco/contracts typecheck
 
-      - name: Test shared package
-        run: pnpm --filter @plyco/shared test
+      - name: Test contracts package
+        run: pnpm --filter @plyco/contracts test
 
       - name: Typecheck client
         run: pnpm --filter cf-app typecheck

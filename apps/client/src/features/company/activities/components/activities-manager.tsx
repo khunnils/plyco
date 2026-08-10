@@ -2,7 +2,7 @@ import {
   type BusinessActivity,
   type BusinessActivityInput,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { ActivityEmptyState } from "@/features/company/activities/components/activity-empty-state"
 import { ActivityForm } from "@/features/company/activities/components/activity-form"

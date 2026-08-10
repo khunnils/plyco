@@ -1,7 +1,7 @@
 import {
   providerLookupResultSchema,
   type ProviderLookupResult,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { type ProviderLookupCodeSource } from "../../infrastructure/airtable-code-source.js"
 import { ApiError } from "../../infrastructure/errors.js"

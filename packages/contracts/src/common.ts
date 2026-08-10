@@ -30,7 +30,7 @@ export const countrySchema = z.object({
 });
 
 // Internal nullable helpers shared across schema modules. These are not part
-// of the public `@plyco/shared` API surface and are intentionally not
+// of the public `@plyco/contracts` API surface and are intentionally not
 // re-exported from the package barrel.
 export const nullableStringSchema = z.string().trim().nullable().default(null);
 export const nullableCodeIdSchema = codeIdSchema

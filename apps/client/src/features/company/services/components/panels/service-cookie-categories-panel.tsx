@@ -3,7 +3,7 @@ import {
   type CookieCategoryCode,
   type ServiceCookieCategory,
   type ServiceProfileInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useEffect, useState } from "react"
 
 import { ProfilePanelShell } from "@/features/company/components/profile-panel-shell"

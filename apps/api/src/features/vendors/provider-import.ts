@@ -2,7 +2,7 @@ import {
   providerImportResultSchema,
   type ProviderImportResult,
   type ProviderLookupResult,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import {
   createAirtableRecord,

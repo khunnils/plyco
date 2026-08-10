@@ -16,7 +16,7 @@ import {
   type Provider,
   type ProviderSystemType,
   type ServiceProfileInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import {
   type OrganizationRepository,

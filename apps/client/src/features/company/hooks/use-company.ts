@@ -20,7 +20,7 @@ import {
   recommendationsQueryKey,
 } from "@/lib/query-keys"
 import { type ProfileDraft } from "@/features/company/types/company"
-import { type SecurityProgramSnapshot } from "@plyco/shared"
+import { type SecurityProgramSnapshot } from "@plyco/contracts"
 
 const useReorderProfileEntities = (entity: "dataTypes" | "services") => {
   const queryClient = useQueryClient()

@@ -2,7 +2,7 @@ import {
   templateInputSchema,
   type TemplateInput,
   type TemplateVariableCatalog,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import {
   loadTemplateVariableCatalog,

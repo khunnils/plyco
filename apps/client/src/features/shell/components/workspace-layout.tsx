@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
 import { LogOut } from "lucide-react"
-import { type AuthUser } from "@plyco/shared"
+import { type AuthUser } from "@plyco/contracts"
 
 import { Button } from "@/components/ui/button"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"

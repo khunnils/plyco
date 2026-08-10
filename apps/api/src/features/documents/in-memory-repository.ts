@@ -4,7 +4,7 @@ import {
   type SystemTemplate,
   type Template,
   type TemplateInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import { ApiError } from "../../infrastructure/errors.js";
 import { type OrganizationRepository } from "../organizations/repository.js";

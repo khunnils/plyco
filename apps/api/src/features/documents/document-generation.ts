@@ -20,7 +20,7 @@ import {
   type Template,
   type OrganizationProvider,
   type Vocabulary,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 type ProviderContextGroup = {
   all: Array<Record<string, unknown>>;

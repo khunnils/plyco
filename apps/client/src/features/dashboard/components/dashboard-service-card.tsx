@@ -1,7 +1,7 @@
 import {
   type ServiceProfileInput,
   type ServiceProviderUsage,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { Link } from "react-router-dom"
 import { ArrowRight, Box, CheckCircle2, Globe2 } from "lucide-react"
 

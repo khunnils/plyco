@@ -3,7 +3,7 @@ import {
   createOrgClient,
   readOrgClientConfig,
   type OrgClient,
-} from "@plyco/org-client"
+} from "@plyco/api-client"
 import { Command, CommanderError } from "commander"
 
 export type ProgramOptions = {

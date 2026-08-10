@@ -2,7 +2,7 @@ import {
   type CompanyProfile,
   type Country,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { CompanyContactsPanel } from "@/features/company/profile/components/panels/company-contacts-panel"
 import { CompanyDataProfilePanel } from "@/features/company/profile/components/panels/company-data-profile-panel"

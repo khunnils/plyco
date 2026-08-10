@@ -7,7 +7,7 @@ import {
   type OrganizationProvider,
   type OrganizationProviderInput,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { Button } from "@/components/ui/button"
 import { VendorEmptyState } from "@/features/vendors/components/vendor-empty-state"

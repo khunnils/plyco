@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
-import { type AuthUser } from "@plyco/shared"
+import { type AuthUser } from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 
 import { Button } from "@/components/ui/button"

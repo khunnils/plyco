@@ -5,7 +5,7 @@ import {
   type VocabularyCode,
   type VocabularyCodeSet,
   type VocabularyCodeInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import { countries } from "./reference-data.js";
 import { type VocabularyRepository } from "./repository.js";

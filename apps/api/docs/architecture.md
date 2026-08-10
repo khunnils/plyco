@@ -58,7 +58,7 @@ cross-cutting; domain ownership should otherwise remain explicit.
 ### HTTP layer
 
 Routes translate HTTP requests into typed application calls. They validate
-external input with `@plyco/shared` Zod schemas, apply the appropriate access
+external input with `@plyco/contracts` Zod schemas, apply the appropriate access
 policy, and return DTOs or structured errors. Route handlers should not expose
 Prisma records or provider response shapes.
 
@@ -100,7 +100,7 @@ before reading or writing organization data.
 
 ## Contracts and Errors
 
-`@plyco/shared` is the source of truth for cross-boundary request and response
+`@plyco/contracts` is the source of truth for cross-boundary request and response
 schemas. The API may use richer internal types, but it maps them to shared DTOs
 at the HTTP boundary. Database-only fields stay in `@plyco/db` and API internals.
 

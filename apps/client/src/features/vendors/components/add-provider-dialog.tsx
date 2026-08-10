@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Loader2, Globe, X, AlertTriangle } from "lucide-react"
-import { type OrganizationProviderInput } from "@plyco/shared"
+import { type OrganizationProviderInput } from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"

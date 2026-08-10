@@ -8,7 +8,7 @@ import {
   organizationInvitationSchema,
   organizationMemberRoleUpdateSchema,
   organizationMemberSchema,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { createHash, randomBytes } from "node:crypto"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 import { z } from "zod"

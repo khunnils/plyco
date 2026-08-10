@@ -1,4 +1,4 @@
-import { type ProviderSelection, type ProviderSystemType } from "@plyco/shared"
+import { type ProviderSelection, type ProviderSystemType } from "@plyco/contracts"
 
 export type InfrastructureProviderSystemType = Exclude<
   ProviderSystemType,

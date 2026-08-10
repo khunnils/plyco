@@ -4,7 +4,7 @@ import {
   organizationPrivacyPolicyLookupInputSchema,
   organizationWebsiteLookupInputSchema,
   privacyProfileSchema,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 
 import { getPersistedSessionUser } from "../../infrastructure/auth.js"

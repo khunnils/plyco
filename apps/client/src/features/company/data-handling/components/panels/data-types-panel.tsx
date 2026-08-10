@@ -1,4 +1,4 @@
-import { type StoredDataType, type Vocabulary } from "@plyco/shared"
+import { type StoredDataType, type Vocabulary } from "@plyco/contracts"
 import {
   AlertCircle,
   ChevronDown,

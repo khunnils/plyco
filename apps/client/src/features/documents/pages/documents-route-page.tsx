@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react"
 import { usePostHog } from "@posthog/react"
-import { type DocumentSummary, type TemplateCatalog } from "@plyco/shared"
+import { type DocumentSummary, type TemplateCatalog } from "@plyco/contracts"
 import { Ellipsis, Pencil, Save, Trash2 } from "lucide-react"
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 

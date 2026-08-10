@@ -4,7 +4,7 @@ import {
   type ServiceProviderUsage,
   type OrganizationProvider,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useState } from "react"
 
 import { Badge } from "@/components/ui/badge"

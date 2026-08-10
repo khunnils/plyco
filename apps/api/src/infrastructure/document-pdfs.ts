@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto"
 import { Storage } from "@google-cloud/storage"
 import PDFDocument from "pdfkit"
 
-import { type Template } from "@plyco/shared"
+import { type Template } from "@plyco/contracts"
 
 import { ApiError } from "./errors.js"
 

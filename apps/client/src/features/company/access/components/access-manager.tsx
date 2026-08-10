@@ -1,4 +1,4 @@
-import { type AccessProfile, type Vocabulary } from "@plyco/shared"
+import { type AccessProfile, type Vocabulary } from "@plyco/contracts"
 
 import { AccessAuthenticationPanel } from "@/features/company/access/components/panels/access-authentication-panel"
 import { AccessControlPanel } from "@/features/company/access/components/panels/access-control-panel"

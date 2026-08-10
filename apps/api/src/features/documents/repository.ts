@@ -4,7 +4,7 @@ import {
   type SystemTemplate,
   type Template,
   type TemplateInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 export type DocumentFreshness = {
   status: "current" | "stale";

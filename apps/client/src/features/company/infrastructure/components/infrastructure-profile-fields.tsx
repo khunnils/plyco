@@ -3,7 +3,7 @@ import {
   type ProviderSelection,
   type Provider,
   type ProviderSystemType,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useEffect } from "react"
 import { type UseFormReturn } from "react-hook-form"
 

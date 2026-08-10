@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createOrgClient, readOrgClientConfig } from "@plyco/org-client"
+import { createOrgClient, readOrgClientConfig } from "@plyco/api-client"
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 
 import { createMcpServer } from "./server.js"

@@ -6,7 +6,7 @@ gives AI agents read-only access to a single Plyco organization.
 ## Configuration and API access
 
 Organization credential config and org-scoped reads are owned by
-`@plyco/org-client`. The MCP server reads config with `readOrgClientConfig` and
+`@plyco/api-client`. The MCP server reads config with `readOrgClientConfig` and
 invokes `createOrgClient` methods from tool handlers.
 
 Required environment variables:
@@ -24,7 +24,7 @@ reserved for the MCP protocol; all diagnostics go to stderr.
 ## Tools
 
 `src/server.ts` registers read-only tools that map one-to-one onto
-`@plyco/org-client` methods:
+`@plyco/api-client` methods:
 
 | Tool | Org client method |
 | --- | --- |

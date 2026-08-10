@@ -4,7 +4,7 @@ import {
   type ServiceProviderUsageInput,
   type OrganizationProvider,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { ServiceManager } from "@/features/company/services/components/service-manager"
 import { type ProfileDraft } from "@/features/company/types/company"

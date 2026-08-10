@@ -8,9 +8,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@plyco/shared": path.resolve(
+      "@plyco/contracts": path.resolve(
         __dirname,
-        "../../packages/shared/src/index.ts"
+        "../../packages/contracts/src/index.ts"
       ),
       "@plyco/db": path.resolve(
         __dirname,

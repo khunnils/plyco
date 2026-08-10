@@ -20,7 +20,7 @@ import {
   type ReadinessScoreArea,
   type ReadinessScores,
   type ServiceProviderUsage,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { parse } from "yaml"
 import { z } from "zod"
 

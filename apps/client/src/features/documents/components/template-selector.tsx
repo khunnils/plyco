@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react"
-import { type SystemTemplate } from "@plyco/shared"
+import { type SystemTemplate } from "@plyco/contracts"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 

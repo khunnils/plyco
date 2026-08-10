@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Check, Edit2, Trash2, X } from "lucide-react"
-import { type BusinessActivityInput } from "@plyco/shared"
+import { type BusinessActivityInput } from "@plyco/contracts"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"

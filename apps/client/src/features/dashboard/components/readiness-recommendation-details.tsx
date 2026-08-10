@@ -1,7 +1,7 @@
 import {
   type Recommendation,
   type RecommendationSeverity,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { ChevronLeft, CircleAlert } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

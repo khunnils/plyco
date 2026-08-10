@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Save, X } from "lucide-react"
-import { storedDataTypeSchema, type StoredDataType } from "@plyco/shared"
+import { storedDataTypeSchema, type StoredDataType } from "@plyco/contracts"
 import { type Resolver, useForm } from "react-hook-form"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"

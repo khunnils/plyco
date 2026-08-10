@@ -1,4 +1,4 @@
-import { emptyServiceProfile } from "@plyco/shared"
+import { emptyServiceProfile } from "@plyco/contracts"
 import { describe, expect, it } from "vitest"
 
 import { emptyProfileDraft } from "@/features/company/lib/profile"

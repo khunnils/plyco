@@ -1,4 +1,4 @@
-import { type CodeId } from "@plyco/shared"
+import { type CodeId } from "@plyco/contracts"
 
 import {
   linkedRecordIds,

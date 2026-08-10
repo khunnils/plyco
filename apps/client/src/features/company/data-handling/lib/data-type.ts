@@ -1,4 +1,4 @@
-import { type StoredDataType } from "@plyco/shared"
+import { type StoredDataType } from "@plyco/contracts"
 
 export const emptyDataTypeDraft = (): StoredDataType => ({
   sortOrder: 0,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { type Recommendation } from "@plyco/shared"
+import { type Recommendation } from "@plyco/contracts"
 
 import { groupRecommendationsBySeverity } from "./recommendations"
 

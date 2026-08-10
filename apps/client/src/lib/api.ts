@@ -96,7 +96,7 @@ import {
   type OrganizationApiKey,
   type CreatedOrganizationApiKey,
   type CreateOrganizationApiKey,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { z } from "zod"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000"

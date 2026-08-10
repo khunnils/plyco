@@ -2,7 +2,7 @@ import {
   isComplianceFieldVisible,
   type Provider,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { ComplianceDisclosuresPanel } from "@/features/company/privacy/components/panels/compliance-disclosures-panel"
 import { InternationalTransfersPanel } from "@/features/company/privacy/components/panels/international-transfers-panel"

@@ -5,7 +5,7 @@ import {
   type ServiceProviderUsage,
   type BusinessActivity,
   isComplianceFieldVisible,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { Link } from "react-router-dom"
 import {
   Building2,

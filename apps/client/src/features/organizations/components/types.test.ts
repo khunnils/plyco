@@ -2,7 +2,7 @@ import {
   emptyCompanyProfile,
   emptyServiceProfile,
   type OrganizationLookupResult,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { describe, expect, it } from "vitest"
 
 import {

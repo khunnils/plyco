@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import {
   templateVariableCatalogSchema,
   type TemplateVariableCatalog,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { Type, type SchemaUnion } from "@google/genai";
 
 import { referencedTemplatePaths } from "./document-generation.js";

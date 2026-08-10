@@ -13,7 +13,7 @@ import {
   type OrganizationMemberRoleUpdate,
   type OrganizationMembershipRole,
   type OrganizationSummary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { ApiError } from "../../infrastructure/errors.js"
 import {

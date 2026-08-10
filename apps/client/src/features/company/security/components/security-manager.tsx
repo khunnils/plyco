@@ -1,4 +1,4 @@
-import { type Vocabulary } from "@plyco/shared"
+import { type Vocabulary } from "@plyco/contracts"
 
 import {
   type ProfileDraft,

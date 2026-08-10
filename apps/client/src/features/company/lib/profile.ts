@@ -14,7 +14,7 @@ import {
   type ProviderSelection,
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { type ProfileDraft } from "@/features/company/types/company"
 

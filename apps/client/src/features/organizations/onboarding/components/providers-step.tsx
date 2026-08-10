@@ -6,7 +6,7 @@ import {
   type OrganizationProviderInput,
   type ProviderCriticality,
   type ProviderSystemType,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { Button } from "@/components/ui/button"
 import { useOnboardingStore } from "../stores/onboarding-store"

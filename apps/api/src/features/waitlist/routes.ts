@@ -3,7 +3,7 @@ import {
   waitlistRemoveInputSchema,
   waitlistRemoveResponseSchema,
   waitlistResponseSchema,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 
 import { requireApiKey } from "../../infrastructure/api-key-auth.js"

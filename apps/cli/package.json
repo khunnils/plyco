@@ -23,7 +23,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@plyco/org-client": "workspace:*",
+    "@plyco/api-client": "workspace:*",
     "commander": "^15.0.0"
   },
   "devDependencies": {

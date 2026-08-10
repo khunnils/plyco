@@ -14,7 +14,7 @@ import {
   type OrganizationWebsiteLookupInput,
   type PrivacyProfile,
   type StoredDataType,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { z } from "zod";
 
 import { apiConfig } from "../../config.js";

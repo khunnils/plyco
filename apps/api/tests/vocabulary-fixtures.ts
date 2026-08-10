@@ -1,4 +1,4 @@
-import { type VocabularyCodeSet } from "@plyco/shared";
+import { type VocabularyCodeSet } from "@plyco/contracts";
 
 const codeSet = (
   codeSetId: string,

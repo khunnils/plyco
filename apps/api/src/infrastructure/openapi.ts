@@ -60,7 +60,7 @@ import {
   waitlistRemoveInputSchema,
   waitlistRemoveResponseSchema,
   waitlistResponseSchema,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type FastifyInstance } from "fastify"
 import { type OpenAPIV3 } from "openapi-types"
 import { z } from "zod"

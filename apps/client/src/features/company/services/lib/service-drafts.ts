@@ -2,7 +2,7 @@ import {
   serviceProfileInputSchema,
   servicePrivacyProfileSchema,
   type ServiceProfileInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type FieldPath } from "react-hook-form"
 import { z } from "zod"
 

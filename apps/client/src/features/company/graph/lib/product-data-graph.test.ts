@@ -11,7 +11,7 @@ import {
   type OrganizationSecurityProfile,
   type SecurityProgramSnapshot,
   type ServiceProviderUsage,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { describe, expect, it } from "vitest"
 
 import {

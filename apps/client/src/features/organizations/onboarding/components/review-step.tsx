@@ -7,7 +7,7 @@ import { usePostHog } from "@posthog/react"
 import {
   type AuthState,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { Button } from "@/components/ui/button"

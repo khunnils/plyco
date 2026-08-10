@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   systemTemplateSchema,
   type SystemTemplate,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import { ApiError } from "./errors.js";
 

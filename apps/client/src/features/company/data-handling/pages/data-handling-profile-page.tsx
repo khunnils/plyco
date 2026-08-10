@@ -1,4 +1,4 @@
-import { type StoredDataType, type Vocabulary } from "@plyco/shared"
+import { type StoredDataType, type Vocabulary } from "@plyco/contracts"
 
 import { DataHandlingManager } from "@/features/company/data-handling/components/data-handling-manager"
 import {

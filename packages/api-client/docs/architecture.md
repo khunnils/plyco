@@ -1,4 +1,4 @@
-# @plyco/org-client — Module Architecture
+# @plyco/api-client — Module Architecture
 
 Shared read-only client for organization-scoped Plyco API access. Used by the
 customer CLI and MCP server so the org credential config and endpoint map live
@@ -44,7 +44,7 @@ injectable for tests.
 | `listDocuments` | `GET /organizations/:id/documents` |
 | `getDocument(documentId)` | `GET /organizations/:id/documents/:documentId` |
 
-Responses are currently untyped JSON (`unknown`). Adding shared DTO return
+Responses are currently untyped JSON (`unknown`). Adding contract DTO return
 types is a follow-up.
 
 ## Boundaries

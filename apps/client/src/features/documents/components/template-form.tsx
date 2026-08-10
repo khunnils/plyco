@@ -4,7 +4,7 @@ import {
   type TemplateInput,
   type TemplateVariable,
   type TemplateVariableField,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import {
   Braces,
   ChevronDown,

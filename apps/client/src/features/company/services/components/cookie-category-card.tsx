@@ -4,7 +4,7 @@ import {
   defaultCookieCategoryRequiresConsent,
   type CookieCategoryCode,
   type ServiceCookieCategory,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { ShieldAlert } from "lucide-react"
 
 import { Switch } from "@/components/ui/switch"

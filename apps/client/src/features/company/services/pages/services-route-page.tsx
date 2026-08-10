@@ -2,7 +2,7 @@ import {
   type ServiceProfileInput,
   type ServiceProviderUsage,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 import { useId, useState } from "react"
 import { createPortal } from "react-dom"

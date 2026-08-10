@@ -8,7 +8,7 @@ import {
   type PrivacyProfile,
   type Provider,
   type ServiceProfileInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 export type SecurityProfileInput = {
   company: CompanyProfile;

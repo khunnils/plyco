@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
-import { type AuthUser } from "@plyco/shared"
+import { type AuthUser } from "@plyco/contracts"
 
 import { useOnboardingStore } from "../stores/onboarding-store"
 import { IdentityStep } from "../components/identity-step"

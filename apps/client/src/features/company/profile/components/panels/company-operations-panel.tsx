@@ -3,7 +3,7 @@ import {
   companyProfileSchema,
   type CompanyProfile,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type MagicLinkRequest } from "@plyco/shared"
+import { type MagicLinkRequest } from "@plyco/contracts"
 import { toast } from "sonner"
 import { usePostHog } from "@posthog/react"
 

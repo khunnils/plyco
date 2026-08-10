@@ -7,7 +7,7 @@ import {
   privacyProfileSchema,
   securityProfileSchema,
   serviceProfileInputSchema,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type ReactNode } from "react"
 import {
   type FieldErrors,

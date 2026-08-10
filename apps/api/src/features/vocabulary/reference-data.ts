@@ -1,4 +1,4 @@
-import { type Country } from "@plyco/shared"
+import { type Country } from "@plyco/contracts"
 
 export const requiredCodeSetIds = [
   "industries",

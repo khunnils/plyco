@@ -1,5 +1,5 @@
 import { AlertCircle, ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react"
-import { type BusinessActivity, type Vocabulary } from "@plyco/shared"
+import { type BusinessActivity, type Vocabulary } from "@plyco/contracts"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"

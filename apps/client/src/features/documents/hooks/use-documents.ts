@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type CreateDocument } from "@plyco/shared"
+import { type CreateDocument } from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"

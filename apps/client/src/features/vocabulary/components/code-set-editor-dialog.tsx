@@ -5,7 +5,7 @@ import {
   codeIdFromName,
   type VocabularyCode,
   type VocabularyCodeInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 
 import { Badge } from "@/components/ui/badge"

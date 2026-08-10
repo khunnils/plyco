@@ -3,7 +3,7 @@ import {
   type CreateOrganization,
   type OrganizationPrivacyPolicyLookupInput,
   type OrganizationWebsiteLookupInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { toast } from "sonner"
 
 import {

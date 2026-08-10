@@ -3,7 +3,7 @@ import { Loader2, Plus, Save, X } from "lucide-react"
 import {
   organizationProviderInputSchema,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 

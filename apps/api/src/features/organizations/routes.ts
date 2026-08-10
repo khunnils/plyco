@@ -15,7 +15,7 @@ import {
   privacyProfileSchema,
   reorderEntitiesSchema,
   serviceProfileInputSchema,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { type FastifyInstance } from "fastify";
 import { z } from "zod";
 

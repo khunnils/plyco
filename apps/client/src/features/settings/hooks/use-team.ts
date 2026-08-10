@@ -3,7 +3,7 @@ import {
   type AuthState,
   type OrganizationInvitationInput,
   type OrganizationMemberRoleUpdate,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { useCurrentOrganizationStore } from "@/features/organizations/stores/current-organization-store"

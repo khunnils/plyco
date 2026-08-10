@@ -42,7 +42,7 @@ Read these before making broad repository changes:
 ## Coding Standards
 
 - Use TypeScript with strict types.
-- Use shared DTOs, Zod schemas, and enums from `packages/shared` for cross-boundary contracts.
+- Use shared DTOs, Zod schemas, and enums from `packages/contracts` for cross-boundary contracts.
 - Keep Prisma and DB-only fields inside `packages/db` and API internals.
 - Validate external inputs with Zod or framework-level schema validation.
 - Return structured errors from API code.

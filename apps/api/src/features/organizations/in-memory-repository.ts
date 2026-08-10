@@ -5,7 +5,7 @@ import {
   type ServiceProfile,
   type ServiceProfileInput,
   type StoredDataType,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import {
   type OrganizationRepository,

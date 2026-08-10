@@ -1,0 +1,59 @@
+name: Publish npm packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - contracts
+          - api-client
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Install OIDC-compatible npm
+        run: npm install --global "npm@^11.5.1"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify packages
+        run: |
+          pnpm --filter @plyco/contracts --filter @plyco/api-client typecheck
+          pnpm --filter @plyco/contracts --filter @plyco/api-client test
+          pnpm --filter @plyco/contracts --filter @plyco/api-client build
+
+      - name: Publish contracts
+        if: inputs.package == 'all' || inputs.package == 'contracts'
+        working-directory: packages/contracts
+        run: npm publish --access public
+
+      - name: Publish API client
+        if: inputs.package == 'all' || inputs.package == 'api-client'
+        working-directory: packages/api-client
+        run: npm publish --access public

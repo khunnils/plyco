@@ -3,7 +3,7 @@ import {
   privacyProfileSchema,
   type PrivacyProfile,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useEffect, useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"

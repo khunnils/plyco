@@ -7,7 +7,7 @@ import {
   dashboardReadinessPresentation,
   readinessScoreStatus,
 } from "@/features/recommendations/lib/readiness-scores"
-import { type ReadinessScore } from "@plyco/shared"
+import { type ReadinessScore } from "@plyco/contracts"
 
 export type ReadinessStatus = ReturnType<typeof readinessScoreStatus>
 

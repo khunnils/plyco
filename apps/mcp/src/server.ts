@@ -1,4 +1,4 @@
-import { type OrgClient } from "@plyco/org-client"
+import { type OrgClient } from "@plyco/api-client"
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 

@@ -4,7 +4,7 @@ import {
   organizationProviderInputSchema,
   providerLookupInputSchema,
   reorderEntitiesSchema,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { type FastifyInstance } from "fastify";
 
 import { requireApiKey } from "../../infrastructure/api-key-auth.js";

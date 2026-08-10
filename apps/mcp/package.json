@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@plyco/org-client": "workspace:*",
+    "@plyco/api-client": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import { type Template } from "@plyco/shared"
+import { type Template } from "@plyco/contracts"
 
 import { DocumentMarkdown } from "@/features/documents/components/document-markdown"
 import { useTemplatePreview } from "@/features/documents/hooks/use-templates"

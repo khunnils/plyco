@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { type VocabularyCodeInput } from "@plyco/shared"
+import { type VocabularyCodeInput } from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { useAuthState } from "@/features/auth/hooks/use-auth"

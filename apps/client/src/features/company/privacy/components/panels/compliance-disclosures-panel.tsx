@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { privacyProfileSchema, type PrivacyProfile } from "@plyco/shared"
+import { privacyProfileSchema, type PrivacyProfile } from "@plyco/contracts"
 import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"

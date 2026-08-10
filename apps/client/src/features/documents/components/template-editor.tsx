@@ -1,4 +1,4 @@
-import { type Template, type TemplateInput } from "@plyco/shared"
+import { type Template, type TemplateInput } from "@plyco/contracts"
 
 import { TemplateForm } from "@/features/documents/components/template-form"
 

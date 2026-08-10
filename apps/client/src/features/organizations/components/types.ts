@@ -12,7 +12,7 @@ import {
   type BusinessActivityInput,
   type OrganizationLookupResult,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type ProfileDraft } from "@/features/company/types/company"
 
 export type WizardStep =

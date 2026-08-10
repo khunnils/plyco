@@ -3,7 +3,7 @@ import {
   infrastructureProfileSchema,
   type InfrastructureProfile,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { useState, useEffect } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 import { z } from "zod"

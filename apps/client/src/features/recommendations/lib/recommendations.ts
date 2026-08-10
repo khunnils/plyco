@@ -1,4 +1,4 @@
-import { type Recommendation, type RecommendationSeverity } from "@plyco/shared"
+import { type Recommendation, type RecommendationSeverity } from "@plyco/contracts"
 
 export const severityOrder: RecommendationSeverity[] = [
   "critical",

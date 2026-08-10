@@ -1,4 +1,4 @@
-import { type Provider, type Vocabulary } from "@plyco/shared"
+import { type Provider, type Vocabulary } from "@plyco/contracts"
 
 import { PrivacyManager } from "@/features/company/privacy/components/privacy-manager"
 import {

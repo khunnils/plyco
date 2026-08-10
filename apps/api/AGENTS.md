@@ -3,7 +3,7 @@
 ## Architecture Fit
 
 - `apps/api` is a Fastify service. Keep route behavior simple and aligned with the single-organization Sprint 1 runtime unless the product architecture changes.
-- Validate external input with Zod schemas from `@plyco/shared` whenever the shape crosses the API/client boundary.
+- Validate external input with Zod schemas from `@plyco/contracts` whenever the shape crosses the API/client boundary.
 - Keep Prisma and database-specific fields behind API internals and `packages/db`; do not leak them into shared DTOs or client-facing responses.
 - When adding, renaming, or removing document-generation data elements, update `apps/api/data/templates/schema.json` in the same change.
 - Return structured JSON errors through the existing error helpers instead of ad hoc response shapes.

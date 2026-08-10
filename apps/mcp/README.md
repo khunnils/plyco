@@ -2,7 +2,7 @@
 
 A stdio [Model Context Protocol](https://modelcontextprotocol.io) server that
 gives AI agents read-only access to a single Plyco organization's workspace
-data. Organization reads go through `@plyco/org-client`, shared with `@plyco/cli`.
+data. Organization reads go through `@plyco/api-client`, shared with `@plyco/cli`.
 
 ## Setup
 

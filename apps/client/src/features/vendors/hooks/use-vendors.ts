@@ -4,7 +4,7 @@ import {
   type ServiceProviderUsageInput,
   type OrganizationProvider,
   type OrganizationProviderInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"

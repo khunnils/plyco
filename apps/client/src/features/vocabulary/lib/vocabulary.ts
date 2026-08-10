@@ -2,7 +2,7 @@ import {
   type Country,
   type Vocabulary,
   type VocabularyCode,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export type CodeSetChange =
   | { type: "update"; previousCodeId: string; code: VocabularyCode }

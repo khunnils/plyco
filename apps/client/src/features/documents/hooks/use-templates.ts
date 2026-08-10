@@ -5,7 +5,7 @@ import {
   type GenerateTemplateInput,
   type Template,
   type TemplateInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { toast } from "sonner"
 
 import { useSelectedOrganization } from "@/features/organizations/hooks/use-selected-organization"

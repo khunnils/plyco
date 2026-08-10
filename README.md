@@ -120,48 +120,62 @@ pnpm build
 
 Public npm packages:
 
-- `@plyco/shared`
-- `@plyco/org-client`
+- `@plyco/contracts`
+- `@plyco/api-client`
 - `@plyco/cli`
 - `@plyco/mcp`
 
 Keep public package versions on the same minor baseline when starting a release.
 Because npm versions are immutable, bump versions before publishing if a version
-already exists. Publish dependencies first (`@plyco/shared`, then
-`@plyco/org-client`) so consumers resolve published versions during publish.
+already exists.
 
 Verify the packages before publishing:
 
 ```bash
-pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp build
-pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp typecheck
-pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp test
-pnpm --filter @plyco/shared --filter @plyco/org-client --filter @plyco/cli --filter @plyco/mcp pack --dry-run
+pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp build
+pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp typecheck
+pnpm --filter @plyco/contracts --filter @plyco/api-client --filter @plyco/cli --filter @plyco/mcp test
+(cd packages/contracts && npm pack --dry-run)
+(cd packages/api-client && npm pack --dry-run)
+(cd apps/cli && npm pack --dry-run)
+(cd apps/mcp && npm pack --dry-run)
 ```
 
-Publish in dependency order:
+`@plyco/contracts` and `@plyco/api-client` publish through npm trusted
+publishing in `.github/workflows/publish-npm.yml`. The workflow uses GitHub OIDC
+and must not receive an npm write token. Trigger it manually and select `all` or
+one package after its version has been bumped:
 
 ```bash
-pnpm --filter @plyco/shared publish --access public --no-git-checks
-pnpm --filter @plyco/org-client publish --access public --no-git-checks
-pnpm --filter @plyco/cli publish --access public --no-git-checks
-pnpm --filter @plyco/mcp publish --access public --no-git-checks
+gh workflow run publish-npm.yml -f package=all
 ```
 
-If npm requires two-factor auth, use a current OTP or a granular access token
-with publish access to the `@plyco` scope and bypass 2FA enabled. For a one-off
-token without writing to the normal npm config, create a temporary config and
-remove it after publishing:
+Configure each package's npm Trusted Publisher with these exact values:
+
+- provider: GitHub Actions
+- organization or user: `khunnils`
+- repository: `plyco`
+- workflow filename: `publish-npm.yml`
+- environment: unset
+- allowed action: `npm publish`
+
+Trusted publishing can only be configured after a package exists on npm. For a
+brand-new package, use a short-lived granular token with `@plyco` package write
+access and bypass 2FA for the first publish only. Token creation does not make
+the CLI use that token; pass it through a temporary npm config:
 
 ```bash
-tmp_config=$(mktemp)
-printf '//registry.npmjs.org/:_authToken=%s\nregistry=https://registry.npmjs.org/\n' "$NPM_TOKEN" > "$tmp_config"
-NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/shared publish --access public --no-git-checks
-NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/org-client publish --access public --no-git-checks
-NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/cli publish --access public --no-git-checks
-NPM_CONFIG_USERCONFIG="$tmp_config" pnpm --filter @plyco/mcp publish --access public --no-git-checks
-rm -f "$tmp_config"
+bootstrap_npmrc=$(mktemp)
+chmod 600 "$bootstrap_npmrc"
+printf '//registry.npmjs.org/:_authToken=%s\nregistry=https://registry.npmjs.org/\n' "$NPM_BOOTSTRAP_TOKEN" > "$bootstrap_npmrc"
+(cd packages/contracts && NPM_CONFIG_USERCONFIG="$bootstrap_npmrc" npm publish --access public)
+(cd packages/api-client && NPM_CONFIG_USERCONFIG="$bootstrap_npmrc" npm publish --access public)
+rm -f "$bootstrap_npmrc"
+unset NPM_BOOTSTRAP_TOKEN
 ```
+
+After the first release, configure both trusted publishers and revoke the
+bootstrap token.
 
 ## Workspace Layout
 
@@ -172,8 +186,8 @@ apps/web          Astro marketing site
 apps/admin-cli    Internal operations CLI
 apps/cli          Customer organization data CLI
 apps/mcp          Read-only MCP server
-packages/shared   Zod schemas, DTOs, enums
-packages/db       Prisma schema and DB mapping
-packages/org-client Shared org-scoped read client
-docs              Architecture and product docs
+packages/contracts    Zod schemas, DTOs, enums
+packages/db           Prisma schema and DB mapping
+packages/api-client   Organization-scoped API client
+docs                  Architecture and product docs
 ```

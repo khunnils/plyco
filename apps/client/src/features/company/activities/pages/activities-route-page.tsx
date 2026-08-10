@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
-import { isComplianceFieldVisible } from "@plyco/shared"
+import { isComplianceFieldVisible } from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"

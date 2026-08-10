@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   generateTemplateInputSchema,
   type GenerateTemplateInput,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { ArrowLeft, Loader2, Sparkles } from "lucide-react"
 import { useForm } from "react-hook-form"
 

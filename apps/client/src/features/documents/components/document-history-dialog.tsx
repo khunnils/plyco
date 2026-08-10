@@ -1,4 +1,4 @@
-import { type DocumentSummary } from "@plyco/shared"
+import { type DocumentSummary } from "@plyco/contracts"
 import { Eye, FileText, X } from "lucide-react"
 import { useEffect, useId } from "react"
 import { createPortal } from "react-dom"

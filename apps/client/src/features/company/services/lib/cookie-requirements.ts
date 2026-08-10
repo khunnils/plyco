@@ -4,7 +4,7 @@ import {
   normalizeServicePrivacyProfile,
   type ServiceCookieCategory,
   type ServicePrivacyProfile,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export const hasCookieCategoriesRequiringConsent = (
   categories: ServiceCookieCategory[] | null | undefined

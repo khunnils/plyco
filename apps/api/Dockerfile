@@ -24,14 +24,14 @@ COPY apps/cli/package.json apps/cli/package.json
 COPY apps/mcp/package.json apps/mcp/package.json
 COPY apps/web/package.json apps/web/package.json
 COPY packages/db/package.json packages/db/package.json
-COPY packages/org-client/package.json packages/org-client/package.json
-COPY packages/shared/package.json packages/shared/package.json
+COPY packages/api-client/package.json packages/api-client/package.json
+COPY packages/contracts/package.json packages/contracts/package.json
 
 RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN pnpm --filter @plyco/shared build \
+RUN pnpm --filter @plyco/contracts build \
   && pnpm --filter @plyco/db build \
   && pnpm --filter @plyco/api build \
   && pnpm --filter @plyco/api --prod deploy --legacy /prod \

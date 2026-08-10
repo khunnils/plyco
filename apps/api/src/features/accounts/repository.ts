@@ -8,7 +8,7 @@ import {
   type OrganizationMemberRoleUpdate,
   type OrganizationMembershipRole,
   type OrganizationSummary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 export type GoogleAccountUserInput = {
   googleSubject: string

@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-import { type Recommendation, type RecommendationSeverity } from "@plyco/shared"
+import { type Recommendation, type RecommendationSeverity } from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 import { ChevronDown, EyeOff, Lightbulb, LoaderCircle } from "lucide-react"
 

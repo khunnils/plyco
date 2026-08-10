@@ -5,7 +5,7 @@ import {
   type ServiceProviderUsageInput,
   type OrganizationProvider,
   type OrganizationProviderInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 export interface ProviderRepository {
   listBusinessActivities(organizationId: string): Promise<BusinessActivity[]>;

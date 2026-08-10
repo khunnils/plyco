@@ -4,7 +4,7 @@ import {
   magicLinkRequestSchema,
   magicLinkResponseSchema,
   type AuthUser,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { type FastifyInstance, type FastifyRequest } from "fastify"
 import { createHash, randomBytes } from "node:crypto"
 import { z } from "zod"

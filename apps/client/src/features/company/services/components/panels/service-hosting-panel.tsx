@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { type ServiceProfileInput, type Vocabulary } from "@plyco/shared"
+import { type ServiceProfileInput, type Vocabulary } from "@plyco/contracts"
 import { useState } from "react"
 import { type Resolver, useForm } from "react-hook-form"
 

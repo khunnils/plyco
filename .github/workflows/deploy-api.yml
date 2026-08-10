@@ -8,7 +8,7 @@ on:
       - ".github/workflows/deploy-api.yml"
       - "apps/api/**"
       - "packages/db/**"
-      - "packages/shared/**"
+      - "packages/contracts/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
@@ -54,7 +54,7 @@ jobs:
 
       - name: Build shared workspace packages
         run: |
-          pnpm --filter @plyco/shared build
+          pnpm --filter @plyco/contracts build
           pnpm --filter @plyco/db build
 
       - name: Typecheck

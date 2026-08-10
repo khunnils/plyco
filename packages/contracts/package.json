@@ -1,6 +1,11 @@
 {
-  "name": "@plyco/org-client",
+  "name": "@plyco/contracts",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khunnils/plyco.git",
+    "directory": "packages/contracts"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -26,8 +31,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "typescript": "~7.0.2",
     "vitest": "^4.1.10"
   }
 }

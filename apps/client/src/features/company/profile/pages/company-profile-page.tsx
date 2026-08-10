@@ -1,4 +1,4 @@
-import { type Country, type Vocabulary } from "@plyco/shared"
+import { type Country, type Vocabulary } from "@plyco/contracts"
 
 import { CompanyManager } from "@/features/company/profile/components/company-manager"
 import {

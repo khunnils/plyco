@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { type AuthUser } from "@plyco/shared"
+import { type AuthUser } from "@plyco/contracts"
 import { type WizardDraft } from "../../components/types"
 
 interface OnboardingState {

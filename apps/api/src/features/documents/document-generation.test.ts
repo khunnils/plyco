@@ -10,7 +10,7 @@ import {
   type SecurityProgramSnapshot,
   type Template,
   type Vocabulary,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 
 import { Jinja2Renderer, ReportContextBuilder } from "./document-generation.js";
 

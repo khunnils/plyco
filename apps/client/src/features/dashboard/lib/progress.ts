@@ -4,7 +4,7 @@ import {
   type ServiceProviderUsage,
   type StoredDataType,
   type BusinessActivity,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 
 import { type ProfileDraft } from "@/features/company/types/company"
 import { hasCookieCategoriesRequiringConsent } from "@/features/company/services/lib/cookie-requirements"

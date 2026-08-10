@@ -4,7 +4,7 @@ import {
   type ServiceProviderUsage,
   type ServiceProviderUsageInput,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import {
   AlertCircle,
   ChevronDown,

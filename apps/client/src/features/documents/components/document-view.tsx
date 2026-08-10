@@ -1,4 +1,4 @@
-import { type Document } from "@plyco/shared"
+import { type Document } from "@plyco/contracts"
 
 import { DocumentContent } from "@/features/documents/components/document-content"
 

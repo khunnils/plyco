@@ -6,7 +6,7 @@ import {
   type Vocabulary,
   type VocabularyCode,
   type VocabularyCodeInput,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { prisma, type PrismaClient } from "@plyco/db";
 
 import { countries } from "./reference-data.js";

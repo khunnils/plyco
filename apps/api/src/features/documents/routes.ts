@@ -10,7 +10,7 @@ import {
   templateVariableCatalogSchema,
   type Document,
   type Template,
-} from "@plyco/shared";
+} from "@plyco/contracts";
 import { type FastifyInstance } from "fastify";
 
 import {

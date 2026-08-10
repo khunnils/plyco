@@ -1,4 +1,4 @@
-import { type DocumentSummary } from "@plyco/shared"
+import { type DocumentSummary } from "@plyco/contracts"
 
 import { DocumentSummaryCard } from "@/features/documents/components/document-summary-card"
 import { DocumentsEmptyState } from "@/features/documents/components/documents-empty-state"

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-import { type SecurityProgramSnapshot } from "@plyco/shared";
+import { type SecurityProgramSnapshot } from "@plyco/contracts";
 import { describe, expect, it } from "vitest";
 
 import { createTestApp } from "./helpers.js";

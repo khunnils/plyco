@@ -2,7 +2,7 @@ import {
   type BusinessActivity,
   type ServiceProfileInput,
   type Vocabulary,
-} from "@plyco/shared"
+} from "@plyco/contracts"
 import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 
