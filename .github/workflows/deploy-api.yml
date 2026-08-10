@@ -104,11 +104,73 @@ jobs:
       - name: Run Prisma migrations
         run: |
           set -euo pipefail
-          export DATABASE_URL="$(
+          database_url="$(
             gcloud secrets versions access latest \
               --project "${PROJECT_ID}" \
               --secret "database-url"
           )"
+
+          cloud_sql_instance="$(
+            DATABASE_URL="${database_url}" node --input-type=module -e '
+              const socketPath = new URL(process.env.DATABASE_URL).searchParams.get("host");
+              const prefix = "/cloudsql/";
+
+              if (!socketPath?.startsWith(prefix) || socketPath.length === prefix.length) {
+                console.error("database-url must include host=/cloudsql/PROJECT:REGION:INSTANCE");
+                process.exit(1);
+              }
+
+              process.stdout.write(socketPath.slice(prefix.length));
+            '
+          )"
+
+          export DATABASE_URL="$(
+            DATABASE_URL="${database_url}" node --input-type=module -e '
+              const url = new URL(process.env.DATABASE_URL);
+              url.hostname = "127.0.0.1";
+              url.port = "5432";
+              url.searchParams.delete("host");
+              process.stdout.write(url.toString());
+            '
+          )"
+
+          proxy_path="${RUNNER_TEMP}/cloud-sql-proxy"
+          proxy_log="${RUNNER_TEMP}/cloud-sql-proxy.log"
+          curl --fail --silent --show-error --location --retry 3 \
+            "https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.23.0/cloud-sql-proxy.linux.amd64" \
+            --output "${proxy_path}"
+          chmod +x "${proxy_path}"
+
+          "${proxy_path}" \
+            --address 127.0.0.1 \
+            --port 5432 \
+            --run-connection-test \
+            "${cloud_sql_instance}" >"${proxy_log}" 2>&1 &
+          proxy_pid=$!
+          trap 'kill "${proxy_pid}" 2>/dev/null || true' EXIT
+
+          proxy_ready=false
+          for _ in {1..30}; do
+            if ! kill -0 "${proxy_pid}" 2>/dev/null; then
+              cat "${proxy_log}" >&2
+              exit 1
+            fi
+
+            if (echo > /dev/tcp/127.0.0.1/5432) 2>/dev/null; then
+              proxy_ready=true
+              break
+            fi
+
+            sleep 1
+          done
+
+          if [ "${proxy_ready}" != "true" ]; then
+            cat "${proxy_log}" >&2
+            echo "Cloud SQL Auth Proxy did not become ready." >&2
+            exit 1
+          fi
+
+          echo "CLOUD_SQL_INSTANCE=${cloud_sql_instance}" >> "${GITHUB_ENV}"
           pnpm --filter @plyco/db exec prisma migrate deploy
 
       - name: Deploy API to Cloud Run
@@ -152,6 +214,7 @@ jobs:
             --image "${IMAGE_URI}" \
             --service-account "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" \
             --allow-unauthenticated \
+            --add-cloudsql-instances "${CLOUD_SQL_INSTANCE}" \
             --set-env-vars "NODE_ENV=production,HOST=0.0.0.0,GCP_PROJECT_ID=${PROJECT_ID},AIRTABLE_BASE=${{ vars.AIRTABLE_BASE }},CLIENT_URL=${{ vars.CLIENT_URL }},WEB_URL=${{ vars.WEB_URL }},API_PUBLIC_URL=${{ vars.API_PUBLIC_URL }},DOCUMENT_PDF_BUCKET=${{ vars.DOCUMENT_PDF_BUCKET }},LANGFUSE_BASE_URL=${{ env.LANGFUSE_BASE_URL }},SENTRY_DSN=${{ vars.SENTRY_DSN }},SENTRY_ENVIRONMENT=production,GEMINI_PROVIDER_LOOKUP_MODEL=gemini-2.5-flash,ORGANIZATION_LOOKUP_MODEL=${{ env.ORGANIZATION_LOOKUP_MODEL }}" \
             --set-secrets "DATABASE_URL=database-url:latest,AIRTABLE_API_KEY=airtable-api-key:latest,PLYCO_API_KEY=plyco-api-key:latest,GEMINI_API_KEY=gemini-api-key:latest,LANGFUSE_PUBLIC_KEY=langfuse-public-key:latest,LANGFUSE_SECRET_KEY=langfuse-secret-key:latest,GOOGLE_OAUTH_CLIENT_ID=google-oauth-client-id:latest,GOOGLE_OAUTH_CLIENT_SECRET=google-oauth-client-secret:latest,SESSION_KEY=session-key:latest"
 
