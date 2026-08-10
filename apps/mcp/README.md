@@ -38,6 +38,7 @@ Example client configuration:
 {
   "mcpServers": {
     "plyco": {
+      "type": "http",
       "url": "https://mcp.plyco.example/organizations/your-organization-id/mcp",
       "headers": {
         "Authorization": "Bearer plyco_org_your_key_here"
@@ -49,6 +50,34 @@ Example client configuration:
 
 `GET /health` provides an unauthenticated health check. MCP connections are
 stateless so the service can run across multiple Cloud Run instances.
+
+### Cloud Run deployment
+
+`.github/workflows/deploy-mcp.yml` builds this directory's Dockerfile, pushes
+the image to Artifact Registry, and deploys the `plyco-mcp` Cloud Run service.
+It runs automatically for MCP or API-client changes on `main` and can also be
+started manually.
+
+The workflow reuses the production Google Cloud configuration used by the API:
+
+- `GCP_PROJECT_ID`
+- `CLOUD_RUN_REGION`
+- `ARTIFACT_REGISTRY_REPOSITORY`
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`
+- `GCP_DEPLOY_SERVICE_ACCOUNT`
+- `CLOUD_RUN_SERVICE_ACCOUNT`
+- `API_PUBLIC_URL`
+
+Optional `MCP_CLOUD_RUN_SERVICE` overrides the default `plyco-mcp` service
+name. Set `MCP_PUBLIC_URL` to the custom origin, such as
+`https://mcp.plyco.co`, after mapping that domain to the Cloud Run service. The
+workflow always verifies the generated Cloud Run URL and also verifies the
+custom origin when `MCP_PUBLIC_URL` is set.
+
+The client deployment passes `MCP_PUBLIC_URL` into the Vite build as
+`VITE_MCP_URL`, so the Settings snippet points at the production MCP service.
+The client workflow requires this variable and supports manual dispatch, which
+allows the client to be rebuilt after the first MCP deployment or domain map.
 
 ## Local stdio
 

@@ -145,10 +145,12 @@ persisted outside the source tree.
 
 ## Runtime and Deployment
 
-The client and marketing site are independent static deployments. The API runs
-as a containerized Node.js service on Cloud Run, uses PostgreSQL on Neon, and
-stores private artifacts in Google Cloud Storage. External services provide
-email delivery, master data, AI capabilities, analytics, and observability.
+The client and marketing site are independent static deployments. The API and
+hosted MCP adapter run as separate containerized Node.js services on Cloud Run.
+The MCP service remains stateless and reaches workspace data only through the
+API. The API uses PostgreSQL on Neon and stores private artifacts in Google
+Cloud Storage. External services provide email delivery, master data, AI
+capabilities, analytics, and observability.
 
 Deployments are stateless apart from PostgreSQL and object storage. Environment
 configuration selects provider credentials, allowed origins, and optional

@@ -1,6 +1,7 @@
 name: Deploy Client
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -62,9 +63,18 @@ jobs:
         run: pnpm --filter cf-app test
 
       - name: Build client
+        env:
+          MCP_PUBLIC_URL: ${{ vars.MCP_PUBLIC_URL }}
         run: |
           set -euo pipefail
+
+          if [ -z "${MCP_PUBLIC_URL}" ]; then
+            echo "MCP_PUBLIC_URL repository variable is required." >&2
+            exit 1
+          fi
+
           VITE_API_URL="${{ vars.VITE_API_URL }}" \
+          VITE_MCP_URL="${MCP_PUBLIC_URL}" \
           VITE_PUBLIC_POSTHOG_PROJECT_TOKEN="${{ vars.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN }}" \
           VITE_PUBLIC_POSTHOG_HOST="${{ vars.VITE_PUBLIC_POSTHOG_HOST }}" \
           VITE_UI_POSTHOG_HOST="${{ vars.VITE_UI_POSTHOG_HOST }}" \

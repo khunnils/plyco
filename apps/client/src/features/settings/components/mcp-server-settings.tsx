@@ -3,25 +3,10 @@ import { Copy } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-
-const MCP_URL = import.meta.env.VITE_MCP_URL ?? "http://localhost:4300"
-const API_KEY_PLACEHOLDER = "YOUR_PLYCO_API_KEY"
-
-const buildMcpConfig = (organizationId: string) =>
-  JSON.stringify(
-    {
-      mcpServers: {
-        plyco: {
-          url: `${MCP_URL}/organizations/${encodeURIComponent(organizationId)}/mcp`,
-          headers: {
-            Authorization: `Bearer ${API_KEY_PLACEHOLDER}`,
-          },
-        },
-      },
-    },
-    null,
-    2
-  )
+import {
+  API_KEY_PLACEHOLDER,
+  buildMcpConfig,
+} from "../lib/mcp-server-config"
 
 const copyToClipboard = async (value: string) => {
   try {

@@ -1,0 +1,188 @@
+name: Deploy MCP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-mcp.yml"
+      - "apps/mcp/**"
+      - "packages/api-client/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-mcp-production
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'plyco-prod' }}
+  REGION: ${{ vars.CLOUD_RUN_REGION || 'us-central1' }}
+  SERVICE: ${{ vars.MCP_CLOUD_RUN_SERVICE || 'plyco-mcp' }}
+  ARTIFACT_REPOSITORY: ${{ vars.ARTIFACT_REGISTRY_REPOSITORY || 'plyco' }}
+  IMAGE_NAME: mcp
+  MCP_PUBLIC_URL: ${{ vars.MCP_PUBLIC_URL }}
+
+jobs:
+  deploy:
+    name: Build and deploy MCP
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify MCP workspace
+        run: |
+          set -euo pipefail
+          pnpm --filter @plyco/api-client build
+          pnpm --filter @plyco/api-client --filter @plyco/mcp typecheck
+          pnpm --filter @plyco/api-client --filter @plyco/mcp test
+          pnpm --filter @plyco/mcp build
+
+      - name: Validate deployment configuration
+        run: |
+          set -euo pipefail
+
+          if [ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ]; then
+            echo "GCP_WORKLOAD_IDENTITY_PROVIDER repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}" ]; then
+            echo "GCP_DEPLOY_SERVICE_ACCOUNT repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" ]; then
+            echo "CLOUD_RUN_SERVICE_ACCOUNT repository variable is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${{ vars.API_PUBLIC_URL }}" ]; then
+            echo "API_PUBLIC_URL repository variable is required." >&2
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+
+      - name: Ensure Artifact Registry repository exists
+        run: |
+          set -euo pipefail
+          if ! gcloud artifacts repositories describe "${ARTIFACT_REPOSITORY}" \
+            --project "${PROJECT_ID}" \
+            --location "${REGION}" >/dev/null 2>&1; then
+            gcloud artifacts repositories create "${ARTIFACT_REPOSITORY}" \
+              --project "${PROJECT_ID}" \
+              --location "${REGION}" \
+              --repository-format docker \
+              --description "Plyco Docker images"
+          fi
+
+      - name: Build and push MCP image
+        env:
+          IMAGE_URI: ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --file apps/mcp/Dockerfile \
+            --tag "${IMAGE_URI}" \
+            .
+          docker push "${IMAGE_URI}"
+          echo "IMAGE_URI=${IMAGE_URI}" >> "${GITHUB_ENV}"
+
+      - name: Deploy MCP to Cloud Run
+        run: |
+          set -euo pipefail
+          gcloud run deploy "${SERVICE}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --platform managed \
+            --image "${IMAGE_URI}" \
+            --service-account "${{ vars.CLOUD_RUN_SERVICE_ACCOUNT }}" \
+            --allow-unauthenticated \
+            --set-env-vars "NODE_ENV=production,MCP_HOST=0.0.0.0,PLYCO_API_URL=${{ vars.API_PUBLIC_URL }}"
+
+      - name: Resolve service URL
+        run: |
+          set -euo pipefail
+          service_url="$(
+            gcloud run services describe "${SERVICE}" \
+              --project "${PROJECT_ID}" \
+              --region "${REGION}" \
+              --format='value(status.url)'
+          )"
+
+          if [ -z "${service_url}" ]; then
+            echo "Cloud Run did not return an MCP service URL." >&2
+            exit 1
+          fi
+
+          echo "MCP_SERVICE_URL=${service_url}" >> "${GITHUB_ENV}"
+          {
+            echo "### MCP deployment"
+            echo "- Service: \`${SERVICE}\`"
+            echo "- URL: ${service_url}"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Verify Cloud Run health endpoint
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "${MCP_SERVICE_URL}/health"
+
+      - name: Verify public MCP domain
+        if: env.MCP_PUBLIC_URL != ''
+        run: |
+          set -euo pipefail
+          public_url="${MCP_PUBLIC_URL%/}"
+          curl --fail --silent --show-error "${public_url}/health"
+
+      - name: Send Telegram Notification
+        uses: appleboy/telegram-action@v1.0.1
+        if: always()
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            Deployment Status: ${{ job.status }}
+            App: MCP Server
+            Workflow: ${{ github.workflow }}
+
+            Commit: ${{ github.event.head_commit.message || github.sha }}
+            Author: ${{ github.actor }}
+
+            See changes: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
