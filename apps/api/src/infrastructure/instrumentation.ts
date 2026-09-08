@@ -2,7 +2,10 @@ import { LangfuseSpanProcessor } from "@langfuse/otel"
 import * as Sentry from "@sentry/node"
 import { NodeSDK } from "@opentelemetry/sdk-node"
 import { type FastifyInstance } from "fastify"
+import { ZodError } from "zod"
 import "./env-loader.js"
+
+import { ApiError } from "./errors.js"
 
 let sdk: NodeSDK | null = null
 let langfuseSpanProcessor: LangfuseSpanProcessor | null = null
@@ -18,11 +21,35 @@ const colors = {
 const langfuseExportMode =
   process.env.NODE_ENV === "production" ? "batched" : "immediate"
 
+export function shouldCaptureFastifyError(
+  error: Error,
+  _request: { method?: string },
+  reply: { statusCode: number },
+) {
+  // Fastify's error hooks run before sendError sets the reply status, so
+  // reply.statusCode is often still 200. Expected client errors such as
+  // AUTHENTICATION_REQUIRED must be classified from the thrown error.
+  if (error instanceof ApiError) {
+    return error.statusCode >= 500
+  }
+
+  if (error instanceof ZodError) {
+    return false
+  }
+
+  return reply.statusCode >= 500 || reply.statusCode <= 299
+}
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
     release: process.env.SENTRY_RELEASE,
+    integrations: [
+      Sentry.fastifyIntegration({
+        shouldHandleError: shouldCaptureFastifyError,
+      }),
+    ],
   })
   sentryEnabled = true
   info(
@@ -95,7 +122,9 @@ export function setupFastifyErrorInstrumentation(app: FastifyInstance) {
     return
   }
 
-  Sentry.setupFastifyErrorHandler(app)
+  Sentry.setupFastifyErrorHandler(app, {
+    shouldHandleError: shouldCaptureFastifyError,
+  })
 }
 
 function info(record: Record<string, unknown>) {
