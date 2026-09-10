@@ -6,7 +6,6 @@ import {
 } from "@plyco/contracts"
 import { useEffect } from "react"
 import { type Resolver, useForm, useWatch } from "react-hook-form"
-import { z } from "zod"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
@@ -16,17 +15,23 @@ import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { serviceProviderUsageHelperText } from "./service-provider-usage-helper-text"
 
-const serviceProviderUsageFormSchema = z.preprocess((value) => {
-  if (!value || typeof value !== "object") {
-    return value
-  }
-
-  const draft = value as Record<string, unknown>
-  return {
-    ...draft,
-    dpaStatus: draft.dpaStatus === "" ? null : draft.dpaStatus,
-  }
-}, serviceProviderUsageInputSchema)
+const resolveServiceProviderUsage: Resolver<ServiceProviderUsageInput> = (
+  values,
+  context,
+  options
+) =>
+  (
+    zodResolver(
+      serviceProviderUsageInputSchema
+    ) as Resolver<ServiceProviderUsageInput>
+  )(
+    {
+      ...values,
+      dpaStatus: values.dpaStatus || null,
+    },
+    context,
+    options
+  )
 
 export const ServiceProviderUsageForm = ({
   dataTypeOptions,
@@ -60,9 +65,7 @@ export const ServiceProviderUsageForm = ({
   const form = useForm<ServiceProviderUsageInput>({
     defaultValues,
     mode: "onBlur",
-    resolver: zodResolver(
-      serviceProviderUsageFormSchema
-    ) as Resolver<ServiceProviderUsageInput>,
+    resolver: resolveServiceProviderUsage,
   })
 
   const dataProcessingLevel =
