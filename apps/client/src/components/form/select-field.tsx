@@ -1,6 +1,7 @@
 import {
   Controller,
   type Control,
+  type FieldError,
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
@@ -29,6 +30,7 @@ const comboboxInputClassName =
 type SelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
   emptyMessage?: string
+  error?: FieldError
   helperText?: string
   label: string
   name: FieldPath<T>
@@ -39,6 +41,7 @@ type SelectFieldProps<T extends FieldValues, TValue extends string> = {
 export const SelectField = <T extends FieldValues, TValue extends string>({
   control,
   emptyMessage = "No options available",
+  error,
   helperText,
   label,
   name,
@@ -159,6 +162,9 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                   </ComboboxList>
                 </ComboboxContent>
               </Combobox>
+              {error ? (
+                <span className="text-xs text-red-700">{error.message}</span>
+              ) : null}
             </label>
             {codeSetId ? (
               <CodeSetEditorDialog

@@ -6,6 +6,7 @@ import {
 } from "@plyco/contracts"
 import { useEffect } from "react"
 import { type Resolver, useForm, useWatch } from "react-hook-form"
+import { z } from "zod"
 
 import { MultiSelectField } from "@/components/form/multi-select-field"
 import { SelectField } from "@/components/form/select-field"
@@ -14,6 +15,18 @@ import { TextField } from "@/components/form/text-field"
 import { Button } from "@/components/ui/button"
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 import { serviceProviderUsageHelperText } from "./service-provider-usage-helper-text"
+
+const serviceProviderUsageFormSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object") {
+    return value
+  }
+
+  const draft = value as Record<string, unknown>
+  return {
+    ...draft,
+    dpaStatus: draft.dpaStatus === "" ? null : draft.dpaStatus,
+  }
+}, serviceProviderUsageInputSchema)
 
 export const ServiceProviderUsageForm = ({
   dataTypeOptions,
@@ -48,13 +61,9 @@ export const ServiceProviderUsageForm = ({
     defaultValues,
     mode: "onBlur",
     resolver: zodResolver(
-      serviceProviderUsageInputSchema
+      serviceProviderUsageFormSchema
     ) as Resolver<ServiceProviderUsageInput>,
   })
-
-  useEffect(() => {
-    form.reset(defaultValues)
-  }, [defaultValues, form])
 
   const dataProcessingLevel =
     useWatch({
@@ -64,14 +73,15 @@ export const ServiceProviderUsageForm = ({
     }) ?? defaultValues.dataProcessingLevel
   const showDataProcessingDetail =
     dataProcessingLevel !== "none" && dataProcessingLevel !== "not_set"
+  const { setValue } = form
 
   useEffect(() => {
     if (dataProcessingLevel === "none" || dataProcessingLevel === "not_set") {
-      form.setValue("dataProcessed", [])
-      form.setValue("dataRegions", [])
-      form.setValue("dpaStatus", null)
+      setValue("dataProcessed", [])
+      setValue("dataRegions", [])
+      setValue("dpaStatus", null)
     }
-  }, [dataProcessingLevel, form])
+  }, [dataProcessingLevel, setValue])
 
   const submitProviderUsage = form.handleSubmit((providerUsage) => {
     onSubmit(providerUsage)
@@ -87,6 +97,7 @@ export const ServiceProviderUsageForm = ({
         {showServiceField ? (
           <SelectField
             control={form.control}
+            error={form.formState.errors.serviceId}
             helperText={serviceProviderUsageHelperText.service}
             label="Service"
             name="serviceId"
@@ -95,6 +106,7 @@ export const ServiceProviderUsageForm = ({
         ) : null}
         <SelectField
           control={form.control}
+          error={form.formState.errors.organizationProviderId}
           helperText={serviceProviderUsageHelperText.provider}
           label="Provider"
           name="organizationProviderId"
@@ -110,6 +122,7 @@ export const ServiceProviderUsageForm = ({
         />
         <SelectField
           control={form.control}
+          error={form.formState.errors.dataProcessingLevel}
           helperText={serviceProviderUsageHelperText.dataProcessingLevel}
           label="Data processing level"
           name="dataProcessingLevel"
@@ -145,10 +158,14 @@ export const ServiceProviderUsageForm = ({
             />
             <SelectField
               control={form.control}
+              error={form.formState.errors.dpaStatus}
               helperText={serviceProviderUsageHelperText.dpaStatus}
               label="DPA status"
               name="dpaStatus"
-              options={dpaStatusOptions}
+              options={[
+                { value: "", label: "Not set" },
+                ...dpaStatusOptions,
+              ]}
             />
           </>
         ) : null}
