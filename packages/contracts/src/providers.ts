@@ -1,16 +1,10 @@
 import { z } from "zod";
 
-import { codeIdSchema, countryCodeSchema } from "./common.js";
-
-export const dpaStatusSchema = z.enum([
-  "not_started",
-  "requested",
-  "under_review",
-  "signed",
-  "not_required",
-  "unavailable",
-  "unknown",
-]);
+import {
+  codeIdSchema,
+  countryCodeSchema,
+  nullableCodeIdSchema,
+} from "./common.js";
 
 export const providerCriticalitySchema = z.enum([
   "low",
@@ -70,7 +64,7 @@ export const serviceProviderUsageFieldsSchema = z.object({
   purpose: z.string().trim().min(1, "Purpose is required"),
   dataProcessingLevel: providerDataProcessingLevelSchema.default("limited"),
   dataProcessed: z.array(z.string().trim().min(1)).default([]),
-  dpaStatus: dpaStatusSchema.nullable().default(null),
+  dpaStatus: nullableCodeIdSchema,
   dataRegions: z.array(codeIdSchema).default([]),
   notes: z.string().trim().optional().or(z.literal("")),
 });
@@ -166,7 +160,7 @@ export const providerImportResultSchema = z
   })
   .strict();
 
-export type DpaStatus = z.infer<typeof dpaStatusSchema>;
+export type DpaStatus = z.infer<typeof nullableCodeIdSchema>;
 export type ProviderCriticality = z.infer<typeof providerCriticalitySchema>;
 export type ProviderDataProcessingLevel = z.infer<
   typeof providerDataProcessingLevelSchema

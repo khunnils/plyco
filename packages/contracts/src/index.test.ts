@@ -124,6 +124,22 @@ describe("shared security profile schemas", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts vocabulary DPA status codes beyond the legacy enum", () => {
+    const result = serviceProviderUsageInputSchema.safeParse({
+      serviceId: "service_1",
+      organizationProviderId: "provider_1",
+      systemType: "analytics",
+      purpose: "Code hosting",
+      dataProcessingLevel: "limited",
+      dataProcessed: ["source_code"],
+      dpaStatus: "in_progress",
+      dataRegions: ["us"],
+      notes: "",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it("normalizes non-processing provider usage", () => {
     const result = serviceProviderUsageInputSchema.safeParse({
       serviceId: "service_1",
