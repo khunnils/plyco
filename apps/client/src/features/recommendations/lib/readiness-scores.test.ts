@@ -80,21 +80,27 @@ describe("readiness scores", () => {
     ).toEqual({ kind: "setup" })
   })
 
-  it("waits for 75% advisor coverage before showing readiness", () => {
+  it("keeps setup primary until readiness is available with 75% advisor coverage", () => {
     expect(
       dashboardReadinessPresentation(75, {
         value: 100,
         assessedRuleCount: 2,
         applicableRuleCount: 3,
       })
-    ).toEqual({ kind: "assessment" })
+    ).toEqual({ kind: "setup" })
     expect(
       dashboardReadinessPresentation(75, {
         value: null,
         assessedRuleCount: 0,
         applicableRuleCount: 0,
       })
-    ).toEqual({ kind: "assessment" })
+    ).toEqual({ kind: "setup" })
+  })
+
+  it("keeps setup primary when readiness is unavailable", () => {
+    expect(dashboardReadinessPresentation(84, undefined)).toEqual({
+      kind: "setup",
+    })
   })
 
   it("caps preliminary readiness at 8/10", () => {

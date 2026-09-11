@@ -16,7 +16,6 @@ const MAX_PRELIMINARY_SCORE = 8
 
 export type DashboardReadinessPresentation =
   | { kind: "setup" }
-  | { kind: "assessment" }
   | {
       kind: "readiness"
       score: number
@@ -107,7 +106,7 @@ export const dashboardReadinessPresentation = (
     readiness.value === null ||
     coverage < MINIMUM_READINESS_COVERAGE
   ) {
-    return { kind: "assessment" }
+    return { kind: "setup" }
   }
 
   const preliminary = coverage < 1

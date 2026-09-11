@@ -216,8 +216,8 @@ at least 75% of applicable advisor checks are assessed. The dashboard converts
 the internal 0–100 result to a 1–10 score using
 `min(10, floor(score / 10) + 1)` and keeps workspace completion visible as
 secondary context. Advisor coverage is not
-displayed on the summary card. If it remains below 75%, the primary card says
-that the readiness assessment is underway instead of showing a score.
+displayed on the summary card. If it remains below 75% or no readiness score is
+available, the primary card continues to show workspace completion.
 
 Scores shown before full advisor coverage are marked Preliminary and capped at
 8/10. The labels are Major gaps for 1–4, Needs strengthening for 5–6, Solid

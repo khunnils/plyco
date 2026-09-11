@@ -26,34 +26,26 @@ export const WorkspaceSetupSummary = ({
     progress.totalFields > 0 &&
     progress.completedFields === progress.totalFields
 
-  if (presentation.kind !== "setup") {
+  if (presentation.kind === "readiness") {
     return (
       <section className="flex min-h-64 flex-col items-center justify-center gap-3 border border-slate-200 bg-white p-8 text-center">
         <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
           Overall readiness
         </span>
-        {presentation.kind === "readiness" ? (
-          <>
-            <div className="text-5xl font-extrabold text-slate-950">
-              {presentation.score}
-              <span className="ml-1 text-xl font-semibold text-slate-400">
-                /10
-              </span>
-            </div>
-            <Badge variant={presentation.badgeVariant}>
-              {presentation.label}
-            </Badge>
-            {presentation.preliminary ? (
-              <p className="text-xs font-medium text-slate-500">
-                Preliminary assessment
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <div className="max-w-52 text-2xl leading-tight font-bold text-slate-950">
-            Readiness assessment underway
-          </div>
-        )}
+        <div className="text-5xl font-extrabold text-slate-950">
+          {presentation.score}
+          <span className="ml-1 text-xl font-semibold text-slate-400">
+            /10
+          </span>
+        </div>
+        <Badge variant={presentation.badgeVariant}>
+          {presentation.label}
+        </Badge>
+        {presentation.preliminary ? (
+          <p className="text-xs font-medium text-slate-500">
+            Preliminary assessment
+          </p>
+        ) : null}
         <p className="text-xs font-medium text-slate-600">
           {progress.percent}% workspace complete
         </p>
