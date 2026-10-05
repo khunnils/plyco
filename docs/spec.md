@@ -8,7 +8,7 @@ Public copy must stay concrete about website and policy analysis: imported value
 
 ## Fictional Startup Demo
 
-`demo.plyco.co` presents Brieflane, a fictional Irish B2B SaaS startup serving
+`plyco-demo.web.app` presents Brieflane, a fictional Irish B2B SaaS startup serving
 EU and US creative and digital agencies. Its primary product is Brieflane
 Workspace, with a separate Brieflane Customer Portal and marketing website.
 The landing page publishes company identity, service descriptions, processing

@@ -1,7 +1,7 @@
 # Brieflane demo startup
 
 An independent static Astro site for Plyco onboarding, testing, and demos.
-Production address: `https://demo.plyco.co/`. Brieflane, its people, company
+Production address: `https://plyco-demo.web.app/`. Brieflane, its people, company
 details, contacts, product controls, and provider configuration are fictional.
 
 ## Run locally
@@ -51,8 +51,9 @@ The implementation checks do not require a browser or end-to-end tests.
 
 Routes: `/`, `/workspace/`, `/portal/`, `/privacy/`, and `/security/`.
 Shared scenario facts live in `src/content/company.ts`. Keep the prose and
-provider assumptions consistent when changing that scenario. Locally hosted
-font files are copied from the same assets used by `apps/web`.
+provider assumptions consistent when changing that scenario. The site uses
+system font stacks and its own warm palette, intentionally distinct from
+`apps/web`, so it is never mistaken for Plyco.
 
 This package uses TypeScript 6 for `astro check`: Astro's language server needs
 the JavaScript compiler API, which the workspace's TypeScript 7 native compiler
@@ -66,65 +67,41 @@ Firebase infrastructure may process access logs. The `.example` contacts are
 not deliverable. The fictional application's AWS residency claims do not
 describe the actual demo's Firebase deployment.
 
-## One-time Firebase and DNS setup
+## Deploy
 
-The repository maps Hosting target `demo` to site `plyco-demo` in project
-`plyco-prod`. Site creation and custom-domain provisioning must happen before
-the first deployment. The site ID is subject to Firebase global availability;
-if unavailable, select an available site ID and update `.firebaserc` together.
+Hosting target `demo` maps to Firebase site `plyco-demo` in project
+`plyco-prod`, served at `https://plyco-demo.web.app/`.
 
-1. Authenticate with an account authorized for the production project:
+`.github/workflows/deploy-demo.yml` typechecks, builds, and deploys that
+target when demo files change on `main`, and on manual dispatch. It uses the
+production environment, the `FIREBASE_DEPLOY_SERVICE_ACCOUNT_JSON` secret, and
+the `FIREBASE_PROJECT_ID` variable (default `plyco-prod`).
 
-   ```sh
-   firebase login --reauth
-   firebase hosting:sites:list --project plyco-prod
-   ```
+To deploy the same target by hand:
 
-2. If `plyco-demo` does not already exist, create it:
-
-   ```sh
-   firebase hosting:sites:create plyco-demo --project plyco-prod
-   ```
-
-3. In the Firebase console, open project `plyco-prod` → Hosting → site
-   `plyco-demo` → Add custom domain. Enter `demo.plyco.co` as the serving domain.
-   Add exactly the ownership-verification and serving DNS records Firebase
-   supplies at the domain's existing DNS provider. Avoid altering records for
-   the main website or other services. Wait for domain verification and TLS
-   provisioning; do not guess IP addresses or DNS targets.
-
-4. Build and deploy only this target:
-
-   ```sh
-   pnpm --filter @plyco/demo typecheck
-   pnpm --filter @plyco/demo build
-   firebase deploy --only hosting:demo --project plyco-prod
-   ```
-
-The dedicated `.github/workflows/deploy-demo.yml` workflow runs checks/build
-and deploys this target on relevant `main` changes or manual dispatch. It uses
-the existing production environment, `FIREBASE_DEPLOY_SERVICE_ACCOUNT_JSON`
-secret, and `FIREBASE_PROJECT_ID` variable (default `plyco-prod`). That service
-account must have permission to deploy to the new site. No new secret is needed.
+```sh
+pnpm --filter @plyco/demo typecheck
+pnpm --filter @plyco/demo build
+firebase deploy --only hosting:demo --project plyco-prod
+```
 
 After deployment, verify all routes and the index header over HTTP:
 
 ```sh
-curl --fail --location --head https://demo.plyco.co/
-curl --fail --location https://demo.plyco.co/workspace/
-curl --fail --location https://demo.plyco.co/portal/
-curl --fail --location https://demo.plyco.co/privacy/
-curl --fail --location https://demo.plyco.co/security/
+curl --fail --location --head https://plyco-demo.web.app/
+curl --fail --location https://plyco-demo.web.app/workspace/
+curl --fail --location https://plyco-demo.web.app/portal/
+curl --fail --location https://plyco-demo.web.app/privacy/
+curl --fail --location https://plyco-demo.web.app/security/
 ```
 
 Confirm status 200, `X-Robots-Tag: noindex, follow`, and the expected page
-contents. Custom-domain setup and public verification are incomplete until
-Firebase access and DNS provisioning succeed.
+contents.
 
 ## Manual Plyco onboarding walkthrough
 
 1. Create an organization named **Brieflane** with website
-   `https://demo.plyco.co/`. Select EU and US regions and the GDPR goal.
+   `https://plyco-demo.web.app/`. Select EU and US regions and the GDPR goal.
 2. Let website and privacy-policy lookup complete. Review suggestions rather
    than accepting them as a guaranteed or exact fixture output. Website lookup
    currently imports only one primary service and at most five suggested data
@@ -135,7 +112,7 @@ Firebase access and DNS provisioning succeed.
    intended sensitive or health data.
 4. Check that the primary service is **Brieflane Workspace**: agency request,
    document, and approval management. The service URL may initially be the
-   landing-page URL; update it to `https://demo.plyco.co/workspace/` in review.
+   landing-page URL; update it to `https://plyco-demo.web.app/workspace/` in review.
    Choose Ireland/EU as this walkthrough's hosting region (US is a separate
    supported customer choice).
 5. Expected data categories are business-user accounts, client contact
@@ -143,7 +120,7 @@ Firebase access and DNS provisioning succeed.
    Expected activities are account/client access management, request/document
    management, recording approvals, service notifications, and service
    monitoring/support. Wording and grouping may vary with AI extraction.
-6. Verify the discovered policy is `https://demo.plyco.co/privacy/`. Expected
+6. Verify the discovered policy is `https://plyco-demo.web.app/privacy/`. Expected
    privacy facts include rights requests by email, 30-day response target
    within one calendar month, identity verification, authorized representatives,
    internal review of refusals, transactional and consent-based marketing
@@ -153,7 +130,7 @@ Firebase access and DNS provisioning succeed.
    is appointed in this scenario.
 7. Complete organization setup. It creates the primary service and fixed
    **Marketing website** service. Add **Brieflane Customer Portal** manually
-   with URL `https://demo.plyco.co/portal/`, customer-data processing enabled,
+   with URL `https://plyco-demo.web.app/portal/`, customer-data processing enabled,
    and the same EU hosting region. Link account/client access, requests,
    approvals, notifications, and security logging as appropriate to both
    services and the data types they process.

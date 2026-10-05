@@ -12,7 +12,7 @@ export const company = {
   country: "Ireland",
   address: "14 Example Quay, Dublin, Ireland (fictional address)",
   teamSize: 8,
-  website: "https://demo.plyco.co",
+  website: "https://plyco-demo.web.app",
   contactEmail: "hello@brieflane.example",
   privacyEmail: "privacy@brieflane.example",
   securityEmail: "security@brieflane.example",
@@ -148,7 +148,7 @@ export const sampleRequests = [
     client: "Juniper Studio",
     owner: "Maya",
     status: "In progress",
-    tone: "blue",
+    tone: "accent",
     date: "8 Oct",
   },
   {
@@ -166,7 +166,7 @@ export const sampleRequests = [
     client: "Cedar Collective",
     owner: "Maya",
     status: "Approved",
-    tone: "teal",
+    tone: "green",
     date: "6 Oct",
   },
 ] as const;

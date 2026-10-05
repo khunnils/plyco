@@ -2,8 +2,12 @@
 
 ## Fictional Startup Demo
 
-Brieflane uses the shared Satoshi body and Clash Grotesk heading fonts, slate
-backgrounds, blue calls to action, and teal positive states. Its landing page
+Brieflane deliberately avoids Plyco's visual identity so users can tell the
+fictional company apart from Plyco. It uses system serif headings (Iowan Old
+Style/Palatino/Georgia), a system sans body, warm cream backgrounds, a dark
+demo banner, terracotta pill-shaped calls to action, and muted green positive
+states. Do not reuse Plyco's Satoshi/Clash Grotesk fonts or slate/blue palette
+here. Its landing page
 combines a clear agency-workflow story with readable service, hosting, and
 business information. Product previews are responsive illustrations built from
 HTML and CSS, with synthetic records and display-only controls. Each page has a

@@ -65,7 +65,7 @@ does not share the authenticated client runtime.
 ### Demo startup site
 
 The demo application is an independent static Astro deployment at
-`demo.plyco.co`, served by the Firebase Hosting `demo` target (`plyco-demo`). It
+`plyco-demo.web.app`, served by the Firebase Hosting `demo` target (`plyco-demo`). It
 describes Brieflane, a fictional startup, and exposes public HTML for website
 and privacy-policy lookup. Its workspace and portal pages contain synthetic,
 display-only interfaces; it has no application backend, authentication, data

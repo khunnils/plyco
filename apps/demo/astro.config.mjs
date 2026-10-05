@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://demo.plyco.co",
+  site: "https://plyco-demo.web.app",
   output: "static",
   trailingSlash: "always",
   server: { port: 4400 },

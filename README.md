@@ -77,9 +77,10 @@ pnpm dev:demo
 ```
 
 Open [http://localhost:4400/](http://localhost:4400/). It needs no API, database,
-environment variables, or Firebase login. See the [demo README](apps/demo/README.md)
-for build previews and the onboarding walkthrough. Remote website lookup needs
-the publicly deployed demo URL rather than localhost.
+environment variables, or Firebase login. The deployed site is
+[https://plyco-demo.web.app/](https://plyco-demo.web.app/). See the
+[demo README](apps/demo/README.md) for the deploy workflow and the onboarding
+walkthrough. Remote website lookup needs that public URL rather than localhost.
 
 ## Admin CLI
 
