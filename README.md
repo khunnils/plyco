@@ -70,6 +70,17 @@ Open the client URL printed by Vite, usually:
 http://localhost:4200
 ```
 
+Run the standalone Brieflane demo website from the repository root:
+
+```bash
+pnpm dev:demo
+```
+
+Open [http://localhost:4400/](http://localhost:4400/). It needs no API, database,
+environment variables, or Firebase login. See the [demo README](apps/demo/README.md)
+for build previews and the onboarding walkthrough. Remote website lookup needs
+the publicly deployed demo URL rather than localhost.
+
 ## Admin CLI
 
 The internal operations CLI (`plyco-admin`) reads `PLYCO_API_URL` and
@@ -195,6 +206,7 @@ bootstrap token.
 apps/client       React + Vite app
 apps/api          Fastify API
 apps/web          Astro marketing site
+apps/demo         Astro fictional startup demo site
 apps/admin-cli    Internal operations CLI
 apps/cli          Customer organization data CLI
 apps/mcp          Read-only MCP server

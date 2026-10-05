@@ -1,0 +1,113 @@
+---
+import { sampleRequests } from "../content/company";
+interface Props {
+  mode?: "workspace" | "portal";
+  compact?: boolean;
+}
+const { mode = "workspace", compact = false } = Astro.props;
+const portal = mode === "portal";
+const requests = portal
+  ? sampleRequests.filter((request) => request.client === "Juniper Studio")
+  : sampleRequests;
+const openRequests = requests.filter(
+  (request) => request.status !== "Approved",
+).length;
+---
+
+<div class:list={["product-preview", { "preview-compact": compact }]}>
+  <div class="preview-toolbar">
+    <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span
+    ><span
+      >{portal ? "Customer portal" : "Team workspace"} / Static preview</span
+    ><span class="preview-region">EU · Ireland</span>
+  </div>
+  <div class="preview-body">
+    <aside class="preview-sidebar" aria-label="Illustrative workspace sidebar">
+      <span class="preview-company"
+        ><span class="mini-logo">{portal ? "J" : "N"}</span>{
+          portal ? "Juniper Studio" : "Northline Agency"
+        }</span
+      >
+      <span class="sidebar-label">{portal ? "CLIENT SPACE" : "WORKSPACE"}</span>
+      <span class="sidebar-item selected"
+        >{portal ? "Your requests" : "All requests"}<span
+          >{requests.length}</span
+        ></span
+      >
+      <span class="sidebar-item">Documents</span><span class="sidebar-item"
+        >Approvals</span
+      >
+      <div class="sidebar-bottom">
+        <span class="avatar">{portal ? "ET" : "MC"}</span><span
+          >{portal ? "Elliot Taylor" : "Maya Chen"}<small
+            >{portal ? "Client reviewer" : "Agency admin"}</small
+          ></span>
+      </div>
+    </aside>
+    <div class="preview-content">
+      <div class="preview-heading">
+        <div>
+          <p class="eyebrow">
+            {portal ? "JUNIPER × NORTHLINE" : "A LITTLE LESS BACK-AND-FORTH"}
+          </p><h3>
+            {portal ? "Your projects, in view." : "A clear view of the work."}
+          </h3>
+        </div><span class="sample-control"
+          >{portal ? "+ New request" : "+ Add request"}</span>
+      </div>
+      <div class="preview-stats">
+        <div><strong>{openRequests}</strong><span>Open requests</span></div><div
+        >
+          <strong>1</strong><span>Awaiting approval</span>
+        </div><div><strong>EU</strong><span>Workspace region</span></div>
+      </div>
+      <div class="request-list">
+        <div class="request-list-heading">
+          <span>Request</span><span>Status</span>
+        </div>
+        {
+          requests.map((request) => (
+            <div class="request-row">
+              <>
+                <div>
+                  <>
+                    <small>
+                      {request.id} · {request.client}
+                    </small>
+                    <strong>{request.title}</strong>
+                    <span class="request-meta">
+                      {request.owner} · Due {request.date}
+                    </span>
+                  </>
+                </div>
+                <span class:list={["status", request.tone]}>
+                  {request.status}
+                </span>
+              </>
+            </div>
+          ))
+        }
+      </div>
+      <div class="approval-note">
+        <span class="approval-icon" aria-hidden="true">✓</span><div>
+          <strong
+            >{
+              portal
+                ? "Your feedback stays with the work."
+                : "One decision. A complete history."
+            }</strong
+          ><p>
+            {
+              portal
+                ? "Review the latest version and keep your agency in the loop."
+                : "Brand guidelines v3 approved by Sam Rivera at Cedar Collective. Recorded against the document version."
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="preview-caption">
+    Illustrative interface · Synthetic records · Controls are display-only
+  </p>
+</div>

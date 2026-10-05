@@ -10,6 +10,9 @@
         ],
         "web": [
           "plyco-web"
+        ],
+        "demo": [
+          "plyco-demo"
         ]
       }
     }

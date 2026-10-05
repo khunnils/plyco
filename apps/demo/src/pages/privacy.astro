@@ -1,0 +1,271 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { company, dataTypes, providers } from "../content/company";
+---
+
+<Layout
+  title="Privacy policy"
+  description="Illustrative Brieflane privacy policy: GDPR practices, data processing, EU and US hosting, retention, rights, and international transfers."
+>
+  <article class="container policy-page">
+    <a class="back-link" href="/">← Back to Brieflane</a><header
+      class="policy-heading"
+    >
+      <p class="eyebrow">PRIVACY, IN PLAIN LANGUAGE</p><h1>Privacy policy</h1><p
+      >
+        Illustrative policy · Updated {company.policyDate}
+      </p>
+    </header>
+    <div class="preview-notice">
+      <strong>Fictional business policy</strong><span
+        >This policy describes the invented Brieflane product for Plyco
+        onboarding. The actual demo is static: no accounts, uploads, analytics,
+        application cookies, or contact submissions. Hosting infrastructure may
+        process visitor IP addresses and access logs to deliver and protect this
+        site. All contacts below are non-deliverable examples.</span>
+    </div>
+    <div class="policy-layout">
+      <nav class="policy-nav" aria-label="Privacy policy sections">
+        <a href="#company">Company &amp; roles</a><a href="#data"
+          >Data &amp; purposes</a
+        ><a href="#hosting">Hosting &amp; providers</a><a href="#transfers"
+          >International transfers</a
+        ><a href="#retention">Retention &amp; deletion</a><a href="#rights"
+          >Your rights</a
+        ><a href="#communications">Emails &amp; cookies</a><a href="#governance"
+          >Privacy governance</a>
+      </nav><div class="policy-content">
+        <section id="company">
+          <h2>1. Who we are and how we act</h2><p>
+            {company.legalName} is a fictional {company.teamSize}-person B2B
+            SaaS startup registered in {company.country}, with an illustrative
+            office at {company.address}. We serve creative and digital agencies
+            in the EU and US.
+          </p><p>
+            Our primary service is Brieflane Workspace. Brieflane Customer
+            Portal is a separate client-facing service linked to an agency
+            workspace. Our public marketing website is a third service.
+          </p><p>
+            We act as a <strong>processor</strong> for project content, client contacts,
+            and approval records that agencies instruct us to handle. The agency is
+            the controller and determines the purposes and legal basis for that content.
+            Our fictional data processing agreement covers instructions, confidentiality,
+            security, subprocessors, assistance with rights requests, and deletion.
+          </p><p>
+            We act as a <strong>controller</strong> for our own account administration,
+            billing, fraud prevention, security, support, and consent-based marketing.
+            Privacy contact: <strong>{company.privacyEmail}</strong> (illustrative;
+            does not receive messages).
+          </p>
+        </section>
+        <section id="data">
+          <h2>2. What we process and why</h2><dl class="policy-data">
+            {
+              dataTypes.map((type) => (
+                <div>
+                  <>
+                    <dt>{type.name}</dt>
+                    <dd>{type.description}</dd>
+                  </>
+                </div>
+              ))
+            }
+          </dl><p>
+            We collect data directly from agency staff and invited clients
+            through account setup, project requests, uploads, comments, and
+            approvals. We generate operational logs as people use the product.
+            Support messages and billing details are collected when needed.
+          </p><div class="table-scroll">
+            <table>
+              <caption
+                >Controller processing purposes and legal bases in the fictional
+                business</caption
+              ><thead
+                ><tr
+                  ><th scope="col">Purpose</th><th scope="col">Legal basis</th
+                  ></tr
+                ></thead
+              ><tbody
+                ><tr
+                  ><td
+                    >Administer subscriptions and provide the service to
+                    contracting individuals</td
+                  ><td>Performance of a contract</td></tr
+                ><tr
+                  ><td
+                    >Manage business contacts, provide support, secure accounts,
+                    and prevent abuse</td
+                  ><td
+                    >Legitimate interests in operating and protecting the
+                    service, balanced against individual rights</td
+                  ></tr
+                ><tr
+                  ><td>Maintain statutory invoices and accounting records</td
+                  ><td>Legal obligation</td></tr
+                ><tr
+                  ><td>Send optional marketing emails</td><td
+                    >Consent, withdrawable at any time</td
+                  ></tr
+                ></tbody>
+            </table>
+          </div><p>
+            Agency-controlled requests, documents, and approvals are processed
+            to deliver the agency’s instructed workflow; the agency supplies its
+            own lawful basis. We do not sell personal data or share it for
+            cross-context behavioral advertising.
+          </p><p>
+            The product is not intended to process health data or other GDPR
+            special-category personal data. Customers should not upload such
+            information. We use no AI, send no customer data to AI providers,
+            and train no models on it. We do not make automated decisions
+            producing legal or similarly significant effects.
+          </p>
+        </section>
+        <section id="hosting">
+          <h2>3. Hosting and supporting providers</h2><p>
+            Customers select EU hosting in <strong
+              >AWS Ireland (eu-west-1)</strong
+            > or US hosting in <strong>AWS Northern Virginia (us-east-1)</strong
+            > when creating a workspace. Application compute, databases, file storage,
+            usage/security logs, and backups stay in that region. The Customer Portal
+            follows the Workspace region. Customer content is not replicated between
+            the two regions.
+          </p><div class="provider-list">
+            {
+              providers.map((provider) => (
+                <div>
+                  <>
+                    <h3>{provider.name}</h3>
+                    <p>{provider.purpose}.</p>
+                    <p>
+                      <strong>Data:</strong> {provider.data}.
+                    </p>
+                    <p>
+                      <strong>Location:</strong> {provider.region}.
+                    </p>
+                  </>
+                </div>
+              ))
+            }
+          </div><p>
+            Notification emails contain minimal information and a link back to
+            the service, without uploaded documents or full project briefs.
+            Billing and email processing do not inherit the workspace’s regional
+            storage promise. Provider descriptions here are fictional
+            configuration assumptions, not assertions about these vendors’
+            actual offerings.
+          </p>
+        </section>
+        <section id="transfers">
+          <h2>4. International transfers</h2><p>
+            Cross-border transfers can occur for US-hosted workspaces, US email
+            delivery, billing operations, or authorized provider support.
+            Choosing EU hosting does not mean every supporting service processes
+            data exclusively in the EU.
+          </p><p>
+            In this fictional scenario, we document international transfers,
+            maintain processor agreements, and use the European Commission’s
+            Standard Contractual Clauses where required. We assess
+            destination-country risks and apply supplementary technical and
+            organizational measures where needed, including encryption, access
+            restrictions, and minimizing data sent to supporting providers. SCCs
+            alone are not a guarantee of GDPR compliance.
+          </p><p>
+            Customers can request the fictional DPA, provider list, and transfer
+            safeguards through {company.privacyEmail}. These documents and this
+            mailbox are illustrative, not live services.
+          </p><p class="policy-reference">
+            Background: <a
+              href="https://www.edpb.europa.eu/topics/international-transfers-and-international-cooperation/standard-contractual-clauses_en"
+              >EDPB guidance on Standard Contractual Clauses</a
+            >.
+          </p>
+        </section>
+        <section id="retention">
+          <h2>5. Retention and deletion</h2><p>
+            We have a documented retention policy. In the fictional product,
+            account and project records remain while the workspace is active. On
+            closure, customers have 30 days to export their data; we delete it
+            from active systems by the end of that period. Deleted data expires
+            from regional rolling backups within a further 35 days. Backups are
+            restricted to recovery and are not used for routine processing.
+          </p><p>
+            Security logs are retained for 90 days, resolved support
+            conversations for 12 months, and statutory billing records for six
+            years, unless applicable obligations require otherwise. Marketing
+            contact data is removed on withdrawal, apart from a minimal
+            suppression record needed to honor the opt-out. Legal holds may
+            delay deletion of specific records, with access restricted.
+          </p><p>
+            Agency administrators can request export or deletion of client
+            records. Clients should contact their agency for agency-controlled
+            content; Brieflane assists that agency under its instructions.
+          </p>
+        </section>
+        <section id="rights">
+          <h2>6. Your rights and requests</h2><p>
+            Subject to applicable conditions, individuals can request access,
+            correction, erasure, restriction, portability, or object to
+            processing. Consent can be withdrawn without affecting prior lawful
+            processing. Requests are accepted by email at {
+              company.privacyEmail
+            }; no online request form is provided in this scenario.
+          </p><p>
+            Our standard response target is <strong>30 days</strong>, within the
+            GDPR requirement of one calendar month. If a complex request needs a
+            permitted extension, we explain the reason within the initial month.
+            We verify identity proportionately before disclosing or changing
+            personal data, requesting only what is needed. Authorized
+            representatives may act with proof of authority.
+          </p><p>
+            For agency-controlled data, we forward or direct requests to the
+            agency and help it respond. Individuals can ask for an internal
+            review of a refusal and lodge a complaint with Ireland’s Data
+            Protection Commission or their local supervisory authority.
+          </p>
+        </section>
+        <section id="communications">
+          <h2>7. Emails, cookies, and tracking</h2><p>
+            The fictional product sends transactional emails for invitations,
+            account security, request updates, and approvals. Optional marketing
+            emails are sent only after a separate opt-in, with an unsubscribe
+            link in every marketing email; withdrawal does not stop necessary
+            service notifications.
+          </p><p>
+            The fictional authenticated services use essential session cookies
+            for sign-in and security. They use no non-essential analytics or
+            advertising cookies. The marketing website uses no analytics or
+            advertising tracking and collects only basic hosting access logs; no
+            consent banner is needed for application cookies because none are
+            set on the actual static demo.
+          </p><p>
+            The actual demo has no email signup, cookie storage, live sessions,
+            or tracking scripts.
+          </p>
+        </section>
+        <section id="governance">
+          <h2>8. Privacy governance and security</h2><p>
+            The fictional company has assessed its activities and has not
+            appointed a statutory data protection officer. Privacy
+            responsibilities belong to the operations lead, reachable through {
+              company.privacyEmail
+            }. As an Irish-established business, it has no separate EU
+            representative.
+          </p><p>
+            Production customer data is not used in development or testing;
+            those environments use synthetic data. Documented controls include
+            encryption, role-based access, region-specific backups, and an
+            incident notification process. Our first formal incident-response
+            exercise and independent penetration test remain pending. See <a
+              href="/security/">Security &amp; providers</a
+            > for details.
+          </p><p>
+            These practices illustrate GDPR readiness. They do not establish
+            certification, guaranteed compliance, or the existence of a real
+            company.
+          </p>
+        </section>
+      </div>
+    </div>
+  </article>
+</Layout>

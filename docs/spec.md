@@ -6,6 +6,28 @@ The public Astro site explains Plyco as a lightweight compliance-readiness works
 
 Public copy must stay concrete about website and policy analysis: imported values are editable starting points, not guaranteed compliance or legal conclusions.
 
+## Fictional Startup Demo
+
+`demo.plyco.co` presents Brieflane, a fictional Irish B2B SaaS startup serving
+EU and US creative and digital agencies. Its primary product is Brieflane
+Workspace, with a separate Brieflane Customer Portal and marketing website.
+The landing page publishes company identity, service descriptions, processing
+activities, data categories, regional hosting choices, and a privacy-policy
+link in static HTML for onboarding lookup.
+
+Workspace and portal previews are display-only and contain synthetic data.
+Every page identifies the fictional scenario. There are no live accounts,
+uploads, submissions, analytics, or application cookies. Privacy and security
+pages describe the invented product's GDPR practices, AWS EU/US hosting,
+supporting providers, and unfinished security work; they distinguish those
+claims from the actual static Firebase-hosted demo.
+
+Existing onboarding imports one primary service plus Marketing website; it
+does not automatically import the separate customer portal or all described
+hosting/provider details. Review imported suggestions and add the portal,
+service-specific provider usage, and regional hosting manually in the workspace.
+The demo guide and expected business facts are in `apps/demo/README.md`.
+
 ## Security Profile
 
 The Company workspace includes a Security profile after Infrastructure.

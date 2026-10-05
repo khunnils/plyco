@@ -1,5 +1,15 @@
 # Design Notes
 
+## Fictional Startup Demo
+
+Brieflane uses the shared Satoshi body and Clash Grotesk heading fonts, slate
+backgrounds, blue calls to action, and teal positive states. Its landing page
+combines a clear agency-workflow story with readable service, hosting, and
+business information. Product previews are responsive illustrations built from
+HTML and CSS, with synthetic records and display-only controls. Each page has a
+visible fictional-demo banner and a footer distinguishing the static demo from
+the invented product. Pending security practices use calm amber callouts.
+
 ## Create Organization Centered Wizard
 
 The create organization flow uses a full-page centered wizard layout:

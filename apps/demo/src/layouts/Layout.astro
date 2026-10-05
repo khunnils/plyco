@@ -1,0 +1,71 @@
+---
+import "../styles/global.css";
+import { company } from "../content/company";
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · {company.name}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={new URL(pathname, company.website)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="demo-banner">
+      <span class="demo-dot"></span> Fictional startup · A Plyco onboarding &amp;
+      compliance demo <a href="https://plyco.co/"
+        >About Plyco <span aria-hidden="true">↗</span></a>
+    </div>
+    <header class="site-header container">
+      <a class="brand" href="/" aria-label="Brieflane home"
+        ><span class="brand-mark" aria-hidden="true">b.</span>{company.name}</a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/#product">Product</a>
+        <a href="/#hosting">Hosting</a>
+        <a
+          href="/security/"
+          aria-current={pathname === "/security/" ? "page" : undefined}
+          >Security</a
+        >
+        <a class="button button-small" href="/portal/"
+          >Explore the portal <span aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="site-footer container">
+      <div>
+        <a class="brand" href="/"
+          ><span class="brand-mark" aria-hidden="true">b.</span>{
+            company.name
+          }</a
+        ><p>Good work starts with a clear brief.</p>
+      </div>
+      <div class="footer-links">
+        <a href="/workspace/">Workspace preview</a><a href="/portal/"
+          >Portal preview</a
+        ><a href="/privacy/">Privacy policy</a><a href="/security/"
+          >Security &amp; providers</a>
+      </div>
+      <p class="footer-disclaimer">
+        {company.legalName} is fictional. All company details, product capabilities,
+        contacts, and records are illustrative. This demo site has no authentication,
+        uploads, analytics, or application cookies. Hosting infrastructure may process
+        access logs. Example-domain email addresses do not receive messages.
+      </p>
+    </footer>
+  </body>
+</html>

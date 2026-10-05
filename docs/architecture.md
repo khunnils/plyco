@@ -33,6 +33,7 @@ apps/
   api/        Fastify HTTP API and application services
   client/     React and Vite authenticated application
   web/        Astro public website
+  demo/       Static Astro fictional startup for onboarding and demonstrations
   admin-cli/  Internal operations command-line client
   cli/        Customer organization data CLI (read and scoped write)
   mcp/        Model Context Protocol adapter (read and scoped write)
@@ -60,6 +61,18 @@ invariants remain server responsibilities.
 The web application is a separately deployed public site. It renders static
 marketing content and calls explicitly public API endpoints where required. It
 does not share the authenticated client runtime.
+
+### Demo startup site
+
+The demo application is an independent static Astro deployment at
+`demo.plyco.co`, served by the Firebase Hosting `demo` target (`plyco-demo`). It
+describes Brieflane, a fictional startup, and exposes public HTML for website
+and privacy-policy lookup. Its workspace and portal pages contain synthetic,
+display-only interfaces; it has no application backend, authentication, data
+collection forms, or dependency on the API. Shared fictional business facts
+belong to the demo application, not cross-boundary contracts. The fictional
+AWS hosting described in its content is distinct from its actual Firebase
+deployment. Setup and onboarding examples are in `apps/demo/README.md`.
 
 ### API
 
@@ -147,7 +160,8 @@ persisted outside the source tree.
 
 ## Runtime and Deployment
 
-The client and marketing site are independent static deployments. The API and
+The client, marketing site, and demo startup site are independent static
+deployments. The API and
 hosted MCP adapter run as separate containerized Node.js services on Cloud Run.
 The MCP service remains stateless and reaches workspace data only through the
 API. The API uses PostgreSQL on Neon and stores private artifacts in Google

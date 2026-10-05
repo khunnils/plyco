@@ -1,0 +1,118 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hosting from "../components/Hosting.astro";
+import { company, providers } from "../content/company";
+---
+
+<Layout
+  title="Security & providers"
+  description="Brieflane's fictional security foundation: encryption, tenant access, regional backups, incident response, providers, and early-stage readiness gaps."
+>
+  <section class="container security-intro">
+    <a class="back-link" href="/">← Back to Brieflane</a><div
+      class="section-heading"
+    >
+      <p class="eyebrow">SECURITY &amp; PROVIDERS</p><h1>
+        A foundation<br />we can explain.
+      </h1><p>
+        Documented practices, clear provider responsibilities, and an honest
+        view of what is still being built.
+      </p>
+    </div><div class="preview-notice">
+      <strong>Illustrative security profile</strong><span
+        >These controls describe the fictional Brieflane product. The actual
+        website is a static Firebase-hosted demo with synthetic records and no
+        customer-data processing application.</span>
+    </div><div class="security-grid">
+      <article class="security-card">
+        <span class="eyebrow">01 / PROTECT</span><h2>
+          Encryption &amp; access
+        </h2><p>
+          The fictional product uses TLS in transit and encryption at rest for
+          databases, files, and backups. Role-based access distinguishes agency
+          admins, staff, and invited client reviewers.
+        </p><p>
+          Tenant authorization is checked on each request. Clients only access
+          explicitly shared projects; staff production access is limited,
+          logged, and protected with MFA.
+        </p>
+      </article><article class="security-card">
+        <span class="eyebrow">02 / RECOVER</span><h2>Regional backups</h2><p>
+          Daily backups stay in the workspace’s selected AWS region and expire
+          after 35 days. Recovery is restricted to authorized operators; no
+          EU-to-US backup replication is used.
+        </p><p>
+          Restore checks are part of the documented operating process. Usage and
+          security logs stay in-region for 90 days.
+        </p>
+      </article><article class="security-card">
+        <span class="eyebrow">03 / BUILD</span><h2>Safer development</h2><p>
+          Code changes receive peer review and automated checks before
+          deployment. Dependency and secret scanning are enabled. Production
+          deployment approval is required.
+        </p><p>
+          Development and testing use synthetic records rather than production
+          customer data. Brieflane does not use AI or send customer data to AI
+          providers.
+        </p>
+      </article><article class="security-card">
+        <span class="eyebrow">04 / RESPOND</span><h2>Incident handling</h2><p>
+          A named incident owner investigates alerts, coordinates containment,
+          and records follow-up work. Affected agencies are notified by email
+          without undue delay so they can meet their controller obligations.
+        </p><p>
+          Where Brieflane acts as controller, reportable personal-data breaches
+          are notified to the supervisory authority within the applicable GDPR
+          deadline, where feasible within 72 hours of awareness. Report concerns
+          to {company.securityEmail} (example only).
+        </p>
+      </article>
+    </div><div class="pending-note security-pending">
+      <strong>Still in progress</strong><p>
+        Our first formal incident-response exercise and independent penetration
+        test are pending. Brieflane has no SOC 2 report, ISO 27001
+        certification, or claim of guaranteed GDPR compliance.
+      </p>
+    </div>
+  </section>
+  <Hosting />
+  <section class="section container">
+    <div class="section-heading">
+      <p class="eyebrow">THE SERVICES BEHIND THE SERVICE</p><h2>
+        Providers, without surprises.
+      </h2><p>
+        This is the fictional provider inventory used for demos. Regional
+        customer-data storage and supporting billing/email processing have
+        different boundaries.
+      </p>
+    </div><div class="table-scroll">
+      <table>
+        <caption>Illustrative Brieflane provider inventory</caption><thead
+          ><tr
+            ><th scope="col">Provider</th><th scope="col">Purpose &amp; data</th
+            ><th scope="col">Processing location</th></tr
+          ></thead
+        ><tbody
+          >{
+            providers.map((provider) => (
+              <tr>
+                <>
+                  <th scope="row">{provider.name}</th>
+                  <td>
+                    {provider.purpose}.<small>{provider.data}.</small>
+                  </td>
+                  <td>{provider.region}.</td>
+                </>
+              </tr>
+            ))
+          }</tbody>
+      </table>
+    </div><p class="hosting-detail">
+      Processor agreements and documented transfer assessments support the
+      fictional operating model. Provider locations above are scenario
+      assumptions, not verified vendor guarantees. <a href="/privacy/#transfers"
+        >Read the privacy policy for retention, rights, and transfer safeguards
+        →</a>
+    </p>
+  </section>
+</Layout>

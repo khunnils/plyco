@@ -1,0 +1,47 @@
+---
+import { regions } from "../content/company";
+---
+
+<section id="hosting" class="section hosting-section">
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">YOUR WORK. YOUR REGION.</p><h2>
+        Choose where your<br />customer data lives.
+      </h2><p>
+        EU or US hosting for both Brieflane Workspace and Brieflane Customer
+        Portal. Pick a region when creating your workspace; your portal follows
+        that choice.
+      </p>
+    </div>
+    <div class="region-grid">
+      {
+        regions.map((region, index) => (
+          <article class="region-card">
+            <>
+              <span class="region-symbol" aria-hidden="true">
+                {index === 0 ? "✳" : "◎"}
+              </span>
+              <div>
+                <>
+                  <p class="eyebrow">{region.name}</p>
+                  <h3>{region.location}</h3>
+                  <p>{region.detail}</p>
+                  <span class="region-code">AWS · {region.code}</span>
+                </>
+              </div>
+            </>
+          </article>
+        ))
+      }
+    </div>
+    <p class="hosting-detail">
+      Application compute, databases, uploaded files, security logs, and backups
+      remain in the selected AWS region. We do not replicate customer content
+      between EU and US regions. Billing through Stripe and email through Resend
+      can involve processing outside that region, including in the US. <a
+        href="/privacy/#transfers"
+        >Read about transfers and safeguards <span aria-hidden="true">↗</span
+        ></a>
+    </p>
+  </div>
+</section>
