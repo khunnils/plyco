@@ -2,17 +2,26 @@
 
 ## Fictional Startup Demo
 
-Brieflane deliberately avoids Plyco's visual identity so users can tell the
-fictional company apart from Plyco. It uses system serif headings (Iowan Old
-Style/Palatino/Georgia), a system sans body, warm cream backgrounds, a dark
-demo banner, terracotta pill-shaped calls to action, and muted green positive
-states. Do not reuse Plyco's Satoshi/Clash Grotesk fonts or slate/blue palette
-here. Its landing page
-combines a clear agency-workflow story with readable service, hosting, and
-business information. Product previews are responsive illustrations built from
-HTML and CSS, with synthetic records and display-only controls. Each page has a
-visible fictional-demo banner and a footer distinguishing the static demo from
-the invented product. Pending security practices use calm amber callouts.
+Brieflane uses a clean SaaS layout with its own self-hosted Manrope sans-serif,
+white surfaces (`#ffffff`), charcoal text and primary actions (`#242329`), and
+restrained violet accents (`#61518e`, pale tint `#eeebf5`). Do not use lime or
+Plyco's Satoshi/Clash Grotesk pairing and slate/blue theme here.
+
+The landing page has a centered headline and actions above an unframed product
+preview, followed by six features, the two service descriptions, and a comparison
+table. Comparison products and capabilities are explicitly fictional, with text
+values rather than an all-checkmarks treatment. The table scrolls horizontally
+on small screens and its scroll region is keyboard focusable. Company data
+processing details use a native disclosure to keep the page concise while
+preserving the facts in its HTML.
+
+Product previews use responsive HTML and CSS with synthetic records: agency
+navigation, a project queue, selected brief, file versions, and client activity.
+On narrow screens the sidebar disappears and the selected request stacks above
+its detail; other requests remain available at larger widths. Preview controls
+are display-only. All pages retain a visible fictional-demo banner and a footer
+distinguishing the static demo from the invented product. Security gaps use calm
+amber callouts. Product facts and privacy disclosures remain crawlable HTML.
 
 ## Create Organization Centered Wizard
 

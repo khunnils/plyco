@@ -3,6 +3,25 @@ import Layout from "../layouts/Layout.astro";
 import ProductPreview from "../components/ProductPreview.astro";
 import Hosting from "../components/Hosting.astro";
 import { company, services, dataTypes, activities } from "../content/company";
+
+const features = [
+  { title: "Client requests", description: "Collect briefs and supporting documents in one shared queue." },
+  { title: "Clear ownership", description: "Assign an owner and keep the next step visible to your team." },
+  { title: "Project files", description: "Keep documents and deliverable versions alongside the brief." },
+  { title: "A client portal", description: "Give invited clients a place to check progress and share feedback." },
+  { title: "Recorded approvals", description: "Keep each decision, reviewer, and timestamp with the exact version." },
+  { title: "Regional hosting", description: "Choose EU or US hosting for your workspace and connected portal." },
+];
+
+// All comparison entries describe invented products for this static demo.
+const comparison = [
+  ["Best suited to", "Agency–client work", "Internal task planning", "Document collaboration"],
+  ["Request intake", "Client briefs & files", "Team-created tasks", "File requests"],
+  ["Dedicated client portal", "Included", "Guest task access", "Shared folders"],
+  ["Version-specific approvals", "Recorded decisions", "Task status only", "Recorded decisions"],
+  ["Project file sharing", "Included", "Attachments", "Included"],
+  ["EU or US hosting choice", "Per workspace", "Fixed region", "Per workspace"],
+];
 ---
 
 <Layout
@@ -10,138 +29,81 @@ import { company, services, dataTypes, activities } from "../content/company";
   description="Brieflane is a fictional B2B SaaS startup for agencies: client requests, documents, and approvals with a team workspace, customer portal, and EU or US hosting."
 >
   <section class="hero container">
-    <div class="hero-copy">
-      <p class="eyebrow">
-        <span class="tiny-star" aria-hidden="true">✳</span> BUILT FOR SMALL AGENCIES
-        WITH BIG IDEAS
-      </p><h1>
-        Less chasing.<br />More <span class="hero-accent">good work.</span>
-      </h1><p class="hero-description">
-        Client requests, project files, and approvals in one clear place. Give
-        your team a workspace and your clients a front door.
-      </p><div class="hero-actions">
-        <a class="button" href="/workspace/"
-          >Explore the workspace <span aria-hidden="true">↗</span></a
-        ><a class="text-link" href="/portal/"
-          >See the client experience <span aria-hidden="true">→</span></a>
-      </div><p class="hero-note">
-        For creative and digital agencies in the EU and US.<br />An early-stage
-        product, illustrated with fictional data.
-      </p>
-    </div>
-    <div class="hero-side">
-      <div class="brief-card">
-        <p class="eyebrow">A BRIEF, NOT AN EMAIL THREAD</p><h2>
-          Autumn campaign
-        </h2><p>Juniper Studio · Brand &amp; creative</p><div
-          class="brief-divider"
-        >
-        </div><span class="status accent">In progress</span><div
-          class="brief-steps"
-        >
-          <div>
-            <span class="step-complete">✓</span><span
-              >Brief received<small>Everything the team needs to start.</small
-              ></span>
-          </div><div>
-            <span class="step-complete">✓</span><span
-              >Files in one place<small>No more “which version?”</small></span>
-          </div><div>
-            <span class="step-pending">3</span><span
-              >Ready for a clear decision<small
-                >Feedback attached to the work.</small
-              ></span>
-          </div>
-        </div><div class="brief-footer">
-          <span class="avatar">MC</span><span
-            >Owned by Maya<span class="muted"> · Northline Agency</span></span>
+    <div class="hero-intro">
+      <h1>Less chasing.<br />More good work.</h1>
+      <div class="hero-copy">
+        <p class="hero-description">Client requests, project files, and approvals in one clear place. Give your team a workspace and your clients a front door.</p>
+        <div class="hero-actions">
+          <a class="button" href="/workspace/">Explore the workspace <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="/portal/">See the client experience <span aria-hidden="true">→</span></a>
         </div>
-      </div><div class="hero-sticker">
-        <span aria-hidden="true">↗</span> From brief<br />to approved.
+        <p class="hero-note">For creative and digital agencies in the EU and US.</p>
       </div>
     </div>
+    <div class="hero-product">
+      <ProductPreview />
+    </div>
   </section>
-  <div class="promise-strip container">
-    <span>One shared source of truth</span><span>A separate client portal</span
-    ><span>EU &amp; US hosting choices</span><span
-      >Privacy practices, in plain sight</span>
-  </div>
   <section id="product" class="section container">
-    <div class="section-heading split-heading">
-      <div>
-        <p class="eyebrow">TWO SPACES. ONE CONNECTED WORKFLOW.</p><h2>
-          Your team gets clarity.<br />Your clients get a portal.
-        </h2>
-      </div><p>
-        Brieflane is subscription software for small creative and digital
-        agencies. Replace scattered inboxes and file links with a shared path
-        from request to approval.
-      </p>
+    <div class="section-heading centered-heading">
+      <h2>Everything your client work needs.</h2>
+      <p>One place to take a request from the first brief to the final approval.</p>
     </div>
+    <ul class="product-features">
+      {features.map((feature) => (
+        <li>
+          <h3>{feature.title}</h3>
+          <p>{feature.description}</p>
+        </li>
+      ))}
+    </ul>
     <div class="service-grid">
-      {
-        Object.values(services).map((service, index) => (
-          <article
-            class:list={["service-card", { "service-portal": index === 1 }]}
-          >
-            <>
-              <span class="service-number">0{index + 1}</span>
-              <p class="eyebrow">{service.audience}</p>
-              <h3>{service.name}</h3>
-              <p>{service.description}</p>
-              <ul class="feature-list">
-                {service.features.map((feature) => (
-                  <li>
-                    <span aria-hidden="true">✓</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <a class="text-link" href={service.path}>
-                Explore the {index === 0 ? "workspace" : "portal"}{" "}
-                <span aria-hidden="true">↗</span>
-              </a>
-            </>
-          </article>
-        ))
-      }
-    </div>
-    <div class="product-showcase"><ProductPreview compact /></div>
-  </section>
-  <section class="section workflow-section">
-    <div class="container">
-      <div class="section-heading">
-        <p class="eyebrow">FROM “CAN YOU HELP?” TO “LOOKS GOOD.”</p><h2>
-          A calmer way to get there.
-        </h2>
-      </div><div class="workflow-grid">
-        <article>
-          <span class="workflow-number">01 /</span><h3>
-            Start with a clear request
-          </h3><p>
-            Clients submit a brief and supporting files through their portal.
-            Your team sees the context together.
-          </p>
-        </article><article>
-          <span class="workflow-number">02 /</span><h3>
-            Keep the work moving
-          </h3><p>
-            Assign an owner, organize documents, and share progress. Service
-            emails let people know when something changes.
-          </p>
-        </article><article>
-          <span class="workflow-number">03 /</span><h3>Close the loop</h3><p>
-            Clients review a deliverable and approve the exact version. The
-            decision and its timestamp stay with the project.
-          </p>
+      {Object.values(services).map((service, index) => (
+        <article class="service-card">
+          <h3>{service.name}</h3>
+          <p>{service.description}</p>
+          <a class="text-link" href={service.path}>
+            Explore the {index === 0 ? "workspace" : "portal"} <span aria-hidden="true">→</span>
+          </a>
         </article>
+      ))}
+    </div>
+  </section>
+  <section id="compare" class="section comparison-section">
+    <div class="container">
+      <div class="section-heading centered-heading">
+        <h2>Find the right fit for your workflow.</h2>
+        <p>Brieflane brings the agency workspace and client experience together.</p>
+      </div>
+      <div class="table-scroll comparison-scroll" tabindex="0" role="region" aria-label="Product comparison, scroll horizontally on small screens">
+        <table class="comparison-table">
+          <caption>Illustrative comparison: Brieflane, Taskboard Co., and Filebox Co. are fictional products. All capabilities below are invented for this demo.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col" class="comparison-featured">Brieflane</th>
+              <th scope="col">Taskboard Co.</th>
+              <th scope="col">Filebox Co.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparison.map(([feature, brieflane, taskboard, filebox]) => (
+              <tr>
+                <th scope="row">{feature}</th>
+                <td class="comparison-featured">{brieflane}</td>
+                <td>{taskboard}</td>
+                <td>{filebox}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
   <Hosting />
   <section class="section container privacy-section">
     <div>
-      <p class="eyebrow">PRIVACY IS PART OF THE PRODUCT</p><h2>
+      <h2>
         Clear practices.<br />Honest progress.
       </h2><p>
         Our fictional business has documented GDPR practices: a data processing
@@ -156,7 +118,7 @@ import { company, services, dataTypes, activities } from "../content/company";
       </p><a class="text-link" href="/privacy/"
         >Read our privacy policy <span aria-hidden="true">↗</span></a>
     </div><aside class="readiness-card">
-      <p class="eyebrow">EARLY STAGE, OPEN ABOUT IT</p><h3>
+      <h3>
         A foundation we can explain.
       </h3><ul class="feature-list">
         <li>
@@ -180,7 +142,7 @@ import { company, services, dataTypes, activities } from "../content/company";
   <section class="section business-section">
     <div class="container">
       <div class="section-heading">
-        <p class="eyebrow">ABOUT BRIEFLANE</p><h2>
+        <h2>
           A small team, making<br />client work feel simpler.
         </h2><p>
           {company.legalName} is a fictional {company.teamSize}-person software
@@ -198,7 +160,9 @@ import { company, services, dataTypes, activities } from "../content/company";
             }<br />Security: {company.securityEmail}
           </p>
         </div>
-      </div><div class="business-facts">
+      </div><details class="business-disclosure">
+        <summary>Data processing &amp; business responsibilities</summary>
+        <div class="business-facts">
         <div>
           <h3>The data our services process</h3><dl>
             {
@@ -233,10 +197,11 @@ import { company, services, dataTypes, activities } from "../content/company";
         website is a separate service; these previews do not process real
         customer data.
       </p>
+      </details>
     </div>
   </section>
   <section class="closing-section container">
-    <p class="eyebrow">TAKE A LOOK AROUND</p><h2>
+    <h2>
       A little less admin.<br />A little more momentum.
     </h2><a class="button" href="/workspace/"
       >Explore Brieflane <span aria-hidden="true">↗</span></a

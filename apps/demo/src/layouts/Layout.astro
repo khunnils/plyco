@@ -19,6 +19,7 @@ const pathname = Astro.url.pathname;
     <meta name="description" content={description} />
     <meta name="robots" content="noindex, follow" />
     <link rel="canonical" href={new URL(pathname, company.website)} />
+    <link rel="preload" href="/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
@@ -33,7 +34,8 @@ const pathname = Astro.url.pathname;
         ><span class="brand-mark" aria-hidden="true">b.</span>{company.name}</a
       >
       <nav aria-label="Main navigation">
-        <a href="/#product">Product</a>
+        <a href="/#product">Features</a>
+        <a href="/#compare">Compare</a>
         <a href="/#hosting">Hosting</a>
         <a
           href="/security/"

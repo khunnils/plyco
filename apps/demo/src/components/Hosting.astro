@@ -5,7 +5,7 @@ import { regions } from "../content/company";
 <section id="hosting" class="section hosting-section">
   <div class="container">
     <div class="section-heading">
-      <p class="eyebrow">YOUR WORK. YOUR REGION.</p><h2>
+      <h2>
         Choose where your<br />customer data lives.
       </h2><p>
         EU or US hosting for both Brieflane Workspace and Brieflane Customer
@@ -15,12 +15,9 @@ import { regions } from "../content/company";
     </div>
     <div class="region-grid">
       {
-        regions.map((region, index) => (
+        regions.map((region) => (
           <article class="region-card">
             <>
-              <span class="region-symbol" aria-hidden="true">
-                {index === 0 ? "✳" : "◎"}
-              </span>
               <div>
                 <>
                   <p class="eyebrow">{region.name}</p>

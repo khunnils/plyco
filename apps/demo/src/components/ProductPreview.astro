@@ -2,112 +2,65 @@
 import { sampleRequests } from "../content/company";
 interface Props {
   mode?: "workspace" | "portal";
-  compact?: boolean;
 }
-const { mode = "workspace", compact = false } = Astro.props;
+const { mode = "workspace" } = Astro.props;
 const portal = mode === "portal";
 const requests = portal
   ? sampleRequests.filter((request) => request.client === "Juniper Studio")
   : sampleRequests;
-const openRequests = requests.filter(
-  (request) => request.status !== "Approved",
-).length;
 ---
 
-<div class:list={["product-preview", { "preview-compact": compact }]}>
+<div class="product-preview">
   <div class="preview-toolbar">
-    <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span
-    ><span
-      >{portal ? "Customer portal" : "Team workspace"} / Static preview</span
-    ><span class="preview-region">EU · Ireland</span>
+    <span class="preview-wordmark"><span class="preview-brand-mark">b.</span> brieflane <span class="preview-slash">/</span> {portal ? "Client portal" : "Team workspace"}</span>
+    <span class="preview-region"><span></span> EU · Ireland</span>
   </div>
   <div class="preview-body">
     <aside class="preview-sidebar" aria-label="Illustrative workspace sidebar">
-      <span class="preview-company"
-        ><span class="mini-logo">{portal ? "J" : "N"}</span>{
-          portal ? "Juniper Studio" : "Northline Agency"
-        }</span
-      >
+      <div class="preview-company"><span class="mini-logo">{portal ? "J" : "N"}</span><span>{portal ? "Juniper Studio" : "Northline Agency"}<small>{portal ? "Your client space" : "Agency workspace"}</small></span></div>
       <span class="sidebar-label">{portal ? "CLIENT SPACE" : "WORKSPACE"}</span>
-      <span class="sidebar-item selected"
-        >{portal ? "Your requests" : "All requests"}<span
-          >{requests.length}</span
-        ></span
-      >
-      <span class="sidebar-item">Documents</span><span class="sidebar-item"
-        >Approvals</span
-      >
-      <div class="sidebar-bottom">
-        <span class="avatar">{portal ? "ET" : "MC"}</span><span
-          >{portal ? "Elliot Taylor" : "Maya Chen"}<small
-            >{portal ? "Client reviewer" : "Agency admin"}</small
-          ></span>
-      </div>
+      <span class="sidebar-item selected"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M3 8h14M8 8v9"/></svg>{portal ? "Your requests" : "All requests"}<span class="sidebar-count">{requests.length}</span></span>
+      <span class="sidebar-item"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 6h5l2 2h7v8H3zM3 6V4h6l2 2h6v2"/></svg>Documents</span>
+      <span class="sidebar-item"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="m7 10 2 2 4-4"/></svg>Approvals</span>
+      <div class="sidebar-project"><span class="sidebar-label">CLIENT</span><span><i></i>Juniper Studio</span>{!portal && <span><i></i>Cedar Collective</span>}</div>
+      <div class="sidebar-bottom"><span class="avatar">{portal ? "ET" : "MC"}</span><span>{portal ? "Elliot Taylor" : "Maya Chen"}<small>{portal ? "Client reviewer" : "Agency admin"}</small></span></div>
     </aside>
     <div class="preview-content">
       <div class="preview-heading">
-        <div>
-          <p class="eyebrow">
-            {portal ? "JUNIPER × NORTHLINE" : "A LITTLE LESS BACK-AND-FORTH"}
-          </p><h3>
-            {portal ? "Your projects, in view." : "A clear view of the work."}
-          </h3>
-        </div><span class="sample-control"
-          >{portal ? "+ New request" : "+ Add request"}</span>
+        <div><h3>{portal ? "Your requests" : "All requests"}</h3><p>{portal ? "Your projects. Your feedback. All together." : "Everything moving through your studio."}</p></div>
+        <span class="sample-control">+ New request</span>
       </div>
-      <div class="preview-stats">
-        <div><strong>{openRequests}</strong><span>Open requests</span></div><div
-        >
-          <strong>1</strong><span>Awaiting approval</span>
-        </div><div><strong>EU</strong><span>Workspace region</span></div>
-      </div>
-      <div class="request-list">
-        <div class="request-list-heading">
-          <span>Request</span><span>Status</span>
+      <div class="preview-viewbar"><span class="view-selected">Overview <span>{requests.length}</span></span><span>Documents</span><span>Activity</span><span class="view-note">Sample workspace</span></div>
+      <div class="workspace-panels">
+        <div class="request-queue">
+          <div class="queue-heading"><strong>Project requests</strong><span>{requests.length}</span></div>
+          <div class="request-list">
+            {requests.map((request, index) => (
+              <div class:list={["request-row", { "request-selected": index === 0 }]}>
+                <div class="request-row-top"><small>{request.id}</small><span class:list={["status", request.tone]}>{request.status}</span></div>
+                <strong>{request.title}</strong>
+                <span class="request-client">{request.client}</span>
+                <div class="request-meta"><span class="request-owner"><span class="avatar">{request.owner === "Maya" ? "MC" : "LP"}</span>{request.owner}</span><span>Due {request.date}</span></div>
+              </div>
+            ))}
+          </div>
+          <div class="queue-note">{portal ? "Only projects shared with you appear here." : "A place for every brief. An owner for every next step."}</div>
         </div>
-        {
-          requests.map((request) => (
-            <div class="request-row">
-              <>
-                <div>
-                  <>
-                    <small>
-                      {request.id} · {request.client}
-                    </small>
-                    <strong>{request.title}</strong>
-                    <span class="request-meta">
-                      {request.owner} · Due {request.date}
-                    </span>
-                  </>
-                </div>
-                <span class:list={["status", request.tone]}>
-                  {request.status}
-                </span>
-              </>
-            </div>
-          ))
-        }
+        <section class="request-detail" aria-label="Sample Autumn campaign request">
+          <div class="detail-breadcrumb"><span>Juniper Studio</span><span>/</span><span>BL-104</span></div>
+          <h4>Autumn campaign brief</h4>
+          <div class="detail-properties"><span class="status accent">In progress</span><span><span class="avatar">MC</span> Maya Chen</span><span>Due 8 Oct</span></div>
+          <div class="detail-brief"><h5>The brief</h5><p>A fresh direction for the autumn launch. Bring the campaign story, homepage copy, and launch assets together for the Juniper team to review.</p></div>
+          <div class="detail-section-title"><h5>Project files</h5><span>2 files</span></div>
+          <div class="deliverable"><div class="campaign-art" aria-label="Illustrative Juniper campaign cover"><span>JUNIPER<br />STUDIO</span><strong>A fresh<br />perspective.</strong><span>AUTUMN / CAMPAIGN DIRECTION</span></div><div class="deliverable-caption"><strong>Campaign direction.pdf</strong><span>Version 2 · Shared with client</span></div></div>
+          <div class="file-row"><span class="file-type">DOC</span><span><strong>Autumn campaign brief.docx</strong><small>Version 1 · Added by Elliot</small></span><span class="file-size">24 KB</span></div>
+          <div class="detail-section-title"><h5>Latest activity</h5><span>Today</span></div>
+          <div class="activity-entry"><span class="avatar">MC</span><div><p><strong>Maya Chen</strong> shared a new version</p><span>Campaign direction.pdf · Version 2</span></div><time>10:42</time></div>
+          <div class="feedback-entry"><span class="avatar avatar-client">ET</span><div><strong>Elliot Taylor</strong><p>Love this direction. Let's carry it through to the launch assets.</p><span>Client feedback · 11:06</span></div></div>
+        </section>
       </div>
-      <div class="approval-note">
-        <span class="approval-icon" aria-hidden="true">✓</span><div>
-          <strong
-            >{
-              portal
-                ? "Your feedback stays with the work."
-                : "One decision. A complete history."
-            }</strong
-          ><p>
-            {
-              portal
-                ? "Review the latest version and keep your agency in the loop."
-                : "Brand guidelines v3 approved by Sam Rivera at Cedar Collective. Recorded against the document version."
-            }
-          </p>
-        </div>
-      </div>
+      <div class="approval-note"><span class="approval-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="m5 10 3 3 7-7"/></svg></span><p>{portal ? <><strong>Feedback stays with the work.</strong> Every conversation belongs to a project.</> : <><strong>Brand guidelines v3 approved.</strong> Sam Rivera · Cedar Collective · Decision saved with the version.</>}</p></div>
     </div>
   </div>
-  <p class="preview-caption">
-    Illustrative interface · Synthetic records · Controls are display-only
-  </p>
+  <p class="preview-caption">Illustrative interface · Synthetic records · Controls are display-only</p>
 </div>

@@ -52,8 +52,12 @@ The implementation checks do not require a browser or end-to-end tests.
 Routes: `/`, `/workspace/`, `/portal/`, `/privacy/`, and `/security/`.
 Shared scenario facts live in `src/content/company.ts`. Keep the prose and
 provider assumptions consistent when changing that scenario. The site uses
-system font stacks and its own warm palette, intentionally distinct from
-`apps/web`, so it is never mistaken for Plyco.
+self-hosted Manrope sans-serif and a white-and-charcoal palette with restrained violet accents,
+intentionally distinct from `apps/web`. The font license is in `public/fonts/OFL.txt`.
+The responsive HTML product illustration presents a request queue, project brief,
+file versions, and client feedback; its controls remain display-only. The landing page includes six features and a
+clearly labeled fictional competitor comparison. Business data details remain
+in the page HTML inside an expandable disclosure.
 
 This package uses TypeScript 6 for `astro check`: Astro's language server needs
 the JavaScript compiler API, which the workspace's TypeScript 7 native compiler
