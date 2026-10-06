@@ -84,10 +84,18 @@ reach feature logic.
 
 ## API Boundaries
 
+Published policy documents may be served as sanitized HTML from
+`GET /public/:orgSlug/:templateSlug`. That route is unauthenticated, looks up
+the organization by `publicSlug` and the template by slug, and returns 404 unless
+the template is marked public and has a generated document. Markdown is converted
+with `marked` and sanitized before it is placed in a standalone HTML page; the
+PDF renderer remains a separate private export path.
+
 The API has three deliberate access classes:
 
 - Public routes are individually declared and protected with endpoint-specific
-  validation and abuse controls.
+  validation and abuse controls. Hosted policy pages are public reads of
+  opt-in published documents only.
 - Browser workspace routes use encrypted HTTP-only sessions and authorize
   access through organization membership and role.
 - Machine routes use purpose-specific bearer keys. Organization keys are
@@ -136,6 +144,34 @@ adapter boundary.
 Operations that are explicitly best-effort, such as analytics or telemetry,
 must not determine the success of the primary transaction. Integrations that
 are required for an operation return structured failures when unavailable.
+
+### Organization lookup
+
+`ORGANIZATION_LOOKUP_STRATEGY` selects `firecrawl` (default) or `agent` in the
+organization lookup service factory. Both implement the same website and
+privacy-policy lookup contract. The agent strategy retains Gemini search and
+URL-context tools. Firecrawl uses an API-owned scraper adapter with
+`FIRECRAWL_API_KEY`; the Cloud Run deployment maps that environment variable to
+the `firecrawl-api-key` Secret Manager secret.
+
+The Firecrawl strategy scrapes the landing page as markdown and links, preserving
+headers and footers. Regex-extracted markdown links and returned links are
+normalized and deduplicated before the `link_extractor` prompt selects up to ten
+privacy/security pages. Only discovered HTTP(S) links may be followed. The prompt receives
+`primaryDomain` and `links` and is loaded from Langfuse without a local prompt
+fallback. Each selected page is then scraped as markdown. The landing page and successful related pages each run
+through `website_parser` with `text`, `websiteUrl`, and `codeSets`, without URL
+or search tools. Scraped text is appended if the production prompt does not yet
+reference `text`.
+
+Raw page extractions are merged before profile defaults are applied. Later
+nonempty legal/contact details refine earlier values, the landing page's service
+identity is retained, code lists and named activities/data categories are combined
+and deduplicated, and positive data-handling evidence survives later false or
+unknown values. Missing values do not overwrite populated fields. Secondary
+scrape/parse failures become bounded warnings; landing-page failures remain
+structured upstream errors. Privacy-policy lookup also scrapes its page before
+running `privacy_policy_parser` with the supplied text.
 
 ## Operability
 

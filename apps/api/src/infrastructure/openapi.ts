@@ -52,7 +52,9 @@ import {
   templatePreviewInputSchema,
   templatePreviewSchema,
   templateSchema,
+  templateSlugSchema,
   templateVariableCatalogSchema,
+  templateVisibilityInputSchema,
   vocabularyCodeInputSchema,
   vocabularyCodeSchema,
   vocabularySchema,
@@ -858,6 +860,28 @@ const paths: Record<string, PathItem> = {
       tag: "Documents",
       params: idParamsSchema,
       success: 204,
+    }),
+  },
+  "/organizations/{organizationId}/templates/{id}/visibility": {
+    put: route({
+      summary: "Publish or unpublish a template's latest document on the web.",
+      tag: "Documents",
+      params: idParamsSchema,
+      body: templateVisibilityInputSchema,
+      success: 200,
+      successSchema: templateSchema,
+    }),
+  },
+  "/public/{orgSlug}/{templateSlug}": {
+    get: publicRoute({
+      summary: "Render the latest public document as HTML.",
+      tag: "Documents",
+      params: z.object({
+        orgSlug: templateSlugSchema,
+        templateSlug: templateSlugSchema,
+      }),
+      success: 200,
+      successContentType: "text/html",
     }),
   },
   "/organizations/{organizationId}/documents": {

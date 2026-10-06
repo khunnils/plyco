@@ -35,6 +35,7 @@ import {
   documentSummarySchema,
   templateInputSchema,
   templateSchema,
+  templateVisibilityInputSchema,
   createOrganizationSchema,
   acceptOrganizationInvitationSchema,
   deleteOrganizationResponseSchema,
@@ -71,6 +72,7 @@ import {
   type Template,
   type TemplateCatalog,
   type TemplateInput,
+  type TemplateVisibilityInput,
   type TemplatePreview,
   type TemplateVariableCatalog,
   type BusinessActivity,
@@ -783,6 +785,24 @@ export const updateTemplate = ({
     {
       method: "PUT",
       body: JSON.stringify(template),
+    }
+  )
+
+export const setTemplateVisibility = ({
+  organizationId,
+  id,
+  visibility,
+}: {
+  organizationId: string
+  id: string
+  visibility: TemplateVisibilityInput
+}): Promise<Template> =>
+  apiRequest(
+    `/organizations/${organizationId}/templates/${id}/visibility`,
+    templateSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(templateVisibilityInputSchema.parse(visibility)),
     }
   )
 

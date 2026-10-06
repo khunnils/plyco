@@ -11,6 +11,7 @@ import {
   useDocument,
   useDocuments,
   useDownloadDocumentPdf,
+  useSetTemplateVisibility,
 } from "@/features/documents/hooks/use-documents"
 import {
   useCreateTemplate,
@@ -72,6 +73,7 @@ export const DocumentsRoutePage = () => {
   const createDocument = useCreateDocument()
   const document = useDocument(mode === "view" ? (id ?? null) : null)
   const downloadDocumentPdf = useDownloadDocumentPdf()
+  const setTemplateVisibility = useSetTemplateVisibility()
 
   const templatesData: TemplateCatalog = templates.data ?? {
     systemTemplates: [],
@@ -472,6 +474,7 @@ export const DocumentsRoutePage = () => {
         organizationName={selectedOrganization?.name ?? "organization"}
         hasTemplates={templatesData.organizationTemplates.length > 0}
         isDownloadPending={downloadDocumentPdf.isPending}
+        isVisibilityPending={setTemplateVisibility.isPending}
         onDeleteTemplate={(templateId) => {
           deleteTemplate.mutate(templateId, {
             onSuccess: () =>
@@ -486,6 +489,17 @@ export const DocumentsRoutePage = () => {
             document_title: doc.title,
           })
           downloadDocumentPdf.mutate(doc)
+        }}
+        onToggleWebPublish={(input) => {
+          posthog.capture(
+            input.isPublic
+              ? POSTHOG_EVENTS.DOCUMENT_PUBLISHED_TO_WEB
+              : POSTHOG_EVENTS.DOCUMENT_UNPUBLISHED_FROM_WEB,
+            {
+              template_id: input.templateId,
+            }
+          )
+          setTemplateVisibility.mutate(input)
         }}
       />
     )

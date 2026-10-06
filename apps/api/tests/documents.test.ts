@@ -55,6 +55,7 @@ const loadDataSecuritySummaryTemplate = async () => {
     versionMinor: 0,
     createdAt: "2026-05-15T00:00:00.000Z",
     updatedAt: "2026-05-15T00:00:00.000Z",
+    isPublic: false,
     ...systemTemplate,
   };
 };
@@ -374,6 +375,7 @@ describe("documents / templates API", () => {
         versionMinor: 0,
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
+        isPublic: false,
         ...systemTemplate,
       },
       context,
@@ -748,6 +750,7 @@ describe("documents / templates API", () => {
         versionMinor: 0,
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
+        isPublic: false,
         ...systemTemplate,
       },
       [],
@@ -762,6 +765,7 @@ describe("documents / templates API", () => {
         versionMinor: 0,
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
+        isPublic: false,
         ...systemTemplate,
       },
       context,
@@ -823,6 +827,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const context = new ReportContextBuilder().build(
@@ -935,6 +940,7 @@ describe("documents / templates API", () => {
         versionMinor: 0,
         createdAt: "2026-05-15T00:00:00.000Z",
         updatedAt: "2026-05-15T00:00:00.000Z",
+        isPublic: false,
         ...systemTemplate,
       },
       context,
@@ -971,6 +977,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -1291,6 +1298,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -1412,6 +1420,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -1506,6 +1515,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -1558,6 +1568,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -1674,6 +1685,7 @@ describe("documents / templates API", () => {
       versionMinor: 0,
       createdAt: "2026-05-15T00:00:00.000Z",
       updatedAt: "2026-05-15T00:00:00.000Z",
+      isPublic: false,
       ...systemTemplate,
     };
     const vocabularyRepository = new InMemoryVocabularyRepository(
@@ -2479,5 +2491,205 @@ describe("documents / templates API", () => {
 
     expect(response.statusCode).toBe(404);
     expect(response.json().error.code).toBe("TEMPLATE_NOT_FOUND");
+  });
+
+  it("renders a public document as HTML", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app, "org-test", profileBody);
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Public Policy",
+        content: "# {{ company.name }} Public Policy\n\nWelcome.\n",
+      },
+    });
+    const template = createResponse.json();
+
+    const generateResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+    expect(generateResponse.statusCode).toBe(201);
+
+    const visibilityResponse = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: true },
+    });
+    expect(visibilityResponse.statusCode).toBe(200);
+    expect(visibilityResponse.json()).toMatchObject({ isPublic: true });
+
+    const documentsResponse = await app.inject({
+      method: "GET",
+      url: "/organizations/org-test/documents",
+    });
+    expect(documentsResponse.json()[0].publicUrl).toMatch(
+      /\/public\/acme-ai\/public-policy$/,
+    );
+
+    const pageResponse = await app.inject({
+      method: "GET",
+      url: "/public/acme-ai/public-policy",
+    });
+    expect(pageResponse.statusCode).toBe(200);
+    expect(pageResponse.headers["content-type"]).toContain("text/html");
+    expect(pageResponse.headers["cache-control"]).toBe("public, max-age=300");
+    expect(pageResponse.headers["x-robots-tag"]).toBe("index");
+    expect(pageResponse.headers["content-security-policy"]).toBe(
+      "default-src 'none'; style-src 'unsafe-inline'",
+    );
+    expect(pageResponse.body).toContain("Acme AI Public Policy");
+    expect(pageResponse.body).toContain("Last updated");
+    expect(pageResponse.body).toContain("<h1>Acme AI Public Policy</h1>");
+    expect(pageResponse.body).toContain("<p>Welcome.</p>");
+  });
+
+  it("returns 404 for a private template", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app, "org-test", profileBody);
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Private Policy",
+        content: "# Private\n",
+      },
+    });
+    const template = createResponse.json();
+
+    await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+    await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: true },
+    });
+    await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: false },
+    });
+
+    const pageResponse = await app.inject({
+      method: "GET",
+      url: "/public/acme-ai/private-policy",
+    });
+    expect(pageResponse.statusCode).toBe(404);
+    expect(pageResponse.json().error.code).toBe("PUBLIC_DOCUMENT_NOT_FOUND");
+  });
+
+  it("returns 404 when a public template has no document", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app, "org-test", profileBody);
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Draft Policy",
+        content: "# Draft\n",
+      },
+    });
+    const template = createResponse.json();
+
+    const visibilityResponse = await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: true },
+    });
+    expect(visibilityResponse.statusCode).toBe(200);
+
+    const pageResponse = await app.inject({
+      method: "GET",
+      url: "/public/acme-ai/draft-policy",
+    });
+    expect(pageResponse.statusCode).toBe(404);
+    expect(pageResponse.json().error.code).toBe("PUBLIC_DOCUMENT_NOT_FOUND");
+  });
+
+  it("strips script tags from public document HTML", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app, "org-test", profileBody);
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Unsafe Policy",
+        content:
+          '# Safe heading\n\n<script>alert("xss")</script>\n\n[Click](javascript:alert(1))\n',
+      },
+    });
+    const template = createResponse.json();
+
+    await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+    await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: true },
+    });
+
+    const pageResponse = await app.inject({
+      method: "GET",
+      url: "/public/acme-ai/unsafe-policy",
+    });
+    expect(pageResponse.statusCode).toBe(200);
+    expect(pageResponse.body).toContain("Safe heading");
+    expect(pageResponse.body).not.toContain("<script>");
+    expect(pageResponse.body).not.toContain("javascript:alert");
+  });
+
+  it("serves the latest published version of a public document", async () => {
+    const app = await createTestApp();
+    await saveProfileDraft(app, "org-test", profileBody);
+    const createResponse = await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/templates",
+      payload: {
+        name: "Versioned Policy",
+        content: "# First version\n",
+      },
+    });
+    const template = createResponse.json();
+
+    await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+
+    await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}`,
+      payload: {
+        name: "Versioned Policy",
+        content: "# Second version\n",
+      },
+    });
+    await app.inject({
+      method: "POST",
+      url: "/organizations/org-test/documents",
+      payload: { templateId: template.id },
+    });
+    await app.inject({
+      method: "PUT",
+      url: `/organizations/org-test/templates/${template.id}/visibility`,
+      payload: { isPublic: true },
+    });
+
+    const pageResponse = await app.inject({
+      method: "GET",
+      url: "/public/acme-ai/versioned-policy",
+    });
+    expect(pageResponse.statusCode).toBe(200);
+    expect(pageResponse.body).toContain("Second version");
+    expect(pageResponse.body).not.toContain("First version");
   });
 });

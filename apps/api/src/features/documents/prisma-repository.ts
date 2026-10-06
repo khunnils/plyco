@@ -18,6 +18,7 @@ import { type OrganizationRepository } from "../organizations/repository.js";
 import {
   type DocumentFreshness,
   type DocumentRepository,
+  type PublicDocument,
 } from "./repository.js";
 
 function slugify(name: string): string {
@@ -28,6 +29,24 @@ function slugify(name: string): string {
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function uniquePublicSlug(name: string, existing: Set<string>) {
+  const root = slugify(name) || "organization";
+
+  if (!existing.has(root)) {
+    return root;
+  }
+
+  let suffix = 2;
+  let candidate = `${root}-${suffix}`;
+
+  while (existing.has(candidate)) {
+    suffix += 1;
+    candidate = `${root}-${suffix}`;
+  }
+
+  return candidate;
 }
 
 function sourceFingerprintJson(fingerprint: Document["sourceFingerprint"]) {
@@ -157,7 +176,11 @@ export class PrismaDocumentRepository implements DocumentRepository {
       where: { organizationId },
       include: {
         documents: {
-          orderBy: { generatedAt: "desc" },
+          orderBy: [
+            { generatedAt: "desc" },
+            { templateVersionMajor: "desc" },
+            { templateVersionMinor: "desc" },
+          ],
         },
       },
       orderBy: { createdAt: "asc" },
@@ -177,6 +200,7 @@ export class PrismaDocumentRepository implements DocumentRepository {
         status: freshness?.status ?? "not_generated",
         staleReasons: freshness?.staleReasons ?? [],
         documents,
+        publicUrl: null,
       };
     });
   }
@@ -277,10 +301,125 @@ export class PrismaDocumentRepository implements DocumentRepository {
     }
     const document = await this.client.document.findFirst({
       where,
-      orderBy: { generatedAt: "desc" },
+      orderBy: [
+        { generatedAt: "desc" },
+        { templateVersionMajor: "desc" },
+        { templateVersionMinor: "desc" },
+      ],
     });
 
     return document ? mapDocumentRecord(document) : null;
+  }
+
+  async setTemplateVisibility(
+    organizationId: string,
+    id: string,
+    isPublic: boolean,
+  ): Promise<Template | null> {
+    const existing = await this.client.template.findFirst({
+      where: { id, organizationId },
+    });
+
+    if (!existing) {
+      return null;
+    }
+
+    if (isPublic) {
+      await this.ensureOrganizationPublicSlug(organizationId);
+    }
+
+    const template = await this.client.template.update({
+      where: { id },
+      data: { isPublic },
+    });
+
+    return mapTemplateRecord(template);
+  }
+
+  async getOrganizationPublicSlug(
+    organizationId: string,
+  ): Promise<string | null> {
+    const organization = await this.client.organization.findUnique({
+      where: { id: organizationId },
+      select: { publicSlug: true },
+    });
+
+    return organization?.publicSlug ?? null;
+  }
+
+  async getPublicDocument(
+    orgSlug: string,
+    templateSlug: string,
+  ): Promise<PublicDocument | null> {
+    const template = await this.client.template.findFirst({
+      where: {
+        slug: templateSlug,
+        isPublic: true,
+        organization: { publicSlug: orgSlug },
+      },
+      include: {
+        organization: {
+          select: { companyName: true, publicSlug: true },
+        },
+        documents: {
+          orderBy: [
+            { generatedAt: "desc" },
+            { templateVersionMajor: "desc" },
+            { templateVersionMinor: "desc" },
+          ],
+          take: 1,
+        },
+      },
+    });
+
+    const document = template?.documents[0];
+
+    if (!template || !document || !template.organization.publicSlug) {
+      return null;
+    }
+
+    return {
+      organizationName: template.organization.companyName,
+      orgSlug: template.organization.publicSlug,
+      template: mapTemplateRecord(template),
+      document: mapDocumentRecord(document),
+    };
+  }
+
+  private async ensureOrganizationPublicSlug(organizationId: string) {
+    const organization = await this.client.organization.findUnique({
+      where: { id: organizationId },
+      select: { companyName: true, publicSlug: true },
+    });
+
+    if (!organization) {
+      throw new ApiError(
+        "ORGANIZATION_NOT_FOUND",
+        "Organization was not found.",
+        404,
+      );
+    }
+
+    if (organization.publicSlug) {
+      return organization.publicSlug;
+    }
+
+    const taken = new Set(
+      (
+        await this.client.organization.findMany({
+          where: { publicSlug: { not: null } },
+          select: { publicSlug: true },
+        })
+      ).flatMap((record) => (record.publicSlug ? [record.publicSlug] : [])),
+    );
+    const slug = uniquePublicSlug(organization.companyName, taken);
+
+    await this.client.organization.update({
+      where: { id: organizationId },
+      data: { publicSlug: slug },
+    });
+
+    return slug;
   }
 
   private throwTemplateConflict(error: unknown, slug: string): never {

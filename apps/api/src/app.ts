@@ -38,6 +38,7 @@ import { InMemoryDocumentRepository } from "./features/documents/in-memory-repos
 import { PrismaDocumentRepository } from "./features/documents/prisma-repository.js"
 import { type DocumentRepository } from "./features/documents/repository.js"
 import { registerDocumentRoutes } from "./features/documents/routes.js"
+import { registerPublicDocumentRoutes } from "./features/documents/public-routes.js"
 import {
   LlmTemplateCreatorService,
   type TemplateCreatorService,
@@ -315,6 +316,9 @@ export async function createApp({
     accountRepository: repositories.accountRepository,
     vocabularyRepository: repositories.vocabularyRepository,
   })
+  await registerPublicDocumentRoutes(app, {
+    documentRepository: repositories.documentRepository,
+  })
   await registerDocumentRoutes(app, {
     accountRepository: repositories.accountRepository,
     documentRepository: repositories.documentRepository,
@@ -327,6 +331,8 @@ export async function createApp({
           )
         : new NullDocumentPdfStorage()),
     organizationRepository: repositories.organizationRepository,
+    publicDocumentsBaseUrl: (auth ? auth.apiPublicUrl : apiConfig.cliApiUrl)
+      .replace(/\/$/, ""),
     systemTemplateSource,
     templateCreatorService:
       templateCreatorService ??

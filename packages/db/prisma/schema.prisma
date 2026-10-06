@@ -20,6 +20,7 @@ model WaitlistEntry {
 model Organization {
   id                    String                   @id(map: "organizations_pkey") @default(cuid())
   companyName           String                   @map("company_name")
+  publicSlug            String?                  @unique(map: "organizations_public_slug_key") @map("public_slug")
   legalEntityName       String?                  @map("legal_entity_name")
   website               String?
   contactEmail          String?                  @map("contact_email")
@@ -517,6 +518,7 @@ model Template {
   slug                     String
   sourceSystemTemplateSlug String?      @map("source_system_template_slug")
   content                  String
+  isPublic                 Boolean      @default(false) @map("is_public")
   versionMajor             Int          @default(1) @map("version_major")
   versionMinor             Int          @default(0) @map("version_minor")
   documents                Document[]

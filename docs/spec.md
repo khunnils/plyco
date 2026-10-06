@@ -62,6 +62,11 @@ website. If that response includes a privacy policy URL, the client calls
 failure is not blocking; the user continues with the entered name, URL, selected
 regions, selected goals, and editable manual defaults.
 
+Website lookup defaults to scraping the landing page and linked privacy/security
+pages, then combines the extracted company, service, activity, and data-category
+information for review. If a linked page cannot be processed, available results
+are retained with a warning.
+
 After lookup, the user reviews setup in two screens:
 
 - company review: organization identity, selected regions, compliance goals,
@@ -193,13 +198,22 @@ the editor after both operations succeed.
 
 Templates appear as paper-like cards that open the template editor when
 selected. A card overflow menu appears on hover or keyboard focus and contains
-the available document actions, including preview, PDF download, history, and
-template deletion. Preview renders the live template for drafts and opens the
-latest stored snapshot for published documents. The editor keeps Publish as its
-primary visible action, provides a subtle back control, and groups Save draft,
-Rename, and Delete in an overflow menu. Drafts do not show version information,
-published documents do not carry a Published badge, and an alert icon identifies
-a published snapshot that is outdated relative to its template or source data.
+the available document actions, including preview, PDF download, publish to
+web, copy public link, history, and template deletion. Preview renders the live
+template for drafts and opens the latest stored snapshot for published
+documents. The editor keeps Publish as its primary visible action, provides a
+subtle back control, and groups Save draft, Rename, and Delete in an overflow
+menu. Drafts do not show version information, published documents do not carry a
+Published badge, and an alert icon identifies a published snapshot that is
+outdated relative to its template or source data.
+
+A published document can be served as a public HTML page at a stable URL of the
+form `/public/{organization-slug}/{template-slug}`. Visibility is off by default
+and is toggled per template, so republishing does not change the link. The page
+always shows the latest published snapshot, including a last-updated date. The
+organization slug is assigned the first time any document is published to the
+web. Unauthenticated visitors receive 404 for private templates and for
+templates that have no published snapshot.
 
 ## Smart Advisor Recommendations
 

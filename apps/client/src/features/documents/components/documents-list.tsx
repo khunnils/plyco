@@ -9,16 +9,20 @@ export const DocumentsList = ({
   organizationName,
   hasTemplates,
   isDownloadPending,
+  isVisibilityPending,
   onDeleteTemplate,
   onDownloadPdf,
+  onToggleWebPublish,
 }: {
   isLoading: boolean
   documents: DocumentSummary[]
   organizationName: string
   hasTemplates: boolean
   isDownloadPending: boolean
+  isVisibilityPending: boolean
   onDeleteTemplate: (templateId: string) => void
   onDownloadPdf: (doc: { id: string; title: string }) => void
+  onToggleWebPublish: (input: { templateId: string; isPublic: boolean }) => void
 }) => {
   if (isLoading) {
     return (
@@ -40,8 +44,10 @@ export const DocumentsList = ({
           summary={summary}
           organizationName={organizationName}
           isDownloadPending={isDownloadPending}
+          isVisibilityPending={isVisibilityPending}
           onDeleteTemplate={() => onDeleteTemplate(summary.template.id)}
           onDownloadPdf={onDownloadPdf}
+          onToggleWebPublish={onToggleWebPublish}
         />
       ))}
     </div>

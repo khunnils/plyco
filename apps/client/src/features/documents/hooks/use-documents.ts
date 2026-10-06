@@ -9,8 +9,13 @@ import {
   downloadDocumentPdf,
   getDocument,
   getOrganizationDocuments,
+  setTemplateVisibility,
 } from "@/lib/api"
-import { documentQueryKey, documentsQueryKey } from "@/lib/query-keys"
+import {
+  documentQueryKey,
+  documentsQueryKey,
+  templatesQueryKey,
+} from "@/lib/query-keys"
 
 export const useDocuments = (enabled = true) => {
   const { data: auth } = useAuthState()
@@ -77,6 +82,35 @@ export const useDownloadDocumentPdf = () => {
       }),
     onError: (err: Error) => {
       toast.error(err.message ?? "Could not download PDF")
+    },
+  })
+}
+
+export const useSetTemplateVisibility = () => {
+  const queryClient = useQueryClient()
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+
+  return useMutation({
+    mutationFn: (input: { templateId: string; isPublic: boolean }) =>
+      setTemplateVisibility({
+        organizationId,
+        id: input.templateId,
+        visibility: { isPublic: input.isPublic },
+      }),
+    onSuccess: (_template, input) => {
+      void queryClient.invalidateQueries({
+        queryKey: documentsQueryKey(organizationId),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: templatesQueryKey(organizationId),
+      })
+      toast.success(
+        input.isPublic ? "Published to the web" : "Removed from the web"
+      )
+    },
+    onError: (err: Error) => {
+      toast.error(err.message ?? "Could not update web publishing")
     },
   })
 }

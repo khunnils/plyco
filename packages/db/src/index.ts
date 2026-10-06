@@ -611,6 +611,7 @@ export function mapTemplateRecord(record: {
   slug: string;
   sourceSystemTemplateSlug: string | null;
   content: string;
+  isPublic: boolean;
   versionMajor: number;
   versionMinor: number;
   createdAt: Date;
@@ -623,6 +624,7 @@ export function mapTemplateRecord(record: {
     slug: record.slug,
     sourceSystemTemplateSlug: record.sourceSystemTemplateSlug,
     content: record.content,
+    isPublic: record.isPublic,
     versionMajor: record.versionMajor,
     versionMinor: record.versionMinor,
     createdAt: toIsoString(record.createdAt),

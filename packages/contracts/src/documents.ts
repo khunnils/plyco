@@ -44,6 +44,7 @@ export const documentSummarySchema = z.object({
   status: documentStatusSchema,
   staleReasons: z.array(z.string().min(1)).default([]),
   documents: z.array(documentSchema).default([]),
+  publicUrl: z.string().url().nullable().default(null),
 });
 
 export const createDocumentSchema = z.object({

@@ -23,10 +23,15 @@ export const templateSchema = z.object({
   slug: templateSlugSchema,
   sourceSystemTemplateSlug: templateSlugSchema.nullable(),
   content: z.string(),
+  isPublic: z.boolean().default(false),
   versionMajor: z.number().int().default(1),
   versionMinor: z.number().int().default(0),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
+});
+
+export const templateVisibilityInputSchema = z.object({
+  isPublic: z.boolean(),
 });
 
 export const templateInputSchema = z.object({
@@ -98,6 +103,9 @@ export const templateCatalogSchema = z.object({
 
 export type SystemTemplate = z.infer<typeof systemTemplateSchema>;
 export type Template = z.infer<typeof templateSchema>;
+export type TemplateVisibilityInput = z.infer<
+  typeof templateVisibilityInputSchema
+>;
 export type TemplateInput = z.infer<typeof templateInputSchema>;
 export type GenerateTemplateInput = z.infer<typeof generateTemplateInputSchema>;
 export type EditTemplateWithPromptInput = z.infer<

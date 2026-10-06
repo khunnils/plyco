@@ -240,7 +240,8 @@ export async function registerAuth(
       request.url.startsWith("/codes/load") ||
       request.url.startsWith("/docs") ||
       request.url.startsWith("/providers/lookup") ||
-      request.url.startsWith("/providers/import")
+      request.url.startsWith("/providers/import") ||
+      request.url.startsWith("/public/")
     ) {
       return
     }

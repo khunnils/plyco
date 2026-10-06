@@ -11,6 +11,13 @@ export type DocumentFreshness = {
   staleReasons: string[];
 };
 
+export type PublicDocument = {
+  organizationName: string;
+  orgSlug: string;
+  template: Template;
+  document: Document;
+};
+
 export interface DocumentRepository {
   listTemplates(organizationId: string): Promise<Template[]>;
   createTemplateFromSystem(
@@ -65,4 +72,14 @@ export interface DocumentRepository {
     versionMinor?: number,
   ): Promise<Document | null>;
   getDocument(organizationId: string, id: string): Promise<Document | null>;
+  setTemplateVisibility(
+    organizationId: string,
+    id: string,
+    isPublic: boolean,
+  ): Promise<Template | null>;
+  getOrganizationPublicSlug(organizationId: string): Promise<string | null>;
+  getPublicDocument(
+    orgSlug: string,
+    templateSlug: string,
+  ): Promise<PublicDocument | null>;
 }

@@ -11,6 +11,7 @@ import { type OrganizationRepository } from "../organizations/repository.js";
 import {
   type DocumentFreshness,
   type DocumentRepository,
+  type PublicDocument,
 } from "./repository.js";
 
 function now() {
@@ -35,6 +36,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
   private templates = new Map<string, Template>();
   private documents = new Map<string, Document>();
   private documentPdfObjectPaths = new Map<string, string>();
+  private organizationPublicSlugs = new Map<string, string>();
 
   constructor(
     private readonly organizationRepository: OrganizationRepository,
@@ -73,6 +75,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       slug: systemTemplate.slug,
       sourceSystemTemplateSlug: systemTemplate.slug,
       content: systemTemplate.content,
+      isPublic: false,
       versionMajor: 1,
       versionMinor: 0,
       createdAt: timestamp,
@@ -111,6 +114,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
       name: input.name,
       slug: slug,
       content: input.content,
+      isPublic: false,
       versionMajor: 1,
       versionMinor: 0,
       createdAt: timestamp,
@@ -192,7 +196,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
               currentDocument.organizationId === organizationId &&
               currentDocument.templateId === template.id,
           )
-          .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+          .sort(compareDocumentsNewestFirst);
 
         const document = documents[0] ?? null;
         const freshness = document
@@ -205,6 +209,7 @@ export class InMemoryDocumentRepository implements DocumentRepository {
           status: freshness?.status ?? "not_generated",
           staleReasons: freshness?.staleReasons ?? [],
           documents,
+          publicUrl: null,
         };
       });
   }
@@ -328,8 +333,133 @@ export class InMemoryDocumentRepository implements DocumentRepository {
           (versionMajor === undefined || currentDocument.templateVersionMajor === versionMajor) &&
           (versionMinor === undefined || currentDocument.templateVersionMinor === versionMinor),
       )
-      .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+      .sort(compareDocumentsNewestFirst);
 
     return matched[0] ?? null;
   }
+
+  async setTemplateVisibility(
+    organizationId: string,
+    id: string,
+    isPublic: boolean,
+  ): Promise<Template | null> {
+    const currentTemplate = this.templates.get(id);
+
+    if (!currentTemplate || currentTemplate.organizationId !== organizationId) {
+      return null;
+    }
+
+    if (isPublic) {
+      await this.ensureOrganizationPublicSlug(organizationId);
+    }
+
+    const template: Template = {
+      ...currentTemplate,
+      isPublic,
+      updatedAt: now(),
+    };
+
+    this.templates.set(id, template);
+    return template;
+  }
+
+  async getOrganizationPublicSlug(
+    organizationId: string,
+  ): Promise<string | null> {
+    return this.organizationPublicSlugs.get(organizationId) ?? null;
+  }
+
+  async getPublicDocument(
+    orgSlug: string,
+    templateSlug: string,
+  ): Promise<PublicDocument | null> {
+    const organizationId = Array.from(
+      this.organizationPublicSlugs.entries(),
+    ).find(([, slug]) => slug === orgSlug)?.[0];
+
+    if (!organizationId) {
+      return null;
+    }
+
+    const template = Array.from(this.templates.values()).find(
+      (currentTemplate) =>
+        currentTemplate.organizationId === organizationId &&
+        currentTemplate.slug === templateSlug &&
+        currentTemplate.isPublic,
+    );
+
+    if (!template) {
+      return null;
+    }
+
+    const document = await this.getDocumentForTemplate(
+      organizationId,
+      template.id,
+    );
+
+    if (!document) {
+      return null;
+    }
+
+    const organization =
+      await this.organizationRepository.getOrganization(organizationId);
+
+    return {
+      organizationName:
+        organization?.company.companyName || organizationId,
+      orgSlug,
+      template,
+      document,
+    };
+  }
+
+  private async ensureOrganizationPublicSlug(organizationId: string) {
+    const existing = this.organizationPublicSlugs.get(organizationId);
+
+    if (existing) {
+      return existing;
+    }
+
+    const organization =
+      await this.organizationRepository.getOrganization(organizationId);
+    const slug = uniquePublicSlug(
+      organization?.company.companyName || organizationId,
+      new Set(this.organizationPublicSlugs.values()),
+    );
+
+    this.organizationPublicSlugs.set(organizationId, slug);
+    return slug;
+  }
+}
+
+function compareDocumentsNewestFirst(left: Document, right: Document) {
+  const generated = right.generatedAt.localeCompare(left.generatedAt);
+
+  if (generated !== 0) {
+    return generated;
+  }
+
+  if (right.templateVersionMajor !== left.templateVersionMajor) {
+    return right.templateVersionMajor - left.templateVersionMajor;
+  }
+
+  return right.templateVersionMinor - left.templateVersionMinor;
+}
+
+function uniquePublicSlug(name: string, existing: Set<string>) {
+  const root = slugify(name) || "organization";
+
+  if (!existing.has(root)) {
+    return root;
+  }
+
+  let suffix = 2;
+  let candidate = `${root}-${suffix}`;
+
+  while (existing.has(candidate)) {
+    suffix += 1;
+    candidate = `${root}-${suffix}`;
+  }
+
+  return candidate;
 }

@@ -33,6 +33,8 @@ export const POSTHOG_EVENTS = {
   TEMPLATE_DELETED: "template_deleted",
   DOCUMENT_PUBLISHED: "document_published",
   DOCUMENT_PDF_DOWNLOADED: "document_pdf_downloaded",
+  DOCUMENT_PUBLISHED_TO_WEB: "document_published_to_web",
+  DOCUMENT_UNPUBLISHED_FROM_WEB: "document_unpublished_from_web",
   RECOMMENDATION_EXPANDED: "recommendation_expanded",
   TEAM_INVITATION_SENT: "team_invitation_sent",
   TEAM_INVITATION_CANCELED: "team_invitation_canceled",

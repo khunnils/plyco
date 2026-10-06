@@ -23,6 +23,7 @@ const template = (content: string): Template => ({
   slug: "privacy-policy",
   sourceSystemTemplateSlug: null,
   content,
+  isPublic: false,
   versionMajor: 1,
   versionMinor: 0,
   createdAt: timestamp,

@@ -8,6 +8,7 @@ import {
   templateInputSchema,
   templatePreviewInputSchema,
   templateVariableCatalogSchema,
+  templateVisibilityInputSchema,
   type Document,
   type Template,
 } from "@plyco/contracts";
@@ -24,6 +25,7 @@ import { ApiError } from "../../infrastructure/errors.js";
 import { requireOrganizationMembership } from "../../infrastructure/organization-context.js";
 import { type SystemTemplateSource } from "../../infrastructure/system-templates.js";
 import { type DocumentPdfStorage } from "../../infrastructure/document-pdfs.js";
+import { buildPublicDocumentUrl } from "../../infrastructure/document-html.js";
 import { type AccountRepository } from "../accounts/repository.js";
 import { type OrganizationRepository } from "../organizations/repository.js";
 import { type ProviderRepository } from "../vendors/repository.js";
@@ -44,6 +46,7 @@ export async function registerDocumentRoutes(
     accountRepository,
     templateCreatorService,
     templateEditorService,
+    publicDocumentsBaseUrl,
   }: {
     accountRepository: AccountRepository;
     documentRepository: DocumentRepository;
@@ -54,6 +57,7 @@ export async function registerDocumentRoutes(
     vocabularyRepository: VocabularyRepository;
     templateCreatorService: TemplateCreatorService;
     templateEditorService: TemplateEditorService;
+    publicDocumentsBaseUrl: string;
   },
 ) {
   const contextBuilder = new ReportContextBuilder();
@@ -148,6 +152,7 @@ export async function registerDocumentRoutes(
         slug: "preview",
         sourceSystemTemplateSlug: null,
         content: draft.content,
+        isPublic: false,
         versionMajor: 1,
         versionMinor: 0,
         createdAt: now,
@@ -221,19 +226,36 @@ export async function registerDocumentRoutes(
         request.params.organizationId,
       );
 
-      return documentRepository.listDocumentSummaries(
-        request.params.organizationId,
-        (template, document) => {
-          const context = contextBuilder.build(
-            snapshot,
-            template,
-            members,
-            vocabulary,
-          );
+      const [summaries, publicSlug] = await Promise.all([
+        documentRepository.listDocumentSummaries(
+          request.params.organizationId,
+          (template, document) => {
+            const context = contextBuilder.build(
+              snapshot,
+              template,
+              members,
+              vocabulary,
+            );
 
-          return evaluateDocumentFreshness({ context, document, template });
-        },
-      );
+            return evaluateDocumentFreshness({ context, document, template });
+          },
+        ),
+        documentRepository.getOrganizationPublicSlug(
+          request.params.organizationId,
+        ),
+      ]);
+
+      return summaries.map((summary) => ({
+        ...summary,
+        publicUrl:
+          summary.template.isPublic && publicSlug
+            ? buildPublicDocumentUrl(
+                publicDocumentsBaseUrl,
+                publicSlug,
+                summary.template.slug,
+              )
+            : null,
+      }));
     },
   );
 
@@ -329,6 +351,33 @@ export async function registerDocumentRoutes(
       }
 
       return reply.status(204).send();
+    },
+  );
+
+  app.put<{ Params: { organizationId: string; id: string } }>(
+    "/organizations/:organizationId/templates/:id/visibility",
+    async (request) => {
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        request.params.organizationId,
+      );
+      const body = templateVisibilityInputSchema.parse(request.body);
+      const template = await documentRepository.setTemplateVisibility(
+        request.params.organizationId,
+        request.params.id,
+        body.isPublic,
+      );
+
+      if (!template) {
+        throw new ApiError(
+          "TEMPLATE_NOT_FOUND",
+          "Template was not found.",
+          404,
+        );
+      }
+
+      return template;
     },
   );
 

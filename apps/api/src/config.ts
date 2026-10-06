@@ -79,6 +79,18 @@ export function readApiDocsEnabled(env: NodeJS.ProcessEnv = process.env) {
   return env.NODE_ENV !== "production"
 }
 
+export type OrganizationLookupStrategy = "firecrawl" | "agent"
+
+export function readOrganizationLookupStrategy(
+  env: NodeJS.ProcessEnv = process.env,
+): OrganizationLookupStrategy {
+  const strategy = env.ORGANIZATION_LOOKUP_STRATEGY ?? "firecrawl"
+  if (strategy !== "firecrawl" && strategy !== "agent") {
+    throw new Error("ORGANIZATION_LOOKUP_STRATEGY must be firecrawl or agent")
+  }
+  return strategy
+}
+
 export const apiConfig = {
   host: process.env.HOST ?? "0.0.0.0",
   port: readPort(process.env.PORT),
@@ -92,6 +104,8 @@ export const apiConfig = {
   geminiApiKey: process.env.GEMINI_API_KEY,
   geminiProviderLookupModel:
     process.env.GEMINI_PROVIDER_LOOKUP_MODEL ?? "gemini-2.5-flash",
+  firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
+  organizationLookupStrategy: readOrganizationLookupStrategy(),
   organizationLookupModel:
     process.env.ORGANIZATION_LOOKUP_MODEL ?? "gemini-3.6-flash",
   templateCreatorModel:

@@ -1,11 +1,15 @@
 import {
   AlertTriangle,
+  Copy,
   Download,
   Ellipsis,
   Eye,
+  Globe,
+  GlobeLock,
   History,
   Trash2,
 } from "lucide-react"
+import { toast } from "sonner"
 import { type DocumentSummary } from "@plyco/contracts"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -31,14 +35,18 @@ export const DocumentSummaryCard = ({
   summary,
   organizationName,
   isDownloadPending,
+  isVisibilityPending,
   onDeleteTemplate,
   onDownloadPdf,
+  onToggleWebPublish,
 }: {
   summary: DocumentSummary
   organizationName: string
   isDownloadPending: boolean
+  isVisibilityPending: boolean
   onDeleteTemplate: () => void
   onDownloadPdf: (doc: { id: string; title: string }) => void
+  onToggleWebPublish: (input: { templateId: string; isPublic: boolean }) => void
 }) => {
   const navigate = useNavigate()
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -136,6 +144,30 @@ export const DocumentSummaryCard = ({
                     }
                   >
                     <Download /> Download PDF
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem
+                  disabled={isVisibilityPending}
+                  onSelect={() =>
+                    onToggleWebPublish({
+                      templateId: summary.template.id,
+                      isPublic: !summary.template.isPublic,
+                    })
+                  }
+                >
+                  {summary.template.isPublic ? <GlobeLock /> : <Globe />}
+                  {summary.template.isPublic
+                    ? "Unpublish from web"
+                    : "Publish to web"}
+                </DropdownMenuItem>
+                {summary.template.isPublic && summary.publicUrl ? (
+                  <DropdownMenuItem
+                    onSelect={() => {
+                      void navigator.clipboard.writeText(summary.publicUrl ?? "")
+                      toast.success("Public link copied")
+                    }}
+                  >
+                    <Copy /> Copy public link
                   </DropdownMenuItem>
                 ) : null}
               </>
