@@ -12,7 +12,7 @@ export const company = {
   country: "Ireland",
   address: "14 Example Quay, Dublin, Ireland (fictional address)",
   teamSize: 8,
-  website: "https://plyco-demo.web.app",
+  website: "https://demo.plyco.co",
   contactEmail: "hello@brieflane.example",
   privacyEmail: "privacy@brieflane.example",
   securityEmail: "security@brieflane.example",

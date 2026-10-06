@@ -19,13 +19,7 @@
     {
       "target": "demo",
       "public": "apps/demo/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "headers": [
-        {
-          "source": "**",
-          "headers": [{ "key": "X-Robots-Tag", "value": "noindex, follow" }]
-        }
-      ]
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
     }
   ]
 }

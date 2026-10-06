@@ -8,12 +8,13 @@ Public copy must stay concrete about website and policy analysis: imported value
 
 ## Fictional Startup Demo
 
-`plyco-demo.web.app` presents Brieflane, a fictional Irish B2B SaaS startup serving
+`demo.plyco.co` presents Brieflane, a fictional Irish B2B SaaS startup serving
 EU and US creative and digital agencies. Its primary product is Brieflane
 Workspace, with a separate Brieflane Customer Portal and marketing website.
 The landing page publishes company identity, service descriptions, processing
 activities, data categories, regional hosting choices, and a privacy-policy
-link in static HTML for onboarding lookup.
+link in static HTML for onboarding lookup. Pages allow search indexing and use
+`https://demo.plyco.co` as their canonical origin.
 
 Workspace and portal previews are display-only and contain synthetic data.
 Every page identifies the fictional scenario. There are no live accounts,

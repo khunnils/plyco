@@ -1,7 +1,7 @@
 # Brieflane demo startup
 
 An independent static Astro site for Plyco onboarding, testing, and demos.
-Production address: `https://plyco-demo.web.app/`. Brieflane, its people, company
+Production address: `https://demo.plyco.co/`. Brieflane, its people, company
 details, contacts, product controls, and provider configuration are fictional.
 
 ## Run locally
@@ -63,8 +63,8 @@ This package uses TypeScript 6 for `astro check`: Astro's language server needs
 the JavaScript compiler API, which the workspace's TypeScript 7 native compiler
 does not expose. Other packages retain their existing TypeScript version.
 
-All pages have `noindex, follow` metadata and deployment headers; `robots.txt`
-allows retrieval for direct URL analysis. There are no SPA fallback rewrites,
+Pages allow search indexing and use `https://demo.plyco.co` as their canonical
+origin. `robots.txt` allows retrieval for direct URL analysis. There are no SPA fallback rewrites,
 client scripts, forms, authentication, or real uploads. Preview controls are
 noninteractive labels. The demo has no analytics or application cookies;
 Firebase infrastructure may process access logs. The `.example` contacts are
@@ -74,7 +74,8 @@ describe the actual demo's Firebase deployment.
 ## Deploy
 
 Hosting target `demo` maps to Firebase site `plyco-demo` in project
-`plyco-prod`, served at `https://plyco-demo.web.app/`.
+`plyco-prod`, served at `https://demo.plyco.co/` and
+`https://plyco-demo.web.app/`. Both hosts use the custom domain for canonical URLs.
 
 `.github/workflows/deploy-demo.yml` typechecks, builds, and deploys that
 target when demo files change on `main`, and on manual dispatch. It uses the
@@ -89,23 +90,23 @@ pnpm --filter @plyco/demo build
 firebase deploy --only hosting:demo --project plyco-prod
 ```
 
-After deployment, verify all routes and the index header over HTTP:
+After deployment, verify all routes and indexing settings over HTTP:
 
 ```sh
-curl --fail --location --head https://plyco-demo.web.app/
-curl --fail --location https://plyco-demo.web.app/workspace/
-curl --fail --location https://plyco-demo.web.app/portal/
-curl --fail --location https://plyco-demo.web.app/privacy/
-curl --fail --location https://plyco-demo.web.app/security/
+curl --fail --location --head https://demo.plyco.co/
+curl --fail --location https://demo.plyco.co/workspace/
+curl --fail --location https://demo.plyco.co/portal/
+curl --fail --location https://demo.plyco.co/privacy/
+curl --fail --location https://demo.plyco.co/security/
 ```
 
-Confirm status 200, `X-Robots-Tag: noindex, follow`, and the expected page
-contents.
+Confirm status 200, no `noindex` directive in headers or HTML, canonical URLs
+under `https://demo.plyco.co/`, and the expected page contents.
 
 ## Manual Plyco onboarding walkthrough
 
 1. Create an organization named **Brieflane** with website
-   `https://plyco-demo.web.app/`. Select EU and US regions and the GDPR goal.
+   `https://demo.plyco.co/`. Select EU and US regions and the GDPR goal.
 2. Let website and privacy-policy lookup complete. Review suggestions rather
    than accepting them as a guaranteed or exact fixture output. Website lookup
    currently imports only one primary service and at most five suggested data
@@ -116,7 +117,7 @@ contents.
    intended sensitive or health data.
 4. Check that the primary service is **Brieflane Workspace**: agency request,
    document, and approval management. The service URL may initially be the
-   landing-page URL; update it to `https://plyco-demo.web.app/workspace/` in review.
+   landing-page URL; update it to `https://demo.plyco.co/workspace/` in review.
    Choose Ireland/EU as this walkthrough's hosting region (US is a separate
    supported customer choice).
 5. Expected data categories are business-user accounts, client contact
@@ -124,7 +125,7 @@ contents.
    Expected activities are account/client access management, request/document
    management, recording approvals, service notifications, and service
    monitoring/support. Wording and grouping may vary with AI extraction.
-6. Verify the discovered policy is `https://plyco-demo.web.app/privacy/`. Expected
+6. Verify the discovered policy is `https://demo.plyco.co/privacy/`. Expected
    privacy facts include rights requests by email, 30-day response target
    within one calendar month, identity verification, authorized representatives,
    internal review of refusals, transactional and consent-based marketing
@@ -134,7 +135,7 @@ contents.
    is appointed in this scenario.
 7. Complete organization setup. It creates the primary service and fixed
    **Marketing website** service. Add **Brieflane Customer Portal** manually
-   with URL `https://plyco-demo.web.app/portal/`, customer-data processing enabled,
+   with URL `https://demo.plyco.co/portal/`, customer-data processing enabled,
    and the same EU hosting region. Link account/client access, requests,
    approvals, notifications, and security logging as appropriate to both
    services and the data types they process.

@@ -17,7 +17,6 @@ const pathname = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · {company.name}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="noindex, follow" />
     <link rel="canonical" href={new URL(pathname, company.website)} />
     <link rel="preload" href="/fonts/Manrope-Variable.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
