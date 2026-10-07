@@ -33,14 +33,19 @@ import {
   saveSecurityProfileSection,
   saveServicesProfile,
 } from "@/lib/api"
-import { authStateQueryKey, organizationSnapshotQueryKey } from "@/lib/query-keys"
+import {
+  authStateQueryKey,
+  organizationSnapshotQueryKey,
+} from "@/lib/query-keys"
 import {
   MARKETING_WEBSITE_SERVICE_NAME,
   WEBSITE_DATA_TYPE_NAME,
+  activitiesWithSavedDataTypes,
   fallbackComplianceGoalOptions,
   fallbackRegionOptions,
   isWebsiteActivity,
   onboardingComplianceGoalOptions,
+  onboardingDataProfile,
   toProfileDraft,
 } from "../../components/types"
 
@@ -143,13 +148,8 @@ const mergeOrganizationProviders = (providers: OrganizationProviderInput[]) => {
 export const ReviewStep = () => {
   const navigate = useNavigate()
   const posthog = usePostHog()
-  const {
-    draft,
-    submitError,
-    setSubmitError,
-    isSubmitting,
-    setIsSubmitting,
-  } = useOnboardingStore()
+  const { draft, submitError, setSubmitError, isSubmitting, setIsSubmitting } =
+    useOnboardingStore()
 
   const [setupTab, setSetupTab] = useState<SetupTab>("company")
   const queryClient = useQueryClient()
@@ -236,7 +236,7 @@ export const ReviewStep = () => {
       await saveServicesProfile(organization.id, initialProfile.services)
       const initialSnapshot = await saveDataProfile(
         organization.id,
-        initialProfile.dataHandling
+        onboardingDataProfile(draft)
       )
       await savePrivacyProfile(organization.id, initialProfile.privacy)
       await saveInfrastructureProfile(
@@ -260,15 +260,17 @@ export const ReviewStep = () => {
         throw new Error("Could not create the default website service.")
       }
 
+      const savedDataTypes =
+        initialSnapshot.organization!.dataHandling.dataTypesStored
+      const savedDraft = {
+        ...draft,
+        dataTypes: savedDataTypes,
+        activities: activitiesWithSavedDataTypes(draft, savedDataTypes),
+      }
       const activities = await Promise.all(
-        draft.activities.map(async (activity) => ({
+        savedDraft.activities.map(async (activity) => ({
           input: activity,
-          activity: await createBusinessActivity(
-            organization.id,
-            isWebsiteActivity(activity)
-              ? { ...activity, dataTypeIds: [websiteDataTypeId] }
-              : activity
-          ),
+          activity: await createBusinessActivity(organization.id, activity),
         }))
       )
       const primaryActivityIds = activities
@@ -292,7 +294,7 @@ export const ReviewStep = () => {
 
       const profile = toProfileDraft(
         {
-          ...draft,
+          ...savedDraft,
           primaryService: {
             ...draft.primaryService,
             id: primaryService.id,

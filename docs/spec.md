@@ -64,21 +64,25 @@ regions, selected goals, and editable manual defaults.
 
 Website lookup defaults to scraping the landing page and linked privacy/security
 pages, then combines the extracted company, service, activity, and data-category
-information for review. If a linked page cannot be processed, available results
-are retained with a warning.
+information for review. A final resolution step consolidates similar activities
+and data categories, targeting five to six key activities when supported by the
+website content, and associates each activity with its data categories. If a
+linked page cannot be processed, available results are retained with a warning.
 
 After lookup, the user reviews setup in two screens:
 
 - company review: organization identity, selected regions, compliance goals,
   privacy policy, and suggested providers
 - setup review: editable tabs for the primary service, data types, and
-  activities, plus a visible fixed Marketing website service summary
+  activities with their associated data types, plus a visible fixed Marketing
+  website service summary
 
 Final submit creates the organization, creates the primary service and a
 Marketing website service, creates all onboarding activities, links primary
 activities to the primary service, links the fixed Operate marketing website
 activity to the Marketing website service, saves all onboarding data types in
-the seeded security profile, adds selected providers to organization inventory,
+the seeded security profile, preserves activity-to-data-type associations using
+the saved data-type IDs, adds selected providers to organization inventory,
 and then opens the workspace. The Marketing website service includes a fixed
 Website visitor data type for basic visitor, analytics, and inquiry data and is
 marked as not processing customer data.

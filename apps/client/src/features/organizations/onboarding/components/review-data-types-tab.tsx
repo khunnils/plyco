@@ -177,6 +177,14 @@ export const ReviewDataTypesTab = () => {
                               dataTypes: current.dataTypes.filter(
                                 (_, currentIndex) => currentIndex !== index
                               ),
+                              activities: current.activities.map(
+                                (activity) => ({
+                                  ...activity,
+                                  dataTypeIds: activity.dataTypeIds.filter(
+                                    (id) => id !== dataType.id
+                                  ),
+                                })
+                              ),
                             }))
                           }
                         >

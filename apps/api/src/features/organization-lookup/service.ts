@@ -505,7 +505,7 @@ const privacyPolicyLink = (
 const nonEmpty = (value: string | null | undefined) =>
   value && value.trim() ? value.trim() : null;
 
-const uniqueBy = <T>(values: T[], key: (item: T) => string) =>
+const uniqueBy = <T,>(values: T[], key: (item: T) => string) =>
   Array.from(
     new Map(
       values
@@ -647,9 +647,12 @@ const mergeWebsiteResults = (
       ? null
       : [...new Set([...(first ?? []), ...(second ?? [])])];
   const mergeBoolean = (first: boolean | null, second: boolean | null) =>
-    first === true || second === true ? true : second ?? first;
+    first === true || second === true ? true : (second ?? first);
 
-  const mergeNamed = <T extends { name: string }>(first: T[], second: T[]): T[] => {
+  const mergeNamed = <T extends { name: string }>(
+    first: T[],
+    second: T[],
+  ): T[] => {
     const values = new Map<string, T>();
     for (const item of [...first, ...second]) {
       const key = item.name.trim().toLowerCase();
@@ -658,12 +661,16 @@ const mergeWebsiteResults = (
       // Keep earlier evidence unless a later page fills a missing detail.
       values.set(
         key,
-        existing ? {
-          ...item,
-          ...Object.fromEntries(
-            Object.entries(existing).filter(([, value]) => value !== null && value !== ""),
-          ),
-        } as T : item,
+        existing
+          ? ({
+              ...item,
+              ...Object.fromEntries(
+                Object.entries(existing).filter(
+                  ([, value]) => value !== null && value !== "",
+                ),
+              ),
+            } as T)
+          : item,
       );
     }
     return [...values.values()];
@@ -677,19 +684,41 @@ const mergeWebsiteResults = (
     contactEmail: nonEmpty(next.contactEmail) ?? current.contactEmail,
     securityEmail: nonEmpty(next.securityEmail) ?? current.securityEmail,
     privacyEmail: nonEmpty(next.privacyEmail) ?? current.privacyEmail,
-    privacyPolicyUrl: nonEmpty(next.privacyPolicyUrl) ?? current.privacyPolicyUrl,
+    privacyPolicyUrl:
+      nonEmpty(next.privacyPolicyUrl) ?? current.privacyPolicyUrl,
     industries: mergeCodes(current.industries, next.industries),
     regions: mergeCodes(current.regions, next.regions),
-    handlesSensitiveData: mergeBoolean(current.handlesSensitiveData, next.handlesSensitiveData),
-    handlesHealthData: mergeBoolean(current.handlesHealthData, next.handlesHealthData),
-    handlesPersonalData: mergeBoolean(current.handlesPersonalData, next.handlesPersonalData),
+    handlesSensitiveData: mergeBoolean(
+      current.handlesSensitiveData,
+      next.handlesSensitiveData,
+    ),
+    handlesHealthData: mergeBoolean(
+      current.handlesHealthData,
+      next.handlesHealthData,
+    ),
+    handlesPersonalData: mergeBoolean(
+      current.handlesPersonalData,
+      next.handlesPersonalData,
+    ),
     primaryService: {
-      name: nonEmpty(current.primaryService.name) ?? nonEmpty(next.primaryService.name),
-      description: nonEmpty(current.primaryService.description) ?? nonEmpty(next.primaryService.description),
-      activities: mergeNamed(current.primaryService.activities, next.primaryService.activities),
-      dataCaptured: mergeNamed(current.primaryService.dataCaptured, next.primaryService.dataCaptured),
+      name:
+        nonEmpty(current.primaryService.name) ??
+        nonEmpty(next.primaryService.name),
+      description:
+        nonEmpty(current.primaryService.description) ??
+        nonEmpty(next.primaryService.description),
+      activities: mergeNamed(
+        current.primaryService.activities,
+        next.primaryService.activities,
+      ),
+      dataCaptured: mergeNamed(
+        current.primaryService.dataCaptured,
+        next.primaryService.dataCaptured,
+      ),
     },
-    warnings: [...new Set([...current.warnings, ...next.warnings])].filter(Boolean).slice(0, 8),
+    warnings: [...new Set([...current.warnings, ...next.warnings])]
+      .filter(Boolean)
+      .slice(0, 8),
   };
 };
 
@@ -705,7 +734,10 @@ export class LlmOrganizationLookupService implements OrganizationLookupService {
     input: OrganizationWebsiteLookupInput,
   ): Promise<OrganizationLookupResult> {
     const codeSets = await this.codeSource.listCodeSets(websiteCodeSetIds);
-    return mapWebsiteLookupResult(input, await this.parseWebsite(input, codeSets));
+    return mapWebsiteLookupResult(
+      input,
+      await this.parseWebsite(input, codeSets),
+    );
   }
 
   protected async parseWebsite(
@@ -784,6 +816,58 @@ const relevantLinksResponseSchema = {
   maxItems: 10,
 } satisfies SchemaUnion;
 
+const resolvedActivitiesSchema = z.object({
+  activities: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1),
+        purpose: z.string().trim(),
+        dataTypes: z.array(
+          z.object({
+            name: z.string().trim().min(1),
+            description: z.string().trim().nullable(),
+          }),
+        ),
+      }),
+    )
+    .min(1)
+    .max(6),
+});
+
+const resolvedActivitiesResponseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    activities: {
+      type: Type.ARRAY,
+      minItems: 1,
+      maxItems: 6,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          name: { type: Type.STRING },
+          purpose: { type: Type.STRING },
+          dataTypes: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                description: nullableStringSchema,
+              },
+              required: ["name", "description"],
+            },
+          },
+        },
+        required: ["name", "purpose", "dataTypes"],
+      },
+    },
+  },
+  required: ["activities"],
+} satisfies SchemaUnion;
+
+const resolvedNameKey = (name: string) =>
+  name.trim().toLowerCase().replace(/\s+/g, " ");
+
 export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupService {
   constructor(
     codeSource: OrganizationLookupCodeSource,
@@ -795,7 +879,9 @@ export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupSer
     super(codeSource, promptClient, llmClient, model);
   }
 
-  private async selectRelevantLinks(page: ScrapedWebsitePage): Promise<string[]> {
+  private async selectRelevantLinks(
+    page: ScrapedWebsitePage,
+  ): Promise<string[]> {
     const links = extractWebsiteLinks(page.markdown, page.links, page.url);
     const linksText = links.join("\n");
     const prompt = await this.promptClient.compilePrompt("link_extractor", {
@@ -821,13 +907,98 @@ export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupSer
 
     const discovered = new Set(links);
     const landingUrl = normalizeWebsiteLink(page.url, page.url);
-    return [...new Set(
-      parsed.data
-        .map((link) => normalizeWebsiteLink(link, page.url))
-        .filter((link): link is string =>
-          link !== null && link !== landingUrl && discovered.has(link),
-        ),
-    )];
+    return [
+      ...new Set(
+        parsed.data
+          .map((link) => normalizeWebsiteLink(link, page.url))
+          .filter(
+            (link): link is string =>
+              link !== null && link !== landingUrl && discovered.has(link),
+          ),
+      ),
+    ];
+  }
+
+  private async resolveActivities(
+    result: OrganizationLookupResult,
+    source: WebsiteLookupGenerated["primaryService"],
+  ): Promise<OrganizationLookupResult> {
+    const prompt = await this.promptClient.compilePrompt("activity_resolver", {
+      activities: JSON.stringify(source.activities),
+      dataTypes: JSON.stringify(source.dataCaptured),
+    });
+    const generated = await this.llmClient.generateJson({
+      model: this.model,
+      prompt: {
+        ...prompt,
+        content:
+          `${prompt.content}\n\nUse only the supplied activities and data categories as evidence. ` +
+          "Consolidate similar activities and data categories while preserving distinct purposes and information. " +
+          "Return each activity with its associated dataTypes. Reuse one canonical name for the same data category " +
+          "across activities. Aim for 5–6 key activities when supported; do not invent activities to reach that target.",
+      },
+      responseSchema: resolvedActivitiesResponseSchema,
+    });
+    const parsed = resolvedActivitiesSchema.safeParse(generated);
+    if (
+      !parsed.success ||
+      (source.dataCaptured.length > 0 &&
+        parsed.data.activities.every(
+          (activity) => activity.dataTypes.length === 0,
+        ))
+    ) {
+      throw new ApiError(
+        "ORGANIZATION_ACTIVITY_RESOLUTION_INVALID_RESPONSE",
+        "Activity resolution returned invalid activities or data types.",
+        502,
+      );
+    }
+
+    const dataTypes = new Map<string, StoredDataType>();
+    const activities = new Map<string, BusinessActivityInput>();
+    for (const activity of parsed.data.activities) {
+      const dataTypeIds: string[] = [];
+      for (const dataType of activity.dataTypes) {
+        const key = resolvedNameKey(dataType.name);
+        let canonical = dataTypes.get(key);
+        if (!canonical) {
+          canonical = {
+            id: `lookup-data-type-${dataTypes.size + 1}`,
+            sortOrder: dataTypes.size,
+            name: dataType.name,
+            description: dataType.description,
+            subjectTypes: null,
+            collectionMethods: null,
+            isSensitive: result.company.handlesSensitiveData,
+            isRequired: true,
+          };
+          dataTypes.set(key, canonical);
+        } else if (!nonEmpty(canonical.description)) {
+          canonical.description = dataType.description;
+        }
+        dataTypeIds.push(canonical.id!);
+      }
+
+      const key = resolvedNameKey(activity.name);
+      const existing = activities.get(key);
+      activities.set(key, {
+        ...defaultActivity(),
+        name: existing?.name ?? activity.name,
+        purpose: nonEmpty(existing?.purpose) ?? activity.purpose,
+        dataTypeIds: [
+          ...new Set([...(existing?.dataTypeIds ?? []), ...dataTypeIds]),
+        ],
+      });
+    }
+
+    // These IDs identify lookup suggestions only; onboarding translates them to
+    // the organization's persisted data-type IDs before saving activities.
+    return organizationLookupResultSchema.parse({
+      ...result,
+      dataTypes:
+        dataTypes.size > 0 ? [...dataTypes.values()] : result.dataTypes,
+      activities: [...activities.values()],
+    });
   }
 
   override async lookupWebsite(
@@ -843,7 +1014,9 @@ export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupSer
       links = await this.selectRelevantLinks(landingPage);
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
-      warnings.push("Unable to select privacy and security pages. Results use the landing page only.");
+      warnings.push(
+        "Unable to select privacy and security pages. Results use the landing page only.",
+      );
     }
 
     for (const link of links) {
@@ -851,7 +1024,9 @@ export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupSer
         pages.push(await this.scraper.scrape(link));
       } catch (error) {
         if (!(error instanceof ApiError)) throw error;
-        warnings.push(lookupWarning(`Unable to scrape a related page: ${link}`));
+        warnings.push(
+          lookupWarning(`Unable to scrape a related page: ${link}`),
+        );
       }
     }
 
@@ -860,20 +1035,34 @@ export class FirecrawlOrganizationLookupService extends LlmOrganizationLookupSer
     let merged = await this.parseWebsite(input, codeSets, landingPage);
     for (const page of pages.slice(1)) {
       try {
-        merged = mergeWebsiteResults(merged, await this.parseWebsite(input, codeSets, page));
+        merged = mergeWebsiteResults(
+          merged,
+          await this.parseWebsite(input, codeSets, page),
+        );
       } catch (error) {
         if (!(error instanceof ApiError)) throw error;
-        warnings.push(lookupWarning(`Unable to parse a related page: ${page.url}`));
+        warnings.push(
+          lookupWarning(`Unable to parse a related page: ${page.url}`),
+        );
       }
     }
-    merged.warnings = [...new Set([...warnings, ...merged.warnings])].filter(Boolean).slice(0, 8);
-    return mapWebsiteLookupResult(input, merged);
+    merged.warnings = [...new Set([...warnings, ...merged.warnings])]
+      .filter(Boolean)
+      .slice(0, 8);
+    const result = mapWebsiteLookupResult(input, merged);
+    return merged.primaryService.activities.length ||
+      merged.primaryService.dataCaptured.length
+      ? this.resolveActivities(result, merged.primaryService)
+      : result;
   }
 
   override async lookupPrivacyPolicy(
     input: OrganizationPrivacyPolicyLookupInput,
   ): Promise<PrivacyProfile> {
-    return this.parsePrivacyPolicy(input, await this.scraper.scrape(input.privacyPolicyUrl));
+    return this.parsePrivacyPolicy(
+      input,
+      await this.scraper.scrape(input.privacyPolicyUrl),
+    );
   }
 }
 
@@ -896,7 +1085,9 @@ export const createDefaultOrganizationLookupService = ({
     apiConfig.geminiApiKey || llmClient ? null : "GEMINI_API_KEY",
     promptClient || apiConfig.langfusePublicKey ? null : "LANGFUSE_PUBLIC_KEY",
     promptClient || apiConfig.langfuseSecretKey ? null : "LANGFUSE_SECRET_KEY",
-    strategy !== "firecrawl" || scraper || apiConfig.firecrawlApiKey ? null : "FIRECRAWL_API_KEY",
+    strategy !== "firecrawl" || scraper || apiConfig.firecrawlApiKey
+      ? null
+      : "FIRECRAWL_API_KEY",
   ].filter((name): name is string => Boolean(name));
 
   if (missing.length > 0) {
@@ -914,18 +1105,21 @@ export const createDefaultOrganizationLookupService = ({
     } satisfies OrganizationLookupService;
   }
 
-  const resolvedCodeSource = codeSource ??
+  const resolvedCodeSource =
+    codeSource ??
     new AirtableOrganizationLookupCodeSource(
       apiConfig.airtableBase ?? "",
       apiConfig.airtableApiKey ?? "",
     );
-  const resolvedPromptClient = promptClient ??
+  const resolvedPromptClient =
+    promptClient ??
     LangfusePromptClient.fromConfig({
       publicKey: apiConfig.langfusePublicKey,
       secretKey: apiConfig.langfuseSecretKey,
       baseUrl: apiConfig.langfuseBaseUrl,
     });
-  const resolvedLlmClient = llmClient ?? new GeminiJsonClient(apiConfig.geminiApiKey ?? "");
+  const resolvedLlmClient =
+    llmClient ?? new GeminiJsonClient(apiConfig.geminiApiKey ?? "");
 
   return strategy === "firecrawl"
     ? new FirecrawlOrganizationLookupService(

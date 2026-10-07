@@ -138,6 +138,12 @@ export const ReviewActivitiesTab = () => {
           <div className="grid gap-3">
             {draft.activities.map((activity, index) => {
               const fixedWebsiteActivity = isWebsiteActivity(activity)
+              const dataTypeNames = draft.dataTypes
+                .filter(
+                  (dataType) =>
+                    dataType.id && activity.dataTypeIds.includes(dataType.id)
+                )
+                .map((dataType) => dataType.name)
 
               return (
                 <div
@@ -152,6 +158,11 @@ export const ReviewActivitiesTab = () => {
                       {activity.purpose ? (
                         <p className="mt-1 text-xs leading-5 text-slate-500">
                           {activity.purpose}
+                        </p>
+                      ) : null}
+                      {dataTypeNames.length > 0 ? (
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Data types: {dataTypeNames.join(", ")}
                         </p>
                       ) : null}
                     </div>

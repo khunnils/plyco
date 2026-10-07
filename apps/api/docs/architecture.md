@@ -157,9 +157,10 @@ the `firecrawl-api-key` Secret Manager secret.
 The Firecrawl strategy scrapes the landing page as markdown and links, preserving
 headers and footers. Regex-extracted markdown links and returned links are
 normalized and deduplicated before the `link_extractor` prompt selects up to ten
-privacy/security pages. Only discovered HTTP(S) links may be followed. The prompt receives
-`primaryDomain` and `links` and is loaded from Langfuse without a local prompt
-fallback. Each selected page is then scraped as markdown. The landing page and successful related pages each run
+privacy/security pages. Only discovered HTTP(S) links may be followed. The prompt
+receives `primaryDomain` and `links` and is loaded from Langfuse without a local
+prompt fallback. Each selected page is then scraped as markdown. The landing
+page and successful related pages each run
 through `website_parser` with `text`, `websiteUrl`, and `codeSets`, without URL
 or search tools. Scraped text is appended if the production prompt does not yet
 reference `text`.
@@ -172,6 +173,24 @@ unknown values. Missing values do not overwrite populated fields. Secondary
 scrape/parse failures become bounded warnings; landing-page failures remain
 structured upstream errors. Privacy-policy lookup also scrapes its page before
 running `privacy_policy_parser` with the supplied text.
+
+After merging the Firecrawl page extractions, `activity_resolver` receives the
+extracted `activities` and `dataTypes` as JSON text. Its structured response is
+an `activities` array of up to six consolidated activities, each with a name,
+purpose, and nested `dataTypes` containing names and descriptions. Similar
+processing purposes and data categories are consolidated once across all pages;
+no default placeholder entries are sent to the resolver. Empty extractions skip
+resolution. Invalid resolver output or loss of all known categories returns a
+structured upstream error.
+
+The nested groups are flattened into a shared canonical data-type inventory;
+activities reference those categories through `dataTypeIds`. Shared categories
+reuse the same lookup ID across activities. These IDs identify review suggestions
+only. Onboarding omits them from the initial data-profile save, translates them
+by the reviewed category names to the IDs returned by that save, and then creates
+activities and performs the final profile save using the persisted IDs. Deleted
+review categories are removed from associations. Existing contracts and database
+relationships are reused.
 
 ## Operability
 

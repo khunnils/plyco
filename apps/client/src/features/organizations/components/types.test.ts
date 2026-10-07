@@ -9,10 +9,12 @@ import {
   MARKETING_WEBSITE_SERVICE_NAME,
   WEBSITE_ACTIVITY_NAME,
   WEBSITE_DATA_TYPE_NAME,
+  activitiesWithSavedDataTypes,
   complianceGoalsForRegions,
   draftFromLookup,
   fallbackDraft,
   onboardingComplianceGoalOptions,
+  onboardingDataProfile,
   toProfileDraft,
 } from "./types"
 
@@ -43,10 +45,7 @@ describe("onboarding profile helpers", () => {
       "iso_27001",
       "ccpa",
     ])
-    expect(complianceGoalsForRegions(["eu"])).toEqual([
-      "gdpr",
-      "iso_27001",
-    ])
+    expect(complianceGoalsForRegions(["eu"])).toEqual(["gdpr", "iso_27001"])
     expect(complianceGoalsForRegions(["global", "us", "eu"])).toEqual([
       "iso_27001",
       "soc_2",
@@ -157,5 +156,93 @@ describe("onboarding profile helpers", () => {
         businessActivityIds: ["activity_website"],
       }),
     ])
+  })
+
+  it("translates grouped lookup references to saved data-type ids by name, not order", () => {
+    const draft = fallbackDraft({
+      name: "Acme",
+      website: "https://acme.example",
+    })
+    draft.dataTypes = [
+      { ...draft.dataTypes[0], id: "lookup-account", name: "Account data" },
+      { ...draft.dataTypes[0], id: "lookup-contact", name: "Contact data" },
+      draft.dataTypes[1],
+    ]
+    draft.activities = [
+      {
+        ...draft.activities[0],
+        name: "Account management",
+        dataTypeIds: ["lookup-account", "lookup-contact"],
+      },
+      {
+        ...draft.activities[0],
+        name: "Support",
+        dataTypeIds: ["lookup-contact"],
+      },
+      draft.activities[1],
+    ]
+    const savedDataTypes = [
+      { ...draft.dataTypes[1], id: "saved-contact" },
+      { ...draft.dataTypes[2], id: "saved-website" },
+      { ...draft.dataTypes[0], id: "saved-account" },
+    ]
+
+    expect(
+      onboardingDataProfile(draft).dataTypesStored.every(
+        (dataType) => !("id" in dataType)
+      )
+    ).toBe(true)
+    const activities = activitiesWithSavedDataTypes(draft, savedDataTypes)
+    expect(activities.map((activity) => activity.dataTypeIds)).toEqual([
+      ["saved-account", "saved-contact"],
+      ["saved-contact"],
+      ["saved-website"],
+    ])
+    expect(draft.activities[0].dataTypeIds).toEqual([
+      "lookup-account",
+      "lookup-contact",
+    ])
+    const finalProfile = toProfileDraft(
+      { ...draft, dataTypes: savedDataTypes, activities },
+      {
+        primaryActivityIds: ["activity-account", "activity-support"],
+        websiteActivityIds: ["activity-website"],
+      }
+    )
+    expect(finalProfile.dataHandling.dataTypesStored).toEqual(savedDataTypes)
+  })
+
+  it("preserves renamed data-category references and drops deleted categories", () => {
+    const draft = fallbackDraft({
+      name: "Acme",
+      website: "https://acme.example",
+    })
+    draft.dataTypes[0] = {
+      ...draft.dataTypes[0],
+      id: "lookup-account",
+      name: "  Renamed account data  ",
+    }
+    draft.activities[0] = {
+      ...draft.activities[0],
+      dataTypeIds: ["lookup-account", "lookup-deleted", "lookup-account"],
+    }
+    const savedDataTypes = draft.dataTypes.map((dataType, index) => ({
+      ...dataType,
+      id: `saved-${index}`,
+      name: dataType.name.trim(),
+    }))
+    expect(
+      activitiesWithSavedDataTypes(draft, savedDataTypes)[0].dataTypeIds
+    ).toEqual(["saved-0"])
+  })
+
+  it("fails before activity creation if a reviewed data type has no saved id", () => {
+    const draft = fallbackDraft({
+      name: "Acme",
+      website: "https://acme.example",
+    })
+    expect(() => activitiesWithSavedDataTypes(draft, draft.dataTypes)).toThrow(
+      "Could not save onboarding data types."
+    )
   })
 })

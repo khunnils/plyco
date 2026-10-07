@@ -310,7 +310,14 @@ export const toProfileDraft = (
   })
 
   const infrastructureProviders = onboardingProviders.filter((p) =>
-    ["ai", "cloud", "source_control", "auth", "password_manager", "issue_tracking"].includes(p.systemType)
+    [
+      "ai",
+      "cloud",
+      "source_control",
+      "auth",
+      "password_manager",
+      "issue_tracking",
+    ].includes(p.systemType)
   )
 
   const privacyProviders = onboardingProviders.filter((p) =>
@@ -343,6 +350,42 @@ export const toProfileDraft = (
     },
     access: emptyAccessProfile,
   }
+}
+
+export const onboardingDataProfile = (draft: WizardDraft) => ({
+  // Lookup IDs are references in the review draft, not persisted database IDs.
+  dataTypesStored: draft.dataTypes.map(({ id: _id, ...dataType }) => dataType),
+})
+
+export const activitiesWithSavedDataTypes = (
+  draft: WizardDraft,
+  savedDataTypes: StoredDataType[]
+): BusinessActivityInput[] => {
+  const savedByName = new Map(
+    savedDataTypes.map((dataType) => [dataType.name.trim(), dataType.id])
+  )
+  const savedIds = new Map(
+    draft.dataTypes.flatMap((dataType) => {
+      const savedId = savedByName.get(dataType.name.trim())
+      if (!savedId) throw new Error("Could not save onboarding data types.")
+      return dataType.id ? [[dataType.id, savedId] as const] : []
+    })
+  )
+
+  return draft.activities.map((activity) => ({
+    ...activity,
+    dataTypeIds: isWebsiteActivity(activity)
+      ? [savedByName.get(WEBSITE_DATA_TYPE_NAME)!]
+      : [
+          ...new Set(
+            activity.dataTypeIds.flatMap((id) => {
+              const savedId = savedIds.get(id)
+              // Removed data categories no longer belong to the activity.
+              return savedId ? [savedId] : []
+            })
+          ),
+        ],
+  }))
 }
 
 export const normalizeUrl = (value: string) => {

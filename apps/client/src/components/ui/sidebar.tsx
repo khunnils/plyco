@@ -13,15 +13,17 @@ export const Sidebar = ({ children }: { children: ReactNode }) => (
 )
 
 export const SidebarHeader = ({ children }: { children: ReactNode }) => (
-  <div className="border-b border-slate-200 p-4">{children}</div>
+  <div className="shrink-0 border-b border-slate-200 p-4">{children}</div>
 )
 
 export const SidebarContent = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-1 flex-col p-1">{children}</div>
+  <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-1">
+    {children}
+  </div>
 )
 
 export const SidebarFooter = ({ children }: { children: ReactNode }) => (
-  <div className="border-t border-slate-200 p-3">{children}</div>
+  <div className="shrink-0 border-t border-slate-200 p-3">{children}</div>
 )
 
 export const SidebarMenu = ({ children }: { children: ReactNode }) => (
