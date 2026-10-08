@@ -36,8 +36,16 @@ function stringArray(value: unknown): string[] | null {
 }
 
 function compareProviderSelections(
-  left: { systemType: string; providerId?: string | null; name?: string | null },
-  right: { systemType: string; providerId?: string | null; name?: string | null },
+  left: {
+    systemType: string;
+    providerId?: string | null;
+    name?: string | null;
+  },
+  right: {
+    systemType: string;
+    providerId?: string | null;
+    name?: string | null;
+  },
 ) {
   const bySystemType = left.systemType.localeCompare(right.systemType);
   if (bySystemType !== 0) {
@@ -56,6 +64,7 @@ function compareProviderSelections(
 
 export function mapOrganizationRecord(record: {
   id: string;
+  fieldNotes?: unknown;
   companyName: string;
   legalEntityName: string | null;
   website: string | null;
@@ -73,6 +82,7 @@ export function mapOrganizationRecord(record: {
   complianceGoals: unknown;
   serviceProfile?: {
     id: string;
+    fieldNotes?: unknown;
     sortOrder: number;
     processesCustomerData: boolean;
     serviceName: string | null;
@@ -83,6 +93,7 @@ export function mapOrganizationRecord(record: {
     availabilityRegions: unknown;
     childrenDirected: boolean | null;
     minimumUserAge: number | null;
+    privacyFieldNotes?: unknown;
     usesCookiesOrTrackingTechnologies: boolean | null;
     cookieCategories: unknown;
     cookieConsentMechanism: string | null;
@@ -98,6 +109,7 @@ export function mapOrganizationRecord(record: {
   } | null;
   services?: Array<{
     id: string;
+    fieldNotes?: unknown;
     sortOrder: number;
     processesCustomerData: boolean;
     serviceName: string | null;
@@ -108,6 +120,7 @@ export function mapOrganizationRecord(record: {
     availabilityRegions: unknown;
     childrenDirected: boolean | null;
     minimumUserAge: number | null;
+    privacyFieldNotes?: unknown;
     usesCookiesOrTrackingTechnologies: boolean | null;
     cookieCategories: unknown;
     cookieConsentMechanism: string | null;
@@ -122,6 +135,7 @@ export function mapOrganizationRecord(record: {
     updatedAt: Date;
   }>;
   privacyProfile: {
+    fieldNotes?: unknown;
     supportedRights: unknown;
     requestMethods: unknown;
     responseTimelineDaysStatus: string | null;
@@ -147,6 +161,7 @@ export function mapOrganizationRecord(record: {
     retentionPolicyExists: boolean | null;
   } | null;
   infrastructureProfile: {
+    fieldNotes?: unknown;
     mfaEnabled: boolean | null;
     encryptedDevicesRequired: boolean | null;
     backupsEnabled: boolean | null;
@@ -167,6 +182,7 @@ export function mapOrganizationRecord(record: {
     explicitNoProviderSystemTypes: string[];
   } | null;
   securityProfile: {
+    fieldNotes?: unknown;
     codeReviewRequired: boolean | null;
     dependencySecurityMonitoring: boolean | null;
     secretScanning: boolean | null;
@@ -195,6 +211,7 @@ export function mapOrganizationRecord(record: {
   }>;
   dataTypes: Array<{
     id: string;
+    fieldNotes?: unknown;
     sortOrder: number;
     name: string;
     description: string | null;
@@ -204,6 +221,7 @@ export function mapOrganizationRecord(record: {
     isRequired: boolean | null;
   }>;
   accessProfile: {
+    fieldNotes?: unknown;
     mfaRequired: boolean | null;
     ssoEnabled: boolean | null;
     sharedAccountsExist: boolean | null;
@@ -229,6 +247,7 @@ export function mapOrganizationRecord(record: {
     "issue_tracking",
   ];
   const company = companyProfileSchema.parse({
+    fieldNotes: record.fieldNotes ?? {},
     companyName: record.companyName,
     legalEntityName: record.legalEntityName,
     website: record.website,
@@ -246,6 +265,7 @@ export function mapOrganizationRecord(record: {
     complianceGoals: stringArray(record.complianceGoals),
   });
   const infrastructure = infrastructureProfileSchema.parse({
+    fieldNotes: record.infrastructureProfile?.fieldNotes ?? {},
     organizationProviders: [
       ...record.organizationProviders.flatMap((provider) =>
         provider.providerId
@@ -305,6 +325,7 @@ export function mapOrganizationRecord(record: {
       record.infrastructureProfile?.encryptionInTransit ?? null,
   });
   const security = securityProfileSchema.parse({
+    fieldNotes: record.securityProfile?.fieldNotes ?? {},
     codeReviewRequired: record.securityProfile?.codeReviewRequired ?? null,
     dependencySecurityMonitoring:
       record.securityProfile?.dependencySecurityMonitoring ?? null,
@@ -349,6 +370,7 @@ export function mapOrganizationRecord(record: {
     service
       ? [
           serviceProfileSchema.parse({
+            fieldNotes: service.fieldNotes ?? {},
             id: service.id,
             sortOrder: service.sortOrder,
             processesCustomerData: service.processesCustomerData,
@@ -365,6 +387,7 @@ export function mapOrganizationRecord(record: {
             childrenDirected: service.childrenDirected,
             minimumUserAge: service.minimumUserAge,
             privacy: {
+              fieldNotes: service.privacyFieldNotes ?? {},
               usesCookiesOrTrackingTechnologies:
                 service.usesCookiesOrTrackingTechnologies,
               cookieCategories: service.cookieCategories,
@@ -384,6 +407,7 @@ export function mapOrganizationRecord(record: {
       : [],
   );
   const privacy = privacyProfileSchema.parse({
+    fieldNotes: record.privacyProfile?.fieldNotes ?? {},
     supportedRights: stringArray(record.privacyProfile?.supportedRights),
     requestMethods: stringArray(record.privacyProfile?.requestMethods),
     responseTimelineDaysStatus:
@@ -442,6 +466,7 @@ export function mapOrganizationRecord(record: {
   });
   const dataHandling = dataHandlingProfileSchema.parse({
     dataTypesStored: record.dataTypes.map((dataType) => ({
+      fieldNotes: dataType.fieldNotes ?? {},
       id: dataType.id,
       sortOrder: dataType.sortOrder,
       name: dataType.name,
@@ -453,6 +478,7 @@ export function mapOrganizationRecord(record: {
     })),
   });
   const access = accessProfileSchema.parse({
+    fieldNotes: record.accessProfile?.fieldNotes ?? {},
     mfaRequired: record.accessProfile?.mfaRequired ?? null,
     ssoEnabled: record.accessProfile?.ssoEnabled ?? null,
     sharedAccountsExist: record.accessProfile?.sharedAccountsExist ?? null,
@@ -488,6 +514,7 @@ export function mapOrganizationRecord(record: {
 
 export function mapBusinessActivityRecord(record: {
   id: string;
+  fieldNotes?: unknown;
   sortOrder: number;
   name: string;
   purpose: string;
@@ -508,6 +535,7 @@ export function mapBusinessActivityRecord(record: {
   updatedAt: Date;
 }): BusinessActivity {
   return businessActivitySchema.parse({
+    fieldNotes: record.fieldNotes ?? {},
     id: record.id,
     sortOrder: record.sortOrder,
     name: record.name,
@@ -532,6 +560,7 @@ export function mapBusinessActivityRecord(record: {
 
 export function mapOrganizationProviderRecord(record: {
   id: string;
+  fieldNotes?: unknown;
   providerId?: string | null;
   systemTypes: string[];
   name: string;
@@ -545,6 +574,7 @@ export function mapOrganizationProviderRecord(record: {
   updatedAt: Date;
 }): OrganizationProvider {
   return organizationProviderInventorySchema.parse({
+    fieldNotes: record.fieldNotes ?? {},
     id: record.id,
     providerId: record.providerId ?? "",
     systemTypes: record.systemTypes,
@@ -562,6 +592,7 @@ export function mapOrganizationProviderRecord(record: {
 
 export function mapServiceProviderUsageRecord(record: {
   id: string;
+  fieldNotes?: unknown;
   serviceId: string;
   service?: {
     serviceName: string | null;
@@ -585,6 +616,7 @@ export function mapServiceProviderUsageRecord(record: {
   updatedAt: Date;
 }): ServiceProviderUsage {
   return serviceProviderUsageSchema.parse({
+    fieldNotes: record.fieldNotes ?? {},
     id: record.id,
     serviceId: record.serviceId,
     serviceName: record.service?.serviceName ?? "",

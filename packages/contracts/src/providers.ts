@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { profileWithFieldNotes } from "./field-notes.js";
 
 import {
   codeIdSchema,
@@ -38,7 +39,7 @@ export const providerSelectionSchema = z.object({
   name: z.string().trim().optional(),
 });
 
-export const organizationProviderInputSchema = z.object({
+export const organizationProviderInputSchema = profileWithFieldNotes({
   providerId: z.string().trim().optional().or(z.literal("")),
   systemTypes: z.array(providerSystemTypeSchema).default([]),
   name: z.string().trim().min(1, "Provider name is required"),
@@ -57,7 +58,7 @@ export const organizationProviderInventorySchema =
     updatedAt: z.string().datetime(),
   });
 
-export const serviceProviderUsageFieldsSchema = z.object({
+export const serviceProviderUsageFieldsSchema = profileWithFieldNotes({
   serviceId: z.string().trim().min(1, "Service is required"),
   organizationProviderId: z.string().trim().min(1, "Provider is required"),
   systemType: providerSystemTypeSchema.nullable().default(null),
@@ -69,7 +70,7 @@ export const serviceProviderUsageFieldsSchema = z.object({
   notes: z.string().trim().optional().or(z.literal("")),
 });
 
-const serviceProviderUsageInputBaseSchema = serviceProviderUsageFieldsSchema
+const serviceProviderUsageInputBaseSchema = serviceProviderUsageFieldsSchema;
 
 const normalizeProviderDataProcessingNone = <
   T extends z.infer<typeof serviceProviderUsageInputBaseSchema>,

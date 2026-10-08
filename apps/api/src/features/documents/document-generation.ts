@@ -1,3 +1,8 @@
+import {
+  customerNotesFor,
+  withoutFieldNotes,
+  prepareNoteRendering,
+} from "./field-notes.js";
 import { createHash } from "node:crypto";
 
 import nunjucks from "nunjucks";
@@ -70,7 +75,11 @@ export class ReportContextBuilder {
     const organization = snapshot.organization;
     const organizationContext = organization
       ? {
-          ...organization.company,
+          ...withoutFieldNotes(organization.company),
+          customerNotes: {
+            ...customerNotesFor(organization.company),
+            ...customerNotesFor(organization.company, { companyName: "name" }),
+          },
           name: organization.company.companyName,
           countryLabel: this.countryLabel(
             countries,
@@ -111,9 +120,7 @@ export class ReportContextBuilder {
       legacySnapshot.serviceProviderUsage ??
       legacySnapshot.serviceVendorUses ??
       []
-    ).map((usage) =>
-      this.providerUsageContext(usage, providers, vocabulary),
-    );
+    ).map((usage) => this.providerUsageContext(usage, providers, vocabulary));
     const services = organization
       ? organization.services.map((service) =>
           this.serviceContext(
@@ -151,22 +158,19 @@ export class ReportContextBuilder {
         ),
         cookiesAnswered: services.some((service) => {
           const servicePrivacy = service.privacy as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
           return (
             servicePrivacy?.usesCookiesOrTrackingTechnologiesAnswered === true
           );
         }),
         hasHostingRegion: services.some((service) => {
           const servicePrivacy = service.privacy as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
           return Boolean(servicePrivacy?.primaryHostingRegionLabel);
         }),
         hasAllSubprocessorsDataRegion: services.some((service) => {
           const servicePrivacy = service.privacy as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
           return Boolean(servicePrivacy?.allSubprocessorsDataRegionLabel);
         }),
       },
@@ -187,7 +191,12 @@ export class ReportContextBuilder {
       dataHandling: organization
         ? this.dataHandlingContext(organization.dataHandling, vocabulary)
         : {},
-      access: organization ? this.withAnswerFlags(organization.access) : {},
+      access: organization
+        ? {
+            ...this.withAnswerFlags(withoutFieldNotes(organization.access)),
+            customerNotes: customerNotesFor(organization.access),
+          }
+        : {},
       providers: this.providerGroups(services, providers, providerUsage),
       vendors: {
         ...this.providerGroups(services, providers, providerUsage),
@@ -277,10 +286,17 @@ export class ReportContextBuilder {
         }
 
         return (left.name ?? "").localeCompare(right.name ?? "");
-      });
+      })
+      .map((provider) => ({
+        ...provider,
+        customerNotes: customerNotesFor(infrastructure, {
+          [`organizationProviders.${provider.systemType}`]: "selection",
+        }),
+      }));
 
     return this.withAnswerFlags({
-      ...infrastructure,
+      ...withoutFieldNotes(infrastructure),
+      customerNotes: customerNotesFor(infrastructure),
       organizationProviders,
     });
   }
@@ -299,7 +315,8 @@ export class ReportContextBuilder {
 
   private dataTypeContext(dataType: StoredDataType, vocabulary?: Vocabulary) {
     return {
-      ...dataType,
+      ...withoutFieldNotes(dataType),
+      customerNotes: customerNotesFor(dataType),
       subjectTypeLabels: this.codeLabels(
         vocabulary,
         "subject_types",
@@ -351,6 +368,18 @@ export class ReportContextBuilder {
     );
 
     return {
+      customerNotes: customerNotesFor(service, {
+        serviceName: "name",
+        serviceDescription: "description",
+        serviceUrl: "url",
+        processesCustomerData: "processesCustomerData",
+        businessActivityIds: "businessActivityIds",
+        userTypes: "userTypes",
+        customerTypes: "customerTypes",
+        availabilityRegions: "availabilityRegions",
+        childrenDirected: "childrenDirected",
+        minimumUserAge: "minimumUserAge",
+      }),
       id: service.id,
       processesCustomerData: service.processesCustomerData,
       name: service.serviceName,
@@ -389,12 +418,18 @@ export class ReportContextBuilder {
         minimumUserAge: service.minimumUserAge,
       }),
       privacy: {
+        customerNotes: customerNotesFor(service.privacy),
         usesCookiesOrTrackingTechnologies:
           service.privacy.usesCookiesOrTrackingTechnologies,
         cookieCategories: (service.privacy.cookieCategories ?? []).map(
           (category) => ({
             ...category,
             label: cookieCategoryLabels[category.category],
+            customerNotes: customerNotesFor(service.privacy, {
+              [`cookieCategories.${category.category}.enabled`]: "enabled",
+              [`cookieCategories.${category.category}.requiresConsent`]:
+                "requiresConsent",
+            }),
           }),
         ),
         cookieConsentRequired:
@@ -458,6 +493,7 @@ export class ReportContextBuilder {
 
   private privacyContext(privacy: PrivacyProfile, vocabulary?: Vocabulary) {
     return {
+      customerNotes: customerNotesFor(privacy),
       supportedRights: privacy.supportedRights,
       supportedRightLabels: this.codeLabels(
         vocabulary,
@@ -559,6 +595,12 @@ export class ReportContextBuilder {
 
     return {
       accessControl: {
+        customerNotes: customerNotesFor(access, {
+          leastPrivilege: "leastPrivilege",
+          roleBasedAccess: "roleBasedAccess",
+          accessReviewCadence: "accessReviewCadence",
+          adminApprovalRequired: "adminApprovalRequired",
+        }),
         leastPrivilege: access.leastPrivilege,
         roleBasedAccess: access.roleBasedAccess,
         accessReviewCadence: access.accessReviewCadence,
@@ -576,6 +618,11 @@ export class ReportContextBuilder {
         }),
       },
       authentication: {
+        customerNotes: customerNotesFor(access, {
+          mfaRequired: "mfaRequired",
+          ssoEnabled: "ssoSupported",
+          passwordManagerRequired: "passwordManagerRequired",
+        }),
         mfaRequired: access.mfaRequired,
         ssoSupported: access.ssoEnabled,
         passwordManagerRequired: access.passwordManagerRequired,
@@ -586,6 +633,13 @@ export class ReportContextBuilder {
         }),
       },
       encryption: {
+        customerNotes: customerNotesFor(infrastructure, {
+          atRestAlgorithm: "atRestAlgorithm",
+          inTransitMinimumTlsVersion: "inTransitMinimumTlsVersion",
+          keyManagementProvider: "keyManagementProvider",
+          encryptionAtRest: "encryptionAtRest",
+          encryptionInTransit: "encryptionInTransit",
+        }),
         atRestAlgorithm,
         atRestAlgorithmLabel: this.codeLabel(
           vocabulary,
@@ -611,6 +665,10 @@ export class ReportContextBuilder {
         }),
       },
       logging: {
+        customerNotes: customerNotesFor(infrastructure, {
+          centralizedLoggingEnabled: "centralizedLogging",
+          securityMonitoring: "securityMonitoring",
+        }),
         centralizedLogging: infrastructure.centralizedLoggingEnabled,
         securityMonitoring: infrastructure.securityMonitoring,
         securityMonitoringLabel: this.codeLabel(
@@ -624,6 +682,15 @@ export class ReportContextBuilder {
         }),
       },
       developmentSecurity: {
+        customerNotes: customerNotesFor(security, {
+          codeReviewRequired: "codeReviewRequired",
+          dependencySecurityMonitoring: "dependencySecurityMonitoring",
+          secretScanning: "secretScanning",
+          automatedTestingBeforeDeployment: "automatedTestingBeforeDeployment",
+          cicdDeploymentProcess: "cicdDeploymentProcess",
+          productionDeploymentApprovalRequired:
+            "productionDeploymentApprovalRequired",
+        }),
         codeReviewRequired: security.codeReviewRequired,
         dependencySecurityMonitoring: security.dependencySecurityMonitoring,
         secretScanning: security.secretScanning,
@@ -644,6 +711,19 @@ export class ReportContextBuilder {
         }),
       },
       vulnerabilityManagement: {
+        customerNotes: customerNotesFor(security, {
+          scanningCadence: "scanningCadence",
+          penetrationTestingStrategy: "penetrationTestingStrategy",
+          penetrationTestingCadence: "penetrationTestingCadence",
+          penetrationTestLastDate: "penetrationTestLastDate",
+          patchingSlaCriticalDays: "patchingSlaCriticalDays",
+          patchingSlaCriticalDaysStatus: "patchingSlaCriticalDaysStatus",
+          patchingSlaHighDays: "patchingSlaHighDays",
+          patchingSlaHighDaysStatus: "patchingSlaHighDaysStatus",
+          vulnerabilityDisclosureProgramExists:
+            "vulnerabilityDisclosureProgramExists",
+          vulnerabilityDisclosureUrl: "vulnerabilityDisclosureUrl",
+        }),
         scanningCadence: security.scanningCadence,
         scanningCadenceLabel: this.codeLabel(
           vocabulary,
@@ -693,6 +773,12 @@ export class ReportContextBuilder {
         }),
       },
       incidentResponse: {
+        customerNotes: customerNotesFor(security, {
+          incidentResponsePlanExists: "planExists",
+          incidentNotificationTimeline: "notificationTimeline",
+          customerNotificationProcess: "customerNotificationProcess",
+          incidentResponseLastTestedDate: "lastTestedDate",
+        }),
         planExists: security.incidentResponsePlanExists,
         notificationTimeline: security.incidentNotificationTimeline,
         notificationTimelineLabel: this.codeLabel(
@@ -715,6 +801,13 @@ export class ReportContextBuilder {
         }),
       },
       backups: {
+        customerNotes: customerNotesFor(infrastructure, {
+          backupsEnabled: "backupsEnabled",
+          backupCadence: "backupCadence",
+          backupRetentionDays: "backupRetentionDays",
+          backupRetentionDaysStatus: "backupRetentionDaysStatus",
+          restoreTestingCadence: "restoreTestingCadence",
+        }),
         backupCadence: infrastructure.backupCadence,
         backupCadenceLabel: this.codeLabel(
           vocabulary,
@@ -741,6 +834,11 @@ export class ReportContextBuilder {
         }),
       },
       vendorRisk: {
+        customerNotes: customerNotesFor(infrastructure, {
+          vendorReviewRequired: "vendorReviewRequired",
+          vendorReviewCadence: "vendorReviewCadence",
+          dpaRequiredForProcessors: "dpaRequiredForProcessors",
+        }),
         vendorReviewRequired: infrastructure.vendorReviewRequired,
         vendorReviewCadence: infrastructure.vendorReviewCadence,
         vendorReviewCadenceLabel: this.codeLabel(
@@ -796,7 +894,12 @@ export class ReportContextBuilder {
   private answerFlags(values: Record<string, unknown>) {
     return Object.fromEntries(
       Object.entries(values)
-        .filter(([key]) => key !== "organizationProviders")
+        .filter(
+          ([key]) =>
+            key !== "organizationProviders" &&
+            key !== "fieldNotes" &&
+            key !== "customerNotes",
+        )
         .flatMap(([key, value]) => [
           [`${key}Answered`, this.answered(value)],
           [`${key}HasValue`, this.hasValue(value)],
@@ -838,6 +941,7 @@ export class ReportContextBuilder {
     countries: Country[] = systemCountries,
   ) {
     return {
+      customerNotes: customerNotesFor(provider),
       id: provider.id,
       providerId: provider.providerId,
       systemTypes: provider.systemTypes,
@@ -885,6 +989,10 @@ export class ReportContextBuilder {
 
     return {
       ...provider,
+      customerNotes: {
+        ...((provider.customerNotes as Record<string, unknown>) ?? {}),
+        ...customerNotesFor(providerUsage),
+      },
       id: providerUsage.id,
       serviceId: providerUsage.serviceId,
       serviceName: providerUsage.serviceName,
@@ -939,7 +1047,9 @@ export class ReportContextBuilder {
       return "";
     }
 
-    const uniqueRegions = new Set(subprocessorRegions.map(([region]) => region));
+    const uniqueRegions = new Set(
+      subprocessorRegions.map(([region]) => region),
+    );
     return uniqueRegions.size === 1 ? [...uniqueRegions][0] : "";
   }
 
@@ -951,9 +1061,7 @@ export class ReportContextBuilder {
       return "";
     }
 
-    return (
-      countries?.find((country) => country.code === value)?.name ?? value
-    );
+    return countries?.find((country) => country.code === value)?.name ?? value;
   }
 
   private businessActivityContext(
@@ -966,6 +1074,7 @@ export class ReportContextBuilder {
     );
 
     return {
+      customerNotes: customerNotesFor(activity),
       id: activity.id,
       name: activity.name,
       purpose: activity.purpose,
@@ -1041,7 +1150,10 @@ export class ReportContextBuilder {
 
 export class Jinja2Renderer {
   render(template: Template, context: NormalizedTemplateContext): string {
-    return nunjucks.renderString(template.content, context);
+    return nunjucks.renderString(
+      template.content,
+      prepareNoteRendering(context) as object,
+    );
   }
 }
 
@@ -1049,7 +1161,9 @@ export function templateSourceHash(
   template: Pick<Template, "content">,
   context: NormalizedTemplateContext,
 ) {
-  return sourceHashFromFingerprint(documentSourceFingerprint(template, context));
+  return sourceHashFromFingerprint(
+    documentSourceFingerprint(template, context),
+  );
 }
 
 export function documentSourceFingerprint(
@@ -1152,7 +1266,8 @@ export function evaluateDocumentFreshness({
       : documentStaleReasons(document.sourceFingerprint, currentFingerprint);
 
   return {
-    status: staleReasons.length === 0 ? ("current" as const) : ("stale" as const),
+    status:
+      staleReasons.length === 0 ? ("current" as const) : ("stale" as const),
     staleReasons,
   };
 }
@@ -1173,8 +1288,7 @@ export function referencedTemplatePaths(content: string): string[] {
         !path.startsWith("loop.") &&
         !NON_SOURCE_POLICY_PATHS.has(path) &&
         !Array.from(paths).some(
-          (candidate) =>
-            candidate !== path && candidate.startsWith(`${path}.`),
+          (candidate) => candidate !== path && candidate.startsWith(`${path}.`),
         ),
     )
     .sort();
@@ -1414,11 +1528,7 @@ function collectNamesInto(
   names: Set<string>,
   includePrimitiveStrings: boolean,
 ) {
-  if (
-    includePrimitiveStrings &&
-    typeof value === "string" &&
-    value.trim()
-  ) {
+  if (includePrimitiveStrings && typeof value === "string" && value.trim()) {
     names.add(value.trim());
     return;
   }

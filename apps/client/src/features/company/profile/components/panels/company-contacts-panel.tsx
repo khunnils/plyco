@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { companyProfileSchema, type CompanyProfile } from "@plyco/contracts"
 import { useState } from "react"
@@ -13,6 +14,7 @@ import {
 import { companyHelperText } from "../company-helper-text"
 
 const contactsSchema = companyProfileSchema.pick({
+  fieldNotes: true,
   contactEmail: true,
   securityContactEmail: true,
   privacyContactEmail: true,
@@ -21,6 +23,7 @@ const contactsSchema = companyProfileSchema.pick({
 type ContactsDraft = z.infer<typeof contactsSchema>
 
 const toContactsDraft = (company: CompanyProfile): ContactsDraft => ({
+  fieldNotes: company.fieldNotes,
   contactEmail: company.contactEmail,
   securityContactEmail: company.securityContactEmail,
   privacyContactEmail: company.privacyContactEmail,
@@ -71,47 +74,49 @@ export const CompanyContactsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Primary points of contact for customers and regulators."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={contactsRows(draft)} />}
-      saveLabel="Save"
-      title="Contacts"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <TextField
-          error={form.formState.errors.contactEmail}
-          helperText={companyHelperText.contactEmail}
-          label="Contact email"
-          name="contactEmail"
-          placeholder="hello@acme.example"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.securityContactEmail}
-          helperText={companyHelperText.securityContactEmail}
-          label="Security contact email"
-          name="securityContactEmail"
-          placeholder="security@acme.example"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.privacyContactEmail}
-          helperText={companyHelperText.privacyContactEmail}
-          label="Privacy contact email"
-          name="privacyContactEmail"
-          placeholder="privacy@acme.example"
-          register={form.register}
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Primary points of contact for customers and regulators."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={<ProfilePanelDetailGrid rows={contactsRows(draft)} />}
+        saveLabel="Save"
+        title="Contacts"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <TextField
+            error={form.formState.errors.contactEmail}
+            helperText={companyHelperText.contactEmail}
+            label="Contact email"
+            name="contactEmail"
+            placeholder="hello@acme.example"
+            register={form.register}
+          />
+          <TextField
+            error={form.formState.errors.securityContactEmail}
+            helperText={companyHelperText.securityContactEmail}
+            label="Security contact email"
+            name="securityContactEmail"
+            placeholder="security@acme.example"
+            register={form.register}
+          />
+          <TextField
+            error={form.formState.errors.privacyContactEmail}
+            helperText={companyHelperText.privacyContactEmail}
+            label="Privacy contact email"
+            name="privacyContactEmail"
+            placeholder="privacy@acme.example"
+            register={form.register}
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

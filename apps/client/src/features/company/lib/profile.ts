@@ -65,6 +65,7 @@ export const profileFromOrganization = (
       organization.services.length > 0
         ? organization.services.map((service) => ({
             id: service.id,
+            fieldNotes: service.fieldNotes,
             sortOrder: service.sortOrder,
             processesCustomerData: service.processesCustomerData,
             serviceName: service.serviceName,
@@ -93,6 +94,7 @@ export const profileFromOrganization = (
 export const toOrganizationProviderInput = (
   provider: OrganizationProvider | OrganizationProviderInput
 ): OrganizationProviderInput => ({
+  fieldNotes: provider.fieldNotes,
   providerId: provider.providerId,
   systemTypes: provider.systemTypes,
   name: provider.name,
@@ -107,6 +109,7 @@ export const toOrganizationProviderInput = (
 export const toServiceProviderUsageInput = (
   providerUsage: ServiceProviderUsage | ServiceProviderUsageInput
 ): ServiceProviderUsageInput => ({
+  fieldNotes: providerUsage.fieldNotes,
   serviceId: providerUsage.serviceId,
   organizationProviderId: providerUsage.organizationProviderId,
   systemType: providerUsage.systemType,

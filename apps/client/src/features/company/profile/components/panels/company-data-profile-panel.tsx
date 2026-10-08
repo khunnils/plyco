@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { companyProfileSchema, type CompanyProfile } from "@plyco/contracts"
 import { useState } from "react"
@@ -15,6 +16,7 @@ import { companyHelperText } from "../company-helper-text"
 import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const dataProfileSchema = companyProfileSchema.pick({
+  fieldNotes: true,
   handlesSensitiveData: true,
   handlesPersonalData: true,
   handlesHealthData: true,
@@ -23,6 +25,7 @@ const dataProfileSchema = companyProfileSchema.pick({
 type DataProfileDraft = z.infer<typeof dataProfileSchema>
 
 const toDataProfileDraft = (company: CompanyProfile): DataProfileDraft => ({
+  fieldNotes: company.fieldNotes,
   handlesSensitiveData: company.handlesSensitiveData,
   handlesPersonalData: company.handlesPersonalData,
   handlesHealthData: company.handlesHealthData,
@@ -73,41 +76,45 @@ export const CompanyDataProfilePanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="High-level data handling posture for questionnaires and documents."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={dataProfileRows(draft)} />}
-      saveLabel="Save"
-      title="Data profile"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={companyHelperText.handlesSensitiveData}
-          label="Handles sensitive data"
-          name="handlesSensitiveData"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.handlesPersonalData}
-          label="Handles personal data"
-          name="handlesPersonalData"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.handlesHealthData}
-          label="Handles health data"
-          name="handlesHealthData"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="High-level data handling posture for questionnaires and documents."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={dataProfileRows(draft)} />
+        }
+        saveLabel="Save"
+        title="Data profile"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={companyHelperText.handlesSensitiveData}
+            label="Handles sensitive data"
+            name="handlesSensitiveData"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.handlesPersonalData}
+            label="Handles personal data"
+            name="handlesPersonalData"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.handlesHealthData}
+            label="Handles health data"
+            name="handlesHealthData"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

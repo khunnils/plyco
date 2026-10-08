@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { emptyServiceProfile, type ServiceProfileInput } from "@plyco/contracts"
 import { type Resolver, useForm } from "react-hook-form"
@@ -29,12 +30,13 @@ export const AddServiceForm = ({
     values: draft,
   })
   const submit = form.handleSubmit(
-    ({ usesCookiesOrTrackingTechnologies, ...basics }) => {
+    ({ usesCookiesOrTrackingTechnologies, privacyFieldNotes, ...basics }) => {
       onSubmit({
         ...emptyServiceProfile,
         ...basics,
         privacy: normalizeCookiePreferences({
           ...emptyServiceProfile.privacy,
+          fieldNotes: privacyFieldNotes,
           usesCookiesOrTrackingTechnologies,
         }),
       })
@@ -42,28 +44,38 @@ export const AddServiceForm = ({
   )
 
   return (
-    <ProfilePanelShell
-      description="Register a new service or application to define its security scope."
-      isEditing
-      isMutationPending={isMutationPending}
-      readOnlyContent={null}
-      saveLabel="Add service"
-      title="Add service"
-      onCancel={() => {
-        form.reset(draft)
-        onCancel()
+    <FieldNotesProvider
+      form={form}
+      bindings={{
+        usesCookiesOrTrackingTechnologies: {
+          path: "privacyFieldNotes",
+          key: "usesCookiesOrTrackingTechnologies",
+        },
       }}
-      onEdit={() => undefined}
-      onSave={submit}
     >
-      <ServiceBasicsFormFields
-        control={form.control}
-        descriptionName={basicsPath("serviceDescription")}
-        errors={form.formState.errors}
-        nameName={basicsPath("serviceName")}
-        register={form.register}
-        urlName={basicsPath("serviceUrl")}
-      />
-    </ProfilePanelShell>
+      <ProfilePanelShell
+        description="Register a new service or application to define its security scope."
+        isEditing
+        isMutationPending={isMutationPending}
+        readOnlyContent={null}
+        saveLabel="Add service"
+        title="Add service"
+        onCancel={() => {
+          form.reset(draft)
+          onCancel()
+        }}
+        onEdit={() => undefined}
+        onSave={submit}
+      >
+        <ServiceBasicsFormFields
+          control={form.control}
+          descriptionName={basicsPath("serviceDescription")}
+          errors={form.formState.errors}
+          nameName={basicsPath("serviceName")}
+          register={form.register}
+          urlName={basicsPath("serviceUrl")}
+        />
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

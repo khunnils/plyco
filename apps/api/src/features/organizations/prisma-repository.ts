@@ -194,6 +194,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private organizationData(input: CompanyProfile) {
     return {
+      fieldNotes: input.fieldNotes,
       companyName: input.companyName,
       legalEntityName: input.legalEntityName,
       website: input.website,
@@ -217,6 +218,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     privacy: PrivacyProfile,
   ) {
     return {
+      fieldNotes: input.fieldNotes,
       mfaEnabled: input.mfaEnabled,
       encryptedDevicesRequired: input.encryptedDevicesRequired,
       backupsEnabled: input.backupsEnabled,
@@ -246,6 +248,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private securityData(input: SecurityProfile) {
     return {
+      fieldNotes: input.fieldNotes,
       codeReviewRequired: input.codeReviewRequired,
       dependencySecurityMonitoring: input.dependencySecurityMonitoring,
       secretScanning: input.secretScanning,
@@ -266,15 +269,15 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
       vulnerabilityDisclosureUrl: input.vulnerabilityDisclosureUrl,
       incidentResponsePlanExists: input.incidentResponsePlanExists,
       incidentNotificationTimeline: input.incidentNotificationTimeline,
-      customerNotificationProcess: jsonValue(
-        input.customerNotificationProcess,
-      ),
+      customerNotificationProcess: jsonValue(input.customerNotificationProcess),
       incidentResponseLastTestedDate: input.incidentResponseLastTestedDate,
     };
   }
 
   private serviceData(input: ServiceProfileInput) {
     return {
+      privacyFieldNotes: input.privacy.fieldNotes,
+      fieldNotes: input.fieldNotes,
       processesCustomerData: input.processesCustomerData,
       serviceName: input.serviceName,
       serviceDescription: input.serviceDescription,
@@ -415,6 +418,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private privacyData(input: PrivacyProfile) {
     return {
+      fieldNotes: input.fieldNotes,
       supportedRights: jsonValue(input.supportedRights),
       requestMethods: jsonValue(input.requestMethods),
       responseTimelineDaysStatus: input.responseTimelineDaysStatus,
@@ -625,6 +629,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private organizationDataTypes(input: DataHandlingProfile) {
     return input.dataTypesStored.map((dataType, sortOrder) => ({
+      fieldNotes: dataType.fieldNotes,
       name: dataType.name,
       description: dataType.description,
       subjectTypes: jsonValue(dataType.subjectTypes),
@@ -640,39 +645,37 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
     input: DataHandlingProfile,
   ) {
     const dataTypes = this.organizationDataTypes(input);
-    const names = dataTypes.map((dataType) => dataType.name);
-
-    await this.client.organizationDataType.deleteMany({
-      where: {
-        organizationId,
-        name: { notIn: names },
-      },
+    await this.client.$transaction(async (tx) => {
+      const existing = await tx.organizationDataType.findMany({
+        where: { organizationId },
+      });
+      const ids = input.dataTypesStored.map((item) => {
+        const current = item.id
+          ? existing.find((record) => record.id === item.id)
+          : existing.find((record) => record.name === item.name);
+        if (item.id && !current)
+          throw new ApiError(
+            "DATA_TYPE_NOT_FOUND",
+            "Data type was not found for this organization.",
+            400,
+          );
+        return current?.id;
+      });
+      await tx.organizationDataType.deleteMany({
+        where: {
+          organizationId,
+          id: { notIn: ids.filter((id): id is string => Boolean(id)) },
+        },
+      });
+      for (const [index, data] of dataTypes.entries()) {
+        const id = ids[index];
+        if (id) await tx.organizationDataType.update({ where: { id }, data });
+        else
+          await tx.organizationDataType.create({
+            data: { organizationId, ...data },
+          });
+      }
     });
-
-    await Promise.all(
-      dataTypes.map((dataType) =>
-        this.client.organizationDataType.upsert({
-          where: {
-            organizationId_name: {
-              organizationId,
-              name: dataType.name,
-            },
-          },
-          create: {
-            organizationId,
-            ...dataType,
-          },
-          update: {
-            description: dataType.description,
-            subjectTypes: dataType.subjectTypes,
-            collectionMethods: dataType.collectionMethods,
-            isSensitive: dataType.isSensitive,
-            isRequired: dataType.isRequired,
-            sortOrder: dataType.sortOrder,
-          },
-        }),
-      ),
-    );
   }
 
   private async reorderOrganizationEntities(
@@ -711,6 +714,7 @@ export class PrismaOrganizationRepository implements OrganizationRepository {
 
   private accessData(input: AccessProfile) {
     return {
+      fieldNotes: input.fieldNotes,
       mfaRequired: input.mfaRequired,
       ssoEnabled: input.ssoEnabled,
       sharedAccountsExist: input.sharedAccountsExist,

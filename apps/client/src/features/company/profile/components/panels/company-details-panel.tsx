@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   companyProfileSchema,
@@ -18,6 +19,7 @@ import { countryLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { companyHelperText } from "../company-helper-text"
 
 const detailsSchema = companyProfileSchema.pick({
+  fieldNotes: true,
   companyName: true,
   legalEntityName: true,
   website: true,
@@ -28,6 +30,7 @@ const detailsSchema = companyProfileSchema.pick({
 type DetailsDraft = z.infer<typeof detailsSchema>
 
 const toDetailsDraft = (company: CompanyProfile): DetailsDraft => ({
+  fieldNotes: company.fieldNotes,
   companyName: company.companyName,
   legalEntityName: company.legalEntityName,
   website: company.website,
@@ -86,65 +89,67 @@ export const CompanyDetailsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Legal identity and primary location."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={detailsRows(draft, countries)} />
-      }
-      saveLabel="Save"
-      title="Company details"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <div className="grid gap-3 sm:grid-cols-2">
-        <TextField
-          error={form.formState.errors.companyName}
-          helperText={companyHelperText.companyName}
-          label="Company name"
-          name="companyName"
-          placeholder="Acme AI"
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.legalEntityName}
-          helperText={companyHelperText.legalEntityName}
-          label="Legal entity name"
-          name="legalEntityName"
-          placeholder="Acme AI, Inc."
-          register={form.register}
-        />
-        <TextField
-          error={form.formState.errors.website}
-          helperText={companyHelperText.website}
-          label="Website"
-          name="website"
-          placeholder="https://acme.example"
-          register={form.register}
-        />
-        <SelectField
-          control={form.control}
-          helperText={companyHelperText.country}
-          label="Country"
-          name="country"
-          options={[{ value: "", label: "Not set" }, ...countryOptionList]}
-          placeholder="United States"
-        />
-        <TextField
-          error={form.formState.errors.address}
-          helperText={companyHelperText.address}
-          label="Address"
-          name="address"
-          placeholder="123 Market Street"
-          register={form.register}
-        />
-      </div>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Legal identity and primary location."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={detailsRows(draft, countries)} />
+        }
+        saveLabel="Save"
+        title="Company details"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField
+            error={form.formState.errors.companyName}
+            helperText={companyHelperText.companyName}
+            label="Company name"
+            name="companyName"
+            placeholder="Acme AI"
+            register={form.register}
+          />
+          <TextField
+            error={form.formState.errors.legalEntityName}
+            helperText={companyHelperText.legalEntityName}
+            label="Legal entity name"
+            name="legalEntityName"
+            placeholder="Acme AI, Inc."
+            register={form.register}
+          />
+          <TextField
+            error={form.formState.errors.website}
+            helperText={companyHelperText.website}
+            label="Website"
+            name="website"
+            placeholder="https://acme.example"
+            register={form.register}
+          />
+          <SelectField
+            control={form.control}
+            helperText={companyHelperText.country}
+            label="Country"
+            name="country"
+            options={[{ value: "", label: "Not set" }, ...countryOptionList]}
+            placeholder="United States"
+          />
+          <TextField
+            error={form.formState.errors.address}
+            helperText={companyHelperText.address}
+            label="Address"
+            name="address"
+            placeholder="123 Market Street"
+            register={form.register}
+          />
+        </div>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

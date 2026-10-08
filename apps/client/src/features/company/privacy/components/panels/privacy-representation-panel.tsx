@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   privacyProfileSchema,
@@ -20,6 +21,7 @@ import { privacyHelperText } from "../privacy-helper-text"
 const APPOINTED_STATUS = "appointed"
 
 const representationSchema = privacyProfileSchema.pick({
+  fieldNotes: true,
   dpoStatus: true,
   dpoName: true,
   dpoEmail: true,
@@ -33,6 +35,7 @@ type RepresentationDraft = z.infer<typeof representationSchema>
 const toRepresentationDraft = (
   privacy: PrivacyProfile
 ): RepresentationDraft => ({
+  fieldNotes: privacy.fieldNotes,
   dpoStatus: privacy.dpoStatus,
   dpoName: privacy.dpoName,
   dpoEmail: privacy.dpoEmail,
@@ -161,81 +164,83 @@ export const PrivacyRepresentationPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Details of designated Data Protection Officers and legal representatives in foreign jurisdictions."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Details of designated Data Protection Officers and legal representatives in foreign jurisdictions."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <div className="grid gap-6 sm:grid-cols-2">
+            <ProfilePanelDetailGrid rows={dpoRows(draft, vocabulary)} />
+            <ProfilePanelDetailGrid
+              rows={euRepresentativeRows(draft, vocabulary)}
+            />
+          </div>
+        }
+        saveLabel="Save"
+        title="Privacy Officers & Representation"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
         <div className="grid gap-6 sm:grid-cols-2">
-          <ProfilePanelDetailGrid rows={dpoRows(draft, vocabulary)} />
-          <ProfilePanelDetailGrid
-            rows={euRepresentativeRows(draft, vocabulary)}
-          />
+          <div className="grid gap-3">
+            <SelectField
+              control={form.control}
+              helperText={privacyHelperText.dpoStatus}
+              label="DPO status"
+              name="dpoStatus"
+              options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
+              placeholder="Not set"
+            />
+            <TextField
+              disabled={!dpoAppointed}
+              error={form.formState.errors.dpoName}
+              label="DPO name"
+              name="dpoName"
+              register={form.register}
+            />
+            <TextField
+              disabled={!dpoAppointed}
+              error={form.formState.errors.dpoEmail}
+              label="DPO email"
+              name="dpoEmail"
+              register={form.register}
+            />
+          </div>
+          <div className="grid gap-3">
+            <SelectField
+              control={form.control}
+              helperText={privacyHelperText.euRepresentativeStatus}
+              label="EU representative status"
+              name="euRepresentativeStatus"
+              options={[
+                { value: "", label: "Not set" },
+                ...euRepresentativeStatusOptions,
+              ]}
+              placeholder="Not set"
+            />
+            <TextField
+              disabled={!euRepresentativeAppointed}
+              error={form.formState.errors.euRepresentativeName}
+              label="EU representative name"
+              name="euRepresentativeName"
+              register={form.register}
+            />
+            <TextField
+              disabled={!euRepresentativeAppointed}
+              error={form.formState.errors.euRepresentativeAddress}
+              label="EU representative address"
+              name="euRepresentativeAddress"
+              register={form.register}
+            />
+          </div>
         </div>
-      }
-      saveLabel="Save"
-      title="Privacy Officers & Representation"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="grid gap-3">
-          <SelectField
-            control={form.control}
-            helperText={privacyHelperText.dpoStatus}
-            label="DPO status"
-            name="dpoStatus"
-            options={[{ value: "", label: "Not set" }, ...dpoStatusOptions]}
-            placeholder="Not set"
-          />
-          <TextField
-            disabled={!dpoAppointed}
-            error={form.formState.errors.dpoName}
-            label="DPO name"
-            name="dpoName"
-            register={form.register}
-          />
-          <TextField
-            disabled={!dpoAppointed}
-            error={form.formState.errors.dpoEmail}
-            label="DPO email"
-            name="dpoEmail"
-            register={form.register}
-          />
-        </div>
-        <div className="grid gap-3">
-          <SelectField
-            control={form.control}
-            helperText={privacyHelperText.euRepresentativeStatus}
-            label="EU representative status"
-            name="euRepresentativeStatus"
-            options={[
-              { value: "", label: "Not set" },
-              ...euRepresentativeStatusOptions,
-            ]}
-            placeholder="Not set"
-          />
-          <TextField
-            disabled={!euRepresentativeAppointed}
-            error={form.formState.errors.euRepresentativeName}
-            label="EU representative name"
-            name="euRepresentativeName"
-            register={form.register}
-          />
-          <TextField
-            disabled={!euRepresentativeAppointed}
-            error={form.formState.errors.euRepresentativeAddress}
-            label="EU representative address"
-            name="euRepresentativeAddress"
-            register={form.register}
-          />
-        </div>
-      </div>
-    </ProfilePanelShell>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

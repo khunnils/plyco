@@ -638,7 +638,7 @@ describe("organizations API", () => {
             sortOrder: number;
           }) => dataType,
         ),
-    ).toEqual(profileBody.dataHandling.dataTypesStored);
+    ).toEqual(profileBody.dataHandling.dataTypesStored.map((item) => ({ ...item, fieldNotes: {} })));
     expect(
       saveResponse
         .json()
@@ -647,16 +647,16 @@ describe("organizations API", () => {
         ),
     ).toBe(true);
     expect(saveResponse.json().organization.services).toEqual([
-      expect.objectContaining(profileBody.services[0]),
+      expect.objectContaining({ ...profileBody.services[0], privacy: { ...profileBody.services[0].privacy, fieldNotes: {} } }),
     ]);
     expect(saveResponse.json().organization.privacy).toEqual(
-      profileBody.privacy,
+      { ...profileBody.privacy, fieldNotes: {} },
     );
     expect(saveResponse.json().organization.infrastructure).toMatchObject(
       profileBody.infrastructure,
     );
     expect(saveResponse.json().organization.security).toEqual(
-      profileBody.security,
+      { ...profileBody.security, fieldNotes: {} },
     );
 
     const getResponse = await app.inject({
@@ -679,7 +679,7 @@ describe("organizations API", () => {
             sortOrder: number;
           }) => dataType,
         ),
-    ).toEqual(profileBody.dataHandling.dataTypesStored);
+    ).toEqual(profileBody.dataHandling.dataTypesStored.map((item) => ({ ...item, fieldNotes: {} })));
     expect(
       getResponse
         .json()
@@ -688,13 +688,13 @@ describe("organizations API", () => {
         ),
     ).toBe(true);
     expect(getResponse.json().organization.services).toEqual([
-      expect.objectContaining(profileBody.services[0]),
+      expect.objectContaining({ ...profileBody.services[0], privacy: { ...profileBody.services[0].privacy, fieldNotes: {} } }),
     ]);
     expect(getResponse.json().organization.privacy).toEqual(
-      profileBody.privacy,
+      { ...profileBody.privacy, fieldNotes: {} },
     );
     expect(getResponse.json().organization.security).toEqual(
-      profileBody.security,
+      { ...profileBody.security, fieldNotes: {} },
     );
   });
 

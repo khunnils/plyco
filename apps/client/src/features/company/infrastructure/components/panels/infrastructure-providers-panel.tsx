@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
@@ -24,6 +25,7 @@ import { providerNamesForSystem } from "@/features/company/lib/profile"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const providersSchema = infrastructureProfileSchema.pick({
+  fieldNotes: true,
   organizationProviders: true,
   mfaEnabled: true,
 })
@@ -31,6 +33,7 @@ const providersSchema = infrastructureProfileSchema.pick({
 const toProvidersDraft = (
   infrastructure: InfrastructureProfile
 ): ProvidersDraft => ({
+  fieldNotes: infrastructure.fieldNotes,
   organizationProviders: infrastructure.organizationProviders,
   mfaEnabled: infrastructure.mfaEnabled,
 })
@@ -126,62 +129,68 @@ export const InfrastructureProvidersPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Hosting providers, databases, CDNs, and other infrastructure services used to deliver applications."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={providerRows(draft, catalogProviders)} />
-      }
-      saveLabel="Save"
-      title="Infrastructure Providers"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <MultiProviderField
-          form={form}
-          helperText={infrastructureHelperText.aiProviders}
-          providers={catalogProviders}
-          systemType="ai"
-        />
-        <MultiProviderField
-          form={form}
-          helperText={infrastructureHelperText.cloudProviders}
-          providers={catalogProviders}
-          systemType="cloud"
-        />
-        {infrastructureSystemTypes
-          .filter((systemType) => systemType !== "ai" && systemType !== "cloud")
-          .map((systemType) => (
-            <SingleProviderField
-              form={form}
-              helperText={
-                systemType === "source_control"
-                  ? infrastructureHelperText.sourceControlProvider
-                  : systemType === "issue_tracking"
-                    ? infrastructureHelperText.issueTrackingProvider
-                    : systemType === "auth"
-                      ? infrastructureHelperText.authProvider
-                      : infrastructureHelperText.passwordManager
-              }
-              key={systemType}
-              providers={catalogProviders}
-              systemType={systemType}
-            />
-          ))}
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.mfaEnabled}
-          label="MFA enabled"
-          name="mfaEnabled"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Hosting providers, databases, CDNs, and other infrastructure services used to deliver applications."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={providerRows(draft, catalogProviders)}
+          />
+        }
+        saveLabel="Save"
+        title="Infrastructure Providers"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <MultiProviderField
+            form={form}
+            helperText={infrastructureHelperText.aiProviders}
+            providers={catalogProviders}
+            systemType="ai"
+          />
+          <MultiProviderField
+            form={form}
+            helperText={infrastructureHelperText.cloudProviders}
+            providers={catalogProviders}
+            systemType="cloud"
+          />
+          {infrastructureSystemTypes
+            .filter(
+              (systemType) => systemType !== "ai" && systemType !== "cloud"
+            )
+            .map((systemType) => (
+              <SingleProviderField
+                form={form}
+                helperText={
+                  systemType === "source_control"
+                    ? infrastructureHelperText.sourceControlProvider
+                    : systemType === "issue_tracking"
+                      ? infrastructureHelperText.issueTrackingProvider
+                      : systemType === "auth"
+                        ? infrastructureHelperText.authProvider
+                        : infrastructureHelperText.passwordManager
+                }
+                key={systemType}
+                providers={catalogProviders}
+                systemType={systemType}
+              />
+            ))}
+          <ToggleField
+            control={form.control}
+            helperText={infrastructureHelperText.mfaEnabled}
+            label="MFA enabled"
+            name="mfaEnabled"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

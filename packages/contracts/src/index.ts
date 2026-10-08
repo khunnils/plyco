@@ -23,3 +23,5 @@ export * from "./documents.js";
 export * from "./organizations.js";
 export * from "./auth.js";
 export * from "./errors.js";
+
+export * from "./field-notes.js";

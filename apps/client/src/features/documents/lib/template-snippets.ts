@@ -5,6 +5,7 @@ import {
 
 const singularOverrides: Record<string, string> = {
   all: "item",
+  cookieCategories: "category",
   activities: "activity",
   dataProcessors: "vendor",
   providers: "provider",
@@ -40,23 +41,18 @@ export const collectionSnippet = (
   const displayField = firstUsableField(variable.itemFields)
   const displayKey = displayField?.key ?? "name"
 
-  if (variable.key.includes("[].")) {
-    const [outerPath, innerPath] = variable.key.split("[].", 2)
-    const outerVariable = variableNameForPath(outerPath)
-    const innerVariable = variableNameForPath(innerPath)
-
-    return `{% for ${outerVariable} in ${outerPath} -%}
-{% for ${innerVariable} in ${outerVariable}.${innerPath} -%}
-{{ ${innerVariable}.${displayKey} }}
-{% endfor %}
-{% endfor %}`
-  }
-
-  const itemVariable = variableNameForPath(variable.key)
-
-  return `{% for ${itemVariable} in ${variable.key} -%}
-{{ ${itemVariable}.${displayKey} }}
-{% endfor %}`
+  const parts = variable.key.split("[].")
+  const loops = parts.map((path, index) => {
+    const source =
+      index === 0 ? path : `${variableNameForPath(parts[index - 1])}.${path}`
+    return `{% for ${variableNameForPath(path)} in ${source} -%}`
+  })
+  const itemVariable = variableNameForPath(parts.at(-1) ?? variable.key)
+  return [
+    ...loops,
+    `{{ ${itemVariable}.${displayKey} }}`,
+    ...parts.map(() => "{% endfor %}"),
+  ].join("\n")
 }
 
 export const itemFieldSnippet = (
@@ -89,7 +85,7 @@ export const isCursorInsideCollectionLoop = (
     ? variableNameForPath(variable.key.split("[].").at(-1) ?? variable.key)
     : variableNameForPath(variable.key)
   const loopSource = variable.key.includes("[].")
-    ? `${variableNameForPath(variable.key.split("[].")[0])}.${variable.key.split("[].").at(-1)}`
+    ? `${variableNameForPath(variable.key.split("[].").at(-2) ?? variable.key)}.${variable.key.split("[].").at(-1)}`
     : variable.key
   const loopStart = `{% for ${itemVariable} in ${loopSource}`
   const lastLoopStart = beforeCursor.lastIndexOf(loopStart)

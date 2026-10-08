@@ -5,7 +5,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
-import { Settings } from "lucide-react"
+import { FieldSettings } from "./field-settings"
 import { useState } from "react"
 
 import {
@@ -79,11 +79,8 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
 
         return (
           <>
-            <label
-              className="grid gap-2 text-sm font-medium text-slate-800"
-              htmlFor={fieldId}
-            >
-              <span>{label}</span>
+            <div className="group/field grid gap-2 text-sm font-medium text-slate-800">
+              <label htmlFor={fieldId}>{label}</label>
               {helperText ? (
                 <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
                   {helperText}
@@ -104,23 +101,16 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                   id={fieldId}
                   className={`${comboboxInputClassName} group/code-select`}
                   endAction={
-                    isEditable && codeSetId ? (
-                      <button
-                        aria-label={`Edit ${label} options`}
-                        className="rounded-sm p-1 text-slate-400 opacity-0 transition group-hover/code-select:opacity-100 hover:bg-slate-100 hover:text-slate-700 focus-visible:opacity-100"
-                        title={`Edit ${label} options`}
-                        type="button"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={(event) => {
-                          event.preventDefault()
-                          event.stopPropagation()
-                          setIsComboboxOpen(false)
-                          setIsEditingOptions(true)
-                        }}
-                      >
-                        <Settings className="size-3.5" />
-                      </button>
-                    ) : null
+                    <FieldSettings
+                      label={label}
+                      name={name}
+                      onOpen={() => setIsComboboxOpen(false)}
+                      onEditOptions={
+                        isEditable && codeSetId
+                          ? () => setIsEditingOptions(true)
+                          : undefined
+                      }
+                    />
                   }
                   placeholder={
                     field.value
@@ -165,7 +155,7 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
               {error ? (
                 <span className="text-xs text-red-700">{error.message}</span>
               ) : null}
-            </label>
+            </div>
             {codeSetId ? (
               <CodeSetEditorDialog
                 codeSetId={codeSetId}

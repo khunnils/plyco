@@ -1,6 +1,7 @@
 import {
   serviceProfileInputSchema,
   servicePrivacyProfileSchema,
+  servicePrivacyProfileBaseSchema,
   type ServiceProfileInput,
 } from "@plyco/contracts"
 import { type FieldPath } from "react-hook-form"
@@ -8,6 +9,7 @@ import { z } from "zod"
 
 export const serviceBasicsSchema = serviceProfileInputSchema
   .pick({
+    fieldNotes: true,
     processesCustomerData: true,
     serviceName: true,
     serviceDescription: true,
@@ -15,9 +17,11 @@ export const serviceBasicsSchema = serviceProfileInputSchema
   })
   .extend({
     usesCookiesOrTrackingTechnologies: z.boolean().nullable(),
+    privacyFieldNotes: servicePrivacyProfileBaseSchema.shape.fieldNotes,
   })
 
 export const serviceAudienceSchema = serviceProfileInputSchema.pick({
+  fieldNotes: true,
   userTypes: true,
   customerTypes: true,
   availabilityRegions: true,
@@ -43,6 +47,8 @@ export const privacyPath = (field: string) =>
 export const serviceBasicsDraft = (
   service: ServiceProfileInput
 ): ServiceBasicsDraft => ({
+  fieldNotes: service.fieldNotes,
+  privacyFieldNotes: service.privacy.fieldNotes,
   processesCustomerData: service.processesCustomerData,
   serviceName: service.serviceName,
   serviceDescription: service.serviceDescription,
@@ -54,6 +60,7 @@ export const serviceBasicsDraft = (
 export const serviceAudienceDraft = (
   service: ServiceProfileInput
 ): ServiceAudienceDraft => ({
+  fieldNotes: service.fieldNotes,
   userTypes: service.userTypes,
   customerTypes: service.customerTypes,
   availabilityRegions: service.availabilityRegions,

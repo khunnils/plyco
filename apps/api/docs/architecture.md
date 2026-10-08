@@ -213,3 +213,19 @@ which allows multiple API instances without process-local coordination.
   contract changes.
 - Update this document only when API layering, trust boundaries, composition,
   persistence strategy, or integration architecture changes.
+
+### Field note metadata
+
+Profile and inventory contracts carry optional, field-key-validated `fieldNotes`
+maps with separate customer-facing and internal strings. Existing scoped save
+routes persist supplied maps and preserve stored maps when omitted; ownership
+and authorization are the same as for their containing records. Notes do not
+participate in profile completion or advisor evaluation.
+
+Document context strips raw note maps before spreading profile data and exposes
+only customer-facing strings under `customerNotes` in normalized field groups
+and collection records. Literal-text encoding and renderer handling preserve
+punctuation and line breaks without interpreting user markup. Internal strings
+never reach document rendering, public policy pages, PDFs, or source
+fingerprints. Template catalog updates affect new copies only, and note variables
+use the existing reference-based freshness mechanism.

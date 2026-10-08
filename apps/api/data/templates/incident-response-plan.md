@@ -4,6 +4,8 @@
 
 # {{ company.name }} Incident Response Plan
 
+{% if company.customerNotes.name %} {{ company.customerNotes.name }}{% endif %}
+
 ## Scope
 
 This plan covers security incidents affecting company systems, customer data, production infrastructure, and critical vendors.

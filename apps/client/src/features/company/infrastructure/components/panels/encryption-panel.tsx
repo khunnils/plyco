@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
@@ -22,6 +23,7 @@ import { infrastructureHelperText } from "../infrastructure-helper-text"
 import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const encryptionSchema = infrastructureProfileSchema.pick({
+  fieldNotes: true,
   encryptionAtRest: true,
   encryptionInTransit: true,
   atRestAlgorithm: true,
@@ -35,6 +37,7 @@ type EncryptionDraft = z.infer<typeof encryptionSchema>
 const toEncryptionDraft = (
   infrastructure: InfrastructureProfile
 ): EncryptionDraft => ({
+  fieldNotes: infrastructure.fieldNotes,
   encryptionAtRest: infrastructure.encryptionAtRest,
   encryptionInTransit: infrastructure.encryptionInTransit,
   atRestAlgorithm: infrastructure.atRestAlgorithm,
@@ -175,80 +178,82 @@ export const EncryptionPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Encryption algorithms, TLS requirements, and cryptographic key management."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={encryptionRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Encryption"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.encryptionAtRest}
-          label="Encrypted at rest"
-          name="encryptionAtRest"
-        />
-        {encryptionAtRest === true ? (
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Encryption algorithms, TLS requirements, and cryptographic key management."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={encryptionRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Encryption"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.encryptionAtRest}
+            label="Encrypted at rest"
+            name="encryptionAtRest"
+          />
+          {encryptionAtRest === true ? (
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.atRestAlgorithm}
+              label="Stored data encryption"
+              name="atRestAlgorithm"
+              options={[
+                { value: "", label: "Not set" },
+                ...securityEncryptionAlgorithmOptions,
+              ]}
+              placeholder="Not set"
+            />
+          ) : null}
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.encryptionInTransit}
+            label="Encrypted in transit"
+            name="encryptionInTransit"
+          />
+          {encryptionInTransit === true ? (
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.inTransitMinimumTlsVersion}
+              label="Minimum TLS version"
+              name="inTransitMinimumTlsVersion"
+              options={[
+                { value: "", label: "Not set" },
+                ...securityTlsVersionOptions,
+              ]}
+              placeholder="Not set"
+            />
+          ) : null}
           <SelectField
             control={form.control}
-            helperText={infrastructureHelperText.atRestAlgorithm}
-            label="Stored data encryption"
-            name="atRestAlgorithm"
+            helperText={infrastructureHelperText.keyManagementProvider}
+            label="Key management"
+            name="keyManagementProvider"
             options={[
               { value: "", label: "Not set" },
-              ...securityEncryptionAlgorithmOptions,
+              ...securityKeyManagementProviderOptions,
             ]}
             placeholder="Not set"
           />
-        ) : null}
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.encryptionInTransit}
-          label="Encrypted in transit"
-          name="encryptionInTransit"
-        />
-        {encryptionInTransit === true ? (
-          <SelectField
+          <ToggleField
             control={form.control}
-            helperText={infrastructureHelperText.inTransitMinimumTlsVersion}
-            label="Minimum TLS version"
-            name="inTransitMinimumTlsVersion"
-            options={[
-              { value: "", label: "Not set" },
-              ...securityTlsVersionOptions,
-            ]}
-            placeholder="Not set"
+            helperText={infrastructureHelperText.encryptedDevicesRequired}
+            label="Work devices encrypted"
+            name="encryptedDevicesRequired"
           />
-        ) : null}
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.keyManagementProvider}
-          label="Key management"
-          name="keyManagementProvider"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityKeyManagementProviderOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.encryptedDevicesRequired}
-          label="Work devices encrypted"
-          name="encryptedDevicesRequired"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

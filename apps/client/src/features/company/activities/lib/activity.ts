@@ -22,6 +22,7 @@ export const emptyActivityDraft: BusinessActivityInput = {
 export const toActivityInput = (
   activity: BusinessActivity | BusinessActivityInput
 ): BusinessActivityInput => ({
+  fieldNotes: activity.fieldNotes,
   name: activity.name,
   purpose: activity.purpose,
   role: activity.role,

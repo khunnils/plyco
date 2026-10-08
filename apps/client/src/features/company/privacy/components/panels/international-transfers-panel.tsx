@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   privacyProfileSchema,
@@ -24,6 +25,7 @@ import {
 import { privacyHelperText } from "../privacy-helper-text"
 
 const transfersSchema = privacyProfileSchema.pick({
+  fieldNotes: true,
   crossBorderTransfers: true,
   transferMechanisms: true,
 })
@@ -31,6 +33,7 @@ const transfersSchema = privacyProfileSchema.pick({
 type TransfersDraft = z.infer<typeof transfersSchema>
 
 const toTransfersDraft = (privacy: PrivacyProfile): TransfersDraft => ({
+  fieldNotes: privacy.fieldNotes,
   crossBorderTransfers: privacy.crossBorderTransfers,
   transferMechanisms: privacy.transferMechanisms,
 })
@@ -101,42 +104,44 @@ export const InternationalTransfersPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Cross-border data transfer methods, safeguards, and legal mechanisms."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={transferRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="International Transfers"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.crossBorderTransfers}
-          label="Cross-border transfers"
-          name="crossBorderTransfers"
-        />
-        {crossBorderTransfersTrue && (
-          <MultiSelectField
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Cross-border data transfer methods, safeguards, and legal mechanisms."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={transferRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="International Transfers"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
             control={form.control}
-            error={form.formState.errors.transferMechanisms?.root}
-            helperText={privacyHelperText.transferMechanisms}
-            label="Transfer mechanisms"
-            name="transferMechanisms"
-            options={transferMechanismOptions}
-            placeholder="Select transfer mechanisms"
+            helperText={privacyHelperText.crossBorderTransfers}
+            label="Cross-border transfers"
+            name="crossBorderTransfers"
           />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+          {crossBorderTransfersTrue && (
+            <MultiSelectField
+              control={form.control}
+              error={form.formState.errors.transferMechanisms?.root}
+              helperText={privacyHelperText.transferMechanisms}
+              label="Transfer mechanisms"
+              name="transferMechanisms"
+              options={transferMechanismOptions}
+              placeholder="Select transfer mechanisms"
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
@@ -21,6 +22,7 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const loggingSchema = infrastructureProfileSchema.pick({
+  fieldNotes: true,
   centralizedLoggingEnabled: true,
   securityMonitoring: true,
 })
@@ -30,6 +32,7 @@ type LoggingDraft = z.infer<typeof loggingSchema>
 const toLoggingDraft = (
   infrastructure: InfrastructureProfile
 ): LoggingDraft => ({
+  fieldNotes: infrastructure.fieldNotes,
   centralizedLoggingEnabled: infrastructure.centralizedLoggingEnabled,
   securityMonitoring: infrastructure.securityMonitoring,
 })
@@ -91,42 +94,44 @@ export const LoggingMonitoringPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Centralized logging and the level of security monitoring in place."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={loggingRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Monitoring & Detection"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.centralizedLoggingEnabled}
-          label="Centralized logging enabled"
-          name="centralizedLoggingEnabled"
-        />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.securityMonitoring}
-          label="Security monitoring"
-          name="securityMonitoring"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityMonitoringOptions,
-          ]}
-          placeholder="Not set"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Centralized logging and the level of security monitoring in place."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={loggingRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Monitoring & Detection"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={infrastructureHelperText.centralizedLoggingEnabled}
+            label="Centralized logging enabled"
+            name="centralizedLoggingEnabled"
+          />
+          <SelectField
+            control={form.control}
+            helperText={infrastructureHelperText.securityMonitoring}
+            label="Security monitoring"
+            name="securityMonitoring"
+            options={[
+              { value: "", label: "Not set" },
+              ...securityMonitoringOptions,
+            ]}
+            placeholder="Not set"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

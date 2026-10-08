@@ -454,6 +454,7 @@ export class PrismaVendorRepository implements ProviderRepository {
 
   private businessActivityData(input: BusinessActivityInput) {
     return {
+      fieldNotes: input.fieldNotes,
       name: input.name,
       purpose: input.purpose,
       role: input.role,
@@ -471,6 +472,7 @@ export class PrismaVendorRepository implements ProviderRepository {
 
   private organizationProviderData(input: OrganizationProviderInput) {
     return {
+      fieldNotes: input.fieldNotes,
       providerId: input.providerId || null,
       systemTypes: input.systemTypes,
       name: input.name,
@@ -508,6 +510,7 @@ export class PrismaVendorRepository implements ProviderRepository {
     const provider = await this.client.organizationProvider.update({
       where: { id: existing.id },
       data: {
+        fieldNotes: input.fieldNotes,
         providerId: existing.providerId || input.providerId || null,
         systemTypes: Array.from(
           new Set([...existing.systemTypes, ...input.systemTypes]),
@@ -527,6 +530,7 @@ export class PrismaVendorRepository implements ProviderRepository {
 
   private serviceProviderUsageData(input: ServiceProviderUsageInput) {
     return {
+      fieldNotes: input.fieldNotes,
       serviceId: input.serviceId,
       organizationProviderId: input.organizationProviderId,
       systemType: input.systemType,

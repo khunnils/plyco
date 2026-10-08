@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { accessProfileSchema, type AccessProfile } from "@plyco/contracts"
 import { useState } from "react"
@@ -15,6 +16,7 @@ import { boolText } from "@/features/company/lib/display"
 import { accessHelperText } from "../access-helper-text"
 
 const authenticationSchema = accessProfileSchema.pick({
+  fieldNotes: true,
   mfaRequired: true,
   ssoEnabled: true,
   passwordManagerRequired: true,
@@ -25,6 +27,7 @@ const authenticationSchema = accessProfileSchema.pick({
 type AuthenticationDraft = z.infer<typeof authenticationSchema>
 
 const toAuthenticationDraft = (access: AccessProfile): AuthenticationDraft => ({
+  fieldNotes: access.fieldNotes,
   mfaRequired: access.mfaRequired,
   ssoEnabled: access.ssoEnabled,
   passwordManagerRequired: access.passwordManagerRequired,
@@ -90,55 +93,57 @@ export const AccessAuthenticationPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Authentication requirements and account lifecycle practices."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={authenticationRows(draft)} />
-      }
-      saveLabel="Save"
-      title="Authentication"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.mfaRequired}
-          label="Multi-factor authentication (MFA) required"
-          name="mfaRequired"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.ssoEnabled}
-          label="Single sign-on supported"
-          name="ssoEnabled"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.passwordManagerRequired}
-          label="Password manager required"
-          name="passwordManagerRequired"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.sharedAccountsExist}
-          label="Shared accounts exist"
-          name="sharedAccountsExist"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.offboardingProcessExists}
-          label="Employee offboarding process exists"
-          name="offboardingProcessExists"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Authentication requirements and account lifecycle practices."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={authenticationRows(draft)} />
+        }
+        saveLabel="Save"
+        title="Authentication"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.mfaRequired}
+            label="Multi-factor authentication (MFA) required"
+            name="mfaRequired"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.ssoEnabled}
+            label="Single sign-on supported"
+            name="ssoEnabled"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.passwordManagerRequired}
+            label="Password manager required"
+            name="passwordManagerRequired"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.sharedAccountsExist}
+            label="Shared accounts exist"
+            name="sharedAccountsExist"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.offboardingProcessExists}
+            label="Employee offboarding process exists"
+            name="offboardingProcessExists"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

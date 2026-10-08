@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type ServiceProfileInput, type Vocabulary } from "@plyco/contracts"
 import { useState } from "react"
@@ -90,57 +91,61 @@ export const ServiceCookieConsentPanel = ({
   ]
 
   return (
-    <ProfilePanelShell
-      description="Describe how this service collects, manages, and honors cookie consent."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows} />}
-      saveLabel="Save"
-      title="Cookie Consent"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={serviceHelperText.nonEssentialCookiesBlockedUntilConsent}
-          label="Blocks non-essential cookies until consent"
-          name={privacyPath("nonEssentialCookiesBlockedUntilConsent")}
-        />
-        <SelectField
-          control={form.control}
-          helperText={serviceHelperText.cookieConsentMechanism}
-          label="Cookie consent mechanism"
-          name={privacyPath("cookieConsentMechanism")}
-          options={[
-            { value: "", label: "Not set" },
-            ...cookieConsentMechanismOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <SelectField
-          control={form.control}
-          helperText={serviceHelperText.cookieConsentWithdrawalMethod}
-          label="Consent withdrawal method"
-          name={privacyPath("cookieConsentWithdrawalMethod")}
-          options={[
-            { value: "", label: "Not set" },
-            ...cookieConsentWithdrawalMethodOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={serviceHelperText.globalPrivacyControlSupported}
-          label="Global Privacy Control supported"
-          name={privacyPath("globalPrivacyControlSupported")}
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Describe how this service collects, manages, and honors cookie consent."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={<ProfilePanelDetailGrid rows={cookieRows} />}
+        saveLabel="Save"
+        title="Cookie Consent"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={
+              serviceHelperText.nonEssentialCookiesBlockedUntilConsent
+            }
+            label="Blocks non-essential cookies until consent"
+            name={privacyPath("nonEssentialCookiesBlockedUntilConsent")}
+          />
+          <SelectField
+            control={form.control}
+            helperText={serviceHelperText.cookieConsentMechanism}
+            label="Cookie consent mechanism"
+            name={privacyPath("cookieConsentMechanism")}
+            options={[
+              { value: "", label: "Not set" },
+              ...cookieConsentMechanismOptions,
+            ]}
+            placeholder="Not set"
+          />
+          <SelectField
+            control={form.control}
+            helperText={serviceHelperText.cookieConsentWithdrawalMethod}
+            label="Consent withdrawal method"
+            name={privacyPath("cookieConsentWithdrawalMethod")}
+            options={[
+              { value: "", label: "Not set" },
+              ...cookieConsentWithdrawalMethodOptions,
+            ]}
+            placeholder="Not set"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={serviceHelperText.globalPrivacyControlSupported}
+            label="Global Privacy Control supported"
+            name={privacyPath("globalPrivacyControlSupported")}
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

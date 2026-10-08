@@ -1,3 +1,4 @@
+import { FieldSettings } from "@/components/form/field-settings"
 import {
   cookieCategoryDescriptions,
   cookieCategoryLabels,
@@ -25,7 +26,8 @@ export const CookieCategoryCard = ({
 }) => {
   const enabled = Boolean(configured)
   const requiresConsent =
-    configured?.requiresConsent ?? defaultCookieCategoryRequiresConsent(category)
+    configured?.requiresConsent ??
+    defaultCookieCategoryRequiresConsent(category)
   const consentLabel = requiresConsent
     ? "Requires consent"
     : "Does not require consent"
@@ -38,11 +40,15 @@ export const CookieCategoryCard = ({
       )}
     >
       {isEditing ? (
-        <div className="grid gap-2">
+        <div className="group/field grid gap-2">
           <div className="flex items-start justify-between gap-4">
             <h4 className="text-sm font-semibold text-slate-950">
               {cookieCategoryLabels[category]}
             </h4>
+            <FieldSettings
+              label={`${cookieCategoryLabels[category]} cookies enabled`}
+              name={`cookieCategories.${category}.enabled`}
+            />
             <Switch
               checked={enabled}
               onCheckedChange={(checked) => onEnabledChange?.(checked)}
@@ -52,6 +58,10 @@ export const CookieCategoryCard = ({
             <p className="min-w-0 flex-1 text-sm leading-5 text-slate-500">
               {cookieCategoryDescriptions[category]}
             </p>
+            <FieldSettings
+              label={`${cookieCategoryLabels[category]} cookies require consent`}
+              name={`cookieCategories.${category}.requiresConsent`}
+            />
             <button
               className={cn(
                 "shrink-0 text-right text-xs font-medium text-slate-500",

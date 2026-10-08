@@ -1,3 +1,4 @@
+import { remarkLineBreaks } from "../lib/remark-line-breaks"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -8,6 +9,8 @@ export const DocumentMarkdown = ({ content }: { content: string }) => (
   <article
     className={`font-sans text-sm leading-6 text-slate-800 ${markdownStyles}`}
   >
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    <ReactMarkdown remarkPlugins={[remarkGfm, remarkLineBreaks]}>
+      {content}
+    </ReactMarkdown>
   </article>
 )

@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   companyProfileSchema,
@@ -22,6 +23,7 @@ import {
 import { companyHelperText } from "../company-helper-text"
 
 const operationsSchema = companyProfileSchema.pick({
+  fieldNotes: true,
   employeeCount: true,
   industries: true,
   regions: true,
@@ -31,6 +33,7 @@ const operationsSchema = companyProfileSchema.pick({
 type OperationsDraft = z.infer<typeof operationsSchema>
 
 const toOperationsDraft = (company: CompanyProfile): OperationsDraft => ({
+  fieldNotes: company.fieldNotes,
   employeeCount: company.employeeCount,
   industries: company.industries,
   regions: company.regions,
@@ -98,60 +101,62 @@ export const CompanyOperationsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Scale, industry context, and compliance targets."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={operationsRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Operations"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <TextField
-          error={form.formState.errors.employeeCount}
-          helperText={companyHelperText.employeeCount}
-          label="Employee count"
-          name="employeeCount"
-          register={form.register}
-          type="number"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.industries?.root}
-          helperText={companyHelperText.industries}
-          label="Industries"
-          name="industries"
-          options={industryOptions}
-          placeholder="Select industries"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.regions?.root}
-          helperText={companyHelperText.regions}
-          label="Operating regions"
-          name="regions"
-          options={regionOptions}
-          placeholder="Select operating regions"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.complianceGoals?.root}
-          helperText={companyHelperText.complianceGoals}
-          label="Compliance goals"
-          name="complianceGoals"
-          options={complianceGoalOptions}
-          placeholder="Select compliance goals"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Scale, industry context, and compliance targets."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={operationsRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Operations"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <TextField
+            error={form.formState.errors.employeeCount}
+            helperText={companyHelperText.employeeCount}
+            label="Employee count"
+            name="employeeCount"
+            register={form.register}
+            type="number"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.industries?.root}
+            helperText={companyHelperText.industries}
+            label="Industries"
+            name="industries"
+            options={industryOptions}
+            placeholder="Select industries"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.regions?.root}
+            helperText={companyHelperText.regions}
+            label="Operating regions"
+            name="regions"
+            options={regionOptions}
+            placeholder="Select operating regions"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.complianceGoals?.root}
+            helperText={companyHelperText.complianceGoals}
+            label="Compliance goals"
+            name="complianceGoals"
+            options={complianceGoalOptions}
+            placeholder="Select compliance goals"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { securityProfileSchema, type SecurityProfile } from "@plyco/contracts"
 import { useState } from "react"
@@ -15,6 +16,7 @@ import { boolText } from "@/features/company/lib/display"
 import { securityHelperText } from "../security-helper-text"
 
 const developmentSecuritySchema = securityProfileSchema.pick({
+  fieldNotes: true,
   codeReviewRequired: true,
   dependencySecurityMonitoring: true,
   secretScanning: true,
@@ -65,34 +67,36 @@ export const DevelopmentSecurityPanel = ({
   ])
 
   return (
-    <ProfilePanelShell
-      description="Secure development and production deployment controls."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={rows} />}
-      saveLabel="Save"
-      title="Development Security"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={form.handleSubmit((next) =>
-        onSave(next, () => setIsEditing(false))
-      )}
-    >
-      <EditPanelGrid>
-        {fields.map(([name, label]) => (
-          <ToggleField
-            key={name}
-            control={form.control}
-            helperText={securityHelperText[name]}
-            label={label}
-            name={name}
-          />
-        ))}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Secure development and production deployment controls."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={<ProfilePanelDetailGrid rows={rows} />}
+        saveLabel="Save"
+        title="Development Security"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={form.handleSubmit((next) =>
+          onSave(next, () => setIsEditing(false))
+        )}
+      >
+        <EditPanelGrid>
+          {fields.map(([name, label]) => (
+            <ToggleField
+              key={name}
+              control={form.control}
+              helperText={securityHelperText[name]}
+              label={label}
+              name={name}
+            />
+          ))}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

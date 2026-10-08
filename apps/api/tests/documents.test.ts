@@ -627,6 +627,7 @@ describe("documents / templates API", () => {
     expect(context.infrastructure.organizationProviders).toEqual([
       {
         systemType: "source_control",
+        customerNotes: {},
         providerId: "prov-github",
       },
     ]);

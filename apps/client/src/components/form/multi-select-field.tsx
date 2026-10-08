@@ -5,7 +5,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
-import { Settings } from "lucide-react"
+import { FieldSettings } from "./field-settings"
 import { useState } from "react"
 
 import {
@@ -42,6 +42,7 @@ type MultiSelectFieldProps<T extends FieldValues, TValue extends string> = {
   error?: FieldError
   helperText?: string
   label: string
+  notesKey?: string
   name: FieldPath<T>
   options: Array<Option & { value: TValue }>
   emptyMessage?: string
@@ -56,6 +57,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
   helperText,
   label,
   name,
+  notesKey,
   options,
   emptyMessage = "No options available",
   placeholder = "Select options",
@@ -76,6 +78,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
           <MultiSelectInput
             error={error}
             fieldId={fieldId}
+            notesKey={notesKey ?? name}
             helperText={helperText}
             label={label}
             options={options}
@@ -94,6 +97,7 @@ export const MultiSelectField = <T extends FieldValues, TValue extends string>({
 const MultiSelectInput = <TValue extends string>({
   error,
   fieldId,
+  notesKey,
   helperText,
   label,
   options,
@@ -105,6 +109,7 @@ const MultiSelectInput = <TValue extends string>({
 }: {
   error?: FieldError
   fieldId: string
+  notesKey: string
   helperText?: string
   label: string
   options: Array<Option & { value: TValue }>
@@ -131,7 +136,7 @@ const MultiSelectInput = <TValue extends string>({
   }
 
   return (
-    <div className="grid gap-2 text-sm font-medium text-slate-800">
+    <div className="group/field grid gap-2 text-sm font-medium text-slate-800">
       <label htmlFor={fieldId}>{label}</label>
       {helperText ? (
         <p className="-mt-1 text-xs leading-5 font-normal text-slate-500">
@@ -180,23 +185,16 @@ const MultiSelectInput = <TValue extends string>({
             onBlur={onBlur}
           />
           <span className="ml-auto flex items-center gap-0.5">
-            {isEditable && codeSetId ? (
-              <button
-                aria-label={`Edit ${label} options`}
-                className="rounded-sm p-1 text-slate-400 opacity-0 transition group-hover/code-select:opacity-100 hover:bg-slate-100 hover:text-slate-700 focus-visible:opacity-100"
-                title={`Edit ${label} options`}
-                type="button"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={(event) => {
-                  event.preventDefault()
-                  event.stopPropagation()
-                  setIsComboboxOpen(false)
-                  setIsEditingOptions(true)
-                }}
-              >
-                <Settings className="size-3.5" />
-              </button>
-            ) : null}
+            <FieldSettings
+              label={label}
+              name={notesKey}
+              onOpen={() => setIsComboboxOpen(false)}
+              onEditOptions={
+                isEditable && codeSetId
+                  ? () => setIsEditingOptions(true)
+                  : undefined
+              }
+            />
             <ComboboxTrigger className="rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />
           </span>
         </ComboboxChips>

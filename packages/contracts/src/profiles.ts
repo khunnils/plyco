@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { profileWithFieldNotes } from "./field-notes.js";
 
 import {
   codeIdSchema,
@@ -15,7 +16,7 @@ import {
   serviceProviderUsageSchema,
 } from "./providers.js";
 
-export const storedDataTypeSchema = z.object({
+export const storedDataTypeSchema = profileWithFieldNotes({
   id: z.string().min(1).optional(),
   sortOrder: z.number().int().min(0).default(0),
   name: z.string().trim().min(1, "Name is required"),
@@ -26,7 +27,7 @@ export const storedDataTypeSchema = z.object({
   isRequired: nullableBooleanSchema,
 });
 
-export const businessActivityInputSchema = z.object({
+export const businessActivityInputSchema = profileWithFieldNotes({
   name: z.string().trim().min(1, "Activity name is required"),
   purpose: z.string().trim().default(""),
   role: codeIdSchema.or(z.literal("")).default(""),
@@ -49,7 +50,7 @@ export const businessActivitySchema = businessActivityInputSchema.extend({
   updatedAt: z.string().datetime(),
 });
 
-export const companyProfileSchema = z.object({
+export const companyProfileSchema = profileWithFieldNotes({
   companyName: z.string().trim().min(1, "Company name is required"),
   legalEntityName: nullableStringSchema,
   website: nullableStringSchema,
@@ -124,15 +125,21 @@ const serviceCookieCategoriesSchema = z
   .nullable()
   .default(null);
 
-const servicePrivacyProfileBaseSchema = z.object({
-  usesCookiesOrTrackingTechnologies: nullableBooleanSchema,
-  cookieCategories: serviceCookieCategoriesSchema,
-  cookieConsentMechanism: nullableCodeIdSchema,
-  nonEssentialCookiesBlockedUntilConsent: nullableBooleanSchema,
-  cookieConsentWithdrawalMethod: nullableCodeIdSchema,
-  globalPrivacyControlSupported: nullableBooleanSchema,
-  primaryHostingRegion: nullableCodeIdSchema,
-});
+export const servicePrivacyProfileBaseSchema = profileWithFieldNotes(
+  {
+    usesCookiesOrTrackingTechnologies: nullableBooleanSchema,
+    cookieCategories: serviceCookieCategoriesSchema,
+    cookieConsentMechanism: nullableCodeIdSchema,
+    nonEssentialCookiesBlockedUntilConsent: nullableBooleanSchema,
+    cookieConsentWithdrawalMethod: nullableCodeIdSchema,
+    globalPrivacyControlSupported: nullableBooleanSchema,
+    primaryHostingRegion: nullableCodeIdSchema,
+  },
+  cookieCategoryCodes.flatMap((category) => [
+    `cookieCategories.${category}.enabled`,
+    `cookieCategories.${category}.requiresConsent`,
+  ]),
+);
 
 type ServicePrivacyProfileValue = z.infer<
   typeof servicePrivacyProfileBaseSchema
@@ -167,7 +174,7 @@ export const normalizeServicePrivacyProfile = (
 export const servicePrivacyProfileSchema =
   servicePrivacyProfileBaseSchema.transform(normalizeServicePrivacyProfile);
 
-export const serviceProfileInputSchema = z.object({
+export const serviceProfileInputSchema = profileWithFieldNotes({
   id: z.string().min(1).optional(),
   sortOrder: z.number().int().min(0).default(0),
   processesCustomerData: z.boolean().default(true),
@@ -189,55 +196,68 @@ export const serviceProfileSchema = serviceProfileInputSchema.extend({
   updatedAt: z.string().datetime(),
 });
 
-export const privacyProfileSchema = z.object({
-  supportedRights: nullableCodeIdArraySchema,
-  requestMethods: nullableCodeIdArraySchema,
-  responseTimelineDaysStatus: nullableCodeIdSchema,
-  responseTimelineDays: nullableNumberSchema(z.number().int().min(0)),
-  identityVerificationRequired: nullableBooleanSchema,
-  authorizedAgentSupported: nullableBooleanSchema,
-  appealProcessExists: nullableBooleanSchema,
-  organizationProviders: z.array(providerSelectionSchema).default([]),
-  sendsMarketingEmails: nullableBooleanSchema,
-  marketingOptOutMethod: nullableCodeIdSchema,
-  transactionalEmailsSent: nullableBooleanSchema,
-  crossBorderTransfers: nullableBooleanSchema,
-  transferMechanisms: nullableCodeIdArraySchema,
-  sellsOrSharesData: nullableBooleanSchema,
-  doNotSellLink: nullableStringSchema,
-  dpoStatus: nullableCodeIdSchema,
-  dpoName: nullableStringSchema,
-  dpoEmail: nullableStringSchema,
-  euRepresentativeStatus: nullableCodeIdSchema,
-  euRepresentativeName: nullableStringSchema,
-  euRepresentativeAddress: nullableStringSchema,
-  usesAutomatedDecisionMaking: nullableBooleanSchema,
-  productionDataInDevelopment: nullableBooleanSchema,
-  retentionPolicyExists: nullableBooleanSchema,
-});
+export const privacyProfileSchema = profileWithFieldNotes(
+  {
+    supportedRights: nullableCodeIdArraySchema,
+    requestMethods: nullableCodeIdArraySchema,
+    responseTimelineDaysStatus: nullableCodeIdSchema,
+    responseTimelineDays: nullableNumberSchema(z.number().int().min(0)),
+    identityVerificationRequired: nullableBooleanSchema,
+    authorizedAgentSupported: nullableBooleanSchema,
+    appealProcessExists: nullableBooleanSchema,
+    organizationProviders: z.array(providerSelectionSchema).default([]),
+    sendsMarketingEmails: nullableBooleanSchema,
+    marketingOptOutMethod: nullableCodeIdSchema,
+    transactionalEmailsSent: nullableBooleanSchema,
+    crossBorderTransfers: nullableBooleanSchema,
+    transferMechanisms: nullableCodeIdArraySchema,
+    sellsOrSharesData: nullableBooleanSchema,
+    doNotSellLink: nullableStringSchema,
+    dpoStatus: nullableCodeIdSchema,
+    dpoName: nullableStringSchema,
+    dpoEmail: nullableStringSchema,
+    euRepresentativeStatus: nullableCodeIdSchema,
+    euRepresentativeName: nullableStringSchema,
+    euRepresentativeAddress: nullableStringSchema,
+    usesAutomatedDecisionMaking: nullableBooleanSchema,
+    productionDataInDevelopment: nullableBooleanSchema,
+    retentionPolicyExists: nullableBooleanSchema,
+  },
+  ["organizationProviders.newsletter"],
+);
 
-export const infrastructureProfileSchema = z.object({
-  organizationProviders: z.array(providerSelectionSchema).default([]),
-  mfaEnabled: nullableBooleanSchema,
-  encryptedDevicesRequired: nullableBooleanSchema,
-  backupsEnabled: nullableBooleanSchema,
-  centralizedLoggingEnabled: nullableBooleanSchema,
-  securityMonitoring: nullableCodeIdSchema,
-  atRestAlgorithm: nullableCodeIdSchema,
-  inTransitMinimumTlsVersion: nullableCodeIdSchema,
-  keyManagementProvider: nullableCodeIdSchema,
-  backupCadence: nullableCodeIdSchema,
-  backupRetentionDays: nullableNumberSchema(z.number().int().min(0)),
-  backupRetentionDaysStatus: nullableCodeIdSchema,
-  restoreTestingCadence: nullableCodeIdSchema,
-  vendorReviewRequired: nullableBooleanSchema,
-  vendorReviewCadence: nullableCodeIdSchema,
-  dpaRequiredForProcessors: nullableBooleanSchema,
-  encryptionAtRest: nullableBooleanSchema,
-  encryptionInTransit: nullableBooleanSchema,
-});
+export const infrastructureProfileSchema = profileWithFieldNotes(
+  {
+    organizationProviders: z.array(providerSelectionSchema).default([]),
+    mfaEnabled: nullableBooleanSchema,
+    encryptedDevicesRequired: nullableBooleanSchema,
+    backupsEnabled: nullableBooleanSchema,
+    centralizedLoggingEnabled: nullableBooleanSchema,
+    securityMonitoring: nullableCodeIdSchema,
+    atRestAlgorithm: nullableCodeIdSchema,
+    inTransitMinimumTlsVersion: nullableCodeIdSchema,
+    keyManagementProvider: nullableCodeIdSchema,
+    backupCadence: nullableCodeIdSchema,
+    backupRetentionDays: nullableNumberSchema(z.number().int().min(0)),
+    backupRetentionDaysStatus: nullableCodeIdSchema,
+    restoreTestingCadence: nullableCodeIdSchema,
+    vendorReviewRequired: nullableBooleanSchema,
+    vendorReviewCadence: nullableCodeIdSchema,
+    dpaRequiredForProcessors: nullableBooleanSchema,
+    encryptionAtRest: nullableBooleanSchema,
+    encryptionInTransit: nullableBooleanSchema,
+  },
+  [
+    "ai",
+    "auth",
+    "source_control",
+    "cloud",
+    "password_manager",
+    "issue_tracking",
+  ].map((type) => `organizationProviders.${type}`),
+);
 
-export const securityProfileSchema = z.object({
+export const securityProfileSchema = profileWithFieldNotes({
   codeReviewRequired: nullableBooleanSchema,
   dependencySecurityMonitoring: nullableBooleanSchema,
   secretScanning: nullableBooleanSchema,
@@ -264,7 +284,7 @@ export const dataHandlingProfileSchema = z.object({
   dataTypesStored: z.array(storedDataTypeSchema).default([]),
 });
 
-export const accessProfileSchema = z.object({
+export const accessProfileSchema = profileWithFieldNotes({
   mfaRequired: nullableBooleanSchema,
   ssoEnabled: nullableBooleanSchema,
   sharedAccountsExist: nullableBooleanSchema,

@@ -87,7 +87,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Industry codes the organization operates in.",
-      "example": ["technology_saas", "artificial_intelligence"]
+      "example": [
+        "technology_saas",
+        "artificial_intelligence"
+      ]
     },
     {
       "key": "organization.industryLabels",
@@ -95,7 +98,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Human-readable industries the organization operates in.",
-      "example": ["Technology / SaaS", "Artificial Intelligence"]
+      "example": [
+        "Technology / SaaS",
+        "Artificial Intelligence"
+      ]
     },
     {
       "key": "organization.regions",
@@ -103,7 +109,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Geographic region codes where the organization operates.",
-      "example": ["us", "eu"]
+      "example": [
+        "us",
+        "eu"
+      ]
     },
     {
       "key": "organization.regionLabels",
@@ -111,7 +120,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Human-readable geographic regions where the organization operates.",
-      "example": ["United States", "European Union"]
+      "example": [
+        "United States",
+        "European Union"
+      ]
     },
     {
       "key": "organization.handlesSensitiveData",
@@ -127,7 +139,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Compliance program codes or customer security goals the organization is working toward.",
-      "example": ["soc_2", "gdpr"]
+      "example": [
+        "soc_2",
+        "gdpr"
+      ]
     },
     {
       "key": "organization.complianceGoalLabels",
@@ -135,7 +150,10 @@
       "type": "string[]",
       "category": "Organization",
       "description": "Human-readable compliance programs or customer security goals the organization is working toward.",
-      "example": ["SOC 2", "GDPR"]
+      "example": [
+        "SOC 2",
+        "GDPR"
+      ]
     },
     {
       "key": "service.name",
@@ -175,7 +193,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "User type codes for the primary service.",
-      "example": ["workspace_admins", "end_users"]
+      "example": [
+        "workspace_admins",
+        "end_users"
+      ]
     },
     {
       "key": "service.userTypeLabels",
@@ -183,7 +204,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service user type codes.",
-      "example": ["Workspace admins", "End users"]
+      "example": [
+        "Workspace admins",
+        "End users"
+      ]
     },
     {
       "key": "service.customerTypes",
@@ -191,7 +215,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "Customer type codes for the primary service.",
-      "example": ["smb", "mid_market"]
+      "example": [
+        "smb",
+        "mid_market"
+      ]
     },
     {
       "key": "service.customerTypeLabels",
@@ -199,7 +226,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service customer type codes.",
-      "example": ["SMB", "Mid-market"]
+      "example": [
+        "SMB",
+        "Mid-market"
+      ]
     },
     {
       "key": "service.availabilityRegions",
@@ -207,7 +237,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "Region codes where the primary service is available.",
-      "example": ["us", "eu"]
+      "example": [
+        "us",
+        "eu"
+      ]
     },
     {
       "key": "service.availabilityRegionLabels",
@@ -215,7 +248,10 @@
       "type": "string[]",
       "category": "Service",
       "description": "Human-readable labels for service availability region codes.",
-      "example": ["United States", "European Union"]
+      "example": [
+        "United States",
+        "European Union"
+      ]
     },
     {
       "key": "service.childrenDirected",
@@ -247,7 +283,25 @@
       "type": "object[]",
       "category": "Service",
       "description": "Structured cookie categories used by the primary service, including label and consent requirement.",
-      "example": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }]
+      "example": [
+        {
+          "category": "necessary",
+          "label": "Necessary",
+          "requiresConsent": false
+        }
+      ],
+      "itemFields": [
+        {
+          "key": "customerNotes.enabled",
+          "label": "enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.requiresConsent",
+          "label": "requiresConsent customer-facing note",
+          "type": "string"
+        }
+      ]
     },
     {
       "key": "service.privacy.cookieCategories[].category",
@@ -360,12 +414,22 @@
           "url": "https://app.acme.example",
           "privacy": {
             "usesCookiesOrTrackingTechnologies": true,
-            "cookieCategories": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }],
+            "cookieCategories": [
+              {
+                "category": "necessary",
+                "label": "Necessary",
+                "requiresConsent": false
+              }
+            ],
             "cookieConsentRequired": false,
             "cookieConsentMechanism": "cookie_banner",
             "globalPrivacyControlSupported": true,
-            "analyticsProviders": ["Google Analytics"],
-            "advertisingProviders": ["Google Ads"],
+            "analyticsProviders": [
+              "Google Analytics"
+            ],
+            "advertisingProviders": [
+              "Google Ads"
+            ],
             "primaryHostingRegion": "us",
             "allSubprocessorsDataRegion": "eu",
             "allSubprocessorsDataRegionLabel": "European Union"
@@ -431,42 +495,60 @@
           "label": "User types",
           "type": "string[]",
           "description": "Service user type codes.",
-          "example": ["workspace_admins", "end_users"]
+          "example": [
+            "workspace_admins",
+            "end_users"
+          ]
         },
         {
           "key": "userTypeLabels",
           "label": "User type labels",
           "type": "string[]",
           "description": "Human-readable service user type labels.",
-          "example": ["Workspace admins", "End users"]
+          "example": [
+            "Workspace admins",
+            "End users"
+          ]
         },
         {
           "key": "customerTypes",
           "label": "Customer types",
           "type": "string[]",
           "description": "Service customer type codes.",
-          "example": ["smb", "mid_market"]
+          "example": [
+            "smb",
+            "mid_market"
+          ]
         },
         {
           "key": "customerTypeLabels",
           "label": "Customer type labels",
           "type": "string[]",
           "description": "Human-readable service customer type labels.",
-          "example": ["SMB", "Mid-market"]
+          "example": [
+            "SMB",
+            "Mid-market"
+          ]
         },
         {
           "key": "availabilityRegions",
           "label": "Availability regions",
           "type": "string[]",
           "description": "Region codes where the service is available.",
-          "example": ["us", "eu"]
+          "example": [
+            "us",
+            "eu"
+          ]
         },
         {
           "key": "availabilityRegionLabels",
           "label": "Availability region labels",
           "type": "string[]",
           "description": "Human-readable availability region labels.",
-          "example": ["United States", "European Union"]
+          "example": [
+            "United States",
+            "European Union"
+          ]
         },
         {
           "key": "childrenDirected",
@@ -494,7 +576,13 @@
           "label": "Cookie categories",
           "type": "object[]",
           "description": "Structured cookie categories used by this service, including label and consent requirement.",
-          "example": [{ "category": "necessary", "label": "Necessary", "requiresConsent": false }]
+          "example": [
+            {
+              "category": "necessary",
+              "label": "Necessary",
+              "requiresConsent": false
+            }
+          ]
         },
         {
           "key": "privacy.cookieConsentRequired",
@@ -550,28 +638,36 @@
           "label": "Analytics providers",
           "type": "string[]",
           "description": "Names of analytics providers used by this service.",
-          "example": ["Google Analytics"]
+          "example": [
+            "Google Analytics"
+          ]
         },
         {
           "key": "privacy.analyticsProviderIds",
           "label": "Analytics provider IDs",
           "type": "string[]",
           "description": "Catalog provider IDs for service analytics providers.",
-          "example": ["prov-google-analytics"]
+          "example": [
+            "prov-google-analytics"
+          ]
         },
         {
           "key": "privacy.advertisingProviders",
           "label": "Advertising providers",
           "type": "string[]",
           "description": "Names of advertising providers used by this service.",
-          "example": ["Google Ads"]
+          "example": [
+            "Google Ads"
+          ]
         },
         {
           "key": "privacy.advertisingProviderIds",
           "label": "Advertising provider IDs",
           "type": "string[]",
           "description": "Catalog provider IDs for service advertising providers.",
-          "example": ["prov-google-ads"]
+          "example": [
+            "prov-google-ads"
+          ]
         },
         {
           "key": "privacy.primaryHostingRegion",
@@ -629,12 +725,137 @@
           "key": "dataTypes",
           "label": "Data types",
           "type": "collection",
-          "description": "Organization data types referenced by this service’s vendors.",
+          "description": "Organization data types referenced by this service\u2019s vendors.",
           "example": [
             {
               "name": "account_data"
             }
           ]
+        },
+        {
+          "key": "customerNotes.processesCustomerData",
+          "label": "processesCustomerData customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.url",
+          "label": "url customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.businessActivityIds",
+          "label": "businessActivityIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.userTypes",
+          "label": "userTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.customerTypes",
+          "label": "customerTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.availabilityRegions",
+          "label": "availabilityRegions customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.childrenDirected",
+          "label": "childrenDirected customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.minimumUserAge",
+          "label": "minimumUserAge customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.usesCookiesOrTrackingTechnologies",
+          "label": "usesCookiesOrTrackingTechnologies customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategories",
+          "label": "cookieCategories customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieConsentMechanism",
+          "label": "cookieConsentMechanism customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.nonEssentialCookiesBlockedUntilConsent",
+          "label": "nonEssentialCookiesBlockedUntilConsent customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieConsentWithdrawalMethod",
+          "label": "cookieConsentWithdrawalMethod customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.globalPrivacyControlSupported",
+          "label": "globalPrivacyControlSupported customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.primaryHostingRegion",
+          "label": "primaryHostingRegion customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.necessary.enabled",
+          "label": "cookieCategoryControls.necessary.enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.necessary.requiresConsent",
+          "label": "cookieCategoryControls.necessary.requiresConsent customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.preferences.enabled",
+          "label": "cookieCategoryControls.preferences.enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.preferences.requiresConsent",
+          "label": "cookieCategoryControls.preferences.requiresConsent customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.analytics.enabled",
+          "label": "cookieCategoryControls.analytics.enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.analytics.requiresConsent",
+          "label": "cookieCategoryControls.analytics.requiresConsent customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.marketing.enabled",
+          "label": "cookieCategoryControls.marketing.enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "privacy.customerNotes.cookieCategoryControls.marketing.requiresConsent",
+          "label": "cookieCategoryControls.marketing.requiresConsent customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -673,7 +894,11 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Privacy right codes supported by the organization.",
-      "example": ["access", "deletion", "correction"]
+      "example": [
+        "access",
+        "deletion",
+        "correction"
+      ]
     },
     {
       "key": "privacy.supportedRightLabels",
@@ -681,7 +906,11 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for supported privacy right codes.",
-      "example": ["Access", "Deletion", "Correction"]
+      "example": [
+        "Access",
+        "Deletion",
+        "Correction"
+      ]
     },
     {
       "key": "privacy.requestMethods",
@@ -689,7 +918,10 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Request method codes accepted for privacy rights requests.",
-      "example": ["email", "web_form"]
+      "example": [
+        "email",
+        "web_form"
+      ]
     },
     {
       "key": "privacy.requestMethodLabels",
@@ -697,7 +929,10 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for privacy request method codes.",
-      "example": ["Email", "Web form"]
+      "example": [
+        "Email",
+        "Web form"
+      ]
     },
     {
       "key": "privacy.responseTimelineDaysStatus",
@@ -793,7 +1028,10 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Transfer mechanism codes used for cross-border data transfers.",
-      "example": ["sccs", "dpf"]
+      "example": [
+        "sccs",
+        "dpf"
+      ]
     },
     {
       "key": "privacy.transferMechanismLabels",
@@ -801,7 +1039,10 @@
       "type": "string[]",
       "category": "Privacy",
       "description": "Human-readable labels for transfer mechanism codes.",
-      "example": ["SCCs", "Data Privacy Framework"]
+      "example": [
+        "SCCs",
+        "Data Privacy Framework"
+      ]
     },
     {
       "key": "privacy.sellsOrSharesData",
@@ -1137,7 +1378,10 @@
       "type": "array",
       "category": "Security",
       "description": "Human-readable customer notification process labels.",
-      "example": ["Email notice", "Status page"]
+      "example": [
+        "Email notice",
+        "Status page"
+      ]
     },
     {
       "key": "security.incidentResponse.lastTestedDate",
@@ -1265,7 +1509,10 @@
       "type": "array",
       "category": "Security",
       "description": "Customer notification process codes.",
-      "example": ["email_notice", "status_page"]
+      "example": [
+        "email_notice",
+        "status_page"
+      ]
     },
     {
       "key": "security.backups.backupCadence",
@@ -1341,6 +1588,11 @@
           "type": "string",
           "description": "Catalog identifier for the selected provider.",
           "example": "prov-github"
+        },
+        {
+          "key": "customerNotes.selection",
+          "label": "Provider selection customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -1443,8 +1695,13 @@
           "id": "data_type_customer_account",
           "name": "customer account data",
           "description": "Profile and billing contact details",
-          "subjectTypes": ["customers", "admins"],
-          "collectionMethods": ["signup form"],
+          "subjectTypes": [
+            "customers",
+            "admins"
+          ],
+          "collectionMethods": [
+            "signup form"
+          ],
           "isSensitive": true,
           "isRequired": true
         }
@@ -1476,28 +1733,38 @@
           "label": "Subject types",
           "type": "string[]",
           "description": "People or account types the data category relates to.",
-          "example": ["customers", "admins"]
+          "example": [
+            "customers",
+            "admins"
+          ]
         },
         {
           "key": "subjectTypeLabels",
           "label": "Subject type labels",
           "type": "string[]",
           "description": "Human-readable labels for the data category's subject type codes.",
-          "example": ["Customers", "Admins"]
+          "example": [
+            "Customers",
+            "Admins"
+          ]
         },
         {
           "key": "collectionMethods",
           "label": "Collection methods",
           "type": "string[]",
           "description": "Ways this data category is collected.",
-          "example": ["signup form"]
+          "example": [
+            "signup form"
+          ]
         },
         {
           "key": "collectionMethodLabels",
           "label": "Collection method labels",
           "type": "string[]",
           "description": "Human-readable labels for the data category's collection method codes.",
-          "example": ["Account signup"]
+          "example": [
+            "Account signup"
+          ]
         },
         {
           "key": "isSensitive",
@@ -1512,6 +1779,36 @@
           "type": "boolean",
           "description": "Whether this data category is required to provide the product or service.",
           "example": true
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -1526,9 +1823,15 @@
           "name": "Account management",
           "purpose": "Operate user accounts",
           "role": "controller",
-          "legalBasis": ["contract"],
-          "dataTypeIds": ["data_type_customer_account"],
-          "dataTypeNames": ["customer account data"],
+          "legalBasis": [
+            "contract"
+          ],
+          "dataTypeIds": [
+            "data_type_customer_account"
+          ],
+          "dataTypeNames": [
+            "customer account data"
+          ],
           "dataTypes": [
             {
               "id": "data_type_customer_account",
@@ -1572,28 +1875,36 @@
           "label": "Legal basis",
           "type": "string[]",
           "description": "Legal bases for this processing activity.",
-          "example": ["contract"]
+          "example": [
+            "contract"
+          ]
         },
         {
           "key": "legalBasisLabels",
           "label": "Legal basis labels",
           "type": "string[]",
           "description": "Human-readable labels for this activity's legal basis codes.",
-          "example": ["Contract"]
+          "example": [
+            "Contract"
+          ]
         },
         {
           "key": "dataTypeIds",
           "label": "Data type IDs",
           "type": "string[]",
           "description": "IDs of data categories processed by this activity.",
-          "example": ["data_type_customer_account"]
+          "example": [
+            "data_type_customer_account"
+          ]
         },
         {
           "key": "dataTypeNames",
           "label": "Data type names",
           "type": "string[]",
           "description": "Names of data categories processed by this activity.",
-          "example": ["customer account data"]
+          "example": [
+            "customer account data"
+          ]
         },
         {
           "key": "dataTypes",
@@ -1676,6 +1987,71 @@
           "type": "boolean",
           "description": "Whether users are told when AI is used in this activity.",
           "example": true
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -1797,9 +2173,13 @@
           "countryOfRegistration": "United States",
           "hasSubprocessors": true,
           "dataProcessingLevel": "limited",
-          "dataProcessed": ["customer account data"],
+          "dataProcessed": [
+            "customer account data"
+          ],
           "dpaStatus": "signed",
-          "dataRegions": ["US"],
+          "dataRegions": [
+            "US"
+          ],
           "criticality": "high",
           "owner": "Engineering",
           "notes": "Critical engineering system"
@@ -1881,7 +2261,9 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": ["customer account data"]
+          "example": [
+            "customer account data"
+          ]
         },
         {
           "key": "dpaStatus",
@@ -1902,14 +2284,18 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Region codes where the vendor processes or stores data.",
-          "example": ["us"]
+          "example": [
+            "us"
+          ]
         },
         {
           "key": "dataRegionLabels",
           "label": "Data region labels",
           "type": "string[]",
           "description": "Human-readable regions where the vendor processes or stores data.",
-          "example": ["United States"]
+          "example": [
+            "United States"
+          ]
         },
         {
           "key": "criticality",
@@ -1938,6 +2324,46 @@
           "type": "string",
           "description": "Additional notes about the vendor.",
           "example": "Critical engineering system"
+        },
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -1954,11 +2380,17 @@
           "countryOfRegistrationLabel": "United States",
           "dataProcessingLevel": "limited",
           "dataProcessingLevelLabel": "Limited",
-          "dataProcessed": ["customer account data"],
+          "dataProcessed": [
+            "customer account data"
+          ],
           "dpaStatus": "signed",
           "dpaStatusLabel": "Signed",
-          "dataRegions": ["us"],
-          "dataRegionLabels": ["United States"]
+          "dataRegions": [
+            "us"
+          ],
+          "dataRegionLabels": [
+            "United States"
+          ]
         }
       ],
       "itemFields": [
@@ -2037,7 +2469,9 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": ["customer account data"]
+          "example": [
+            "customer account data"
+          ]
         },
         {
           "key": "dpaStatus",
@@ -2058,14 +2492,18 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Region codes where the vendor processes or stores data.",
-          "example": ["us"]
+          "example": [
+            "us"
+          ]
         },
         {
           "key": "dataRegionLabels",
           "label": "Data region labels",
           "type": "string[]",
           "description": "Human-readable regions where the vendor processes or stores data.",
-          "example": ["United States"]
+          "example": [
+            "United States"
+          ]
         },
         {
           "key": "criticality",
@@ -2094,6 +2532,81 @@
           "type": "string",
           "description": "Additional notes about the vendor.",
           "example": "Critical engineering system"
+        },
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -2109,8 +2622,14 @@
           "purpose": "Payment processing",
           "countryOfRegistration": "US",
           "countryOfRegistrationLabel": "United States",
-          "dataRegions": ["us", "eu"],
-          "dataRegionLabels": ["United States", "European Union"],
+          "dataRegions": [
+            "us",
+            "eu"
+          ],
+          "dataRegionLabels": [
+            "United States",
+            "European Union"
+          ],
           "dpaStatus": "signed",
           "dpaStatusLabel": "Signed"
         }
@@ -2191,7 +2710,9 @@
           "label": "Data processed",
           "type": "string[]",
           "description": "Organization data categories processed by the vendor.",
-          "example": ["customer account data"]
+          "example": [
+            "customer account data"
+          ]
         },
         {
           "key": "dpaStatus",
@@ -2212,14 +2733,18 @@
           "label": "Data regions",
           "type": "string[]",
           "description": "Region codes where the vendor processes or stores data.",
-          "example": ["us"]
+          "example": [
+            "us"
+          ]
         },
         {
           "key": "dataRegionLabels",
           "label": "Data region labels",
           "type": "string[]",
           "description": "Human-readable regions where the vendor processes or stores data.",
-          "example": ["United States"]
+          "example": [
+            "United States"
+          ]
         },
         {
           "key": "criticality",
@@ -2248,6 +2773,81 @@
           "type": "string",
           "description": "Additional notes about the vendor.",
           "example": "Critical engineering system"
+        },
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
         }
       ]
     },
@@ -2283,6 +2883,3705 @@
               "dataProcessingLevel": "subprocessor"
             }
           ]
+        }
+      ]
+    },
+    {
+      "key": "organization.customerNotes.companyName",
+      "label": "companyName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.legalEntityName",
+      "label": "legalEntityName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.website",
+      "label": "website customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.contactEmail",
+      "label": "contactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.securityContactEmail",
+      "label": "securityContactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.privacyContactEmail",
+      "label": "privacyContactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.country",
+      "label": "country customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.address",
+      "label": "address customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.employeeCount",
+      "label": "employeeCount customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.industries",
+      "label": "industries customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.regions",
+      "label": "regions customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.handlesSensitiveData",
+      "label": "handlesSensitiveData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.handlesPersonalData",
+      "label": "handlesPersonalData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.handlesHealthData",
+      "label": "handlesHealthData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.complianceGoals",
+      "label": "complianceGoals customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "organization.customerNotes.name",
+      "label": "name customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.companyName",
+      "label": "companyName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.legalEntityName",
+      "label": "legalEntityName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.website",
+      "label": "website customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.contactEmail",
+      "label": "contactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.securityContactEmail",
+      "label": "securityContactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.privacyContactEmail",
+      "label": "privacyContactEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.country",
+      "label": "country customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.address",
+      "label": "address customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.employeeCount",
+      "label": "employeeCount customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.industries",
+      "label": "industries customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.regions",
+      "label": "regions customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.handlesSensitiveData",
+      "label": "handlesSensitiveData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.handlesPersonalData",
+      "label": "handlesPersonalData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.handlesHealthData",
+      "label": "handlesHealthData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.complianceGoals",
+      "label": "complianceGoals customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "company.customerNotes.name",
+      "label": "name customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.processesCustomerData",
+      "label": "processesCustomerData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.name",
+      "label": "name customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.description",
+      "label": "description customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.url",
+      "label": "url customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.businessActivityIds",
+      "label": "businessActivityIds customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.userTypes",
+      "label": "userTypes customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.customerTypes",
+      "label": "customerTypes customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.availabilityRegions",
+      "label": "availabilityRegions customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.childrenDirected",
+      "label": "childrenDirected customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.customerNotes.minimumUserAge",
+      "label": "minimumUserAge customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.activities",
+      "label": "activities records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.activities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.businessActivities",
+      "label": "businessActivities records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.businessActivities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.privacy.customerNotes.usesCookiesOrTrackingTechnologies",
+      "label": "usesCookiesOrTrackingTechnologies customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategories",
+      "label": "cookieCategories customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieConsentMechanism",
+      "label": "cookieConsentMechanism customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.nonEssentialCookiesBlockedUntilConsent",
+      "label": "nonEssentialCookiesBlockedUntilConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieConsentWithdrawalMethod",
+      "label": "cookieConsentWithdrawalMethod customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.globalPrivacyControlSupported",
+      "label": "globalPrivacyControlSupported customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.primaryHostingRegion",
+      "label": "primaryHostingRegion customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.necessary.enabled",
+      "label": "cookieCategoryControls.necessary.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.necessary.requiresConsent",
+      "label": "cookieCategoryControls.necessary.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.preferences.enabled",
+      "label": "cookieCategoryControls.preferences.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.preferences.requiresConsent",
+      "label": "cookieCategoryControls.preferences.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.analytics.enabled",
+      "label": "cookieCategoryControls.analytics.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.analytics.requiresConsent",
+      "label": "cookieCategoryControls.analytics.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.marketing.enabled",
+      "label": "cookieCategoryControls.marketing.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.privacy.customerNotes.cookieCategoryControls.marketing.requiresConsent",
+      "label": "cookieCategoryControls.marketing.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "service.providerUsage",
+      "label": "providerUsage records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.vendorUses",
+      "label": "vendorUses records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.providers",
+      "label": "providers records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.vendors",
+      "label": "vendors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "service.dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].activities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].businessActivities",
+      "label": "businessActivities records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].businessActivities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].privacy.cookieCategories",
+      "label": "cookieCategories records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.enabled",
+          "label": "enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.requiresConsent",
+          "label": "requiresConsent customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].providerUsage",
+      "label": "providerUsage records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].vendorUses",
+      "label": "vendorUses records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].providers",
+      "label": "providers records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].vendors",
+      "label": "vendors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.all[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.customerNotes.processesCustomerData",
+      "label": "processesCustomerData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.name",
+      "label": "name customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.description",
+      "label": "description customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.url",
+      "label": "url customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.businessActivityIds",
+      "label": "businessActivityIds customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.userTypes",
+      "label": "userTypes customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.customerTypes",
+      "label": "customerTypes customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.availabilityRegions",
+      "label": "availabilityRegions customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.childrenDirected",
+      "label": "childrenDirected customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.customerNotes.minimumUserAge",
+      "label": "minimumUserAge customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.activities",
+      "label": "activities records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.activities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.businessActivities",
+      "label": "businessActivities records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.role",
+          "label": "role customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalBasis",
+          "label": "legalBasis customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataTypeIds",
+          "label": "dataTypeIds customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionPolicy",
+          "label": "retentionPolicy customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.retentionDays",
+          "label": "retentionDays customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.usesAi",
+          "label": "usesAi customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUseCases",
+          "label": "aiUseCases customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataUsedForTraining",
+          "label": "aiCustomerDataUsedForTraining customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiCustomerDataSentToProviders",
+          "label": "aiCustomerDataSentToProviders customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiHumanReviewOfOutputs",
+          "label": "aiHumanReviewOfOutputs customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.aiUsersInformedWhenUsed",
+          "label": "aiUsersInformedWhenUsed customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.businessActivities[].dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.usesCookiesOrTrackingTechnologies",
+      "label": "usesCookiesOrTrackingTechnologies customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategories",
+      "label": "cookieCategories customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieConsentMechanism",
+      "label": "cookieConsentMechanism customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.nonEssentialCookiesBlockedUntilConsent",
+      "label": "nonEssentialCookiesBlockedUntilConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieConsentWithdrawalMethod",
+      "label": "cookieConsentWithdrawalMethod customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.globalPrivacyControlSupported",
+      "label": "globalPrivacyControlSupported customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.primaryHostingRegion",
+      "label": "primaryHostingRegion customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.necessary.enabled",
+      "label": "cookieCategoryControls.necessary.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.necessary.requiresConsent",
+      "label": "cookieCategoryControls.necessary.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.preferences.enabled",
+      "label": "cookieCategoryControls.preferences.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.preferences.requiresConsent",
+      "label": "cookieCategoryControls.preferences.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.analytics.enabled",
+      "label": "cookieCategoryControls.analytics.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.analytics.requiresConsent",
+      "label": "cookieCategoryControls.analytics.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.marketing.enabled",
+      "label": "cookieCategoryControls.marketing.enabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.customerNotes.cookieCategoryControls.marketing.requiresConsent",
+      "label": "cookieCategoryControls.marketing.requiresConsent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "services.primary.privacy.cookieCategories",
+      "label": "cookieCategories records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.enabled",
+          "label": "enabled customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.requiresConsent",
+          "label": "requiresConsent customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.providerUsage",
+      "label": "providerUsage records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.vendorUses",
+      "label": "vendorUses records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.providers",
+      "label": "providers records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.vendors",
+      "label": "vendors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "services.primary.dataTypes",
+      "label": "dataTypes records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.description",
+          "label": "description customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.subjectTypes",
+          "label": "subjectTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.collectionMethods",
+          "label": "collectionMethods customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isSensitive",
+          "label": "isSensitive customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.isRequired",
+          "label": "isRequired customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "privacy.customerNotes.supportedRights",
+      "label": "supportedRights customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.requestMethods",
+      "label": "requestMethods customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.responseTimelineDaysStatus",
+      "label": "responseTimelineDaysStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.responseTimelineDays",
+      "label": "responseTimelineDays customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.identityVerificationRequired",
+      "label": "identityVerificationRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.authorizedAgentSupported",
+      "label": "authorizedAgentSupported customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.appealProcessExists",
+      "label": "appealProcessExists customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.organizationProviders",
+      "label": "organizationProviders customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.sendsMarketingEmails",
+      "label": "sendsMarketingEmails customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.marketingOptOutMethod",
+      "label": "marketingOptOutMethod customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.transactionalEmailsSent",
+      "label": "transactionalEmailsSent customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.crossBorderTransfers",
+      "label": "crossBorderTransfers customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.transferMechanisms",
+      "label": "transferMechanisms customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.sellsOrSharesData",
+      "label": "sellsOrSharesData customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.doNotSellLink",
+      "label": "doNotSellLink customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.dpoStatus",
+      "label": "dpoStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.dpoName",
+      "label": "dpoName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.dpoEmail",
+      "label": "dpoEmail customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.euRepresentativeStatus",
+      "label": "euRepresentativeStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.euRepresentativeName",
+      "label": "euRepresentativeName customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.euRepresentativeAddress",
+      "label": "euRepresentativeAddress customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.usesAutomatedDecisionMaking",
+      "label": "usesAutomatedDecisionMaking customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.productionDataInDevelopment",
+      "label": "productionDataInDevelopment customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.retentionPolicyExists",
+      "label": "retentionPolicyExists customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "privacy.customerNotes.providerSystems.newsletter",
+      "label": "providerSystems.newsletter customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.accessControl.customerNotes.leastPrivilege",
+      "label": "leastPrivilege customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.accessControl.customerNotes.roleBasedAccess",
+      "label": "roleBasedAccess customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.accessControl.customerNotes.accessReviewCadence",
+      "label": "accessReviewCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.accessControl.customerNotes.adminApprovalRequired",
+      "label": "adminApprovalRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.authentication.customerNotes.mfaRequired",
+      "label": "mfaRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.authentication.customerNotes.ssoSupported",
+      "label": "ssoSupported customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.authentication.customerNotes.passwordManagerRequired",
+      "label": "passwordManagerRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.encryption.customerNotes.atRestAlgorithm",
+      "label": "atRestAlgorithm customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.encryption.customerNotes.inTransitMinimumTlsVersion",
+      "label": "inTransitMinimumTlsVersion customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.encryption.customerNotes.keyManagementProvider",
+      "label": "keyManagementProvider customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.encryption.customerNotes.encryptionAtRest",
+      "label": "encryptionAtRest customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.encryption.customerNotes.encryptionInTransit",
+      "label": "encryptionInTransit customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.logging.customerNotes.centralizedLogging",
+      "label": "centralizedLogging customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.logging.customerNotes.securityMonitoring",
+      "label": "securityMonitoring customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.codeReviewRequired",
+      "label": "codeReviewRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.dependencySecurityMonitoring",
+      "label": "dependencySecurityMonitoring customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.secretScanning",
+      "label": "secretScanning customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.automatedTestingBeforeDeployment",
+      "label": "automatedTestingBeforeDeployment customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.cicdDeploymentProcess",
+      "label": "cicdDeploymentProcess customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.developmentSecurity.customerNotes.productionDeploymentApprovalRequired",
+      "label": "productionDeploymentApprovalRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.scanningCadence",
+      "label": "scanningCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.penetrationTestingStrategy",
+      "label": "penetrationTestingStrategy customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.penetrationTestingCadence",
+      "label": "penetrationTestingCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.penetrationTestLastDate",
+      "label": "penetrationTestLastDate customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.patchingSlaCriticalDays",
+      "label": "patchingSlaCriticalDays customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.patchingSlaCriticalDaysStatus",
+      "label": "patchingSlaCriticalDaysStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.patchingSlaHighDays",
+      "label": "patchingSlaHighDays customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.patchingSlaHighDaysStatus",
+      "label": "patchingSlaHighDaysStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.vulnerabilityDisclosureProgramExists",
+      "label": "vulnerabilityDisclosureProgramExists customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vulnerabilityManagement.customerNotes.vulnerabilityDisclosureUrl",
+      "label": "vulnerabilityDisclosureUrl customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.incidentResponse.customerNotes.planExists",
+      "label": "planExists customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.incidentResponse.customerNotes.notificationTimeline",
+      "label": "notificationTimeline customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.incidentResponse.customerNotes.customerNotificationProcess",
+      "label": "customerNotificationProcess customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.incidentResponse.customerNotes.lastTestedDate",
+      "label": "lastTestedDate customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.backups.customerNotes.backupsEnabled",
+      "label": "backupsEnabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.backups.customerNotes.backupCadence",
+      "label": "backupCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.backups.customerNotes.backupRetentionDays",
+      "label": "backupRetentionDays customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.backups.customerNotes.backupRetentionDaysStatus",
+      "label": "backupRetentionDaysStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.backups.customerNotes.restoreTestingCadence",
+      "label": "restoreTestingCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vendorRisk.customerNotes.vendorReviewRequired",
+      "label": "vendorReviewRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vendorRisk.customerNotes.vendorReviewCadence",
+      "label": "vendorReviewCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "security.vendorRisk.customerNotes.dpaRequiredForProcessors",
+      "label": "dpaRequiredForProcessors customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.organizationProviders",
+      "label": "organizationProviders customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.mfaEnabled",
+      "label": "mfaEnabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.encryptedDevicesRequired",
+      "label": "encryptedDevicesRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.backupsEnabled",
+      "label": "backupsEnabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.centralizedLoggingEnabled",
+      "label": "centralizedLoggingEnabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.securityMonitoring",
+      "label": "securityMonitoring customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.atRestAlgorithm",
+      "label": "atRestAlgorithm customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.inTransitMinimumTlsVersion",
+      "label": "inTransitMinimumTlsVersion customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.keyManagementProvider",
+      "label": "keyManagementProvider customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.backupCadence",
+      "label": "backupCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.backupRetentionDays",
+      "label": "backupRetentionDays customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.backupRetentionDaysStatus",
+      "label": "backupRetentionDaysStatus customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.restoreTestingCadence",
+      "label": "restoreTestingCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.vendorReviewRequired",
+      "label": "vendorReviewRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.vendorReviewCadence",
+      "label": "vendorReviewCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.dpaRequiredForProcessors",
+      "label": "dpaRequiredForProcessors customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.encryptionAtRest",
+      "label": "encryptionAtRest customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.encryptionInTransit",
+      "label": "encryptionInTransit customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.ai",
+      "label": "providerSystems.ai customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.cloud",
+      "label": "providerSystems.cloud customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.source_control",
+      "label": "providerSystems.source_control customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.auth",
+      "label": "providerSystems.auth customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.password_manager",
+      "label": "providerSystems.password_manager customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "infrastructure.customerNotes.providerSystems.issue_tracking",
+      "label": "providerSystems.issue_tracking customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.mfaRequired",
+      "label": "mfaRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.ssoEnabled",
+      "label": "ssoEnabled customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.sharedAccountsExist",
+      "label": "sharedAccountsExist customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.offboardingProcessExists",
+      "label": "offboardingProcessExists customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.accessReviewsPerformed",
+      "label": "accessReviewsPerformed customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.leastPrivilege",
+      "label": "leastPrivilege customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.roleBasedAccess",
+      "label": "roleBasedAccess customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.accessReviewCadence",
+      "label": "accessReviewCadence customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.adminApprovalRequired",
+      "label": "adminApprovalRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.passwordManagerRequired",
+      "label": "passwordManagerRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.securityTrainingRequired",
+      "label": "securityTrainingRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "access.customerNotes.confidentialityAgreementsRequired",
+      "label": "confidentialityAgreementsRequired customer-facing note",
+      "type": "string",
+      "category": "Customer-facing notes",
+      "description": "Optional literal customer-facing commentary. Place alongside its field statement under the same inclusion conditions. Internal notes are never available."
+    },
+    {
+      "key": "providers.all",
+      "label": "all records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "providers.uses",
+      "label": "uses records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "providers.dataProcessors",
+      "label": "dataProcessors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "providers.byService[].providers",
+      "label": "providers records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "providers.byService[].vendors",
+      "label": "vendors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "vendors.uses",
+      "label": "uses records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "vendors.byService[].providers",
+      "label": "providers records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "key": "vendors.byService[].vendors",
+      "label": "vendors records",
+      "type": "collection",
+      "category": "Customer-facing notes",
+      "description": "Customer-facing field notes for these records. Place notes alongside the corresponding field statement.",
+      "itemFields": [
+        {
+          "key": "customerNotes.systemTypes",
+          "label": "systemTypes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.name",
+          "label": "name customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.legalName",
+          "label": "legalName customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.category",
+          "label": "category customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.countryOfRegistration",
+          "label": "countryOfRegistration customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.criticality",
+          "label": "criticality customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.notes",
+          "label": "notes customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.purpose",
+          "label": "purpose customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.serviceId",
+          "label": "serviceId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.organizationProviderId",
+          "label": "organizationProviderId customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.systemType",
+          "label": "systemType customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessingLevel",
+          "label": "dataProcessingLevel customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataProcessed",
+          "label": "dataProcessed customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dpaStatus",
+          "label": "dpaStatus customer-facing note",
+          "type": "string"
+        },
+        {
+          "key": "customerNotes.dataRegions",
+          "label": "dataRegions customer-facing note",
+          "type": "string"
         }
       ]
     }

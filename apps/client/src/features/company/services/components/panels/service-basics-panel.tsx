@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type ServiceProfileInput } from "@plyco/contracts"
 import { useState } from "react"
@@ -38,12 +39,13 @@ export const ServiceBasicsPanel = ({
     values: draft,
   })
   const submit = form.handleSubmit(
-    ({ usesCookiesOrTrackingTechnologies, ...basics }) => {
+    ({ usesCookiesOrTrackingTechnologies, privacyFieldNotes, ...basics }) => {
       onSave(
         {
           ...basics,
           privacy: normalizeCookiePreferences({
             ...service.privacy,
+            fieldNotes: privacyFieldNotes,
             usesCookiesOrTrackingTechnologies,
           }),
         },
@@ -52,59 +54,69 @@ export const ServiceBasicsPanel = ({
     }
   )
   return (
-    <ProfilePanelShell
-      description="Core identification and public details of the service or product."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={[
-            [
-              "Service name",
-              service.serviceName || "Not set",
-              serviceHelperText.serviceName,
-            ],
-            [
-              "Service URL",
-              service.serviceUrl || "Not set",
-              serviceHelperText.serviceUrl,
-            ],
-            [
-              "Description",
-              service.serviceDescription || "Not set",
-              serviceHelperText.serviceDescription,
-            ],
-            [
-              "Processes customer data",
-              boolText(service.processesCustomerData),
-              serviceHelperText.processesCustomerData,
-            ],
-            [
-              "Uses cookies or tracking technologies",
-              boolText(service.privacy.usesCookiesOrTrackingTechnologies),
-              serviceHelperText.usesCookiesOrTrackingTechnologies,
-            ],
-          ]}
-        />
-      }
-      saveLabel="Save"
-      title="General"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
+    <FieldNotesProvider
+      form={form}
+      bindings={{
+        usesCookiesOrTrackingTechnologies: {
+          path: "privacyFieldNotes",
+          key: "usesCookiesOrTrackingTechnologies",
+        },
       }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
     >
-      <ServiceBasicsFormFields
-        control={form.control}
-        descriptionName={basicsPath("serviceDescription")}
-        errors={form.formState.errors}
-        nameName={basicsPath("serviceName")}
-        register={form.register}
-        urlName={basicsPath("serviceUrl")}
-      />
-    </ProfilePanelShell>
+      <ProfilePanelShell
+        description="Core identification and public details of the service or product."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={[
+              [
+                "Service name",
+                service.serviceName || "Not set",
+                serviceHelperText.serviceName,
+              ],
+              [
+                "Service URL",
+                service.serviceUrl || "Not set",
+                serviceHelperText.serviceUrl,
+              ],
+              [
+                "Description",
+                service.serviceDescription || "Not set",
+                serviceHelperText.serviceDescription,
+              ],
+              [
+                "Processes customer data",
+                boolText(service.processesCustomerData),
+                serviceHelperText.processesCustomerData,
+              ],
+              [
+                "Uses cookies or tracking technologies",
+                boolText(service.privacy.usesCookiesOrTrackingTechnologies),
+                serviceHelperText.usesCookiesOrTrackingTechnologies,
+              ],
+            ]}
+          />
+        }
+        saveLabel="Save"
+        title="General"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <ServiceBasicsFormFields
+          control={form.control}
+          descriptionName={basicsPath("serviceDescription")}
+          errors={form.formState.errors}
+          nameName={basicsPath("serviceName")}
+          register={form.register}
+          urlName={basicsPath("serviceUrl")}
+        />
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

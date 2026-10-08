@@ -1,3 +1,5 @@
+import { useState } from "react"
+import { FieldSettings } from "@/components/form/field-settings"
 import {
   type ProviderSelection,
   type Provider,
@@ -66,6 +68,7 @@ export const MultiProviderField = ({
       helperText={helperText}
       label={label}
       name="organizationProviders"
+      notesKey={`organizationProviders.${systemType}`}
       options={options}
       placeholder={`Select ${label.toLowerCase()}`}
       value={selectedIds}
@@ -95,6 +98,7 @@ export const SingleProviderField = ({
   providers: Provider[]
   systemType: InfrastructureProviderSystemType
 }) => {
+  const [isComboboxOpen, setIsComboboxOpen] = useState(false)
   const organizationProviders = form.watch("organizationProviders")
   const selectedIds = selectedProviderIds(organizationProviders, systemType)
   const options = [
@@ -124,17 +128,18 @@ export const SingleProviderField = ({
   }
 
   return (
-    <label
-      className="grid gap-2 text-sm font-medium text-slate-800"
-      htmlFor={fieldId}
-    >
-      <span>{infrastructureProviderLabels[systemType]}</span>
+    <div className="group/field grid gap-2 text-sm font-medium text-slate-800">
+      <label htmlFor={fieldId}>
+        {infrastructureProviderLabels[systemType]}
+      </label>
       {helperText ? (
         <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
           {helperText}
         </span>
       ) : null}
       <Combobox
+        open={isComboboxOpen}
+        onOpenChange={setIsComboboxOpen}
         items={selectableOptions.map((option) => option.value)}
         value={selectedIds[0] || null}
         autoHighlight
@@ -143,6 +148,13 @@ export const SingleProviderField = ({
       >
         <ComboboxInput
           id={fieldId}
+          endAction={
+            <FieldSettings
+              label={infrastructureProviderLabels[systemType]}
+              name={`organizationProviders.${systemType}`}
+              onOpen={() => setIsComboboxOpen(false)}
+            />
+          }
           className={comboboxInputClassName}
           placeholder="Not set"
           showClear={selectedIds.length > 0}
@@ -172,11 +184,11 @@ export const SingleProviderField = ({
           </ComboboxList>
         </ComboboxContent>
       </Combobox>
-    </label>
+    </div>
   )
 }
 
 export type ProvidersDraft = Pick<
   ProfileDraft["infrastructure"],
-  "organizationProviders" | "mfaEnabled"
+  "organizationProviders" | "mfaEnabled" | "fieldNotes"
 >

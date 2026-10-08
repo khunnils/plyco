@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
@@ -22,6 +23,7 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const vendorRiskSchema = infrastructureProfileSchema.pick({
+  fieldNotes: true,
   vendorReviewRequired: true,
   vendorReviewCadence: true,
   dpaRequiredForProcessors: true,
@@ -32,6 +34,7 @@ type VendorRiskDraft = z.infer<typeof vendorRiskSchema>
 const toVendorRiskDraft = (
   infrastructure: InfrastructureProfile
 ): VendorRiskDraft => ({
+  fieldNotes: infrastructure.fieldNotes,
   vendorReviewRequired: infrastructure.vendorReviewRequired,
   vendorReviewCadence: infrastructure.vendorReviewCadence,
   dpaRequiredForProcessors: infrastructure.dpaRequiredForProcessors,
@@ -126,54 +129,56 @@ export const VendorRiskPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Procedures for auditing third-party vendors, review cadences, and DPA mandates."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={vendorRiskRows(draft, vocabulary, complianceGoals)}
-        />
-      }
-      saveLabel="Save"
-      title="Vendor Risk"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.vendorReviewRequired}
-          label="Vendor review required"
-          name="vendorReviewRequired"
-        />
-        {vendorReviewRequired && (
-          <SelectField
-            control={form.control}
-            helperText={infrastructureHelperText.vendorReviewCadence}
-            label="Vendor review frequency"
-            name="vendorReviewCadence"
-            options={[
-              { value: "", label: "Not set" },
-              ...securityCadenceOptions,
-            ]}
-            placeholder="Not set"
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Procedures for auditing third-party vendors, review cadences, and DPA mandates."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={vendorRiskRows(draft, vocabulary, complianceGoals)}
           />
-        )}
-        {showDpaRequired && (
+        }
+        saveLabel="Save"
+        title="Vendor Risk"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
           <ToggleField
             control={form.control}
-            helperText={infrastructureHelperText.dpaRequiredForProcessors}
-            label="DPA required for processors"
-            name="dpaRequiredForProcessors"
+            helperText={infrastructureHelperText.vendorReviewRequired}
+            label="Vendor review required"
+            name="vendorReviewRequired"
           />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+          {vendorReviewRequired && (
+            <SelectField
+              control={form.control}
+              helperText={infrastructureHelperText.vendorReviewCadence}
+              label="Vendor review frequency"
+              name="vendorReviewCadence"
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
+              placeholder="Not set"
+            />
+          )}
+          {showDpaRequired && (
+            <ToggleField
+              control={form.control}
+              helperText={infrastructureHelperText.dpaRequiredForProcessors}
+              label="DPA required for processors"
+              name="dpaRequiredForProcessors"
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

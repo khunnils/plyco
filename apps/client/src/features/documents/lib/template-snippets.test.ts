@@ -64,3 +64,27 @@ describe("template snippets", () => {
     ).toBe("{{ vendor.name }}")
   })
 })
+
+it("builds nested collection note snippets with the immediate parent alias", () => {
+  const variable = {
+    key: "services.all[].activities[].dataTypes",
+    itemFields: [
+      { key: "customerNotes.name", label: "Name note", type: "string" },
+    ],
+  }
+  const content = collectionSnippet(variable)
+  expect(content).toBe(`{% for service in services.all -%}
+{% for activity in service.activities -%}
+{% for dataType in activity.dataTypes -%}
+{{ dataType.customerNotes.name }}
+{% endfor %}
+{% endfor %}
+{% endfor %}`)
+  expect(
+    isCursorInsideCollectionLoop(
+      content,
+      content.indexOf("{{ dataType"),
+      variable
+    )
+  ).toBe(true)
+})

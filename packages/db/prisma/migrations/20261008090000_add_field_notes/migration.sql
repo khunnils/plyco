@@ -1,0 +1,11 @@
+ALTER TABLE "organizations" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "privacy_profiles" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "infrastructure_profiles" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "security_profiles" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "access_profiles" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "service_profiles" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "service_profiles" ADD COLUMN "privacy_field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "organization_data_types" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "business_activities" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "organization_providers" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "service_provider_usage" ADD COLUMN "field_notes" JSONB NOT NULL DEFAULT '{}';

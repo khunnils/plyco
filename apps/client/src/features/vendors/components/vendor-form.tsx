@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Plus, Save, X } from "lucide-react"
 import {
@@ -51,81 +52,83 @@ export const OrganizationProviderForm = ({
   })
 
   return (
-    <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4">
-      {title && (
-        <h3 className="text-base font-semibold text-slate-950">{title}</h3>
-      )}
-      <div className="grid gap-4 md:grid-cols-2">
-        <TextField
-          error={form.formState.errors.name}
-          label="Provider name"
-          name="name"
-          placeholder="GitHub"
+    <FieldNotesProvider form={form}>
+      <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4">
+        {title && (
+          <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+        )}
+        <div className="grid gap-4 md:grid-cols-2">
+          <TextField
+            error={form.formState.errors.name}
+            label="Provider name"
+            name="name"
+            placeholder="GitHub"
+            register={form.register}
+          />
+          <SelectField
+            control={form.control}
+            label="Category"
+            name="category"
+            options={[
+              { value: "", label: "Not set" },
+              ...providerCategoryOptions,
+            ]}
+          />
+          <TextField
+            error={form.formState.errors.legalName}
+            label="Legal name"
+            name="legalName"
+            placeholder="GitHub, Inc."
+            register={form.register}
+          />
+          <SelectField
+            control={form.control}
+            label="Country of registration"
+            name="countryOfRegistration"
+            options={[{ value: "", label: "Not set" }, ...countryOptions]}
+          />
+          <SelectField
+            control={form.control}
+            label="Criticality"
+            name="criticality"
+            options={criticalityOptions}
+          />
+        </div>
+        <TextAreaField
+          error={form.formState.errors.notes}
+          label="Notes"
+          name="notes"
+          placeholder="Key contract, review, or operational context"
           register={form.register}
         />
-        <SelectField
-          control={form.control}
-          label="Category"
-          name="category"
-          options={[
-            { value: "", label: "Not set" },
-            ...providerCategoryOptions,
-          ]}
-        />
-        <TextField
-          error={form.formState.errors.legalName}
-          label="Legal name"
-          name="legalName"
-          placeholder="GitHub, Inc."
-          register={form.register}
-        />
-        <SelectField
-          control={form.control}
-          label="Country of registration"
-          name="countryOfRegistration"
-          options={[{ value: "", label: "Not set" }, ...countryOptions]}
-        />
-        <SelectField
-          control={form.control}
-          label="Criticality"
-          name="criticality"
-          options={criticalityOptions}
-        />
-      </div>
-      <TextAreaField
-        error={form.formState.errors.notes}
-        label="Notes"
-        name="notes"
-        placeholder="Key contract, review, or operational context"
-        register={form.register}
-      />
-      <div className="flex items-center justify-end gap-2">
-        {onCancel ? (
+        <div className="flex items-center justify-end gap-2">
+          {onCancel ? (
+            <Button
+              disabled={submitDisabled}
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              <X />
+              Cancel
+            </Button>
+          ) : null}
           <Button
             disabled={submitDisabled}
             type="button"
-            variant="outline"
-            onClick={onCancel}
+            onClick={submitProvider}
           >
-            <X />
-            Cancel
+            {submitDisabled ? (
+              <Loader2 className="animate-spin" />
+            ) : onCancel ? (
+              <Save />
+            ) : (
+              <Plus />
+            )}
+            {submitLabel}
           </Button>
-        ) : null}
-        <Button
-          disabled={submitDisabled}
-          type="button"
-          onClick={submitProvider}
-        >
-          {submitDisabled ? (
-            <Loader2 className="animate-spin" />
-          ) : onCancel ? (
-            <Save />
-          ) : (
-            <Plus />
-          )}
-          {submitLabel}
-        </Button>
+        </div>
       </div>
-    </div>
+    </FieldNotesProvider>
   )
 }

@@ -1,3 +1,4 @@
+import { documentPlainText } from "./document-text.js"
 import { randomUUID } from "node:crypto"
 
 import { Storage } from "@google-cloud/storage"
@@ -195,7 +196,7 @@ function writeMarkdownLine(document: PDFKit.PDFDocument, line: string) {
       .font("Helvetica-Bold")
       .fontSize(level === 1 ? 18 : level === 2 ? 15 : 13)
       .fillColor("#0f172a")
-      .text(heading[2] ?? "", { lineGap: 3 })
+      .text(documentPlainText(heading[2] ?? ""), { lineGap: 3 })
       .moveDown(0.2)
     return
   }
@@ -207,7 +208,7 @@ function writeMarkdownLine(document: PDFKit.PDFDocument, line: string) {
       .font("Helvetica")
       .fontSize(10.5)
       .fillColor("#334155")
-      .text(`- ${bullet[1] ?? ""}`, { indent: 12, lineGap: 3 })
+      .text(documentPlainText(`- ${bullet[1] ?? ""}`), { indent: 12, lineGap: 3 })
     return
   }
 
@@ -215,7 +216,7 @@ function writeMarkdownLine(document: PDFKit.PDFDocument, line: string) {
     .font("Helvetica")
     .fontSize(10.5)
     .fillColor("#334155")
-    .text(trimmedLine, { lineGap: 3 })
+    .text(documentPlainText(trimmedLine), { lineGap: 3 })
 }
 
 function parseMarkdownTable(lines: string[], startIndex: number) {
@@ -260,7 +261,7 @@ function parseMarkdownTableRow(line: string) {
   return trimmedLine
     .slice(1, -1)
     .split("|")
-    .map((cell) => cell.trim())
+    .map((cell) => documentPlainText(cell.trim()))
 }
 
 function isMarkdownTableSeparator(cells: string[]) {

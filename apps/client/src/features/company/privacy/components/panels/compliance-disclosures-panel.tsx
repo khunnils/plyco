@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { privacyProfileSchema, type PrivacyProfile } from "@plyco/contracts"
 import { useState, useEffect } from "react"
@@ -17,6 +18,7 @@ import { privacyHelperText } from "../privacy-helper-text"
 import { dataHelperText } from "@/features/company/data-handling/components/data-helper-text"
 
 const complianceSchema = privacyProfileSchema.pick({
+  fieldNotes: true,
   sellsOrSharesData: true,
   doNotSellLink: true,
   usesAutomatedDecisionMaking: true,
@@ -27,6 +29,7 @@ const complianceSchema = privacyProfileSchema.pick({
 type ComplianceDraft = z.infer<typeof complianceSchema>
 
 const toComplianceDraft = (privacy: PrivacyProfile): ComplianceDraft => ({
+  fieldNotes: privacy.fieldNotes,
   sellsOrSharesData: privacy.sellsOrSharesData,
   doNotSellLink: privacy.doNotSellLink,
   usesAutomatedDecisionMaking: privacy.usesAutomatedDecisionMaking,
@@ -107,56 +110,60 @@ export const ComplianceDisclosuresPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="CCPA, COPPA, and regulatory compliance disclosures, including opt-out mechanism links."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={complianceRows(draft)} />}
-      saveLabel="Save"
-      title="Compliance & Disclosures"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.sellsOrSharesData}
-          label="Sells or shares data (CCPA)"
-          name="sellsOrSharesData"
-        />
-        {sellsOrSharesDataTrue && (
-          <TextField
-            error={form.formState.errors.doNotSellLink}
-            helperText={privacyHelperText.doNotSellLink}
-            label="Do Not Sell link"
-            name="doNotSellLink"
-            register={form.register}
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="CCPA, COPPA, and regulatory compliance disclosures, including opt-out mechanism links."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={complianceRows(draft)} />
+        }
+        saveLabel="Save"
+        title="Compliance & Disclosures"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.sellsOrSharesData}
+            label="Sells or shares data (CCPA)"
+            name="sellsOrSharesData"
           />
-        )}
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.usesAutomatedDecisionMaking}
-          label="Uses automated decision making"
-          name="usesAutomatedDecisionMaking"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.productionDataInDevelopment}
-          label="Customer data in development"
-          name="productionDataInDevelopment"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={dataHelperText.retentionPolicyExists}
-          label="Retention policy exists"
-          name="retentionPolicyExists"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+          {sellsOrSharesDataTrue && (
+            <TextField
+              error={form.formState.errors.doNotSellLink}
+              helperText={privacyHelperText.doNotSellLink}
+              label="Do Not Sell link"
+              name="doNotSellLink"
+              register={form.register}
+            />
+          )}
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.usesAutomatedDecisionMaking}
+            label="Uses automated decision making"
+            name="usesAutomatedDecisionMaking"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.productionDataInDevelopment}
+            label="Customer data in development"
+            name="productionDataInDevelopment"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={dataHelperText.retentionPolicyExists}
+            label="Retention policy exists"
+            name="retentionPolicyExists"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

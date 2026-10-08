@@ -1,4 +1,5 @@
 import {
+  preserveFieldNotes,
   businessActivitySchema,
   organizationProviderInventorySchema,
   serviceProviderUsageSchema,
@@ -85,7 +86,12 @@ export class InMemoryVendorRepository implements ProviderRepository {
       organizationId,
       input,
     );
-    const activity = { ...current, ...input, dataTypeIds, updatedAt: now() };
+    const activity = {
+      ...current,
+      ...preserveFieldNotes(input, current),
+      dataTypeIds,
+      updatedAt: now(),
+    };
     this.activities.set(id, activity);
     return activity;
   }
@@ -141,6 +147,7 @@ export class InMemoryVendorRepository implements ProviderRepository {
     if (duplicateProvider) {
       const provider = organizationProviderInventorySchema.parse({
         ...duplicateProvider,
+        fieldNotes: input.fieldNotes ?? duplicateProvider.fieldNotes,
         providerId: duplicateProvider.providerId || input.providerId,
         systemTypes: Array.from(
           new Set([...duplicateProvider.systemTypes, ...input.systemTypes]),
@@ -183,7 +190,11 @@ export class InMemoryVendorRepository implements ProviderRepository {
       return null;
     }
 
-    const provider = { ...currentProvider, ...input, updatedAt: now() };
+    const provider = {
+      ...currentProvider,
+      ...preserveFieldNotes(input, currentProvider),
+      updatedAt: now(),
+    };
     this.organizationProviders.set(id, provider);
     return provider;
   }
@@ -256,7 +267,7 @@ export class InMemoryVendorRepository implements ProviderRepository {
     );
     const providerUsage = serviceProviderUsageSchema.parse({
       id,
-      ...input,
+      ...preserveFieldNotes(input, current),
       serviceName: await this.serviceName(organizationId, input.serviceId),
       providerName:
         this.organizationProviders.get(input.organizationProviderId)?.name ??

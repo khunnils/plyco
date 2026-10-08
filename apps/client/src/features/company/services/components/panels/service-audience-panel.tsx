@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type ServiceProfileInput, type Vocabulary } from "@plyco/contracts"
 import { useEffect, useState } from "react"
@@ -68,113 +69,119 @@ export const ServiceAudiencePanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Target user types, customer industries, availability regions, and age restrictions."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={[
-            [
-              "User types",
-              codeValueList(
-                vocabulary,
-                "service_user_types",
-                service.userTypes
-              ),
-              serviceHelperText.userTypes,
-            ],
-            [
-              "Customer types",
-              codeValueList(
-                vocabulary,
-                "service_customer_types",
-                service.customerTypes
-              ),
-              serviceHelperText.customerTypes,
-            ],
-            [
-              "Available regions",
-              codeValueList(vocabulary, "regions", service.availabilityRegions),
-              serviceHelperText.availabilityRegions,
-            ],
-            [
-              "Directed to children",
-              boolText(service.childrenDirected),
-              serviceHelperText.childrenDirected,
-            ],
-            ...(service.childrenDirected
-              ? [
-                  [
-                    "Minimum user age",
-                    service.minimumUserAge === null
-                      ? "Not answered"
-                      : service.minimumUserAge === 0
-                        ? "Not set"
-                        : service.minimumUserAge,
-                    serviceHelperText.minimumUserAge,
-                  ] as ProfilePanelDetailRow,
-                ]
-              : []),
-          ]}
-        />
-      }
-      saveLabel="Save"
-      title="Audience and Availability"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.userTypes?.root}
-          helperText={serviceHelperText.userTypes}
-          label="User types"
-          name={audiencePath("userTypes")}
-          options={userTypeOptions}
-          placeholder="Select user types"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.customerTypes?.root}
-          helperText={serviceHelperText.customerTypes}
-          label="Customer types"
-          name={audiencePath("customerTypes")}
-          options={customerTypeOptions}
-          placeholder="Select customer types"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.availabilityRegions?.root}
-          helperText={serviceHelperText.availabilityRegions}
-          label="Availability regions"
-          name={audiencePath("availabilityRegions")}
-          options={regionOptions}
-          placeholder="Select availability regions"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={serviceHelperText.childrenDirected}
-          label="Directed to children"
-          name={audiencePath("childrenDirected")}
-        />
-        {childrenDirected === true && (
-          <TextField
-            error={form.formState.errors.minimumUserAge}
-            helperText={serviceHelperText.minimumUserAge}
-            label="Minimum user age"
-            name={audiencePath("minimumUserAge")}
-            register={form.register}
-            type="number"
-            min={0}
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Target user types, customer industries, availability regions, and age restrictions."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={[
+              [
+                "User types",
+                codeValueList(
+                  vocabulary,
+                  "service_user_types",
+                  service.userTypes
+                ),
+                serviceHelperText.userTypes,
+              ],
+              [
+                "Customer types",
+                codeValueList(
+                  vocabulary,
+                  "service_customer_types",
+                  service.customerTypes
+                ),
+                serviceHelperText.customerTypes,
+              ],
+              [
+                "Available regions",
+                codeValueList(
+                  vocabulary,
+                  "regions",
+                  service.availabilityRegions
+                ),
+                serviceHelperText.availabilityRegions,
+              ],
+              [
+                "Directed to children",
+                boolText(service.childrenDirected),
+                serviceHelperText.childrenDirected,
+              ],
+              ...(service.childrenDirected
+                ? [
+                    [
+                      "Minimum user age",
+                      service.minimumUserAge === null
+                        ? "Not answered"
+                        : service.minimumUserAge === 0
+                          ? "Not set"
+                          : service.minimumUserAge,
+                      serviceHelperText.minimumUserAge,
+                    ] as ProfilePanelDetailRow,
+                  ]
+                : []),
+            ]}
           />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+        }
+        saveLabel="Save"
+        title="Audience and Availability"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.userTypes?.root}
+            helperText={serviceHelperText.userTypes}
+            label="User types"
+            name={audiencePath("userTypes")}
+            options={userTypeOptions}
+            placeholder="Select user types"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.customerTypes?.root}
+            helperText={serviceHelperText.customerTypes}
+            label="Customer types"
+            name={audiencePath("customerTypes")}
+            options={customerTypeOptions}
+            placeholder="Select customer types"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.availabilityRegions?.root}
+            helperText={serviceHelperText.availabilityRegions}
+            label="Availability regions"
+            name={audiencePath("availabilityRegions")}
+            options={regionOptions}
+            placeholder="Select availability regions"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={serviceHelperText.childrenDirected}
+            label="Directed to children"
+            name={audiencePath("childrenDirected")}
+          />
+          {childrenDirected === true && (
+            <TextField
+              error={form.formState.errors.minimumUserAge}
+              helperText={serviceHelperText.minimumUserAge}
+              label="Minimum user age"
+              name={audiencePath("minimumUserAge")}
+              register={form.register}
+              type="number"
+              min={0}
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

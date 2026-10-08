@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   privacyProfileSchema,
@@ -26,6 +27,7 @@ import {
 import { privacyHelperText } from "../privacy-helper-text"
 
 const rightsSchema = privacyProfileSchema.pick({
+  fieldNotes: true,
   supportedRights: true,
   requestMethods: true,
   responseTimelineDaysStatus: true,
@@ -38,6 +40,7 @@ const rightsSchema = privacyProfileSchema.pick({
 type RightsDraft = z.infer<typeof rightsSchema>
 
 const toRightsDraft = (privacy: PrivacyProfile): RightsDraft => ({
+  fieldNotes: privacy.fieldNotes,
   supportedRights: privacy.supportedRights,
   requestMethods: privacy.requestMethods,
   responseTimelineDaysStatus: privacy.responseTimelineDaysStatus,
@@ -155,83 +158,85 @@ export const PrivacyRightsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Rights supported and how requests are handled."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={rightsRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Privacy Rights & Request Handling"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.supportedRights?.root}
-          helperText={privacyHelperText.supportedRights}
-          label="Privacy supported rights"
-          name="supportedRights"
-          options={supportedRightOptions}
-          placeholder="Select supported rights"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.requestMethods?.root}
-          helperText={privacyHelperText.requestMethods}
-          label="Request methods"
-          name="requestMethods"
-          options={requestMethodOptions}
-          placeholder="Select request methods"
-        />
-        <SelectField
-          control={form.control}
-          helperText={privacyHelperText.responseTimelineDaysStatus}
-          label="Response timeline status"
-          name="responseTimelineDaysStatus"
-          options={[
-            { value: "", label: "Not set" },
-            ...responseTimelineStatusOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <TextField
-          disabled={responseTimelineDaysDisabled}
-          error={form.formState.errors.responseTimelineDays}
-          helperText={privacyHelperText.responseTimelineDays}
-          label="Response timeline days"
-          name="responseTimelineDays"
-          register={form.register}
-          type="number"
-          min={0}
-        />
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.identityVerificationRequired}
-          label="Identity verification required"
-          name="identityVerificationRequired"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.authorizedAgentSupported}
-          label="Authorized agent supported"
-          name="authorizedAgentSupported"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.appealProcessExists}
-          label="Appeal process exists"
-          name="appealProcessExists"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Rights supported and how requests are handled."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={rightsRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Privacy Rights & Request Handling"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.supportedRights?.root}
+            helperText={privacyHelperText.supportedRights}
+            label="Privacy supported rights"
+            name="supportedRights"
+            options={supportedRightOptions}
+            placeholder="Select supported rights"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.requestMethods?.root}
+            helperText={privacyHelperText.requestMethods}
+            label="Request methods"
+            name="requestMethods"
+            options={requestMethodOptions}
+            placeholder="Select request methods"
+          />
+          <SelectField
+            control={form.control}
+            helperText={privacyHelperText.responseTimelineDaysStatus}
+            label="Response timeline status"
+            name="responseTimelineDaysStatus"
+            options={[
+              { value: "", label: "Not set" },
+              ...responseTimelineStatusOptions,
+            ]}
+            placeholder="Not set"
+          />
+          <TextField
+            disabled={responseTimelineDaysDisabled}
+            error={form.formState.errors.responseTimelineDays}
+            helperText={privacyHelperText.responseTimelineDays}
+            label="Response timeline days"
+            name="responseTimelineDays"
+            register={form.register}
+            type="number"
+            min={0}
+          />
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.identityVerificationRequired}
+            label="Identity verification required"
+            name="identityVerificationRequired"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.authorizedAgentSupported}
+            label="Authorized agent supported"
+            name="authorizedAgentSupported"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.appealProcessExists}
+            label="Appeal process exists"
+            name="appealProcessExists"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }
 

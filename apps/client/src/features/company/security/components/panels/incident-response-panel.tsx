@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   securityProfileSchema,
@@ -27,6 +28,7 @@ import {
 import { securityHelperText as infrastructureHelperText } from "../security-helper-text"
 
 const incidentSchema = securityProfileSchema.pick({
+  fieldNotes: true,
   incidentResponsePlanExists: true,
   incidentNotificationTimeline: true,
   customerNotificationProcess: true,
@@ -36,6 +38,7 @@ const incidentSchema = securityProfileSchema.pick({
 type IncidentDraft = z.infer<typeof incidentSchema>
 
 const toIncidentDraft = (security: SecurityProfile): IncidentDraft => ({
+  fieldNotes: security.fieldNotes,
   incidentResponsePlanExists: security.incidentResponsePlanExists,
   incidentNotificationTimeline: security.incidentNotificationTimeline,
   customerNotificationProcess: security.customerNotificationProcess,
@@ -125,61 +128,65 @@ export const IncidentResponsePanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Breach notification plans, customer communication processes, and reporting timelines."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={incidentRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Incident Response"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.incidentResponsePlanExists}
-          label="Incident response plan exists"
-          name="incidentResponsePlanExists"
-        />
-        <SelectField
-          control={form.control}
-          helperText={infrastructureHelperText.incidentNotificationTimeline}
-          label="Notification timeline"
-          name="incidentNotificationTimeline"
-          options={[
-            { value: "", label: "Not set" },
-            ...securityNotificationTimelineOptions,
-          ]}
-          placeholder="Not set"
-        />
-        <MultiSelectField
-          control={form.control}
-          error={form.formState.errors.customerNotificationProcess?.root}
-          helperText={infrastructureHelperText.customerNotificationProcess}
-          label="Customer notification process"
-          name="customerNotificationProcess"
-          options={securityCustomerNotificationProcessOptions}
-          placeholder="Select notification methods"
-        />
-        {incidentResponsePlanExists && (
-          <TextField
-            error={form.formState.errors.incidentResponseLastTestedDate}
-            helperText={infrastructureHelperText.incidentResponseLastTestedDate}
-            label="Last tested date"
-            name="incidentResponseLastTestedDate"
-            register={form.register}
-            type="date"
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Breach notification plans, customer communication processes, and reporting timelines."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={incidentRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Incident Response"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={infrastructureHelperText.incidentResponsePlanExists}
+            label="Incident response plan exists"
+            name="incidentResponsePlanExists"
           />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+          <SelectField
+            control={form.control}
+            helperText={infrastructureHelperText.incidentNotificationTimeline}
+            label="Notification timeline"
+            name="incidentNotificationTimeline"
+            options={[
+              { value: "", label: "Not set" },
+              ...securityNotificationTimelineOptions,
+            ]}
+            placeholder="Not set"
+          />
+          <MultiSelectField
+            control={form.control}
+            error={form.formState.errors.customerNotificationProcess?.root}
+            helperText={infrastructureHelperText.customerNotificationProcess}
+            label="Customer notification process"
+            name="customerNotificationProcess"
+            options={securityCustomerNotificationProcessOptions}
+            placeholder="Select notification methods"
+          />
+          {incidentResponsePlanExists && (
+            <TextField
+              error={form.formState.errors.incidentResponseLastTestedDate}
+              helperText={
+                infrastructureHelperText.incidentResponseLastTestedDate
+              }
+              label="Last tested date"
+              name="incidentResponseLastTestedDate"
+              register={form.register}
+              type="date"
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

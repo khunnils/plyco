@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   type ProviderSelection,
@@ -25,6 +26,7 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { privacyHelperText } from "../privacy-helper-text"
 
 const marketingSchema = privacyProfileSchema.pick({
+  fieldNotes: true,
   sendsMarketingEmails: true,
   marketingOptOutMethod: true,
   transactionalEmailsSent: true,
@@ -34,6 +36,7 @@ const marketingSchema = privacyProfileSchema.pick({
 type MarketingDraft = z.infer<typeof marketingSchema>
 
 const toMarketingDraft = (privacy: PrivacyProfile): MarketingDraft => ({
+  fieldNotes: privacy.fieldNotes,
   sendsMarketingEmails: privacy.sendsMarketingEmails,
   marketingOptOutMethod: privacy.marketingOptOutMethod,
   transactionalEmailsSent: privacy.transactionalEmailsSent,
@@ -156,81 +159,84 @@ export const MarketingCommunicationsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Marketing communication practices, newsletters, and opt-out methodologies."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={marketingRows(draft, vocabulary, catalogProviders)}
-        />
-      }
-      saveLabel="Save"
-      title="Marketing & Communications"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.sendsMarketingEmails}
-          label="Sends marketing emails"
-          name="sendsMarketingEmails"
-        />
-        {sendsMarketingEmailsTrue && (
-          <SelectField
-            control={form.control}
-            helperText={privacyHelperText.marketingOptOutMethod}
-            label="Marketing opt-out method"
-            name="marketingOptOutMethod"
-            options={[
-              { value: "", label: "Not set" },
-              ...marketingOptOutMethodOptions,
-            ]}
-            placeholder="Not set"
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Marketing communication practices, newsletters, and opt-out methodologies."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={marketingRows(draft, vocabulary, catalogProviders)}
           />
-        )}
-        <ToggleField
-          control={form.control}
-          helperText={privacyHelperText.transactionalEmailsSent}
-          label="Transactional emails sent"
-          name="transactionalEmailsSent"
-        />
-        {sendsMarketingEmailsTrue && (
-          <MultiSelectField
+        }
+        saveLabel="Save"
+        title="Marketing & Communications"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
             control={form.control}
-            helperText={privacyHelperText.newsletterProvider}
-            label="Newsletter provider"
-            name="organizationProviders"
-            options={newsletterProviderOptions}
-            placeholder="Select newsletter provider"
-            value={selectedNewsletterIds(organizationProviders)}
-            onValueChange={(providerIds) => {
-              const selectedId = providerIds.slice(-1)
-              const otherProviders = organizationProviders.filter(
-                (provider) => provider.systemType !== "newsletter"
-              )
+            helperText={privacyHelperText.sendsMarketingEmails}
+            label="Sends marketing emails"
+            name="sendsMarketingEmails"
+          />
+          {sendsMarketingEmailsTrue && (
+            <SelectField
+              control={form.control}
+              helperText={privacyHelperText.marketingOptOutMethod}
+              label="Marketing opt-out method"
+              name="marketingOptOutMethod"
+              options={[
+                { value: "", label: "Not set" },
+                ...marketingOptOutMethodOptions,
+              ]}
+              placeholder="Not set"
+            />
+          )}
+          <ToggleField
+            control={form.control}
+            helperText={privacyHelperText.transactionalEmailsSent}
+            label="Transactional emails sent"
+            name="transactionalEmailsSent"
+          />
+          {sendsMarketingEmailsTrue && (
+            <MultiSelectField
+              control={form.control}
+              helperText={privacyHelperText.newsletterProvider}
+              label="Newsletter provider"
+              name="organizationProviders"
+              notesKey="organizationProviders.newsletter"
+              options={newsletterProviderOptions}
+              placeholder="Select newsletter provider"
+              value={selectedNewsletterIds(organizationProviders)}
+              onValueChange={(providerIds) => {
+                const selectedId = providerIds.slice(-1)
+                const otherProviders = organizationProviders.filter(
+                  (provider) => provider.systemType !== "newsletter"
+                )
 
-              form.setValue(
-                "organizationProviders",
-                [
-                  ...otherProviders,
-                  ...selectedId.map((providerId) => ({
-                    systemType: "newsletter" as const,
-                    providerId,
-                  })),
-                ],
-                { shouldDirty: true, shouldValidate: true }
-              )
-            }}
-          />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+                form.setValue(
+                  "organizationProviders",
+                  [
+                    ...otherProviders,
+                    ...selectedId.map((providerId) => ({
+                      systemType: "newsletter" as const,
+                      providerId,
+                    })),
+                  ],
+                  { shouldDirty: true, shouldValidate: true }
+                )
+              }}
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { type ServiceProfileInput, type Vocabulary } from "@plyco/contracts"
 import { useState } from "react"
@@ -48,47 +49,49 @@ export const ServiceHostingPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Primary hosting region for this service."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid
-          rows={[
-            [
-              "Primary hosting region",
-              service.privacy.primaryHostingRegion
-                ? codeLabel(
-                    vocabulary,
-                    "regions",
-                    service.privacy.primaryHostingRegion
-                  )
-                : "Not set",
-              serviceHelperText.primaryHostingRegion,
-            ],
-          ]}
-        />
-      }
-      saveLabel="Save"
-      title="Service Hosting"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <SelectField
-          control={form.control}
-          helperText={serviceHelperText.primaryHostingRegion}
-          label="Primary hosting region"
-          name={privacyPath("primaryHostingRegion")}
-          options={[{ value: "", label: "Not set" }, ...regionOptions]}
-          placeholder="Not set"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Primary hosting region for this service."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid
+            rows={[
+              [
+                "Primary hosting region",
+                service.privacy.primaryHostingRegion
+                  ? codeLabel(
+                      vocabulary,
+                      "regions",
+                      service.privacy.primaryHostingRegion
+                    )
+                  : "Not set",
+                serviceHelperText.primaryHostingRegion,
+              ],
+            ]}
+          />
+        }
+        saveLabel="Save"
+        title="Service Hosting"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <SelectField
+            control={form.control}
+            helperText={serviceHelperText.primaryHostingRegion}
+            label="Primary hosting region"
+            name={privacyPath("primaryHostingRegion")}
+            options={[{ value: "", label: "Not set" }, ...regionOptions]}
+            placeholder="Not set"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

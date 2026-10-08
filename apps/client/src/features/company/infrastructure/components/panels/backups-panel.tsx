@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   infrastructureProfileSchema,
@@ -26,6 +27,7 @@ import {
 import { infrastructureHelperText } from "../infrastructure-helper-text"
 
 const backupsSchema = infrastructureProfileSchema.pick({
+  fieldNotes: true,
   backupsEnabled: true,
   backupCadence: true,
   backupRetentionDays: true,
@@ -38,6 +40,7 @@ type BackupsDraft = z.infer<typeof backupsSchema>
 const toBackupsDraft = (
   infrastructure: InfrastructureProfile
 ): BackupsDraft => ({
+  fieldNotes: infrastructure.fieldNotes,
   backupsEnabled: infrastructure.backupsEnabled,
   backupCadence: infrastructure.backupCadence,
   backupRetentionDays: infrastructure.backupRetentionDays,
@@ -142,78 +145,80 @@ export const BackupsPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Backup intervals, encryption status, and geographical distribution of recovery points."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={backupRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Backups"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={infrastructureHelperText.backupsEnabled}
-          label="Backups enabled"
-          name="backupsEnabled"
-        />
-        {backupsEnabled && (
-          <>
-            <SelectField
-              control={form.control}
-              helperText={infrastructureHelperText.backupCadence}
-              label="Backup frequency"
-              name="backupCadence"
-              options={[
-                { value: "", label: "Not set" },
-                ...securityCadenceOptions,
-              ]}
-              placeholder="Not set"
-            />
-            <SelectField
-              control={form.control}
-              helperText={infrastructureHelperText.backupRetentionDaysStatus}
-              label="Backup retention status"
-              name="backupRetentionDaysStatus"
-              options={[
-                { value: "", label: "Not set" },
-                ...codeOptions(vocabulary, "defined_statuses"),
-              ]}
-              placeholder="Not set"
-            />
-            <TextField
-              disabled={isBackupRetentionDaysDisabled}
-              error={form.formState.errors.backupRetentionDays}
-              helperText={infrastructureHelperText.backupRetentionDays}
-              label="Backup retention days"
-              name="backupRetentionDays"
-              register={form.register}
-              type="number"
-              min={0}
-            />
-            <SelectField
-              control={form.control}
-              helperText={infrastructureHelperText.restoreTestingCadence}
-              label="Restore test frequency"
-              name="restoreTestingCadence"
-              options={[
-                { value: "", label: "Not set" },
-                ...securityCadenceOptions,
-              ]}
-              placeholder="Not set"
-            />
-          </>
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Backup intervals, encryption status, and geographical distribution of recovery points."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={backupRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Backups"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={infrastructureHelperText.backupsEnabled}
+            label="Backups enabled"
+            name="backupsEnabled"
+          />
+          {backupsEnabled && (
+            <>
+              <SelectField
+                control={form.control}
+                helperText={infrastructureHelperText.backupCadence}
+                label="Backup frequency"
+                name="backupCadence"
+                options={[
+                  { value: "", label: "Not set" },
+                  ...securityCadenceOptions,
+                ]}
+                placeholder="Not set"
+              />
+              <SelectField
+                control={form.control}
+                helperText={infrastructureHelperText.backupRetentionDaysStatus}
+                label="Backup retention status"
+                name="backupRetentionDaysStatus"
+                options={[
+                  { value: "", label: "Not set" },
+                  ...codeOptions(vocabulary, "defined_statuses"),
+                ]}
+                placeholder="Not set"
+              />
+              <TextField
+                disabled={isBackupRetentionDaysDisabled}
+                error={form.formState.errors.backupRetentionDays}
+                helperText={infrastructureHelperText.backupRetentionDays}
+                label="Backup retention days"
+                name="backupRetentionDays"
+                register={form.register}
+                type="number"
+                min={0}
+              />
+              <SelectField
+                control={form.control}
+                helperText={infrastructureHelperText.restoreTestingCadence}
+                label="Restore test frequency"
+                name="restoreTestingCadence"
+                options={[
+                  { value: "", label: "Not set" },
+                  ...securityCadenceOptions,
+                ]}
+                placeholder="Not set"
+              />
+            </>
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

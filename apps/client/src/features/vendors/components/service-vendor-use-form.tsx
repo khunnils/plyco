@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Plus, Save, X } from "lucide-react"
 import {
@@ -91,125 +92,124 @@ export const ServiceProviderUsageForm = ({
   })
 
   return (
-    <form
-      id="service-provider-usage-form"
-      onSubmit={submitProviderUsage}
-      className="grid gap-4 border border-slate-200 bg-slate-50 p-4"
-    >
-      <div className="grid gap-4 md:grid-cols-2">
-        {showServiceField ? (
-          <SelectField
-            control={form.control}
-            error={form.formState.errors.serviceId}
-            helperText={serviceProviderUsageHelperText.service}
-            label="Service"
-            name="serviceId"
-            options={serviceOptions}
-          />
-        ) : null}
-        <SelectField
-          control={form.control}
-          error={form.formState.errors.organizationProviderId}
-          helperText={serviceProviderUsageHelperText.provider}
-          label="Provider"
-          name="organizationProviderId"
-          options={providerOptions}
-        />
-        <TextField
-          error={form.formState.errors.purpose}
-          helperText={serviceProviderUsageHelperText.purpose}
-          label="Purpose"
-          name="purpose"
-          placeholder="Code hosting and reviews"
-          register={form.register}
-        />
-        <SelectField
-          control={form.control}
-          error={form.formState.errors.dataProcessingLevel}
-          helperText={serviceProviderUsageHelperText.dataProcessingLevel}
-          label="Data processing level"
-          name="dataProcessingLevel"
-          options={[
-            { value: "not_set", label: "Not set" },
-            ...dataProcessingLevelOptions,
-          ]}
-        />
-        {showDataProcessingDetail ? (
-          <>
-            <MultiSelectField
-              control={form.control}
-              error={form.formState.errors.dataProcessed?.root}
-              emptyMessage="Add data types stored in the organization profile first."
-              helperText={serviceProviderUsageHelperText.dataProcessed}
-              label="Data processed"
-              name="dataProcessed"
-              options={dataTypeOptions}
-              placeholder={
-                dataTypeOptions.length > 0
-                  ? "Select organization data types"
-                  : "No organization data types defined"
-              }
-            />
-            <MultiSelectField
-              control={form.control}
-              error={form.formState.errors.dataRegions?.root}
-              helperText={serviceProviderUsageHelperText.dataRegions}
-              label="Data regions"
-              name="dataRegions"
-              options={dataRegionOptions}
-              placeholder="Select data regions"
-            />
+    <FieldNotesProvider form={form}>
+      <form
+        id="service-provider-usage-form"
+        onSubmit={submitProviderUsage}
+        className="grid gap-4 border border-slate-200 bg-slate-50 p-4"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          {showServiceField ? (
             <SelectField
               control={form.control}
-              error={form.formState.errors.dpaStatus}
-              helperText={serviceProviderUsageHelperText.dpaStatus}
-              label="DPA status"
-              name="dpaStatus"
-              options={[
-                { value: "", label: "Not set" },
-                ...dpaStatusOptions,
-              ]}
+              error={form.formState.errors.serviceId}
+              helperText={serviceProviderUsageHelperText.service}
+              label="Service"
+              name="serviceId"
+              options={serviceOptions}
             />
-          </>
-        ) : null}
-      </div>
-      <TextAreaField
-        error={form.formState.errors.notes}
-        helperText={serviceProviderUsageHelperText.notes}
-        label="Notes"
-        name="notes"
-        placeholder="Service-specific processing context"
-        register={form.register}
-      />
-      {showButtons ? (
-        <div className="flex items-center justify-end gap-2">
-          {onCancel ? (
+          ) : null}
+          <SelectField
+            control={form.control}
+            error={form.formState.errors.organizationProviderId}
+            helperText={serviceProviderUsageHelperText.provider}
+            label="Provider"
+            name="organizationProviderId"
+            options={providerOptions}
+          />
+          <TextField
+            error={form.formState.errors.purpose}
+            helperText={serviceProviderUsageHelperText.purpose}
+            label="Purpose"
+            name="purpose"
+            placeholder="Code hosting and reviews"
+            register={form.register}
+          />
+          <SelectField
+            control={form.control}
+            error={form.formState.errors.dataProcessingLevel}
+            helperText={serviceProviderUsageHelperText.dataProcessingLevel}
+            label="Data processing level"
+            name="dataProcessingLevel"
+            options={[
+              { value: "not_set", label: "Not set" },
+              ...dataProcessingLevelOptions,
+            ]}
+          />
+          {showDataProcessingDetail ? (
+            <>
+              <MultiSelectField
+                control={form.control}
+                error={form.formState.errors.dataProcessed?.root}
+                emptyMessage="Add data types stored in the organization profile first."
+                helperText={serviceProviderUsageHelperText.dataProcessed}
+                label="Data processed"
+                name="dataProcessed"
+                options={dataTypeOptions}
+                placeholder={
+                  dataTypeOptions.length > 0
+                    ? "Select organization data types"
+                    : "No organization data types defined"
+                }
+              />
+              <MultiSelectField
+                control={form.control}
+                error={form.formState.errors.dataRegions?.root}
+                helperText={serviceProviderUsageHelperText.dataRegions}
+                label="Data regions"
+                name="dataRegions"
+                options={dataRegionOptions}
+                placeholder="Select data regions"
+              />
+              <SelectField
+                control={form.control}
+                error={form.formState.errors.dpaStatus}
+                helperText={serviceProviderUsageHelperText.dpaStatus}
+                label="DPA status"
+                name="dpaStatus"
+                options={[{ value: "", label: "Not set" }, ...dpaStatusOptions]}
+              />
+            </>
+          ) : null}
+        </div>
+        <TextAreaField
+          error={form.formState.errors.notes}
+          helperText={serviceProviderUsageHelperText.notes}
+          label="Notes"
+          name="notes"
+          placeholder="Service-specific processing context"
+          register={form.register}
+        />
+        {showButtons ? (
+          <div className="flex items-center justify-end gap-2">
+            {onCancel ? (
+              <Button
+                disabled={submitDisabled}
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+              >
+                <X />
+                Cancel
+              </Button>
+            ) : null}
             <Button
               disabled={submitDisabled}
               type="button"
-              variant="outline"
-              onClick={onCancel}
+              onClick={submitProviderUsage}
             >
-              <X />
-              Cancel
+              {submitDisabled ? (
+                <Loader2 className="animate-spin" />
+              ) : onCancel ? (
+                <Save />
+              ) : (
+                <Plus />
+              )}
+              {submitLabel}
             </Button>
-          ) : null}
-          <Button
-            disabled={submitDisabled}
-            type="button"
-            onClick={submitProviderUsage}
-          >
-            {submitDisabled ? (
-              <Loader2 className="animate-spin" />
-            ) : onCancel ? (
-              <Save />
-            ) : (
-              <Plus />
-            )}
-            {submitLabel}
-          </Button>
-        </div>
-      ) : null}
-    </form>
+          </div>
+        ) : null}
+      </form>
+    </FieldNotesProvider>
   )
 }

@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { accessProfileSchema, type AccessProfile } from "@plyco/contracts"
 import { useState } from "react"
@@ -15,6 +16,7 @@ import { boolText } from "@/features/company/lib/display"
 import { accessHelperText } from "../access-helper-text"
 
 const personnelSchema = accessProfileSchema.pick({
+  fieldNotes: true,
   securityTrainingRequired: true,
   confidentialityAgreementsRequired: true,
 })
@@ -22,6 +24,7 @@ const personnelSchema = accessProfileSchema.pick({
 type PersonnelDraft = z.infer<typeof personnelSchema>
 
 const toPersonnelDraft = (access: AccessProfile): PersonnelDraft => ({
+  fieldNotes: access.fieldNotes,
   securityTrainingRequired: access.securityTrainingRequired,
   confidentialityAgreementsRequired: access.confidentialityAgreementsRequired,
 })
@@ -65,35 +68,37 @@ export const PersonnelSecurityPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Workforce security expectations such as training and confidentiality agreements."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={<ProfilePanelDetailGrid rows={personnelRows(draft)} />}
-      saveLabel="Save"
-      title="Personnel security"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.securityTrainingRequired}
-          label="Security awareness training required"
-          name="securityTrainingRequired"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.confidentialityAgreementsRequired}
-          label="Confidentiality / NDA agreements required"
-          name="confidentialityAgreementsRequired"
-        />
-      </EditPanelGrid>
-    </ProfilePanelShell>
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Workforce security expectations such as training and confidentiality agreements."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={<ProfilePanelDetailGrid rows={personnelRows(draft)} />}
+        saveLabel="Save"
+        title="Personnel security"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.securityTrainingRequired}
+            label="Security awareness training required"
+            name="securityTrainingRequired"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.confidentialityAgreementsRequired}
+            label="Confidentiality / NDA agreements required"
+            name="confidentialityAgreementsRequired"
+          />
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

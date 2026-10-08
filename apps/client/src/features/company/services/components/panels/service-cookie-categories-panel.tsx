@@ -1,3 +1,5 @@
+import { FieldNotesValueProvider } from "@/components/form/field-notes-value-provider"
+import { type FieldNotes } from "@plyco/contracts"
 import {
   cookieCategoryCodes,
   type CookieCategoryCode,
@@ -87,14 +89,18 @@ export const ServiceCookieCategoriesPanel = ({
   const serverCategories = service.privacy.cookieCategories
   const savedCategories = serverCategories ?? []
   const [isEditing, setIsEditing] = useState(false)
+  const [draftNotes, setDraftNotes] = useState<FieldNotes>(
+    service.privacy.fieldNotes ?? {}
+  )
   const [draftCategories, setDraftCategories] =
     useState<ServiceCookieCategory[]>(savedCategories)
 
   useEffect(() => {
     if (!isEditing) {
       setDraftCategories(serverCategories ?? [])
+      setDraftNotes(service.privacy.fieldNotes ?? {})
     }
-  }, [isEditing, serverCategories])
+  }, [isEditing, serverCategories, service.privacy.fieldNotes])
 
   const setCategoryEnabled = (
     category: CookieCategoryCode,
@@ -138,42 +144,47 @@ export const ServiceCookieCategoriesPanel = ({
   }
 
   return (
-    <ProfilePanelShell
-      description="Types of cookie categories used by this service."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <CategoryCards categories={savedCategories} isEditing={false} />
-      }
-      saveLabel="Save"
-      title="Cookie Categories"
-      onCancel={() => {
-        setDraftCategories(savedCategories)
-        setIsEditing(false)
-      }}
-      onEdit={() => {
-        setDraftCategories(savedCategories)
-        setIsEditing(true)
-      }}
-      onSave={() => {
-        onSave(
-          {
-            privacy: normalizeCookiePreferences({
-              ...service.privacy,
-              cookieCategories: draftCategories,
-            }),
-          },
-          () => setIsEditing(false)
-        )
-      }}
-    >
-      <CategoryCards
-        categories={draftCategories}
-        isEditing
-        onEnabledChange={setCategoryEnabled}
-        onRequiresConsentChange={setCategoryRequiresConsent}
-      />
-    </ProfilePanelShell>
+    <FieldNotesValueProvider notes={draftNotes} onChange={setDraftNotes}>
+      <ProfilePanelShell
+        description="Types of cookie categories used by this service."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <CategoryCards categories={savedCategories} isEditing={false} />
+        }
+        saveLabel="Save"
+        title="Cookie Categories"
+        onCancel={() => {
+          setDraftCategories(savedCategories)
+          setDraftNotes(service.privacy.fieldNotes ?? {})
+          setIsEditing(false)
+        }}
+        onEdit={() => {
+          setDraftCategories(savedCategories)
+          setDraftNotes(service.privacy.fieldNotes ?? {})
+          setIsEditing(true)
+        }}
+        onSave={() => {
+          onSave(
+            {
+              privacy: normalizeCookiePreferences({
+                ...service.privacy,
+                fieldNotes: draftNotes,
+                cookieCategories: draftCategories,
+              }),
+            },
+            () => setIsEditing(false)
+          )
+        }}
+      >
+        <CategoryCards
+          categories={draftCategories}
+          isEditing
+          onEnabledChange={setCategoryEnabled}
+          onRequiresConsentChange={setCategoryRequiresConsent}
+        />
+      </ProfilePanelShell>
+    </FieldNotesValueProvider>
   )
 }

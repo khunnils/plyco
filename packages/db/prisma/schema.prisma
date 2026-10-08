@@ -18,6 +18,7 @@ model WaitlistEntry {
 }
 
 model Organization {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                    String                   @id(map: "organizations_pkey") @default(cuid())
   companyName           String                   @map("company_name")
   publicSlug            String?                  @unique(map: "organizations_public_slug_key") @map("public_slug")
@@ -238,6 +239,8 @@ model OrganizationApiKey {
 }
 
 model ServiceProfile {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
+  privacyFieldNotes                     Json         @default("{}") @map("privacy_field_notes")
   id                                     String                    @id(map: "service_profiles_pkey") @default(cuid())
   organizationId                         String                    @map("organization_id")
   organization                           Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_profiles_organization_id_fkey")
@@ -269,6 +272,7 @@ model ServiceProfile {
 }
 
 model PrivacyProfile {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                           String       @id(map: "privacy_profiles_pkey") @default(cuid())
   organizationId               String       @unique(map: "privacy_profiles_organization_id_key") @map("organization_id")
   organization                 Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "privacy_profiles_organization_id_fkey")
@@ -302,6 +306,7 @@ model PrivacyProfile {
 }
 
 model InfrastructureProfile {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                            String       @id(map: "infrastructure_profiles_pkey") @default(cuid())
   organizationId                String       @unique(map: "infrastructure_profiles_organization_id_key") @map("organization_id")
   organization                  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "infrastructure_profiles_organization_id_fkey")
@@ -330,6 +335,7 @@ model InfrastructureProfile {
 }
 
 model SecurityProfile {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                                   String       @id(map: "security_profiles_pkey") @default(cuid())
   organizationId                       String       @unique(map: "security_profiles_organization_id_key") @map("organization_id")
   organization                         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "security_profiles_organization_id_fkey")
@@ -360,6 +366,7 @@ model SecurityProfile {
 }
 
 model OrganizationDataType {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                        String                     @id(map: "organization_data_types_pkey") @default(cuid())
   organizationId            String                     @map("organization_id")
   organization              Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "organization_data_types_organization_id_fkey")
@@ -382,6 +389,7 @@ model OrganizationDataType {
 }
 
 model BusinessActivity {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                            String                     @id(map: "business_activities_pkey") @default(cuid())
   organizationId                String                     @map("organization_id")
   organization                  Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "business_activities_organization_id_fkey")
@@ -440,6 +448,7 @@ model ServiceBusinessActivity {
 }
 
 model AccessProfile {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                                String       @id(map: "access_profiles_pkey") @default(cuid())
   organizationId                    String       @unique(map: "access_profiles_organization_id_key") @map("organization_id")
   organization                      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "access_profiles_organization_id_fkey")
@@ -462,6 +471,7 @@ model AccessProfile {
 }
 
 model OrganizationProvider {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                    String                 @id(map: "vendors_pkey") @default(cuid())
   organizationId        String                 @map("organization_id")
   organization          Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "vendors_organization_id_fkey")
@@ -485,6 +495,7 @@ model OrganizationProvider {
 }
 
 model ServiceProviderUsage {
+  fieldNotes                            Json         @default("{}") @map("field_notes")
   id                     String                  @id(map: "service_vendor_uses_pkey") @default(cuid())
   organizationId         String                  @map("organization_id")
   organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade, map: "service_vendor_uses_organization_id_fkey")

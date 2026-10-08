@@ -290,3 +290,32 @@ categories. Critical, high, medium, and low checks contribute weights of 8, 4,
 coverage in the recommendations API. The overall score pools all assessed rule
 weights. These scores are live readiness signals, not audit or certification
 results, and are not persisted or historically tracked.
+
+## Field Notes
+
+Editable Company workspace fields support optional customer-facing and internal
+notes, including service, activity, data-type, provider inventory, and provider
+usage fields. Notes are available from a subtle field settings icon while editing;
+fields with notes retain a small visual indicator. Where vocabulary options can
+also be edited, the same settings menu offers Field notes and Edit options.
+The control is accessible by keyboard and visible on touch devices.
+
+The notes dialog has separate Customer-facing note and Internal note text areas.
+Apply updates the form draft; saving the containing panel or form persists notes
+and values together. Canceling the dialog discards its changes, and canceling the
+containing form discards the entire draft. Failed saves retain the draft. Each
+note permits up to 5,000 characters, preserves line breaks, and is removed when
+both variants are empty. Notes are optional and never affect completion or
+readiness.
+
+Updated built-in templates include customer-facing notes alongside the relevant
+field statements, under the same inclusion conditions. Existing organization
+copies are preserved; their editors can add customer-note variables from the
+variable picker. Published documents remain snapshots until regenerated.
+Notes render as literal text in previews, PDF exports, and public policy pages.
+Internal notes are available to authorized workspace users and organization API
+clients but are excluded from document context and template variables. Changing
+a referenced customer note makes a document stale; internal-note changes do not.
+Notes stay with record IDs through renames and reordering and are removed with
+the record. Onboarding, template metadata, and unrelated settings forms do not
+collect field notes. Existing provider-level Notes fields retain their meaning.

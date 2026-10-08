@@ -1,3 +1,4 @@
+import { FieldNotesProvider } from "@/components/form/field-notes-provider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   accessProfileSchema,
@@ -21,6 +22,7 @@ import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { accessHelperText } from "../access-helper-text"
 
 const accessControlSchema = accessProfileSchema.pick({
+  fieldNotes: true,
   leastPrivilege: true,
   roleBasedAccess: true,
   accessReviewCadence: true,
@@ -31,6 +33,7 @@ const accessControlSchema = accessProfileSchema.pick({
 type AccessControlDraft = z.infer<typeof accessControlSchema>
 
 const toAccessControlDraft = (access: AccessProfile): AccessControlDraft => ({
+  fieldNotes: access.fieldNotes,
   leastPrivilege: access.leastPrivilege,
   roleBasedAccess: access.roleBasedAccess,
   accessReviewCadence: access.accessReviewCadence,
@@ -128,62 +131,64 @@ export const AccessControlPanel = ({
   })
 
   return (
-    <ProfilePanelShell
-      description="Access hygiene, review cadence, and privileged access controls."
-      isEditing={isEditing}
-      isMutationPending={isMutationPending}
-      needsAttention={needsAttention}
-      readOnlyContent={
-        <ProfilePanelDetailGrid rows={accessControlRows(draft, vocabulary)} />
-      }
-      saveLabel="Save"
-      title="Access control"
-      onCancel={() => {
-        form.reset(draft)
-        setIsEditing(false)
-      }}
-      onEdit={() => setIsEditing(true)}
-      onSave={submit}
-    >
-      <EditPanelGrid>
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.leastPrivilege}
-          label="Least privilege access"
-          name="leastPrivilege"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.roleBasedAccess}
-          label="Role-based access"
-          name="roleBasedAccess"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.adminApprovalRequired}
-          label="Admin access requires approval"
-          name="adminApprovalRequired"
-        />
-        <ToggleField
-          control={form.control}
-          helperText={accessHelperText.accessReviewsPerformed}
-          label="Periodic access reviews are performed"
-          name="accessReviewsPerformed"
-        />
-        {accessReviewsPerformed === true && (
-          <SelectField
+    <FieldNotesProvider form={form}>
+      <ProfilePanelShell
+        description="Access hygiene, review cadence, and privileged access controls."
+        isEditing={isEditing}
+        isMutationPending={isMutationPending}
+        needsAttention={needsAttention}
+        readOnlyContent={
+          <ProfilePanelDetailGrid rows={accessControlRows(draft, vocabulary)} />
+        }
+        saveLabel="Save"
+        title="Access control"
+        onCancel={() => {
+          form.reset(draft)
+          setIsEditing(false)
+        }}
+        onEdit={() => setIsEditing(true)}
+        onSave={submit}
+      >
+        <EditPanelGrid>
+          <ToggleField
             control={form.control}
-            helperText={accessHelperText.accessReviewCadence}
-            label="Access review frequency"
-            name="accessReviewCadence"
-            options={[
-              { value: "", label: "Not set" },
-              ...securityCadenceOptions,
-            ]}
-            placeholder="Not set"
+            helperText={accessHelperText.leastPrivilege}
+            label="Least privilege access"
+            name="leastPrivilege"
           />
-        )}
-      </EditPanelGrid>
-    </ProfilePanelShell>
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.roleBasedAccess}
+            label="Role-based access"
+            name="roleBasedAccess"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.adminApprovalRequired}
+            label="Admin access requires approval"
+            name="adminApprovalRequired"
+          />
+          <ToggleField
+            control={form.control}
+            helperText={accessHelperText.accessReviewsPerformed}
+            label="Periodic access reviews are performed"
+            name="accessReviewsPerformed"
+          />
+          {accessReviewsPerformed === true && (
+            <SelectField
+              control={form.control}
+              helperText={accessHelperText.accessReviewCadence}
+              label="Access review frequency"
+              name="accessReviewCadence"
+              options={[
+                { value: "", label: "Not set" },
+                ...securityCadenceOptions,
+              ]}
+              placeholder="Not set"
+            />
+          )}
+        </EditPanelGrid>
+      </ProfilePanelShell>
+    </FieldNotesProvider>
   )
 }

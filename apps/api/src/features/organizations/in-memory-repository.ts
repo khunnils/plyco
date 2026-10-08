@@ -1,4 +1,5 @@
 import {
+  preserveFieldNotes,
   type ProviderSelection,
   type OrganizationSecurityProfile,
   type Provider,
@@ -37,8 +38,19 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
   ): Promise<OrganizationSecurityProfile> {
     const timestamp = now();
     const existing = this.organizations.get(organizationId);
+    const preservedInput = {
+      ...input,
+      company: preserveFieldNotes(input.company, existing?.company),
+      privacy: preserveFieldNotes(input.privacy, existing?.privacy),
+      infrastructure: preserveFieldNotes(
+        input.infrastructure,
+        existing?.infrastructure,
+      ),
+      security: preserveFieldNotes(input.security, existing?.security),
+      access: preserveFieldNotes(input.access, existing?.access),
+    };
     const inputWithProviderNames = this.withProviderNames(
-      input,
+      preservedInput,
       providerCatalog,
     );
     const services = this.servicesWithIds(
@@ -161,7 +173,8 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
       }
 
       return {
-        ...service,
+        ...preserveFieldNotes(service, existingService),
+        privacy: preserveFieldNotes(service.privacy, existingService?.privacy),
         id: serviceId ?? newId("service"),
         sortOrder: index,
         createdAt: existingService?.createdAt ?? timestamp,
@@ -174,8 +187,27 @@ export class InMemoryOrganizationRepository implements OrganizationRepository {
     inputDataTypes: StoredDataType[],
     existingDataTypes: StoredDataType[],
   ): StoredDataType[] {
+    for (const dataType of inputDataTypes) {
+      if (
+        dataType.id &&
+        !existingDataTypes.some((current) => current.id === dataType.id)
+      ) {
+        throw new ApiError(
+          "DATA_TYPE_NOT_FOUND",
+          "Data type was not found for this organization.",
+          400,
+        );
+      }
+    }
     return inputDataTypes.map((dataType, sortOrder) => ({
-      ...dataType,
+      ...preserveFieldNotes(
+        dataType,
+        existingDataTypes.find((current) =>
+          dataType.id
+            ? current.id === dataType.id
+            : current.name === dataType.name,
+        ),
+      ),
       sortOrder,
       id:
         dataType.id ??
