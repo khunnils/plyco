@@ -25,6 +25,8 @@ export const DataHandlingProfileRoutePage = () => {
   const snapshot = organizationSnapshot.data
   const defaultValues = profileFromOrganization(snapshot?.organization ?? null)
   const vocabularyData = vocabulary.data
+  const businessActivities = snapshot?.businessActivities ?? []
+  const serviceProviderUsage = snapshot?.serviceProviderUsage ?? []
 
   return (
     <>
@@ -36,8 +38,10 @@ export const DataHandlingProfileRoutePage = () => {
         title="Data Types"
       />
       <DataHandlingProfilePage
+        businessActivities={businessActivities}
         isMutationPending={saveProfile.isPending}
         profile={defaultValues}
+        serviceProviderUsage={serviceProviderUsage}
         vocabulary={vocabularyData}
         onCreateDataType={(dataType) =>
           posthog.capture(POSTHOG_EVENTS.DATA_TYPE_CREATED, {

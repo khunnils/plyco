@@ -3,6 +3,8 @@ import { Plus } from "lucide-react"
 import { isComplianceFieldVisible } from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
 
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { countLabel } from "@/lib/count-label"
 import { POSTHOG_EVENTS } from "@/lib/posthog-events"
 import { useVocabulary } from "@/features/vocabulary/hooks/use-vocabulary"
 import { useOrganizationSnapshot } from "@/features/company/hooks/use-company"
@@ -46,6 +48,15 @@ export const ActivitiesRoutePage = () => {
   const [editingActivityId, setEditingActivityId] = useState<string | null>(
     null
   )
+  const [activityPendingDelete, setActivityPendingDelete] = useState<
+    (typeof businessActivities)[number] | null
+  >(null)
+  const linkedServiceCount = activityPendingDelete
+    ? (snapshot?.organization?.services ?? []).filter((service) =>
+        service.businessActivityIds.includes(activityPendingDelete.id)
+      ).length
+    : 0
+  const linkedDataTypeCount = activityPendingDelete?.dataTypeIds.length ?? 0
 
   const isActivityMutationPending =
     createBusinessActivity.isPending ||
@@ -54,6 +65,48 @@ export const ActivitiesRoutePage = () => {
 
   return (
     <>
+      <DeleteConfirmDialog
+        confirmLabel="Delete"
+        description={
+          <>
+            This will permanently delete{" "}
+            <span className="font-medium text-slate-950">
+              {activityPendingDelete?.name.trim() || "this activity"}
+            </span>
+            , including activity details,{" "}
+            {countLabel(
+              linkedServiceCount,
+              "service assignment",
+              "service assignments"
+            )}
+            , and{" "}
+            {countLabel(
+              linkedDataTypeCount,
+              "data type link",
+              "data type links"
+            )}
+            . Services and data types will not be deleted.
+          </>
+        }
+        isOpen={Boolean(activityPendingDelete)}
+        isPending={deleteBusinessActivity.isPending}
+        title="Delete activity?"
+        onClose={() => setActivityPendingDelete(null)}
+        onConfirm={() => {
+          if (!activityPendingDelete) {
+            return
+          }
+
+          deleteBusinessActivity.mutate(activityPendingDelete.id, {
+            onSuccess: () => {
+              posthog.capture(POSTHOG_EVENTS.ACTIVITY_DELETED, {
+                activity_id: activityPendingDelete.id,
+              })
+              setActivityPendingDelete(null)
+            },
+          })
+        }}
+      />
       <PageHeader
         breadcrumbs={sectionPageBreadcrumbs(SIDEBAR_SECTION.productAndData, [
           { label: "Activities" },
@@ -129,19 +182,13 @@ export const ActivitiesRoutePage = () => {
               },
             })
           }
-          onDelete={(activity) => {
-            deleteBusinessActivity.mutate(activity.id, {
-              onSuccess: () => {
-                posthog.capture(POSTHOG_EVENTS.ACTIVITY_DELETED, {
-                  activity_id: activity.id,
-                })
-              },
-            })
-          }}
+          onDelete={(activity) => setActivityPendingDelete(activity)}
           onUpdate={(input, onSuccess) =>
             updateBusinessActivity.mutate(input, {
               onSuccess: () => {
-                posthog.capture(POSTHOG_EVENTS.ACTIVITY_UPDATED, { activity_id: input.id })
+                posthog.capture(POSTHOG_EVENTS.ACTIVITY_UPDATED, {
+                  activity_id: input.id,
+                })
                 onSuccess?.()
               },
             })

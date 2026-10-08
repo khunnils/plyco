@@ -102,6 +102,12 @@ organization creation, except onboarding automatically links Operate marketing
 website to Website visitor data so the default website service appears in the
 Product and Data graph.
 
+Deleting an activity or data type asks for confirmation first. The activity
+dialog names the activity and how many service assignments and data-type links
+will be removed. The data-type dialog names the data type and how many activity
+and provider-usage links will be removed. Related services, activities, data
+types, and provider usage records stay in the workspace.
+
 Activities also record whether AI is used. When an activity uses AI, the
 workspace captures free-text AI use cases plus whether customer data is used for
 training, whether customer data is sent to AI providers, whether AI outputs get

@@ -4,8 +4,7 @@ import {
   type Vocabulary,
 } from "@plyco/contracts"
 import { usePostHog } from "@posthog/react"
-import { useId, useState } from "react"
-import { createPortal } from "react-dom"
+import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import {
   ArrowRight,
@@ -50,6 +49,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { countLabel } from "@/lib/count-label"
 import { Button } from "@/components/ui/button"
 import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
 import { EditPanelGrid } from "@/features/company/components/profile-panel-shell"
@@ -62,83 +63,6 @@ const codeValueList = (
   values && values.length > 0
     ? values.map((value) => codeLabel(vocabulary, codeSetId, value)).join(", ")
     : "Not set"
-
-const DeleteServiceDialog = ({
-  isOpen,
-  isMutationPending,
-  providerUsageCount,
-  serviceName,
-  onClose,
-  onConfirm,
-}: {
-  isOpen: boolean
-  isMutationPending: boolean
-  providerUsageCount: number
-  serviceName: string
-  onClose: () => void
-  onConfirm: () => void
-}) => {
-  const titleId = useId()
-  const descriptionId = useId()
-
-  if (!isOpen) {
-    return null
-  }
-
-  return createPortal(
-    <div
-      aria-describedby={descriptionId}
-      aria-labelledby={titleId}
-      aria-modal="true"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4"
-      role="dialog"
-    >
-      <div className="w-full max-w-md border border-slate-200 bg-white p-6 shadow-2xl">
-        <div className="flex items-start gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-red-50 text-red-700">
-            <Trash2 className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-slate-950" id={titleId}>
-              Delete service?
-            </h2>
-            <p
-              className="mt-2 text-sm leading-6 text-slate-600"
-              id={descriptionId}
-            >
-              This will permanently delete{" "}
-              <span className="font-medium text-slate-950">{serviceName}</span>,
-              including service details, assigned activities, and{" "}
-              {providerUsageCount === 1
-                ? "1 linked provider usage record"
-                : `${providerUsageCount} linked provider usage records`}
-              . Providers and activity inventory items will not be deleted.
-            </p>
-          </div>
-        </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <Button
-            disabled={isMutationPending}
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={isMutationPending}
-            type="button"
-            variant="destructive"
-            onClick={onConfirm}
-          >
-            Delete service
-          </Button>
-        </div>
-      </div>
-    </div>,
-    document.body
-  )
-}
 
 const ServiceSelectorPage = ({
   businessActivityOptions,
@@ -174,13 +98,26 @@ const ServiceSelectorPage = ({
 
   return (
     <div className="grid gap-5">
-      <DeleteServiceDialog
-        isOpen={Boolean(servicePendingDelete)}
-        isMutationPending={deleteDisabled}
-        providerUsageCount={pendingDeleteUsageCount}
-        serviceName={
-          servicePendingDelete?.serviceName?.trim() || "this service"
+      <DeleteConfirmDialog
+        confirmLabel="Delete service"
+        description={
+          <>
+            This will permanently delete{" "}
+            <span className="font-medium text-slate-950">
+              {servicePendingDelete?.serviceName?.trim() || "this service"}
+            </span>
+            , including service details, assigned activities, and{" "}
+            {countLabel(
+              pendingDeleteUsageCount,
+              "linked provider usage record",
+              "linked provider usage records"
+            )}
+            . Providers and activity inventory items will not be deleted.
+          </>
         }
+        isOpen={Boolean(servicePendingDelete)}
+        isPending={deleteDisabled}
+        title="Delete service?"
         onClose={() => setServicePendingDelete(null)}
         onConfirm={() => {
           if (!servicePendingDelete) {

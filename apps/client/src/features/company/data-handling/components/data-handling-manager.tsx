@@ -1,4 +1,9 @@
-import { type StoredDataType, type Vocabulary } from "@plyco/contracts"
+import {
+  type BusinessActivity,
+  type ServiceProviderUsage,
+  type StoredDataType,
+  type Vocabulary,
+} from "@plyco/contracts"
 
 import { DataTypesPanel } from "@/features/company/data-handling/components/panels/data-types-panel"
 import {
@@ -8,9 +13,11 @@ import {
 import { type Option } from "@/features/vocabulary/lib/vocabulary"
 
 export const DataHandlingManager = ({
+  businessActivities,
   collectionMethodOptions,
   isMutationPending,
   profile,
+  serviceProviderUsage,
   subjectTypeOptions,
   vocabulary,
   onCreateDataType,
@@ -20,9 +27,11 @@ export const DataHandlingManager = ({
   onReorder,
   reorderDisabled,
 }: {
+  businessActivities: BusinessActivity[]
   collectionMethodOptions: Option[]
   isMutationPending: boolean
   profile: ProfileDraft
+  serviceProviderUsage: ServiceProviderUsage[]
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
   onCreateDataType?: (dataType: StoredDataType) => void
@@ -48,9 +57,11 @@ export const DataHandlingManager = ({
   return (
     <div className="grid gap-6">
       <DataTypesPanel
+        businessActivities={businessActivities}
         collectionMethodOptions={collectionMethodOptions}
         dataTypes={profile.dataHandling.dataTypesStored}
         isMutationPending={isMutationPending}
+        serviceProviderUsage={serviceProviderUsage}
         subjectTypeOptions={subjectTypeOptions}
         vocabulary={vocabulary}
         onSave={(dataTypesStored, onSuccess) =>

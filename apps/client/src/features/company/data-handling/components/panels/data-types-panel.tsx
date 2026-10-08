@@ -1,4 +1,9 @@
-import { type StoredDataType, type Vocabulary } from "@plyco/contracts"
+import {
+  type BusinessActivity,
+  type ServiceProviderUsage,
+  type StoredDataType,
+  type Vocabulary,
+} from "@plyco/contracts"
 import {
   AlertCircle,
   ChevronDown,
@@ -10,6 +15,8 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 
+import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
+import { countLabel } from "@/lib/count-label"
 import { Button } from "@/components/ui/button"
 import { SensitiveTooltip } from "@/components/ui/info-tooltip"
 import { SortableList } from "@/components/sortable-list"
@@ -48,9 +55,11 @@ const displayTitle = (dataType: StoredDataType, index: number) =>
   `Data type ${index + 1}`
 
 export const DataTypesPanel = ({
+  businessActivities,
   collectionMethodOptions,
   dataTypes,
   isMutationPending,
+  serviceProviderUsage,
   subjectTypeOptions,
   vocabulary,
   onSave,
@@ -60,9 +69,11 @@ export const DataTypesPanel = ({
   onUpdate,
   reorderDisabled,
 }: {
+  businessActivities: BusinessActivity[]
   collectionMethodOptions: Option[]
   dataTypes: StoredDataType[]
   isMutationPending: boolean
+  serviceProviderUsage: ServiceProviderUsage[]
   subjectTypeOptions: Option[]
   vocabulary: Vocabulary | undefined
   onSave: (dataTypes: StoredDataType[], onSuccess?: () => void) => void
@@ -75,6 +86,19 @@ export const DataTypesPanel = ({
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set())
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [dataTypePendingDelete, setDataTypePendingDelete] =
+    useState<StoredDataType | null>(null)
+  const pendingDataTypeId = dataTypePendingDelete?.id
+  const linkedActivityCount = pendingDataTypeId
+    ? businessActivities.filter((activity) =>
+        activity.dataTypeIds.includes(pendingDataTypeId)
+      ).length
+    : 0
+  const linkedProviderUsageCount = dataTypePendingDelete
+    ? serviceProviderUsage.filter((usage) =>
+        usage.dataProcessed.includes(dataTypePendingDelete.name)
+      ).length
+    : 0
 
   const closeForm = () => {
     setShowCreateForm(false)
@@ -125,9 +149,13 @@ export const DataTypesPanel = ({
 
   const handleDelete = (index: number) => {
     const deletedDataType = dataTypes[index]
-    onSave(dataTypes.filter((_, currentIndex) => currentIndex !== index), () => {
-      if (deletedDataType) onDelete?.(deletedDataType)
-    })
+    onSave(
+      dataTypes.filter((_, currentIndex) => currentIndex !== index),
+      () => {
+        if (deletedDataType) onDelete?.(deletedDataType)
+        setDataTypePendingDelete(null)
+      }
+    )
     const deletedId = dataTypes[index]?.id
     setExpandedIds((current) => {
       const next = new Set(current)
@@ -155,6 +183,45 @@ export const DataTypesPanel = ({
 
   return (
     <div>
+      <DeleteConfirmDialog
+        confirmLabel="Delete"
+        description={
+          <>
+            This will permanently delete{" "}
+            <span className="font-medium text-slate-950">
+              {dataTypePendingDelete?.name.trim() || "this data type"}
+            </span>
+            , including data type details,{" "}
+            {countLabel(linkedActivityCount, "activity link", "activity links")}
+            , and{" "}
+            {countLabel(
+              linkedProviderUsageCount,
+              "provider usage link",
+              "provider usage links"
+            )}
+            . Activities and provider usage records will not be deleted.
+          </>
+        }
+        isOpen={Boolean(dataTypePendingDelete)}
+        isPending={isMutationPending}
+        title="Delete data type?"
+        onClose={() => setDataTypePendingDelete(null)}
+        onConfirm={() => {
+          if (!dataTypePendingDelete?.id) {
+            return
+          }
+
+          const index = dataTypes.findIndex(
+            (dataType) => dataType.id === dataTypePendingDelete.id
+          )
+          if (index < 0) {
+            setDataTypePendingDelete(null)
+            return
+          }
+
+          handleDelete(index)
+        }}
+      />
       <div className="mb-4 flex flex-col gap-3 border-b pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h3 className="text-base font-semibold text-slate-950">Data types</h3>
@@ -335,7 +402,7 @@ export const DataTypesPanel = ({
                           disabled={isMutationPending}
                           onClick={(event) => {
                             event.stopPropagation()
-                            handleDelete(index)
+                            setDataTypePendingDelete(dataType)
                           }}
                         >
                           <Trash2 />
