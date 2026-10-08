@@ -53,16 +53,16 @@ metadata remains available later in the company sections.
 
 ## Field Notes Controls
 
-Company workspace edit forms reuse the vocabulary selector's small settings
-icon for field commentary. The control appears on field hover or keyboard focus,
-remains visible on touch devices, and uses a restrained blue indicator when notes
-exist. Keep a single settings control per field; when both capabilities exist,
-its menu contains Field notes and Edit options. Read-only panels keep their
-existing compact layout.
+Company workspace edit forms use a small notes icon beside the field label for
+field commentary. The control appears on field hover or keyboard focus, remains
+visible on touch devices, and uses a restrained blue indicator when notes exist.
+Vocabulary selectors retain a separate inline settings icon for editing code-set
+options. Each icon opens its editor directly. Read-only panels keep their existing
+compact layout.
 
 Use a focused, accessible dialog titled with the field label. Customer-facing
 note and Internal note have distinct labels and helper text explaining where
 they appear. Apply changes the draft; the containing form provides Save and
 Cancel. Keep note text collapsed in the field itself. Dialog shortcuts must not
 trigger the containing panel's Save or Cancel, and closing the dialog returns
-focus to its settings control.
+focus to its notes control.

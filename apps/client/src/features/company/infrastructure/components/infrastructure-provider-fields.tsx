@@ -129,9 +129,16 @@ export const SingleProviderField = ({
 
   return (
     <div className="group/field grid gap-2 text-sm font-medium text-slate-800">
-      <label htmlFor={fieldId}>
-        {infrastructureProviderLabels[systemType]}
-      </label>
+      <span className="flex items-center justify-between gap-2">
+        <label htmlFor={fieldId}>
+          {infrastructureProviderLabels[systemType]}
+        </label>
+        <FieldSettings
+          label={infrastructureProviderLabels[systemType]}
+          name={`organizationProviders.${systemType}`}
+          onOpen={() => setIsComboboxOpen(false)}
+        />
+      </span>
       {helperText ? (
         <span className="-mt-1 text-xs leading-5 font-normal text-slate-500">
           {helperText}
@@ -148,13 +155,6 @@ export const SingleProviderField = ({
       >
         <ComboboxInput
           id={fieldId}
-          endAction={
-            <FieldSettings
-              label={infrastructureProviderLabels[systemType]}
-              name={`organizationProviders.${systemType}`}
-              onOpen={() => setIsComboboxOpen(false)}
-            />
-          }
           className={comboboxInputClassName}
           placeholder="Not set"
           showClear={selectedIds.length > 0}

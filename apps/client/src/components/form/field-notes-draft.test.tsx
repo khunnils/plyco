@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { createFormControl, type Resolver } from "react-hook-form"
 import { renderToStaticMarkup } from "react-dom/server"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,6 +12,8 @@ import {
 } from "@plyco/contracts"
 import { applyNoteToForm, noteBindingFor } from "./field-notes-draft"
 import { FieldNotesContext } from "./field-notes-context"
+import { CodeSetEditButton } from "./code-set-edit-button"
+import { SelectField } from "./select-field"
 import { FieldSettings } from "./field-settings"
 import { DocumentMarkdown } from "@/features/documents/components/document-markdown"
 
@@ -85,20 +88,47 @@ describe("field notes drafts", () => {
     })
     unsubscribe()
   })
-  it("renders one settings trigger when notes and vocabulary editing coexist", () => {
+  it("keeps notes beside the label and code-set settings inline when both are available", () => {
+    const form = createFormControl<{ reviewTool: string }>({
+      defaultValues: { reviewTool: "github" },
+    })
     const html = renderToStaticMarkup(
-      <FieldNotesContext.Provider
-        value={{ getNote: () => note, applyNote: () => undefined }}
-      >
-        <FieldSettings
-          name="codeReviewRequired"
-          label="Code review required"
-          onEditOptions={() => undefined}
-        />
-      </FieldNotesContext.Provider>
+      <QueryClientProvider client={new QueryClient()}>
+        <FieldNotesContext.Provider
+          value={{ getNote: () => note, applyNote: () => undefined }}
+        >
+          <SelectField
+            control={form.control}
+            name="reviewTool"
+            label="Review tool"
+            options={[
+              {
+                value: "github",
+                label: "GitHub",
+                codeSetId: "review_tools",
+                editable: true,
+              },
+            ]}
+          />
+        </FieldNotesContext.Provider>
+      </QueryClientProvider>
     )
-    expect(html.match(/<button/g)).toHaveLength(1)
-    expect(html).toContain("Code review required settings, has notes")
+    expect(html).toContain('aria-label="Review tool notes, has notes"')
+    expect(html).toContain('aria-label="Edit Review tool options"')
+    expect(html).toContain("lucide-sticky-note")
+    expect(html).toContain("lucide-settings")
+    expect(html.indexOf("Review tool notes")).toBeLessThan(
+      html.indexOf('role="combobox"')
+    )
+    expect(html.indexOf("Edit Review tool options")).toBeGreaterThan(
+      html.indexOf('role="combobox"')
+    )
+    expect(html).not.toContain('aria-haspopup="menu"')
+    expect(
+      renderToStaticMarkup(
+        <CodeSetEditButton label="Review tool" onEdit={() => undefined} />
+      )
+    ).toContain('aria-label="Edit Review tool options"')
     expect(html).not.toContain(note.internal)
     expect(
       renderToStaticMarkup(<FieldSettings name="name" label="Name" />)

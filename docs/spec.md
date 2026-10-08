@@ -295,10 +295,11 @@ results, and are not persisted or historically tracked.
 
 Editable Company workspace fields support optional customer-facing and internal
 notes, including service, activity, data-type, provider inventory, and provider
-usage fields. Notes are available from a subtle field settings icon while editing;
-fields with notes retain a small visual indicator. Where vocabulary options can
-also be edited, the same settings menu offers Field notes and Edit options.
-The control is accessible by keyboard and visible on touch devices.
+usage fields. Notes are available from a subtle notes icon beside the field label
+while editing; fields with notes retain a small visual indicator. Where vocabulary
+options can also be edited, a separate inline settings icon opens code-set editing.
+Both controls open their editors directly, are accessible by keyboard, and remain
+visible on touch devices.
 
 The notes dialog has separate Customer-facing note and Internal note text areas.
 Apply updates the form draft; saving the containing panel or form persists notes

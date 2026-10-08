@@ -5,6 +5,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form"
+import { CodeSetEditButton } from "./code-set-edit-button"
 import { FieldSettings } from "./field-settings"
 import { useState } from "react"
 
@@ -137,7 +138,14 @@ const MultiSelectInput = <TValue extends string>({
 
   return (
     <div className="group/field grid gap-2 text-sm font-medium text-slate-800">
-      <label htmlFor={fieldId}>{label}</label>
+      <span className="flex items-center justify-between gap-2">
+        <label htmlFor={fieldId}>{label}</label>
+        <FieldSettings
+          label={label}
+          name={notesKey}
+          onOpen={() => setIsComboboxOpen(false)}
+        />
+      </span>
       {helperText ? (
         <p className="-mt-1 text-xs leading-5 font-normal text-slate-500">
           {helperText}
@@ -185,16 +193,15 @@ const MultiSelectInput = <TValue extends string>({
             onBlur={onBlur}
           />
           <span className="ml-auto flex items-center gap-0.5">
-            <FieldSettings
-              label={label}
-              name={notesKey}
-              onOpen={() => setIsComboboxOpen(false)}
-              onEditOptions={
-                isEditable && codeSetId
-                  ? () => setIsEditingOptions(true)
-                  : undefined
-              }
-            />
+            {isEditable && codeSetId ? (
+              <CodeSetEditButton
+                label={label}
+                onEdit={() => {
+                  setIsComboboxOpen(false)
+                  setIsEditingOptions(true)
+                }}
+              />
+            ) : null}
             <ComboboxTrigger className="rounded-sm p-1 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700" />
           </span>
         </ComboboxChips>
