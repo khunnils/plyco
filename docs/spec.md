@@ -126,6 +126,21 @@ offer an in-context editor for adding, renaming, describing, activating,
 deactivating, and removing codes without leaving the current page. System code
 sets remain read-only.
 
+## Services
+
+Existing services can be duplicated from their service card or detail header.
+The duplicate dialog requires a service name, HTTP(S) service URL, and primary
+hosting region. It suggests the original name followed by “(copy)” and prefills
+the existing URL and region; matching names and URLs are allowed. A successful
+copy opens the new service, appended to the service list.
+
+Duplication copies all service settings and field notes, activity assignments,
+and provider usage with its notes and data-type links. Existing activities,
+providers, and data types are reused. Only the three prompted service fields
+are replaced; provider purposes and data regions remain unchanged. The copy
+has independent service and usage records, and the original is unchanged.
+Failed creation leaves no partial copy and retains the dialog's entered values.
+
 ## Service Cookies
 
 The General panel in Service details records whether the service processes

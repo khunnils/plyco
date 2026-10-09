@@ -129,6 +129,12 @@ that maintain ordering, membership, or relationship invariants must be atomic.
 Tenant identifiers are carried through repository operations so isolation is
 enforced below the route layer as well as at authorization time.
 
+The organizations feature owns service duplication through a narrow duplication
+repository. Its Prisma adapter creates the service, activity assignments,
+provider usage, and provider data-type links in one transaction, reusing the
+organization's existing inventory. Its in-memory adapter prepares all copied
+records before publishing them to the organization and vendor repositories.
+
 Static, version-controlled definitions may be loaded from `data/`. They remain
 separate from organization-owned state and are validated before use. Private
 binary artifacts live in object storage, with database records retaining their

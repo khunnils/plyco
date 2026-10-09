@@ -51,6 +51,9 @@ import { InMemoryOrganizationRepository } from "./features/organizations/in-memo
 import { PrismaOrganizationRepository } from "./features/organizations/prisma-repository.js"
 import { type OrganizationRepository } from "./features/organizations/repository.js"
 import { registerOrganizationRoutes } from "./features/organizations/routes.js"
+import { type ServiceDuplicationRepository } from "./features/organizations/service-duplication-repository.js"
+import { InMemoryServiceDuplicationRepository } from "./features/organizations/in-memory-service-duplication-repository.js"
+import { PrismaServiceDuplicationRepository } from "./features/organizations/prisma-service-duplication-repository.js"
 import {
   createDefaultOrganizationLookupService,
   type OrganizationLookupService,
@@ -110,6 +113,7 @@ export type CreateAppOptions = {
   auth?: false | AuthConfig
   accountRepository?: AccountRepository
   organizationRepository?: OrganizationRepository
+  serviceDuplicationRepository?: ServiceDuplicationRepository
   vendorRepository?: ProviderRepository
   vocabularyRepository?: VocabularyRepository
   documentRepository?: DocumentRepository
@@ -146,6 +150,7 @@ export async function createApp({
   auth = apiConfig.auth(),
   accountRepository,
   organizationRepository,
+  serviceDuplicationRepository,
   vendorRepository,
   vocabularyRepository,
   documentRepository,
@@ -304,6 +309,15 @@ export async function createApp({
     providerSource,
     vendorRepository: repositories.vendorRepository,
     vocabularyRepository: repositories.vocabularyRepository,
+    serviceDuplicationRepository:
+      serviceDuplicationRepository ??
+      (repositories.organizationRepository instanceof InMemoryOrganizationRepository &&
+      repositories.vendorRepository instanceof InMemoryVendorRepository
+        ? new InMemoryServiceDuplicationRepository(
+            repositories.organizationRepository,
+            repositories.vendorRepository
+          )
+        : new PrismaServiceDuplicationRepository()),
   })
   await registerRecommendationRoutes(app, {
     accountRepository: repositories.accountRepository,

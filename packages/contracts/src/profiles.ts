@@ -319,6 +319,29 @@ export const securityProgramSnapshotSchema = z.object({
   serviceProviderUsage: z.array(serviceProviderUsageSchema),
 });
 
+export const duplicateServiceInputSchema = z.object({
+  serviceName: z.string().trim().min(1, "Service name is required"),
+  serviceUrl: z
+    .string()
+    .trim()
+    .url("Enter a valid service URL")
+    .refine(
+      (value) => /^https?:\/\//i.test(value),
+      "Service URL must use HTTP or HTTPS",
+    ),
+  primaryHostingRegion: codeIdSchema,
+});
+
+export const duplicateServiceResponseSchema = z.object({
+  serviceId: z.string().min(1),
+  snapshot: securityProgramSnapshotSchema,
+});
+
+export type DuplicateServiceInput = z.infer<typeof duplicateServiceInputSchema>;
+export type DuplicateServiceResponse = z.infer<
+  typeof duplicateServiceResponseSchema
+>;
+
 export type StoredDataType = z.infer<typeof storedDataTypeSchema>;
 export type BusinessActivityInput = z.infer<typeof businessActivityInputSchema>;
 export type BusinessActivity = z.infer<typeof businessActivitySchema>;

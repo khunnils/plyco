@@ -215,6 +215,15 @@ export class InMemoryVendorRepository implements ProviderRepository {
     );
   }
 
+  insertPreparedServiceProviderUsage(
+    organizationId: string,
+    usages: ServiceProviderUsage[],
+  ) {
+    for (const usage of usages) {
+      this.serviceProviderUsage.set(usage.id, { ...usage, organizationId });
+    }
+  }
+
   async createServiceProviderUsage(
     organizationId: string,
     input: ServiceProviderUsageInput,

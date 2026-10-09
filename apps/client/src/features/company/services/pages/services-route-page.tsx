@@ -15,6 +15,7 @@ import {
   MapPin,
   RadioTower,
   Plus,
+  Copy,
   Trash2,
 } from "lucide-react"
 import { SortableList } from "@/components/sortable-list"
@@ -25,6 +26,7 @@ import {
   useSaveServicesProfile,
   useOrganizationSnapshot,
   useReorderServices,
+  useDuplicateService,
 } from "@/features/company/hooks/use-company"
 import {
   useCreateServiceProviderUsage,
@@ -36,6 +38,7 @@ import {
   dataTypeOptionsFromProfile,
 } from "@/features/company/lib/profile"
 import { ServiceProfilePage } from "./service-profile-page"
+import { DuplicateServiceDialog } from "../components/duplicate-service-dialog"
 import { PageHeader } from "@/features/shell/components/page-header"
 import {
   SIDEBAR_SECTION,
@@ -52,7 +55,11 @@ import {
 import { DeleteConfirmDialog } from "@/components/delete-confirm-dialog"
 import { countLabel } from "@/lib/count-label"
 import { Button } from "@/components/ui/button"
-import { codeLabel, type Option } from "@/features/vocabulary/lib/vocabulary"
+import {
+  codeLabel,
+  codeOptions,
+  type Option,
+} from "@/features/vocabulary/lib/vocabulary"
 import { EditPanelGrid } from "@/features/company/components/profile-panel-shell"
 
 const codeValueList = (
@@ -73,6 +80,8 @@ const ServiceSelectorPage = ({
   onDeleteService,
   onReorder,
   reorderDisabled,
+  duplicateDisabled,
+  onDuplicateService,
 }: {
   businessActivityOptions: Option[]
   deleteDisabled: boolean
@@ -86,6 +95,8 @@ const ServiceSelectorPage = ({
   ) => void
   onReorder: (ids: string[]) => void
   reorderDisabled: boolean
+  duplicateDisabled: boolean
+  onDuplicateService: (service: ServiceProfileInput) => void
 }) => {
   const availableServices = services.filter((service) => service.id)
   const [servicePendingDelete, setServicePendingDelete] =
@@ -204,6 +215,18 @@ const ServiceSelectorPage = ({
 
               return (
                 <div className="relative h-full">
+                  <Button
+                    aria-label={`Duplicate ${service.serviceName?.trim() || `service ${index + 1}`}`}
+                    title="Duplicate service"
+                    className="absolute top-4 right-24 z-20 bg-white/95"
+                    disabled={duplicateDisabled}
+                    size="icon-sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => onDuplicateService(service)}
+                  >
+                    <Copy />
+                  </Button>
                   <Button
                     aria-label={`Delete ${
                       service.serviceName?.trim() || `service ${index + 1}`
@@ -339,6 +362,9 @@ export const ServicesRoutePage = () => {
   const vocabulary = useVocabulary()
   const saveProfile = useSaveServicesProfile()
   const reorderServices = useReorderServices()
+  const duplicateService = useDuplicateService()
+  const [servicePendingDuplicate, setServicePendingDuplicate] =
+    useState<ServiceProfileInput | null>(null)
   const createServiceProviderUsage = useCreateServiceProviderUsage()
   const deleteServiceProviderUsage = useDeleteServiceProviderUsage()
   const updateServiceProviderUsage = useUpdateServiceProviderUsage()
@@ -389,11 +415,50 @@ export const ServicesRoutePage = () => {
 
   return (
     <>
+      {servicePendingDuplicate ? (
+        <DuplicateServiceDialog
+          key={servicePendingDuplicate.id}
+          service={servicePendingDuplicate}
+          regionOptions={codeOptions(vocabularyData, "regions")}
+          isPending={duplicateService.isPending}
+          onClose={() => setServicePendingDuplicate(null)}
+          onSubmit={(input) => {
+            if (!servicePendingDuplicate.id) return
+            duplicateService.mutate(
+              { serviceId: servicePendingDuplicate.id, input },
+              {
+                onSuccess: ({ serviceId }) => {
+                  setServicePendingDuplicate(null)
+                  navigate(`/company/services/${serviceId}`)
+                },
+              }
+            )
+          }}
+        />
+      ) : null}
       <PageHeader
         breadcrumbs={breadcrumbs}
         eyebrow={SIDEBAR_SECTION.productAndData}
         title={activeCompanyTitle}
-      />
+      >
+        {routedSelectedServiceId &&
+        headerService?.id === routedSelectedServiceId ? (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={
+              saveProfile.isPending ||
+              duplicateService.isPending ||
+              isVendorMutationPending ||
+              reorderServices.isPending
+            }
+            onClick={() => setServicePendingDuplicate(headerService)}
+          >
+            <Copy />
+            Duplicate service
+          </Button>
+        ) : null}
+      </PageHeader>
 
       {!serviceId ? (
         <ServiceSelectorPage
@@ -402,6 +467,13 @@ export const ServicesRoutePage = () => {
           serviceProviderUsage={serviceProviderUsage}
           services={defaultValues.services}
           vocabulary={vocabularyData}
+          duplicateDisabled={
+            saveProfile.isPending ||
+            duplicateService.isPending ||
+            isVendorMutationPending ||
+            reorderServices.isPending
+          }
+          onDuplicateService={setServicePendingDuplicate}
           onDeleteService={(service, providerUsageCount, onSuccess) => {
             if (!service.id) {
               return

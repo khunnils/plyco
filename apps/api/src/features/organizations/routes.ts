@@ -9,6 +9,7 @@ import {
   emptyPrivacyProfile,
   emptySecurityProfile,
   emptyServiceProfile,
+  duplicateServiceInputSchema,
   infrastructureProfileSchema,
   type OrganizationSecurityProfile,
   securityProfileSchema,
@@ -33,6 +34,8 @@ import {
 } from "../vocabulary/validation.js";
 import { type VocabularyRepository } from "../vocabulary/repository.js";
 import { type ProviderRepository } from "../vendors/repository.js";
+import { ApiError } from "../../infrastructure/errors.js";
+import { type ServiceDuplicationRepository } from "./service-duplication-repository.js";
 import {
   type OrganizationRepository,
   type SecurityProfileInput,
@@ -50,14 +53,61 @@ export async function registerOrganizationRoutes(
     vendorRepository,
     accountRepository,
     vocabularyRepository,
+    serviceDuplicationRepository,
   }: {
     accountRepository: AccountRepository;
     organizationRepository: OrganizationRepository;
     providerSource: ProviderSource;
     vendorRepository: ProviderRepository;
     vocabularyRepository: VocabularyRepository;
+    serviceDuplicationRepository: ServiceDuplicationRepository;
   },
 ) {
+  app.post<{ Params: { organizationId: string; serviceId: string } }>(
+    "/organizations/:organizationId/services/:serviceId/duplicate",
+    async (request, reply) => {
+      const { organizationId, serviceId } = request.params;
+      await requireOrganizationMembership(
+        request,
+        accountRepository,
+        organizationId,
+      );
+      const input = duplicateServiceInputSchema.parse(request.body);
+      if (
+        !(await vocabularyRepository.codeExists(
+          organizationId,
+          "regions",
+          input.primaryHostingRegion,
+        ))
+      ) {
+        throw new ApiError(
+          "CODE_NOT_FOUND",
+          "Selected hosting region is not available.",
+          400,
+          {
+            codeSetId: "regions",
+            field: "primaryHostingRegion",
+            value: input.primaryHostingRegion,
+          },
+        );
+      }
+      const copiedServiceId =
+        await serviceDuplicationRepository.duplicateService(
+          organizationId,
+          serviceId,
+          input,
+        );
+      return reply.code(201).send({
+        serviceId: copiedServiceId,
+        snapshot: await organizationSnapshot(
+          organizationId,
+          organizationRepository,
+          vendorRepository,
+        ),
+      });
+    },
+  );
+
   app.get<{ Params: { organizationId: string } }>(
     "/organizations/:organizationId",
     async (request) => {

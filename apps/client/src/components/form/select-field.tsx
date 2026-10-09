@@ -30,6 +30,8 @@ const comboboxInputClassName =
 
 type SelectFieldProps<T extends FieldValues, TValue extends string> = {
   control: Control<T>
+  disabled?: boolean
+  portalContainer?: HTMLElement | null
   emptyMessage?: string
   error?: FieldError
   helperText?: string
@@ -41,6 +43,8 @@ type SelectFieldProps<T extends FieldValues, TValue extends string> = {
 
 export const SelectField = <T extends FieldValues, TValue extends string>({
   control,
+  disabled = false,
+  portalContainer,
   emptyMessage = "No options available",
   error,
   helperText,
@@ -95,6 +99,7 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                 </span>
               ) : null}
               <Combobox<TValue>
+                disabled={disabled}
                 open={isComboboxOpen}
                 items={selectableOptions.map((option) => option.value)}
                 value={field.value || null}
@@ -106,6 +111,7 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                 onOpenChange={setIsComboboxOpen}
               >
                 <ComboboxInput
+                  disabled={disabled}
                   id={fieldId}
                   className={`${comboboxInputClassName} group/code-select`}
                   endAction={
@@ -127,7 +133,10 @@ export const SelectField = <T extends FieldValues, TValue extends string>({
                   showClear={!!field.value}
                   onBlur={field.onBlur}
                 />
-                <ComboboxContent className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0">
+                <ComboboxContent
+                  portalContainer={portalContainer}
+                  className="rounded-sm border border-slate-200 bg-white shadow-lg ring-0"
+                >
                   <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
                   <ComboboxList>
                     <ComboboxCollection>

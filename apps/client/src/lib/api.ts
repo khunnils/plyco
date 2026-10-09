@@ -9,6 +9,10 @@ import {
   infrastructureProfileSchema,
   securityProfileSchema,
   serviceProfileInputSchema,
+  duplicateServiceInputSchema,
+  duplicateServiceResponseSchema,
+  type DuplicateServiceInput,
+  type DuplicateServiceResponse,
   structuredErrorSchema,
   providerSchema,
   countrySchema,
@@ -549,6 +553,20 @@ export const saveServicesProfile = (
     {
       method: "PUT",
       body: JSON.stringify(z.array(serviceProfileInputSchema).parse(services)),
+    }
+  )
+
+export const duplicateService = (
+  organizationId: string,
+  serviceId: string,
+  input: DuplicateServiceInput
+): Promise<DuplicateServiceResponse> =>
+  apiRequest(
+    `/organizations/${organizationId}/services/${serviceId}/duplicate`,
+    duplicateServiceResponseSchema,
+    {
+      method: "POST",
+      body: JSON.stringify(duplicateServiceInputSchema.parse(input)),
     }
   )
 

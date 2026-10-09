@@ -17,6 +17,8 @@ import {
   generateTemplateInputSchema,
   dataHandlingProfileSchema,
   deleteOrganizationResponseSchema,
+  duplicateServiceInputSchema,
+  duplicateServiceResponseSchema,
   documentSchema,
   documentSummarySchema,
   infrastructureProfileSchema,
@@ -475,6 +477,19 @@ const paths: Record<string, PathItem> = {
       body: servicesProfileBodySchema,
       success: 200,
       successSchema: securityProgramSnapshotSchema,
+    }),
+  },
+  "/organizations/{organizationId}/services/{serviceId}/duplicate": {
+    post: orgMemberRoute({
+      summary:
+        "Duplicate a service with its activity and provider assignments.",
+      tag: "Organizations",
+      params: organizationIdParamsSchema.extend({
+        serviceId: z.string().min(1),
+      }),
+      body: duplicateServiceInputSchema,
+      success: 201,
+      successSchema: duplicateServiceResponseSchema,
     }),
   },
   "/organizations/{organizationId}/data": {

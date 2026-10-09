@@ -13,6 +13,7 @@ import {
   savePrivacyProfile,
   saveSecurityProfileSection,
   saveServicesProfile,
+  duplicateService,
 } from "@/lib/api"
 import {
   authStateQueryKey,
@@ -20,7 +21,37 @@ import {
   recommendationsQueryKey,
 } from "@/lib/query-keys"
 import { type ProfileDraft } from "@/features/company/types/company"
-import { type SecurityProgramSnapshot } from "@plyco/contracts"
+import {
+  type DuplicateServiceInput,
+  type SecurityProgramSnapshot,
+} from "@plyco/contracts"
+
+export const useDuplicateService = () => {
+  const queryClient = useQueryClient()
+  const { selectedOrganizationId } = useSelectedOrganization()
+  const organizationId = selectedOrganizationId ?? ""
+  return useMutation({
+    mutationFn: ({
+      serviceId,
+      input,
+    }: {
+      serviceId: string
+      input: DuplicateServiceInput
+    }) => duplicateService(organizationId, serviceId, input),
+    onSuccess: ({ snapshot }) => {
+      queryClient.setQueryData(
+        organizationSnapshotQueryKey(organizationId),
+        snapshot
+      )
+      void queryClient.invalidateQueries({
+        queryKey: recommendationsQueryKey(organizationId),
+      })
+      toast.success("Service duplicated")
+    },
+    onError: (error: Error) =>
+      toast.error(error.message ?? "Could not duplicate service"),
+  })
+}
 
 const useReorderProfileEntities = (entity: "dataTypes" | "services") => {
   const queryClient = useQueryClient()
